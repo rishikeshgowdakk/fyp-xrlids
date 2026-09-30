@@ -25,8 +25,13 @@ Status values: `OPEN` (awaiting user) · `DECIDED` · `SUPERSEDED`
 
 ## D-002 — Feature contract: inherit R10/R15/R20 or re-derive
 
-- **Status:** **OPEN — USER DECISION REQUIRED**
+- **Status:** **OPEN — USER DECISION REQUIRED** (evidence artifact now exists)
 - **Date raised:** 2026-09-30
+- **Evidence gathered (2026-09-30):** `results/audits/feature_contract_evidence.json` and
+  `reports/generated/feature_contract_evidence.md` record: static availability per rung per
+  dataset (UNSW-NB15 supports 4/10 of R10), live-computability blocks (active/idle/subflow
+  features), decision-gate gaps, and the evidence still missing (distribution behaviour,
+  missingness, sweep deltas) with the reason it is missing.
 - **Question:** Are the historical R10/R15/R20 rungs accepted as the feature contract, or re-derived from first principles against the §21 decision gate?
 - **Options:**
   - A. Inherit the historical rung definitions as the starting contract, then test them.
@@ -58,8 +63,15 @@ Status values: `OPEN` (awaiting user) · `DECIDED` · `SUPERSEDED`
 
 ## D-004 — Dataset acquisition
 
-- **Status:** **OPEN — USER DECISION REQUIRED**
+- **Status:** **OPEN — USER DECISION REQUIRED** (acquisition workflow complete; downloads blocked)
 - **Date raised:** 2026-09-30
+- **Evidence gathered (2026-09-30):** Reproducible preparation workflow implemented
+  (`scripts/phase1/prepare_dataset.py`, `src/xrlids/datasets/prepare.py`) with manifest
+  registration/verification of real checksums. **Acquisition constraint discovered:** the
+  historical primary mirror `iscxdownloads.cs.unb.ca` is unreachable from this network
+  (DNS NXDOMAIN; general internet verified working via control hosts). Manual download from
+  the official pages is required; exact per-file instructions: `prepare_dataset.py instructions`.
+  No checksum was invented and no file was fabricated.
 - **Question:** Which datasets to acquire, from which mirrors, and under what storage budget?
 - **Options:**
   - A. All three (CICIDS2017, CSE-CIC-IDS2018, UNSW-NB15) — matches the historical scope and RQ5.

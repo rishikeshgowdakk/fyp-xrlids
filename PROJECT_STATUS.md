@@ -29,10 +29,15 @@ Legend: ✅ done · 🟡 implemented, not yet run on real data · ⛔ blocked on
 | Threshold sweep + candidate operating points | ✅ | `src/xrlids/evaluation/thresholding.py` |
 | Experiment registry + result metadata | ✅ | `src/xrlids/experiments/registry.py` |
 | Dataset manifest + integrity/availability | ✅ | `src/xrlids/datasets/loading.py` |
+| Dataset acquisition workflow (register/verify) | ✅ | `src/xrlids/datasets/prepare.py` + `scripts/phase1/prepare_dataset.py` + tests |
+| Real-file schema validation (header vs column map) | ✅ | `src/xrlids/datasets/schema.py` + tests |
+| D-002 evidence artifact | ✅ | `results/audits/feature_contract_evidence.json` (decision remains OPEN) |
+| Real-data audit runner | ✅ | `scripts/phase1/03_run_audit.py` (reports DATA_NOT_AVAILABLE honestly) |
+| Baseline experiment config | 🟡 | `configs/experiments/p1_baseline.yaml` (prepared, gated on D-002/D-004) |
 | Dataset audit | ✅ | `src/xrlids/datasets/audit.py` + tests |
 | CLI | ✅ | `src/xrlids/cli.py` |
 | Report generation from artifacts | ✅ | `scripts/phase1/generate_reports.py` |
-| Test suite | ✅ | 67 tests passing |
+| Test suite | ✅ | 89 tests passing |
 | SHAP module | ⬜ | documented only |
 | Error-analysis module | ⬜ | planned |
 | OOD / cross-dataset runners | ⬜ | planned |
@@ -42,6 +47,7 @@ Legend: ✅ done · 🟡 implemented, not yet run on real data · ⛔ blocked on
 
 | Experiment | Status | Reason |
 | --- | --- | --- |
+| Dataset acquisition | ⛔ blocked | mirrors unreachable from this network; manual download required (`prepare_dataset.py instructions`) |
 | Dataset audit (real files) | `DATA_NOT_AVAILABLE` | datasets not acquired |
 | Splits / leakage (real data) | `DATA_NOT_AVAILABLE` | datasets not acquired |
 | RF / LSTM / Fusion baselines | `DATA_NOT_AVAILABLE` | datasets not acquired |
