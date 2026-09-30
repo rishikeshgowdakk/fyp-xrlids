@@ -330,9 +330,9 @@ def run_experiment(
     val_df = split_result.splits["validation"]
     test_df = split_result.splits["test"]
 
-    y_train = labels.loc[split_result.assignment == "train"].reset_index(drop=True)
-    y_val = labels.loc[split_result.assignment == "validation"].reset_index(drop=True)
-    y_test = labels.loc[split_result.assignment == "test"].reset_index(drop=True)
+    y_train = split_result.label_splits["train"]
+    y_val = split_result.label_splits["validation"]
+    y_test = split_result.label_splits["test"]
 
     print(f"       Split counts -> Train: {len(train_df):,}, Val: {len(val_df):,}, Test: {len(test_df):,}")
     leakage_status = split_result.leakage.get("status", "unknown")
