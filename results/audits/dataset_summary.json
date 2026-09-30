@@ -1,14 +1,14 @@
 [
   {
-    "dataset": "cicids2017",
-    "status": "DATA_NOT_AVAILABLE"
-  },
-  {
     "dataset": "cse_cic_ids2018",
-    "status": "DATA_NOT_AVAILABLE"
-  },
-  {
-    "dataset": "unsw_nb15",
-    "status": "DATA_NOT_AVAILABLE"
+    "status": "completed",
+    "files": 1,
+    "rows": 331125,
+    "schema_status": "validated",
+    "label_status": "rejected_labels_present",
+    "artifacts": [
+      "results/audits/cse_cic_ids2018_audit.json",
+      "reports/generated/audits/cse_cic_ids2018_audit.md"
+    ]
   }
 ]

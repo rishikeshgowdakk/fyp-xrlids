@@ -1,0 +1,2 @@
+dataset,original_label,normalized_label,row_count,percentage,reason
+cse_cic_ids2018,Label,LABEL,25,0.00755,label not in benign tokens and not in declared known-attack allow-list

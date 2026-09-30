@@ -1,11 +1,11 @@
 {
   "metadata": {
     "experiment_id": "EVIDENCE-D002-001",
-    "git_commit": "e9905a8c0c07d5918fd94b12048f6ec091d604e8",
+    "git_commit": "9a8d69662b675560d570040e85a9e1548c538e42",
     "dataset_sha256": null,
     "feature_schema_hash": null,
     "seed": null,
-    "created_at": "2026-09-30T08:47:50.091027+00:00",
+    "created_at": "2026-09-30T14:29:15.247947+00:00",
     "software_environment": {
       "python_version": "3.14.4",
       "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
@@ -13,7 +13,7 @@
       "processor_count": null,
       "cuda_available": false,
       "cuda_version": null,
-      "git_commit": "e9905a8c0c07d5918fd94b12048f6ec091d604e8",
+      "git_commit": "9a8d69662b675560d570040e85a9e1548c538e42",
       "packages": {
         "numpy": "2.5.3",
         "pandas": "3.0.6",
@@ -428,8 +428,25 @@
       "reason": "no files registered or present"
     },
     "cse_cic_ids2018": {
-      "status": "DATA_NOT_AVAILABLE",
-      "reason": "no files registered or present"
+      "status": "validated",
+      "dataset": "cse_cic_ids2018",
+      "n_files": 1,
+      "all_declared_columns_present": true,
+      "files_identical_schema": true,
+      "label_columns_found": [
+        {
+          "file": "data/raw/cse_cic_ids2018/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv",
+          "label_column": "Label"
+        }
+      ],
+      "files": [
+        {
+          "path": "data/raw/cse_cic_ids2018/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv",
+          "n_columns": 80,
+          "missing_declared_columns": [],
+          "label_column": "Label"
+        }
+      ]
     },
     "unsw_nb15": {
       "status": "DATA_NOT_AVAILABLE",

@@ -72,3 +72,12 @@ def test_missing_group_column_fails_loudly():
     X, y, cols = _dataset(100)
     with pytest.raises(SplitConfigurationError):
         build_splits(X, y, cols, SplitConfig(group_column="nope"), dataset="d")
+
+
+def test_row_hashes_handles_nan_gracefully():
+    from xrlids.splitting.leakage import _row_hashes
+    df = pd.DataFrame({"f1": [1.0, np.nan, 1.0], "f2": [np.nan, 2.0, np.nan]})
+    hashes = _row_hashes(df, ["f1", "f2"])
+    assert len(hashes) == 3
+    assert hashes.iloc[0] == hashes.iloc[2]
+    assert hashes.iloc[0] != hashes.iloc[1]

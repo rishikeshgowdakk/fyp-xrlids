@@ -1,0 +1,123 @@
+{
+  "dataset": "cse_cic_ids2018",
+  "rung": "R10",
+  "schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+  "cleaning": {
+    "raw_rows_at_start": 331125,
+    "removed_duplicates": 97,
+    "removed_unknown_label": 1,
+    "removed_invalid": 0,
+    "recovered_rows": 0,
+    "final_accepted_rows": 331027,
+    "total_removed": 98
+  },
+  "manifest": {
+    "dataset": "cse_cic_ids2018",
+    "methodology": "stratified_random",
+    "rationale": "",
+    "ratios": {
+      "train": 0.6,
+      "validation": 0.2,
+      "test": 0.2
+    },
+    "seed": 42,
+    "stratified": true,
+    "group_column": null,
+    "time_column": null,
+    "counts": {
+      "train": 198616,
+      "validation": 66205,
+      "test": 66206
+    },
+    "class_distribution": {
+      "train": {
+        "benign": 142792,
+        "attack": 55824,
+        "attack_fraction": 0.28106496958955973
+      },
+      "validation": {
+        "benign": 47597,
+        "attack": 18608,
+        "attack_fraction": 0.28106638471414547
+      },
+      "test": {
+        "benign": 47598,
+        "attack": 18608,
+        "attack_fraction": 0.28106213938313745
+      }
+    },
+    "split_config_hash": "71219f7cbc108799468463c6270b0a2cf13f868151a6aa8dc37f4fd0563388ef"
+  },
+  "leakage_audit": {
+    "status": "fail",
+    "failed_checks": [
+      "duplicate_overlap",
+      "near_duplicate_overlap"
+    ],
+    "checks": [
+      {
+        "id": "L-01",
+        "check": "duplicate_overlap",
+        "performed": true,
+        "passed": false,
+        "detail": {
+          "train__validation": 7576,
+          "train__test": 7559,
+          "validation__test": 4357
+        }
+      },
+      {
+        "id": "L-02",
+        "check": "near_duplicate_overlap",
+        "performed": true,
+        "passed": false,
+        "method": "exact match on feature vectors rounded to 6 decimals",
+        "detail": {
+          "train__validation": 245,
+          "train__test": 258,
+          "validation__test": 258
+        },
+        "limitation": "rounding-based proxy; cannot detect all near-duplicates"
+      },
+      {
+        "id": "L-03",
+        "check": "group_overlap",
+        "performed": false,
+        "passed": null,
+        "detail": "no group column supplied or present"
+      },
+      {
+        "id": "L-04",
+        "check": "source_ip_overlap",
+        "performed": false,
+        "passed": null,
+        "detail": "no source-IP column present"
+      },
+      {
+        "id": "L-05",
+        "check": "temporal_overlap",
+        "performed": false,
+        "passed": null,
+        "detail": "no timestamp column supplied or present"
+      },
+      {
+        "id": "L-06",
+        "check": "sequence_overlap",
+        "performed": true,
+        "passed": true,
+        "method": "sequences are built independently within each split; index_origin is recorded per sequence",
+        "detail": "enforced by construction in xrlids.models.lstm.build_sequences"
+      }
+    ],
+    "not_performed": [
+      "group_overlap",
+      "source_ip_overlap",
+      "temporal_overlap"
+    ],
+    "split_sizes": {
+      "train": 198616,
+      "validation": 66205,
+      "test": 66206
+    }
+  }
+}

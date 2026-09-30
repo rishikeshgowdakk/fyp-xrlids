@@ -98,9 +98,9 @@ datasets:
     status: verified
     source: AWS Open Data s3://cse-cic-ids2018
     registered_at: '2026-09-30T14:23:27.238896+00:00'
-  schema_status: validated
-  label_status: rejected_labels_present
-  audit_status: completed
+  schema_status: not_run
+  label_status: not_run
+  audit_status: not_run
   known_limitations:
   - Historical audit reported heterogeneous per-file schemas; to be established per
     file.

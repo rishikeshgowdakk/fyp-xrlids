@@ -32,7 +32,10 @@ Contract status: `candidate_not_frozen`
 - `DATA_NOT_AVAILABLE` - no files registered or present
 
 ### cse_cic_ids2018
-- `DATA_NOT_AVAILABLE` - no files registered or present
+- status: `validated`
+- files checked: 1
+- identical schemas across files: True
+- all declared columns present: True
 
 ### unsw_nb15
 - `DATA_NOT_AVAILABLE` - no files registered or present

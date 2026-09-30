@@ -17,9 +17,8 @@ from xrlids.utils.hashing import sha256_bytes
 
 def _row_hashes(frame: pd.DataFrame, columns: Sequence[str]) -> pd.Series:
     """Stable per-row hash over the given columns (order-sensitive)."""
-    sub = frame[columns]
-    joined = sub.astype(str).agg("|".join, axis=1)
-    return joined.map(lambda s: sha256_bytes(s.encode("utf-8")))
+    sub = frame[list(columns)]
+    return pd.util.hash_pandas_object(sub, index=False).map(lambda v: sha256_bytes(str(v).encode("utf-8")))
 
 
 def audit_split_leakage(
