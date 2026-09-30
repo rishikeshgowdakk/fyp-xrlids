@@ -24,13 +24,27 @@ records its originating split. `assert_no_boundary_crossing` recomputes
 `origin + seq_len <= split_size` for every sequence and raises otherwise. Unit-tested,
 including a deliberate violation case.
 
-## Current status on fixture runs
+## Current status on real data (2026-09-30)
 
-On synthetic fixture runs, L-01 and L-02 pass and are reported; L-03, L-04 and L-05 are
-reported as **not performed** because the fixtures carry no group, source-IP or timestamp
-columns. That is the honest result: those leakage vectors are currently **unverified for the
-real datasets**, and remain unverified until the datasets are audited and a split with those
-columns is actually run.
+### Real data split audit (`CSE-CIC-IDS2018`, Thursday-01-03-2018)
+- **Split config:** `stratified_random` 60/20/20, seed 42.
+- **Accepted rows:** 331,027.
+- **Findings:**
+  - **L-01 (Duplicate overlap): FAILED.**
+    - Train / Validation duplicate overlap: **7,576** rows.
+    - Train / Test duplicate overlap: **7,559** rows.
+    - Validation / Test duplicate overlap: **4,357** rows.
+  - **L-02 (Near-duplicate overlap): FAILED.**
+    - Train / Validation: **245** rows.
+    - Train / Test: **258** rows.
+    - Validation / Test: **258** rows.
+  - **L-03, L-04, L-05:** Not performed (`not_performed`) because no group, source-IP or valid timestamp range grouping was enforced.
+
+### Root Cause Analysis:
+1. **Row-level vs Feature-level Duplication:** The cleaning step removes exact duplicates across the full 80-column raw frame (97 rows removed). However, when projected into the 10-feature candidate R10 space, **114,315 rows (34.53%)** are identical across feature values (common for short scan packets and repetitive background flows).
+2. **Naive Splitting Leakage:** A naive stratified random split assigns these identical feature vectors independently across train, validation, and test sets.
+3. **Mitigation verification:** When feature-level deduplication is applied prior to splitting, **L-01 and L-02 pass cleanly with 0 duplicate overlaps**.
+4. **Research Decision Required:** Whether to adopt feature-level deduplication (reducing sample count from 331,027 to 216,712 unique feature vectors) or enforce group/temporal splitting is an open research decision for the team.
 
 ## What is NOT covered
 

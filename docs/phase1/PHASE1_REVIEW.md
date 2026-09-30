@@ -14,24 +14,31 @@ contract, feature contract, cleaning, leakage-audited splitting, preprocessing, 
 fusion, calibration, threshold analysis, SHAP/error-analysis infrastructure, experiment
 registry, artifact metadata, centralized metrics, a CLI and an automated test suite.
 
-The Phase 1 *empirical* programme has not run, because **no datasets are present** in the
-repository. Every result-producing experiment therefore reports `DATA_NOT_AVAILABLE`.
-The pipeline has been executed end-to-end on synthetic fixtures to prove it runs; those
-outputs are labelled `SMOKE_ONLY` and are explicitly not evidence.
+The Phase 1 *empirical* programme has begun with the acquisition and verification of
+real data from CSE-CIC-IDS2018 (`Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv`, 331,125 rows,
+102.8 MB, verified SHA-256 `b0534c5d...`). Schema validation and comprehensive dataset audit
+have passed on real data, revealing critical data-quality and leakage findings.
 
 ## 2. Dataset status
 
 | Dataset | Files present | Checksums | Audit | Status |
 | --- | --- | --- | --- | --- |
-| CICIDS2017 | 0 | none recorded | not run | `DATA_NOT_AVAILABLE` |
-| CSE-CIC-IDS2018 | 0 | none recorded | not run | `DATA_NOT_AVAILABLE` |
-| UNSW-NB15 | 0 | none recorded | not run | `DATA_NOT_AVAILABLE` |
+| CICIDS2017 | 0 | none recorded | not run | `DATA_NOT_AVAILABLE` (form/session barrier) |
+| CSE-CIC-IDS2018 | 1 | verified (`b0534c5d...`) | completed (331,125 rows) | `PARTIAL` (1 file verified) |
+| UNSW-NB15 | 0 | none recorded | not run | `DATA_NOT_AVAILABLE` (SharePoint auth barrier) |
 
-## 3. Dataset audit findings
+## 3. Dataset audit findings (real data: CSE-CIC-IDS2018)
 
-None — no data. The auditor is implemented and unit-tested (`tests/data/test_audit.py`) on
-fixtures, including NaN/Inf counting, duplicate detection, negative-duration detection,
-schema-variation detection and unknown-label reporting.
+Audited `Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv` (machine-readable: `results/audits/cse_cic_ids2018_audit.json`):
+- **Rows:** 331,125 rows, 80 columns.
+- **Duplicates:** 97 exact raw duplicate rows.
+- **Missing / Infinite values:** 1,834 NaN cells in `Flow Byts/s`; 0 infinite values.
+- **Near-constant columns:** 8 columns (`Bwd PSH Flags`, `Bwd URG Flags`, `Fwd Byts/b Avg`, `Fwd Pkts/b Avg`, `Fwd Blk Rate Avg`, `Bwd Byts/b Avg`, `Bwd Pkts/b Avg`, `Bwd Blk Rate Avg`).
+- **Duration anomalies:** 0 negative durations; 2,919 zero-duration flows; 25 NaN durations (from embedded headers).
+- **Label audit & rejections:**
+  - Benign: 238,037 (71.89%)
+  - Infiltration (`INFILTERATION`): 93,063 (28.10%)
+  - Repeated header rows (`LABEL`): 25 rows (0.00755%) correctly rejected as unknown labels, never mapped to BENIGN.
 
 ## 4. Feature contract
 
@@ -39,24 +46,20 @@ Implemented: 20 canonical features with mathematical definitions, three candidat
 (R10/R15/R20, 10/15/20 features), per-feature decision-gate answers, and per-dataset column
 maps. Status is `candidate_not_frozen` — **D-002 is open.**
 
-**Key finding:** UNSW-NB15 supports only **4/10** features of the R10 contract (no TCP flag
-counts, no IAT, no active/idle, no subflow). The 3×3×3 sweep is therefore evaluable only
-2/3 at R10. The pipeline returns `BLOCKED_FEATURE_INCOMPATIBLE` rather than substituting
-columns. This needs a project decision (see FEATURE_COMPATIBILITY.md).
+- **CSE-CIC-IDS2018:** All 20 canonical features verified from data (columns present and mathematically computable).
+- **UNSW-NB15:** Supports only **4/10** features of the R10 contract (no TCP flag counts, no IAT, no active/idle, no subflow). The planned 3×3×3 sweep cannot run uniformly without a research decision.
 
 ## 5. Cleaning decisions
 
-Five documented rules with problem/detection/affected/action/reason/risk/alternative, plus
-an arithmetic reconciliation that fails loudly if rows are unexplained. Vendor Infinity rate
-columns are never used (rates are recomputed from source quantities).
+Cleaning correctly drops 97 exact duplicates, rejects 25 unknown embedded header rows, and reconciles row accounting perfectly (331,125 raw -> 331,027 accepted).
 
-## 6. Split methodology
+## 6. Split methodology & Leakage findings
 
-`stratified_random` 60/20/20, seed 42. Candidate, not frozen. Temporal/grouped splits are not
-used because no trustworthy grouping/timestamp key is assumed to exist until the audit says
-otherwise.
-
-## 7. Leakage findings
+- Naive stratified random split (60/20/20, seed 42) **FAILED the leakage audit**:
+  - L-01 duplicate overlap: 7,576 rows shared between train & validation; 7,559 shared between train & test.
+  - Root cause: In the 10-feature R10 space, 114,315 rows (34.53%) have identical feature vectors. Naive flow splitting places duplicate feature vectors across splits, creating severe artificial test inflation.
+  - Mitigation verified: Feature-space deduplication prior to split construction passes L-01 with 0 duplicate overlaps.
+  - Action: No model training run until the researcher formally decides the deduplication/grouping policy.
 
 L-01/L-02/L-06 implemented and enforced; L-03/L-04/L-05 implemented but **not performed** on
 fixture runs (no group/source-IP/timestamp columns), and therefore not yet verified for the

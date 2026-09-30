@@ -37,7 +37,7 @@ Legend: ✅ done · 🟡 implemented, not yet run on real data · ⛔ blocked on
 | Dataset audit | ✅ | `src/xrlids/datasets/audit.py` + tests |
 | CLI | ✅ | `src/xrlids/cli.py` |
 | Report generation from artifacts | ✅ | `scripts/phase1/generate_reports.py` |
-| Test suite | ✅ | 89 tests passing |
+| Test suite | ✅ | 90 tests passing |
 | SHAP module | ⬜ | documented only |
 | Error-analysis module | ⬜ | planned |
 | OOD / cross-dataset runners | ⬜ | planned |
@@ -47,15 +47,15 @@ Legend: ✅ done · 🟡 implemented, not yet run on real data · ⛔ blocked on
 
 | Experiment | Status | Reason |
 | --- | --- | --- |
-| Dataset acquisition | ⛔ blocked | mirrors unreachable from this network; manual download required (`prepare_dataset.py instructions`) |
-| Dataset audit (real files) | `DATA_NOT_AVAILABLE` | datasets not acquired |
-| Splits / leakage (real data) | `DATA_NOT_AVAILABLE` | datasets not acquired |
-| RF / LSTM / Fusion baselines | `DATA_NOT_AVAILABLE` | datasets not acquired |
+| Dataset acquisition | 🟡 PARTIAL | CSE-CIC-IDS2018 acquired/verified from AWS Open Data; CICIDS2017 and UNSW-NB15 `DATA_NOT_AVAILABLE` (auth/session barriers) |
+| Dataset audit (real files) | ✅ COMPLETED | CSE-CIC-IDS2018 audited (331,125 rows, 80 cols, 25 unknown headers rejected) |
+| Splits / leakage (real data) | 🟡 VALIDATED | Naive split fails L-01 (7,559 duplicates across train/test); feature-dedup split passes |
+| RF / LSTM / Fusion baselines | ⛔ BLOCKED | D-002 open; duplicate-split policy required; no empirical model trained |
 | Feature sweep (27 conditions) | ⛔ blocked | D-002 open; UNSW-NB15 cannot satisfy R10 |
 | Cross-dataset (6 directions) | ⛔ blocked | D-005 open; datasets absent |
 | OOD / unseen attack | ⛔ blocked | datasets absent |
 | SHAP | ⛔ blocked | no trained model on real data |
-| Calibration (real data) | `DATA_NOT_AVAILABLE` | datasets not acquired |
+| Calibration (real data) | ⛔ blocked | model training gated on D-002 |
 | Threshold objective | ⛔ blocked | D-003 open |
 | End-to-end smoke on synthetic fixture | ✅ executed | `results/smoke/smoke_R10.json` (NOT evidence) |
 

@@ -1,37 +1,37 @@
 # DATASET PROVENANCE
 
-Status: **acquisition workflow complete; datasets NOT acquired.**
+Status: **partial acquisition complete; 1 verified real dataset file present.**
 Authoritative machine record: [`../../data/manifests/dataset_registry.yaml`](../../data/manifests/dataset_registry.yaml)
 
 ## Provenance declared
 
-| Dataset | Source | Official page | Version declared | License |
-| --- | --- | --- | --- | --- |
-| CIC-IDS2017 | CIC, University of New Brunswick | https://www.unb.ca/cic/datasets/ids-2017.html | as-published-2017 | research use per CIC terms (to confirm on page) |
-| CSE-CIC-IDS2018 | CSE + CIC, UNB | https://www.unb.ca/cic/datasets/ids-2018.html | as-published-2018 | research use per CIC/CSE terms (to confirm) |
-| UNSW-NB15 | UNSW Canberra Cyber | https://research.unsw.edu.au/projects/unsw-nb15-dataset | as-published-2015 | research use per UNSW terms (to confirm) |
+| Dataset | Source | Official page | Version declared | License | Status |
+| --- | --- | --- | --- | --- | --- |
+| CIC-IDS2017 | CIC, University of New Brunswick | https://www.unb.ca/cic/datasets/ids-2017.html | as-published-2017 | research use per CIC terms | `DATA_NOT_AVAILABLE` |
+| CSE-CIC-IDS2018 | CSE + CIC, UNB / AWS Open Data | https://www.unb.ca/cic/datasets/ids-2018.html | as-published-2018 | research use / AWS Open Data | `PARTIAL` (1 file verified) |
+| UNSW-NB15 | UNSW Canberra Cyber | https://research.unsw.edu.au/projects/unsw-nb15-dataset | as-published-2015 | research use per UNSW terms | `DATA_NOT_AVAILABLE` |
 
-## Acquisition constraint (checked 2026-09-30)
+## Acquisition status and findings (checked 2026-09-30)
 
-The historical primary mirror `iscxdownloads.cs.unb.ca` **does not resolve from this
-network** — DNS returns NXDOMAIN for both `iscxdownloads.cs.unb.ca` and `download.unb.ca`.
-Controls performed at the same time: `google.com` → 200, `github.com` → 200, `unb.ca` → 200,
-PyPI download → succeeded. So this is a hostname/mirror availability problem, **not** a
-general network failure. The official dataset *pages* are reachable; the download *hosts*
-are not, from here.
+### 1. CSE-CIC-IDS2018 (`PARTIAL / VERIFIED FILE`)
+- **Acquired File:** `data/raw/cse_cic_ids2018/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv`
+- **Source:** AWS Registry of Open Data (`s3://cse-cic-ids2018/Processed Traffic Data for ML Algorithms/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv`)
+- **File size:** 107,842,858 bytes (102.8 MB)
+- **SHA-256:** `b0534c5d7d8b41e03df71c6966c995d116a8ed28e61f377c8b14cdf5d28f4edf`
+- **Row count:** 331,125 data rows (+ 1 header row)
+- **Column count:** 80 columns
+- **Acquisition date:** 2026-09-30
+- **Status:** Registered in manifest and verified against SHA-256 checksum.
 
-Consequence: acquisition requires **manual download** by the project owner (or an
-authorised mirror), followed by registration + verification. This is recorded in the
-manifest (`acquisition_note`) rather than worked around.
+### 2. CIC-IDS2017 (`DATA_NOT_AVAILABLE`)
+- Primary mirror `iscxdownloads.cs.unb.ca` does not resolve from this network (DNS NXDOMAIN).
+- Web portal `https://cicresearch.ca/CICDataset/CIC-IDS-2017/` requires manual web registration form and browser session; unauthenticated automated downloads return HTTP 403 Forbidden.
+- Manual acquisition instructions: see `python scripts/phase1/prepare_dataset.py instructions`.
 
-## What was NOT done (deliberately)
-
-- No checksum was invented or hand-entered. `sha256` fields are only written by
-  `prepare_dataset.py register`, which hashes the actual bytes on disk.
-- No file was marked `verified` — nothing is present to verify.
-- No substitute dataset, sample, or mirror was silently accepted.
-- `expected_files` lists the filenames as published by the sources; mirrors that rename
-  files must be registered with a note, never passed off as identical content.
+### 3. UNSW-NB15 (`DATA_NOT_AVAILABLE`)
+- Official source link on UNSW research page directs to a personal Microsoft SharePoint repository requiring interactive Microsoft web authentication.
+- Historical AARNet CloudStor mirror is decommissioned.
+- Manual acquisition instructions: see `python scripts/phase1/prepare_dataset.py instructions`.
 
 ## Expected files
 
