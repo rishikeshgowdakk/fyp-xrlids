@@ -1,0 +1,45 @@
+{
+  "dataset": "cse_cic_ids2018",
+  "methodology": "stratified_random",
+  "rationale": "Split with duplicate_policy=deduplicate_features",
+  "duplicate_policy": "deduplicate_features",
+  "duplicate_accounting": {
+    "policy": "deduplicate_features",
+    "input_rows": 2972,
+    "duplicate_rows_dropped": 418,
+    "unique_rows_retained": 2554,
+    "duplicate_fraction": 0.14064602960969044
+  },
+  "ratios": {
+    "train": 0.6,
+    "validation": 0.2,
+    "test": 0.2
+  },
+  "seed": 42,
+  "stratified": true,
+  "group_column": null,
+  "time_column": null,
+  "counts": {
+    "train": 1532,
+    "validation": 511,
+    "test": 511
+  },
+  "class_distribution": {
+    "train": {
+      "benign": 1135,
+      "attack": 397,
+      "attack_fraction": 0.2591383812010444
+    },
+    "validation": {
+      "benign": 378,
+      "attack": 133,
+      "attack_fraction": 0.2602739726027397
+    },
+    "test": {
+      "benign": 379,
+      "attack": 132,
+      "attack_fraction": 0.2583170254403131
+    }
+  },
+  "split_config_hash": "17ed21c579d06350a2a6093f545a5193c328f04b9acab39d918f0019bd002c93"
+}

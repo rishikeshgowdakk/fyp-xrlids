@@ -66,7 +66,10 @@ def compute_rf_shap_explanations(
     # TreeExplainer
     sklearn_rf = rf_detector.model if hasattr(rf_detector, "model") else rf_detector
     explainer = shap.TreeExplainer(sklearn_rf, data=X_bg.to_numpy(dtype=float))
-    raw_shap = explainer.shap_values(X_exp.to_numpy(dtype=float))
+    try:
+        raw_shap = explainer.shap_values(X_exp.to_numpy(dtype=float), check_additivity=False)
+    except TypeError:
+        raw_shap = explainer.shap_values(X_exp.to_numpy(dtype=float))
 
     # Depending on SHAP version and model, raw_shap can be:
     # 1. list of [class_0, class_1] arrays (shape: (N, F))

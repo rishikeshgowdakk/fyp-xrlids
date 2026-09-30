@@ -258,8 +258,15 @@ def run_experiment(
 
     is_subsample = False
     if sample_limit and sample_limit < total_raw_rows:
-        print(f"       Applying development sample limit: {sample_limit:,} rows (PRELIMINARY_SUBSAMPLE mode)")
-        raw_df = raw_df.iloc[:sample_limit].copy()
+        print(f"       Applying development stratified sample limit: {sample_limit:,} rows (PRELIMINARY_SUBSAMPLE mode)")
+        sample_indices: list[int] = []
+        label_col = "Label" if "Label" in raw_df.columns else "label"
+        frac = min(1.0, float(sample_limit / total_raw_rows))
+        for _, group_df in raw_df.groupby(label_col):
+            n_sample = max(1, int(round(len(group_df) * frac)))
+            sampled = group_df.sample(n=min(len(group_df), n_sample), random_state=seed)
+            sample_indices.extend(sampled.index)
+        raw_df = raw_df.loc[sorted(sample_indices)].copy().reset_index(drop=True)
         is_subsample = True
 
     # Setup directories
@@ -558,14 +565,15 @@ def run_experiment(
         (output_dir / "transfer_report.json").write_text(json.dumps(transfer_results, indent=2, default=str), encoding="utf-8")
 
     # Experiment Record
-    exp_status = "PRELIMINARY_SUBSAMPLE" if is_subsample else "EMPIRICALLY_OBSERVED"
+    dataset_entry = next((d for d in manifest.get("datasets", []) if d.get("key") == dataset_key), {})
+    dataset_ver = dataset_entry.get("version", "1.0.0")
     record = ExperimentRecord(
         experiment_id=exp_id,
         research_question=exp_cfg.get("research_question", "RQ1"),
         hypothesis=exp_cfg.get("hypothesis", ""),
         dataset=dataset_key,
         dataset_sha256=raw_sha256,
-        dataset_version=avail.get("dataset", {}).get("version", "1.0.0"),
+        dataset_version=dataset_ver,
         input_files=[str(raw_file_path)],
         rows_total=int(len(clean_df)),
         rows_train=int(len(train_df)),
