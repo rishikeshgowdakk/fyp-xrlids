@@ -1,4 +1,4 @@
-# Response Safety Policy — XRL-IDARS v2 (repo: xrlids-v1)
+# Response Safety Policy - XRL-IDARS v1 (repo: fyp-xrlids)
 #
 # The DQN may RECOMMEND an action. It may never directly apply a firewall rule.
 # Every BLOCK passes through the gate below (§69).

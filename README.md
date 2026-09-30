@@ -1,14 +1,21 @@
-# XRL-IDARS v2
+# XRL-IDARS v1
 
 **Explainable Reinforcement Learning Based Intrusion Detection and Autonomous Response System**
 
 | Field | Value |
 | --- | --- |
-| Project | `xrl-idars-v2` |
-| Repository | `xrlids-v1` |
+| Project | XRL-IDARS v1 |
+| Repository | `fyp-xrlids` |
+| Python package | `xrlids` |
 | Strategy | 3 phases / 3 weeks: data foundation → ML platform → live validation |
-| Current phase | Phase 1 — Data + Research + Model Foundation (in progress) |
-| Status detail | See [`PROJECT_STATUS.md`](PROJECT_STATUS.md) |
+| Current phase | Phase 1 — Data + Research + Model Foundation |
+| Phase 1 status | **PARTIALLY COMPLETE** — implementation complete, empirical programme pending datasets |
+| Status detail | See [`PROJECT_STATUS.md`](PROJECT_STATUS.md) and [`docs/phase1/PHASE1_REVIEW.md`](docs/phase1/PHASE1_REVIEW.md) |
+
+> **No metrics are reported in this README.** No dataset is present in the repository, so no
+> detection result exists yet. Historical numbers from the previous project are quarantined in
+> [`docs/04_QUESTIONS/HISTORICAL_RESULTS.md`](docs/04_QUESTIONS/HISTORICAL_RESULTS.md) and are
+> **not** results of this repository.
 
 > **Build rule:** this repository is *designed to record the research before the research starts*.
 > No result without an artifact. No artifact without code. No code experiment without a config.

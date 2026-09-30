@@ -11,14 +11,15 @@ dist/
 venv/
 env/
 .ipynb_checkpoints/
+.pytest_cache/
 
-# Environment / secrets — never commit credentials or environment-specific values
+# Environment / secrets - never commit credentials or environment-specific values
 .env
 .env.*
 *.pem
 *.key
 
-# Datasets — large, licensed, and checksum-tracked via data/manifests/dataset_registry.yaml.
+# Datasets - large, licensed, and checksum-tracked via data/manifests/dataset_registry.yaml.
 # Raw/interim/processed data must NOT be committed; only manifests and splits metadata.
 data/raw/*
 data/interim/*
@@ -27,17 +28,21 @@ data/processed/*
 !data/interim/.gitkeep
 !data/processed/.gitkeep
 
-# Model binaries — tracked by the model registry (hashes), not committed by default
+# Model binaries - tracked by the model registry (hashes), not committed by default
 models/rf/*
 models/lstm/*
 models/fusion/*
 models/dqn/*
 !models/*/.gitkeep
+*.joblib
+*.pt
+*.pth
 
-# Generated reports/figures (regenerate from results/; do not hand-edit)
-reports/generated/*
+# Generated figures are regenerated from results; generated Markdown reports ARE committed
+# so the repository contains readable evidence derived from the result artifacts.
+reports/generated/*.png
+reports/generated/*.pdf
 reports/figures/*
-!reports/generated/.gitkeep
 !reports/figures/.gitkeep
 
 # Live capture artifacts

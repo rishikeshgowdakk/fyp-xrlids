@@ -1,118 +1,100 @@
 # REPRODUCIBILITY
 
-Goal: anyone cloning `xrlids-v1` can follow the sequence below and regenerate the
-project's results from scratch.
+Goal: anyone cloning `fyp-xrlids` can set up the environment, acquire the documented
+datasets, run the documented commands and regenerate the results.
 
-> Status: **skeleton**. Exact commands are added as each stage is implemented.
-> A stage listed here without a command is not yet reproducible and must not be
-> cited as evidence.
+> Status: **environment pinned and reproducible. Datasets not yet acquired, so the empirical
+> stages currently report `DATA_NOT_AVAILABLE`.** Anything below marked *pending data* has not
+> been run against real data and must not be cited as a result.
 
 ---
 
-## Required sequence
+## 1. Environment setup
 
-```text
-environment setup
-      ↓
-dataset preparation        (acquire + checksum-verify)
-      ↓
-audit                      (scripts/phase1/01_dataset_audit.py)
-      ↓
-preprocessing              (cleaning + label contract)
-      ↓
-splits                     (scripts/phase1/02_build_splits.py + leakage audit)
-      ↓
-training                   (RF / LSTM / Fusion)
-      ↓
-evaluation                 (metrics, thresholding, calibration)
-      ↓
-result generation          (experiment JSON → reports)
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install --upgrade pip
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m pip install -e .            # optional: editable install of the package
 ```
-
----
-
-## Environment
 
 | Item | Value |
 | --- | --- |
-| Python | _TBD_ (pin on first dependency freeze) |
-| Package manager | _TBD_ |
-| OS tested for live capture | Linux (Scapy requires elevated capture privileges) |
+| Python | 3.14.4 |
+| Platform verified | Linux x86_64, CPU-only |
+| numpy | 2.5.3 |
+| pandas | 3.0.6 |
+| scikit-learn | 1.9.1 |
+| scipy | 1.18.1 |
+| torch | 2.14.0 (CPU) |
+| shap | 0.52.0 |
+| matplotlib | 3.11.2 |
+| PyYAML | 6.0.3 |
 
-Environment setup is **not yet pinned**. Pinning is tracked as a Phase 1 task; until
-seeds, library versions and hardware are recorded, results are not fully reproducible.
+Verify with:
+
+```bash
+.venv/bin/python -m xrlids.cli info
+```
+
+## 2. Tests (no datasets required)
+
+```bash
+.venv/bin/python -m pytest -q
+```
+
+Expected: 67 passed. Tests use tiny deterministic fixtures only.
+
+## 3. End-to-end execution check (no datasets required)
+
+```bash
+.venv/bin/python -m xrlids.cli smoke --rung R10 --rows 1500
+```
+
+Writes `results/smoke/smoke_R10.json`. **This is a plumbing check on synthetic fixtures and is
+labelled `SMOKE_ONLY`; it is not evidence.**
+
+## 4. Dataset preparation — *pending data*
+
+```bash
+# 1. place each dataset file, then record its path + SHA256 in data/manifests/dataset_registry.yaml
+# 2. verify integrity
+.venv/bin/python -m xrlids.cli verify-datasets
+```
+
+Checksum rule: a SHA256 mismatch is a hard failure. Datasets are never silently replaced.
+
+## 5. Audit → splits → train → evaluate — *pending data*
+
+```bash
+.venv/bin/python scripts/phase1/01_dataset_audit.py --dataset cicids2017 --input <file.csv>
+.venv/bin/python scripts/phase1/02_build_splits.py  --dataset cicids2017 --rung R10 --input <file.csv>
+.venv/bin/python scripts/phase1/generate_reports.py
+```
+
+## 6. Regenerating documentation from results
+
+```bash
+.venv/bin/python scripts/phase1/generate_reports.py
+```
+
+Writes `reports/generated/*.md` from the feature registry, the metrics module and result JSON.
+Final metrics are never hand-typed into Markdown.
 
 ---
 
-## Determinism requirements
+## Determinism record
 
-Every experiment must record, in its experiment card:
+Every experiment artifact records: experiment id, Git commit, dataset SHA-256, feature-schema
+hash, seed, timestamp, software environment and artifact version. Seeds are applied to Python,
+NumPy and PyTorch. Where full determinism is impossible (GPU kernels), the source of
+nondeterminism must be recorded rather than hidden; phase 1 runs on CPU.
 
-```text
-random seed(s)
-library versions (requirements lock / environment hash)
-hardware (CPU/GPU model)
-training wall-clock time
-Git commit SHA
-dataset file SHA256 values
-feature-schema hash
-preprocessor artifact hash
-```
+## Tracing a single claim
 
-See the template at [`docs/templates/EXPERIMENT_CARD_TEMPLATE.md`](docs/templates/EXPERIMENT_CARD_TEMPLATE.md).
-
----
-
-## Per-stage commands
-
-### 1. Environment setup
-
-```bash
-# TODO: create and activate environment, install pinned dependencies
-```
-
-### 2. Dataset preparation
-
-```bash
-# TODO: download per data/manifests/dataset_registry.yaml and verify SHA256
-```
-
-Checksum rule: if a downloaded file's SHA256 does not match the registry, the
-pipeline must **stop and report a mismatch**. Datasets are never silently replaced.
-
-### 3. Audit
-
-```bash
-# TODO: python scripts/phase1/01_dataset_audit.py --config configs/datasets/<name>.yaml
-```
-
-### 4. Preprocessing and splits
-
-```bash
-# TODO: python scripts/phase1/02_build_splits.py --config configs/splits/splits.yaml
-```
-
-### 5. Training
-
-```bash
-# TODO: RF / LSTM / Fusion entrypoints
-```
-
-### 6. Evaluation and reporting
-
-```bash
-# TODO: python scripts/reporting/<generator>.py
-```
-
----
-
-## Reproducing a single claim
-
-Given a claim ID from [`docs/03_DECISIONS/CLAIMS_REGISTRY.md`](docs/03_DECISIONS/CLAIMS_REGISTRY.md):
-
-1. Find the linked experiment ID in [`docs/experiments/EXPERIMENT_REGISTRY.md`](docs/experiments/EXPERIMENT_REGISTRY.md).
-2. Open the experiment card and read its config, seed, and Git commit.
-3. Check out that commit and run the documented command.
-4. Compare the regenerated result artifact against the committed artifact.
+1. Find the experiment in `docs/experiments/EXPERIMENT_REGISTRY.md`.
+2. Open its result JSON in `results/` and read the `metadata` block.
+3. Check out the recorded Git commit and re-run the documented command.
+4. Compare regenerated artifacts.
 
 If any step is missing, the claim's status must be downgraded to *Pending*.

@@ -1,4 +1,4 @@
-# Fusion Baseline — XRL-IDARS v2 (repo: xrlids-v1)
+# Fusion Baseline - XRL-IDARS v1 (repo: fyp-xrlids)
 #
 # Fusion is only meaningful if the two component scores are ALIGNED on the same flows and are
 # comparably scaled. Both conditions must be checked, not assumed (Checkpoint 6, §28).

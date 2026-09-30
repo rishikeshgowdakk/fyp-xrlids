@@ -1,4 +1,4 @@
-# DQN Response Policy — XRL-IDARS v2 (repo: xrlids-v1)
+# DQN Response Policy - XRL-IDARS v1 (repo: fyp-xrlids)
 #
 # The DQN is a RESPONSE POLICY, not the detector. It maps detector state to an action.
 # The historical reward function below is a HYPOTHESIS to test, not a universal truth (§51).
