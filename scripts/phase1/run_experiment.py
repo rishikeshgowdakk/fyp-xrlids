@@ -565,6 +565,7 @@ def run_experiment(
         (output_dir / "transfer_report.json").write_text(json.dumps(transfer_results, indent=2, default=str), encoding="utf-8")
 
     # Experiment Record
+    exp_status = "PRELIMINARY_SUBSAMPLE" if is_subsample else "EMPIRICALLY_OBSERVED"
     dataset_entry = next((d for d in manifest.get("datasets", []) if d.get("key") == dataset_key), {})
     dataset_ver = dataset_entry.get("version", "1.0.0")
     record = ExperimentRecord(

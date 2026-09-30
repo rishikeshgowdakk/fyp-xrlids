@@ -29,8 +29,8 @@
   "scaler_type": "StandardScaler",
   "missing_policy": "median_train",
   "n_train_rows": 1532,
-  "fitted_at": "2026-09-30T15:51:26.641224+00:00",
-  "git_commit": "7fe3e2156124db7f4f6fbeafc59f4ac459562f63",
+  "fitted_at": "2026-09-30T15:52:42.534599+00:00",
+  "git_commit": "2372e36791561dcb84f943dedc65a0c5b1be1e78",
   "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
   "scaler_params": {
     "mean": [
