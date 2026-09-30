@@ -1,0 +1,96 @@
+# Controlled first baseline experiment - XRL-IDARS v1 (repo: fyp-xrlids)
+#
+# STATUS: prepared, NOT executed. Requires: datasets acquired+verified (D-004),
+# schema/label validation passed, and D-002 resolved for the feature rung choice.
+#
+# This config exists so the first real experiment is configuration-driven (no parameters
+# hardcoded in scripts) and so the D-003 threshold objective is visibly deferred.
+
+experiment:
+  id: EXP-P1-BASELINE-001
+  phase: 1
+  research_question: RQ1
+  hypothesis: >
+    Flow-level features separate benign and malicious traffic on CICIDS2017 at
+    usable operating points. (To be tested, not assumed.)
+  status: prepared_not_executed
+
+dataset:
+  key: cicids2017
+  require_verified_checksums: true
+  require_schema_validated: true
+
+label_contract:
+  path: configs/labels/label_mapping.yaml
+  require_status: frozen        # contract must be frozen before the experiment runs
+  unknown_label_policy: REJECT
+
+features:
+  registry: configs/features/features.yaml
+  rung: R10                     # provisional; final choice awaits D-002
+  require_frozen: true          # registry must be frozen (D-002) before execution
+
+cleaning:
+  drop_exact_duplicates: true
+  drop_negative_duration: true
+  accounting_required: true     # arithmetic must reconcile or the run aborts
+
+split:
+  methodology: stratified_random
+  train: 0.6
+  validation: 0.2
+  test: 0.2
+  seed: 42
+  leakage_audit_required: true
+  fail_on_leakage: true
+
+preprocessing:
+  scaler: StandardScaler
+  imputation: median_train
+  fit_on: train_only
+
+models:
+  random_forest:
+    n_estimators: 200
+    max_depth: 16
+    min_samples_leaf: 2
+    class_weight: balanced_subsample
+    random_state: 42
+    n_jobs: -1
+  lstm:
+    seq_len: 5
+    stride: 1
+    label_rule: last
+    hidden_size: 64
+    num_layers: 2
+    dropout: 0.2
+    learning_rate: 0.001
+    batch_size: 256
+    epochs: 30
+    patience: 5
+    seed: 42
+  fusion:
+    alpha: 0.5
+    alignment: inner
+
+calibration:
+  method: platt
+  fit_on: validation            # never on test
+  report: [brier, ece, reliability_curve]
+
+thresholding:
+  sweep: [0.0, 1.0, 0.01]
+  population: validation        # never test
+  objective: null               # D-003 OPEN: no objective selected; candidates only
+  decision_id: D-003
+
+evaluation:
+  metrics: [accuracy, precision, recall, f1, macro_f1, weighted_f1, balanced_accuracy,
+            specificity, fpr, fnr, roc_auc, pr_auc]
+  confusion_matrix_required: true
+  report_population: aligned_intersection   # RF vs LSTM vs Fusion comparison rule
+
+outputs:
+  results_dir: results/baselines
+  experiment_record: docs/experiments/
+  predictions: true

@@ -1,0 +1,14 @@
+[
+  {
+    "dataset": "cicids2017",
+    "status": "DATA_NOT_AVAILABLE"
+  },
+  {
+    "dataset": "cse_cic_ids2018",
+    "status": "DATA_NOT_AVAILABLE"
+  },
+  {
+    "dataset": "unsw_nb15",
+    "status": "DATA_NOT_AVAILABLE"
+  }
+]
