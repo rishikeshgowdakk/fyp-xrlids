@@ -59,6 +59,8 @@ class SplitResult:
     manifest: dict[str, Any] = field(default_factory=dict)
     leakage: dict[str, Any] = field(default_factory=dict)
     test_duplicate_mask: pd.Series | None = None
+    label_splits: dict[str, pd.Series] = field(default_factory=dict)
+
 
 
 def build_splits(
@@ -221,4 +223,5 @@ def build_splits(
         manifest=manifest,
         leakage=leakage,
         test_duplicate_mask=test_duplicate_mask,
+        label_splits=label_splits,
     )
