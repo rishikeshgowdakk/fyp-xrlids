@@ -96,10 +96,40 @@ def run_single_dataset(
     accepted_index = cleaned.frame.index
 
     # ---- 2. features ----------------------------------------------------------
-    semantics_available = registry.available_semantics(dataset)
-    from xrlids.features.compute import compute_features, extract_semantics, validate_feature_matrix
+    from xrlids.features.compute import (
+        FeatureValidationError,
+        compute_features,
+        extract_semantics,
+    )
 
-    semantics, extraction_report = extract_semantics(cleaned.frame, dataset, registry, strict=True)
+    try:
+        semantics, extraction_report = extract_semantics(cleaned.frame, dataset, registry, strict=True)
+    except FeatureValidationError as exc:
+        # The dataset cannot even supply the semantic fields this contract needs. Report it
+        # as blocked rather than crashing or substituting columns (section 39: fail loudly,
+        # but do not fabricate a way forward).
+        return PipelineResult(
+            dataset=dataset,
+            rung=rung,
+            status="BLOCKED_FEATURE_INCOMPATIBLE",
+            experiment_id=make_experiment_id(
+                phase=1, model="MULTI", dataset=dataset, rung=rung, sequence=sequence
+            ),
+            warnings=warnings + [str(exc)],
+            payload={
+                "feature_contract": {
+                    "rung": rung,
+                    "available": registry.features_supported(dataset, rung),
+                    "unavailable": unsupported,
+                },
+                "note": (
+                    "experiment not executed: the dataset's raw columns cannot satisfy the "
+                    "semantic fields required by this feature contract"
+                ),
+                "extraction_error": str(exc),
+            },
+        )
+
     feature_frame, available, unavailable = compute_features(
         semantics, features, dataset=dataset, strict=False
     )
