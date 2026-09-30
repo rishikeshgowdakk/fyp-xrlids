@@ -1,0 +1,348 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P1-CSE2018-POLICY-B-001",
+    "git_commit": "63f44770aae32237d08c82e36724b316f159c6f0",
+    "dataset_sha256": "b0534c5d7d8b41e03df71c6966c995d116a8ed28e61f377c8b14cdf5d28f4edf",
+    "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+    "seed": 42,
+    "created_at": "2026-09-30T15:53:52.299842+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "63f44770aae32237d08c82e36724b316f159c6f0",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {
+      "config_hash": "3a57877b3be2c9bd3480f4af16d49d97ce4b5e4cc6cfa2a101f761c5ca8793d0"
+    }
+  },
+  "experiment_id": "EXP-P1-CSE2018-POLICY-B-001",
+  "research_question": "RQ1_DUPLICATE_POLICY",
+  "hypothesis": "Retaining duplicate feature vectors results in cross-split duplicate leakage (failing L-01), and test performance on duplicate samples may be distinct from unique samples.\n",
+  "dataset": "cse_cic_ids2018",
+  "dataset_sha256": "b0534c5d7d8b41e03df71c6966c995d116a8ed28e61f377c8b14cdf5d28f4edf",
+  "dataset_version": "as-published-2018",
+  "input_files": [
+    "data/raw/cse_cic_ids2018/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv"
+  ],
+  "rows_total": 2972,
+  "rows_train": 1783,
+  "rows_validation": 594,
+  "rows_test": 595,
+  "feature_contract": "R10",
+  "feature_list": [
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean",
+    "packet_length_std",
+    "syn_count",
+    "ack_count",
+    "rst_count",
+    "fin_count",
+    "syn_ack_ratio"
+  ],
+  "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+  "preprocessing": {
+    "preprocessor_version": "1.0.0",
+    "dataset": "cse_cic_ids2018",
+    "feature_list": [
+      "flow_duration_ms",
+      "flow_packets_per_s",
+      "flow_bytes_per_s",
+      "packet_length_mean",
+      "packet_length_std",
+      "syn_count",
+      "ack_count",
+      "rst_count",
+      "fin_count",
+      "syn_ack_ratio"
+    ],
+    "n_features": 10,
+    "feature_order": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "scaler_type": "StandardScaler",
+    "missing_policy": "median_train",
+    "n_train_rows": 1783,
+    "fitted_at": "2026-09-30T15:53:44.939181+00:00",
+    "git_commit": "daf02be5376b58d7f0b87fe1c4584c1f61937e1b",
+    "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+    "scaler_params": {
+      "mean": [
+        13887.370453168816,
+        78607.54804768023,
+        179654.9826589189,
+        77.75487256344755,
+        104.48585275839878,
+        0.054963544587773416,
+        0.1968592260235558,
+        0.19237240605720696,
+        0.006730229949523275,
+        0.054963544587773416
+      ],
+      "scale": [
+        34146.81639264855,
+        284999.87872662576,
+        1731960.218028625,
+        109.76179109464948,
+        161.28186743327953,
+        0.22790909010858093,
+        0.39762503838787916,
+        0.39416400577040017,
+        0.081761445402768,
+        0.22790909010858093
+      ],
+      "var": [
+        1166005069.7532516,
+        81224930874.19139,
+        2999686196833.762,
+        12047.650784305475,
+        26011.84076276595,
+        0.05194255335412126,
+        0.15810567115296237,
+        0.15536526344496807,
+        0.006684933954349813,
+        0.05194255335412126
+      ]
+    },
+    "imputation_medians": {
+      "flow_duration_ms": 11.217999999999998,
+      "flow_packets_per_s": 306.1146399326548,
+      "flow_bytes_per_s": 1259.2604555763457,
+      "packet_length_mean": 49.33333333,
+      "packet_length_std": 21.68524844,
+      "syn_count": 0.0,
+      "ack_count": 0.0,
+      "rst_count": 0.0,
+      "fin_count": 0.0,
+      "syn_ack_ratio": 0.0
+    },
+    "preprocessor_hash": "e5c1f67c2ececd4db85aa3368ffefedee19e4dc8513c4f9a4a7438143329351d"
+  },
+  "split_id": "40accaf707b8be0e71520d7ff9776e62dfdd3c6ff4e9fa1108a87d7fcdb38c11",
+  "model": {
+    "model_type": "RandomForest",
+    "params": {
+      "n_estimators": 100,
+      "max_depth": 16,
+      "min_samples_leaf": 2,
+      "class_weight": "balanced_subsample",
+      "random_state": 42,
+      "n_jobs": -1
+    },
+    "n_features": 10
+  },
+  "hyperparameters": {
+    "rf": {
+      "n_estimators": 100,
+      "max_depth": 16,
+      "min_samples_leaf": 2,
+      "class_weight": "balanced_subsample",
+      "random_state": 42,
+      "n_jobs": -1
+    },
+    "split": {
+      "methodology": "stratified_random",
+      "duplicate_policy": "retain_with_subset_evaluation",
+      "train": 0.6,
+      "validation": 0.2,
+      "test": 0.2,
+      "seed": 42,
+      "leakage_audit_required": true,
+      "fail_on_leakage": false
+    },
+    "duplicate_policy": "retain_with_subset_evaluation"
+  },
+  "random_seed": 42,
+  "threshold": 0.5,
+  "threshold_decision_id": "D-003",
+  "metrics": {
+    "rf": {
+      "threshold": 0.5,
+      "positive_class": 1,
+      "score_definition": "P(class=1) or a comparable continuous detector score",
+      "confusion": {
+        "tn": 347,
+        "fp": 81,
+        "fn": 97,
+        "tp": 70
+      },
+      "population": 595,
+      "positive_support": 167,
+      "negative_support": 428,
+      "accuracy": 0.7008403361344537,
+      "precision": 0.46357615894039733,
+      "recall": 0.41916167664670656,
+      "f1": 0.44025157232704404,
+      "macro_f1": 0.6180615659800357,
+      "weighted_f1": 0.6960588909269784,
+      "balanced_accuracy": 0.6149546700990542,
+      "specificity": 0.8107476635514018,
+      "fpr": 0.18925233644859812,
+      "fnr": 0.5808383233532934,
+      "per_class": {
+        "benign": {
+          "precision": 0.7815315315315315,
+          "recall": 0.8107476635514018,
+          "f1": 0.7958715596330275,
+          "support": 428
+        },
+        "attack": {
+          "precision": 0.46357615894039733,
+          "recall": 0.41916167664670656,
+          "f1": 0.44025157232704404,
+          "support": 167
+        }
+      },
+      "roc_auc": 0.6338281381162908,
+      "pr_auc": 0.506606112518168,
+      "reason": null
+    },
+    "lstm": {
+      "threshold": 0.5,
+      "positive_class": 1,
+      "score_definition": "P(class=1) or a comparable continuous detector score",
+      "confusion": {
+        "tn": 424,
+        "fp": 0,
+        "fn": 167,
+        "tp": 0
+      },
+      "population": 591,
+      "positive_support": 167,
+      "negative_support": 424,
+      "accuracy": 0.7174280879864636,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "macro_f1": 0.41773399014778323,
+      "weighted_f1": 0.5993881956773607,
+      "balanced_accuracy": 0.5,
+      "specificity": 1.0,
+      "fpr": 0.0,
+      "fnr": 1.0,
+      "per_class": {
+        "benign": {
+          "precision": 0.7174280879864636,
+          "recall": 1.0,
+          "f1": 0.8354679802955665,
+          "support": 424
+        },
+        "attack": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 167
+        }
+      },
+      "roc_auc": 0.6207773132979324,
+      "pr_auc": 0.3791135470278624,
+      "reason": null
+    },
+    "fusion": {
+      "threshold": 0.5,
+      "positive_class": 1,
+      "score_definition": "P(class=1) or a comparable continuous detector score",
+      "confusion": {
+        "tn": 405,
+        "fp": 19,
+        "fn": 146,
+        "tp": 21
+      },
+      "population": 591,
+      "positive_support": 167,
+      "negative_support": 424,
+      "accuracy": 0.7208121827411168,
+      "precision": 0.525,
+      "recall": 0.12574850299401197,
+      "f1": 0.2028985507246377,
+      "macro_f1": 0.5168338907469343,
+      "weighted_f1": 0.6533506122117908,
+      "balanced_accuracy": 0.5404685911196475,
+      "specificity": 0.9551886792452831,
+      "fpr": 0.04481132075471698,
+      "fnr": 0.874251497005988,
+      "per_class": {
+        "benign": {
+          "precision": 0.73502722323049,
+          "recall": 0.9551886792452831,
+          "f1": 0.8307692307692308,
+          "support": 424
+        },
+        "attack": {
+          "precision": 0.525,
+          "recall": 0.12574850299401197,
+          "f1": 0.2028985507246377,
+          "support": 167
+        }
+      },
+      "roc_auc": 0.6581883403005309,
+      "pr_auc": 0.49269610853630535,
+      "reason": null
+    }
+  },
+  "confusion_matrix": {
+    "tn": 347,
+    "fp": 81,
+    "fn": 97,
+    "tp": 70
+  },
+  "training_duration_s": 10.664015531539917,
+  "hardware": "CPU (linux)",
+  "status": "PRELIMINARY_SUBSAMPLE",
+  "result_interpretation": "Preliminary validation run on subsampled data.",
+  "limitations": [
+    "Threshold objective D-003 remains open; reporting uses neutral threshold 0.5.",
+    "Feature contract D-002 candidate evaluation.",
+    "Duplicate policy applied: retain_with_subset_evaluation."
+  ],
+  "artifacts": {
+    "predictions": "results/experiments/EXP-P1-CSE2018-POLICY-B-001/predictions_test.csv",
+    "rf_model": "results/experiments/EXP-P1-CSE2018-POLICY-B-001/random_forest.joblib",
+    "report": "results/experiments/EXP-P1-CSE2018-POLICY-B-001/experiment_report.md"
+  },
+  "git_commit": "63f44770aae32237d08c82e36724b316f159c6f0",
+  "software_environment": {
+    "python_version": "3.14.4",
+    "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+    "machine": "x86_64",
+    "processor_count": null,
+    "cuda_available": false,
+    "cuda_version": null,
+    "git_commit": "63f44770aae32237d08c82e36724b316f159c6f0",
+    "packages": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.6",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1",
+      "torch": "2.14.0+cpu",
+      "shap": "0.52.0",
+      "matplotlib": "3.11.2",
+      "PyYAML": "6.0.3"
+    }
+  }
+}

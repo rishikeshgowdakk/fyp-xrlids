@@ -1,0 +1,42 @@
+{
+  "decision_id": "D-003",
+  "decision_status": "OPEN - USER DECISION REQUIRED",
+  "note": "These are candidate operating points for comparison only. No objective has been selected; a single operating threshold must not be frozen until D-003 is decided by the project owner.",
+  "objectives_available": [
+    "max_f1",
+    "min_fpr_subject_to_recall_floor",
+    "min_fnr_subject_to_fpr_ceiling",
+    "cost_sensitive"
+  ],
+  "candidates": {
+    "max_f1": {
+      "threshold": 0.29,
+      "f1": 0.5010893246187363
+    },
+    "min_fpr_subject_to_recall_floor": {
+      "threshold": 0.2,
+      "recall": 0.9518072289156626,
+      "fpr": 0.8867924528301887,
+      "constraint": {
+        "recall_floor": 0.95
+      }
+    },
+    "min_fnr_subject_to_fpr_ceiling": {
+      "threshold": 0.53,
+      "fnr": 0.8855421686746988,
+      "fpr": 0.0047169811320754715,
+      "constraint": {
+        "fpr_ceiling": 0.01
+      }
+    },
+    "cost_sensitive": {
+      "threshold": 0.15,
+      "expected_cost": 418.0,
+      "assumptions": {
+        "fp_cost": 1.0,
+        "fn_cost": 10.0
+      },
+      "caveat": "costs are illustrative defaults, not project-justified values"
+    }
+  }
+}

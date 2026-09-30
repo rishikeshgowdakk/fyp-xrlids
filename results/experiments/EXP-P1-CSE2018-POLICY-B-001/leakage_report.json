@@ -1,0 +1,72 @@
+{
+  "status": "fail",
+  "failed_checks": [
+    "duplicate_overlap",
+    "near_duplicate_overlap"
+  ],
+  "checks": [
+    {
+      "id": "L-01",
+      "check": "duplicate_overlap",
+      "performed": true,
+      "passed": false,
+      "detail": {
+        "train__validation": 54,
+        "train__test": 42,
+        "validation__test": 30
+      }
+    },
+    {
+      "id": "L-02",
+      "check": "near_duplicate_overlap",
+      "performed": true,
+      "passed": false,
+      "method": "exact match on feature vectors rounded to 6 decimals",
+      "detail": {
+        "train__validation": 54,
+        "train__test": 42,
+        "validation__test": 30
+      },
+      "limitation": "rounding-based proxy; cannot detect all near-duplicates"
+    },
+    {
+      "id": "L-03",
+      "check": "group_overlap",
+      "performed": false,
+      "passed": null,
+      "detail": "no group column supplied or present"
+    },
+    {
+      "id": "L-04",
+      "check": "source_ip_overlap",
+      "performed": false,
+      "passed": null,
+      "detail": "no source-IP column present"
+    },
+    {
+      "id": "L-05",
+      "check": "temporal_overlap",
+      "performed": false,
+      "passed": null,
+      "detail": "no timestamp column supplied or present"
+    },
+    {
+      "id": "L-06",
+      "check": "sequence_overlap",
+      "performed": true,
+      "passed": true,
+      "method": "sequences are built independently within each split; index_origin is recorded per sequence",
+      "detail": "enforced by construction in xrlids.models.lstm.build_sequences"
+    }
+  ],
+  "not_performed": [
+    "group_overlap",
+    "source_ip_overlap",
+    "temporal_overlap"
+  ],
+  "split_sizes": {
+    "train": 1783,
+    "validation": 594,
+    "test": 595
+  }
+}
