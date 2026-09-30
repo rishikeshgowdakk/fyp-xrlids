@@ -1,0 +1,55 @@
+# .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# Environment / secrets — never commit credentials or environment-specific values
+.env
+.env.*
+*.pem
+*.key
+
+# Datasets — large, licensed, and checksum-tracked via data/manifests/dataset_registry.yaml.
+# Raw/interim/processed data must NOT be committed; only manifests and splits metadata.
+data/raw/*
+data/interim/*
+data/processed/*
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+
+# Model binaries — tracked by the model registry (hashes), not committed by default
+models/rf/*
+models/lstm/*
+models/fusion/*
+models/dqn/*
+!models/*/.gitkeep
+
+# Generated reports/figures (regenerate from results/; do not hand-edit)
+reports/generated/*
+reports/figures/*
+!reports/generated/.gitkeep
+!reports/figures/.gitkeep
+
+# Live capture artifacts
+*.pcap
+*.pcapng
+
+# Logs
+*.log
+logs/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

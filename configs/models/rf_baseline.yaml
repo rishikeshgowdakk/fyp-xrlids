@@ -1,0 +1,33 @@
+# RF Baseline — XRL-IDARS v2 (repo: xrlids-v1)
+#
+# IMPORTANT (§25): these values are the HISTORICAL configuration used as a STARTING POINT.
+# They are NOT a reproduced result. Any run using this file is recorded as a NEW run and
+# its metrics are its own. Do not carry historical RF metrics into this repo.
+
+model_id_prefix: "<DATASET>-<RUNG>-RF"
+type: RandomForest
+status: historical_starter      # historical_starter | tuned | frozen
+
+hyperparameters:
+  n_estimators: 200
+  max_depth: 16
+  min_samples_leaf: 2
+  class_weight: balanced_subsample
+  random_state: 42
+
+# Class imbalance handling is recorded explicitly (§33).
+class_imbalance:
+  strategy: class_weight
+  observed_distribution: null   # TODO after audit
+
+outputs_required:
+  - metrics.json
+  - metrics.csv
+  - confusion_matrix.csv
+  - classification_report.csv
+  - predictions.parquet
+  - feature_importances.csv
+
+notes:
+  - "Threshold is NOT fixed at 0.5; it is selected on validation (§31) according to D-003."
+  - "RF probability is used as a DQN state component; its calibration must be measured (§40)."

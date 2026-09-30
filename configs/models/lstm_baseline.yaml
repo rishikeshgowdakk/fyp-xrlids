@@ -1,0 +1,43 @@
+# LSTM Baseline — XRL-IDARS v2 (repo: xrlids-v1)
+#
+# The LSTM is a SUPERVISED temporal classifier over sequences of flow vectors (not generative).
+# Historical hyperparameters are a STARTING POINT, not a result (§26).
+
+model_id_prefix: "<DATASET>-<RUNG>-LSTM"
+type: SupervisedLSTM
+status: historical_starter
+
+sequence:
+  T: 5                    # sequence length: number of consecutive flow vectors
+  construction: null      # TODO: how sequences are built (consecutive in time? per group?)
+  ordering_key: null      # what defines consecutive (timestamp? row order? shuffled?)
+  grouping_key: null      # must not span different flows/sources if that would be meaningless
+  label_rule: null        # label of the sequence (last element? majority? any-attack?)
+  boundary_handling: no_cross_split   # MANDATORY: no sequence may cross train/val/test
+  padding: null
+
+hyperparameters:
+  hidden_size: 64
+  num_layers: 2
+  dropout: 0.2
+  optimizer: Adam
+  learning_rate: 0.001
+  loss: BCEWithLogitsLoss
+  batch_size: null        # TODO
+  epochs: null            # TODO
+  early_stopping: null
+  best_checkpoint_criterion: null
+
+training:
+  seeds: []               # record all seeds used
+  hardware: null
+  time_HH_MM: null
+
+critical_checks:
+  - id: CHK-LSTM-01
+    description: "Train/validation/test sequence boundaries do not overlap (§27)."
+    fail_action: "STOP -> FIX SPLITTING -> REGENERATE SEQUENCES -> DOCUMENT FAILURE"
+    status: not_run
+
+notes:
+  - "Sequence construction must be defined before any LSTM run; an undefined ordering makes results unreproducible."

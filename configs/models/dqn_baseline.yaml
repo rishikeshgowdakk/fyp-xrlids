@@ -1,0 +1,73 @@
+# DQN Response Policy — XRL-IDARS v2 (repo: xrlids-v1)
+#
+# The DQN is a RESPONSE POLICY, not the detector. It maps detector state to an action.
+# The historical reward function below is a HYPOTHESIS to test, not a universal truth (§51).
+
+model_id_prefix: "<DATASET>-<RUNG>-DQN"
+type: DQN
+status: historical_starter
+
+state:
+  components:
+    - rf_probability
+    - lstm_score
+    - fusion_score
+  normalization: null       # TODO (§50): how state is normalized
+  extra_features: []        # deliberately minimal; adding state requires justification
+
+actions:
+  - id: 0
+    name: ALLOW
+  - id: 1
+    name: ALERT
+  - id: 2
+    name: BLOCK
+
+# ---------------------------------------------------------------------------
+# Reward — historical configuration, TO BE TESTED via sensitivity study (§51)
+# ---------------------------------------------------------------------------
+reward:
+  status: hypothesis_not_truth
+  historical:
+    benign:
+      ALLOW: 1
+      ALERT: -2
+      BLOCK: -10
+    attack:
+      ALLOW: -50
+      ALERT: -5
+      BLOCK: 10
+  sensitivity_study:
+    configurations: [A, B, C]   # TODO: define B and C
+    compare:
+      - attack_protection
+      - false_blocking
+      - expected_reward
+      - action_distribution
+
+training:
+  seeds: []
+  episodes: null
+  exploration: null
+  replay_buffer: null
+  target_update: null
+  gamma: null
+  learning_rate: null
+
+baselines_required:          # §52 — DQN must be compared, not trusted
+  - Always-ALLOW
+  - Always-BLOCK
+  - Fixed-threshold policy
+  - RF policy
+  - Fusion policy
+
+stability_checks:            # §50
+  - policy_stability
+  - reward_sensitivity
+  - threshold_sensitivity
+  - seed_sensitivity
+  - state_distribution
+
+safety:
+  policy_config: configs/safety/response_safety_policy.yaml
+  note: "DQN output is a recommendation. The safety layer may downgrade it. DQN never writes firewall rules."

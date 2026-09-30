@@ -1,0 +1,80 @@
+# Split Configuration — XRL-IDARS v2 (repo: xrlids-v1)
+#
+# STATUS: SKELETON — ratios intentionally unset until the split methodology is chosen.
+#
+# PRINCIPLE (§22):
+#   TRAIN       - learn parameters
+#   VALIDATION  - select hyperparameters / thresholds
+#   FINAL TEST  - final evaluation only, touched once
+#
+# The test set is never used for threshold selection, model selection, or feature selection.
+
+config_version: "0.1.0"
+last_updated: "2026-09-30"
+status: provisional
+
+methodology:
+  type: null          # TODO: stratified_random | grouped | temporal | hybrid
+  rationale: null     # required before freeze
+  stratify_on: null   # label? family? both?
+  grouping_key: null  # if grouped: source IP / capture day / flow group
+  temporal_seed: null # if temporal: how the time boundary is chosen
+
+ratios:
+  train: null
+  validation: null
+  test: null
+
+seeds:
+  split_seed: null    # must be recorded once chosen
+
+# ---------------------------------------------------------------------------
+# Leakage checks — ALL mandatory (§23). A split is not valid until all pass.
+# ---------------------------------------------------------------------------
+leakage_checks:
+  - id: L-01
+    check: duplicate_overlap          # exact duplicates across splits
+    required: true
+  - id: L-02
+    check: near_duplicate_overlap     # near-duplicates (needs a defined distance)
+    required: true
+    method: null
+  - id: L-03
+    check: group_overlap              # same group key in >1 split
+    required: true
+  - id: L-04
+    check: source_ip_overlap          # where meaningful for the dataset
+    required: true
+  - id: L-05
+    check: temporal_overlap
+    required: true
+  - id: L-06
+    check: sequence_overlap          # LSTM windows crossing split boundaries
+    required: true
+
+leakage_report:
+  output_json: results/splits/leakage_report.json
+  output_doc: docs/phase1/LEAKAGE_AUDIT.md
+  fail_action: stop_and_report       # stop, do not silently regenerate
+
+# ---------------------------------------------------------------------------
+# Cross-dataset split policy
+# ---------------------------------------------------------------------------
+cross_dataset:
+  policy: null      # see D-005
+  note: >
+    For transfer experiments the source train/val/test are used as-is and the target dataset
+    provides an external test population. The target split must still be leakage-audited
+    internally where it is used for any selection.
+
+# ---------------------------------------------------------------------------
+# Scaler rule (§24)
+# ---------------------------------------------------------------------------
+scaling:
+  fit_on: train_only
+  artifacts:
+    - scaler_file
+    - scaler_metadata
+    - training_data_hash
+    - feature_schema_hash
+  applied_to: [train, validation, test, live]

@@ -1,0 +1,44 @@
+# Fusion Baseline — XRL-IDARS v2 (repo: xrlids-v1)
+#
+# Fusion is only meaningful if the two component scores are ALIGNED on the same flows and are
+# comparably scaled. Both conditions must be checked, not assumed (Checkpoint 6, §28).
+
+model_id_prefix: "<DATASET>-<RUNG>-FUSION"
+type: ScoreFusion
+status: historical_starter
+
+formula:
+  expression: "S_fusion = (P_RF + S_LSTM) / 2"
+  notes: >
+    The historical fusion averaged aligned RF/LSTM scores. Mean-of-scores is only one option;
+    a weighted or learned combiner may be tested later, but the baseline keeps the simple form
+    so its contribution is measurable.
+
+alignment:
+  population: null            # TODO: exactly which rows are being compared
+  join_key: null
+  handling: inner_join        # rows present in only one model are excluded and counted
+  expected_agreement: null
+  actual_agreement: null
+
+score_comparability:
+  rf_score_is_probability: true
+  lstm_score_is_probability: null   # TODO after sigmoid/loss analysis
+  calibration_required: true
+  calibration_ref: results/calibration/
+
+threshold:
+  default: null               # selected on validation per D-003
+  selected_on: validation
+  # Never select the fusion threshold on the test set.
+
+outputs_required:
+  - metrics.json
+  - metrics.csv
+  - confusion_matrix.csv
+  - classification_report.csv
+  - predictions.parquet
+  - score_distributions.png
+
+notes:
+  - "If fusion does not beat its components, that is a reportable negative result (RQ3)."

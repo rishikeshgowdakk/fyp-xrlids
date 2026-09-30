@@ -1,0 +1,108 @@
+# Feature Registry — XRL-IDARS v2 (repo: xrlids-v1)
+#
+# STATUS: SKELETON — NOT FROZEN.  Blocked by D-002 (see docs/03_DECISIONS/DECISION_LOG.md).
+#
+# RULES (§18–§21):
+#   - No feature enters the canonical schema without a written mathematical definition.
+#   - Every feature must record where it can be computed (dataset fields AND live fields).
+#   - Nothing here is final. The historical pool below is a HYPOTHESIS to re-derive,
+#     not a canonical contract.
+
+registry_version: "0.1.0"
+last_updated: "2026-09-30"
+contract_status: provisional      # provisional | frozen
+frozen_by_decision: null          # will be D-002
+
+# ---------------------------------------------------------------------------
+# Historical pool — QUARANTINED, provisional only
+# ---------------------------------------------------------------------------
+# The previous XRL-IDARS repository used a feature pool with these nominal sizes.
+# They are recorded here so they can be re-derived and COMPARED, not inherited.
+historical_pool:
+  status: historical_not_verified
+  counts:
+    P_common: 19      # historical: reproducible from live traffic
+    P_flow: 37        # historical: flow-level derived features
+    P_research: 23    # historical: research-only, not live-reproducible
+  note: >
+    The historical separation of live-reproducible features from research-only features is
+    treated as a good idea worth preserving, but the exact membership must be re-derived
+    against the decision gate below.
+
+# ---------------------------------------------------------------------------
+# Feature rungs — PROVISIONAL. Membership intentionally empty until D-002.
+# ---------------------------------------------------------------------------
+rungs:
+  - id: R10
+    description: "Smallest rung: features most likely to be live-reproducible and dataset-portable."
+    rationale: null
+    live_compatible: null
+    features: []      # TODO: exact feature list (blocked by D-002)
+  - id: R15
+    description: "Intermediate rung."
+    rationale: null
+    live_compatible: null
+    features: []      # TODO
+  - id: R20
+    description: "Largest rung; includes features most likely to be research-only."
+    rationale: null
+    live_compatible: null
+    features: []      # TODO
+
+# ---------------------------------------------------------------------------
+# Per-feature record — every canonical feature must fill ALL of these.
+# Mirrors §19 of the build spec.
+# ---------------------------------------------------------------------------
+feature_record_schema:
+  required_fields:
+    - name
+    - description
+    - formula              # mathematical, not prose
+    - source_fields        # which raw fields it derives from
+    - unit
+    - directionality       # e.g. higher = more suspicious / neutral
+    - required_packet_info # what must be observed to compute it live
+    - dataset_availability # which of the three datasets provide it
+    - live_availability    # yes | no | conditional (+ condition)
+    - edge_cases           # e.g. duration == 0
+    - missing_value_policy
+    - normalization
+    - inclusion_reason
+    - known_limitations
+  status_values: [provisional, accepted, rejected]
+
+# ---------------------------------------------------------------------------
+# Feature selection decision gate (§21) — must be answered for every candidate
+# before freezing. Unclear answers are documented, not ignored.
+# ---------------------------------------------------------------------------
+decision_gate:
+  - id: Q1
+    question: "Can this feature be reproduced live?"
+  - id: Q2
+    question: "Is its definition identical across datasets?"
+  - id: Q3
+    question: "Could it leak dataset identity?"
+  - id: Q4
+    question: "Does it contain target information?"
+  - id: Q5
+    question: "Does it depend on unavailable metadata?"
+  - id: Q6
+    question: "Is its unit identical?"
+  - id: Q7
+    question: "Does adding it materially improve validation performance?"
+  - id: Q8
+    question: "Does it hurt cross-dataset performance?"
+  - id: Q9
+    question: "Does it increase inference cost?"
+  - id: Q10
+    question: "Does the professor have a reasonable explanation for why we selected it?"
+
+# ---------------------------------------------------------------------------
+# Forbidden columns — must never be used as model inputs
+# ---------------------------------------------------------------------------
+exclusions:
+  identifier_columns: []   # e.g. flow id, timestamp, source/destination IP and port
+  rationale: >
+    Identifiers are not behavioural features and leak dataset identity. They may be used for
+    grouping/leakage analysis (e.g. source-IP overlap) but never as model inputs.
+  target_leakage_columns: []   # populated during audit

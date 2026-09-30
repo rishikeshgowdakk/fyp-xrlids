@@ -1,0 +1,75 @@
+# Label Contract — XRL-IDARS v2 (repo: xrlids-v1)
+#
+# RULES (§16, §17):
+#   - Binary target: BENIGN/NORMAL -> 0, ATTACK -> 1.
+#   - Original attack labels are preserved SEPARATELY for secondary analysis.
+#   - Unknown labels are REJECTED. They are NEVER silently converted to BENIGN.
+#   - Label values are confirmed by the audit (scripts/phase1/01_dataset_audit.py),
+#     not assumed from documentation.
+
+contract_version: "0.1.0"
+last_updated: "2026-09-30"
+status: provisional      # provisional | frozen
+
+# ---------------------------------------------------------------------------
+# Binary mapping
+# ---------------------------------------------------------------------------
+binary:
+  positive_class: 1
+  negative_class: 0
+  benign_tokens:            # matched case-insensitively after strip
+    - BENIGN
+    - NORMAL
+  attack_token_rule: "any label not in benign_tokens and not in rejection tokens -> ATTACK"
+  unknown_label_policy: REJECT   # REJECT | (no other value is acceptable)
+  rejection_reporting: "every rejected label and its row count must appear in the audit and data-accounting reports"
+
+# ---------------------------------------------------------------------------
+# Normalization chain: dataset native -> normalized -> binary -> attack family
+# ---------------------------------------------------------------------------
+chain:
+  - stage: native
+    description: "Raw label as it appears in the dataset file."
+  - stage: normalized
+    description: "Whitespace-stripped, case-normalized, encoding-artifact-cleaned label."
+  - stage: binary
+    description: "0/1 per the mapping above."
+  - stage: family
+    description: "Coarse attack family for secondary analysis; mapped per dataset."
+
+# ---------------------------------------------------------------------------
+# Attack families — MAPPING IS PER-DATASET. Taxonomies are NOT identical (§17).
+# Populate after audit. Document every imperfect mapping explicitly.
+# ---------------------------------------------------------------------------
+attack_families:
+  - DoS
+  - DDoS
+  - PortScan
+  - Web
+  - BruteForce
+  - Bot
+  - Reconnaissance
+  - Infiltration
+  - Other
+
+per_dataset_family_map:
+  cicids2017: {}            # TODO after audit
+  cse_cic_ids2018: {}       # TODO after audit
+  unsw_nb15: {}             # TODO after audit
+
+taxonomy_warnings:
+  - "A family name shared across datasets may cover different underlying attacks. Any such case must be documented, not flattened."
+  - "Where a native label has no honest family, map to 'Other' rather than forcing it into a wrong family."
+
+# ---------------------------------------------------------------------------
+# Known label artifacts to check (hypotheses, not conclusions)
+# ---------------------------------------------------------------------------
+known_label_artifacts:
+  - id: ART-001
+    hypothesis: "CICIDS2017 contains a label-header artifact where a header row appears inside the data."
+    status: unverified
+    check: "audit: detect rows whose values appear to be a header"
+  - id: ART-002
+    hypothesis: "Some CICIDS2017 labels have leading spaces (e.g. ' Web Attack ...')."
+    status: unverified
+    check: "audit: count distinct labels before and after strip()"

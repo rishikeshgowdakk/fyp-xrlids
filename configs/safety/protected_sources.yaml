@@ -1,0 +1,31 @@
+# Protected Sources — XRL-IDARS v2 (repo: xrlids-v1)
+#
+# RULES (§70):
+#   - Protect management, gateway, localhost and system-critical sources.
+#   - The concrete list is ENVIRONMENT-SPECIFIC.
+#   - Do NOT commit personal, college or production network addresses into the repository.
+#     Fill these lists locally (e.g. via an untracked override) before enforcement.
+#
+# If any protected source appears as a block candidate, the safety layer must downgrade
+# the action and log the event. This is a hard rule, not a preference.
+
+config_version: "0.1.0"
+last_updated: "2026-09-30"
+
+enforcement_defaults:
+  mode: OBSERVE          # OBSERVE | DRY_RUN | ENFORCE  — must default to non-enforcing
+
+protected:
+  management_ips: []     # e.g. control plane / SSH sources for the gateway
+  gateway_ips: []        # e.g. default gateway, DNS resolvers the lab depends on
+  localhost_ips:         # safe, non-identifying defaults
+    - "127.0.0.1"
+    - "::1"
+  system_critical_destinations: []   # e.g. infrastructure the lab cannot lose
+
+  protected_subnets: []
+  protected_ports: []    # ports that must never be blocked (e.g. management)
+
+never_block_overrides:
+  # Add explicit (ip, reason, date) exclusions discovered during operation.
+  - []

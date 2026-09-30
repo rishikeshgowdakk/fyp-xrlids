@@ -1,0 +1,67 @@
+# Response Safety Policy — XRL-IDARS v2 (repo: xrlids-v1)
+#
+# The DQN may RECOMMEND an action. It may never directly apply a firewall rule.
+# Every BLOCK passes through the gate below (§69).
+#
+#   DQN -> confidence / policy validation -> protected-source check -> repeat confirmation
+#       -> existing-block check -> cooldown check -> firewall action
+#
+# All values below are PROVISIONAL until measured (Phase 3).
+
+config_version: "0.1.0"
+last_updated: "2026-09-30"
+status: provisional
+
+modes:
+  OBSERVE:
+    predicts: true
+    logs_would_be_action: false
+    applies_action: false
+    description: "Prediction only."
+  DRY_RUN:
+    predicts: true
+    logs_would_be_action: true
+    applies_action: false
+    description: "Logs what would happen, changes nothing."
+  ENFORCE:
+    predicts: true
+    logs_would_be_action: true
+    applies_action: true
+    description: "Actually applies the (gated) action. Requires all preconditions below."
+    preconditions:
+      - feature_parity_pass
+      - replay_pass
+      - dry_run_pass
+      - safety_tests_pass
+      - rollback_verified
+
+block_gate:
+  minimum_confidence: null            # TODO — depends on D-003 calibration outcome
+  require_calibrated_score: true      # do not treat an uncalibrated score as confidence
+  minimum_repeated_observations: null # TODO
+  repeat_window_seconds: null
+  maximum_block_duration_seconds: null
+  cooldown_seconds: null
+  protected_source_check: required
+  existing_block_check: required
+  manual_override: required
+  rollback_required: true
+
+non_blocking_actions:
+  ALLOW:
+    side_effects: none
+  ALERT:
+    side_effects: [log_event, dashboard_notification]
+    description: "Safe default when confidence is below the block gate."
+
+failure_behavior:
+  ml_api_unavailable: fail_closed_to_observe   # never block on missing evidence
+  database_unavailable: fail_closed_to_observe
+  model_missing_or_wrong_version: fail_closed_to_observe
+  invalid_or_nan_features: fail_closed_to_observe
+  firewall_command_failed: log_and_alert
+  capture_failure: log_and_alert
+
+audit:
+  log_every: [prediction, response_decision, firewall_action, rollback, operator_override]
+  required_fields: [event_id, timestamp, source, destination, protocol, scores, prediction, action, model_version, execution_mode, reason]
