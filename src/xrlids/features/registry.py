@@ -21,6 +21,24 @@ class FeatureRegistryError(ValueError):
     """Raised when the feature registry is internally inconsistent or invalid."""
 
 
+def _normalize_gate(gate: dict[str, dict[str, object]]) -> dict[str, dict[str, str]]:
+    """Coerce YAML 1.1 ``yes``/``no`` booleans back to readable gate answers.
+
+    YAML parses bare ``yes``/``no`` as booleans, which would silently turn a documentable
+    decision-gate answer into ``True``/``False``.
+    """
+    normalized: dict[str, dict[str, str]] = {}
+    for feature, answers in gate.items():
+        row: dict[str, str] = {}
+        for key, value in (answers or {}).items():
+            if isinstance(value, bool):
+                row[key] = "yes" if value else "no"
+            else:
+                row[key] = str(value)
+        normalized[feature] = row
+    return normalized
+
+
 @dataclass
 class FeatureRegistry:
     raw: dict[str, Any]
@@ -41,7 +59,7 @@ class FeatureRegistry:
         registry = cls(
             raw=data,
             rungs=data.get("rungs", {}) or {},
-            gate=data.get("gate", {}) or {},
+            gate=_normalize_gate(data.get("gate", {}) or {}),
             column_maps=data.get("column_maps", {}) or {},
             excluded_patterns=tuple(data.get("excluded_column_patterns", []) or ()),
             version=str(data.get("registry_version", "0.0.0")),
