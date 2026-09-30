@@ -252,7 +252,7 @@ def run_experiment(
 
     print(f"\n[1/10] Loading raw data: {raw_file_path} ...")
     raw_df = pd.read_csv(raw_file_path, low_memory=False)
-    raw_sha256 = file_sha256(raw_file_path)
+    raw_sha256 = sha256_file(raw_file_path)
     total_raw_rows = len(raw_df)
     print(f"       Loaded {total_raw_rows:,} rows, 80 columns. SHA-256: {raw_sha256[:16]}...")
 
