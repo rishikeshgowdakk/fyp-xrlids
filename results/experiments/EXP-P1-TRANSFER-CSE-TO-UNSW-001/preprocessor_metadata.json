@@ -1,0 +1,50 @@
+{
+  "preprocessor_version": "1.0.0",
+  "dataset": "cse_cic_ids2018",
+  "feature_list": [
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean"
+  ],
+  "n_features": 4,
+  "feature_order": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "scaler_type": "StandardScaler",
+  "missing_policy": "median_train",
+  "n_train_rows": 1518,
+  "fitted_at": "2026-09-30T15:53:11.333883+00:00",
+  "git_commit": "daf02be5376b58d7f0b87fe1c4584c1f61937e1b",
+  "feature_schema_hash": "7b2e3edf447d34b7d00c8f2a877c51599af42fd42e5ff63e6811c6b22eda12a4",
+  "scaler_params": {
+    "mean": [
+      15031.93617588933,
+      9007.44928226457,
+      152252.61888454543,
+      86.66870575425428
+    ],
+    "scale": [
+      35316.44528834047,
+      84364.72906642458,
+      1340641.2494581954,
+      114.72945932954342
+    ],
+    "var": [
+      1247251307.8043454,
+      7117407510.451223,
+      1797318959748.831,
+      13162.848838049356
+    ]
+  },
+  "imputation_medians": {
+    "flow_duration_ms": 32.1335,
+    "flow_packets_per_s": 108.39639370350369,
+    "flow_bytes_per_s": 1955.361305044673,
+    "packet_length_mean": 54.33333333
+  },
+  "preprocessor_hash": "7f6bf994af1317b0a52862fcdf8f20b8269de1e0b52d16693617c4daacdd846d"
+}

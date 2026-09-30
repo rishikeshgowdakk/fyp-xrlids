@@ -1,0 +1,26 @@
+{
+  "source_dataset": "cse_cic_ids2018",
+  "target_dataset": "unsw_nb15",
+  "basis": "rung_R10",
+  "candidate_count": 10,
+  "common_transfer_count": 4,
+  "common_transfer_features": [
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean"
+  ],
+  "source_only_supported": [
+    "packet_length_std",
+    "syn_count",
+    "ack_count",
+    "rst_count",
+    "fin_count",
+    "syn_ack_ratio"
+  ],
+  "target_only_supported": [],
+  "neither_supported": [],
+  "schema_hash": "7b2e3edf447d34b7d00c8f2a877c51599af42fd42e5ff63e6811c6b22eda12a4",
+  "scientific_note": "For cross-dataset/transfer evaluation, models must ONLY be trained and tested on common_transfer_features. Excluded features must NEVER be fabricated or proxied.",
+  "target_availability": "DATA_NOT_AVAILABLE"
+}

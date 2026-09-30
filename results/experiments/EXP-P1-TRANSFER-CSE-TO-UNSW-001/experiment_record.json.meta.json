@@ -1,0 +1,31 @@
+{
+  "experiment_id": "EXP-P1-TRANSFER-CSE-TO-UNSW-001",
+  "git_commit": "daf02be5376b58d7f0b87fe1c4584c1f61937e1b",
+  "dataset_sha256": "b0534c5d7d8b41e03df71c6966c995d116a8ed28e61f377c8b14cdf5d28f4edf",
+  "feature_schema_hash": "7b2e3edf447d34b7d00c8f2a877c51599af42fd42e5ff63e6811c6b22eda12a4",
+  "seed": 42,
+  "created_at": "2026-09-30T15:53:18.236117+00:00",
+  "software_environment": {
+    "python_version": "3.14.4",
+    "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+    "machine": "x86_64",
+    "processor_count": null,
+    "cuda_available": false,
+    "cuda_version": null,
+    "git_commit": "daf02be5376b58d7f0b87fe1c4584c1f61937e1b",
+    "packages": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.6",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1",
+      "torch": "2.14.0+cpu",
+      "shap": "0.52.0",
+      "matplotlib": "3.11.2",
+      "PyYAML": "6.0.3"
+    }
+  },
+  "artifact_version": "1",
+  "extra": {
+    "config_hash": "9bf797d93642d9daa6d039f823a695e4868fa89abe2a3319274acf81627f528a"
+  }
+}
