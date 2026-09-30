@@ -54,23 +54,41 @@ Expected: 67 passed. Tests use tiny deterministic fixtures only.
 Writes `results/smoke/smoke_R10.json`. **This is a plumbing check on synthetic fixtures and is
 labelled `SMOKE_ONLY`; it is not evidence.**
 
-## 4. Dataset preparation — *pending data*
+## 4. Dataset preparation - *blocked on manual download*
+
+The historical primary mirror (`iscxdownloads.cs.unb.ca`) does not resolve from this
+network (NXDOMAIN, verified 2026-09-30; general internet confirmed working via control
+hosts). Download the files manually from the official pages, then:
 
 ```bash
-# 1. place each dataset file, then record its path + SHA256 in data/manifests/dataset_registry.yaml
-# 2. verify integrity
+# what is missing and where it goes:
+.venv/bin/python scripts/phase1/prepare_dataset.py instructions
+
+# after placing files in data/raw/<dataset>/:
+.venv/bin/python scripts/phase1/prepare_dataset.py register --dataset <key> --all
+.venv/bin/python scripts/phase1/prepare_dataset.py verify --dataset <key>
 .venv/bin/python -m xrlids.cli verify-datasets
 ```
 
+`register` computes each SHA256 from the actual bytes on disk - checksums cannot be
+hand-entered. `verify` re-reads files and hard-fails on mismatch. A file that was never
+downloaded stays `expected`; nothing is fabricated.
+
 Checksum rule: a SHA256 mismatch is a hard failure. Datasets are never silently replaced.
 
-## 5. Audit → splits → train → evaluate — *pending data*
+## 5. Audit → splits → train → evaluate - *pending data*
 
 ```bash
+.venv/bin/python scripts/phase1/03_run_audit.py                     # audit all acquired datasets
 .venv/bin/python scripts/phase1/01_dataset_audit.py --dataset cicids2017 --input <file.csv>
 .venv/bin/python scripts/phase1/02_build_splits.py  --dataset cicids2017 --rung R10 --input <file.csv>
+.venv/bin/python scripts/phase1/feature_contract_evidence.py        # D-002 evidence
 .venv/bin/python scripts/phase1/generate_reports.py
 ```
+
+The audit runner validates every real file's header against the declared column maps
+(`schema_status`), audits each file, records label-rejection accounting, and updates the
+manifest honestly (`validated` only when validation actually passed).
 
 ## 6. Regenerating documentation from results
 
