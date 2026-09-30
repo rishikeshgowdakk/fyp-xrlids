@@ -85,3 +85,25 @@ def test_infinite_values_rejected_by_validation(registry):
     frame = pd.DataFrame({"a": [1.0, np.inf], "b": [1.0, 2.0]})
     with pytest.raises(FeatureValidationError, match="infinite"):
         validate_feature_matrix(frame, ["a", "b"], strict=True)
+
+
+def test_common_transfer_contract_computation(registry):
+    contract = registry.common_transfer_contract("cse_cic_ids2018", "unsw_nb15", "R10")
+    expected = [
+        "flow_duration_ms",
+        "flow_packets_per_s",
+        "flow_bytes_per_s",
+        "packet_length_mean",
+    ]
+    assert contract == expected
+
+
+def test_transfer_compatibility_report_structure(registry):
+    rep = registry.transfer_compatibility_report("cse_cic_ids2018", "unsw_nb15", "R10")
+    assert rep["source_dataset"] == "cse_cic_ids2018"
+    assert rep["target_dataset"] == "unsw_nb15"
+    assert rep["common_transfer_count"] == 4
+    assert "syn_count" in rep["source_only_supported"]
+    assert "schema_hash" in rep
+    assert "scientific_note" in rep
+

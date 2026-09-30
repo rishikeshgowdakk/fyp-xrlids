@@ -116,3 +116,20 @@ def test_fusion_alpha_bounds_enforced():
     rf = pd.Series([0.2], index=[0])
     with pytest.raises(FusionError):
         fuse_scores(rf, rf, alpha=1.5)
+
+
+def test_tune_fusion_alpha_selects_best_weight_on_validation():
+    from xrlids.models.fusion import tune_fusion_alpha
+
+    y = pd.Series([0, 1, 1, 0], index=[0, 1, 2, 3])
+    # RF gets sample 1 right, misses sample 2
+    rf = pd.Series([0.2, 0.8, 0.3, 0.2], index=[0, 1, 2, 3])
+    # LSTM gets sample 2 right, misses sample 1
+    lstm = pd.Series([0.1, 0.3, 0.8, 0.2], index=[0, 1, 2, 3])
+
+    res = tune_fusion_alpha(rf, lstm, y, metric="f1")
+    # alpha=0.5 fuses them to [0.15, 0.55, 0.55, 0.20], classifying all 4 correctly!
+    assert res["best_alpha"] == 0.5
+    assert res["best_metric_value"] == pytest.approx(1.0)
+
+

@@ -126,3 +126,61 @@ def compare_components(
         "fusion": evaluate(y, fusion.scores, threshold),
         "alpha": alpha,
     }
+
+
+def tune_fusion_alpha(
+    val_rf: pd.Series,
+    val_lstm: pd.Series,
+    y_val: pd.Series,
+    *,
+    metric: str = "roc_auc",
+    alpha_grid: Sequence[float] | None = None,
+) -> dict[str, Any]:
+    """Tune fusion weight alpha on VALIDATION data only (never test data).
+
+    Sweeps candidate alphas across [0.0, 1.0] and chooses the alpha that maximizes
+    the specified validation metric (default: roc_auc).
+    """
+    if alpha_grid is None:
+        alpha_grid = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+
+    aligned_rf, aligned_lstm, report = align_scores(val_rf, val_lstm, how="inner")
+    y_aligned = y_val.loc[aligned_rf.index]
+
+    sweep_results = []
+    best_alpha = 0.5
+    best_metric_val = -float("inf")
+
+    rf_arr = aligned_rf.to_numpy(dtype=float)
+    lstm_arr = aligned_lstm.to_numpy(dtype=float)
+    y_arr = y_aligned.to_numpy(dtype=int)
+
+    for a in alpha_grid:
+        scores = a * rf_arr + (1.0 - a) * lstm_arr
+        m = evaluate(y_arr, scores, threshold=0.5)
+        score_val = m.get(metric)
+        if score_val is not None:
+            # If strictly better, or tied and closer to 0.5 (balanced prior)
+            is_better = score_val > best_metric_val + 1e-9
+            is_tied = abs(score_val - best_metric_val) <= 1e-9 and abs(a - 0.5) < abs(best_alpha - 0.5)
+            if is_better or is_tied:
+                best_metric_val = score_val
+                best_alpha = float(a)
+        sweep_results.append({
+            "alpha": float(a),
+            "metric": metric,
+            "metric_value": score_val,
+            "f1": m.get("f1"),
+            "roc_auc": m.get("roc_auc"),
+            "pr_auc": m.get("pr_auc"),
+        })
+
+    return {
+        "best_alpha": best_alpha,
+        "target_metric": metric,
+        "best_metric_value": best_metric_val,
+        "sweep": sweep_results,
+        "population": report,
+        "note": "Alpha was tuned strictly on validation data. Test set was not used for weight selection.",
+    }
+

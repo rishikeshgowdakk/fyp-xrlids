@@ -9,6 +9,10 @@ from xrlids.evaluation.calibration import (
     expected_calibration_error,
     reliability_curve,
 )
+from xrlids.evaluation.error_analysis import (
+    analyze_model_disagreements,
+    compute_error_analysis,
+)
 from xrlids.evaluation.metrics import (
     MetricError,
     binary_metrics,
@@ -46,4 +50,7 @@ __all__ = [
     "DECISION_ID",
     "DECISION_STATUS",
     "OBJECTIVES",
+    "compute_error_analysis",
+    "analyze_model_disagreements",
 ]
+

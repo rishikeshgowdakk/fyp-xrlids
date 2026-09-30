@@ -39,11 +39,17 @@ class SplitConfig:
     time_column: str | None = None
     methodology: str = "stratified_random"
     rationale: str = ""
+    duplicate_policy: str = "deduplicate_features"  # "deduplicate_features" | "retain_with_subset_evaluation" | "none"
 
     def __post_init__(self) -> None:
         total = self.train + self.validation + self.test
         if abs(total - 1.0) > 1e-9:
             raise SplitConfigurationError(f"split ratios must sum to 1.0, got {total}")
+        valid_policies = {"deduplicate_features", "retain_with_subset_evaluation", "none"}
+        if self.duplicate_policy not in valid_policies:
+            raise SplitConfigurationError(
+                f"invalid duplicate_policy '{self.duplicate_policy}'; expected one of {sorted(valid_policies)}"
+            )
 
 
 @dataclass
@@ -52,6 +58,7 @@ class SplitResult:
     assignment: pd.Series
     manifest: dict[str, Any] = field(default_factory=dict)
     leakage: dict[str, Any] = field(default_factory=dict)
+    test_duplicate_mask: pd.Series | None = None
 
 
 def build_splits(
@@ -73,6 +80,40 @@ def build_splits(
         raise SplitConfigurationError("frame and labels have different lengths")
     labels = labels.reset_index(drop=True)
     frame = frame.reset_index(drop=True)
+
+    duplicate_accounting: dict[str, Any] = {
+        "policy": config.duplicate_policy,
+        "input_rows": int(len(frame)),
+    }
+    test_duplicate_mask: pd.Series | None = None
+
+    if config.duplicate_policy == "deduplicate_features":
+        # Policy A: Feature-level deduplication before splitting (eliminates L-01/L-02 leakage)
+        feat_subset = [c for c in feature_columns if c in frame.columns]
+        is_dupe = frame.duplicated(subset=feat_subset, keep="first")
+        n_dupes = int(is_dupe.sum())
+        duplicate_accounting["duplicate_rows_dropped"] = n_dupes
+        duplicate_accounting["unique_rows_retained"] = int(len(frame) - n_dupes)
+        duplicate_accounting["duplicate_fraction"] = float(n_dupes / max(1, len(frame)))
+        if n_dupes > 0:
+            logger.info(
+                "Policy A: deduplicating %d duplicate feature rows (%0.2f%%)",
+                n_dupes,
+                duplicate_accounting["duplicate_fraction"] * 100,
+            )
+            frame = frame.loc[~is_dupe].reset_index(drop=True)
+            labels = labels.loc[~is_dupe].reset_index(drop=True)
+
+    elif config.duplicate_policy == "retain_with_subset_evaluation":
+        # Policy B: Retain duplicates; tag rows to allow separate duplicate / unique evaluation
+        feat_subset = [c for c in feature_columns if c in frame.columns]
+        is_dupe_vector = frame.duplicated(subset=feat_subset, keep=False)
+        n_dupe_rows = int(is_dupe_vector.sum())
+        duplicate_accounting["duplicate_rows_total"] = n_dupe_rows
+        duplicate_accounting["unique_vectors"] = int(len(frame.drop_duplicates(subset=feat_subset)))
+        duplicate_accounting["duplicate_fraction"] = float(n_dupe_rows / max(1, len(frame)))
+    else:
+        duplicate_accounting["note"] = "no duplicate handling applied"
 
     if config.group_column:
         if config.group_column not in frame.columns:
@@ -108,6 +149,11 @@ def build_splits(
             stratify=stratify_temp,
         )
 
+    if config.duplicate_policy == "retain_with_subset_evaluation":
+        test_duplicate_mask = is_dupe_vector.iloc[test_idx].reset_index(drop=True)
+        duplicate_accounting["test_duplicate_rows"] = int(test_duplicate_mask.sum())
+        duplicate_accounting["test_unique_rows"] = int((~test_duplicate_mask).sum())
+
     assignment = pd.Series("unassigned", index=frame.index, name="split")
     assignment.iloc[np.asarray(train_idx)] = "train"
     assignment.iloc[np.asarray(val_idx)] = "validation"
@@ -128,6 +174,8 @@ def build_splits(
         "dataset": dataset,
         "methodology": config.methodology,
         "rationale": config.rationale,
+        "duplicate_policy": config.duplicate_policy,
+        "duplicate_accounting": duplicate_accounting,
         "ratios": {"train": config.train, "validation": config.validation, "test": config.test},
         "seed": config.seed,
         "stratified": config.stratify,
@@ -149,6 +197,7 @@ def build_splits(
                 "seed": config.seed,
                 "stratified": config.stratify,
                 "group_column": config.group_column,
+                "duplicate_policy": config.duplicate_policy,
             }
         ),
     }
@@ -166,4 +215,10 @@ def build_splits(
         else:
             logger.info("leakage audit passed for %s", dataset)
 
-    return SplitResult(splits=splits, assignment=assignment, manifest=manifest, leakage=leakage)
+    return SplitResult(
+        splits=splits,
+        assignment=assignment,
+        manifest=manifest,
+        leakage=leakage,
+        test_duplicate_mask=test_duplicate_mask,
+    )

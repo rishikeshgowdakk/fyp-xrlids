@@ -81,3 +81,44 @@ def test_row_hashes_handles_nan_gracefully():
     assert len(hashes) == 3
     assert hashes.iloc[0] == hashes.iloc[2]
     assert hashes.iloc[0] != hashes.iloc[1]
+
+
+def test_policy_a_deduplicates_features_before_splitting():
+    # Rows 0, 1, 2 have identical features but different indices
+    X = pd.DataFrame({
+        "f1": [1.0, 1.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0],
+        "f2": [2.0, 2.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0],
+    })
+    y = pd.Series([0, 0, 0, 1, 1, 0, 1, 0, 1, 0])
+    cfg = SplitConfig(seed=42, duplicate_policy="deduplicate_features", train=0.6, validation=0.2, test=0.2)
+    res = build_splits(X, y, ["f1", "f2"], cfg, dataset="test_ds")
+
+    # 10 rows initially, 2 duplicates dropped -> 8 unique rows
+    assert res.manifest["duplicate_accounting"]["input_rows"] == 10
+    assert res.manifest["duplicate_accounting"]["duplicate_rows_dropped"] == 2
+    assert res.manifest["duplicate_accounting"]["unique_rows_retained"] == 8
+    total_split_rows = sum(len(df) for df in res.splits.values())
+    assert total_split_rows == 8
+    assert res.leakage["status"] == "pass"
+
+
+def test_policy_b_retains_duplicates_and_tags_test_subset():
+    X = pd.DataFrame({
+        "f1": [1.0, 1.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0],
+        "f2": [2.0, 2.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0],
+    })
+    y = pd.Series([0, 0, 0, 1, 1, 0, 1, 0, 1, 0])
+    cfg = SplitConfig(seed=42, duplicate_policy="retain_with_subset_evaluation", train=0.6, validation=0.2, test=0.2)
+    res = build_splits(X, y, ["f1", "f2"], cfg, dataset="test_ds", run_leakage_audit=False)
+
+    assert res.manifest["duplicate_accounting"]["input_rows"] == 10
+    total_split_rows = sum(len(df) for df in res.splits.values())
+    assert total_split_rows == 10
+    assert res.test_duplicate_mask is not None
+    assert len(res.test_duplicate_mask) == len(res.splits["test"])
+
+
+def test_invalid_duplicate_policy_raises():
+    with pytest.raises(SplitConfigurationError, match="invalid duplicate_policy"):
+        SplitConfig(duplicate_policy="unknown_policy")
+

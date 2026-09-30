@@ -136,6 +136,87 @@ class FeatureRegistry:
     def rung_fully_supported(self, dataset: str, rung: str) -> bool:
         return not self.unsupported_features(dataset, rung)
 
+    def common_transfer_contract(
+        self,
+        source_dataset: str,
+        target_dataset: str,
+        candidate_features: Sequence[str] | str | None = None,
+    ) -> list[str]:
+        """Compute the programmatic semantic feature intersection supported by BOTH datasets.
+
+        Rule (§11): source-supported features ∩ target-supported features = transfer contract.
+        Does not manually hard-code an intersection or fabricate unsupported features.
+        """
+        if isinstance(candidate_features, str):
+            candidates = self.rung_features(candidate_features)
+        elif candidate_features is not None:
+            candidates = list(candidate_features)
+        else:
+            candidates = list(FEATURES)
+
+        source_avail = self.available_semantics(source_dataset)
+        target_avail = self.available_semantics(target_dataset)
+
+        intersection: list[str] = []
+        for name in candidates:
+            spec = feature_spec(name)
+            requires = set(spec.requires) - {"total_packets", "total_bytes"}
+            if requires <= source_avail and requires <= target_avail:
+                intersection.append(name)
+        return intersection
+
+    def transfer_compatibility_report(
+        self,
+        source_dataset: str,
+        target_dataset: str,
+        candidate_features: Sequence[str] | str | None = None,
+    ) -> dict[str, Any]:
+        """Detailed audit report on feature overlap and incompatibilities for transfer."""
+        if isinstance(candidate_features, str):
+            candidates = self.rung_features(candidate_features)
+            basis = f"rung_{candidate_features}"
+        elif candidate_features is not None:
+            candidates = list(candidate_features)
+            basis = "custom_feature_list"
+        else:
+            candidates = list(FEATURES)
+            basis = "all_registry_features"
+
+        common = self.common_transfer_contract(source_dataset, target_dataset, candidates)
+        source_avail = self.available_semantics(source_dataset)
+        target_avail = self.available_semantics(target_dataset)
+
+        source_supported: list[str] = []
+        target_supported: list[str] = []
+        for name in candidates:
+            spec = feature_spec(name)
+            req = set(spec.requires) - {"total_packets", "total_bytes"}
+            if req <= source_avail:
+                source_supported.append(name)
+            if req <= target_avail:
+                target_supported.append(name)
+
+        source_only = [f for f in source_supported if f not in target_supported]
+        target_only = [f for f in target_supported if f not in source_supported]
+        neither = [f for f in candidates if f not in source_supported and f not in target_supported]
+
+        return {
+            "source_dataset": source_dataset,
+            "target_dataset": target_dataset,
+            "basis": basis,
+            "candidate_count": len(candidates),
+            "common_transfer_count": len(common),
+            "common_transfer_features": common,
+            "source_only_supported": source_only,
+            "target_only_supported": target_only,
+            "neither_supported": neither,
+            "schema_hash": feature_schema_hash(common),
+            "scientific_note": (
+                "For cross-dataset/transfer evaluation, models must ONLY be trained and tested "
+                "on common_transfer_features. Excluded features must NEVER be fabricated or proxied."
+            ),
+        }
+
     def gate_for(self, feature: str) -> dict[str, str]:
         if feature not in self.gate:
             raise KeyError(f"no gate answers for feature '{feature}'")

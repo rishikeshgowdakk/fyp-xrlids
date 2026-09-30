@@ -14,19 +14,28 @@ last_updated: "2026-09-30"
 status: provisional
 
 methodology:
-  type: null          # TODO: stratified_random | grouped | temporal | hybrid
-  rationale: null     # required before freeze
-  stratify_on: null   # label? family? both?
+  type: stratified_random
+  rationale: "Default supervised split preserving attack/benign proportions across train, val, test"
+  stratify_on: label
   grouping_key: null  # if grouped: source IP / capture day / flow group
   temporal_seed: null # if temporal: how the time boundary is chosen
 
 ratios:
-  train: null
-  validation: null
-  test: null
+  train: 0.6
+  validation: 0.2
+  test: 0.2
 
 seeds:
-  split_seed: null    # must be recorded once chosen
+  split_seed: 42
+
+# ---------------------------------------------------------------------------
+# Duplicate Policy (§17)
+# ---------------------------------------------------------------------------
+# Policy A: deduplicate_features (deduplication before splitting; eliminates L-01/L-02 leakage)
+# Policy B: retain_with_subset_evaluation (retains duplicates; evaluates test_unique vs test_duplicate subsets)
+# Policy C: grouped_or_temporal (uses group_column or time_column where dataset metadata exists)
+duplicate_policy: deduplicate_features
+
 
 # ---------------------------------------------------------------------------
 # Leakage checks — ALL mandatory (§23). A split is not valid until all pass.
