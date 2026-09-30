@@ -1,46 +1,42 @@
-# Label Contract — XRL-IDARS v2 (repo: xrlids-v1)
+# Label Contract - XRL-IDARS v1
 #
-# RULES (§16, §17):
+# RULES (build spec sections 7 and 14; scientific RULE 3):
 #   - Binary target: BENIGN/NORMAL -> 0, ATTACK -> 1.
-#   - Original attack labels are preserved SEPARATELY for secondary analysis.
-#   - Unknown labels are REJECTED. They are NEVER silently converted to BENIGN.
-#   - Label values are confirmed by the audit (scripts/phase1/01_dataset_audit.py),
-#     not assumed from documentation.
+#   - Native and canonical labels are PRESERVED as separate columns.
+#   - Unknown labels are REJECTED and counted. They are NEVER silently mapped to BENIGN.
+#   - Known attack labels are an explicit ALLOW-LIST per dataset. Anything not in the
+#     allow-list and not benign is UNKNOWN -> rejected.
+#
+# STATUS: unverified_pending_audit
+#   The label sets below are documented from public dataset descriptions. They MUST be
+#   confirmed against the real files by scripts/phase1/01_dataset_audit.py before the
+#   contract is frozen. The audit reports unknown labels, so a wrong entry here fails
+#   loudly rather than silently mislabelling data.
 
-contract_version: "0.1.0"
+contract_version: "0.2.0"
 last_updated: "2026-09-30"
-status: provisional      # provisional | frozen
+status: unverified_pending_audit      # unverified_pending_audit | frozen
 
-# ---------------------------------------------------------------------------
-# Binary mapping
-# ---------------------------------------------------------------------------
 binary:
-  positive_class: 1
-  negative_class: 0
-  benign_tokens:            # matched case-insensitively after strip
+  positive_class: 1        # ATTACK
+  negative_class: 0        # BENIGN
+  benign_tokens:           # compared after normalization
     - BENIGN
     - NORMAL
-  attack_token_rule: "any label not in benign_tokens and not in rejection tokens -> ATTACK"
-  unknown_label_policy: REJECT   # REJECT | (no other value is acceptable)
-  rejection_reporting: "every rejected label and its row count must appear in the audit and data-accounting reports"
+  unknown_label_policy: REJECT
 
-# ---------------------------------------------------------------------------
-# Normalization chain: dataset native -> normalized -> binary -> attack family
-# ---------------------------------------------------------------------------
-chain:
-  - stage: native
-    description: "Raw label as it appears in the dataset file."
-  - stage: normalized
-    description: "Whitespace-stripped, case-normalized, encoding-artifact-cleaned label."
-  - stage: binary
-    description: "0/1 per the mapping above."
-  - stage: family
-    description: "Coarse attack family for secondary analysis; mapped per dataset."
+normalization:
+  strip: true
+  collapse_internal_whitespace: true
+  case: upper
+  # Encoding artifacts frequently seen in CICIDS2017 labels.
+  unicode_replacements:
+    "\u2013": "-"          # en dash -> hyphen
+    "\u2014": "-"          # em dash -> hyphen
+    "\u2019": "'"
+  # Trailing/leading punctuation seen in some exported label columns.
+  strip_characters: " \t\r\n\u00a0"
 
-# ---------------------------------------------------------------------------
-# Attack families — MAPPING IS PER-DATASET. Taxonomies are NOT identical (§17).
-# Populate after audit. Document every imperfect mapping explicitly.
-# ---------------------------------------------------------------------------
 attack_families:
   - DoS
   - DDoS
@@ -50,26 +46,76 @@ attack_families:
   - Bot
   - Reconnaissance
   - Infiltration
+  - Analysis
+  - Backdoor
+  - Exploits
+  - Fuzzers
+  - Shellcode
+  - Worms
+  - Generic
+  - Heartbleed
   - Other
 
-per_dataset_family_map:
-  cicids2017: {}            # TODO after audit
-  cse_cic_ids2018: {}       # TODO after audit
-  unsw_nb15: {}             # TODO after audit
-
-taxonomy_warnings:
-  - "A family name shared across datasets may cover different underlying attacks. Any such case must be documented, not flattened."
-  - "Where a native label has no honest family, map to 'Other' rather than forcing it into a wrong family."
-
 # ---------------------------------------------------------------------------
-# Known label artifacts to check (hypotheses, not conclusions)
+# Per-dataset taxonomy. Keys are NORMALIZED known attack labels.
 # ---------------------------------------------------------------------------
-known_label_artifacts:
-  - id: ART-001
-    hypothesis: "CICIDS2017 contains a label-header artifact where a header row appears inside the data."
-    status: unverified
-    check: "audit: detect rows whose values appear to be a header"
-  - id: ART-002
-    hypothesis: "Some CICIDS2017 labels have leading spaces (e.g. ' Web Attack ...')."
-    status: unverified
-    check: "audit: count distinct labels before and after strip()"
+datasets:
+
+  cicids2017:
+    label_column_candidates: ["Label", "Label "]   # audit confirms the real one
+    benign_labels: ["BENIGN"]
+    family_map:
+      "DOS HULK": DoS
+      "DOS GOLDENEYE": DoS
+      "DOS SLOWLORIS": DoS
+      "DOS SLOWHTTPTEST": DoS
+      "HEARTBLEED": Heartbleed
+      "DDOS": DDoS
+      "PORTSCAN": PortScan
+      "FTP-PATATOR": BruteForce
+      "SSH-PATATOR": BruteForce
+      "WEB ATTACK - BRUTE FORCE": Web
+      "WEB ATTACK - XSS": Web
+      "WEB ATTACK - SQL INJECTION": Web
+      "INFILTRATION": Infiltration
+      "BOT": Bot
+
+  cse_cic_ids2018:
+    label_column_candidates: ["Label"]
+    benign_labels: ["BENIGN"]
+    family_map:
+      "BENIGN": Other       # guard: a benign label must never appear as an attack key
+      "DOS ATTACKS-HULK": DoS
+      "DOS ATTACKS-SLOWHTTPTEST": DoS
+      "DOS ATTACKS-GOLDENEYE": DoS
+      "DOS ATTACKS-SLOWLORIS": DoS
+      "DDOS ATTACK-HOIC": DDoS
+      "DDOS ATTACK-LOIC-UDP": DDoS
+      "DDOS ATTACKS-LOIC-HTTP": DDoS
+      "BRUTE FORCE -WEB": Web
+      "BRUTE FORCE -XSS": Web
+      "SQL INJECTION": Web
+      "INFILTERATION": Infiltration
+      "BOT": Bot
+      "FTP-BRUTEFORCE": BruteForce
+      "SSH-BRUTEFORCE": BruteForce
+
+  unsw_nb15:
+    label_column_candidates: ["label", "Label"]
+    # UNSW-NB15 carries a numeric label plus a categorical attack_cat.
+    attack_category_column: "attack_cat"
+    benign_labels: ["NORMAL", "BENIGN"]
+    family_map:
+      "GENERIC": Generic
+      "EXPLOITS": Exploits
+      "FUZZERS": Fuzzers
+      "DOS": DoS
+      "RECONNAISSANCE": Reconnaissance
+      "ANALYSIS": Analysis
+      "BACKDOOR": Backdoor
+      "SHELLCODE": Shellcode
+      "WORMS": Worms
+
+rejection_accounting:
+  required_fields: [dataset, original_label, normalized_label, row_count, percentage, reason]
+  output: results/audits/label_rejections.csv

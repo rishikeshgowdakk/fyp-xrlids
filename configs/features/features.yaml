@@ -1,108 +1,187 @@
-# Feature Registry — XRL-IDARS v2 (repo: xrlids-v1)
+# Feature Registry - XRL-IDARS v1
 #
-# STATUS: SKELETON — NOT FROZEN.  Blocked by D-002 (see docs/03_DECISIONS/DECISION_LOG.md).
+# STATUS: candidate_not_frozen. Blocked from freezing by D-002 (feature contract).
 #
-# RULES (§18–§21):
-#   - No feature enters the canonical schema without a written mathematical definition.
-#   - Every feature must record where it can be computed (dataset fields AND live fields).
-#   - Nothing here is final. The historical pool below is a HYPOTHESIS to re-derive,
-#     not a canonical contract.
+# RULES (build spec sections 8-10):
+#   - Every canonical feature has a mathematical definition (docs/phase1/FEATURE_DEFINITIONS.md).
+#   - Formulas live in Python (src/xrlids/features/definitions.py) as the single source of
+#     truth; this file holds rung membership, gate answers and per-dataset column maps.
+#   - R10/R15/R20 are CANDIDATES. They are not final until the decision gate is resolved
+#     with evidence (feature sweep + validation).
+#   - Identifiers (IP, port, flow id, timestamp) are NEVER model features.
 
-registry_version: "0.1.0"
+registry_version: "0.2.0"
 last_updated: "2026-09-30"
-contract_status: provisional      # provisional | frozen
-frozen_by_decision: null          # will be D-002
+contract_status: candidate_not_frozen
+frozen_by_decision: D-002
 
 # ---------------------------------------------------------------------------
-# Historical pool — QUARANTINED, provisional only
-# ---------------------------------------------------------------------------
-# The previous XRL-IDARS repository used a feature pool with these nominal sizes.
-# They are recorded here so they can be re-derived and COMPARED, not inherited.
-historical_pool:
-  status: historical_not_verified
-  counts:
-    P_common: 19      # historical: reproducible from live traffic
-    P_flow: 37        # historical: flow-level derived features
-    P_research: 23    # historical: research-only, not live-reproducible
-  note: >
-    The historical separation of live-reproducible features from research-only features is
-    treated as a good idea worth preserving, but the exact membership must be re-derived
-    against the decision gate below.
-
-# ---------------------------------------------------------------------------
-# Feature rungs — PROVISIONAL. Membership intentionally empty until D-002.
+# Rungs - candidate membership, ordered. Order is part of the schema identity.
 # ---------------------------------------------------------------------------
 rungs:
-  - id: R10
-    description: "Smallest rung: features most likely to be live-reproducible and dataset-portable."
-    rationale: null
-    live_compatible: null
-    features: []      # TODO: exact feature list (blocked by D-002)
-  - id: R15
-    description: "Intermediate rung."
-    rationale: null
-    live_compatible: null
-    features: []      # TODO
-  - id: R20
-    description: "Largest rung; includes features most likely to be research-only."
-    rationale: null
-    live_compatible: null
-    features: []      # TODO
+  R10:
+    description: "Live-reproducible behavioural core (the project's stated 10-feature baseline)."
+    live_compatible: true
+    features:
+      - flow_duration_ms
+      - flow_packets_per_s
+      - flow_bytes_per_s
+      - packet_length_mean
+      - packet_length_std
+      - syn_count
+      - ack_count
+      - rst_count
+      - fin_count
+      - syn_ack_ratio
+  R15:
+    description: "R10 plus inter-arrival timing and directional packet-size structure."
+    live_compatible: true
+    features:
+      - flow_duration_ms
+      - flow_packets_per_s
+      - flow_bytes_per_s
+      - packet_length_mean
+      - packet_length_std
+      - syn_count
+      - ack_count
+      - rst_count
+      - fin_count
+      - syn_ack_ratio
+      - flow_iat_mean_ms
+      - flow_iat_std_ms
+      - down_up_ratio
+      - fwd_packet_length_mean
+      - bwd_packet_length_mean
+  R20:
+    description: "R15 plus flow-activity structure and subflow volume (research-heavier features)."
+    live_compatible: false
+    features:
+      - flow_duration_ms
+      - flow_packets_per_s
+      - flow_bytes_per_s
+      - packet_length_mean
+      - packet_length_std
+      - syn_count
+      - ack_count
+      - rst_count
+      - fin_count
+      - syn_ack_ratio
+      - flow_iat_mean_ms
+      - flow_iat_std_ms
+      - down_up_ratio
+      - fwd_packet_length_mean
+      - bwd_packet_length_mean
+      - flow_bytes_per_packet
+      - active_mean_ms
+      - idle_mean_ms
+      - subflow_fwd_bytes
+      - subflow_bwd_bytes
 
 # ---------------------------------------------------------------------------
-# Per-feature record — every canonical feature must fill ALL of these.
-# Mirrors §19 of the build spec.
+# Feature selection decision gate (section 9). Short codes:
+#   yes | no | partial | unverified (needs the audit / feature sweep)
 # ---------------------------------------------------------------------------
-feature_record_schema:
-  required_fields:
-    - name
-    - description
-    - formula              # mathematical, not prose
-    - source_fields        # which raw fields it derives from
-    - unit
-    - directionality       # e.g. higher = more suspicious / neutral
-    - required_packet_info # what must be observed to compute it live
-    - dataset_availability # which of the three datasets provide it
-    - live_availability    # yes | no | conditional (+ condition)
-    - edge_cases           # e.g. duration == 0
-    - missing_value_policy
-    - normalization
-    - inclusion_reason
-    - known_limitations
-  status_values: [provisional, accepted, rejected]
+gate:
+  flow_duration_ms:    {Q1_live: yes, Q2_cross_dataset: yes, Q3_identity_leak: no,  Q4_target_leak: no, Q5_metadata: no,  Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no,  Q10_justify: yes}
+  flow_packets_per_s:  {Q1_live: yes, Q2_cross_dataset: yes, Q3_identity_leak: no,  Q4_target_leak: no, Q5_metadata: no,  Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no,  Q10_justify: yes}
+  flow_bytes_per_s:    {Q1_live: yes, Q2_cross_dataset: yes, Q3_identity_leak: no,  Q4_target_leak: no, Q5_metadata: no,  Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no,  Q10_justify: yes}
+  packet_length_mean:  {Q1_live: yes, Q2_cross_dataset: partial, Q3_identity_leak: no, Q4_target_leak: no, Q5_metadata: no, Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no, Q10_justify: yes}
+  packet_length_std:   {Q1_live: yes, Q2_cross_dataset: no, Q3_identity_leak: no,  Q4_target_leak: no, Q5_metadata: no,  Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no,  Q10_justify: partial}
+  syn_count:           {Q1_live: yes, Q2_cross_dataset: no, Q3_identity_leak: no,  Q4_target_leak: no, Q5_metadata: no,  Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no,  Q10_justify: partial}
+  ack_count:           {Q1_live: yes, Q2_cross_dataset: no, Q3_identity_leak: no,  Q4_target_leak: no, Q5_metadata: no,  Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no,  Q10_justify: partial}
+  rst_count:           {Q1_live: yes, Q2_cross_dataset: no, Q3_identity_leak: no,  Q4_target_leak: no, Q5_metadata: no,  Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no,  Q10_justify: partial}
+  fin_count:           {Q1_live: yes, Q2_cross_dataset: no, Q3_identity_leak: no,  Q4_target_leak: no, Q5_metadata: no,  Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no,  Q10_justify: partial}
+  syn_ack_ratio:       {Q1_live: yes, Q2_cross_dataset: no, Q3_identity_leak: no,  Q4_target_leak: no, Q5_metadata: no,  Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no,  Q10_justify: yes}
+  flow_iat_mean_ms:    {Q1_live: yes, Q2_cross_dataset: no, Q3_identity_leak: no,  Q4_target_leak: no, Q5_metadata: no,  Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no,  Q10_justify: yes}
+  flow_iat_std_ms:     {Q1_live: yes, Q2_cross_dataset: no, Q3_identity_leak: no,  Q4_target_leak: no, Q5_metadata: no,  Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no,  Q10_justify: partial}
+  down_up_ratio:       {Q1_live: yes, Q2_cross_dataset: partial, Q3_identity_leak: no, Q4_target_leak: no, Q5_metadata: no, Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no, Q10_justify: yes}
+  fwd_packet_length_mean: {Q1_live: yes, Q2_cross_dataset: no, Q3_identity_leak: no, Q4_target_leak: no, Q5_metadata: no, Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no, Q10_justify: partial}
+  bwd_packet_length_mean: {Q1_live: yes, Q2_cross_dataset: no, Q3_identity_leak: no, Q4_target_leak: no, Q5_metadata: no, Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no, Q10_justify: partial}
+  flow_bytes_per_packet: {Q1_live: yes, Q2_cross_dataset: yes, Q3_identity_leak: no, Q4_target_leak: no, Q5_metadata: no, Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no, Q10_justify: yes}
+  active_mean_ms:      {Q1_live: partial, Q2_cross_dataset: no, Q3_identity_leak: no, Q4_target_leak: no, Q5_metadata: no, Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: yes, Q10_justify: partial}
+  idle_mean_ms:        {Q1_live: partial, Q2_cross_dataset: no, Q3_identity_leak: no, Q4_target_leak: no, Q5_metadata: no, Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: yes, Q10_justify: partial}
+  subflow_fwd_bytes:   {Q1_live: no, Q2_cross_dataset: no, Q3_identity_leak: no, Q4_target_leak: no, Q5_metadata: no, Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no, Q10_justify: partial}
+  subflow_bwd_bytes:   {Q1_live: no, Q2_cross_dataset: no, Q3_identity_leak: no, Q4_target_leak: no, Q5_metadata: no, Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no, Q10_justify: partial}
 
 # ---------------------------------------------------------------------------
-# Feature selection decision gate (§21) — must be answered for every candidate
-# before freezing. Unclear answers are documented, not ignored.
+# Per-dataset column maps: raw column -> semantic field.
+# Entry forms:
+#   {column: NAME, scale: NUMBER}                 -> semantic = column * scale
+#   {sum: [A,B], divide_by_sum: [C,D]}            -> semantic = (A+B)/(C+D)
+# STATUS unverified_pending_audit: confirmed by 01_dataset_audit.py, not assumed.
 # ---------------------------------------------------------------------------
-decision_gate:
-  - id: Q1
-    question: "Can this feature be reproduced live?"
-  - id: Q2
-    question: "Is its definition identical across datasets?"
-  - id: Q3
-    question: "Could it leak dataset identity?"
-  - id: Q4
-    question: "Does it contain target information?"
-  - id: Q5
-    question: "Does it depend on unavailable metadata?"
-  - id: Q6
-    question: "Is its unit identical?"
-  - id: Q7
-    question: "Does adding it materially improve validation performance?"
-  - id: Q8
-    question: "Does it hurt cross-dataset performance?"
-  - id: Q9
-    question: "Does it increase inference cost?"
-  - id: Q10
-    question: "Does the professor have a reasonable explanation for why we selected it?"
+column_maps_status: unverified_pending_audit
+column_maps:
+
+  cicids2017:
+    duration_seconds:        {column: "Flow Duration", scale: 0.000001}
+    total_fwd_packets:       {column: "Total Fwd Packets"}
+    total_bwd_packets:       {column: "Total Backward Packets"}
+    fwd_bytes:               {column: "Total Length of Fwd Packets"}
+    bwd_bytes:               {column: "Total Length of Bwd Packets"}
+    pkt_len_mean:            {column: "Packet Length Mean"}
+    pkt_len_std:             {column: "Packet Length Std"}
+    syn_flags:               {column: "SYN Flag Count"}
+    ack_flags:               {column: "ACK Flag Count"}
+    rst_flags:               {column: "RST Flag Count"}
+    fin_flags:               {column: "FIN Flag Count"}
+    flow_iat_mean_s:         {column: "Flow IAT Mean", scale: 0.000001}
+    flow_iat_std_s:          {column: "Flow IAT Std", scale: 0.000001}
+    fwd_pkt_len_mean:        {column: "Fwd Packet Length Mean"}
+    bwd_pkt_len_mean:        {column: "Bwd Packet Length Mean"}
+    active_mean_s:           {column: "Active Mean", scale: 0.000001}
+    idle_mean_s:             {column: "Idle Mean", scale: 0.000001}
+    subflow_fwd_bytes:       {column: "Subflow Fwd Bytes"}
+    subflow_bwd_bytes:       {column: "Subflow Bwd Bytes"}
+
+  cse_cic_ids2018:
+    duration_seconds:        {column: "Flow Duration", scale: 0.000001}
+    total_fwd_packets:       {column: "Tot Fwd Pkts"}
+    total_bwd_packets:       {column: "Tot Bwd Pkts"}
+    fwd_bytes:               {column: "TotLen Fwd Pkts"}
+    bwd_bytes:               {column: "TotLen Bwd Pkts"}
+    pkt_len_mean:            {column: "Pkt Len Mean"}
+    pkt_len_std:             {column: "Pkt Len Std"}
+    syn_flags:               {column: "SYN Flag Cnt"}
+    ack_flags:               {column: "ACK Flag Cnt"}
+    rst_flags:               {column: "RST Flag Cnt"}
+    fin_flags:               {column: "FIN Flag Cnt"}
+    flow_iat_mean_s:         {column: "Flow IAT Mean", scale: 0.000001}
+    flow_iat_std_s:          {column: "Flow IAT Std", scale: 0.000001}
+    fwd_pkt_len_mean:        {column: "Fwd Pkt Len Mean"}
+    bwd_pkt_len_mean:        {column: "Bwd Pkt Len Mean"}
+    active_mean_s:           {column: "Active Mean", scale: 0.000001}
+    idle_mean_s:             {column: "Idle Mean", scale: 0.000001}
+    subflow_fwd_bytes:       {column: "Subflow Fwd Byts"}
+    subflow_bwd_bytes:       {column: "Subflow Bwd Byts"}
+
+  unsw_nb15:
+    duration_seconds:        {column: "dur"}
+    total_fwd_packets:       {column: "Spkts"}
+    total_bwd_packets:       {column: "Dpkts"}
+    fwd_bytes:               {column: "Sbytes"}
+    bwd_bytes:               {column: "Dbytes"}
+    pkt_len_mean:            {sum: ["Sbytes", "Dbytes"], divide_by_sum: ["Spkts", "Dpkts"]}
+    # UNSW-NB15 has no per-flag counts, no IAT, no active/idle, no subflow fields.
+    # These are intentionally absent rather than guessed. See FEATURE_COMPATIBILITY.md.
 
 # ---------------------------------------------------------------------------
-# Forbidden columns — must never be used as model inputs
+# Excluded columns (never model inputs)
 # ---------------------------------------------------------------------------
-exclusions:
-  identifier_columns: []   # e.g. flow id, timestamp, source/destination IP and port
-  rationale: >
-    Identifiers are not behavioural features and leak dataset identity. They may be used for
-    grouping/leakage analysis (e.g. source-IP overlap) but never as model inputs.
-  target_leakage_columns: []   # populated during audit
+excluded_column_patterns:
+  - "^(flow )?id$"
+  - "timestamp"
+  - "src[_ ]?ip"
+  - "dst[_ ]?ip"
+  - "source[_ ]?ip"
+  - "destination[_ ]?ip"
+  - "src[_ ]?port"
+  - "dst[_ ]?port"
+  - "source[_ ]?port"
+  - "destination[_ ]?port"
+  - "attack_cat"
+  - "^label$"
+exclusion_reason: >
+  Identifiers and labels are not behavioural features. They leak dataset identity
+  (Q3) or target information (Q4) and may only be used for grouping, leakage analysis
+  and provenance.

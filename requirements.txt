@@ -1,0 +1,13 @@
+# XRL-IDARS v1 - pinned environment
+# Verified on Python 3.14.4, Linux x86_64, CPU-only.
+# Regenerate/verify with: python -c "import xrlids.utils.env as e; print(e.environment_fingerprint())"
+numpy==2.5.3
+pandas==3.0.6
+scikit-learn==1.9.1
+scipy==1.18.1
+PyYAML==6.0.3
+joblib==1.6.0
+torch==2.14.0
+shap==0.52.0
+matplotlib==3.11.2
+pytest==9.1.1
