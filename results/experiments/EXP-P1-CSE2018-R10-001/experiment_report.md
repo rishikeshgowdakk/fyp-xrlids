@@ -1,20 +1,20 @@
 # Phase 1 Experiment Report: `EXP-P1-CSE2018-R10-001`
 
-- **Status**: `PRELIMINARY_SUBSAMPLE`
+- **Status**: `EMPIRICALLY_OBSERVED`
 - **Dataset**: `cse_cic_ids2018` (Version: `as-published-2018`)
 - **SHA-256**: `b0534c5d7d8b41e03df71c6966c995d116a8ed28e61f377c8b14cdf5d28f4edf`
 - **Feature Contract**: `R10` (10 features, Hash: `d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21`)
 - **Random Seed**: `42`
-- **Git Commit**: `2372e36791561dcb84f943dedc65a0c5b1be1e78`
-- **Execution Duration**: `10.73s`
+- **Git Commit**: `fff0040519903ae5ee197faea61835a6b9adce3b`
+- **Execution Duration**: `84.07s`
 
 ---
 ## 1. Population and Split Counts
 
-- **Total Rows**: 2,972
-- **Train Rows**: 1,532
-- **Validation Rows**: 511
-- **Test Rows**: 511
+- **Total Rows**: 328,110
+- **Train Rows**: 130,017
+- **Validation Rows**: 43,339
+- **Test Rows**: 43,340
 
 ---
 ## 2. Test Set Evaluation Metrics (Operating Point: 0.5)
@@ -24,18 +24,18 @@
 
 | Model | Population | Accuracy | Precision | Recall | F1 Score | Specificity | FPR | ROC-AUC | PR-AUC |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| **RF** | 511 | 0.7299 | 0.4706 | 0.3636 | 0.4103 | 0.8575 | 0.1425 | 0.6048 | 0.4645 |
-| **LSTM** | 507 | 0.7396 | 0.0000 | 0.0000 | 0.0000 | 1.0000 | 0.0000 | 0.5071 | 0.3648 |
-| **FUSION** | 507 | 0.7633 | 1.0000 | 0.0909 | 0.1667 | 1.0000 | 0.0000 | 0.5762 | 0.4682 |
+| **RF** | 43340 | 0.6479 | 0.3206 | 0.4742 | 0.3826 | 0.6998 | 0.3002 | 0.6443 | 0.4140 |
+| **LSTM** | 43336 | 0.7938 | 0.7390 | 0.1602 | 0.2633 | 0.9831 | 0.0169 | 0.7284 | 0.4860 |
+| **FUSION** | 43336 | 0.7978 | 0.7640 | 0.1750 | 0.2848 | 0.9838 | 0.0162 | 0.7452 | 0.5151 |
 
 ---
 ## 3. Model Disagreement and Fusion Analysis
 
-- **Aligned Evaluation Population**: 507 rows
-- **RF vs LSTM Disagreements**: 102 (20.12%)
-- **RF Predicted Attack, LSTM Predicted Benign**: 102 (RF Correct: 48, RF False Alarm: 54)
-- **LSTM Predicted Attack, RF Predicted Benign**: 0 (LSTM Correct: 0, LSTM False Alarm: 0)
-- **Fusion Rescues When One Model Failed**: 66
+- **Aligned Evaluation Population**: 43,336 rows
+- **RF vs LSTM Disagreements**: 14,287 (32.97%)
+- **RF Predicted Attack, LSTM Predicted Benign**: 13436 (RF Correct: 3627, RF False Alarm: 9809)
+- **LSTM Predicted Attack, RF Predicted Benign**: 851 (LSTM Correct: 496, LSTM False Alarm: 355)
+- **Fusion Rescues When One Model Failed**: 10478
 - **Fusion Rescues When Both Models Failed**: 0
 - **Fusion Degradations (Both Right, Fusion Wrong)**: 0
 
@@ -48,16 +48,16 @@
 
 | Rank | Feature Name | Mean Absolute SHAP Value |
 | --- | --- | --- |
-| 1 | `flow_duration_ms` | 0.044560 |
-| 2 | `flow_bytes_per_s` | 0.044340 |
-| 3 | `flow_packets_per_s` | 0.043378 |
-| 4 | `packet_length_mean` | 0.038025 |
-| 5 | `packet_length_std` | 0.025729 |
-| 6 | `rst_count` | 0.017008 |
-| 7 | `ack_count` | 0.010991 |
-| 8 | `syn_ack_ratio` | 0.001433 |
-| 9 | `syn_count` | 0.001332 |
-| 10 | `fin_count` | 0.000168 |
+| 1 | `packet_length_std` | 0.030879 |
+| 2 | `rst_count` | 0.029423 |
+| 3 | `flow_duration_ms` | 0.027289 |
+| 4 | `flow_packets_per_s` | 0.021770 |
+| 5 | `flow_bytes_per_s` | 0.021082 |
+| 6 | `packet_length_mean` | 0.020351 |
+| 7 | `ack_count` | 0.004935 |
+| 8 | `syn_ack_ratio` | 0.001238 |
+| 9 | `syn_count` | 0.000958 |
+| 10 | `fin_count` | 0.000000 |
 
 ---
 ## 6. Open Decisions and Scientific Limitations

@@ -62,8 +62,8 @@
     "temporal_overlap"
   ],
   "split_sizes": {
-    "train": 1532,
-    "validation": 511,
-    "test": 511
+    "train": 130017,
+    "validation": 43339,
+    "test": 43340
   }
 }

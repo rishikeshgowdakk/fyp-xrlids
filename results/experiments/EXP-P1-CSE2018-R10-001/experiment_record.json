@@ -1,11 +1,11 @@
 {
   "metadata": {
     "experiment_id": "EXP-P1-CSE2018-R10-001",
-    "git_commit": "2372e36791561dcb84f943dedc65a0c5b1be1e78",
+    "git_commit": "fff0040519903ae5ee197faea61835a6b9adce3b",
     "dataset_sha256": "b0534c5d7d8b41e03df71c6966c995d116a8ed28e61f377c8b14cdf5d28f4edf",
     "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
     "seed": 42,
-    "created_at": "2026-09-30T15:52:49.800579+00:00",
+    "created_at": "2026-09-30T15:56:18.019335+00:00",
     "software_environment": {
       "python_version": "3.14.4",
       "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
@@ -13,7 +13,7 @@
       "processor_count": null,
       "cuda_available": false,
       "cuda_version": null,
-      "git_commit": "2372e36791561dcb84f943dedc65a0c5b1be1e78",
+      "git_commit": "fff0040519903ae5ee197faea61835a6b9adce3b",
       "packages": {
         "numpy": "2.5.3",
         "pandas": "3.0.6",
@@ -39,10 +39,10 @@
   "input_files": [
     "data/raw/cse_cic_ids2018/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv"
   ],
-  "rows_total": 2972,
-  "rows_train": 1532,
-  "rows_validation": 511,
-  "rows_test": 511,
+  "rows_total": 328110,
+  "rows_train": 130017,
+  "rows_validation": 43339,
+  "rows_test": 43340,
   "feature_contract": "R10",
   "feature_list": [
     "flow_duration_ms",
@@ -87,61 +87,61 @@
     ],
     "scaler_type": "StandardScaler",
     "missing_policy": "median_train",
-    "n_train_rows": 1532,
-    "fitted_at": "2026-09-30T15:52:42.534599+00:00",
-    "git_commit": "2372e36791561dcb84f943dedc65a0c5b1be1e78",
+    "n_train_rows": 130017,
+    "fitted_at": "2026-09-30T15:55:04.743291+00:00",
+    "git_commit": "fff0040519903ae5ee197faea61835a6b9adce3b",
     "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
     "scaler_params": {
       "mean": [
-        16335.081663185378,
-        15297.790142681133,
-        204882.8684466834,
-        87.47287163153264,
-        119.44587917360964,
-        0.0639686684073107,
-        0.16579634464751958,
-        0.22650130548302871,
-        0.006527415143603133,
-        0.0639686684073107
+        20532.304062038038,
+        1717.9448711597267,
+        71578.00076204723,
+        102.11961327845904,
+        149.24561506385285,
+        0.04652468523346947,
+        0.11120084296668897,
+        0.30362183406785265,
+        0.003345716329403078,
+        0.04652468523346947
       ],
       "scale": [
-        36772.91885015218,
-        138697.53279842748,
-        2387203.7796651395,
-        115.3808408235356,
-        166.73308324820556,
-        0.24469711455083862,
-        0.3718977235061281,
-        0.418567156018616,
-        0.08052830555243413,
-        0.24469711455083862
+        40211.412605579644,
+        29963.66569007607,
+        1020160.6994489277,
+        113.15598581500898,
+        176.34885535749544,
+        0.2106184676076532,
+        0.3143806856188637,
+        0.4598212869638878,
+        0.05774532458689832,
+        0.2106184676076532
       ],
       "var": [
-        1352247560.7598774,
-        19237005604.370865,
-        5698741885647.527,
-        13312.738429146062,
-        27799.92104945305,
-        0.05987667786950624,
-        0.1383079167490405,
-        0.17519846409751244,
-        0.006484807995146194,
-        0.05987667786950624
+        1616957703.7361696,
+        897821261.586642,
+        1040727852700.1254,
+        12804.277125766514,
+        31098.918785898844,
+        0.04436013889739606,
+        0.09883521549018678,
+        0.21143561594512605,
+        0.003334522511646244,
+        0.04436013889739606
       ]
     },
     "imputation_medians": {
-      "flow_duration_ms": 39.05799999999999,
-      "flow_packets_per_s": 89.8704184021729,
-      "flow_bytes_per_s": 1935.344682870764,
-      "packet_length_mean": 54.5,
-      "packet_length_std": 32.90896534,
+      "flow_duration_ms": 422.195,
+      "flow_packets_per_s": 14.34092685410258,
+      "flow_bytes_per_s": 1565.7311159899357,
+      "packet_length_mean": 65.34285714,
+      "packet_length_std": 52.58136552,
       "syn_count": 0.0,
       "ack_count": 0.0,
       "rst_count": 0.0,
       "fin_count": 0.0,
       "syn_ack_ratio": 0.0
     },
-    "preprocessor_hash": "148af9bdc3aee3001f090b2badb9277b61898fb4ad1bc501e61990d3478a1f8d"
+    "preprocessor_hash": "fb1e2116e583e52c2102e7d7d3f0ec9071f8b6dac2d870a7670d01cb4a19f9ea"
   },
   "split_id": "17ed21c579d06350a2a6093f545a5193c328f04b9acab39d918f0019bd002c93",
   "model": {
@@ -186,40 +186,40 @@
       "positive_class": 1,
       "score_definition": "P(class=1) or a comparable continuous detector score",
       "confusion": {
-        "tn": 325,
-        "fp": 54,
-        "fn": 84,
-        "tp": 48
+        "tn": 23352,
+        "fp": 10018,
+        "fn": 5242,
+        "tp": 4728
       },
-      "population": 511,
-      "positive_support": 132,
-      "negative_support": 379,
-      "accuracy": 0.7299412915851272,
-      "precision": 0.47058823529411764,
-      "recall": 0.36363636363636365,
-      "f1": 0.41025641025641024,
-      "macro_f1": 0.6175647533515554,
-      "weighted_f1": 0.7177705473721049,
-      "balanced_accuracy": 0.6105780762772848,
-      "specificity": 0.8575197889182058,
-      "fpr": 0.1424802110817942,
-      "fnr": 0.6363636363636364,
+      "population": 43340,
+      "positive_support": 9970,
+      "negative_support": 33370,
+      "accuracy": 0.6479003230272266,
+      "precision": 0.3206293232062932,
+      "recall": 0.474222668004012,
+      "f1": 0.3825861789933646,
+      "macro_f1": 0.5681570750366732,
+      "weighted_f1": 0.6683499446124329,
+      "balanced_accuracy": 0.5870064493750956,
+      "specificity": 0.6997902307461792,
+      "fpr": 0.3002097692538208,
+      "fnr": 0.525777331995988,
       "per_class": {
         "benign": {
-          "precision": 0.7946210268948656,
-          "recall": 0.8575197889182058,
-          "f1": 0.8248730964467005,
-          "support": 379
+          "precision": 0.8166748268867594,
+          "recall": 0.6997902307461792,
+          "f1": 0.7537279710799819,
+          "support": 33370
         },
         "attack": {
-          "precision": 0.47058823529411764,
-          "recall": 0.36363636363636365,
-          "f1": 0.41025641025641024,
-          "support": 132
+          "precision": 0.3206293232062932,
+          "recall": 0.474222668004012,
+          "f1": 0.3825861789933646,
+          "support": 9970
         }
       },
-      "roc_auc": 0.6048412888782282,
-      "pr_auc": 0.46447819628254916,
+      "roc_auc": 0.6442802936829668,
+      "pr_auc": 0.41398683984643186,
       "reason": null
     },
     "lstm": {
@@ -227,40 +227,40 @@
       "positive_class": 1,
       "score_definition": "P(class=1) or a comparable continuous detector score",
       "confusion": {
-        "tn": 375,
-        "fp": 0,
-        "fn": 132,
-        "tp": 0
+        "tn": 32802,
+        "fp": 564,
+        "fn": 8373,
+        "tp": 1597
       },
-      "population": 507,
-      "positive_support": 132,
-      "negative_support": 375,
-      "accuracy": 0.7396449704142012,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
-      "macro_f1": 0.42517006802721086,
-      "weighted_f1": 0.6289498047739805,
-      "balanced_accuracy": 0.5,
-      "specificity": 1.0,
-      "fpr": 0.0,
-      "fnr": 1.0,
+      "population": 43336,
+      "positive_support": 9970,
+      "negative_support": 33366,
+      "accuracy": 0.7937742292781983,
+      "precision": 0.7390097177232763,
+      "recall": 0.16018054162487463,
+      "f1": 0.2632923913939494,
+      "macro_f1": 0.5716993208227444,
+      "weighted_f1": 0.7382003481652792,
+      "balanced_accuracy": 0.571638553495408,
+      "specificity": 0.9830965653659414,
+      "fpr": 0.016903434634058623,
+      "fnr": 0.8398194583751254,
       "per_class": {
         "benign": {
-          "precision": 0.7396449704142012,
-          "recall": 1.0,
-          "f1": 0.8503401360544217,
-          "support": 375
+          "precision": 0.796648451730419,
+          "recall": 0.9830965653659414,
+          "f1": 0.8801062502515394,
+          "support": 33366
         },
         "attack": {
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1": 0.0,
-          "support": 132
+          "precision": 0.7390097177232763,
+          "recall": 0.16018054162487463,
+          "f1": 0.2632923913939494,
+          "support": 9970
         }
       },
-      "roc_auc": 0.5071313131313131,
-      "pr_auc": 0.3647646940154166,
+      "roc_auc": 0.728353098617317,
+      "pr_auc": 0.48596398030532345,
       "reason": null
     },
     "fusion": {
@@ -268,53 +268,53 @@
       "positive_class": 1,
       "score_definition": "P(class=1) or a comparable continuous detector score",
       "confusion": {
-        "tn": 375,
-        "fp": 0,
-        "fn": 120,
-        "tp": 12
+        "tn": 32827,
+        "fp": 539,
+        "fn": 8225,
+        "tp": 1745
       },
-      "population": 507,
-      "positive_support": 132,
-      "negative_support": 375,
-      "accuracy": 0.7633136094674556,
-      "precision": 1.0,
-      "recall": 0.09090909090909091,
-      "f1": 0.16666666666666666,
-      "macro_f1": 0.514367816091954,
-      "weighted_f1": 0.6810174794259675,
-      "balanced_accuracy": 0.5454545454545454,
-      "specificity": 1.0,
-      "fpr": 0.0,
-      "fnr": 0.9090909090909091,
+      "population": 43336,
+      "positive_support": 9970,
+      "negative_support": 33366,
+      "accuracy": 0.7977662913051504,
+      "precision": 0.7640105078809106,
+      "recall": 0.17502507522567703,
+      "f1": 0.2848049616451771,
+      "macro_f1": 0.5835188773933107,
+      "weighted_f1": 0.7447868941194352,
+      "balanced_accuracy": 0.5794354531556066,
+      "specificity": 0.9838458310855361,
+      "fpr": 0.016154168914463824,
+      "fnr": 0.824974924774323,
       "per_class": {
         "benign": {
-          "precision": 0.7575757575757576,
-          "recall": 1.0,
-          "f1": 0.8620689655172413,
-          "support": 375
+          "precision": 0.7996443535028744,
+          "recall": 0.9838458310855361,
+          "f1": 0.8822327931414443,
+          "support": 33366
         },
         "attack": {
-          "precision": 1.0,
-          "recall": 0.09090909090909091,
-          "f1": 0.16666666666666666,
-          "support": 132
+          "precision": 0.7640105078809106,
+          "recall": 0.17502507522567703,
+          "f1": 0.2848049616451771,
+          "support": 9970
         }
       },
-      "roc_auc": 0.5762222222222222,
-      "pr_auc": 0.4681579002821561,
+      "roc_auc": 0.7452164411474548,
+      "pr_auc": 0.5150527026222268,
       "reason": null
     }
   },
   "confusion_matrix": {
-    "tn": 325,
-    "fp": 54,
-    "fn": 84,
-    "tp": 48
+    "tn": 23352,
+    "fp": 10018,
+    "fn": 5242,
+    "tp": 4728
   },
-  "training_duration_s": 10.73179817199707,
+  "training_duration_s": 84.07162284851074,
   "hardware": "CPU (linux)",
-  "status": "PRELIMINARY_SUBSAMPLE",
-  "result_interpretation": "Preliminary validation run on subsampled data.",
+  "status": "EMPIRICALLY_OBSERVED",
+  "result_interpretation": "Real-data empirical evaluation; test set evaluated post-hoc without model tuning.",
   "limitations": [
     "Threshold objective D-003 remains open; reporting uses neutral threshold 0.5.",
     "Feature contract D-002 candidate evaluation.",
@@ -325,7 +325,7 @@
     "rf_model": "results/experiments/EXP-P1-CSE2018-R10-001/random_forest.joblib",
     "report": "results/experiments/EXP-P1-CSE2018-R10-001/experiment_report.md"
   },
-  "git_commit": "2372e36791561dcb84f943dedc65a0c5b1be1e78",
+  "git_commit": "fff0040519903ae5ee197faea61835a6b9adce3b",
   "software_environment": {
     "python_version": "3.14.4",
     "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
@@ -333,7 +333,7 @@
     "processor_count": null,
     "cuda_available": false,
     "cuda_version": null,
-    "git_commit": "2372e36791561dcb84f943dedc65a0c5b1be1e78",
+    "git_commit": "fff0040519903ae5ee197faea61835a6b9adce3b",
     "packages": {
       "numpy": "2.5.3",
       "pandas": "3.0.6",
