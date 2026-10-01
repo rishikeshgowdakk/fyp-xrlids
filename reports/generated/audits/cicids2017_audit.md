@@ -20,17 +20,13 @@ Schema validation: `validated`
 
 ```json
 {
-  "dataset": "cicids2017",
   "label_column": " Label",
   "rows_total": 225745,
   "rows_accepted": 225745,
   "rows_rejected_unknown_label": 0,
-  "benign_rows": 97718,
-  "attack_rows": 128027,
-  "distinct_raw_labels": 2,
   "distinct_labels": {
-    "-D-D-O-S-": 128027,
-    "-B-E-N-I-G-N-": 97718
+    "DDoS": 128027,
+    "BENIGN": 97718
   }
 }
 ```

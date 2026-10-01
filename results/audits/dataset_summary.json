@@ -1,14 +1,14 @@
 [
   {
-    "dataset": "unsw_nb15",
+    "dataset": "cicids2017",
     "status": "completed",
-    "files": 2,
-    "rows": 257673,
+    "files": 8,
+    "rows": 2830743,
     "schema_status": "validated",
     "label_status": "validated",
     "artifacts": [
-      "results/audits/unsw_nb15_audit.json",
-      "reports/generated/audits/unsw_nb15_audit.md"
+      "results/audits/cicids2017_audit.json",
+      "reports/generated/audits/cicids2017_audit.md"
     ]
   }
 ]

@@ -118,11 +118,11 @@ def test_in_memory_vs_streaming_equivalence(mock_fixture_csv):
     np.testing.assert_array_equal(splits_mem.label_splits["test"].to_numpy(), splits_stream.label_splits["test"].to_numpy())
 
     # Verification 5: Identical model training and predictions
-    prep_mem = Preprocessor(fit_on="train_only").fit(splits_mem.splits["train"])
+    prep_mem = Preprocessor(features=feature_names, dataset=dataset_key).fit(splits_mem.splits["train"])
     X_tr_mem = prep_mem.transform(splits_mem.splits["train"])
     X_te_mem = prep_mem.transform(splits_mem.splits["test"])
 
-    prep_stream = Preprocessor(fit_on="train_only").fit(splits_stream.splits["train"])
+    prep_stream = Preprocessor(features=feature_names, dataset=dataset_key).fit(splits_stream.splits["train"])
     X_tr_stream = prep_stream.transform(splits_stream.splits["train"])
     X_te_stream = prep_stream.transform(splits_stream.splits["test"])
 

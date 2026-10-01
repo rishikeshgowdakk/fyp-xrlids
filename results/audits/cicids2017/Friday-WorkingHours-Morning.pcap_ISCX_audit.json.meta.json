@@ -1,10 +1,10 @@
 {
-  "experiment_id": "AUDIT-cicids2017-001",
+  "experiment_id": "AUDIT-cicids2017-Friday-WorkingHours-Morning.pcap_ISCX",
   "git_commit": null,
-  "dataset_sha256": "6ff1580f5f81c0ae28a26f7631721018577f5f7c5e0feac28b795fcfe7b411ee",
+  "dataset_sha256": "53a41c24d570ea83b7ac55b2e94df94e7a8216aeb80a2af0246b6bc8bb543000",
   "feature_schema_hash": null,
   "seed": null,
-  "created_at": "2026-10-01T21:30:44.069277+00:00",
+  "created_at": "2026-10-01T21:30:09.347056+00:00",
   "software_environment": {
     "python_version": "3.14.4",
     "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",

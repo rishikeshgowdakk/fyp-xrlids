@@ -1,10 +1,10 @@
 {
-  "experiment_id": "AUDIT-cicids2017-001",
+  "experiment_id": "AUDIT-unsw_nb15-UNSW_NB15_training-set",
   "git_commit": null,
-  "dataset_sha256": "6ff1580f5f81c0ae28a26f7631721018577f5f7c5e0feac28b795fcfe7b411ee",
+  "dataset_sha256": "bec7dd5ec88dc2a0ccc7a07879d338395ed7421750f675fd0339e07dfe0648fa",
   "feature_schema_hash": null,
   "seed": null,
-  "created_at": "2026-10-01T21:30:44.069277+00:00",
+  "created_at": "2026-10-01T21:29:45.496421+00:00",
   "software_environment": {
     "python_version": "3.14.4",
     "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
