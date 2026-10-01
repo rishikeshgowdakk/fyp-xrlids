@@ -182,9 +182,13 @@ def run_experiment_pipeline(
         contract=contract,
         registry=registry,
     )
+    feature_names = list(population.features.columns)
     print(
         f"       Population loaded: {population.accounting.aggregate['raw_rows']:,} raw rows "
         f"-> {len(population.features):,} final modeling rows across {len(population.files)} files."
+    )
+    print(
+        f"       Active features ({len(feature_names)}): {feature_names}"
     )
     print(
         f"       Accounting reconciliation: {'RECONCILED' if population.accounting.reconciled else 'DEVELOPMENT_SUBSAMPLE'}"
