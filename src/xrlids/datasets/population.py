@@ -417,7 +417,11 @@ def load_dataset_population(
 
             # Align family series and source row positions with accepted indices
             accepted_idx_arr = cleaned.frame.index.to_numpy()
-            clean_families = chunk_family_series.loc[cleaned.frame.index].reset_index(drop=True)
+            if config.dataset == "unsw_nb15" and "attack_cat" in chunk.columns:
+                clean_families = chunk["attack_cat"].astype(str).str.strip().loc[cleaned.frame.index].reset_index(drop=True)
+            else:
+                clean_families = cleaned.labels.normalized.loc[cleaned.frame.index].reset_index(drop=True)
+            clean_families = clean_families.str.replace("\ufffd", "-", regex=False).str.replace("–", "-", regex=False)
             clean_source_rows = pd.Series(file_chunk_indices[accepted_idx_arr], name="source_row_index")
             clean_global_orders = pd.Series(chunk_global_indices[accepted_idx_arr], name="original_order")
 

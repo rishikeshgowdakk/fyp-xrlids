@@ -14,11 +14,11 @@ from pathlib import Path
 from typing import Any
 
 
-def get_rss_mib() -> float:
-    """Return process peak RSS in MiB.
+def get_peak_rss_mib() -> float:
+    """Return process lifetime peak RSS (high-water mark) in MiB via getrusage.
 
-    On Linux, ru_maxrss is in KiB (1024 bytes).
-    On Darwin (macOS), ru_maxrss is in bytes.
+    On Linux, ru_maxrss is reported in KiB (1024 bytes).
+    On Darwin (macOS), ru_maxrss is reported in bytes.
     """
     rusage = resource.getrusage(resource.RUSAGE_SELF)
     raw_rss = float(rusage.ru_maxrss)
@@ -28,9 +28,37 @@ def get_rss_mib() -> float:
     return raw_rss / 1024.0
 
 
+# Backward compatibility alias
+get_rss_mib = get_peak_rss_mib
+
+
+def get_current_rss_mib() -> float:
+    """Return instantaneous resident set size (current RSS) in MiB.
+
+    On Linux, reads from /proc/self/statm for true instantaneous memory usage.
+    Falls back to get_peak_rss_mib() on systems without /proc.
+    """
+    if sys.platform.startswith("linux"):
+        try:
+            with open("/proc/self/statm", "r", encoding="utf-8") as f:
+                parts = f.read().split()
+                if len(parts) >= 2:
+                    resident_pages = int(parts[1])
+                    return float(resident_pages * resource.getpagesize()) / (1024.0 * 1024.0)
+        except OSError:
+            pass
+    return get_peak_rss_mib()
+
+
 @dataclass
 class ResourceProfile:
-    """Structured resource consumption metrics."""
+    """Structured resource consumption metrics.
+
+    Note on memory semantics:
+    - start_rss_mib: instantaneous process RSS at profiler entry.
+    - end_rss_mib: instantaneous process RSS at profiler exit.
+    - peak_rss_mib: kernel-recorded process lifetime high-water mark (ru_maxrss).
+    """
 
     peak_rss_mib: float = 0.0
     start_rss_mib: float = 0.0
@@ -53,7 +81,7 @@ class ResourceProfile:
 
 
 class ResourceProfiler:
-    """Context manager for profiling execution resources."""
+    """Context manager for profiling execution resources with precise semantics."""
 
     def __init__(self, target_dir: str | Path | None = None) -> None:
         self.target_dir = Path(target_dir) if target_dir else None
@@ -62,14 +90,14 @@ class ResourceProfiler:
 
     def __enter__(self) -> ResourceProfiler:
         self._start_time = time.perf_counter()
-        self.profile.start_rss_mib = get_rss_mib()
+        self.profile.start_rss_mib = get_current_rss_mib()
         self.profile.cpu_count = os.cpu_count() or 1
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         self.profile.duration_s = time.perf_counter() - self._start_time
-        self.profile.end_rss_mib = get_rss_mib()
-        self.profile.peak_rss_mib = max(self.profile.start_rss_mib, self.profile.end_rss_mib)
+        self.profile.end_rss_mib = get_current_rss_mib()
+        self.profile.peak_rss_mib = get_peak_rss_mib()
         if self.target_dir and self.target_dir.is_dir():
             total_disk = 0
             for p in self.target_dir.rglob("*"):

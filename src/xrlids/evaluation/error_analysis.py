@@ -291,6 +291,10 @@ def compute_per_family_metrics(
     yt = np.asarray(y_true, dtype=int)
     ys = np.asarray(y_score, dtype=float)
     fams = np.asarray(label_families, dtype=str)
+    # Sanitize unicode replacement artifacts (\ufffd, en-dash, em-dash)
+    fams = np.char.replace(fams, "\ufffd", "-")
+    fams = np.char.replace(fams, "\u2013", "-")
+    fams = np.char.replace(fams, "\u2014", "-")
 
     if not (len(yt) == len(ys) == len(fams)):
         raise ValueError("y_true, y_score, and label_families must have identical lengths")

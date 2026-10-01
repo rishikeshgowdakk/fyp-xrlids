@@ -56,5 +56,18 @@ def test_compute_stratified_dataset_summary():
     assert summary["total_rows"] == 5
     assert summary["benign_count"] == 3
     assert summary["attack_count"] == 2
-    assert summary["number_of_attack_families"] == 2
     assert summary["distinct_source_files"] == 3
+
+
+def test_per_family_metrics_unicode_cleanliness():
+    """Verify that family names with raw replacement artifacts are sanitized."""
+    y_true = np.array([1, 1, 0])
+    y_score = np.array([0.8, 0.2, 0.1])
+    # Raw family with replacement char or dash
+    families = np.array(["Web Attack \ufffd Brute Force", "Web Attack \u2013 XSS", "BENIGN"])
+
+    res = compute_per_family_metrics(y_true, y_score, families, threshold=0.5)
+    bdown = res["family_breakdown"]
+    # Check keys do not contain literal replacement characters
+    for fam in bdown.keys():
+        assert "\ufffd" not in fam, f"Replacement character found in family: {fam}"

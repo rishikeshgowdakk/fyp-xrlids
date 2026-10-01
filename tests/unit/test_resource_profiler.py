@@ -45,3 +45,16 @@ def test_profiler_context_manager(tmp_path: Path):
     assert data["peak_rss_mib"] >= data["start_rss_mib"]
     assert data["disk_bytes"] >= 4096
     assert data["cpu_count"] >= 1
+
+
+def test_get_current_vs_peak_rss():
+    """Verify that get_current_rss_mib returns positive value and peak >= current."""
+    from xrlids.utils.profiler import get_current_rss_mib, get_peak_rss_mib
+
+    curr = get_current_rss_mib()
+    peak = get_peak_rss_mib()
+
+    assert curr > 0.0
+    assert peak > 0.0
+    # Process peak (ru_maxrss) should always be greater than or equal to current instantaneous RSS
+    assert peak >= curr
