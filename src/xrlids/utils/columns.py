@@ -87,4 +87,5 @@ def canonicalize_frame(frame: pd.DataFrame) -> pd.DataFrame:
     out.columns = canon
     out.attrs["raw_columns"] = raw
     out.attrs["raw_to_canonical"] = raw_to_canonical_map(raw)
+    out.attrs["canonical_to_raw"] = {canonicalize_column(c): str(c) for c in raw}
     return out

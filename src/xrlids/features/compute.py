@@ -18,7 +18,7 @@ from typing import Any, Iterable, Sequence
 import numpy as np
 import pandas as pd
 
-from xrlids.features.definitions import FeatureComputationError, feature_spec
+from xrlids.features.definitions import FeatureComputationError, feature_spec, SEMANTIC_FIELDS
 from xrlids.features.registry import FeatureRegistry
 from xrlids.utils.columns import canonicalize_column, canonicalize_frame
 
@@ -105,19 +105,21 @@ def extract_semantics(
         else:
             raise ValueError(f"unrecognised column-map entry for semantic '{semantic}': {spec}")
 
+    absent_semantics = sorted(set(SEMANTIC_FIELDS) - set(resolved))
     report = {
         "dataset": dataset,
         "canonical_headers": list(canon_frame.columns),
         "raw_headers": raw_headers,
         "semantic_resolved": sorted(resolved),
-        "semantic_absent": sorted(set(mapping) - set(resolved)),
+        "semantic_absent": absent_semantics,
         "raw_columns_missing": sorted(set(missing_columns)),
         "provenance": provenance,
     }
 
-    if strict and missing_columns:
+    if strict and (missing_columns or absent_semantics):
         raise FeatureValidationError(
             f"dataset '{dataset}' is missing required raw columns: {sorted(set(missing_columns))}. "
+            f"absent_semantics={absent_semantics}. "
             "Confirm column names with scripts/phase1/01_dataset_audit.py; do not guess."
         )
 

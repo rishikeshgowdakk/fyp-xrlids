@@ -300,9 +300,11 @@ def apply_label_contract(
         ]
     )
 
+    raw_label_column = frame.attrs.get("canonical_to_raw", {}).get(label_column, label_column)
     stats = {
         "dataset": dataset,
-        "label_column": label_column,
+        "label_column": raw_label_column,
+        "label_column_canonical": canonicalize_column(label_column),
         "rows_total": int(total),
         "rows_accepted": int(sum(accepted)),
         "rows_rejected_unknown_label": int(total - sum(accepted)),
