@@ -71,11 +71,22 @@ def audit_dataset(key: str, *, chunk_size: int | None = None) -> dict:
         schema_block = {"status": "failed", "reason": str(exc)}
 
     # ---- 2. per-file audit -------------------------------------------------------
+    effective_chunk_size = chunk_size or 100_000
     audits = []
     for path in paths:
         logger.info("auditing %s", path)
-        audits.append(
-            audit_file(path, dataset=key, contract=contract, registry=registry, chunk_size=chunk_size)
+        f_audit = audit_file(path, dataset=key, contract=contract, registry=registry, chunk_size=effective_chunk_size)
+        audits.append(f_audit)
+        file_artifact_path = RESULTS / key / f"{path.stem}_audit.json"
+        file_artifact_path.parent.mkdir(parents=True, exist_ok=True)
+        write_json_artifact(
+            file_artifact_path,
+            f_audit,
+            ArtifactMetadata(
+                experiment_id=f"AUDIT-{key}-{path.stem}",
+                dataset_sha256=f_audit.get("sha256"),
+                extra={"environment": environment_fingerprint()},
+            ),
         )
     summary = summarize_audits(audits)
 
@@ -157,7 +168,7 @@ def audit_dataset(key: str, *, chunk_size: int | None = None) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description="audit acquired datasets")
     parser.add_argument("--dataset", default=None, help="audit one dataset (default: all)")
-    parser.add_argument("--chunk-size", type=int, default=None, help="stream large CSVs in chunks of N rows")
+    parser.add_argument("--chunk-size", type=int, default=100_000, help="stream large CSVs in chunks of N rows (default: 100000)")
     args = parser.parse_args()
 
     manifest = load_manifest()
