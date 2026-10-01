@@ -1,10 +1,10 @@
 {
-  "experiment_id": "AUDIT-cse_cic_ids2018-001",
+  "experiment_id": "AUDIT-cse_cic_ids2018-Friday-02-03-2018_TrafficForML_CICFlowMeter",
   "git_commit": null,
   "dataset_sha256": "d96f38e7496aba83475031e6fb8c6fdf1abf6aa1b71325a917798f3c7de93de1",
   "feature_schema_hash": null,
   "seed": null,
-  "created_at": "2026-10-01T21:36:28.979669+00:00",
+  "created_at": "2026-10-01T21:31:19.780293+00:00",
   "software_environment": {
     "python_version": "3.14.4",
     "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
@@ -12,7 +12,7 @@
     "processor_count": null,
     "cuda_available": false,
     "cuda_version": null,
-    "git_commit": "a4344636de3d96f7e29fdbbd8f2fc93b8f69a66c",
+    "git_commit": "ce0ee0bdaa21595f8de52c07e8fe59e31ace9df3",
     "packages": {
       "numpy": "2.5.3",
       "pandas": "3.0.6",
@@ -33,7 +33,7 @@
       "processor_count": null,
       "cuda_available": false,
       "cuda_version": null,
-      "git_commit": "a4344636de3d96f7e29fdbbd8f2fc93b8f69a66c",
+      "git_commit": "ce0ee0bdaa21595f8de52c07e8fe59e31ace9df3",
       "packages": {
         "numpy": "2.5.3",
         "pandas": "3.0.6",

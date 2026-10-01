@@ -10,5 +10,29 @@
       "results/audits/cicids2017_audit.json",
       "reports/generated/audits/cicids2017_audit.md"
     ]
+  },
+  {
+    "dataset": "cse_cic_ids2018",
+    "status": "completed",
+    "files": 10,
+    "rows": 16233002,
+    "schema_status": "validated",
+    "label_status": "rejected_labels_present",
+    "artifacts": [
+      "results/audits/cse_cic_ids2018_audit.json",
+      "reports/generated/audits/cse_cic_ids2018_audit.md"
+    ]
+  },
+  {
+    "dataset": "unsw_nb15",
+    "status": "completed",
+    "files": 2,
+    "rows": 257673,
+    "schema_status": "validated",
+    "label_status": "validated",
+    "artifacts": [
+      "results/audits/unsw_nb15_audit.json",
+      "reports/generated/audits/unsw_nb15_audit.md"
+    ]
   }
 ]

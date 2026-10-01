@@ -1,10 +1,10 @@
 {
-  "experiment_id": "AUDIT-cse_cic_ids2018-001",
+  "experiment_id": "AUDIT-cse_cic_ids2018-Friday-16-02-2018_TrafficForML_CICFlowMeter",
   "git_commit": null,
-  "dataset_sha256": "d96f38e7496aba83475031e6fb8c6fdf1abf6aa1b71325a917798f3c7de93de1",
+  "dataset_sha256": "1a4919faa0c49c7af97230b0c2d076eba23ee6dd81103a3801d51ac316355d8b",
   "feature_schema_hash": null,
   "seed": null,
-  "created_at": "2026-10-01T21:36:28.979669+00:00",
+  "created_at": "2026-10-01T21:31:38.728704+00:00",
   "software_environment": {
     "python_version": "3.14.4",
     "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
