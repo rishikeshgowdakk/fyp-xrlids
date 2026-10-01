@@ -378,8 +378,11 @@ def load_dataset_population(
         file_removed_non_finite = 0
         file_final_modeling_rows = 0
 
+        file_row_counter = 0
+
         # We process chunk by chunk
         for chunk in pd.read_csv(path, chunksize=chunk_size, low_memory=False):
+            chunk = chunk.reset_index(drop=True)
             n_chunk_raw = len(chunk)
             raw_rows_this_file += n_chunk_raw
 
@@ -394,7 +397,10 @@ def load_dataset_population(
             else:
                 chunk_family_series = chunk[raw_label_col].astype(str).str.strip()
 
-            chunk_row_indices = np.arange(global_row_counter, global_row_counter + n_chunk_raw)
+            file_chunk_indices = np.arange(file_row_counter, file_row_counter + n_chunk_raw)
+            file_row_counter += n_chunk_raw
+
+            chunk_global_indices = np.arange(global_row_counter, global_row_counter + n_chunk_raw)
             global_row_counter += n_chunk_raw
 
             # Clean frame (handles label normalization, unknown-label rejection, negative duration, exact dupes)
@@ -409,14 +415,14 @@ def load_dataset_population(
             if n_clean == 0:
                 continue
 
-            # Align family series with accepted indices
-            accepted_indices = cleaned.frame.index
-            clean_families = chunk_family_series.iloc[accepted_indices].reset_index(drop=True)
-            clean_source_rows = pd.Series(accepted_indices, name="source_row_index")
-            clean_global_orders = pd.Series(chunk_row_indices[accepted_indices], name="original_order")
+            # Align family series and source row positions with accepted indices
+            accepted_idx_arr = cleaned.frame.index.to_numpy()
+            clean_families = chunk_family_series.loc[cleaned.frame.index].reset_index(drop=True)
+            clean_source_rows = pd.Series(file_chunk_indices[accepted_idx_arr], name="source_row_index")
+            clean_global_orders = pd.Series(chunk_global_indices[accepted_idx_arr], name="original_order")
 
             # Extract semantic fields & compute features
-            semantics, _ = extract_semantics(cleaned.frame, config.dataset, registry, strict=True)
+            semantics, _ = extract_semantics(cleaned.frame, config.dataset, registry, strict=False)
             feat_matrix, avail, unavail = compute_features(
                 semantics, feature_names, dataset=config.dataset, strict=False
             )
@@ -431,12 +437,12 @@ def load_dataset_population(
             if n_finite == 0:
                 continue
 
-            feat_df = feat_df.loc[finite_mask].reset_index(drop=True)
-            chunk_labels = cleaned.labels.binary.loc[finite_mask].reset_index(drop=True)
-            chunk_canonical = cleaned.labels.canonical.loc[finite_mask].reset_index(drop=True)
-            chunk_families = clean_families.loc[finite_mask].reset_index(drop=True)
-            chunk_src_rows = clean_source_rows.loc[finite_mask].reset_index(drop=True)
-            chunk_gl_orders = clean_global_orders.loc[finite_mask].reset_index(drop=True)
+            feat_df = feat_df.iloc[finite_mask].reset_index(drop=True)
+            chunk_labels = cleaned.labels.binary.iloc[finite_mask].reset_index(drop=True)
+            chunk_canonical = cleaned.labels.canonical.iloc[finite_mask].reset_index(drop=True)
+            chunk_families = clean_families.iloc[finite_mask].reset_index(drop=True)
+            chunk_src_rows = clean_source_rows.iloc[finite_mask].reset_index(drop=True)
+            chunk_gl_orders = clean_global_orders.iloc[finite_mask].reset_index(drop=True)
 
             file_final_modeling_rows += n_finite
 

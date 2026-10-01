@@ -1,0 +1,104 @@
+# UNSW-NB15 Native Flow Feature Baseline Experiment (4 Supported Flow Features)
+# XRL-IDARS Phase 1 (repo: fyp-xrlids)
+
+experiment:
+  id: EXP-P1-UNSW-NATIVE-001
+  phase: 1
+  research_question: RQ1_IN_DOMAIN_UNSW
+  hypothesis: >
+    Evaluates the 4 genuine flow features supported natively by the UNSW-NB15 CSV schema
+    (flow_duration_ms, flow_packets_per_s, flow_bytes_per_s, packet_length_mean).
+    Missing TCP flag, subflow, and IAT features are intentionally omitted rather than fabricated.
+  status: ready_for_execution
+
+dataset:
+  key: unsw_nb15
+  files: all_verified
+  require_verified_checksums: true
+  require_schema_validated: true
+
+label_contract:
+  path: configs/labels/label_mapping.yaml
+  require_status: candidate_frozen
+  unknown_label_policy: REJECT
+
+features:
+  registry: configs/features/features.yaml
+  mode: programmatic_common_transfer_contract
+  rung: R10
+  require_frozen: false
+
+cleaning:
+  drop_exact_duplicates: true
+  drop_negative_duration: true
+  accounting_required: true
+
+split:
+  methodology: stratified_random
+  duplicate_policy: deduplicate_features
+  duplicate_conflict_policy: reject_conflicts
+  train: 0.6
+  validation: 0.2
+  test: 0.2
+  seed: 42
+  seeds: [42, 123, 456]
+  leakage_audit_required: true
+  fail_on_leakage: true
+
+preprocessing:
+  scaler: StandardScaler
+  imputation: median_train
+  fit_on: train_only
+
+models:
+  random_forest:
+    n_estimators: 100
+    max_depth: 16
+    min_samples_leaf: 2
+    class_weight: balanced_subsample
+    random_state: 42
+    n_jobs: -1
+  lstm:
+    seq_len: 5
+    stride: 1
+    label_rule: last
+    hidden_size: 32
+    num_layers: 2
+    dropout: 0.2
+    learning_rate: 0.001
+    batch_size: 256
+    epochs: 15
+    patience: 3
+    seed: 42
+  fusion:
+    alpha: null
+    alignment: inner
+    tune_metric: roc_auc
+
+calibration:
+  method: platt
+  fit_on: validation
+  report: [brier, ece, reliability_curve]
+
+thresholding:
+  sweep: [0.0, 1.0, 0.01]
+  population: validation
+  objective: null
+  decision_id: D-003
+
+evaluation:
+  metrics: [accuracy, precision, recall, f1, macro_f1, weighted_f1, balanced_accuracy,
+            specificity, fpr, fnr, roc_auc, pr_auc]
+  confusion_matrix_required: true
+  report_population: aligned_intersection
+
+explainability:
+  shap:
+    enabled: true
+    method: tree_shap
+    max_background: 100
+    max_explain: 200
+
+outputs:
+  results_dir: results/experiments/EXP-P1-UNSW-NATIVE-001
+  save_models: true
