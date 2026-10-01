@@ -101,3 +101,45 @@ def test_lstm_memory_bounded_training():
     delta_mb = end_rss - start_rss
     # Training moderate dataset on CPU should not balloon RSS (< 500 MiB delta)
     assert delta_mb < 500.0
+
+
+def test_lstm_save_and_load(tmp_path):
+    """Verify LSTMDetector save and load reconstruct identical model predictions."""
+    n_rows = 100
+    features = pd.DataFrame(np.random.randn(n_rows, 4), columns=["f1", "f2", "f3", "f4"])
+    labels = pd.Series(np.random.randint(0, 2, size=n_rows))
+
+    tr = build_sequences(features.iloc[:70], labels.iloc[:70], split="train", seq_len=4)
+    va = build_sequences(features.iloc[70:], labels.iloc[70:], split="validation", seq_len=4)
+
+    det = LSTMDetector(
+        params={"epochs": 2, "batch_size": 16, "hidden_size": 8, "num_layers": 1, "dropout": 0.0},
+        feature_names=["f1", "f2", "f3", "f4"],
+        seq_len=4,
+        seed=42,
+    ).fit(tr, va)
+
+    preds_before = det.predict_proba(va)
+    save_path = det.save(tmp_path)
+    assert save_path.is_file()
+
+    loaded = LSTMDetector.load(tmp_path)
+    assert loaded.seq_len == det.seq_len
+    assert loaded.feature_names == det.feature_names
+    preds_after = loaded.predict_proba(va)
+
+    np.testing.assert_allclose(preds_before, preds_after, rtol=1e-5)
+
+
+def test_build_sequences_session_column_alias():
+    """Verify session_column argument behaves identically to groups argument."""
+    n_rows = 20
+    features = pd.DataFrame(np.random.randn(n_rows, 3))
+    labels = pd.Series(np.zeros(n_rows, dtype=int))
+    sessions = pd.Series([1] * 10 + [2] * 10)
+
+    seq_set = build_sequences(features, labels, split="train", seq_len=4, session_column=sessions)
+    assert len(seq_set) == 14
+    for orig in seq_set.origins:
+        assert orig not in [7, 8, 9]
+
