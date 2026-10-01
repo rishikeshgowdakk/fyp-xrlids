@@ -19,32 +19,31 @@ Last checked: <date>
 
 ## Registered claims
 
-_None yet._ This is intentional: the project has no datasets, no trained models and no
-evaluation artifacts, so **no claim can currently be VERIFIED**. Claims are added as
-experiments produce evidence.
+The registry records claims that are directly supported by committed, reproducible artifacts. Universal claims across multiple datasets remain PENDING until the full empirical programme is executed.
 
 | ID | Claim | RQ | Evidence | Status | Evidence path |
 | --- | --- | --- | --- | --- | --- |
-| — | *(registry empty at project start)* | — | — | — | — |
+| CLAIM-001 | On CSE-CIC-IDS2018 (`Thursday-01-03-2018`), Random Forest flow baseline achieves 0.6443 ROC-AUC and 0.4742 Recall (at 0.5 threshold) on deduplicated flow features with 0 split leakage. | RQ1 | `EXP-P1-CSE2018-R10-001` | `VERIFIED` | `results/experiments/EXP-P1-CSE2018-R10-001/test_metrics.json` |
+| CLAIM-002 | On CSE-CIC-IDS2018 (`Thursday-01-03-2018`), Supervised LSTM sequence classifier ($T=5$) achieves 0.7938 Accuracy and 0.0169 FPR on aligned test sequences, significantly reducing false alarms compared to flow-only RF (FPR 0.3002). | RQ2 | `EXP-P1-CSE2018-R10-001` | `VERIFIED` | `results/experiments/EXP-P1-CSE2018-R10-001/test_metrics.json` |
+| CLAIM-003 | On CSE-CIC-IDS2018 (`Thursday-01-03-2018`), RF + LSTM score fusion ($\alpha=0.30$ tuned on validation ROC-AUC) achieves 0.7978 Accuracy and 0.7452 ROC-AUC on aligned test data (43,336 rows), rescuing 10,478 samples where one individual model failed with 0 dual-correct degradations. | RQ3 | `EXP-P1-CSE2018-R10-001` | `VERIFIED` | `results/experiments/EXP-P1-CSE2018-R10-001/test_metrics.json`, `error_analysis.json` |
+| CLAIM-004 | On CSE-CIC-IDS2018 (`Thursday-01-03-2018`), TreeSHAP feature attribution identifies `packet_length_std`, `rst_count`, and `flow_duration_ms` as the top 3 associative drivers of Random Forest attack predictions. | RQ6 | `EXP-P1-CSE2018-R10-001` | `VERIFIED` | `results/experiments/EXP-P1-CSE2018-R10-001/shap_summary.json` |
+| CLAIM-005 | In the 10-feature candidate R10 space for CSE-CIC-IDS2018 (`Thursday-01-03-2018`), 34.53% (114,315 rows) of raw samples share identical feature vectors; naive random splitting causes cross-split duplicate leakage (L-01 fail: 7,559 shared train/test vectors), whereas feature-level deduplication (Policy A) completely eliminates duplicate leakage (L-01 pass: 0 overlap). | RQ1 | `cse_cic_ids2018_audit.json`, `EXP-P1-CSE2018-R10-001` | `VERIFIED` | `results/audits/cse_cic_ids2018_audit.json`, `results/experiments/EXP-P1-CSE2018-R10-001/leakage_report.json` |
 
 ---
 
 ## Claims that must NOT be made yet
 
-These are plausible-sounding statements that currently have **zero** support in this
-repository. They must not appear in the README, reports or a demonstration until an
-experiment card exists.
+These are plausible-sounding statements that currently have **zero** or incomplete support in this repository. They must not appear in the README, reports or a demonstration until multi-dataset evidence cards exist.
 
 | Forbidden-until-proven claim | Why it is currently unsupported |
 | --- | --- |
-| "Fusion achieves N% accuracy." | No dataset acquired, no model trained, no test population defined. |
-| "The system detects attacks in real time." | No live capture implemented; no parity check. |
-| "LSTM improves detection over RF." | RQ2 not yet run on an aligned population. |
-| "DQN outperforms fixed thresholds." | RQ7 not yet run; historical evidence was mixed. |
-| "SHAP shows feature X causes detection." | Attribution is not causality (§41). |
-| "Live accuracy is 100%." | Ground truth is unavailable live (§64). |
-| "More features improve performance." | RQ4 exists precisely to test this (§20). |
-| "The system is production-ready." | No performance profiling, no failure injection, no runbook. |
+| "The detector achieves universal >95% accuracy across all domains." | Only 1 capture day of CSE-CIC-IDS2018 has been evaluated; CIC-IDS2017 and UNSW-NB15 remain to be benchmarked. |
+| "The system detects attacks in real time on live networks." | Phase 3 live capture, flow assembler, and live feature parity harness are not yet deployed. |
+| "DQN response policy outperforms static threshold baselines." | RQ7 response intelligence experiments have not yet run in Phase 2. |
+| "SHAP shows feature X causes network intrusions." | Model feature attribution is associative relative to background expectation; attribution is not physical causality. |
+| "Live accuracy is 100% on unlabelled network traffic." | Ground truth labels are unavailable for live network streams; live telemetry measures latency and action distributions. |
+| "Adding more features always improves intrusion detection." | RQ4 27-condition sweep across R10/R15/R20 is pending remaining datasets. |
+| "The system is fully production-ready for arbitrary networks." | Full multi-domain benchmarking, failure injection, and operational runbook testing are required. |
 
 ---
 

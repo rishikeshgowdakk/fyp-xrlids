@@ -2,7 +2,7 @@
 
 - **Platform**: XRL-IDARS (Intrusion Detection and Autonomous Response System)
 - **Phase**: 1 (Empirical Research Platform & Explainability)
-- **Git Commit**: `e84fb9fc114bf53bb5f7b0e885940508a93cc024`
+- **Git Commit**: `d854a769ccdf444c57a7e461e8ae1ac3a27a52d9`
 - **Environment**: Python 3.14.4 · PyTorch 2.14.0+cpu · Scikit-Learn 1.9.1 · SHAP 0.52.0
 
 ---
@@ -23,7 +23,7 @@
 | TreeSHAP Explainability | `EMPIRICALLY OBSERVED` | Computed on RF; top driver `packet_length_std` |
 | Deterministic Error Analysis | `EMPIRICALLY OBSERVED` | Confidence distributions, 10,478 fusion rescues |
 | Cross-Dataset Transfer Design | `IMPLEMENTED` | Programmatic 4-feature common transfer contract |
-| Decision Gate D-001 (Duplicate Policy) | `EMPIRICALLY OBSERVED` | Evidence established for researcher decision |
+| Duplicate-Split Policy Decision | `EMPIRICALLY OBSERVED` | Evidence established for researcher decision |
 | Decision Gate D-002 (Feature Contract) | `RESEARCH DECISION REQUIRED` | Candidate frozen (R10); awaiting formal freeze |
 | Decision Gate D-003 (Threshold Objective) | `RESEARCH DECISION REQUIRED` | Candidates evaluated; awaiting researcher objective |
 
@@ -51,7 +51,7 @@
 ---
 ## 3. Open Decisions Requiring Researcher Confirmation
 
-1. **Decision D-001 (Duplicate-Split Policy)**:
+1. **Duplicate-Split Policy Decision (Policy A vs Policy B)**:
    - **Recommendation**: Adopt **Policy A** (`deduplicate_features`) as the primary benchmark to ensure scientific validity and 0 test leakage, while reporting Policy B in an appendix to demonstrate memorization bias.
 2. **Decision D-002 (Primary Feature Rung Freeze)**:
    - **Recommendation**: Formally freeze **R10** for CSE-CIC-IDS2018 in-domain benchmarks and the 4-feature intersection for cross-dataset transfer.

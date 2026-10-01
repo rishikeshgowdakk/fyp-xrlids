@@ -53,8 +53,9 @@ reports/figures/*
 *.log
 logs/
 
-# OS / editor
+# OS / editor / local tools
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/
+.freebuff/

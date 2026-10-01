@@ -73,7 +73,7 @@
   "per_file_audits": [
     {
       "dataset": "cse_cic_ids2018",
-      "source_file": "/home/rishikesh/Desktop/fyp-xrlids/data/raw/cse_cic_ids2018/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv",
+      "source_file": "data/raw/cse_cic_ids2018/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv",
       "rows": 331125,
       "columns": 80,
       "column_names": [
@@ -235,7 +235,7 @@
         "distinct_column_sets": 1,
         "schemas_identical": true,
         "files": {
-          "/home/rishikesh/Desktop/fyp-xrlids/data/raw/cse_cic_ids2018/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv": 80
+          "data/raw/cse_cic_ids2018/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv": 80
         }
       }
     }

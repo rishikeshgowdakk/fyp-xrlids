@@ -1,9 +1,9 @@
 # PHASE 1 REVIEW
 
-Status: **PARTIALLY COMPLETE — implementation complete, empirical results pending datasets.**
+Status: **PARTIALLY COMPLETE — implementation complete, initial empirical baseline observed on CSE-CIC-IDS2018, multi-dataset programme pending remaining data.**
 
 This review reports what actually exists. Where an experiment has not run, it says so.
-No metric in this document is a dataset result.
+Empirical metrics reported reflect the verified single day file of CSE-CIC-IDS2018 (`Thursday-01-03-2018`).
 
 ---
 
@@ -67,107 +67,85 @@ real datasets. L-02 is a rounding proxy and is documented as incomplete.
 
 ## 8. RF results
 
-Not run. Implementation complete and unit-tested (continuous probability output, feature
-order enforcement, single-class rejection).
+Empirical baseline executed on CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-001`). On the 43,340-row deduplicated test split (Policy A, threshold 0.5): Accuracy 0.6479, Precision 0.3206, Recall 0.4742, F1 0.3826, Specificity 0.6998, FPR 0.3002, ROC-AUC 0.6443, PR-AUC 0.4140. Results are scoped to this verified day file.
 
 ## 9. LSTM results
 
-Not run. Implementation complete and unit-tested. **Sequence safety verified
-programmatically**: no sequence can cross a train/validation/test boundary.
+Empirical sequence classifier executed on CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-001`, $T=5$, boundary-safe). On test sequences: Accuracy 0.7938, Precision 0.7390, Recall 0.1602, F1 0.2633, Specificity 0.9831, FPR 0.0169, ROC-AUC 0.7284, PR-AUC 0.4860. Demonstrates a dramatic reduction in false alarm rate (FPR 0.0169 vs RF 0.3002).
 
 ## 10. RF vs LSTM comparison
 
-Infrastructure complete: comparison is performed on the **aligned intersection** of the two
-score populations, and the alignment report records how many rows each model scored and how
-many were dropped. On the fixture this correctly showed RF scoring 300 rows vs LSTM 296
-(sequence windows), fusing on 296. No dataset result.
+Evaluated on the aligned test population (43,336 rows). Model disagreement rate: 32.97% (14,287 rows). RF predicted attack while LSTM predicted benign on 13,436 rows (RF false alarm on 9,809 benign rows; RF correct on 3,627 attack rows). LSTM predicted attack while RF predicted benign on 851 rows (LSTM correct on 496 attack rows; false alarm on 355 rows).
 
 ## 11. Fusion results
 
-Implementation complete (`alpha * rf + (1-alpha) * lstm`, alpha configurable, default 0.5).
-Fusion is not assumed to help; `compare_components` reports RF, LSTM and Fusion side by side
-on one population.
+RF + LSTM score fusion ($\alpha=0.30$, tuned strictly on validation ROC-AUC). On aligned test data: Accuracy 0.7978, Precision 0.7640, Recall 0.1750, F1 0.2848, Specificity 0.9838, FPR 0.0162, ROC-AUC 0.7452, PR-AUC 0.5151. Error analysis confirms 10,478 samples were successfully rescued by fusion when one individual model failed, with 0 dual-correct degradations.
 
 ## 12. Calibration findings
 
-Implementation complete: reliability curve, Brier score, ECE, and validation-only Platt
-scaling. No dataset finding. Important caveat retained: a score is not called "confidence"
-until ECE supports it.
+Platt scaling, ECE, Brier score, and reliability curves computed on validation and test splits (`EXP-P1-CSE2018-R10-001/calibration_report.json`). Validation Platt-calibrated RF and Fusion models evaluated on test. Caveat retained: raw model scores are not called "confidence" until supported by calibration analysis.
 
 ## 13. Threshold analysis
 
-Implementation complete: full 0.00–1.00 sweep plus candidate operating points for
-max-F1 / min-FPR-subject-to-recall / min-FNR-subject-to-FPR / cost-sensitive.
-**No threshold has been frozen** — D-003 is open. Every result states the threshold used.
+Validation threshold sweep (0.00–1.00) completed. Candidate operating points computed for max-F1, min-FPR at recall floor, min-FNR at FPR cap, and cost-sensitive objectives (`threshold_candidates.json`). Neutral 0.5 threshold reported in baseline tables; **no operational threshold has been frozen** (D-003 remains open).
 
 ## 14. Feature sweep
 
-Not run (blocked by D-002 and by data availability; partially impossible for UNSW-NB15 at R10).
+Full 27-condition sweep remains blocked by D-002, UNSW-NB15 R10 incompatibility, and pending acquisition of CIC-IDS2017/UNSW-NB15 datasets.
 
 ## 15. Cross-dataset results
 
-Not run. Only the "source-trained preprocessing applied unchanged to target" option is
-implemented; normalisation strategy is D-005 and remains open.
+Programmatic 4-feature common transfer contract implemented in `src/xrlids/features/registry.py`. Source-side training and evaluation on CSE-CIC-IDS2018 recorded in `EXP-P1-TRANSFER-CSE-TO-UNSW-001`. Target evaluation on UNSW-NB15 is pending dataset acquisition (`DATA_NOT_AVAILABLE`). Normalization strategy D-005 remains open.
 
 ## 16. OOD results
 
-Not run — infrastructure partially available via the label-family column, but no experiment
-executed.
+Not run — infrastructure ready via the label-family taxonomy, but blocked on additional datasets.
 
 ## 17. SHAP findings
 
-Not run. Methodology (attribution not causality) is documented; the SHAP module is the
-remaining implementation item.
+TreeSHAP attribution computed on CSE-CIC-IDS2018 Random Forest (`EXP-P1-CSE2018-R10-001`). Top three predictive drivers: `packet_length_std` (mean |SHAP|=0.0309), `rst_count` (0.0294), and `flow_duration_ms` (0.0273). Caveat preserved: attribution quantifies model feature reliance, not physical network causality.
 
 ## 18. Error analysis
 
-Not run. `results/error_analysis/` is defined; the analyzer is not yet written.
+Deterministic error analyzer implemented in `src/xrlids/evaluation/error_analysis.py` and executed for `EXP-P1-CSE2018-R10-001`, producing confidence distributions, hardest misclassified rows, duplicate-mask annotations, and fusion interaction breakdowns.
 
 ## 19. Reproducibility status
 
-Environment pinned (`requirements.txt`, `pyproject.toml`); Python 3.14.4; artifact metadata
-records Git commit, dataset SHA-256, feature-schema hash, seed and environment fingerprint.
-Datasets are not checksum-pinned yet (none acquired).
+Environment pinned (`requirements.txt`, `pyproject.toml`); Python 3.14.4; artifact metadata records Git commit, dataset SHA-256, feature-schema hash, seed and environment fingerprint. CSE-CIC-IDS2018 day file verified by SHA-256 (`b0534c5d...`).
 
 ## 20. Known limitations
 
-- No datasets ⇒ no empirical claims whatsoever.
-- Column maps are `unverified_pending_audit`.
-- Near-duplicate leakage detection is a proxy.
-- Group/temporal/source-IP leakage checks have not run against real data.
-- Only a stratified split is implemented; temporal/grouped splits are future work.
+- Empirical results currently reflect one verified file of CSE-CIC-IDS2018 (`Thursday-01-03-2018`).
+- CIC-IDS2017 and UNSW-NB15 datasets are not yet acquired in the manifest.
+- Near-duplicate leakage detection uses a rounding proxy.
+- Group/temporal/source-IP leakage checks require explicit metadata columns not present in the current single file.
+- Primary feature contract (D-002) and threshold objective (D-003) remain open research decisions.
 
 ## 21. Unresolved decisions
 
 | ID | Decision | Blocks |
 | --- | --- | --- |
-| D-002 | Feature contract R10/R15/R20 | feature sweep, baselines, SHAP |
-| D-003 | Threshold objective | freezing any operating point |
-| D-004 | Dataset acquisition | everything empirical |
-| D-005 | Cross-dataset normalisation | transfer experiments |
-| — | UNSW-NB15 R10 incompatibility | 1/3 of the primary sweep |
+| D-002 | Feature contract R10/R15/R20 | Full 27-condition feature sweep, multi-dataset baselines |
+| D-003 | Threshold objective | Freezing single operational operating point |
+| D-004 | Dataset acquisition | Remaining empirical work for CIC-IDS2017 and UNSW-NB15 |
+| D-005 | Cross-dataset normalisation | Target evaluation on transferred feature spaces |
+| — | Duplicate-Split Policy | Formal adoption of Policy A (`deduplicate_features`) vs Policy B |
+| — | UNSW-NB15 R10 incompatibility | 1/3 of primary feature sweep |
 
 ## 22. Failed experiments
 
-None executed, therefore none failed. One **test** failure was found and fixed during
-development (an incorrect expectation about fixture row indices, not a code defect).
+None failed due to pipeline defects. Synthetic smoke test passed (`results/smoke/smoke_R10.json`).
 
 ## 23. Negative findings
 
-- UNSW-NB15 cannot satisfy the R10 contract. This is a genuine, reportable negative result
-  about the *design*, discovered before any training was run.
-- Zero-duration flows are not rare in principle: the rate features are legitimately
-  undefined for them, which forces an explicit row-level policy rather than silent NaN.
+- UNSW-NB15 cannot satisfy the R10 contract (4/10 features supported).
+- Zero-duration flows occur (2,919 flows), causing undefined rate features that require explicit NaN handling rather than silent imputation.
+- Naive flow splitting on tabular features leads to severe duplicate leakage (34.53% duplicate feature vectors).
 
 ## 24. What Phase 2 requires
 
-A frozen feature contract (D-002), a frozen operating threshold (D-003), acquired and
-audited datasets (D-004), trained and registered models, and calibration results before any
-DQN state or response policy is built.
+A formally frozen feature contract (D-002), a frozen operating threshold (D-003), acquired and audited datasets for all three domains (D-004), and full cross-dataset transfer validation before any DQN response policy is built.
 
 ## 25. What cannot yet be claimed
 
-Nothing about detection performance. Specifically, no accuracy, precision, recall, F1,
-ROC-AUC, PR-AUC, confusion matrix, cross-dataset behaviour, SHAP attribution or calibration
-result is currently supported by this repository. The `CLAIMS_REGISTRY.md` remains empty of
-verified claims by design.
+No claim of universal or cross-dataset intrusion detection accuracy. No claim that findings from one CSE-CIC-IDS2018 capture day apply identically to different network topologies. No claim of live real-time detection without ground truth. Claims in `CLAIMS_REGISTRY.md` are strictly limited to verified, reproducible single-dataset artifacts under `results/experiments/`.

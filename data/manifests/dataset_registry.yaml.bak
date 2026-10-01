@@ -1,6 +1,6 @@
 registry_version: 0.3.0
 last_updated: '2026-09-30'
-overall_acquisition_status: verified
+overall_acquisition_status: partial
 datasets:
 - key: cicids2017
   name: CIC-IDS2017
@@ -179,7 +179,7 @@ datasets:
     files.
 
     '
-  acquisition_status: verified
+  acquisition_status: partial
   acquisition_note: 'Distributed via UNSW''s official page (historically a share-link)
     and mirrors. Register the CSV files after manual download. Packet captures (pcap)
     are NOT required for Phase 1.
@@ -201,14 +201,14 @@ datasets:
     filename: UNSW_NB15_testing-set.csv
     size_bytes: 15380800
     sha256: 734fe6642edf758f7c94d7d9149426b49d202fe8e7bf0bef47392489c3c0a559
-    status: verified
+    status: registered
     source: UNSW Canberra Cyber (mirrored)
     registered_at: '2026-10-01T10:35:36.870047+00:00'
   - path: data/raw/unsw_nb15/UNSW_NB15_training-set.csv
     filename: UNSW_NB15_training-set.csv
     size_bytes: 32293018
     sha256: bec7dd5ec88dc2a0ccc7a07879d338395ed7421750f675fd0339e07dfe0648fa
-    status: verified
+    status: registered
     source: UNSW Canberra Cyber (mirrored)
     registered_at: '2026-10-01T10:35:36.943220+00:00'
   schema_status: not_run

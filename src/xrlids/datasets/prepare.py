@@ -91,25 +91,31 @@ def register_file(
     (by absolute path) was already registered, it is re-registered (updated), because
     re-hashing an existing file is harmless and self-correcting.
     """
-    file_path = Path(file_path).resolve()
-    if not file_path.is_file():
+    resolved_path = Path(file_path).resolve()
+    if not resolved_path.is_file():
         raise PrepareError(f"cannot register '{file_path}': file does not exist")
+
+    # Store repository-relative path if inside working directory, else relative/clean path string
+    try:
+        rel_path_str = str(resolved_path.relative_to(Path.cwd().resolve()))
+    except ValueError:
+        rel_path_str = str(file_path)
 
     manifest = load_manifest(manifest_path)
     entry = get_entry(manifest, dataset_key)
 
-    digest = sha256_file(file_path)
+    digest = sha256_file(resolved_path)
     record = {
-        "path": str(file_path),
-        "filename": file_path.name,
-        "size_bytes": file_path.stat().st_size,
+        "path": rel_path_str,
+        "filename": resolved_path.name,
+        "size_bytes": resolved_path.stat().st_size,
         "sha256": digest,
         "status": "registered",
         "source": source or "manual download (see acquisition_note)",
         "registered_at": _now(),
     }
 
-    files = [f for f in entry.get("files", []) if f.get("path") != str(file_path)]
+    files = [f for f in entry.get("files", []) if f.get("filename") != resolved_path.name and f.get("path") != rel_path_str]
     files.append(record)
     entry["files"] = files
 
