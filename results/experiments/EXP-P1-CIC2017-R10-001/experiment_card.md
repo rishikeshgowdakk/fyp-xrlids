@@ -98,12 +98,12 @@ Final Modelling Population:           1,779,322
 | `FTP-Patator` | ATTACK | 897 | 894 | 0 | 3 | 99.67% | 0.33% |
 | `SSH-Patator` | ATTACK | 648 | 638 | 0 | 10 | 98.46% | 1.54% |
 | `PortScan` | ATTACK | 320 | 317 | 0 | 3 | 99.06% | 0.94% |
-| `Web Attack � Brute Force` | ATTACK | 258 | 41 | 0 | 217 | 15.89% | 84.11% |
+| `Web Attack - Brute Force` | ATTACK | 258 | 41 | 0 | 217 | 15.89% | 84.11% |
 | `Bot` | ATTACK | 196 | 188 | 0 | 8 | 95.92% | 4.08% |
-| `Web Attack � XSS` | ATTACK | 108 | 3 | 0 | 105 | 2.78% | 97.22% |
+| `Web Attack - XSS` | ATTACK | 108 | 3 | 0 | 105 | 2.78% | 97.22% |
 | `Infiltration` | ATTACK | 8 | 0 | 0 | 8 | 0.00% | 100.00% |
 | `Heartbleed` | ATTACK | 3 | 2 | 0 | 1 | 66.67% | 33.33% |
-| `Web Attack � Sql Injection` | ATTACK | 3 | 0 | 0 | 3 | 0.00% | 100.00% |
+| `Web Attack - Sql Injection` | ATTACK | 3 | 0 | 0 | 3 | 0.00% | 100.00% |
 
 ---
 ## 7. Explainability (TreeSHAP Feature Attributions)

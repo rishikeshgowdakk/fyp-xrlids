@@ -3,7 +3,7 @@
 Last updated: 2026-10-02
 Project: **XRL-IDARS v1** · Repository: `fyp-xrlids`
 Phase: **1 — Data + Research + Model Foundation**
-Overall: **FOUNDATION COMPLETE & VERIFIED — all 20 dataset CSVs physically present, SHA-256 verified, audited per-file; memory-bounded streaming pipelines, pre-flight gate, and ML models active.**
+Overall: **FOUNDATION REPAIRED & EVIDENCE RECONCILED — all 20 dataset CSVs physically present, SHA-256 verified, audited per-file; memory-bounded streaming pipelines, pre-flight gate, baseline ladder, and error analysis active; multi-file in-domain baseline experiments executed; LSTM and Fusion multi-file experiments pending.**
 
 Legend: ✅ done / verified · 🟡 implemented / empirically observed on partial data · ⛔ blocked on research decision · ⬜ planned / not started
 
@@ -21,44 +21,50 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Feature computation + canonical column maps | ✅ | `src/xrlids/features/compute.py` + tests (CIC-IDS2017 R10 verified) |
 | Feature compatibility matrix | ✅ | `reports/generated/feature_compatibility.md` |
 | Cleaning + row accounting | ✅ | `src/xrlids/preprocessing/cleaning.py` + tests |
+| Multi-file dataset population loader | ✅ | `src/xrlids/datasets/population.py` (reconciled accounting, conflict resolution) |
 | Chunked streaming data pipeline | ✅ | `src/xrlids/preprocessing/streaming.py` + equivalence tests |
 | Leakage-safe splits + leakage audit | ✅ | `src/xrlids/splitting/` + tests |
 | Preprocessing (train-only fit) | ✅ | `src/xrlids/preprocessing/pipeline.py` + tests |
+| Baseline ladder detectors (Majority, LR, DT) | ✅ | `src/xrlids/models/baselines.py` + tests |
 | Memory-bounded Random Forest (capped parallelism) | ✅ | `src/xrlids/models/random_forest.py` (`n_jobs=min(4, os.cpu_count())`) |
 | Memory-bounded Supervised LSTM (lazy sequence batching) | ✅ | `src/xrlids/models/lstm.py` (`SequenceArray` on-the-fly mini-batching) |
 | Fusion (aligned populations) | ✅ | `src/xrlids/models/fusion.py` + tests |
 | Calibration (Brier/ECE/reliability/Platt) | ✅ | `src/xrlids/evaluation/calibration.py` + tests |
 | Threshold sweep + candidate operating points | ✅ | `src/xrlids/evaluation/thresholding.py` + tests |
+| Statistical hypothesis testing & paired bootstrap | ✅ | `src/xrlids/evaluation/statistics.py` (empirical 95% CIs, p-values) |
+| Per-attack-family evaluation | ✅ | `src/xrlids/evaluation/error_analysis.py` + tests |
 | Experiment registry + result metadata | ✅ | `src/xrlids/experiments/registry.py` |
 | Dataset manifest + checksum enforcement | ✅ | `src/xrlids/datasets/loading.py` (`verify_dataset_file`) + tests |
 | Dataset acquisition workflow (register/verify) | ✅ | `src/xrlids/datasets/prepare.py` + `scripts/phase1/prepare_dataset.py` + tests |
 | Real-file schema validation (canonical headers) | ✅ | `src/xrlids/datasets/schema.py` + tests |
 | Real-data per-file streaming audit runner | ✅ | `scripts/phase1/03_run_audit.py` (25 structured audit fields per file) |
 | Unified experiment runner + pre-flight gate | ✅ | `scripts/phase1/run_experiment.py` + `src/xrlids/experiments/preflight.py` (10-point check) |
-| Resource profiler (RSS MiB, duration, CPU, disk) | ✅ | `src/xrlids/utils/profiler.py` + tests |
+| Resource profiler (instantaneous RSS, peak ru_maxrss) | ✅ | `src/xrlids/utils/profiler.py` + tests |
 | Baseline experiment configs | ✅ | `configs/experiments/` |
 | Dataset audit module | ✅ | `src/xrlids/datasets/audit.py` + tests |
 | CLI | ✅ | `src/xrlids/cli.py` |
 | Report generation from artifacts | ✅ | `scripts/phase1/generate_reports.py` (dynamic git hashes, live manifests) |
-| Test suite | ✅ | 164 tests passing (0 failures) |
+| Test suite | ✅ | 180 unit and integration tests passing (0 failures) |
 | SHAP explainability module | ✅ | `src/xrlids/explainability/shap_analysis.py` + tests |
-| Error-analysis & disagreement module | ✅ | `src/xrlids/evaluation/error_analysis.py` + tests |
 | Cross-dataset transfer module | ✅ | `src/xrlids/features/registry.py` + `run_experiment.py` (4-feature contract) |
 
 ## Empirical status
 
 | Experiment | Status | Reason / Evidence |
 | --- | --- | --- |
-| Dataset acquisition | ✅ VERIFIED | All 20 physical CSV files acquired and verified (8 CIC-IDS2017, 10 CSE-CIC-IDS2018, 2 UNSW-NB15) |
+| Dataset acquisition | ✅ VERIFIED | All 20 physical CSV files acquired and verified against canonical manifest (8 CIC-IDS2017, 10 CSE-CIC-IDS2018, 2 UNSW-NB15) |
 | Dataset audit (real files) | ✅ COMPLETED | All 20 files audited via chunked streaming with per-file JSON artifacts in `results/audits/` |
-| Splits / leakage (real data) | ✅ VALIDATED | Naive split fails L-01; Policy A feature-dedup split passes L-01/L-02 cleanly (0 duplicates) |
-| RF / LSTM / Fusion baselines | 🟡 EMPIRICALLY OBSERVED | Executed on CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-001`, `EXP-P1-CSE2018-POLICY-B-001`) |
-| Feature contract (R10/R15/R20) | ✅ VERIFIED | CIC-IDS2017 and CSE-CIC-IDS2018 satisfy R10/R15/R20; UNSW-NB15 satisfies 4-feature transfer contract |
+| Splits / leakage (real data) | ✅ VALIDATED | Policy A feature-dedup split passes L-01/L-02 cleanly (0 cross-split duplicate vectors) |
+| CIC-IDS2017 Multi-File Baselines | ✅ EMPIRICALLY OBSERVED | Executed across all 8 files (2,830,743 raw rows -> 1,779,322 modeling rows); baseline ladder evaluated (`EXP-P1-CIC2017-R10-001`, RF test acc=0.9815, F1=0.9512) |
+| UNSW-NB15 Multi-File Baselines | ✅ EMPIRICALLY OBSERVED | Executed across all 2 files (257,673 raw rows -> 122,520 modeling rows); native 4-feature contract evaluated (`EXP-P1-UNSW-NATIVE-001`, RF test acc=0.8588, F1=0.8546) |
+| CSE-CIC-IDS2018 Baselines | 🟡 EMPIRICALLY OBSERVED | Historical single-day runs executed (`EXP-P1-CSE2018-R10-001`, `EXP-P1-CSE2018-POLICY-B-001`); full 10-file multi-day run pending |
+| Supervised LSTM (Multi-file) | ⬜ NOT YET EXECUTED | Unit-tested and memory-safe; full multi-file empirical training pending computational schedule |
+| Score Fusion (Multi-file) | ⬜ NOT YET EXECUTED | Unit-tested; full multi-file empirical runs pending completed LSTM models |
+| Multi-seed evaluation | 🟡 PARTIAL | Runner supports multi-seed loop and aggregate metrics; full multi-file runs executed with seed 42 only |
 | Cross-dataset transfer | 🟡 PARTIAL | Programmatic 4-feature contract evaluated source-side in `EXP-P1-TRANSFER-CSE-TO-UNSW-001` |
-| SHAP (real data) | 🟡 EMPIRICALLY OBSERVED | TreeSHAP evaluated on CSE-CIC-IDS2018 RF (`EXP-P1-CSE2018-R10-001`, top feature `packet_length_std`) |
-| Calibration (real data) | 🟡 EMPIRICALLY OBSERVED | Platt scaling, ECE, reliability curves evaluated on CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-001`) |
+| SHAP (real data) | 🟡 EMPIRICALLY OBSERVED | TreeSHAP evaluated on CIC-IDS2017 and UNSW-NB15 Random Forest models |
+| Calibration (real data) | 🟡 EMPIRICALLY OBSERVED | Platt scaling evaluated on CIC-IDS2017 and UNSW-NB15 models |
 | Threshold objective | 🟡 CANDIDATES EVALUATED | Evaluated across 0.00–1.00; neutral 0.5 baseline reported; operational freeze gated on D-003 |
-| End-to-end streaming equivalence | ✅ VERIFIED | In-memory vs chunked streaming pipeline produces exact identical features, splits, and predictions (`tests/data/test_streaming_pipeline_equivalence.py`) |
 
 ## Research decisions status
 
@@ -73,7 +79,9 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 ## Explicitly not claimed
 
 - No claims of universal performance or production readiness across all three benchmark domains.
-- No claims that empirical findings on a single capture day generalize universally without multi-day and cross-dataset confirmation.
+- No claims that RQ2 (LSTM sequence modeling) or RQ3 (RF+LSTM score fusion) have been empirically demonstrated on full multi-file CIC-IDS2017 or UNSW-NB15 (experiments pending).
+- No claims that sequence models capture true physical packet arrival timelines; sequence ordering represents capture flow arrival order within sample partitions.
+- No claims of three-seed empirical averaging; full multi-file experiments reflect single-seed (seed=42) execution.
 - No final threshold frozen (D-003 remains open; reporting uses neutral 0.5 baseline).
 - Auxiliary event list `UNSW-NB15_LIST_EVENTS.csv` is absent (`DATA_NOT_AVAILABLE`); modeling relies solely on the two verified train/test partitions.
 - `CLAIMS_REGISTRY.md` records only scoped, traceable empirical claims directly supported by committed `results/` artifacts.
