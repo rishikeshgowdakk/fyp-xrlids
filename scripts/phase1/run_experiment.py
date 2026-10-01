@@ -238,27 +238,49 @@ def run_experiment_pipeline(
 
     # 5. Preprocessing (Fitted on TRAIN ONLY)
     print("\n[4/10] Fitting preprocessing on TRAIN ONLY (scientific isolation)...")
-    preprocessor = Preprocessor(features=feature_names, dataset=dataset_key).fit(train_df)
+    preproc_file = out_dir / "preprocessor.joblib"
+    if preproc_file.exists():
+        print(f"       Loading existing preprocessor from {preproc_file}...")
+        preprocessor = Preprocessor.load(out_dir)
+    else:
+        preprocessor = Preprocessor(features=feature_names, dataset=dataset_key).fit(train_df)
     X_train = preprocessor.transform(train_df)
     X_val = preprocessor.transform(val_df)
     X_test = preprocessor.transform(test_df)
 
     # 6. Baseline Ladder Execution
     print("\n[5/10] Training Baseline Ladder (Majority Class, Logistic Regression, Decision Tree)...")
-    maj = MajorityClassDetector().fit(X_train, y_train)
+    maj_file = out_dir / "majority_class.joblib"
+    if maj_file.exists():
+        maj = MajorityClassDetector.load(maj_file)
+    else:
+        maj = MajorityClassDetector().fit(X_train, y_train)
     maj_test = maj.predict_proba(X_test)
 
-    lr = LogisticRegressionDetector(seed=seed).fit(X_train, y_train)
+    lr_file = out_dir / "logistic_regression.joblib"
+    if lr_file.exists():
+        lr = LogisticRegressionDetector.load(lr_file)
+    else:
+        lr = LogisticRegressionDetector(seed=seed).fit(X_train, y_train)
     lr_val = lr.predict_proba(X_val)
     lr_test = lr.predict_proba(X_test)
 
-    dt = DecisionTreeDetector(seed=seed).fit(X_train, y_train)
+    dt_file = out_dir / "decision_tree.joblib"
+    if dt_file.exists():
+        dt = DecisionTreeDetector.load(dt_file)
+    else:
+        dt = DecisionTreeDetector(seed=seed).fit(X_train, y_train)
     dt_val = dt.predict_proba(X_val)
     dt_test = dt.predict_proba(X_test)
 
     print("\n[6/10] Training Random Forest detector...")
-    rf_params = dict(models_cfg.get("random_forest", {}))
-    rf = RandomForestDetector(params=rf_params, feature_names=feature_names).fit(X_train, y_train)
+    rf_file = out_dir / "random_forest.joblib"
+    if rf_file.exists():
+        print(f"       Loading existing reference Random Forest from {rf_file}...")
+        rf = RandomForestDetector.load(out_dir)
+    else:
+        rf_params = dict(models_cfg.get("random_forest", {}))
+        rf = RandomForestDetector(params=rf_params, feature_names=feature_names).fit(X_train, y_train)
     rf_val = pd.Series(rf.predict_proba(X_val), index=X_val.index, name="rf_score")
     rf_test = pd.Series(rf.predict_proba(X_test), index=X_test.index, name="rf_score")
 
@@ -373,6 +395,9 @@ def run_experiment_pipeline(
         statistical_comparisons.append(
             paired_model_comparison(yt_alg, fusion_test_series.to_numpy(), aligned_test_rf.to_numpy(), model_a_name="Fusion", model_b_name="RF", seed=seed)
         )
+        statistical_comparisons.append(
+            paired_model_comparison(yt_alg, fusion_test_series.to_numpy(), aligned_test_lstm.to_numpy(), model_a_name="Fusion", model_b_name="LSTM", seed=seed)
+        )
 
     # 9. Per-Attack-Family Evaluation (Task 10)
     print("\n[9/10] Computing per-attack-family metrics and failure analysis...")
@@ -387,6 +412,8 @@ def run_experiment_pipeline(
     if len(lstm_test) > 0 and fusion_test_series is not None:
         error_analysis["lstm"] = compute_error_analysis(y_test_seq, lstm_test, threshold=0.5, provenance_df=prov_test.iloc[lstm_test.index].reset_index(drop=True))
         error_analysis["fusion"] = compute_error_analysis(y_test_aligned, fusion_test_series, threshold=0.5, provenance_df=prov_test.iloc[aligned_test_rf.index].reset_index(drop=True))
+        error_analysis["per_family_lstm"] = compute_per_family_metrics(y_test_seq, lstm_test, test_families.iloc[lstm_test.index], threshold=0.5)
+        error_analysis["per_family_fusion"] = compute_per_family_metrics(y_test_aligned, fusion_test_series, test_families.iloc[aligned_test_rf.index], threshold=0.5)
         error_analysis["model_disagreements"] = analyze_model_disagreements(
             y_test_aligned, aligned_test_rf, aligned_test_lstm, fusion_score=fusion_test_series, threshold=0.5
         )
@@ -394,7 +421,7 @@ def run_experiment_pipeline(
     # Calibration & Thresholding
     cal_rf = calibration_report(y_val, rf_val).to_dict()
     cal_lstm = calibration_report(y_val_seq, lstm_val).to_dict() if len(lstm_val) else None
-    cal_fusion = None
+    cal_fusion = calibration_report(y_val_aligned, (alpha * aligned_val_rf + (1.0 - alpha) * aligned_val_lstm)).to_dict() if fusion_test_series is not None else None
 
     test_calibration: dict[str, Any] = {}
     try:
@@ -411,7 +438,12 @@ def run_experiment_pipeline(
 
     # 10. TreeSHAP Feature Attributions (Task 21)
     shap_summary = None
-    if not skip_shap and shap_cfg.get("enabled", True):
+    shap_file = out_dir / "shap_summary.json"
+    if shap_file.exists() and not skip_shap:
+        print("\n[10/10] Loading existing TreeSHAP explainability...")
+        shap_summary = json.loads(shap_file.read_text(encoding="utf-8"))
+        print(f"        SHAP top feature: {shap_summary['global_importance'][0]['feature']} (mean |SHAP|={shap_summary['global_importance'][0]['mean_abs_shap']:.4f})")
+    elif not skip_shap and shap_cfg.get("enabled", True):
         print("\n[10/10] Computing TreeSHAP explainability...")
         try:
             shap_summary = compute_rf_shap_explanations(

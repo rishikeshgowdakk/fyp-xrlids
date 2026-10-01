@@ -147,6 +147,7 @@ def build_sequences(
     stride: int = 1,
     label_rule: str = "last",
     groups: pd.Series | np.ndarray | None = None,
+    session_column: pd.Series | np.ndarray | None = None,
 ) -> SequenceSet:
     """Build sequences inside a single split without materializing (N, T, F) in memory.
 
@@ -156,9 +157,11 @@ def build_sequences(
         ``majority`` - majority vote over the window
 
     Because this function only ever sees one split's rows, no window can cross a split
-    boundary. If ``groups`` is supplied (e.g. session / IP IDs), sequences that cross group
-    boundaries are discarded.
+    boundary. If ``groups`` (or ``session_column``) is supplied (e.g. session / IP IDs / file provenance),
+    sequences that cross group boundaries are discarded.
     """
+    if groups is None and session_column is not None:
+        groups = session_column
     if seq_len < 1:
         raise SequenceError("seq_len must be >= 1")
     if len(features) != len(labels):
@@ -410,8 +413,11 @@ class LSTMDetector:
                     epochs_without_improvement += 1
 
             self.history.append({"epoch": epoch, "train_loss": epoch_loss, "val_loss": val_loss})
+            logger.info("Epoch %d/%d: train_loss=%.5f, val_loss=%.5f", epoch + 1, self.params["epochs"], epoch_loss, val_loss)
+            print(f"       Epoch {epoch + 1}/{self.params['epochs']}: train_loss={epoch_loss:.5f}, val_loss={val_loss:.5f} (best: {self.best_val_loss:.5f} at ep {self.best_epoch + 1})")
             if epochs_without_improvement >= patience:
                 logger.info("LSTM early stopping at epoch %d (best epoch %d)", epoch, self.best_epoch)
+                print(f"       LSTM early stopping triggered at epoch {epoch + 1} (best epoch {self.best_epoch + 1})")
                 break
 
         net.load_state_dict(best_state)
@@ -487,3 +493,26 @@ class LSTMDetector:
             path,
         )
         return path
+
+    @classmethod
+    def load(cls, path_or_dir: str | Path) -> "LSTMDetector":
+        torch = _torch()
+        path = Path(path_or_dir)
+        if path.is_dir():
+            path = path / "lstm.pt"
+        if not path.is_file():
+            raise FileNotFoundError(f"LSTM model checkpoint not found at {path}")
+        data = torch.load(path, map_location="cpu", weights_only=False)
+        detector = cls(
+            params=data.get("params", {}),
+            feature_names=data.get("feature_names", []),
+            seq_len=data.get("seq_len", 5),
+            label_rule=data.get("label_rule", "last"),
+            seed=data.get("seed", 42),
+        )
+        if data.get("state_dict") is not None:
+            n_features = len(detector.feature_names)
+            detector.model = detector._build(n_features)
+            detector.model.load_state_dict(data["state_dict"])
+            detector.model.eval()
+        return detector
