@@ -1,0 +1,16 @@
+family,is_attack,support,correct,false_positives,false_negatives,detection_rate,error_rate
+BENIGN,False,291045,285094,5951,0,0.979553,0.020447
+DoS Hulk,True,33074,32996,0,78,0.997642,0.002358
+DDoS,True,25347,25271,0,76,0.997002,0.002998
+DoS GoldenEye,True,2037,1959,0,78,0.961708,0.038292
+DoS Slowhttptest,True,1020,1004,0,16,0.984314,0.015686
+DoS slowloris,True,901,867,0,34,0.962264,0.037736
+FTP-Patator,True,897,894,0,3,0.996656,0.003344
+SSH-Patator,True,648,638,0,10,0.984568,0.015432
+PortScan,True,320,317,0,3,0.990625,0.009375
+Web Attack � Brute Force,True,258,41,0,217,0.158915,0.841085
+Bot,True,196,188,0,8,0.959184,0.040816
+Web Attack � XSS,True,108,3,0,105,0.027778,0.972222
+Infiltration,True,8,0,0,8,0.0,1.0
+Heartbleed,True,3,2,0,1,0.666667,0.333333
+Web Attack � Sql Injection,True,3,0,0,3,0.0,1.0

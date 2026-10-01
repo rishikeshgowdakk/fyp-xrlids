@@ -1,0 +1,592 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P1-CIC2017-R10-001",
+    "git_commit": "40a0c58d3f3fef5301ea808750cf56afb3c80f4c",
+    "dataset_sha256": "6ff1580f5f81c0ae28a26f7631721018577f5f7c5e0feac28b795fcfe7b411ee",
+    "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+    "seed": 42,
+    "created_at": "2026-10-01T22:11:32.669511+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "40a0c58d3f3fef5301ea808750cf56afb3c80f4c",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {
+      "config_hash": "677eb615db9a22f7042e7d496eea52877ea95927b92a2574326807a1ec35f862"
+    }
+  },
+  "experiment_id": "EXP-P1-CIC2017-R10-001",
+  "research_question": "RQ1_RQ2_RQ3",
+  "hypothesis": "Flow-level behavioral features separate benign and malicious traffic on CIC-IDS2017; supervised LSTM and RF+LSTM fusion provide complementary signals without test leakage.\n",
+  "dataset": "cicids2017",
+  "dataset_sha256": "6ff1580f5f81c0ae28a26f7631721018577f5f7c5e0feac28b795fcfe7b411ee",
+  "dataset_version": "1.0.0",
+  "input_files": [
+    "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+    "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+    "Friday-WorkingHours-Morning.pcap_ISCX.csv",
+    "Monday-WorkingHours.pcap_ISCX.csv",
+    "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+    "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+    "Tuesday-WorkingHours.pcap_ISCX.csv",
+    "Wednesday-workingHours.pcap_ISCX.csv"
+  ],
+  "rows_total": 1779322,
+  "rows_train": 1067593,
+  "rows_validation": 355864,
+  "rows_test": 355865,
+  "feature_contract": "R10",
+  "feature_list": [
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean",
+    "packet_length_std",
+    "syn_count",
+    "ack_count",
+    "rst_count",
+    "fin_count",
+    "syn_ack_ratio"
+  ],
+  "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+  "preprocessing": {
+    "preprocessor_version": "1.0.0",
+    "dataset": "cicids2017",
+    "feature_list": [
+      "flow_duration_ms",
+      "flow_packets_per_s",
+      "flow_bytes_per_s",
+      "packet_length_mean",
+      "packet_length_std",
+      "syn_count",
+      "ack_count",
+      "rst_count",
+      "fin_count",
+      "syn_ack_ratio"
+    ],
+    "n_features": 10,
+    "feature_order": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "scaler_type": "StandardScaler",
+    "missing_policy": "median_train",
+    "n_train_rows": 1067593,
+    "fitted_at": "2026-10-01T22:02:47.655327+00:00",
+    "git_commit": "40a0c58d3f3fef5301ea808750cf56afb3c80f4c",
+    "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+    "scaler_params": {
+      "mean": [
+        23410.770426815692,
+        2222.8213411223287,
+        186470.98976291151,
+        259.66442147222557,
+        461.4388065957597,
+        0.035367410614344605,
+        0.2149779925495952,
+        0.00037467461851098686,
+        0.039366125480403115,
+        0.035367410614344605
+      ],
+      "scale": [
+        39921.447089271926,
+        28736.557001882957,
+        4813151.34753279,
+        354.5439209091218,
+        747.0427199067539,
+        0.18470667795394125,
+        0.4108070779197231,
+        0.019352887057006003,
+        0.19446447913453058,
+        0.18470667795394125
+      ],
+      "var": [
+        1593721937.7015378,
+        825789708.3224684,
+        23166425894256.715,
+        125701.39185361365,
+        558072.8253656807,
+        0.03411655688078096,
+        0.16876245526894143,
+        0.00037453423744123046,
+        0.037816433645064276,
+        0.03411655688078096
+      ]
+    },
+    "imputation_medians": {
+      "flow_duration_ms": 261.87200927734375,
+      "flow_packets_per_s": 21.33492660522461,
+      "flow_bytes_per_s": 1816.787841796875,
+      "packet_length_mean": 81.80000305175781,
+      "packet_length_std": 63.50852966308594,
+      "syn_count": 0.0,
+      "ack_count": 0.0,
+      "rst_count": 0.0,
+      "fin_count": 0.0,
+      "syn_ack_ratio": 0.0
+    },
+    "preprocessor_hash": "bb2eff8f8befce052e31820953feadf8439db621a84b9e173e10b4b9594d4850"
+  },
+  "split_id": "17ed21c579d06350a2a6093f545a5193c328f04b9acab39d918f0019bd002c93",
+  "model": {
+    "model_type": "RandomForest",
+    "params": {
+      "n_estimators": 100,
+      "max_depth": 16,
+      "min_samples_leaf": 2,
+      "class_weight": "balanced_subsample",
+      "random_state": 42,
+      "n_jobs": 4
+    },
+    "n_features": 10
+  },
+  "hyperparameters": {
+    "rf": {
+      "n_estimators": 100,
+      "max_depth": 16,
+      "min_samples_leaf": 2,
+      "class_weight": "balanced_subsample",
+      "random_state": 42,
+      "n_jobs": -1
+    },
+    "split": {
+      "methodology": "stratified_random",
+      "duplicate_policy": "deduplicate_features",
+      "duplicate_conflict_policy": "reject_conflicts",
+      "train": 0.6,
+      "validation": 0.2,
+      "test": 0.2,
+      "seed": 42,
+      "seeds": [
+        42,
+        123,
+        456
+      ],
+      "leakage_audit_required": true,
+      "fail_on_leakage": true
+    },
+    "duplicate_policy": "deduplicate_features"
+  },
+  "random_seed": 42,
+  "threshold": 0.5,
+  "threshold_decision_id": "D-003",
+  "metrics": {
+    "native": {
+      "majority": {
+        "threshold": 0.5,
+        "positive_class": 1,
+        "score_definition": "P(class=1) or a comparable continuous detector score",
+        "confusion": {
+          "tn": 291045,
+          "fp": 0,
+          "fn": 64820,
+          "tp": 0
+        },
+        "population": 355865,
+        "positive_support": 64820,
+        "negative_support": 291045,
+        "accuracy": 0.8178522754415298,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "macro_f1": 0.44990029524972563,
+        "weighted_f1": 0.7359039603836084,
+        "balanced_accuracy": 0.5,
+        "specificity": 1.0,
+        "fpr": 0.0,
+        "fnr": 1.0,
+        "per_class": {
+          "benign": {
+            "precision": 0.8178522754415298,
+            "recall": 1.0,
+            "f1": 0.8998005904994513,
+            "support": 291045
+          },
+          "attack": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 64820
+          }
+        },
+        "roc_auc": 0.5,
+        "pr_auc": 0.1821477245584702,
+        "reason": null,
+        "family": "prior_baseline"
+      },
+      "logistic_regression": {
+        "threshold": 0.5,
+        "positive_class": 1,
+        "score_definition": "P(class=1) or a comparable continuous detector score",
+        "confusion": {
+          "tn": 257305,
+          "fp": 33740,
+          "fn": 4772,
+          "tp": 60048
+        },
+        "population": 355865,
+        "positive_support": 64820,
+        "negative_support": 291045,
+        "accuracy": 0.8917791859272477,
+        "precision": 0.6402524843263531,
+        "recall": 0.9263807466831225,
+        "f1": 0.7571875315242611,
+        "macro_f1": 0.8437804695996203,
+        "weighted_f1": 0.8988279944084611,
+        "balanced_accuracy": 0.905226828185314,
+        "specificity": 0.8840729096875054,
+        "fpr": 0.11592709031249464,
+        "fnr": 0.0736192533168775,
+        "per_class": {
+          "benign": {
+            "precision": 0.9817916108624565,
+            "recall": 0.8840729096875054,
+            "f1": 0.9303734076749794,
+            "support": 291045
+          },
+          "attack": {
+            "precision": 0.6402524843263531,
+            "recall": 0.9263807466831225,
+            "f1": 0.7571875315242611,
+            "support": 64820
+          }
+        },
+        "roc_auc": 0.9292170080778352,
+        "pr_auc": 0.8238023061194657,
+        "reason": null,
+        "family": "linear_baseline"
+      },
+      "decision_tree": {
+        "threshold": 0.5,
+        "positive_class": 1,
+        "score_definition": "P(class=1) or a comparable continuous detector score",
+        "confusion": {
+          "tn": 282911,
+          "fp": 8134,
+          "fn": 969,
+          "tp": 63851
+        },
+        "population": 355865,
+        "positive_support": 64820,
+        "negative_support": 291045,
+        "accuracy": 0.9744200750284518,
+        "precision": 0.8870042369938181,
+        "recall": 0.9850509102128973,
+        "f1": 0.9334600343554694,
+        "macro_f1": 0.9588133323927628,
+        "weighted_f1": 0.9749305393349649,
+        "balanced_accuracy": 0.9785516709837185,
+        "specificity": 0.9720524317545397,
+        "fpr": 0.027947568245460325,
+        "fnr": 0.014949089787102746,
+        "per_class": {
+          "benign": {
+            "precision": 0.9965865858813583,
+            "recall": 0.9720524317545397,
+            "f1": 0.9841666304300561,
+            "support": 291045
+          },
+          "attack": {
+            "precision": 0.8870042369938181,
+            "recall": 0.9850509102128973,
+            "f1": 0.9334600343554694,
+            "support": 64820
+          }
+        },
+        "roc_auc": 0.9945475247513365,
+        "pr_auc": 0.9674219291396664,
+        "reason": null,
+        "family": "tree_baseline"
+      },
+      "random_forest": {
+        "threshold": 0.5,
+        "positive_class": 1,
+        "score_definition": "P(class=1) or a comparable continuous detector score",
+        "confusion": {
+          "tn": 285094,
+          "fp": 5951,
+          "fn": 640,
+          "tp": 64180
+        },
+        "population": 355865,
+        "positive_support": 64820,
+        "negative_support": 291045,
+        "accuracy": 0.9814789316173268,
+        "precision": 0.9151445152642911,
+        "recall": 0.9901265041653811,
+        "f1": 0.9511600506850635,
+        "macro_f1": 0.9698663984594449,
+        "weighted_f1": 0.9817581088700201,
+        "balanced_accuracy": 0.9848397471264123,
+        "specificity": 0.9795529900874436,
+        "fpr": 0.020447009912556477,
+        "fnr": 0.009873495834618945,
+        "per_class": {
+          "benign": {
+            "precision": 0.9977601545493361,
+            "recall": 0.9795529900874436,
+            "f1": 0.9885727462338262,
+            "support": 291045
+          },
+          "attack": {
+            "precision": 0.9151445152642911,
+            "recall": 0.9901265041653811,
+            "f1": 0.9511600506850635,
+            "support": 64820
+          }
+        },
+        "roc_auc": 0.996776776970498,
+        "pr_auc": 0.9824110785700803,
+        "reason": null,
+        "family": "ensemble"
+      }
+    },
+    "aligned": {
+      "population_size": 355865,
+      "models": {
+        "majority": {
+          "threshold": 0.5,
+          "positive_class": 1,
+          "score_definition": "P(class=1) or a comparable continuous detector score",
+          "confusion": {
+            "tn": 291045,
+            "fp": 0,
+            "fn": 64820,
+            "tp": 0
+          },
+          "population": 355865,
+          "positive_support": 64820,
+          "negative_support": 291045,
+          "accuracy": 0.8178522754415298,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "macro_f1": 0.44990029524972563,
+          "weighted_f1": 0.7359039603836084,
+          "balanced_accuracy": 0.5,
+          "specificity": 1.0,
+          "fpr": 0.0,
+          "fnr": 1.0,
+          "per_class": {
+            "benign": {
+              "precision": 0.8178522754415298,
+              "recall": 1.0,
+              "f1": 0.8998005904994513,
+              "support": 291045
+            },
+            "attack": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 64820
+            }
+          },
+          "roc_auc": 0.5,
+          "pr_auc": 0.1821477245584702,
+          "reason": null,
+          "family": "prior_baseline"
+        },
+        "logistic_regression": {
+          "threshold": 0.5,
+          "positive_class": 1,
+          "score_definition": "P(class=1) or a comparable continuous detector score",
+          "confusion": {
+            "tn": 257305,
+            "fp": 33740,
+            "fn": 4772,
+            "tp": 60048
+          },
+          "population": 355865,
+          "positive_support": 64820,
+          "negative_support": 291045,
+          "accuracy": 0.8917791859272477,
+          "precision": 0.6402524843263531,
+          "recall": 0.9263807466831225,
+          "f1": 0.7571875315242611,
+          "macro_f1": 0.8437804695996203,
+          "weighted_f1": 0.8988279944084611,
+          "balanced_accuracy": 0.905226828185314,
+          "specificity": 0.8840729096875054,
+          "fpr": 0.11592709031249464,
+          "fnr": 0.0736192533168775,
+          "per_class": {
+            "benign": {
+              "precision": 0.9817916108624565,
+              "recall": 0.8840729096875054,
+              "f1": 0.9303734076749794,
+              "support": 291045
+            },
+            "attack": {
+              "precision": 0.6402524843263531,
+              "recall": 0.9263807466831225,
+              "f1": 0.7571875315242611,
+              "support": 64820
+            }
+          },
+          "roc_auc": 0.9292170080778352,
+          "pr_auc": 0.8238023061194657,
+          "reason": null,
+          "family": "linear_baseline"
+        },
+        "decision_tree": {
+          "threshold": 0.5,
+          "positive_class": 1,
+          "score_definition": "P(class=1) or a comparable continuous detector score",
+          "confusion": {
+            "tn": 282911,
+            "fp": 8134,
+            "fn": 969,
+            "tp": 63851
+          },
+          "population": 355865,
+          "positive_support": 64820,
+          "negative_support": 291045,
+          "accuracy": 0.9744200750284518,
+          "precision": 0.8870042369938181,
+          "recall": 0.9850509102128973,
+          "f1": 0.9334600343554694,
+          "macro_f1": 0.9588133323927628,
+          "weighted_f1": 0.9749305393349649,
+          "balanced_accuracy": 0.9785516709837185,
+          "specificity": 0.9720524317545397,
+          "fpr": 0.027947568245460325,
+          "fnr": 0.014949089787102746,
+          "per_class": {
+            "benign": {
+              "precision": 0.9965865858813583,
+              "recall": 0.9720524317545397,
+              "f1": 0.9841666304300561,
+              "support": 291045
+            },
+            "attack": {
+              "precision": 0.8870042369938181,
+              "recall": 0.9850509102128973,
+              "f1": 0.9334600343554694,
+              "support": 64820
+            }
+          },
+          "roc_auc": 0.9945475247513365,
+          "pr_auc": 0.9674219291396664,
+          "reason": null,
+          "family": "tree_baseline"
+        },
+        "random_forest": {
+          "threshold": 0.5,
+          "positive_class": 1,
+          "score_definition": "P(class=1) or a comparable continuous detector score",
+          "confusion": {
+            "tn": 285094,
+            "fp": 5951,
+            "fn": 640,
+            "tp": 64180
+          },
+          "population": 355865,
+          "positive_support": 64820,
+          "negative_support": 291045,
+          "accuracy": 0.9814789316173268,
+          "precision": 0.9151445152642911,
+          "recall": 0.9901265041653811,
+          "f1": 0.9511600506850635,
+          "macro_f1": 0.9698663984594449,
+          "weighted_f1": 0.9817581088700201,
+          "balanced_accuracy": 0.9848397471264123,
+          "specificity": 0.9795529900874436,
+          "fpr": 0.020447009912556477,
+          "fnr": 0.009873495834618945,
+          "per_class": {
+            "benign": {
+              "precision": 0.9977601545493361,
+              "recall": 0.9795529900874436,
+              "f1": 0.9885727462338262,
+              "support": 291045
+            },
+            "attack": {
+              "precision": 0.9151445152642911,
+              "recall": 0.9901265041653811,
+              "f1": 0.9511600506850635,
+              "support": 64820
+            }
+          },
+          "roc_auc": 0.996776776970498,
+          "pr_auc": 0.9824110785700803,
+          "reason": null,
+          "family": "ensemble"
+        }
+      }
+    }
+  },
+  "confusion_matrix": {
+    "tn": 285094,
+    "fp": 5951,
+    "fn": 640,
+    "tp": 64180
+  },
+  "training_duration_s": 613.3225166797638,
+  "hardware": "CPU (12 cores)",
+  "resource_profile": {
+    "peak_rss_mib": 1692.64,
+    "start_rss_mib": 433.41,
+    "end_rss_mib": 1692.64,
+    "rss_delta_mib": 1259.23,
+    "duration_s": 610.9345,
+    "cpu_count": 12,
+    "disk_bytes": 0,
+    "disk_mib": 0.0
+  },
+  "status": "EMPIRICALLY_OBSERVED",
+  "result_interpretation": "Multi-file empirical research evaluation on full verified dataset population.",
+  "limitations": [
+    "Threshold objective D-003 remains open; reporting uses neutral threshold 0.5.",
+    "Feature contract candidate evaluation.",
+    "Duplicate policy applied: deduplicate_features."
+  ],
+  "artifacts": {
+    "population_manifest": "results/experiments/EXP-P1-CIC2017-R10-001/experiment_population.json",
+    "predictions": "results/experiments/EXP-P1-CIC2017-R10-001/predictions_test.csv",
+    "per_family_metrics": "results/experiments/EXP-P1-CIC2017-R10-001/per_family_metrics.csv",
+    "card": "results/experiments/EXP-P1-CIC2017-R10-001/experiment_card.md"
+  },
+  "git_commit": "40a0c58d3f3fef5301ea808750cf56afb3c80f4c",
+  "software_environment": {
+    "python_version": "3.14.4",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "machine": "x86_64",
+    "processor_count": null,
+    "cuda_available": false,
+    "cuda_version": null,
+    "git_commit": "40a0c58d3f3fef5301ea808750cf56afb3c80f4c",
+    "packages": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.6",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1",
+      "torch": "2.14.0+cpu",
+      "shap": "0.52.0",
+      "matplotlib": "3.11.2",
+      "PyYAML": "6.0.3"
+    }
+  }
+}
