@@ -20,15 +20,15 @@ from xrlids.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
 
-# Historical starting configuration (build spec section 14). The values are a starting
-# point, not a result.
+import os
+
 DEFAULT_RF_PARAMS: dict[str, Any] = {
     "n_estimators": 200,
     "max_depth": 16,
     "min_samples_leaf": 2,
     "class_weight": "balanced_subsample",
     "random_state": 42,
-    "n_jobs": -1,
+    "n_jobs": min(4, os.cpu_count() or 1),
 }
 
 
@@ -48,6 +48,13 @@ class RandomForestDetector:
     def __post_init__(self) -> None:
         merged = dict(DEFAULT_RF_PARAMS)
         merged.update(self.params or {})
+        # If user explicitly configured -1 or 0, cap at reasonable parallelism (e.g. min(4, os.cpu_count()))
+        # to avoid OOM from excessive worker process forking on memory-constrained systems
+        configured_jobs = merged.get("n_jobs", -1)
+        if configured_jobs in (-1, 0):
+            clamped = min(4, os.cpu_count() or 1)
+            logger.info("RandomForest n_jobs=%d clamped to %d for resource safety", configured_jobs, clamped)
+            merged["n_jobs"] = clamped
         self.params = merged
 
     def fit(self, X: pd.DataFrame, y: pd.Series) -> "RandomForestDetector":
@@ -58,10 +65,12 @@ class RandomForestDetector:
         if y.nunique() < 2:
             raise RandomForestError("training labels contain a single class; cannot fit a detector")
         self.feature_names = list(X.columns)
+        n_workers = self.params.get("n_jobs", 1)
+        logger.info("Fitting RandomForest with n_jobs=%d workers", n_workers)
         self.model = RandomForestClassifier(**self.params)
         self.model.fit(X.to_numpy(dtype=float), y.to_numpy(dtype=int))
         self.n_train_rows = int(len(X))
-        logger.info("RF fitted rows=%d features=%d", self.n_train_rows, len(self.feature_names))
+        logger.info("RF fitted rows=%d features=%d n_jobs=%d", self.n_train_rows, len(self.feature_names), n_workers)
         return self
 
     def _check(self) -> RandomForestClassifier:
