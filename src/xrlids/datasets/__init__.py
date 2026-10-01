@@ -7,6 +7,7 @@ from xrlids.datasets.loading import (
     dataset_availability,
     load_manifest,
     verify_files,
+    verify_dataset_file,
 )
 
 __all__ = [
@@ -15,6 +16,7 @@ __all__ = [
     "summarize_audits",
     "load_manifest",
     "verify_files",
+    "verify_dataset_file",
     "dataset_availability",
     "DatasetIntegrityError",
     "DatasetNotAvailableError",

@@ -107,13 +107,17 @@ def cmd_smoke(args: argparse.Namespace) -> int:
     out.write_text(json.dumps(result.to_dict(), indent=2, default=str), encoding="utf-8")
     print(f"SMOKE run complete -> {out}")
     print(f"status: {result.status}")
-    print("test metrics (synthetic fixture - NOT evidence):")
-    print(json.dumps(result.payload["test_metrics"], indent=2, default=str))
+    if "test_metrics" in result.payload:
+        print("test metrics (synthetic fixture - NOT evidence):")
+        print(json.dumps(result.payload["test_metrics"], indent=2, default=str))
+    else:
+        reason = result.payload.get("note") or result.payload.get("reason") or "execution blocked"
+        print(f"blocked reason: {reason}")
     if result.warnings:
         print("warnings:")
         for w in result.warnings:
             print(f"  - {w}")
-    return 0
+    return 0 if result.status == "SMOKE_ONLY" else 2
 
 
 def build_parser() -> argparse.ArgumentParser:

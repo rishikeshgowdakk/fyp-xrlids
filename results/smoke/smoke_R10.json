@@ -425,8 +425,8 @@
     "scaler_type": "StandardScaler",
     "missing_policy": "median_train",
     "n_train_rows": 720,
-    "fitted_at": "2026-10-01T20:59:13.846838+00:00",
-    "git_commit": "e0dc62b09fb90c31c4d88083eb4206c0841e4c4b",
+    "fitted_at": "2026-10-01T21:00:04.682361+00:00",
+    "git_commit": "6d4a9ddf9a84ff32663c307041b8c3f835da309a",
     "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
     "scaler_params": {
       "mean": [
@@ -3193,7 +3193,7 @@
   "threshold_used_for_reporting": 0.5,
   "threshold_note": "0.5 is a neutral reporting point only. The operating objective is D-003 and remains OPEN; no threshold has been frozen.",
   "saved_artifacts": {},
-  "training_duration_s": 4.161605358123779,
+  "training_duration_s": 3.9880313873291016,
   "data_provenance": {
     "source": "synthetic_fixture"
   },

@@ -100,11 +100,16 @@ def dataset_availability(manifest: dict[str, Any], key: str) -> dict[str, Any]:
     entry = get_dataset_entry(manifest, key)
     files = entry.get("files") or []
     present = [f for f in files if Path(f.get("path", "")).is_file()]
+    missing = [f for f in files if not Path(f.get("path", "")).is_file()]
+    existing_file_names = [f.get("filename") or Path(f.get("path", "")).name for f in present]
+    missing_file_names = [f.get("filename") or Path(f.get("path", "")).name for f in missing]
     availability = {
         "dataset": key,
         "declared_files": len(files),
         "present_files": len(present),
         "status": "DATA_NOT_AVAILABLE" if not present else "available",
+        "existing_files": existing_file_names,
+        "missing_files": missing_file_names,
     }
     if not present:
         availability["reason"] = (
@@ -112,3 +117,99 @@ def dataset_availability(manifest: dict[str, Any], key: str) -> dict[str, Any]:
             f"{MANIFEST_PATH} (see scripts/phase1/prepare_dataset.py)."
         )
     return availability
+
+
+def verify_dataset_file(
+    file_path: str | Path,
+    dataset_key: str,
+    manifest: dict[str, Any] | None = None,
+    *,
+    require_verified: bool = True,
+) -> dict[str, Any]:
+    """Verify that a specific dataset file exists, is in the manifest, and matches its SHA-256.
+
+    Enforces the integrity gate before training:
+    1. resolve the configured dataset file,
+    2. verify that it is present on disk,
+    3. verify that it is registered in the manifest,
+    4. verify its SHA-256,
+    5. refuse execution on mismatch,
+    6. refuse execution if checksum verification is required but unavailable.
+    """
+    path = Path(file_path)
+    if manifest is None:
+        manifest = load_manifest()
+
+    result: dict[str, Any] = {
+        "dataset": dataset_key,
+        "file": path.name,
+        "path": str(path),
+        "require_verified": require_verified,
+        "exists": path.is_file(),
+        "registered": False,
+        "expected_sha256": None,
+        "actual_sha256": None,
+        "status": "unknown",
+    }
+
+    if not path.is_file():
+        result["status"] = "missing_file"
+        if require_verified:
+            raise DatasetNotAvailableError(f"Dataset file '{path}' is not present on disk.")
+        return result
+
+    try:
+        entry = get_dataset_entry(manifest, dataset_key)
+    except KeyError:
+        result["status"] = "unregistered_dataset"
+        if require_verified:
+            raise DatasetIntegrityError(f"Dataset '{dataset_key}' is not registered in the manifest.")
+        return result
+
+    files = entry.get("files") or []
+    target_entry = None
+    for f in files:
+        f_name = f.get("filename") or Path(f.get("path", "")).name
+        if f_name == path.name:
+            target_entry = f
+            break
+        try:
+            if Path(f.get("path", "")).resolve() == path.resolve():
+                target_entry = f
+                break
+        except Exception:
+            pass
+
+    if target_entry is None:
+        result["status"] = "unregistered_file"
+        if require_verified:
+            raise DatasetIntegrityError(
+                f"File '{path.name}' is not registered in the manifest for dataset '{dataset_key}'."
+            )
+        return result
+
+    result["registered"] = True
+    expected_sha = target_entry.get("sha256")
+    result["expected_sha256"] = expected_sha
+
+    if not expected_sha:
+        result["status"] = "unverifiable"
+        if require_verified:
+            raise DatasetIntegrityError(
+                f"File '{path.name}' has no SHA-256 recorded in the manifest; verification required."
+            )
+        return result
+
+    actual_sha = sha256_file(path)
+    result["actual_sha256"] = actual_sha
+
+    if actual_sha != expected_sha:
+        result["status"] = "checksum_mismatch"
+        if require_verified:
+            raise DatasetIntegrityError(
+                f"Checksum mismatch for '{path.name}': expected {expected_sha}, got {actual_sha}."
+            )
+        return result
+
+    result["status"] = "verified"
+    return result
