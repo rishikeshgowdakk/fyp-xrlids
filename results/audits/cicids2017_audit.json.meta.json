@@ -1,0 +1,49 @@
+{
+  "experiment_id": "AUDIT-cicids2017-001",
+  "git_commit": null,
+  "dataset_sha256": "6ff1580f5f81c0ae28a26f7631721018577f5f7c5e0feac28b795fcfe7b411ee",
+  "feature_schema_hash": null,
+  "seed": null,
+  "created_at": "2026-10-01T11:05:46.588006+00:00",
+  "software_environment": {
+    "python_version": "3.14.4",
+    "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+    "machine": "x86_64",
+    "processor_count": null,
+    "cuda_available": false,
+    "cuda_version": null,
+    "git_commit": "9ebcbd2a66b48ab5e3a8f8d5669976ff91aa2992",
+    "packages": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.6",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1",
+      "torch": "2.14.0+cpu",
+      "shap": "0.52.0",
+      "matplotlib": "3.11.2",
+      "PyYAML": "6.0.3"
+    }
+  },
+  "artifact_version": "1",
+  "extra": {
+    "environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "9ebcbd2a66b48ab5e3a8f8d5669976ff91aa2992",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    }
+  }
+}

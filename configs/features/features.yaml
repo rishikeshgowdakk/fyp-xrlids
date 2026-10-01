@@ -114,25 +114,25 @@ column_maps_status: unverified_pending_audit
 column_maps:
 
   cicids2017:
-    duration_seconds:        {column: "Flow Duration", scale: 0.000001}
-    total_fwd_packets:       {column: "Total Fwd Packets"}
-    total_bwd_packets:       {column: "Total Backward Packets"}
+    duration_seconds:        {column: " Flow Duration", scale: 0.000001}
+    total_fwd_packets:       {column: " Total Fwd Packets"}
+    total_bwd_packets:       {column: " Total Backward Packets"}
     fwd_bytes:               {column: "Total Length of Fwd Packets"}
-    bwd_bytes:               {column: "Total Length of Bwd Packets"}
-    pkt_len_mean:            {column: "Packet Length Mean"}
-    pkt_len_std:             {column: "Packet Length Std"}
-    syn_flags:               {column: "SYN Flag Count"}
-    ack_flags:               {column: "ACK Flag Count"}
-    rst_flags:               {column: "RST Flag Count"}
+    bwd_bytes:               {column: " Total Length of Bwd Packets"}
+    pkt_len_mean:            {column: " Packet Length Mean"}
+    pkt_len_std:             {column: " Packet Length Std"}
+    syn_flags:               {column: " SYN Flag Count"}
+    ack_flags:               {column: " ACK Flag Count"}
+    rst_flags:               {column: " RST Flag Count"}
     fin_flags:               {column: "FIN Flag Count"}
-    flow_iat_mean_s:         {column: "Flow IAT Mean", scale: 0.000001}
-    flow_iat_std_s:          {column: "Flow IAT Std", scale: 0.000001}
-    fwd_pkt_len_mean:        {column: "Fwd Packet Length Mean"}
-    bwd_pkt_len_mean:        {column: "Bwd Packet Length Mean"}
+    flow_iat_mean_s:         {column: " Flow IAT Mean", scale: 0.000001}
+    flow_iat_std_s:          {column: " Flow IAT Std", scale: 0.000001}
+    fwd_pkt_len_mean:        {column: " Fwd Packet Length Mean"}
+    bwd_pkt_len_mean:        {column: " Bwd Packet Length Mean"}
     active_mean_s:           {column: "Active Mean", scale: 0.000001}
     idle_mean_s:             {column: "Idle Mean", scale: 0.000001}
-    subflow_fwd_bytes:       {column: "Subflow Fwd Bytes"}
-    subflow_bwd_bytes:       {column: "Subflow Bwd Bytes"}
+    subflow_fwd_bytes:       {column: " Subflow Fwd Bytes"}
+    subflow_bwd_bytes:       {column: " Subflow Bwd Bytes"}
 
   cse_cic_ids2018:
     duration_seconds:        {column: "Flow Duration", scale: 0.000001}
@@ -157,11 +157,11 @@ column_maps:
 
   unsw_nb15:
     duration_seconds:        {column: "dur"}
-    total_fwd_packets:       {column: "Spkts"}
-    total_bwd_packets:       {column: "Dpkts"}
-    fwd_bytes:               {column: "Sbytes"}
-    bwd_bytes:               {column: "Dbytes"}
-    pkt_len_mean:            {sum: ["Sbytes", "Dbytes"], divide_by_sum: ["Spkts", "Dpkts"]}
+    total_fwd_packets:       {column: "spkts"}
+    total_bwd_packets:       {column: "dpkts"}
+    fwd_bytes:               {column: "sbytes"}
+    bwd_bytes:               {column: "dbytes"}
+    pkt_len_mean:            {sum: ["sbytes", "dbytes"], divide_by_sum: ["spkts", "dpkts"]}
     # UNSW-NB15 has no per-flag counts, no IAT, no active/idle, no subflow fields.
     # These are intentionally absent rather than guessed. See FEATURE_COMPATIBILITY.md.
 

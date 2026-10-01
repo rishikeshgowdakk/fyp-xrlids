@@ -4,9 +4,9 @@ Status: `VERIFIED` (real files checked via SHA-256 and row/column counts).
 
 | Dataset | Status | Files Found | Rows | Columns | SHA-256 (Primary) |
 | --- | --- | --- | --- | --- | --- |
-| **CIC-IDS2017** (`cicids2017`) | `DATA_NOT_AVAILABLE` | 0 | N/A | N/A | N/A |
-| **CSE-CIC-IDS2018** (`cse_cic_ids2018`) | `AVAILABLE (VERIFIED)` | 1 | N/A | N/A | `b0534c5d7d8b41e0...` |
-| **UNSW-NB15** (`unsw_nb15`) | `DATA_NOT_AVAILABLE` | 0 | N/A | N/A | N/A |
+| **CIC-IDS2017** (`cicids2017`) | `AVAILABLE (VERIFIED)` | 8 | N/A | N/A | `6ff1580f5f81c0ae...` |
+| **CSE-CIC-IDS2018** (`cse_cic_ids2018`) | `AVAILABLE (VERIFIED)` | 10 | N/A | N/A | `d96f38e7496aba83...` |
+| **UNSW-NB15** (`unsw_nb15`) | `AVAILABLE (VERIFIED)` | 2 | N/A | N/A | `734fe6642edf758f...` |
 
 ## Detailed Acquisition and Placement Status
 

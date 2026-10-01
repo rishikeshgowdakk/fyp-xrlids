@@ -33,6 +33,8 @@ normalization:
   unicode_replacements:
     "\u2013": "-"          # en dash -> hyphen
     "\u2014": "-"          # em dash -> hyphen
+    "\ufffd": "-"          # unicode replacement char -> hyphen
+    "": "-"               # mojibake byte replacement -> hyphen
     "\u2019": "'"
   # Trailing/leading punctuation seen in some exported label columns.
   strip_characters: " \t\r\n\u00a0"
@@ -62,7 +64,7 @@ attack_families:
 datasets:
 
   cicids2017:
-    label_column_candidates: ["Label", "Label "]   # audit confirms the real one
+    label_column_candidates: [" Label", "Label", "Label "]   # audit confirms the real one
     benign_labels: ["BENIGN"]
     family_map:
       "DOS HULK": DoS
@@ -101,10 +103,10 @@ datasets:
       "SSH-BRUTEFORCE": BruteForce
 
   unsw_nb15:
-    label_column_candidates: ["label", "Label"]
+    label_column_candidates: ["attack_cat", "label", "Label"]
     # UNSW-NB15 carries a numeric label plus a categorical attack_cat.
     attack_category_column: "attack_cat"
-    benign_labels: ["NORMAL", "BENIGN"]
+    benign_labels: ["NORMAL", "BENIGN", "0"]
     family_map:
       "GENERIC": Generic
       "EXPLOITS": Exploits

@@ -1,14 +1,14 @@
 [
   {
-    "dataset": "cse_cic_ids2018",
+    "dataset": "unsw_nb15",
     "status": "completed",
-    "files": 1,
-    "rows": 331125,
+    "files": 2,
+    "rows": 257673,
     "schema_status": "validated",
-    "label_status": "rejected_labels_present",
+    "label_status": "validated",
     "artifacts": [
-      "results/audits/cse_cic_ids2018_audit.json",
-      "reports/generated/audits/cse_cic_ids2018_audit.md"
+      "results/audits/unsw_nb15_audit.json",
+      "reports/generated/audits/unsw_nb15_audit.md"
     ]
   }
 ]

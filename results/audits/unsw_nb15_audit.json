@@ -1,0 +1,318 @@
+{
+  "metadata": {
+    "experiment_id": "AUDIT-unsw_nb15-001",
+    "git_commit": null,
+    "dataset_sha256": "734fe6642edf758f7c94d7d9149426b49d202fe8e7bf0bef47392489c3c0a559",
+    "feature_schema_hash": null,
+    "seed": null,
+    "created_at": "2026-10-01T11:06:10.966042+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "9ebcbd2a66b48ab5e3a8f8d5669976ff91aa2992",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {
+      "environment": {
+        "python_version": "3.14.4",
+        "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+        "machine": "x86_64",
+        "processor_count": null,
+        "cuda_available": false,
+        "cuda_version": null,
+        "git_commit": "9ebcbd2a66b48ab5e3a8f8d5669976ff91aa2992",
+        "packages": {
+          "numpy": "2.5.3",
+          "pandas": "3.0.6",
+          "scikit-learn": "1.9.1",
+          "scipy": "1.18.1",
+          "torch": "2.14.0+cpu",
+          "shap": "0.52.0",
+          "matplotlib": "3.11.2",
+          "PyYAML": "6.0.3"
+        }
+      }
+    }
+  },
+  "dataset": "unsw_nb15",
+  "schema_validation": {
+    "status": "validated",
+    "dataset": "unsw_nb15",
+    "n_files": 2,
+    "all_declared_columns_present": true,
+    "files_identical_schema": true,
+    "label_columns_found": [
+      {
+        "file": "data/raw/unsw_nb15/UNSW_NB15_testing-set.csv",
+        "label_column": "attack_cat"
+      },
+      {
+        "file": "data/raw/unsw_nb15/UNSW_NB15_training-set.csv",
+        "label_column": "attack_cat"
+      }
+    ],
+    "files": [
+      {
+        "path": "data/raw/unsw_nb15/UNSW_NB15_testing-set.csv",
+        "n_columns": 45,
+        "missing_declared_columns": [],
+        "label_column": "attack_cat"
+      },
+      {
+        "path": "data/raw/unsw_nb15/UNSW_NB15_training-set.csv",
+        "n_columns": 45,
+        "missing_declared_columns": [],
+        "label_column": "attack_cat"
+      }
+    ]
+  },
+  "per_file_audits": [
+    {
+      "dataset": "unsw_nb15",
+      "source_file": "data/raw/unsw_nb15/UNSW_NB15_testing-set.csv",
+      "rows": 82332,
+      "columns": 45,
+      "column_names": [
+        "id",
+        "dur",
+        "proto",
+        "service",
+        "state",
+        "spkts",
+        "dpkts",
+        "sbytes",
+        "dbytes",
+        "rate",
+        "sttl",
+        "dttl",
+        "sload",
+        "dload",
+        "sloss",
+        "dloss",
+        "sinpkt",
+        "dinpkt",
+        "sjit",
+        "djit",
+        "swin",
+        "stcpb",
+        "dtcpb",
+        "dwin",
+        "tcprtt",
+        "synack",
+        "ackdat",
+        "smean",
+        "dmean",
+        "trans_depth",
+        "response_body_len",
+        "ct_srv_src",
+        "ct_state_ttl",
+        "ct_dst_ltm",
+        "ct_src_dport_ltm",
+        "ct_dst_sport_ltm",
+        "ct_dst_src_ltm",
+        "is_ftp_login",
+        "ct_ftp_cmd",
+        "ct_flw_http_mthd",
+        "ct_src_ltm",
+        "ct_srv_dst",
+        "is_sm_ips_ports",
+        "attack_cat",
+        "label"
+      ],
+      "dtypes": {
+        "int64": 30,
+        "float64": 11,
+        "str": 4
+      },
+      "nan_counts": {},
+      "inf_counts": {},
+      "total_nan": 0,
+      "total_inf": 0,
+      "duplicate_rows": 0,
+      "duplicate_row_fraction": 0.0,
+      "constant_columns": [],
+      "near_constant_columns": [],
+      "identifier_or_label_columns": [
+        "id",
+        "attack_cat",
+        "label"
+      ],
+      "duration_findings": {
+        "dur": {
+          "negative": 0,
+          "zero": 950,
+          "nan": 0,
+          "min": 0.0,
+          "max": 59.999989
+        }
+      },
+      "label_audit": {
+        "dataset": "unsw_nb15",
+        "label_column": "attack_cat",
+        "rows_total": 82332,
+        "rows_accepted": 82332,
+        "rows_rejected_unknown_label": 0,
+        "benign_rows": 37000,
+        "attack_rows": 45332,
+        "distinct_raw_labels": 10,
+        "distinct_labels": {
+          "-N-O-R-M-A-L-": 37000,
+          "-G-E-N-E-R-I-C-": 18871,
+          "-E-X-P-L-O-I-T-S-": 11132,
+          "-F-U-Z-Z-E-R-S-": 6062,
+          "-D-O-S-": 4089,
+          "-R-E-C-O-N-N-A-I-S-S-A-N-C-E-": 3496,
+          "-A-N-A-L-Y-S-I-S-": 677,
+          "-B-A-C-K-D-O-O-R-": 583,
+          "-S-H-E-L-L-C-O-D-E-": 378,
+          "-W-O-R-M-S-": 44
+        }
+      },
+      "unknown_label_rejections": [],
+      "size_bytes": 15380800
+    },
+    {
+      "dataset": "unsw_nb15",
+      "source_file": "data/raw/unsw_nb15/UNSW_NB15_training-set.csv",
+      "rows": 175341,
+      "columns": 45,
+      "column_names": [
+        "id",
+        "dur",
+        "proto",
+        "service",
+        "state",
+        "spkts",
+        "dpkts",
+        "sbytes",
+        "dbytes",
+        "rate",
+        "sttl",
+        "dttl",
+        "sload",
+        "dload",
+        "sloss",
+        "dloss",
+        "sinpkt",
+        "dinpkt",
+        "sjit",
+        "djit",
+        "swin",
+        "stcpb",
+        "dtcpb",
+        "dwin",
+        "tcprtt",
+        "synack",
+        "ackdat",
+        "smean",
+        "dmean",
+        "trans_depth",
+        "response_body_len",
+        "ct_srv_src",
+        "ct_state_ttl",
+        "ct_dst_ltm",
+        "ct_src_dport_ltm",
+        "ct_dst_sport_ltm",
+        "ct_dst_src_ltm",
+        "is_ftp_login",
+        "ct_ftp_cmd",
+        "ct_flw_http_mthd",
+        "ct_src_ltm",
+        "ct_srv_dst",
+        "is_sm_ips_ports",
+        "attack_cat",
+        "label"
+      ],
+      "dtypes": {
+        "int64": 30,
+        "float64": 11,
+        "str": 4
+      },
+      "nan_counts": {},
+      "inf_counts": {},
+      "total_nan": 0,
+      "total_inf": 0,
+      "duplicate_rows": 0,
+      "duplicate_row_fraction": 0.0,
+      "constant_columns": [],
+      "near_constant_columns": [],
+      "identifier_or_label_columns": [
+        "id",
+        "attack_cat",
+        "label"
+      ],
+      "duration_findings": {
+        "dur": {
+          "negative": 0,
+          "zero": 2657,
+          "nan": 0,
+          "min": 0.0,
+          "max": 59.999989
+        }
+      },
+      "label_audit": {
+        "dataset": "unsw_nb15",
+        "label_column": "attack_cat",
+        "rows_total": 175341,
+        "rows_accepted": 175341,
+        "rows_rejected_unknown_label": 0,
+        "benign_rows": 56000,
+        "attack_rows": 119341,
+        "distinct_raw_labels": 10,
+        "distinct_labels": {
+          "-N-O-R-M-A-L-": 56000,
+          "-G-E-N-E-R-I-C-": 40000,
+          "-E-X-P-L-O-I-T-S-": 33393,
+          "-F-U-Z-Z-E-R-S-": 18184,
+          "-D-O-S-": 12264,
+          "-R-E-C-O-N-N-A-I-S-S-A-N-C-E-": 10491,
+          "-A-N-A-L-Y-S-I-S-": 2000,
+          "-B-A-C-K-D-O-O-R-": 1746,
+          "-S-H-E-L-L-C-O-D-E-": 1133,
+          "-W-O-R-M-S-": 130
+        }
+      },
+      "unknown_label_rejections": [],
+      "size_bytes": 32293018
+    }
+  ],
+  "dataset_summary": {
+    "n_files_audited": 2,
+    "datasets": [
+      "unsw_nb15"
+    ],
+    "total_rows": 257673,
+    "total_duplicate_rows": 0,
+    "schema_variation": {
+      "unsw_nb15": {
+        "n_files": 2,
+        "distinct_column_sets": 1,
+        "schemas_identical": true,
+        "files": {
+          "data/raw/unsw_nb15/UNSW_NB15_testing-set.csv": 45,
+          "data/raw/unsw_nb15/UNSW_NB15_training-set.csv": 45
+        }
+      }
+    }
+  },
+  "unknown_label_rejections": [],
+  "manifest_status_before": {
+    "schema_status": "not_run",
+    "label_status": "not_run",
+    "audit_status": "not_run"
+  }
+}
