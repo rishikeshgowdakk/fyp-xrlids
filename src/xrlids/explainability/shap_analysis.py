@@ -23,25 +23,14 @@ def compute_rf_shap_explanations(
     X_background: pd.DataFrame,
     X_explain: pd.DataFrame,
     y_explain: pd.Series | np.ndarray | None = None,
+    families_explain: pd.Series | np.ndarray | None = None,
     *,
     feature_names: Sequence[str] | None = None,
     max_background: int = 100,
     max_explain: int = 200,
     seed: int = 42,
 ) -> dict[str, Any]:
-    """Compute TreeSHAP attributions on a representative sample.
-
-    Parameters
-    ----------
-    rf_detector:
-        Fitted RandomForestDetector instance.
-    X_background:
-        Training data background sample.
-    X_explain:
-        Held-out evaluation samples to explain.
-    y_explain:
-        True labels for X_explain (optional, for class-specific breakdown).
-    """
+    """Compute TreeSHAP attributions on a representative sample."""
     import shap
 
     feats = list(feature_names or X_background.columns)
@@ -59,9 +48,11 @@ def compute_rf_shap_explanations(
         exp_idx = rng.choice(len(X_explain), size=max_explain, replace=False)
         X_exp = X_explain.iloc[exp_idx]
         y_exp = np.asarray(y_explain)[exp_idx] if y_explain is not None else None
+        fams_exp = np.asarray(families_explain)[exp_idx] if families_explain is not None else None
     else:
         X_exp = X_explain
         y_exp = np.asarray(y_explain) if y_explain is not None else None
+        fams_exp = np.asarray(families_explain) if families_explain is not None else None
 
     # TreeExplainer
     sklearn_rf = rf_detector.model if hasattr(rf_detector, "model") else rf_detector
@@ -111,6 +102,19 @@ def compute_rf_shap_explanations(
                 feats[i]: float(np.mean(shap_class1[benign_mask, i])) for i in range(len(feats))
             }
 
+    # Family-specific mean absolute attributions where label families are available
+    family_patterns: dict[str, Any] = {}
+    if fams_exp is not None:
+        for fam in np.unique(fams_exp):
+            fam_mask = fams_exp == fam
+            if np.any(fam_mask):
+                fam_mean_abs = np.mean(np.abs(shap_class1[fam_mask]), axis=0)
+                fam_rank = np.argsort(-fam_mean_abs)
+                family_patterns[str(fam)] = [
+                    {"rank": int(r + 1), "feature": feats[idx], "mean_abs_shap": round(float(fam_mean_abs[idx]), 6)}
+                    for r, idx in enumerate(fam_rank[:5])
+                ]
+
     # Representative local explanations:
     # Top 3 highest predicted attack probabilities
     # Top 3 lowest predicted attack probabilities
@@ -127,6 +131,7 @@ def compute_rf_shap_explanations(
                 "sample_index": int(idx),
                 "predicted_probability": float(probs[idx]),
                 "true_label": int(y_exp[idx]) if y_exp is not None else None,
+                "label_family": str(fams_exp[idx]) if fams_exp is not None else None,
                 "feature_values": row_features,
                 "shap_attributions": row_attributions,
                 "top_positive_features": sorted(
@@ -158,6 +163,7 @@ def compute_rf_shap_explanations(
         },
         "global_importance": global_importance,
         "class_specific_patterns": class_patterns,
+        "family_specific_patterns": family_patterns,
         "local_explanations": local_samples,
         "scientific_caveats": {
             "causality": (

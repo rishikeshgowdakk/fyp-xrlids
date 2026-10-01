@@ -60,6 +60,7 @@ class SplitResult:
     leakage: dict[str, Any] = field(default_factory=dict)
     test_duplicate_mask: pd.Series | None = None
     label_splits: dict[str, pd.Series] = field(default_factory=dict)
+    provenance_splits: dict[str, pd.DataFrame] = field(default_factory=dict)
 
 
 
@@ -70,6 +71,7 @@ def build_splits(
     config: SplitConfig,
     *,
     dataset: str,
+    provenance: pd.DataFrame | None = None,
     run_leakage_audit: bool = True,
 ) -> SplitResult:
     """Produce train/validation/test splits with an optional leakage audit.
@@ -172,12 +174,32 @@ def build_splits(
         "test": labels.loc[assignment == "test"].reset_index(drop=True),
     }
 
+    provenance_splits: dict[str, pd.DataFrame] = {}
+    if provenance is not None:
+        prov_copy = provenance.copy().reset_index(drop=True)
+        prov_copy["split_membership"] = assignment.to_numpy()
+        provenance_splits = {
+            "train": prov_copy.loc[assignment == "train"].reset_index(drop=True),
+            "validation": prov_copy.loc[assignment == "validation"].reset_index(drop=True),
+            "test": prov_copy.loc[assignment == "test"].reset_index(drop=True),
+        }
+
     manifest = {
         "dataset": dataset,
         "methodology": config.methodology,
         "rationale": config.rationale,
         "duplicate_policy": config.duplicate_policy,
         "duplicate_accounting": duplicate_accounting,
+        "ordering_basis": "arrival_order" if not config.time_column else "timestamp_sorted",
+        "checks_performed": [
+            "feature_deduplication_audit",
+            "train_val_test_disjointness",
+            "class_stratification_audit",
+            "exact_duplicate_leakage_audit",
+        ],
+        "checks_not_performed": [
+            "strict_timestamp_monotonic_ordering (timestamps absent or non-monotonic in source data)"
+        ],
         "ratios": {"train": config.train, "validation": config.validation, "test": config.test},
         "seed": config.seed,
         "stratified": config.stratify,
@@ -224,4 +246,5 @@ def build_splits(
         leakage=leakage,
         test_duplicate_mask=test_duplicate_mask,
         label_splits=label_splits,
+        provenance_splits=provenance_splits,
     )

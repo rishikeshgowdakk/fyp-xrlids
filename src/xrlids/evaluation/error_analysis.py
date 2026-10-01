@@ -51,6 +51,7 @@ def compute_error_analysis(
     threshold: float = 0.5,
     features_df: pd.DataFrame | None = None,
     duplicate_mask: pd.Series | np.ndarray | None = None,
+    provenance_df: pd.DataFrame | None = None,
     n_difficult: int = 5,
 ) -> dict[str, Any]:
     """Compute error analysis metrics for a given model score series."""
@@ -91,6 +92,14 @@ def compute_error_analysis(
             }
             if features_df is not None and idx < len(features_df):
                 item["features"] = features_df.iloc[idx].to_dict()
+            if provenance_df is not None and idx < len(provenance_df):
+                prov_row = provenance_df.iloc[idx].to_dict()
+                item["provenance"] = {
+                    "source_file": prov_row.get("source_file"),
+                    "source_row_index": int(prov_row.get("source_row_index", 0)) if prov_row.get("source_row_index") is not None else None,
+                    "label_family": prov_row.get("label_family"),
+                    "canonical_label": prov_row.get("canonical_label"),
+                }
             worst_fn.append(item)
     else:
         worst_fn = []
@@ -109,6 +118,14 @@ def compute_error_analysis(
             }
             if features_df is not None and idx < len(features_df):
                 item["features"] = features_df.iloc[idx].to_dict()
+            if provenance_df is not None and idx < len(provenance_df):
+                prov_row = provenance_df.iloc[idx].to_dict()
+                item["provenance"] = {
+                    "source_file": prov_row.get("source_file"),
+                    "source_row_index": int(prov_row.get("source_row_index", 0)) if prov_row.get("source_row_index") is not None else None,
+                    "label_family": prov_row.get("label_family"),
+                    "canonical_label": prov_row.get("canonical_label"),
+                }
             worst_fp.append(item)
     else:
         worst_fp = []
@@ -252,4 +269,110 @@ def analyze_model_disagreements(
         },
         "fusion_analysis": fusion_analysis,
         "representative_disagreement_examples": examples,
+    }
+
+
+def compute_per_family_metrics(
+    y_true: pd.Series | np.ndarray,
+    y_score: pd.Series | np.ndarray,
+    label_families: pd.Series | np.ndarray,
+    *,
+    threshold: float = 0.5,
+) -> dict[str, Any]:
+    """Compute per-attack-family evaluation metrics (Task 10).
+
+    For each distinct attack category and benign:
+    - Support count
+    - False positives (alarms on benign or misattributed attacks)
+    - False negatives (missed attacks)
+    - Detection rate (recall)
+    - Per-family error rate
+    """
+    yt = np.asarray(y_true, dtype=int)
+    ys = np.asarray(y_score, dtype=float)
+    fams = np.asarray(label_families, dtype=str)
+
+    if not (len(yt) == len(ys) == len(fams)):
+        raise ValueError("y_true, y_score, and label_families must have identical lengths")
+
+    preds = (ys >= threshold).astype(int)
+    unique_fams = np.unique(fams)
+
+    table: list[dict[str, Any]] = []
+    breakdown: dict[str, Any] = {}
+
+    for fam in unique_fams:
+        fam_mask = fams == fam
+        fam_support = int(np.sum(fam_mask))
+        if fam_support == 0:
+            continue
+
+        fam_yt = yt[fam_mask]
+        fam_preds = preds[fam_mask]
+        is_attack = bool(np.any(fam_yt == 1))
+
+        if is_attack:
+            tp = int(np.sum((fam_yt == 1) & (fam_preds == 1)))
+            fn = int(np.sum((fam_yt == 1) & (fam_preds == 0)))
+            fp = 0
+            recall = float(tp / fam_support)
+            error_rate = float(fn / fam_support)
+        else:
+            # Benign
+            tp = int(np.sum((fam_yt == 0) & (fam_preds == 0)))  # true negatives
+            fp = int(np.sum((fam_yt == 0) & (fam_preds == 1)))  # false alarms
+            fn = 0
+            recall = float(tp / fam_support)  # specificity
+            error_rate = float(fp / fam_support)  # FPR
+
+        row_dict = {
+            "family": str(fam),
+            "is_attack": is_attack,
+            "support": fam_support,
+            "correct": tp,
+            "false_positives": fp,
+            "false_negatives": fn,
+            "detection_rate": round(recall, 6),
+            "error_rate": round(error_rate, 6),
+        }
+        table.append(row_dict)
+        breakdown[str(fam)] = row_dict
+
+    # Sort table: Benign first, then attack families by support descending
+    table.sort(key=lambda x: (x["is_attack"], -x["support"]))
+
+    return {
+        "threshold": float(threshold),
+        "total_evaluated_rows": len(yt),
+        "total_attack_families": len([t for t in table if t["is_attack"]]),
+        "summary_table": table,
+        "family_breakdown": breakdown,
+    }
+
+
+def compute_stratified_dataset_summary(
+    provenance_df: pd.DataFrame,
+    labels: pd.Series | np.ndarray,
+) -> dict[str, Any]:
+    """Produce comprehensive stratified dataset statistics (Task 11)."""
+    lbls = np.asarray(labels, dtype=int)
+    total_rows = len(lbls)
+    benign_count = int(np.sum(lbls == 0))
+    attack_count = int(np.sum(lbls == 1))
+
+    fam_counts = provenance_df["label_family"].value_counts().to_dict()
+    file_counts = provenance_df["source_file"].value_counts().to_dict()
+
+    imbalance_ratio = float(benign_count / max(1, attack_count))
+
+    return {
+        "total_rows": total_rows,
+        "benign_count": benign_count,
+        "attack_count": attack_count,
+        "attack_fraction": round(float(attack_count / max(1, total_rows)), 6),
+        "class_imbalance_ratio_benign_to_attack": round(imbalance_ratio, 4),
+        "number_of_attack_families": len([k for k, v in fam_counts.items() if k.upper() != "BENIGN" and k.lower() != "normal"]),
+        "rows_per_family": fam_counts,
+        "rows_per_file": file_counts,
+        "distinct_source_files": len(file_counts),
     }

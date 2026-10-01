@@ -43,13 +43,20 @@ class PreflightValidationError(RuntimeError):
 
 def validate_experiment_preflight(
     config: dict[str, Any],
-    raw_file_path: Path,
+    raw_file_path: Path | Sequence[Path] | str | Sequence[str],
     manifest: dict[str, Any] | None = None,
     *,
     sample_limit: int | None = None,
 ) -> dict[str, Any]:
     """Execute the 10-point pre-flight validation gate before model training."""
-    raw_file_path = Path(raw_file_path)
+    if isinstance(raw_file_path, (str, Path)):
+        file_paths = [Path(raw_file_path)]
+    else:
+        file_paths = [Path(p) for p in raw_file_path]
+
+    if not file_paths:
+        raise PreflightValidationError("No raw file paths provided for pre-flight validation")
+
     dataset_cfg = config.get("dataset", {})
     dataset_key = dataset_cfg.get("key") or config.get("source_dataset", {}).get("key")
     if not dataset_key:
@@ -60,38 +67,50 @@ def validate_experiment_preflight(
 
     require_checksums = bool(dataset_cfg.get("require_verified_checksums", True))
 
-    # 1 & 2. File exists, registered in manifest, SHA-256 matches manifest entry
-    try:
-        verify_res = verify_dataset_file(
-            raw_file_path,
-            dataset_key,
-            manifest=manifest,
-            require_verified=require_checksums,
-        )
-    except (DatasetIntegrityError, DatasetNotAvailableError) as exc:
-        raise PreflightValidationError(f"Pre-flight checksum/manifest failure: {exc}") from exc
-
-    # 3 & 5. Schema matches expected canonical schema and label column is present
     registry = load_feature_registry()
     contract = load_label_contract()
     spec = contract.datasets.get(dataset_key, {})
     label_candidates = spec.get("label_column_candidates", ["Label", "label", "attack_cat"])
 
-    schema_rep = validate_file_schema(
-        raw_file_path,
-        dataset_key,
-        registry,
-        label_candidates=label_candidates,
-    )
-    if schema_rep.missing:
-        raise PreflightValidationError(
-            f"Schema conflict: raw file '{raw_file_path.name}' is missing declared columns: "
-            f"{schema_rep.missing}"
+    verified_files = []
+    total_size_bytes = 0
+
+    for path in file_paths:
+        # 1 & 2. File exists, registered in manifest, SHA-256 matches manifest entry
+        try:
+            verify_res = verify_dataset_file(
+                path,
+                dataset_key,
+                manifest=manifest,
+                require_verified=require_checksums,
+            )
+        except (DatasetIntegrityError, DatasetNotAvailableError) as exc:
+            raise PreflightValidationError(f"Pre-flight checksum/manifest failure on '{path.name}': {exc}") from exc
+
+        # 3 & 5. Schema matches expected canonical schema and label column is present
+        schema_rep = validate_file_schema(
+            path,
+            dataset_key,
+            registry,
+            label_candidates=label_candidates,
         )
-    if schema_rep.label_column_found is None:
-        raise PreflightValidationError(
-            f"No label column found in '{raw_file_path.name}'. Expected one of: {label_candidates}"
-        )
+        if schema_rep.missing:
+            raise PreflightValidationError(
+                f"Schema conflict: raw file '{path.name}' is missing declared columns: "
+                f"{schema_rep.missing}"
+            )
+        if schema_rep.label_column_found is None:
+            raise PreflightValidationError(
+                f"No label column found in '{path.name}'. Expected one of: {label_candidates}"
+            )
+
+        total_size_bytes += path.stat().st_size
+        verified_files.append({
+            "filename": path.name,
+            "sha256": verify_res.get("actual_sha256"),
+            "label_column": schema_rep.label_column_found,
+            "size_bytes": path.stat().st_size,
+        })
 
     # 4. Required feature rung columns are present or extractable
     features_cfg = config.get("features", {})
@@ -146,22 +165,23 @@ def validate_experiment_preflight(
         )
 
     # 10. Memory requirement within budget
-    file_size_bytes = raw_file_path.stat().st_size
-    file_size_gb = file_size_bytes / (1024.0**3)
+    file_size_gb = total_size_bytes / (1024.0**3)
     if file_size_gb > 2.0 and sample_limit is None:
-        # Warn or require chunked / bounded execution
         logger.warning(
-            "Large raw file (%.2f GiB): memory-bounded chunked execution required to prevent OOM",
+            "Large raw dataset (%.2f GiB across %d files): memory-bounded chunked execution required to prevent OOM",
             file_size_gb,
+            len(file_paths),
         )
 
     return {
         "status": "passed",
         "dataset": dataset_key,
-        "file": raw_file_path.name,
-        "sha256": verify_res.get("actual_sha256"),
+        "files": verified_files,
+        "file": file_paths[0].name,
+        "sha256": verified_files[0]["sha256"] if verified_files else None,
+        "total_files": len(file_paths),
         "schema_ok": True,
-        "label_column": schema_rep.label_column_found,
+        "label_column": verified_files[0]["label_column"] if verified_files else None,
         "split_ratios": {"train": train_r, "val": val_r, "test": test_r},
         "seed": int(seed),
         "fit_on": fit_on,
