@@ -25,12 +25,12 @@ Column-map status: `unverified_pending_audit`.
 > never be fabricated or assigned arbitrary proxy values.
 
 - **Common Transfer Features (Intersection = 4)**:
-  1. `flow_duration_ms` (Flow Duration converted to milliseconds)
-  2. `flow_pkts_per_s` (Flow Packets per Second)
-  3. `flow_bytes_per_s` (Flow Bytes per Second)
-  4. `fwd_packets_count` (Total Forward Packets Count)
+  1. `flow_duration_ms`
+  2. `flow_packets_per_s`
+  3. `flow_bytes_per_s`
+  4. `packet_length_mean`
 - **Unsupported UNSW-NB15 Features in R10 (6 features marked `UNSUPPORTED`)**:
-  `syn_flag_count`, `ack_flag_count`, `rst_flag_count`, `fin_flag_count`, `syn_ack_ratio`, `pkt_len_std`.
+  `packet_length_std`, `syn_count`, `ack_count`, `rst_count`, `fin_count`, `syn_ack_ratio`.
 
 ## Feature Definitions
 

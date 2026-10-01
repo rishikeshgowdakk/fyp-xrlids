@@ -264,10 +264,16 @@ def _make_sequence_dataset(seq_set: SequenceSet):
             self.s = s
             self.is_2d = hasattr(s, "features_2d") and s.features_2d is not None and len(s.features_2d) > 0
             if self.is_2d:
-                self.features = torch.as_tensor(s.features_2d, dtype=torch.float32)
+                feat_arr = s.features_2d
+                if not feat_arr.flags.writeable:
+                    feat_arr = feat_arr.copy()
+                self.features = torch.from_numpy(feat_arr).float()
             else:
                 self.features = None
-            self.targets = torch.as_tensor(s.y, dtype=torch.float32)
+            tgt_arr = s.y
+            if not tgt_arr.flags.writeable:
+                tgt_arr = tgt_arr.copy()
+            self.targets = torch.from_numpy(tgt_arr).float()
             self.origins = s.origins
             self.seq_len = s.seq_len
 
