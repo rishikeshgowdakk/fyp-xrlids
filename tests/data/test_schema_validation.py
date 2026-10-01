@@ -24,8 +24,9 @@ CIC_COLS = [
 ]
 
 UNSW_COLS = [
-    "srcip", "sport", "dstip", "dsport", "proto", "state", "dur", "Sbytes", "Dbytes",
-    "Spkts", "Dpkts", "label", "attack_cat",
+    # faithful to the real UNSW-NB15 partitioned CSV header (all lowercase)
+    "id", "dur", "proto", "service", "state", "spkts", "dpkts", "sbytes", "dbytes",
+    "label", "attack_cat",
 ]
 
 

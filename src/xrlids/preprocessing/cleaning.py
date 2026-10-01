@@ -78,10 +78,16 @@ class CleanedDataset:
         }
 
 
-def _strip_column_names(frame: pd.DataFrame) -> pd.DataFrame:
-    out = frame.copy()
-    out.columns = [str(c).strip() for c in out.columns]
-    return out
+def _canonical_header_layer(frame: pd.DataFrame) -> pd.DataFrame:
+    """Canonical header normalization layer (single column contract).
+
+    Replaces the historical whitespace-only ``strip``: headers become canonical
+    (NFKC, whitespace collapsed) while the raw headers are preserved in
+    ``frame.attrs['raw_columns']`` for provenance/audit reporting.
+    """
+    from xrlids.utils.columns import canonicalize_frame
+
+    return canonicalize_frame(frame)
 
 
 def clean_dataset_frame(
@@ -101,7 +107,8 @@ def clean_dataset_frame(
     the cleaned frame, so nothing here depends on the feature registry.
     """
     steps: list[CleaningStep] = []
-    frame = _strip_column_names(raw_frame)
+    raw_columns = [str(c) for c in raw_frame.columns]
+    frame = _canonical_header_layer(raw_frame)
     raw_rows = len(frame)
     rows_at_start = raw_rows
 
@@ -191,6 +198,16 @@ def clean_dataset_frame(
 
     rejection_summary = _rejection_summary(accounting, labels.rejections, dataset)
 
+    # Column provenance: raw headers are preserved even though processing uses the
+    # canonical names. Audit artifacts can therefore show both representations.
+    extra: dict[str, Any] = {
+        "raw_columns": raw_columns,
+        "canonical_columns": list(frame.columns),
+        "raw_to_canonical": {
+            raw: canon for raw, canon in zip(raw_columns, list(frame.columns))
+        },
+    }
+
     logger.info(
         "cleaned dataset=%s raw=%d accepted=%d removed=%d",
         dataset,
@@ -206,6 +223,7 @@ def clean_dataset_frame(
         accounting=accounting,
         rejection_summary=rejection_summary,
         dataset=dataset,
+        extra=extra,
     )
 
 

@@ -4,6 +4,11 @@ Reading only the header row of each CSV is cheap even for multi-GB files, so thi
 validate every declared mapping against every real file as soon as data is placed -
 before any full audit or training run. A column map that references a column absent from
 the real file is a contract bug and must be reported, not papered over.
+
+Column contract: both the *raw* file header and the *declared* column name are
+canonicalized with :func:`xrlids.utils.columns.canonicalize_column` before comparison,
+exactly as cleaning and semantic extraction do. The report keeps both raw and canonical
+names so provenance is never lost.
 """
 
 from __future__ import annotations
@@ -15,6 +20,7 @@ from typing import Any
 import pandas as pd
 
 from xrlids.features.registry import FeatureRegistry
+from xrlids.utils.columns import canonicalize_column, canonicalize_columns
 
 
 class SchemaValidationError(RuntimeError):
@@ -24,9 +30,10 @@ class SchemaValidationError(RuntimeError):
 @dataclass
 class FileSchemaReport:
     path: str
-    columns: list[str]
+    columns: list[str]                 # RAW headers exactly as read from the file
+    canonical_columns: list[str]       # canonical form of the raw headers
     n_columns: int
-    declared_columns: list[str]
+    declared_columns: list[str]        # declared names in canonical form
     missing: list[str]
     label_column_found: str | None
     extra_note: str = ""
@@ -35,9 +42,24 @@ class FileSchemaReport:
     def ok(self) -> bool:
         return not self.missing
 
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "path": self.path,
+            "columns": self.columns,
+            "canonical_columns": self.canonical_columns,
+            "raw_to_canonical": {
+                raw: canon for raw, canon in zip(self.columns, self.canonical_columns)
+            },
+            "n_columns": self.n_columns,
+            "declared_columns": self.declared_columns,
+            "missing_declared_columns": self.missing,
+            "label_column": self.label_column_found,
+            "note": self.extra_note,
+        }
+
 
 def read_header(path: str | Path) -> list[str]:
-    """Read only the header row of a CSV."""
+    """Read only the RAW header row of a CSV (no canonicalization)."""
     return list(pd.read_csv(path, nrows=0).columns)
 
 
@@ -52,7 +74,8 @@ def _declared_columns_for_dataset(
         elif "sum" in spec:
             declared.extend(spec["sum"])
             declared.extend(spec["divide_by_sum"])
-    return sorted(set(declared))
+    # declared names are compared in canonical form, same as real headers
+    return sorted({canonicalize_column(c) for c in declared})
 
 
 def validate_file_schema(
@@ -67,20 +90,23 @@ def validate_file_schema(
     if not path.is_file():
         raise FileNotFoundError(path)
 
-    columns = read_header(path)
+    raw_columns = read_header(path)
+    columns = canonicalize_columns(raw_columns)
     declared = _declared_columns_for_dataset(registry, dataset)
     missing = [c for c in declared if c not in columns]
 
     label_found = None
     for candidate in label_candidates or []:
-        if candidate in columns:
-            label_found = candidate
+        canon_candidate = canonicalize_column(candidate)
+        if canon_candidate in columns:
+            label_found = canon_candidate
             break
 
     return FileSchemaReport(
         path=str(path),
-        columns=columns,
-        n_columns=len(columns),
+        columns=raw_columns,
+        canonical_columns=columns,
+        n_columns=len(raw_columns),
         declared_columns=declared,
         missing=missing,
         label_column_found=label_found,
@@ -98,7 +124,7 @@ class DatasetSchemaReport:
         return bool(self.files) and all(f.ok for f in self.files)
 
     def to_dict(self) -> dict[str, Any]:
-        column_sets = {tuple(f.columns) for f in self.files}
+        column_sets = {tuple(f.canonical_columns) for f in self.files}
         return {
             "dataset": self.dataset,
             "n_files": len(self.files),
@@ -109,15 +135,7 @@ class DatasetSchemaReport:
             "label_columns_found": [
                 {"file": f.path, "label_column": f.label_column_found} for f in self.files
             ],
-            "files": [
-                {
-                    "path": f.path,
-                    "n_columns": f.n_columns,
-                    "missing_declared_columns": f.missing,
-                    "label_column": f.label_column_found,
-                }
-                for f in self.files
-            ],
+            "files": [f.to_dict() for f in self.files],
         }
 
 

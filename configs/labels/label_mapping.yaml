@@ -34,8 +34,11 @@ normalization:
     "\u2013": "-"          # en dash -> hyphen
     "\u2014": "-"          # em dash -> hyphen
     "\ufffd": "-"          # unicode replacement char -> hyphen
-    "": "-"               # mojibake byte replacement -> hyphen
     "\u2019": "'"
+    # INVARIANT: every replacement key must be a non-empty string that is not a single
+    # ASCII alphanumeric/space character. An empty key ("") was present historically and
+    # corrupted every label ("BENIGN" -> "-B-E-N-I-G-N-"); it is now rejected at load time
+    # by labels/contract.py::validate_replacements with a regression test guarding it.
   # Trailing/leading punctuation seen in some exported label columns.
   strip_characters: " \t\r\n\u00a0"
 

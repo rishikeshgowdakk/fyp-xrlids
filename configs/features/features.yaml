@@ -104,35 +104,40 @@ gate:
   subflow_bwd_bytes:   {Q1_live: no, Q2_cross_dataset: no, Q3_identity_leak: no, Q4_target_leak: no, Q5_metadata: no, Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no, Q10_justify: partial}
 
 # ---------------------------------------------------------------------------
-# Per-dataset column maps: raw column -> semantic field.
-# Entry forms:
+# Per-dataset column maps: raw column -> semantic field.#   Entry forms:
 #   {column: NAME, scale: NUMBER}                 -> semantic = column * scale
 #   {sum: [A,B], divide_by_sum: [C,D]}            -> semantic = (A+B)/(C+D)
 # STATUS unverified_pending_audit: confirmed by 01_dataset_audit.py, not assumed.
+#
+# COLUMN CONTRACT: every ``column`` value below is written in CANONICAL form
+# (see src/xrlids/utils/columns.py::canonicalize_column: NFKC, whitespace collapsed,
+# leading/trailing whitespace stripped). Real files keep their raw headers; schema
+# validation, cleaning and semantic extraction all canonicalize before comparing, so
+# CIC-IDS2017's leading-space headers (" Flow Duration") match "Flow Duration".
 # ---------------------------------------------------------------------------
 column_maps_status: unverified_pending_audit
 column_maps:
 
   cicids2017:
-    duration_seconds:        {column: " Flow Duration", scale: 0.000001}
-    total_fwd_packets:       {column: " Total Fwd Packets"}
-    total_bwd_packets:       {column: " Total Backward Packets"}
+    duration_seconds:        {column: "Flow Duration", scale: 0.000001}
+    total_fwd_packets:       {column: "Total Fwd Packets"}
+    total_bwd_packets:       {column: "Total Backward Packets"}
     fwd_bytes:               {column: "Total Length of Fwd Packets"}
-    bwd_bytes:               {column: " Total Length of Bwd Packets"}
-    pkt_len_mean:            {column: " Packet Length Mean"}
-    pkt_len_std:             {column: " Packet Length Std"}
-    syn_flags:               {column: " SYN Flag Count"}
-    ack_flags:               {column: " ACK Flag Count"}
-    rst_flags:               {column: " RST Flag Count"}
+    bwd_bytes:               {column: "Total Length of Bwd Packets"}
+    pkt_len_mean:            {column: "Packet Length Mean"}
+    pkt_len_std:             {column: "Packet Length Std"}
+    syn_flags:               {column: "SYN Flag Count"}
+    ack_flags:               {column: "ACK Flag Count"}
+    rst_flags:               {column: "RST Flag Count"}
     fin_flags:               {column: "FIN Flag Count"}
-    flow_iat_mean_s:         {column: " Flow IAT Mean", scale: 0.000001}
-    flow_iat_std_s:          {column: " Flow IAT Std", scale: 0.000001}
-    fwd_pkt_len_mean:        {column: " Fwd Packet Length Mean"}
-    bwd_pkt_len_mean:        {column: " Bwd Packet Length Mean"}
+    flow_iat_mean_s:         {column: "Flow IAT Mean", scale: 0.000001}
+    flow_iat_std_s:          {column: "Flow IAT Std", scale: 0.000001}
+    fwd_pkt_len_mean:        {column: "Fwd Packet Length Mean"}
+    bwd_pkt_len_mean:        {column: "Bwd Packet Length Mean"}
     active_mean_s:           {column: "Active Mean", scale: 0.000001}
     idle_mean_s:             {column: "Idle Mean", scale: 0.000001}
-    subflow_fwd_bytes:       {column: " Subflow Fwd Bytes"}
-    subflow_bwd_bytes:       {column: " Subflow Bwd Bytes"}
+    subflow_fwd_bytes:       {column: "Subflow Fwd Bytes"}
+    subflow_bwd_bytes:       {column: "Subflow Bwd Bytes"}
 
   cse_cic_ids2018:
     duration_seconds:        {column: "Flow Duration", scale: 0.000001}

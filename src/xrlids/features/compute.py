@@ -20,6 +20,7 @@ import pandas as pd
 
 from xrlids.features.definitions import FeatureComputationError, feature_spec
 from xrlids.features.registry import FeatureRegistry
+from xrlids.utils.columns import canonicalize_column, canonicalize_frame
 
 
 class FeatureValidationError(ValueError):
@@ -59,6 +60,12 @@ def extract_semantics(
     if dataset not in registry.column_maps:
         raise KeyError(f"no column map declared for dataset '{dataset}'")
 
+    # ONE column contract: canonicalize the frame headers (idempotent) and compare
+    # against canonicalized declared column names. Raw headers remain available in
+    # ``frame.attrs['raw_columns']`` for provenance.
+    canon_frame = canonicalize_frame(frame)
+    raw_headers = list(canon_frame.attrs.get("raw_columns", list(frame.columns)))
+
     mapping = registry.column_maps[dataset]
     resolved: dict[str, pd.Series] = {}
     provenance: dict[str, Any] = {}
@@ -66,28 +73,33 @@ def extract_semantics(
 
     for semantic, spec in mapping.items():
         if "column" in spec:
-            column = spec["column"]
-            if column not in frame.columns:
+            column = canonicalize_column(spec["column"])
+            if column not in canon_frame.columns:
                 missing_columns.append(column)
                 continue
-            series = _numeric(frame, column)
+            series = _numeric(canon_frame, column)
             scale = float(spec.get("scale", 1.0))
             if scale != 1.0:
                 series = series * scale
             resolved[semantic] = series
-            provenance[semantic] = {"source_columns": [column], "scale": scale}
+            provenance[semantic] = {
+                "source_columns": [column],
+                "declared_column": spec["column"],
+                "scale": scale,
+            }
         elif "sum" in spec and "divide_by_sum" in spec:
-            num_cols = list(spec["sum"])
-            den_cols = list(spec["divide_by_sum"])
-            absent = [c for c in (*num_cols, *den_cols) if c not in frame.columns]
+            num_cols = [canonicalize_column(c) for c in spec["sum"]]
+            den_cols = [canonicalize_column(c) for c in spec["divide_by_sum"]]
+            absent = [c for c in (*num_cols, *den_cols) if c not in canon_frame.columns]
             if absent:
                 missing_columns.extend(absent)
                 continue
-            numerator = sum(_numeric(frame, c) for c in num_cols)
-            denominator = sum(_numeric(frame, c) for c in den_cols)
+            numerator = sum(_numeric(canon_frame, c) for c in num_cols)
+            denominator = sum(_numeric(canon_frame, c) for c in den_cols)
             resolved[semantic] = numerator / denominator.replace(0, np.nan)
             provenance[semantic] = {
                 "source_columns": [*num_cols, *den_cols],
+                "declared_columns": [*spec["sum"], *spec["divide_by_sum"]],
                 "derivation": f"sum({num_cols}) / sum({den_cols})",
             }
         else:
@@ -95,6 +107,8 @@ def extract_semantics(
 
     report = {
         "dataset": dataset,
+        "canonical_headers": list(canon_frame.columns),
+        "raw_headers": raw_headers,
         "semantic_resolved": sorted(resolved),
         "semantic_absent": sorted(set(mapping) - set(resolved)),
         "raw_columns_missing": sorted(set(missing_columns)),
