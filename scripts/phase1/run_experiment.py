@@ -39,6 +39,10 @@ from xrlids.evaluation.thresholding import (  # noqa: E402
     candidate_operating_points,
     threshold_sweep,
 )
+from xrlids.experiments.preflight import (  # noqa: E402
+    PreflightValidationError,
+    validate_experiment_preflight,
+)
 from xrlids.experiments.registry import (  # noqa: E402
     ExperimentRecord,
     load_yaml_config,
@@ -62,6 +66,7 @@ from xrlids.splitting.splitter import SplitConfig, build_splits  # noqa: E402
 from xrlids.utils.env import environment_fingerprint, git_commit  # noqa: E402
 from xrlids.utils.hashing import sha256_file  # noqa: E402
 from xrlids.utils.logging_utils import get_logger  # noqa: E402
+from xrlids.utils.profiler import ResourceProfiler  # noqa: E402
 from xrlids.utils.seeding import set_global_seeds  # noqa: E402
 
 logger = get_logger("run_experiment")
@@ -250,6 +255,22 @@ def run_experiment(
         print(f"DATA_NOT_AVAILABLE: {raw_file_path} not found on disk.", file=sys.stderr)
         return 2
 
+    print("\n[0/10] Pre-flight validation gate...")
+    try:
+        preflight_res = validate_experiment_preflight(
+            config,
+            raw_file_path,
+            manifest=manifest,
+            sample_limit=sample_limit,
+        )
+        print(f"       Pre-flight validation PASSED: SHA-256 verified ({preflight_res['sha256'][:16]}...), schema validated.")
+    except PreflightValidationError as exc:
+        print("\n=======================================================", file=sys.stderr)
+        print(f"PREFLIGHT_VALIDATION_ERROR: {exc}", file=sys.stderr)
+        print("Refusing execution to protect experimental integrity and prevent OOM.", file=sys.stderr)
+        print("=======================================================\n", file=sys.stderr)
+        return 3
+
     print(f"\n[1/10] Loading raw data: {raw_file_path} ...")
     raw_df = pd.read_csv(raw_file_path, low_memory=False)
     raw_sha256 = sha256_file(raw_file_path)
@@ -273,6 +294,8 @@ def run_experiment(
     exp_id = exp_cfg.get("id", f"EXP-P1-{dataset_key.upper()}-{int(time.time())}")
     output_dir = Path(out_dir or config.get("outputs", {}).get("results_dir", f"results/experiments/{exp_id}"))
     output_dir.mkdir(parents=True, exist_ok=True)
+    profiler = ResourceProfiler(target_dir=output_dir)
+    profiler.__enter__()
 
     # 1. Clean dataset and validate labels
     print("[2/10] Applying label contract and cleaning rules...")
@@ -564,6 +587,11 @@ def run_experiment(
     if transfer_results is not None:
         (output_dir / "transfer_report.json").write_text(json.dumps(transfer_results, indent=2, default=str), encoding="utf-8")
 
+    # Finish resource profiling
+    profiler.__exit__(None, None, None)
+    resource_info = profiler.to_dict()
+    (output_dir / "resource_profile.json").write_text(json.dumps(resource_info, indent=2), encoding="utf-8")
+
     # Experiment Record
     exp_status = "PRELIMINARY_SUBSAMPLE" if is_subsample else "EMPIRICALLY_OBSERVED"
     dataset_entry = next((d for d in manifest.get("datasets", []) if d.get("key") == dataset_key), {})
@@ -594,6 +622,7 @@ def run_experiment(
         confusion_matrix=test_metrics["rf"]["confusion"],
         training_duration_s=duration_s,
         hardware="CPU (linux)",
+        resource_profile=resource_info,
         status=exp_status,
         result_interpretation=(
             "Preliminary validation run on subsampled data." if is_subsample

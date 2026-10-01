@@ -65,6 +65,7 @@ class ExperimentRecord:
     confusion_matrix: dict[str, int] = field(default_factory=dict)
     training_duration_s: float | None = None
     hardware: str | None = None
+    resource_profile: dict[str, Any] = field(default_factory=dict)
     status: str = "pending"
     result_interpretation: str = ""
     limitations: list[str] = field(default_factory=list)
