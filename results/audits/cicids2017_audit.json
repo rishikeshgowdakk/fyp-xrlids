@@ -5,15 +5,15 @@
     "dataset_sha256": "6ff1580f5f81c0ae28a26f7631721018577f5f7c5e0feac28b795fcfe7b411ee",
     "feature_schema_hash": null,
     "seed": null,
-    "created_at": "2026-10-01T11:05:46.588006+00:00",
+    "created_at": "2026-10-01T18:46:33.065505+00:00",
     "software_environment": {
       "python_version": "3.14.4",
-      "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
       "machine": "x86_64",
       "processor_count": null,
       "cuda_available": false,
       "cuda_version": null,
-      "git_commit": "9ebcbd2a66b48ab5e3a8f8d5669976ff91aa2992",
+      "git_commit": "364495a2c22f338bbf44ddd23abe49423edbdf2f",
       "packages": {
         "numpy": "2.5.3",
         "pandas": "3.0.6",
@@ -29,12 +29,12 @@
     "extra": {
       "environment": {
         "python_version": "3.14.4",
-        "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
         "machine": "x86_64",
         "processor_count": null,
         "cuda_available": false,
         "cuda_version": null,
-        "git_commit": "9ebcbd2a66b48ab5e3a8f8d5669976ff91aa2992",
+        "git_commit": "364495a2c22f338bbf44ddd23abe49423edbdf2f",
         "packages": {
           "numpy": "2.5.3",
           "pandas": "3.0.6",
@@ -1287,8 +1287,8 @@
   },
   "unknown_label_rejections": [],
   "manifest_status_before": {
-    "schema_status": "not_run",
-    "label_status": "not_run",
-    "audit_status": "not_run"
+    "schema_status": "validated",
+    "label_status": "validated",
+    "audit_status": "completed"
   }
 }

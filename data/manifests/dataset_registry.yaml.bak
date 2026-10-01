@@ -271,9 +271,9 @@ datasets:
     status: verified
     source: UNSW Canberra Cyber (mirrored)
     registered_at: '2026-10-01T10:35:36.943220+00:00'
-  schema_status: not_run
-  label_status: not_run
-  audit_status: not_run
+  schema_status: validated
+  label_status: validated
+  audit_status: completed
   known_limitations:
   - Different feature-derivation pipeline (Argus/Bro) from the CIC datasets.
   - No TCP flag counts, no IAT statistics, no active/idle, no subflow fields in the

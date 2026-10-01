@@ -1,11 +1,11 @@
 # Phase 1 environment and status (generated)
 
-Generated at commit: `9ebcbd2a66b48ab5e3a8f8d5669976ff91aa2992`
+Generated at commit: `364495a2c22f338bbf44ddd23abe49423edbdf2f`
 
 | item | value |
 | --- | --- |
 | Python | 3.14.4 |
-| Platform | Linux-7.0.0-34-generic-x86_64-with-glibc2.43 |
+| Platform | Linux-7.0.0-38-generic-x86_64-with-glibc2.43 |
 | CUDA | False |
 | PyYAML | 6.0.3 |
 | matplotlib | 3.11.2 |
