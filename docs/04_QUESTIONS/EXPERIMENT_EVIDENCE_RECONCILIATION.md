@@ -86,13 +86,13 @@ The results confirm that **`data/manifests/dataset_registry.yaml` is the canonic
 
 - **Command Executed**: `.venv/bin/pytest -q`
 - **Result**:
-  - **Tests Collected**: 180
-  - **Tests Passed**: 180
+  - **Tests Collected**: 189
+  - **Tests Passed**: 189
   - **Tests Failed**: 0
   - **Exit Code**: 0
-  - **Execution Time**: ~53 seconds
+  - **Execution Time**: ~36 seconds
   - **Warnings**: 3 (deprecation warnings from SHAP color mapping; non-fatal)
-- **Status Reconciliation**: `PROJECT_STATUS.md` was updated from the stale "164 tests passing" to the verified "180 passing tests" (including 2 new tests verifying memory profiler semantics and per-family unicode label cleanliness).
+- **Status Reconciliation**: `PROJECT_STATUS.md` is synchronized with the verified "189 passing tests" (including 2 new tests verifying memory profiler semantics and per-family unicode label cleanliness).
 
 ---
 

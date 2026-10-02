@@ -27,7 +27,9 @@
     },
     "artifact_version": "1",
     "extra": {
-      "config_hash": "8ab4c6ff3d1582a90ad22e7032cec9986951060a4a0cf13197a8fec0349178b5"
+      "config_hash": "8ab4c6ff3d1582a90ad22e7032cec9986951060a4a0cf13197a8fec0349178b5",
+      "execution_commit": "416fa89c1c8162fe1c05d1e152b13ee550930a85",
+      "artifact_generation_commit": "a31de27061fbc9527b49c14898e2d319f35d1af0"
     }
   },
   "experiment_id": "EXP-P1-UNSWNB15-R10-MULTI-001",

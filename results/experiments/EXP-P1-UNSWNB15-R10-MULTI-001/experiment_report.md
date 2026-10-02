@@ -86,6 +86,9 @@ Final Modelling Population:             122,520
 | **Fusion** vs **RF** | `f1` | 0.8970 | 0.8548 | +0.0421 | [0.0389, 0.0457] | 0.0000 | ✅ YES |
 | **Fusion** vs **LSTM** | `f1` | 0.8970 | 0.8637 | +0.0332 | [0.0295, 0.0367] | 0.0000 | ✅ YES |
 
+> [!NOTE]
+> **Delta Direction Clarification**: Row 3 evaluates $\Delta(A - B)$ where $A=\text{RF}$ and $B=\text{LSTM}$, giving $\text{RF} - \text{LSTM} = -0.0089$ (95% CI [-0.0143, -0.0042], $p = 0.0000$). Equivalently, $\text{LSTM} - \text{RF} = +0.0089$, demonstrating that Supervised LSTM statistically significantly outperforms Random Forest on UNSW-NB15.
+
 ---
 ## 6. Per-Attack-Family Evaluation
 

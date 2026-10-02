@@ -42,7 +42,7 @@
     "p_value": 0.0,
     "is_statistically_significant": true,
     "superior_model": "LSTM",
-    "scientific_statement": "LSTM outperforms with statistical significance (\u0394=-0.0089, 95% CI [-0.0143, -0.0042], p=0.0000)"
+    "scientific_statement": "LSTM outperforms with statistical significance (LSTM − RF = +0.0089, RF − LSTM = −0.0089, 95% CI [-0.0143, -0.0042], p=0.0000)"
   },
   {
     "model_a": "Fusion",
