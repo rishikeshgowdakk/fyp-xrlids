@@ -32,7 +32,7 @@
   },
   "experiment_id": "EXP-P1-CIC2017-R10-001",
   "research_question": "RQ1_RQ2_RQ3",
-  "hypothesis": "Flow-level behavioral features separate benign and malicious traffic on CIC-IDS2017; supervised LSTM and RF+LSTM fusion provide complementary signals without test leakage.\n",
+  "hypothesis": "Flow-level behavioral features separate benign and malicious traffic on CIC-IDS2017; supervised LSTM sequence modeling and RF+LSTM score fusion provide complementary signals without test leakage.\n",
   "dataset": "cicids2017",
   "dataset_sha256": "6ff1580f5f81c0ae28a26f7631721018577f5f7c5e0feac28b795fcfe7b411ee",
   "dataset_version": "1.0.0",
@@ -152,14 +152,99 @@
   },
   "split_id": "17ed21c579d06350a2a6093f545a5193c328f04b9acab39d918f0019bd002c93",
   "model": {
-    "model_type": "RandomForest",
-    "params": {
-      "n_estimators": 100,
-      "max_depth": 16,
-      "min_samples_leaf": 2,
-      "class_weight": "balanced_subsample",
-      "random_state": 42,
-      "n_jobs": 4
+    "model_type": "CompositeLadderWithFusion",
+    "primary_baseline": {
+      "model_type": "RandomForest",
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 16,
+        "min_samples_leaf": 2,
+        "class_weight": "balanced_subsample",
+        "random_state": 42,
+        "n_jobs": 4
+      },
+      "n_features": 10,
+      "artifact_path": "results/experiments/EXP-P1-CIC2017-R10-001/random_forest.joblib"
+    },
+    "models_evaluated": {
+      "majority": {
+        "name": "majority",
+        "model_type": "MajorityClassDetector",
+        "family": "prior_baseline",
+        "artifact_path": "results/experiments/EXP-P1-CIC2017-R10-001/majority_class.joblib"
+      },
+      "logistic_regression": {
+        "name": "logistic_regression",
+        "model_type": "LogisticRegressionDetector",
+        "family": "linear_baseline",
+        "params": {
+          "penalty": "l2",
+          "C": 1.0,
+          "max_iter": 1000,
+          "solver": "lbfgs",
+          "random_state": 42
+        },
+        "artifact_path": "results/experiments/EXP-P1-CIC2017-R10-001/logistic_regression.joblib"
+      },
+      "decision_tree": {
+        "name": "decision_tree",
+        "model_type": "DecisionTreeDetector",
+        "family": "tree_baseline",
+        "params": {
+          "max_depth": 10,
+          "min_samples_leaf": 5,
+          "random_state": 42
+        },
+        "artifact_path": "results/experiments/EXP-P1-CIC2017-R10-001/decision_tree.joblib"
+      },
+      "random_forest": {
+        "name": "random_forest",
+        "model_type": "RandomForestDetector",
+        "family": "ensemble",
+        "params": {
+          "n_estimators": 100,
+          "max_depth": 16,
+          "min_samples_leaf": 2,
+          "class_weight": "balanced_subsample",
+          "random_state": 42,
+          "n_jobs": 4
+        },
+        "artifact_path": "results/experiments/EXP-P1-CIC2017-R10-001/random_forest.joblib"
+      },
+      "lstm": {
+        "name": "lstm",
+        "model_type": "SupervisedLSTM",
+        "family": "temporal_recurrent",
+        "params": {
+          "seq_len": 5,
+          "stride": 1,
+          "label_rule": "last",
+          "hidden_size": 32,
+          "num_layers": 2,
+          "dropout": 0.2,
+          "learning_rate": 0.001,
+          "batch_size": 256,
+          "epochs": 15,
+          "early_stopping_patience": 3,
+          "sequence_boundary_protected": true,
+          "file_bounded": true
+        },
+        "best_epoch": 15,
+        "best_val_loss": 0.043713,
+        "artifact_path": "results/experiments/EXP-P1-CIC2017-R10-001/lstm.pt"
+      },
+      "fusion": {
+        "name": "fusion",
+        "model_type": "RFPlusLSTMScoreFusion",
+        "family": "ensemble_fusion",
+        "params": {
+          "formulation": "alpha * P_rf + (1 - alpha) * P_lstm",
+          "alpha": 0.5,
+          "tuning_split": "validation",
+          "tuning_objective": "roc_auc",
+          "validation_roc_auc": 0.9989
+        }
+      }
     },
     "n_features": 10
   },
@@ -170,7 +255,28 @@
       "min_samples_leaf": 2,
       "class_weight": "balanced_subsample",
       "random_state": 42,
-      "n_jobs": -1
+      "n_jobs": 4
+    },
+    "lstm": {
+      "seq_len": 5,
+      "stride": 1,
+      "label_rule": "last",
+      "hidden_size": 32,
+      "num_layers": 2,
+      "dropout": 0.2,
+      "learning_rate": 0.001,
+      "batch_size": 256,
+      "epochs": 15,
+      "early_stopping_patience": 3,
+      "sequence_boundary_protected": true,
+      "file_bounded": true
+    },
+    "fusion": {
+      "method": "score_averaging",
+      "alpha": 0.5,
+      "tuning_split": "validation",
+      "tuning_objective": "roc_auc",
+      "validation_roc_auc": 0.998928
     },
     "split": {
       "methodology": "stratified_random",
@@ -181,9 +287,7 @@
       "test": 0.2,
       "seed": 42,
       "seeds": [
-        42,
-        123,
-        456
+        42
       ],
       "leakage_audit_required": true,
       "fail_on_leakage": true
@@ -683,17 +787,25 @@
     "disk_mib": 57.177
   },
   "status": "EMPIRICALLY_OBSERVED",
-  "result_interpretation": "Multi-file empirical research evaluation on full verified dataset population.",
+  "result_interpretation": "Multi-file empirical research evaluation on full verified dataset population with Baseline Ladder (Majority, LR, DT, RF), Supervised LSTM, and RF+LSTM Score Fusion.",
   "limitations": [
     "Threshold objective D-003 remains open; reporting uses neutral threshold 0.5.",
-    "Feature contract candidate evaluation.",
-    "Duplicate policy applied: deduplicate_features."
+    "Feature contract candidate evaluation (R10).",
+    "Duplicate policy applied: deduplicate_features under reject_conflicts.",
+    "Aligned population excludes 32 boundary records (8 files * 4 rows) where T=5 file-bounded context is unavailable.",
+    "Sequence order reflects capture file row order within partitions, not continuous microsecond physical packet time."
   ],
   "artifacts": {
     "population_manifest": "results/experiments/EXP-P1-CIC2017-R10-001/experiment_population.json",
     "predictions": "results/experiments/EXP-P1-CIC2017-R10-001/predictions_test.csv",
     "per_family_metrics": "results/experiments/EXP-P1-CIC2017-R10-001/per_family_metrics.csv",
-    "card": "results/experiments/EXP-P1-CIC2017-R10-001/experiment_card.md"
+    "card": "results/experiments/EXP-P1-CIC2017-R10-001/experiment_card.md",
+    "random_forest_checkpoint": "results/experiments/EXP-P1-CIC2017-R10-001/random_forest.joblib",
+    "lstm_checkpoint": "results/experiments/EXP-P1-CIC2017-R10-001/lstm.pt",
+    "preprocessor_checkpoint": "results/experiments/EXP-P1-CIC2017-R10-001/preprocessor.joblib",
+    "model_comparisons": "results/experiments/EXP-P1-CIC2017-R10-001/model_comparisons.json",
+    "error_analysis": "results/experiments/EXP-P1-CIC2017-R10-001/error_analysis.json",
+    "calibration_report": "results/experiments/EXP-P1-CIC2017-R10-001/calibration_report.json"
   },
   "git_commit": "fa370a9001fb328cde9f3cfa1d6ae48d3a72679c",
   "software_environment": {
@@ -714,5 +826,15 @@
       "matplotlib": "3.11.2",
       "PyYAML": "6.0.3"
     }
+  },
+  "execution_commit": "fa370a9001fb328cde9f3cfa1d6ae48d3a72679c",
+  "artifact_generation_commit": "eb04596d66e744ec1c97a82c6114eb79bfbca354",
+  "repository_head_commit": "eb04596d66e744ec1c97a82c6114eb79bfbca354",
+  "aligned_population_accounting": {
+    "full_modeling_rows": 1779322,
+    "tabular_test_rows": 355865,
+    "aligned_sequence_test_rows": 355833,
+    "boundary_dropped_rows": 32,
+    "explanation": "The 32-row discrepancy between the full tabular test set (355,865 rows) and the aligned test set (355,833 rows) occurs because sequence construction requires T=5 consecutive records within the same source capture file (stride=1, label_rule=\"last\"). To prevent synthetic temporal cross-contamination across disjoint capture days, sequence windows are strictly forbidden from crossing source file boundaries. Across the 8 source capture files in the test split, the first T - 1 = 4 flow records of each file lack sufficient preceding intra-file context to form a valid 5-step sequence ending at those records (8 files * 4 boundary records = 32 dropped rows). Direct baseline ladder comparisons and paired statistical hypothesis tests are evaluated exclusively on this identical aligned test slice."
   }
 }

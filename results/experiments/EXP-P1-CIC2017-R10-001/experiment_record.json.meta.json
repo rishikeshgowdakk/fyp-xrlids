@@ -26,6 +26,16 @@
   },
   "artifact_version": "1",
   "extra": {
-    "config_hash": "677eb615db9a22f7042e7d496eea52877ea95927b92a2574326807a1ec35f862"
+    "config_hash": "677eb615db9a22f7042e7d496eea52877ea95927b92a2574326807a1ec35f862",
+    "execution_commit": "fa370a9001fb328cde9f3cfa1d6ae48d3a72679c",
+    "artifact_generation_commit": "eb04596d66e744ec1c97a82c6114eb79bfbca354",
+    "repository_head_commit": "eb04596d66e744ec1c97a82c6114eb79bfbca354",
+    "aligned_population_accounting": {
+      "full_modeling_rows": 1779322,
+      "tabular_test_rows": 355865,
+      "aligned_sequence_test_rows": 355833,
+      "boundary_dropped_rows": 32,
+      "explanation": "The 32-row discrepancy between the full tabular test set (355,865 rows) and the aligned test set (355,833 rows) occurs because sequence construction requires T=5 consecutive records within the same source capture file (stride=1, label_rule=\"last\"). To prevent synthetic temporal cross-contamination across disjoint capture days, sequence windows are strictly forbidden from crossing source file boundaries. Across the 8 source capture files in the test split, the first T - 1 = 4 flow records of each file lack sufficient preceding intra-file context to form a valid 5-step sequence ending at those records (8 files * 4 boundary records = 32 dropped rows). Direct baseline ladder comparisons and paired statistical hypothesis tests are evaluated exclusively on this identical aligned test slice."
+    }
   }
 }

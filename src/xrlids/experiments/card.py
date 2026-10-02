@@ -121,12 +121,31 @@ def generate_experiment_card(
         "- **Sequence Safety**: LSTM sequences are strictly bounded within individual source files; no cross-file sequence generation.",
         f"- **Split Counts**: Train={record.rows_train:,}, Val={record.rows_validation:,}, Test={record.rows_test:,}",
         "",
+    ]
+
+    diff_rows = (record.rows_test or 0) - aligned_metrics.get("population_size", 0)
+    boundary_expl = ""
+    if diff_rows > 0:
+        n_files = len(population.files)
+        boundary_expl = (
+            f"\n>\n"
+            f"> **Aligned Population Accounting ({diff_rows}-Row Boundary Explanation)**:\n"
+            f"> The {diff_rows}-row discrepancy between the full tabular test set ({record.rows_test:,} rows) and the aligned test set ({aligned_metrics.get('population_size', 0):,} rows) "
+            f"occurs because sequence construction requires $T=5$ consecutive records within the same source capture file (`stride=1`, `label_rule='last'`). "
+            f"To prevent synthetic temporal cross-contamination across disjoint capture days, sequence windows are strictly forbidden from crossing source file boundaries. "
+            f"Across the {n_files} source capture files in the test split, the first $T - 1 = 4$ flow records of each file lack sufficient preceding intra-file context "
+            f"to form a valid 5-step sequence ending at those records ({n_files} files $\\times$ 4 boundary records = {diff_rows} dropped rows). "
+            f"Direct baseline ladder comparisons and paired statistical hypothesis tests are evaluated exclusively on this identical aligned test slice."
+        )
+
+    lines += [
         "---",
         "## 5. Baseline Ladder Comparison (Fair Aligned Population)",
         "",
         "> [!NOTE]",
         "> To ensure direct mathematical fairness, all baseline ladder models and headline fusion",
-        f"> comparisons are evaluated on the exact same aligned test slice ({aligned_metrics.get('population_size', 0):,} rows).",
+        f"> comparisons are evaluated on the exact same aligned test slice ({aligned_metrics.get('population_size', 0):,} rows)."
+        f"{boundary_expl}",
         "",
         "| Model | Model Family | Test Accuracy | Precision | Recall | F1 Score | Specificity | FPR | ROC-AUC | PR-AUC |",
         "| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |",

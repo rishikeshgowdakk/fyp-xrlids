@@ -71,6 +71,10 @@ class ExperimentRecord:
     limitations: list[str] = field(default_factory=list)
     artifacts: dict[str, str] = field(default_factory=dict)
     git_commit: str | None = None
+    execution_commit: str | None = None
+    artifact_generation_commit: str | None = None
+    repository_head_commit: str | None = None
+    aligned_population_accounting: dict[str, Any] = field(default_factory=dict)
     software_environment: dict[str, Any] = field(default_factory=environment_fingerprint)
 
     def to_dict(self) -> dict[str, Any]:
@@ -84,13 +88,23 @@ def write_experiment_record(
     path: str | Path,
 ) -> Path:
     """Write an experiment record as JSON with a reproducibility sidecar."""
+    extra_meta: dict[str, Any] = {"config_hash": dict_hash(record.to_dict().get("hyperparameters", {}))}
+    if record.execution_commit:
+        extra_meta["execution_commit"] = record.execution_commit
+    if record.artifact_generation_commit:
+        extra_meta["artifact_generation_commit"] = record.artifact_generation_commit
+    if record.repository_head_commit:
+        extra_meta["repository_head_commit"] = record.repository_head_commit
+    if record.aligned_population_accounting:
+        extra_meta["aligned_population_accounting"] = record.aligned_population_accounting
+
     metadata = ArtifactMetadata(
         experiment_id=record.experiment_id,
         git_commit=record.git_commit or git_commit(),
         dataset_sha256=record.dataset_sha256,
         feature_schema_hash=record.feature_schema_hash,
         seed=record.random_seed,
-        extra={"config_hash": dict_hash(record.to_dict().get("hyperparameters", {}))},
+        extra=extra_meta,
     )
     payload = record.to_dict()
     payload["git_commit"] = payload.get("git_commit") or git_commit()
