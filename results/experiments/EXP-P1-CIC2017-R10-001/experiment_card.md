@@ -11,10 +11,10 @@
 - **Hypothesis**: Flow-level behavioral features separate benign and malicious traffic on CIC-IDS2017; supervised LSTM and RF+LSTM fusion provide complementary signals without test leakage.
 - **Dataset Key**: `cicids2017` (Version: `1.0.0`)
 - **Execution Status**: `EMPIRICALLY_OBSERVED`
-- **Git Commit**: `40a0c58d3f3fef5301ea808750cf56afb3c80f4c`
+- **Git Commit**: `fa370a9001fb328cde9f3cfa1d6ae48d3a72679c`
 - **Random Seed(s)**: `42`
-- **Wall-Clock Time**: `613.32s`
-- **Peak RSS**: `1692.64 MiB` (CPU Count: `12`)
+- **Wall-Clock Time**: `895.86s`
+- **Peak RSS**: `1668.85 MiB` (CPU Count: `12`)
 
 ---
 ## 2. Input Files and Integrity Verification
@@ -68,21 +68,26 @@ Final Modelling Population:           1,779,322
 
 > [!NOTE]
 > To ensure direct mathematical fairness, all baseline ladder models and headline fusion
-> comparisons are evaluated on the exact same aligned test slice (355,865 rows).
+> comparisons are evaluated on the exact same aligned test slice (355,833 rows).
 
 | Model | Model Family | Test Accuracy | Precision | Recall | F1 Score | Specificity | FPR | ROC-AUC | PR-AUC |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **MAJORITY** | `prior_baseline` | 0.8179 | 0.0000 | 0.0000 | 0.0000 | 1.0000 | 0.0000 | 0.5000 | 0.1821 |
+| **MAJORITY** | `prior_baseline` | 0.8178 | 0.0000 | 0.0000 | 0.0000 | 1.0000 | 0.0000 | 0.5000 | 0.1822 |
 | **LOGISTIC_REGRESSION** | `linear_baseline` | 0.8918 | 0.6403 | 0.9264 | 0.7572 | 0.8841 | 0.1159 | 0.9292 | 0.8238 |
-| **DECISION_TREE** | `tree_baseline` | 0.9744 | 0.8870 | 0.9851 | 0.9335 | 0.9721 | 0.0279 | 0.9945 | 0.9674 |
+| **DECISION_TREE** | `tree_baseline` | 0.9744 | 0.8870 | 0.9851 | 0.9335 | 0.9720 | 0.0280 | 0.9945 | 0.9674 |
 | **RANDOM_FOREST** | `ensemble` | 0.9815 | 0.9151 | 0.9901 | 0.9512 | 0.9796 | 0.0204 | 0.9968 | 0.9824 |
+| **LSTM** | `temporal_recurrent` | 0.9867 | 0.9691 | 0.9576 | 0.9633 | 0.9932 | 0.0068 | 0.9974 | 0.9904 |
+| **FUSION** | `ensemble_fusion` | 0.9906 | 0.9669 | 0.9823 | 0.9745 | 0.9925 | 0.0075 | 0.9989 | 0.9947 |
 
 ### Statistical Model Comparisons (Paired Non-Parametric Bootstrap)
 
 | Comparison (A vs B) | Metric | Estimate A | Estimate B | Δ (A - B) | 95% Bootstrap CI | p-value | Statistically Significant? |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **LR** vs **DT** | `f1` | 0.7572 | 0.9335 | -0.1763 | [-0.1782, -0.1741] | 0.0000 | ✅ YES |
+| **LR** vs **DT** | `f1` | 0.7572 | 0.9335 | -0.1763 | [-0.1782, -0.1742] | 0.0000 | ✅ YES |
 | **DT** vs **RF** | `f1` | 0.9335 | 0.9512 | -0.0177 | [-0.0185, -0.0169] | 0.0000 | ✅ YES |
+| **RF** vs **LSTM** | `f1` | 0.9512 | 0.9633 | -0.0121 | [-0.0134, -0.0109] | 0.0000 | ✅ YES |
+| **Fusion** vs **RF** | `f1` | 0.9745 | 0.9512 | +0.0234 | [0.0224, 0.0244] | 0.0000 | ✅ YES |
+| **Fusion** vs **LSTM** | `f1` | 0.9745 | 0.9633 | +0.0113 | [0.0104, 0.0120] | 0.0000 | ✅ YES |
 
 ---
 ## 6. Per-Attack-Family Evaluation
@@ -90,20 +95,20 @@ Final Modelling Population:           1,779,322
 | Attack Family | Class | Test Support | Correct | False Positives | False Negatives | Detection Rate (Recall) | Error Rate |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `BENIGN` | BENIGN | 291,045 | 285,094 | 5,951 | 0 | 97.96% | 2.04% |
-| `DoS Hulk` | ATTACK | 33,074 | 32,996 | 0 | 78 | 99.76% | 0.24% |
-| `DDoS` | ATTACK | 25,347 | 25,271 | 0 | 76 | 99.70% | 0.30% |
-| `DoS GoldenEye` | ATTACK | 2,037 | 1,959 | 0 | 78 | 96.17% | 3.83% |
-| `DoS Slowhttptest` | ATTACK | 1,020 | 1,004 | 0 | 16 | 98.43% | 1.57% |
-| `DoS slowloris` | ATTACK | 901 | 867 | 0 | 34 | 96.23% | 3.77% |
-| `FTP-Patator` | ATTACK | 897 | 894 | 0 | 3 | 99.67% | 0.33% |
-| `SSH-Patator` | ATTACK | 648 | 638 | 0 | 10 | 98.46% | 1.54% |
-| `PortScan` | ATTACK | 320 | 317 | 0 | 3 | 99.06% | 0.94% |
-| `Web Attack - Brute Force` | ATTACK | 258 | 41 | 0 | 217 | 15.89% | 84.11% |
-| `Bot` | ATTACK | 196 | 188 | 0 | 8 | 95.92% | 4.08% |
-| `Web Attack - XSS` | ATTACK | 108 | 3 | 0 | 105 | 2.78% | 97.22% |
-| `Infiltration` | ATTACK | 8 | 0 | 0 | 8 | 0.00% | 100.00% |
-| `Heartbleed` | ATTACK | 3 | 2 | 0 | 1 | 66.67% | 33.33% |
-| `Web Attack - Sql Injection` | ATTACK | 3 | 0 | 0 | 3 | 0.00% | 100.00% |
+| `DOS HULK` | ATTACK | 33,074 | 32,996 | 0 | 78 | 99.76% | 0.24% |
+| `DDOS` | ATTACK | 25,347 | 25,271 | 0 | 76 | 99.70% | 0.30% |
+| `DOS GOLDENEYE` | ATTACK | 2,037 | 1,959 | 0 | 78 | 96.17% | 3.83% |
+| `DOS SLOWHTTPTEST` | ATTACK | 1,020 | 1,004 | 0 | 16 | 98.43% | 1.57% |
+| `DOS SLOWLORIS` | ATTACK | 901 | 867 | 0 | 34 | 96.23% | 3.77% |
+| `FTP-PATATOR` | ATTACK | 897 | 894 | 0 | 3 | 99.67% | 0.33% |
+| `SSH-PATATOR` | ATTACK | 648 | 638 | 0 | 10 | 98.46% | 1.54% |
+| `PORTSCAN` | ATTACK | 320 | 317 | 0 | 3 | 99.06% | 0.94% |
+| `WEB ATTACK - BRUTE FORCE` | ATTACK | 258 | 41 | 0 | 217 | 15.89% | 84.11% |
+| `BOT` | ATTACK | 196 | 188 | 0 | 8 | 95.92% | 4.08% |
+| `WEB ATTACK - XSS` | ATTACK | 108 | 3 | 0 | 105 | 2.78% | 97.22% |
+| `INFILTRATION` | ATTACK | 8 | 0 | 0 | 8 | 0.00% | 100.00% |
+| `HEARTBLEED` | ATTACK | 3 | 2 | 0 | 1 | 66.67% | 33.33% |
+| `WEB ATTACK - SQL INJECTION` | ATTACK | 3 | 0 | 0 | 3 | 0.00% | 100.00% |
 
 ---
 ## 7. Explainability (TreeSHAP Feature Attributions)
@@ -124,6 +129,14 @@ Final Modelling Population:           1,779,322
 | 8 | `syn_count` | 0.003289 |
 | 9 | `syn_ack_ratio` | 0.002803 |
 | 10 | `rst_count` | 0.000000 |
+
+---
+## 8. Failure Analysis & Model Disagreements
+
+- **Aligned Evaluation Size**: 355,833 rows
+- **RF vs LSTM Disagreements**: 8,126 (2.28%)
+- **RF Positive, LSTM Negative**: 7103 (RF Correct: 2297, RF False Alarm: 4806)
+- **LSTM Positive, RF Negative**: 1023 (LSTM Correct: 186, LSTM False Alarm: 837)
 
 ---
 ## 9. Calibration & Threshold Analysis

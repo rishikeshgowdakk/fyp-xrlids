@@ -117,11 +117,11 @@ The results confirm that **`data/manifests/dataset_registry.yaml` is the canonic
 | **Logistic Regression**| ✅ Implemented | ✅ Passing | ✅ Empirically Executed | ✅ Empirically Executed | 🟡 Historical single-file only |
 | **Decision Tree** | ✅ Implemented | ✅ Passing | ✅ Empirically Executed | ✅ Empirically Executed | 🟡 Historical single-file only |
 | **Random Forest** | ✅ Implemented | ✅ Passing | ✅ Empirically Executed | ✅ Empirically Executed | 🟡 Historical single-file only |
-| **Supervised LSTM** | ✅ Implemented | ✅ Passing | ⛔ **NOT DEMONSTRATED** | ⛔ **NOT DEMONSTRATED** | 🟡 Historical single-file only |
-| **RF + LSTM Fusion** | ✅ Implemented | ✅ Passing | ⛔ **NOT DEMONSTRATED** | ⛔ **NOT DEMONSTRATED** | 🟡 Historical single-file only |
+| **Supervised LSTM** | ✅ Implemented | ✅ Passing | ✅ Empirically Executed | ⛔ **NOT DEMONSTRATED** | 🟡 Historical single-file only |
+| **RF + LSTM Fusion** | ✅ Implemented | ✅ Passing | ✅ Empirically Executed | ⛔ **NOT DEMONSTRATED** | 🟡 Historical single-file only |
 
-> [!WARNING]
-> Because Supervised LSTM and Fusion were skipped (`--skip-lstm`) during the initial full-dataset runs, **Research Questions RQ2 (temporal sequencing) and RQ3 (score fusion) cannot be claimed as answered**. They remain open empirical research tasks.
+> [!NOTE]
+> Supervised LSTM and RF+LSTM Fusion have now been empirically executed on the complete multi-file CIC-IDS2017 dataset (`EXP-P1-CIC2017-R10-001`, 1,067,557 sequences, 355,833 aligned test samples). Research Questions RQ2 and RQ3 are empirically demonstrated on CIC-IDS2017. Their execution on multi-file UNSW-NB15 and CSE-CIC-IDS2018 remains pending.
 
 ---
 
@@ -178,11 +178,11 @@ The paired bootstrap comparison (`src/xrlids/evaluation/statistics.py`) tests th
 
 ## 11. Remaining Scientific Blockers & Next Research Tasks
 
-1. **RQ2 & RQ3 Full Empirical Execution**:
-   - Supervised LSTM and RF+LSTM Fusion must be executed on multi-file CIC-IDS2017 and UNSW-NB15 with full sequence evaluation before claiming answering these research questions.
+1. **Multi-File CSE-CIC-IDS2018 & UNSW-NB15 Sequence Modeling**:
+   - Supervised LSTM and Fusion have been empirically executed and validated on the multi-file CIC-IDS2017 population (`EXP-P1-CIC2017-R10-001`). Multi-file sequence training on UNSW-NB15 and CSE-CIC-IDS2018 remains pending.
 2. **CSE-CIC-IDS2018 Multi-File Execution**:
    - The full 10-file CSE-CIC-IDS2018 dataset (16.23M rows) has been audited and verified, but multi-file training requires running the updated runner under the 10-GiB memory budget.
 3. **Decision D-003 (Operational Threshold)**:
-   - Remains OPEN. The trade-off between false alarm rate ($2.04\%$ on Benign in CIC-IDS2017) and low-footprint attack detection ($15.89\%$ on Brute Force, $2.78\%$ on XSS) requires explicit operational cost matrices.
+   - Remains OPEN. The trade-off between false alarm rate ($0.75\%$ on Benign under Fusion in CIC-IDS2017) and low-footprint attack detection ($15.89\%$ on Brute Force, $2.78\%$ on XSS) requires explicit operational cost matrices.
 4. **Multi-Seed Full Runs**:
    - Seeds 123 and 456 must be executed across full populations to substantiate variance and stability claims.
