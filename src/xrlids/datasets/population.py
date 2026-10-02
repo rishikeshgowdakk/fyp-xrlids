@@ -442,11 +442,11 @@ def load_dataset_population(
                 continue
 
             feat_df = feat_df.iloc[finite_mask].reset_index(drop=True)
-            chunk_labels = cleaned.labels.binary.iloc[finite_mask].reset_index(drop=True)
+            chunk_labels = cleaned.labels.binary.iloc[finite_mask].astype(np.int8).reset_index(drop=True)
             chunk_canonical = cleaned.labels.canonical.iloc[finite_mask].reset_index(drop=True)
             chunk_families = clean_families.iloc[finite_mask].reset_index(drop=True)
-            chunk_src_rows = clean_source_rows.iloc[finite_mask].reset_index(drop=True)
-            chunk_gl_orders = clean_global_orders.iloc[finite_mask].reset_index(drop=True)
+            chunk_src_rows = clean_source_rows.iloc[finite_mask].astype(np.int32).reset_index(drop=True)
+            chunk_gl_orders = clean_global_orders.iloc[finite_mask].astype(np.int32).reset_index(drop=True)
 
             file_final_modeling_rows += n_finite
 
@@ -487,9 +487,15 @@ def load_dataset_population(
     if not all_features_chunks:
         raise ValueError(f"No valid modeling rows extracted across {len(file_records)} files.")
 
+    import gc
+
     combined_features = pd.concat(all_features_chunks, ignore_index=True)
+    del all_features_chunks
     combined_labels = pd.concat(all_labels_chunks, ignore_index=True)
+    del all_labels_chunks
     combined_prov = pd.concat(all_prov_chunks, ignore_index=True)
+    del all_prov_chunks
+    gc.collect()
 
     # 5. Feature-space deduplication & Conflict Analysis
     total_removed_feature_dupes = 0
@@ -510,10 +516,12 @@ def load_dataset_population(
             combined_features = combined_features.loc[retain_idx].reset_index(drop=True)
             combined_labels = combined_labels.loc[retain_idx].reset_index(drop=True)
             combined_prov = combined_prov.loc[retain_idx].reset_index(drop=True)
+            gc.collect()
 
         # Then deduplicate remaining identical feature vectors (Policy A)
         h = pd.util.hash_pandas_object(combined_features, index=False)
         is_feat_dupe = h.duplicated(keep="first")
+        del h
         n_feat_dupes = int(is_feat_dupe.sum())
         total_removed_feature_dupes = n_feat_dupes
 
@@ -522,6 +530,8 @@ def load_dataset_population(
             combined_features = combined_features.loc[~is_feat_dupe].reset_index(drop=True)
             combined_labels = combined_labels.loc[~is_feat_dupe].reset_index(drop=True)
             combined_prov = combined_prov.loc[~is_feat_dupe].reset_index(drop=True)
+            del is_feat_dupe
+            gc.collect()
 
     # 6. Optional developmental subsample limit (strictly tagged)
     if config.sample_limit and config.sample_limit < len(combined_features):
