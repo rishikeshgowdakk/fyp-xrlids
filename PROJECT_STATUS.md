@@ -71,7 +71,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | ID | Decision | Status |
 | --- | --- | --- |
 | D-001 | Normalization & Cleaning contract | RESOLVED: Canonical column contract established with preserved raw provenance |
-| D-002 | Feature contract R10/R15/R20 | OPEN: R10 verified on CIC-IDS2017 and CSE-CIC-IDS2018; 4-feature contract for cross-dataset with UNSW-NB15 |
+| D-002 | Feature contract R10/R15/R20 | RESOLVED: R10 frozen as Main Cross-Dataset 10-Feature Contract for CIC-IDS2017/CSE-CIC-IDS2018; UNSW-NB15 blocked on 6 missing features (auxiliary fallback) |
 | D-003 | Threshold objective | OPEN: Neutral 0.5 baseline used pending operational deployment criteria |
 | D-004 | Dataset acquisition | RESOLVED: All 20 modeling files acquired, verified, and audited |
 | D-005 | Cross-dataset normalisation | OPEN: Train-only standard scaling applied within source domain |

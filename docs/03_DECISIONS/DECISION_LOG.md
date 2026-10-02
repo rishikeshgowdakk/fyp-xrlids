@@ -25,22 +25,12 @@ Status values: `OPEN` (awaiting user) · `DECIDED` · `SUPERSEDED`
 
 ## D-002 — Feature contract: inherit R10/R15/R20 or re-derive
 
-- **Status:** **OPEN — USER DECISION REQUIRED** (evidence artifact now exists)
-- **Date raised:** 2026-09-30
-- **Evidence gathered (2026-09-30):** `results/audits/feature_contract_evidence.json` and
-  `reports/generated/feature_contract_evidence.md` record: static availability per rung per
-  dataset (UNSW-NB15 supports 4/10 of R10), live-computability blocks (active/idle/subflow
-  features), decision-gate gaps, and the evidence still missing (distribution behaviour,
-  missingness, sweep deltas) with the reason it is missing.
-- **Question:** Are the historical R10/R15/R20 rungs accepted as the feature contract, or re-derived from first principles against the §21 decision gate?
-- **Options:**
-  - A. Inherit the historical rung definitions as the starting contract, then test them.
-  - B. Re-derive rungs from the feature taxonomy and compatibility constraints, then compare to historical lists.
-  - C. Run both and report the difference.
-- **Trade-offs:** A is faster and preserves continuity with previous work, but risks inheriting unexamined choices. B is more defensible but is more work and may diverge from the professor's expectations. C is the strongest evidentially but costs more compute.
-- **Impact if deferred:** Feature-dependent experiments (RQ4 sweep, all baselines) cannot be frozen.
-- **Recommended evidence-gathering step:** Produce the feature taxonomy + definitions and the 10-point gate answers for each candidate feature, then choose.
-- **USER DECISION REQUIRED.**
+- **Status:** **DECIDED**
+- **Date decided:** 2026-10-02
+- **Evidence gathered:** `docs/phase1/FEATURE_CONTRACT_AUDIT.md`, empirical range profiling across CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15.
+- **Decision:** Freeze R10 (`flow_duration_ms`, `flow_packets_per_s`, `flow_bytes_per_s`, `packet_length_mean`, `packet_length_std`, `syn_count`, `ack_count`, `rst_count`, `fin_count`, `syn_ack_ratio`) as the **MAIN CROSS-DATASET 10-FEATURE CONTRACT** (v1.0.0, schema hash `9d6c3826...`) for CIC-IDS2017 and CSE-CIC-IDS2018.
+- **UNSW-NB15 Blocker Resolution:** UNSW-NB15 supports only 4 of the 10 features (`flow_duration_ms`, `flow_packets_per_s`, `flow_bytes_per_s`, `packet_length_mean`). The remaining 6 features (`packet_length_std`, `syn_count`, `ack_count`, `rst_count`, `fin_count`, `syn_ack_ratio`) are absent from Argus/Bro flow logs and cannot be derived without raw PCAPs. Under the scientific integrity mandate, these 6 features are **never fabricated**. The 4-feature contract is quarantined as an auxiliary/fallback domain-shift benchmark.
+- **Artifacts:** `configs/features/features.yaml`, `docs/phase1/FEATURE_CONTRACT_AUDIT.md`, `tests/unit/test_common_10_feature_contract.py`.
 
 ---
 

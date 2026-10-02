@@ -1,7 +1,7 @@
 # Feature Compatibility and Contract Report (generated)
 
-Registry status: `candidate_not_frozen` (frozen by `D-002`).
-Column-map status: `unverified_pending_audit`.
+Registry status: `frozen` (frozen by `D-002`).
+Column-map status: `verified_audited`.
 
 ## In-Domain Rungs (Supported vs Unsupported)
 
