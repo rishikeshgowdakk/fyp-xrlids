@@ -21,8 +21,8 @@
       "true_positives": {
         "count": 64180,
         "mean": 0.9748276437665618,
-        "std": 0.04502737567382907,
-        "median": 0.9896385606477224,
+        "std": 0.045027375673829056,
+        "median": 0.9896385606477223,
         "min": 0.5014179741530032,
         "max": 0.9999998468867437,
         "p25": 0.9798294961924874,
@@ -36,17 +36,17 @@
         "min": 0.0,
         "max": 0.49947369482080967,
         "p25": 0.00011734227137800908,
-        "p75": 0.004904142568161505
+        "p75": 0.004904142568161504
       },
       "false_positives": {
         "count": 5951,
         "mean": 0.864925270450061,
         "std": 0.12803300385058913,
-        "median": 0.9187329188121904,
+        "median": 0.9187329188121903,
         "min": 0.5001188357985334,
         "max": 0.999192774478521,
         "p25": 0.8045733687617308,
-        "p75": 0.9794201106887697
+        "p75": 0.9794201106887694
       },
       "false_negatives": {
         "count": 640,
@@ -54,8 +54,8 @@
         "std": 0.11536007967347309,
         "median": 0.3494847571633087,
         "min": 6.030914115381456e-06,
-        "max": 0.49928576843703437,
-        "p25": 0.27964930384329895,
+        "max": 0.4992857684370345,
+        "p25": 0.279649303843299,
         "p75": 0.35024490245220924
       }
     },
@@ -81,7 +81,7 @@
           "provenance": {
             "source_file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
             "source_row_index": 257877,
-            "label_family": "PortScan",
+            "label_family": "PORTSCAN",
             "canonical_label": "ATTACK"
           }
         },
@@ -105,7 +105,7 @@
           "provenance": {
             "source_file": "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
             "source_row_index": 87271,
-            "label_family": "Infiltration",
+            "label_family": "INFILTRATION",
             "canonical_label": "ATTACK"
           }
         },
@@ -129,7 +129,7 @@
           "provenance": {
             "source_file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
             "source_row_index": 196993,
-            "label_family": "DDoS",
+            "label_family": "DDOS",
             "canonical_label": "ATTACK"
           }
         },
@@ -153,14 +153,14 @@
           "provenance": {
             "source_file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
             "source_row_index": 135204,
-            "label_family": "DDoS",
+            "label_family": "DDOS",
             "canonical_label": "ATTACK"
           }
         },
         {
           "index": 171367,
           "true_label": 1,
-          "predicted_score": 0.004902635154208918,
+          "predicted_score": 0.004902635154208917,
           "predicted_label": 0,
           "features": {
             "flow_duration_ms": 66695.828125,
@@ -177,7 +177,7 @@
           "provenance": {
             "source_file": "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
             "source_row_index": 115196,
-            "label_family": "Infiltration",
+            "label_family": "INFILTRATION",
             "canonical_label": "ATTACK"
           }
         }
@@ -234,7 +234,7 @@
         {
           "index": 297476,
           "true_label": 0,
-          "predicted_score": 0.9977407693082735,
+          "predicted_score": 0.9977407693082734,
           "predicted_label": 1,
           "features": {
             "flow_duration_ms": 100158.765625,
@@ -282,7 +282,7 @@
         {
           "index": 309519,
           "true_label": 0,
-          "predicted_score": 0.9972320240098762,
+          "predicted_score": 0.997232024009876,
           "predicted_label": 1,
           "features": {
             "flow_duration_ms": 100091.640625,
@@ -323,7 +323,7 @@
         "error_rate": 0.020447
       },
       {
-        "family": "DoS Hulk",
+        "family": "DOS HULK",
         "is_attack": true,
         "support": 33074,
         "correct": 32996,
@@ -333,7 +333,7 @@
         "error_rate": 0.002358
       },
       {
-        "family": "DDoS",
+        "family": "DDOS",
         "is_attack": true,
         "support": 25347,
         "correct": 25271,
@@ -343,7 +343,7 @@
         "error_rate": 0.002998
       },
       {
-        "family": "DoS GoldenEye",
+        "family": "DOS GOLDENEYE",
         "is_attack": true,
         "support": 2037,
         "correct": 1959,
@@ -353,7 +353,7 @@
         "error_rate": 0.038292
       },
       {
-        "family": "DoS Slowhttptest",
+        "family": "DOS SLOWHTTPTEST",
         "is_attack": true,
         "support": 1020,
         "correct": 1004,
@@ -363,7 +363,7 @@
         "error_rate": 0.015686
       },
       {
-        "family": "DoS slowloris",
+        "family": "DOS SLOWLORIS",
         "is_attack": true,
         "support": 901,
         "correct": 867,
@@ -373,7 +373,7 @@
         "error_rate": 0.037736
       },
       {
-        "family": "FTP-Patator",
+        "family": "FTP-PATATOR",
         "is_attack": true,
         "support": 897,
         "correct": 894,
@@ -383,7 +383,7 @@
         "error_rate": 0.003344
       },
       {
-        "family": "SSH-Patator",
+        "family": "SSH-PATATOR",
         "is_attack": true,
         "support": 648,
         "correct": 638,
@@ -393,7 +393,7 @@
         "error_rate": 0.015432
       },
       {
-        "family": "PortScan",
+        "family": "PORTSCAN",
         "is_attack": true,
         "support": 320,
         "correct": 317,
@@ -403,7 +403,7 @@
         "error_rate": 0.009375
       },
       {
-        "family": "Web Attack \ufffd Brute Force",
+        "family": "WEB ATTACK - BRUTE FORCE",
         "is_attack": true,
         "support": 258,
         "correct": 41,
@@ -413,7 +413,7 @@
         "error_rate": 0.841085
       },
       {
-        "family": "Bot",
+        "family": "BOT",
         "is_attack": true,
         "support": 196,
         "correct": 188,
@@ -423,7 +423,7 @@
         "error_rate": 0.040816
       },
       {
-        "family": "Web Attack \ufffd XSS",
+        "family": "WEB ATTACK - XSS",
         "is_attack": true,
         "support": 108,
         "correct": 3,
@@ -433,7 +433,7 @@
         "error_rate": 0.972222
       },
       {
-        "family": "Infiltration",
+        "family": "INFILTRATION",
         "is_attack": true,
         "support": 8,
         "correct": 0,
@@ -443,7 +443,7 @@
         "error_rate": 1.0
       },
       {
-        "family": "Heartbleed",
+        "family": "HEARTBLEED",
         "is_attack": true,
         "support": 3,
         "correct": 2,
@@ -453,7 +453,7 @@
         "error_rate": 0.333333
       },
       {
-        "family": "Web Attack \ufffd Sql Injection",
+        "family": "WEB ATTACK - SQL INJECTION",
         "is_attack": true,
         "support": 3,
         "correct": 0,
@@ -474,8 +474,8 @@
         "detection_rate": 0.979553,
         "error_rate": 0.020447
       },
-      "Bot": {
-        "family": "Bot",
+      "BOT": {
+        "family": "BOT",
         "is_attack": true,
         "support": 196,
         "correct": 188,
@@ -484,8 +484,8 @@
         "detection_rate": 0.959184,
         "error_rate": 0.040816
       },
-      "DDoS": {
-        "family": "DDoS",
+      "DDOS": {
+        "family": "DDOS",
         "is_attack": true,
         "support": 25347,
         "correct": 25271,
@@ -494,8 +494,8 @@
         "detection_rate": 0.997002,
         "error_rate": 0.002998
       },
-      "DoS GoldenEye": {
-        "family": "DoS GoldenEye",
+      "DOS GOLDENEYE": {
+        "family": "DOS GOLDENEYE",
         "is_attack": true,
         "support": 2037,
         "correct": 1959,
@@ -504,8 +504,8 @@
         "detection_rate": 0.961708,
         "error_rate": 0.038292
       },
-      "DoS Hulk": {
-        "family": "DoS Hulk",
+      "DOS HULK": {
+        "family": "DOS HULK",
         "is_attack": true,
         "support": 33074,
         "correct": 32996,
@@ -514,8 +514,8 @@
         "detection_rate": 0.997642,
         "error_rate": 0.002358
       },
-      "DoS Slowhttptest": {
-        "family": "DoS Slowhttptest",
+      "DOS SLOWHTTPTEST": {
+        "family": "DOS SLOWHTTPTEST",
         "is_attack": true,
         "support": 1020,
         "correct": 1004,
@@ -524,8 +524,8 @@
         "detection_rate": 0.984314,
         "error_rate": 0.015686
       },
-      "DoS slowloris": {
-        "family": "DoS slowloris",
+      "DOS SLOWLORIS": {
+        "family": "DOS SLOWLORIS",
         "is_attack": true,
         "support": 901,
         "correct": 867,
@@ -534,8 +534,8 @@
         "detection_rate": 0.962264,
         "error_rate": 0.037736
       },
-      "FTP-Patator": {
-        "family": "FTP-Patator",
+      "FTP-PATATOR": {
+        "family": "FTP-PATATOR",
         "is_attack": true,
         "support": 897,
         "correct": 894,
@@ -544,8 +544,8 @@
         "detection_rate": 0.996656,
         "error_rate": 0.003344
       },
-      "Heartbleed": {
-        "family": "Heartbleed",
+      "HEARTBLEED": {
+        "family": "HEARTBLEED",
         "is_attack": true,
         "support": 3,
         "correct": 2,
@@ -554,8 +554,8 @@
         "detection_rate": 0.666667,
         "error_rate": 0.333333
       },
-      "Infiltration": {
-        "family": "Infiltration",
+      "INFILTRATION": {
+        "family": "INFILTRATION",
         "is_attack": true,
         "support": 8,
         "correct": 0,
@@ -564,8 +564,8 @@
         "detection_rate": 0.0,
         "error_rate": 1.0
       },
-      "PortScan": {
-        "family": "PortScan",
+      "PORTSCAN": {
+        "family": "PORTSCAN",
         "is_attack": true,
         "support": 320,
         "correct": 317,
@@ -574,8 +574,8 @@
         "detection_rate": 0.990625,
         "error_rate": 0.009375
       },
-      "SSH-Patator": {
-        "family": "SSH-Patator",
+      "SSH-PATATOR": {
+        "family": "SSH-PATATOR",
         "is_attack": true,
         "support": 648,
         "correct": 638,
@@ -584,8 +584,8 @@
         "detection_rate": 0.984568,
         "error_rate": 0.015432
       },
-      "Web Attack \ufffd Brute Force": {
-        "family": "Web Attack \ufffd Brute Force",
+      "WEB ATTACK - BRUTE FORCE": {
+        "family": "WEB ATTACK - BRUTE FORCE",
         "is_attack": true,
         "support": 258,
         "correct": 41,
@@ -594,8 +594,8 @@
         "detection_rate": 0.158915,
         "error_rate": 0.841085
       },
-      "Web Attack \ufffd Sql Injection": {
-        "family": "Web Attack \ufffd Sql Injection",
+      "WEB ATTACK - SQL INJECTION": {
+        "family": "WEB ATTACK - SQL INJECTION",
         "is_attack": true,
         "support": 3,
         "correct": 0,
@@ -604,8 +604,8 @@
         "detection_rate": 0.0,
         "error_rate": 1.0
       },
-      "Web Attack \ufffd XSS": {
-        "family": "Web Attack \ufffd XSS",
+      "WEB ATTACK - XSS": {
+        "family": "WEB ATTACK - XSS",
         "is_attack": true,
         "support": 108,
         "correct": 3,
@@ -615,5 +615,1073 @@
         "error_rate": 0.972222
       }
     }
+  },
+  "lstm": {
+    "threshold": 0.5,
+    "total_evaluated": 355833,
+    "confusion": {
+      "tn": 289031,
+      "fp": 1982,
+      "fn": 2751,
+      "tp": 62069
+    },
+    "rates": {
+      "accuracy": 0.9866988165796876,
+      "precision": 0.969055908572856,
+      "recall": 0.9575593952483801,
+      "f1": 0.9632733508702501,
+      "fpr": 0.006810692305842007,
+      "fnr": 0.04244060475161987,
+      "balanced_accuracy": 0.975374351471269
+    },
+    "confidence_distributions": {
+      "true_positives": {
+        "count": 62069,
+        "mean": 0.9650948575791423,
+        "std": 0.07722619596324168,
+        "median": 0.996044933795929,
+        "min": 0.5000231266021729,
+        "max": 0.9999992847442627,
+        "p25": 0.9834649562835693,
+        "p75": 0.9998610019683838
+      },
+      "true_negatives": {
+        "count": 289031,
+        "mean": 0.006529948102075475,
+        "std": 0.03178066829221541,
+        "median": 0.0001854443398769945,
+        "min": 1.3485802696777682e-07,
+        "max": 0.4999508261680603,
+        "p25": 5.024520396545995e-05,
+        "p75": 0.0010789588559418917
+      },
+      "false_positives": {
+        "count": 1982,
+        "mean": 0.7780167699521774,
+        "std": 0.15292204437776352,
+        "median": 0.7835146486759186,
+        "min": 0.500001072883606,
+        "max": 0.999980092048645,
+        "p25": 0.6500959396362305,
+        "p75": 0.9115902632474899
+      },
+      "false_negatives": {
+        "count": 2751,
+        "mean": 0.18702931699243008,
+        "std": 0.15998711655121275,
+        "median": 0.1436784565448761,
+        "min": 8.451275789411739e-06,
+        "max": 0.499557226896286,
+        "p25": 0.03717639856040478,
+        "p75": 0.324518546462059
+      }
+    },
+    "difficult_samples": {
+      "worst_false_negatives": [
+        {
+          "index": 268087,
+          "true_label": 1,
+          "predicted_score": 8.451275789411739e-06,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "Wednesday-workingHours.pcap_ISCX.csv",
+            "source_row_index": 27386,
+            "label_family": "DOS SLOWLORIS",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 274314,
+          "true_label": 1,
+          "predicted_score": 2.330990719201509e-05,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "Wednesday-workingHours.pcap_ISCX.csv",
+            "source_row_index": 69109,
+            "label_family": "DOS SLOWLORIS",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 268099,
+          "true_label": 1,
+          "predicted_score": 2.7631545890471898e-05,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "Wednesday-workingHours.pcap_ISCX.csv",
+            "source_row_index": 27477,
+            "label_family": "DOS SLOWLORIS",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 274317,
+          "true_label": 1,
+          "predicted_score": 4.264384915586561e-05,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "Wednesday-workingHours.pcap_ISCX.csv",
+            "source_row_index": 69115,
+            "label_family": "DOS SLOWLORIS",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 196525,
+          "true_label": 1,
+          "predicted_score": 4.3251879105810076e-05,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+            "source_row_index": 86041,
+            "label_family": "WEB ATTACK - XSS",
+            "canonical_label": "ATTACK"
+          }
+        }
+      ],
+      "worst_false_positives": [
+        {
+          "index": 26191,
+          "true_label": 0,
+          "predicted_score": 0.999980092048645,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+            "source_row_index": 139127,
+            "label_family": "BENIGN",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 31354,
+          "true_label": 0,
+          "predicted_score": 0.9999710321426392,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+            "source_row_index": 165738,
+            "label_family": "BENIGN",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 26126,
+          "true_label": 0,
+          "predicted_score": 0.9999604225158691,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+            "source_row_index": 138799,
+            "label_family": "BENIGN",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 31353,
+          "true_label": 0,
+          "predicted_score": 0.9999499320983887,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+            "source_row_index": 165734,
+            "label_family": "BENIGN",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 26192,
+          "true_label": 0,
+          "predicted_score": 0.9999332427978516,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+            "source_row_index": 139130,
+            "label_family": "BENIGN",
+            "canonical_label": "BENIGN"
+          }
+        }
+      ]
+    },
+    "duplicate_subset_analysis": null
+  },
+  "fusion": {
+    "threshold": 0.5,
+    "total_evaluated": 355833,
+    "confusion": {
+      "tn": 288835,
+      "fp": 2178,
+      "fn": 1150,
+      "tp": 63670
+    },
+    "rates": {
+      "accuracy": 0.9906472980302558,
+      "precision": 0.9669238245656664,
+      "recall": 0.9822585621721691,
+      "f1": 0.9745308721339578,
+      "fpr": 0.007484201736692175,
+      "fnr": 0.017741437827830917,
+      "balanced_accuracy": 0.9873871802177385
+    },
+    "confidence_distributions": {
+      "true_positives": {
+        "count": 63670,
+        "mean": 0.9609498005549117,
+        "std": 0.07613704913708516,
+        "median": 0.9913247218079542,
+        "min": 0.5000093167664421,
+        "max": 0.9999977918693077,
+        "p25": 0.9630864469746325,
+        "p75": 0.9959487382737757
+      },
+      "true_negatives": {
+        "count": 288835,
+        "mean": 0.015147737757062905,
+        "std": 0.05917116034629535,
+        "median": 0.0005651434073041068,
+        "min": 4.018325228116737e-07,
+        "max": 0.4999489800912935,
+        "p25": 0.00022888809385226077,
+        "p75": 0.003760668485620608
+      },
+      "false_positives": {
+        "count": 2178,
+        "mean": 0.7346211478755682,
+        "std": 0.17144696648306207,
+        "median": 0.7268895009438763,
+        "min": 0.5000162438694886,
+        "max": 0.9973559498396836,
+        "p25": 0.5594970571212751,
+        "p75": 0.897449971035577
+      },
+      "false_negatives": {
+        "count": 1150,
+        "mean": 0.35307483775426834,
+        "std": 0.13523177471153533,
+        "median": 0.39771269391709674,
+        "min": 2.5871937485126326e-05,
+        "max": 0.4998563916445795,
+        "p25": 0.22338504970859757,
+        "p75": 0.4794864267321643
+      }
+    },
+    "difficult_samples": {
+      "worst_false_negatives": [
+        {
+          "index": 57896,
+          "true_label": 1,
+          "predicted_score": 2.5871937485126326e-05,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+            "source_row_index": 257877,
+            "label_family": "PORTSCAN",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 171347,
+          "true_label": 1,
+          "predicted_score": 0.0029260353361660633,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+            "source_row_index": 115196,
+            "label_family": "INFILTRATION",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 167825,
+          "true_label": 1,
+          "predicted_score": 0.0034313300809837954,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+            "source_row_index": 87271,
+            "label_family": "INFILTRATION",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 196525,
+          "true_label": 1,
+          "predicted_score": 0.004400814598698621,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+            "source_row_index": 86041,
+            "label_family": "WEB ATTACK - XSS",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 177129,
+          "true_label": 1,
+          "predicted_score": 0.004818393416885852,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+            "source_row_index": 220906,
+            "label_family": "INFILTRATION",
+            "canonical_label": "ATTACK"
+          }
+        }
+      ],
+      "worst_false_positives": [
+        {
+          "index": 297444,
+          "true_label": 0,
+          "predicted_score": 0.9973559498396836,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "Wednesday-workingHours.pcap_ISCX.csv",
+            "source_row_index": 219625,
+            "label_family": "BENIGN",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 295958,
+          "true_label": 0,
+          "predicted_score": 0.9965789013033115,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "Wednesday-workingHours.pcap_ISCX.csv",
+            "source_row_index": 209540,
+            "label_family": "BENIGN",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 299213,
+          "true_label": 0,
+          "predicted_score": 0.9965444915521221,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "Wednesday-workingHours.pcap_ISCX.csv",
+            "source_row_index": 231812,
+            "label_family": "BENIGN",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 296324,
+          "true_label": 0,
+          "predicted_score": 0.9955537448910408,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "Wednesday-workingHours.pcap_ISCX.csv",
+            "source_row_index": 211950,
+            "label_family": "BENIGN",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 276935,
+          "true_label": 0,
+          "predicted_score": 0.9955230057692952,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "Wednesday-workingHours.pcap_ISCX.csv",
+            "source_row_index": 84160,
+            "label_family": "BENIGN",
+            "canonical_label": "BENIGN"
+          }
+        }
+      ]
+    },
+    "duplicate_subset_analysis": null
+  },
+  "per_family_lstm": {
+    "threshold": 0.5,
+    "total_evaluated_rows": 355833,
+    "total_attack_families": 14,
+    "summary_table": [
+      {
+        "family": "BENIGN",
+        "is_attack": false,
+        "support": 291013,
+        "correct": 289031,
+        "false_positives": 1982,
+        "false_negatives": 0,
+        "detection_rate": 0.993189,
+        "error_rate": 0.006811
+      },
+      {
+        "family": "DOS HULK",
+        "is_attack": true,
+        "support": 33074,
+        "correct": 32550,
+        "false_positives": 0,
+        "false_negatives": 524,
+        "detection_rate": 0.984157,
+        "error_rate": 0.015843
+      },
+      {
+        "family": "DDOS",
+        "is_attack": true,
+        "support": 25347,
+        "correct": 24937,
+        "false_positives": 0,
+        "false_negatives": 410,
+        "detection_rate": 0.983825,
+        "error_rate": 0.016175
+      },
+      {
+        "family": "DOS GOLDENEYE",
+        "is_attack": true,
+        "support": 2037,
+        "correct": 1724,
+        "false_positives": 0,
+        "false_negatives": 313,
+        "detection_rate": 0.846343,
+        "error_rate": 0.153657
+      },
+      {
+        "family": "DOS SLOWHTTPTEST",
+        "is_attack": true,
+        "support": 1020,
+        "correct": 960,
+        "false_positives": 0,
+        "false_negatives": 60,
+        "detection_rate": 0.941176,
+        "error_rate": 0.058824
+      },
+      {
+        "family": "DOS SLOWLORIS",
+        "is_attack": true,
+        "support": 901,
+        "correct": 530,
+        "false_positives": 0,
+        "false_negatives": 371,
+        "detection_rate": 0.588235,
+        "error_rate": 0.411765
+      },
+      {
+        "family": "FTP-PATATOR",
+        "is_attack": true,
+        "support": 897,
+        "correct": 619,
+        "false_positives": 0,
+        "false_negatives": 278,
+        "detection_rate": 0.690078,
+        "error_rate": 0.309922
+      },
+      {
+        "family": "SSH-PATATOR",
+        "is_attack": true,
+        "support": 648,
+        "correct": 530,
+        "false_positives": 0,
+        "false_negatives": 118,
+        "detection_rate": 0.817901,
+        "error_rate": 0.182099
+      },
+      {
+        "family": "PORTSCAN",
+        "is_attack": true,
+        "support": 320,
+        "correct": 200,
+        "false_positives": 0,
+        "false_negatives": 120,
+        "detection_rate": 0.625,
+        "error_rate": 0.375
+      },
+      {
+        "family": "WEB ATTACK - BRUTE FORCE",
+        "is_attack": true,
+        "support": 258,
+        "correct": 10,
+        "false_positives": 0,
+        "false_negatives": 248,
+        "detection_rate": 0.03876,
+        "error_rate": 0.96124
+      },
+      {
+        "family": "BOT",
+        "is_attack": true,
+        "support": 196,
+        "correct": 8,
+        "false_positives": 0,
+        "false_negatives": 188,
+        "detection_rate": 0.040816,
+        "error_rate": 0.959184
+      },
+      {
+        "family": "WEB ATTACK - XSS",
+        "is_attack": true,
+        "support": 108,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 108,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      },
+      {
+        "family": "INFILTRATION",
+        "is_attack": true,
+        "support": 8,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 8,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      },
+      {
+        "family": "HEARTBLEED",
+        "is_attack": true,
+        "support": 3,
+        "correct": 1,
+        "false_positives": 0,
+        "false_negatives": 2,
+        "detection_rate": 0.333333,
+        "error_rate": 0.666667
+      },
+      {
+        "family": "WEB ATTACK - SQL INJECTION",
+        "is_attack": true,
+        "support": 3,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 3,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      }
+    ],
+    "family_breakdown": {
+      "BENIGN": {
+        "family": "BENIGN",
+        "is_attack": false,
+        "support": 291013,
+        "correct": 289031,
+        "false_positives": 1982,
+        "false_negatives": 0,
+        "detection_rate": 0.993189,
+        "error_rate": 0.006811
+      },
+      "BOT": {
+        "family": "BOT",
+        "is_attack": true,
+        "support": 196,
+        "correct": 8,
+        "false_positives": 0,
+        "false_negatives": 188,
+        "detection_rate": 0.040816,
+        "error_rate": 0.959184
+      },
+      "DDOS": {
+        "family": "DDOS",
+        "is_attack": true,
+        "support": 25347,
+        "correct": 24937,
+        "false_positives": 0,
+        "false_negatives": 410,
+        "detection_rate": 0.983825,
+        "error_rate": 0.016175
+      },
+      "DOS GOLDENEYE": {
+        "family": "DOS GOLDENEYE",
+        "is_attack": true,
+        "support": 2037,
+        "correct": 1724,
+        "false_positives": 0,
+        "false_negatives": 313,
+        "detection_rate": 0.846343,
+        "error_rate": 0.153657
+      },
+      "DOS HULK": {
+        "family": "DOS HULK",
+        "is_attack": true,
+        "support": 33074,
+        "correct": 32550,
+        "false_positives": 0,
+        "false_negatives": 524,
+        "detection_rate": 0.984157,
+        "error_rate": 0.015843
+      },
+      "DOS SLOWHTTPTEST": {
+        "family": "DOS SLOWHTTPTEST",
+        "is_attack": true,
+        "support": 1020,
+        "correct": 960,
+        "false_positives": 0,
+        "false_negatives": 60,
+        "detection_rate": 0.941176,
+        "error_rate": 0.058824
+      },
+      "DOS SLOWLORIS": {
+        "family": "DOS SLOWLORIS",
+        "is_attack": true,
+        "support": 901,
+        "correct": 530,
+        "false_positives": 0,
+        "false_negatives": 371,
+        "detection_rate": 0.588235,
+        "error_rate": 0.411765
+      },
+      "FTP-PATATOR": {
+        "family": "FTP-PATATOR",
+        "is_attack": true,
+        "support": 897,
+        "correct": 619,
+        "false_positives": 0,
+        "false_negatives": 278,
+        "detection_rate": 0.690078,
+        "error_rate": 0.309922
+      },
+      "HEARTBLEED": {
+        "family": "HEARTBLEED",
+        "is_attack": true,
+        "support": 3,
+        "correct": 1,
+        "false_positives": 0,
+        "false_negatives": 2,
+        "detection_rate": 0.333333,
+        "error_rate": 0.666667
+      },
+      "INFILTRATION": {
+        "family": "INFILTRATION",
+        "is_attack": true,
+        "support": 8,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 8,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      },
+      "PORTSCAN": {
+        "family": "PORTSCAN",
+        "is_attack": true,
+        "support": 320,
+        "correct": 200,
+        "false_positives": 0,
+        "false_negatives": 120,
+        "detection_rate": 0.625,
+        "error_rate": 0.375
+      },
+      "SSH-PATATOR": {
+        "family": "SSH-PATATOR",
+        "is_attack": true,
+        "support": 648,
+        "correct": 530,
+        "false_positives": 0,
+        "false_negatives": 118,
+        "detection_rate": 0.817901,
+        "error_rate": 0.182099
+      },
+      "WEB ATTACK - BRUTE FORCE": {
+        "family": "WEB ATTACK - BRUTE FORCE",
+        "is_attack": true,
+        "support": 258,
+        "correct": 10,
+        "false_positives": 0,
+        "false_negatives": 248,
+        "detection_rate": 0.03876,
+        "error_rate": 0.96124
+      },
+      "WEB ATTACK - SQL INJECTION": {
+        "family": "WEB ATTACK - SQL INJECTION",
+        "is_attack": true,
+        "support": 3,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 3,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      },
+      "WEB ATTACK - XSS": {
+        "family": "WEB ATTACK - XSS",
+        "is_attack": true,
+        "support": 108,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 108,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      }
+    }
+  },
+  "per_family_fusion": {
+    "threshold": 0.5,
+    "total_evaluated_rows": 355833,
+    "total_attack_families": 14,
+    "summary_table": [
+      {
+        "family": "BENIGN",
+        "is_attack": false,
+        "support": 291013,
+        "correct": 288835,
+        "false_positives": 2178,
+        "false_negatives": 0,
+        "detection_rate": 0.992516,
+        "error_rate": 0.007484
+      },
+      {
+        "family": "DOS HULK",
+        "is_attack": true,
+        "support": 33074,
+        "correct": 32964,
+        "false_positives": 0,
+        "false_negatives": 110,
+        "detection_rate": 0.996674,
+        "error_rate": 0.003326
+      },
+      {
+        "family": "DDOS",
+        "is_attack": true,
+        "support": 25347,
+        "correct": 25251,
+        "false_positives": 0,
+        "false_negatives": 96,
+        "detection_rate": 0.996213,
+        "error_rate": 0.003787
+      },
+      {
+        "family": "DOS GOLDENEYE",
+        "is_attack": true,
+        "support": 2037,
+        "correct": 1891,
+        "false_positives": 0,
+        "false_negatives": 146,
+        "detection_rate": 0.928326,
+        "error_rate": 0.071674
+      },
+      {
+        "family": "DOS SLOWHTTPTEST",
+        "is_attack": true,
+        "support": 1020,
+        "correct": 977,
+        "false_positives": 0,
+        "false_negatives": 43,
+        "detection_rate": 0.957843,
+        "error_rate": 0.042157
+      },
+      {
+        "family": "DOS SLOWLORIS",
+        "is_attack": true,
+        "support": 901,
+        "correct": 711,
+        "false_positives": 0,
+        "false_negatives": 190,
+        "detection_rate": 0.789123,
+        "error_rate": 0.210877
+      },
+      {
+        "family": "FTP-PATATOR",
+        "is_attack": true,
+        "support": 897,
+        "correct": 891,
+        "false_positives": 0,
+        "false_negatives": 6,
+        "detection_rate": 0.993311,
+        "error_rate": 0.006689
+      },
+      {
+        "family": "SSH-PATATOR",
+        "is_attack": true,
+        "support": 648,
+        "correct": 630,
+        "false_positives": 0,
+        "false_negatives": 18,
+        "detection_rate": 0.972222,
+        "error_rate": 0.027778
+      },
+      {
+        "family": "PORTSCAN",
+        "is_attack": true,
+        "support": 320,
+        "correct": 287,
+        "false_positives": 0,
+        "false_negatives": 33,
+        "detection_rate": 0.896875,
+        "error_rate": 0.103125
+      },
+      {
+        "family": "WEB ATTACK - BRUTE FORCE",
+        "is_attack": true,
+        "support": 258,
+        "correct": 8,
+        "false_positives": 0,
+        "false_negatives": 250,
+        "detection_rate": 0.031008,
+        "error_rate": 0.968992
+      },
+      {
+        "family": "BOT",
+        "is_attack": true,
+        "support": 196,
+        "correct": 59,
+        "false_positives": 0,
+        "false_negatives": 137,
+        "detection_rate": 0.30102,
+        "error_rate": 0.69898
+      },
+      {
+        "family": "WEB ATTACK - XSS",
+        "is_attack": true,
+        "support": 108,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 108,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      },
+      {
+        "family": "INFILTRATION",
+        "is_attack": true,
+        "support": 8,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 8,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      },
+      {
+        "family": "HEARTBLEED",
+        "is_attack": true,
+        "support": 3,
+        "correct": 1,
+        "false_positives": 0,
+        "false_negatives": 2,
+        "detection_rate": 0.333333,
+        "error_rate": 0.666667
+      },
+      {
+        "family": "WEB ATTACK - SQL INJECTION",
+        "is_attack": true,
+        "support": 3,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 3,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      }
+    ],
+    "family_breakdown": {
+      "BENIGN": {
+        "family": "BENIGN",
+        "is_attack": false,
+        "support": 291013,
+        "correct": 288835,
+        "false_positives": 2178,
+        "false_negatives": 0,
+        "detection_rate": 0.992516,
+        "error_rate": 0.007484
+      },
+      "BOT": {
+        "family": "BOT",
+        "is_attack": true,
+        "support": 196,
+        "correct": 59,
+        "false_positives": 0,
+        "false_negatives": 137,
+        "detection_rate": 0.30102,
+        "error_rate": 0.69898
+      },
+      "DDOS": {
+        "family": "DDOS",
+        "is_attack": true,
+        "support": 25347,
+        "correct": 25251,
+        "false_positives": 0,
+        "false_negatives": 96,
+        "detection_rate": 0.996213,
+        "error_rate": 0.003787
+      },
+      "DOS GOLDENEYE": {
+        "family": "DOS GOLDENEYE",
+        "is_attack": true,
+        "support": 2037,
+        "correct": 1891,
+        "false_positives": 0,
+        "false_negatives": 146,
+        "detection_rate": 0.928326,
+        "error_rate": 0.071674
+      },
+      "DOS HULK": {
+        "family": "DOS HULK",
+        "is_attack": true,
+        "support": 33074,
+        "correct": 32964,
+        "false_positives": 0,
+        "false_negatives": 110,
+        "detection_rate": 0.996674,
+        "error_rate": 0.003326
+      },
+      "DOS SLOWHTTPTEST": {
+        "family": "DOS SLOWHTTPTEST",
+        "is_attack": true,
+        "support": 1020,
+        "correct": 977,
+        "false_positives": 0,
+        "false_negatives": 43,
+        "detection_rate": 0.957843,
+        "error_rate": 0.042157
+      },
+      "DOS SLOWLORIS": {
+        "family": "DOS SLOWLORIS",
+        "is_attack": true,
+        "support": 901,
+        "correct": 711,
+        "false_positives": 0,
+        "false_negatives": 190,
+        "detection_rate": 0.789123,
+        "error_rate": 0.210877
+      },
+      "FTP-PATATOR": {
+        "family": "FTP-PATATOR",
+        "is_attack": true,
+        "support": 897,
+        "correct": 891,
+        "false_positives": 0,
+        "false_negatives": 6,
+        "detection_rate": 0.993311,
+        "error_rate": 0.006689
+      },
+      "HEARTBLEED": {
+        "family": "HEARTBLEED",
+        "is_attack": true,
+        "support": 3,
+        "correct": 1,
+        "false_positives": 0,
+        "false_negatives": 2,
+        "detection_rate": 0.333333,
+        "error_rate": 0.666667
+      },
+      "INFILTRATION": {
+        "family": "INFILTRATION",
+        "is_attack": true,
+        "support": 8,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 8,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      },
+      "PORTSCAN": {
+        "family": "PORTSCAN",
+        "is_attack": true,
+        "support": 320,
+        "correct": 287,
+        "false_positives": 0,
+        "false_negatives": 33,
+        "detection_rate": 0.896875,
+        "error_rate": 0.103125
+      },
+      "SSH-PATATOR": {
+        "family": "SSH-PATATOR",
+        "is_attack": true,
+        "support": 648,
+        "correct": 630,
+        "false_positives": 0,
+        "false_negatives": 18,
+        "detection_rate": 0.972222,
+        "error_rate": 0.027778
+      },
+      "WEB ATTACK - BRUTE FORCE": {
+        "family": "WEB ATTACK - BRUTE FORCE",
+        "is_attack": true,
+        "support": 258,
+        "correct": 8,
+        "false_positives": 0,
+        "false_negatives": 250,
+        "detection_rate": 0.031008,
+        "error_rate": 0.968992
+      },
+      "WEB ATTACK - SQL INJECTION": {
+        "family": "WEB ATTACK - SQL INJECTION",
+        "is_attack": true,
+        "support": 3,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 3,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      },
+      "WEB ATTACK - XSS": {
+        "family": "WEB ATTACK - XSS",
+        "is_attack": true,
+        "support": 108,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 108,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      }
+    }
+  },
+  "model_disagreements": {
+    "threshold": 0.5,
+    "aligned_population_size": 355833,
+    "disagreement_count": 8126,
+    "disagreement_fraction": 0.02283655535040314,
+    "rf_pos_lstm_neg": {
+      "count": 7103,
+      "true_attacks_rf_right": 2297,
+      "true_benign_rf_false_alarm": 4806
+    },
+    "rf_neg_lstm_pos": {
+      "count": 1023,
+      "true_attacks_lstm_right": 186,
+      "true_benign_lstm_false_alarm": 837
+    },
+    "fusion_analysis": {
+      "fusion_rescues_when_one_model_failed": 6397,
+      "fusion_rescues_when_both_models_failed": 0,
+      "fusion_degradations_when_both_were_right": 0,
+      "fusion_accuracy_on_disagreements": 0.7872261875461481
+    },
+    "representative_disagreement_examples": [
+      {
+        "index": 5,
+        "true_label": 0,
+        "rf_score": 0.7007321397508188,
+        "rf_pred": 1,
+        "lstm_score": 0.05404233559966087,
+        "lstm_pred": 0,
+        "fusion_score": 0.37738723767523985,
+        "fusion_pred": 0
+      },
+      {
+        "index": 141,
+        "true_label": 0,
+        "rf_score": 0.7373062485860855,
+        "rf_pred": 1,
+        "lstm_score": 0.0002840463421307504,
+        "lstm_pred": 0,
+        "fusion_score": 0.36879514746410813,
+        "fusion_pred": 0
+      },
+      {
+        "index": 142,
+        "true_label": 0,
+        "rf_score": 0.7447071159021817,
+        "rf_pred": 1,
+        "lstm_score": 0.0012769378954544663,
+        "lstm_pred": 0,
+        "fusion_score": 0.3729920268988181,
+        "fusion_pred": 0
+      },
+      {
+        "index": 292,
+        "true_label": 0,
+        "rf_score": 0.6756076505429272,
+        "rf_pred": 1,
+        "lstm_score": 0.0008409834699705243,
+        "lstm_pred": 0,
+        "fusion_score": 0.33822431700644884,
+        "fusion_pred": 0
+      },
+      {
+        "index": 701,
+        "true_label": 0,
+        "rf_score": 0.6249473786896754,
+        "rf_pred": 1,
+        "lstm_score": 0.017771556973457336,
+        "lstm_pred": 0,
+        "fusion_score": 0.3213594678315664,
+        "fusion_pred": 0
+      }
+    ]
   }
 }

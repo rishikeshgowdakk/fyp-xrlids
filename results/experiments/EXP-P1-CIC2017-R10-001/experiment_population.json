@@ -264,7 +264,7 @@
         ],
         "label_families": [
           "BENIGN",
-          "DoS Hulk"
+          "DOS HULK"
         ],
         "sample_indices": [
           478188,
@@ -281,7 +281,7 @@
         ],
         "label_families": [
           "BENIGN",
-          "Bot"
+          "BOT"
         ],
         "sample_indices": [
           3578,
@@ -298,7 +298,7 @@
         ],
         "label_families": [
           "BENIGN",
-          "Bot"
+          "BOT"
         ],
         "sample_indices": [
           1652,
@@ -315,7 +315,7 @@
         ],
         "label_families": [
           "BENIGN",
-          "Bot"
+          "BOT"
         ],
         "sample_indices": [
           16146,
@@ -332,7 +332,7 @@
         ],
         "label_families": [
           "BENIGN",
-          "DoS Hulk"
+          "DOS HULK"
         ],
         "sample_indices": [
           692909,
@@ -349,7 +349,7 @@
         ],
         "label_families": [
           "BENIGN",
-          "Bot"
+          "BOT"
         ],
         "sample_indices": [
           3537,
@@ -366,7 +366,7 @@
         ],
         "label_families": [
           "BENIGN",
-          "Bot"
+          "BOT"
         ],
         "sample_indices": [
           13271,
@@ -383,7 +383,7 @@
         ],
         "label_families": [
           "BENIGN",
-          "DoS Hulk"
+          "DOS HULK"
         ],
         "sample_indices": [
           215994,
@@ -400,7 +400,7 @@
         ],
         "label_families": [
           "BENIGN",
-          "DoS Hulk"
+          "DOS HULK"
         ],
         "sample_indices": [
           85942,
@@ -417,7 +417,7 @@
         ],
         "label_families": [
           "BENIGN",
-          "DoS Hulk"
+          "DOS HULK"
         ],
         "sample_indices": [
           275721,
@@ -434,20 +434,20 @@
     "attack_fraction": 0.18214746965417164,
     "attack_families": {
       "BENIGN": 1455223,
-      "DoS Hulk": 165009,
-      "DDoS": 127380,
-      "DoS GoldenEye": 10217,
-      "DoS Slowhttptest": 5018,
-      "DoS slowloris": 4534,
-      "FTP-Patator": 4233,
-      "SSH-Patator": 2999,
-      "PortScan": 1497,
-      "Web Attack \ufffd Brute Force": 1348,
-      "Bot": 1186,
-      "Web Attack \ufffd XSS": 621,
-      "Infiltration": 34,
-      "Web Attack \ufffd Sql Injection": 12,
-      "Heartbleed": 11
+      "DOS HULK": 165009,
+      "DDOS": 127380,
+      "DOS GOLDENEYE": 10217,
+      "DOS SLOWHTTPTEST": 5018,
+      "DOS SLOWLORIS": 4534,
+      "FTP-PATATOR": 4233,
+      "SSH-PATATOR": 2999,
+      "PORTSCAN": 1497,
+      "WEB ATTACK - BRUTE FORCE": 1348,
+      "BOT": 1186,
+      "WEB ATTACK - XSS": 621,
+      "INFILTRATION": 34,
+      "WEB ATTACK - SQL INJECTION": 12,
+      "HEARTBLEED": 11
     },
     "rows_per_file": {
       "Wednesday-workingHours.pcap_ISCX.csv": 459681,

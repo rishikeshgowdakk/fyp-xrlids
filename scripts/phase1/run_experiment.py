@@ -273,13 +273,13 @@ def run_experiment_pipeline(
     dt_val = dt.predict_proba(X_val)
     dt_test = dt.predict_proba(X_test)
 
+    rf_params = dict(models_cfg.get("random_forest", {}))
     print("\n[6/10] Training Random Forest detector...")
     rf_file = out_dir / "random_forest.joblib"
     if rf_file.exists():
         print(f"       Loading existing reference Random Forest from {rf_file}...")
         rf = RandomForestDetector.load(out_dir)
     else:
-        rf_params = dict(models_cfg.get("random_forest", {}))
         rf = RandomForestDetector(params=rf_params, feature_names=feature_names).fit(X_train, y_train)
     rf_val = pd.Series(rf.predict_proba(X_val), index=X_val.index, name="rf_score")
     rf_test = pd.Series(rf.predict_proba(X_test), index=X_test.index, name="rf_score")
@@ -306,8 +306,13 @@ def run_experiment_pipeline(
         val_seqs = build_sequences(X_val, y_val, split="validation", seq_len=seq_len, stride=stride, label_rule=label_rule, session_column=val_session)
         test_seqs = build_sequences(X_test, y_test, split="test", seq_len=seq_len, stride=stride, label_rule=label_rule, session_column=test_session)
 
-        lstm = LSTMDetector(params=lstm_params, feature_names=feature_names, seq_len=seq_len, seed=seed)
-        lstm.fit(train_seqs, val_seqs)
+        lstm_file = out_dir / "lstm.pt"
+        if lstm_file.exists():
+            print(f"       Loading existing trained LSTM detector from {lstm_file}...")
+            lstm = LSTMDetector.load(out_dir)
+        else:
+            lstm = LSTMDetector(params=lstm_params, feature_names=feature_names, seq_len=seq_len, seed=seed)
+            lstm.fit(train_seqs, val_seqs)
 
         lstm_val_scores = lstm.predict_proba(val_seqs)
         lstm_test_scores = lstm.predict_proba(test_seqs)

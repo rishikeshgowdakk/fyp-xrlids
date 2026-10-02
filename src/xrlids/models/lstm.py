@@ -489,6 +489,9 @@ class LSTMDetector:
                 "seq_len": self.seq_len,
                 "label_rule": self.label_rule,
                 "seed": self.seed,
+                "best_epoch": self.best_epoch,
+                "best_val_loss": self.best_val_loss,
+                "history": self.history,
             },
             path,
         )
@@ -510,6 +513,9 @@ class LSTMDetector:
             label_rule=data.get("label_rule", "last"),
             seed=data.get("seed", 42),
         )
+        detector.best_epoch = data.get("best_epoch", 0)
+        detector.best_val_loss = data.get("best_val_loss", float("inf"))
+        detector.history = data.get("history", [])
         if data.get("state_dict") is not None:
             n_features = len(detector.feature_names)
             detector.model = detector._build(n_features)

@@ -10,28 +10,28 @@
   ],
   "candidates": {
     "max_f1": {
-      "threshold": 0.89,
-      "f1": 0.9570506150927229
+      "threshold": 0.5,
+      "f1": 0.974252606119981
     },
     "min_fpr_subject_to_recall_floor": {
-      "threshold": 0.92,
-      "recall": 0.9502776920703486,
-      "fpr": 0.010070642239661358,
+      "threshold": 0.75,
+      "recall": 0.9507867941993212,
+      "fpr": 0.003810839415556747,
       "constraint": {
         "recall_floor": 0.95
       }
     },
     "min_fnr_subject_to_fpr_ceiling": {
-      "threshold": 0.93,
-      "fnr": 0.11440913298364702,
-      "fpr": 0.007768584818790286,
+      "threshold": 0.47,
+      "fnr": 0.012526997840172787,
+      "fpr": 0.009690322048575317,
       "constraint": {
         "fpr_ceiling": 0.01
       }
     },
     "cost_sensitive": {
-      "threshold": 0.33,
-      "expected_cost": 11162.0,
+      "threshold": 0.2,
+      "expected_cost": 10557.0,
       "assumptions": {
         "fp_cost": 1.0,
         "fn_cost": 10.0
