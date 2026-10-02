@@ -2,7 +2,7 @@
 # XRL-IDARS Phase 1 (repo: fyp-xrlids)
 
 experiment:
-  id: EXP-P1-CSE2018-R10-MULTIFILE-001
+  id: EXP-P1-CSE2018-R10-MULTI-001
   phase: 1
   research_question: RQ1_RQ2_RQ3
   hypothesis: >
@@ -24,7 +24,7 @@ label_contract:
 features:
   registry: configs/features/features.yaml
   rung: R10
-  require_frozen: false
+  require_frozen: true
 
 cleaning:
   drop_exact_duplicates: true
@@ -98,5 +98,5 @@ explainability:
     max_explain: 200
 
 outputs:
-  results_dir: results/experiments/EXP-P1-CSE2018-R10-MULTIFILE-001
+  results_dir: results/experiments/EXP-P1-CSE2018-R10-MULTI-001
   save_models: true

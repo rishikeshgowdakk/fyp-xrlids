@@ -535,6 +535,84 @@ def run_experiment_pipeline(
 
     # Build and write experiment record
     exp_status = "PRELIMINARY_SUBSAMPLE" if pop_config.sample_limit else "EMPIRICALLY_OBSERVED"
+
+    models_evaluated_dict: dict[str, Any] = {
+        "majority": maj.config() if hasattr(maj, "config") else {"name": "majority", "model_type": "MajorityClassDetector", "family": "prior_baseline", "artifact_path": str(out_dir / "majority_class.joblib")},
+        "logistic_regression": lr.config() if hasattr(lr, "config") else {"name": "logistic_regression", "model_type": "LogisticRegressionDetector", "family": "linear_baseline", "artifact_path": str(out_dir / "logistic_regression.joblib")},
+        "decision_tree": dt.config() if hasattr(dt, "config") else {"name": "decision_tree", "model_type": "DecisionTreeDetector", "family": "tree_baseline", "artifact_path": str(out_dir / "decision_tree.joblib")},
+        "random_forest": rf.config(),
+    }
+    if lstm is not None:
+        lstm_cfg = lstm.config() if hasattr(lstm, "config") else {
+            "name": "lstm",
+            "model_type": "SupervisedLSTM",
+            "family": "temporal_recurrent",
+            "params": {
+                "seq_len": seq_len if 'seq_len' in locals() else 5,
+                "stride": stride if 'stride' in locals() else 1,
+                "label_rule": label_rule if 'label_rule' in locals() else "last",
+                "hidden_size": 32,
+                "num_layers": 2,
+                "dropout": 0.2,
+                "learning_rate": 0.001,
+                "batch_size": 256,
+                "epochs": 15,
+                "early_stopping_patience": 3,
+                "sequence_boundary_protected": True,
+                "file_bounded": True,
+            },
+            "artifact_path": str(out_dir / "lstm.pt"),
+        }
+        models_evaluated_dict["lstm"] = lstm_cfg
+    if fusion_test_series is not None:
+        models_evaluated_dict["fusion"] = {
+            "name": "fusion",
+            "model_type": "RFPlusLSTMScoreFusion",
+            "family": "ensemble_fusion",
+            "params": {
+                "formulation": "alpha * P_rf + (1 - alpha) * P_lstm",
+                "alpha": float(alpha),
+                "tuning_split": "validation",
+                "tuning_objective": "roc_auc",
+                "validation_roc_auc": float(fusion_tuning["best_metric_value"]) if fusion_tuning else None,
+            },
+        }
+    composite_model_config = {
+        "model_type": "CompositeLadderWithFusion" if fusion_test_series is not None else "RandomForest",
+        "primary_baseline": rf.config(),
+        "models_evaluated": models_evaluated_dict,
+        "n_features": len(feature_names),
+    }
+
+    hyperparameters_dict: dict[str, Any] = {
+        "rf": rf_params,
+        "split": split_cfg,
+        "duplicate_policy": dup_policy,
+    }
+    if not skip_lstm and lstm is not None:
+        hyperparameters_dict["lstm"] = {
+            "seq_len": seq_len if 'seq_len' in locals() else 5,
+            "stride": stride if 'stride' in locals() else 1,
+            "label_rule": label_rule if 'label_rule' in locals() else "last",
+            "hidden_size": 32,
+            "num_layers": 2,
+            "dropout": 0.2,
+            "learning_rate": 0.001,
+            "batch_size": 256,
+            "epochs": 15,
+            "early_stopping_patience": 3,
+            "sequence_boundary_protected": True,
+            "file_bounded": True,
+        }
+    if fusion_test_series is not None:
+        hyperparameters_dict["fusion"] = {
+            "method": "score_averaging",
+            "alpha": float(alpha),
+            "tuning_split": "validation",
+            "tuning_objective": "roc_auc",
+            "validation_roc_auc": float(fusion_tuning["best_metric_value"]) if fusion_tuning else None,
+        }
+
     record = ExperimentRecord(
         experiment_id=exp_cfg.get("id", f"EXP-P1-{dataset_key.upper()}-{int(time.time())}"),
         research_question=exp_cfg.get("research_question", "RQ1_RQ2"),
@@ -552,8 +630,8 @@ def run_experiment_pipeline(
         feature_schema_hash=registry.schema_hash(rung),
         preprocessing=preprocessor.metadata(),
         split_id=split_result.manifest.get("split_config_hash"),
-        model=rf.config(),
-        hyperparameters={"rf": rf_params, "split": split_cfg, "duplicate_policy": dup_policy},
+        model=composite_model_config,
+        hyperparameters=hyperparameters_dict,
         random_seed=seed,
         threshold=0.5,
         threshold_decision_id="D-003",
