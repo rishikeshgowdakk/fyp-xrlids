@@ -1,0 +1,55 @@
+{
+  "dataset": "unsw_nb15",
+  "methodology": "stratified_random",
+  "rationale": "Multi-file split with duplicate_policy=deduplicate_features",
+  "duplicate_policy": "deduplicate_features",
+  "duplicate_accounting": {
+    "policy": "deduplicate_features",
+    "input_rows": 122520,
+    "duplicate_rows_dropped": 0,
+    "unique_rows_retained": 122520,
+    "duplicate_fraction": 0.0
+  },
+  "ordering_basis": "arrival_order",
+  "checks_performed": [
+    "feature_deduplication_audit",
+    "train_val_test_disjointness",
+    "class_stratification_audit",
+    "exact_duplicate_leakage_audit"
+  ],
+  "checks_not_performed": [
+    "strict_timestamp_monotonic_ordering (timestamps absent or non-monotonic in source data)"
+  ],
+  "ratios": {
+    "train": 0.6,
+    "validation": 0.2,
+    "test": 0.2
+  },
+  "seed": 42,
+  "stratified": true,
+  "group_column": null,
+  "time_column": null,
+  "counts": {
+    "train": 73512,
+    "validation": 24504,
+    "test": 24504
+  },
+  "class_distribution": {
+    "train": {
+      "benign": 40427,
+      "attack": 33085,
+      "attack_fraction": 0.45006257481771683
+    },
+    "validation": {
+      "benign": 13476,
+      "attack": 11028,
+      "attack_fraction": 0.45004897159647406
+    },
+    "test": {
+      "benign": 13476,
+      "attack": 11028,
+      "attack_fraction": 0.45004897159647406
+    }
+  },
+  "split_config_hash": "17ed21c579d06350a2a6093f545a5193c328f04b9acab39d918f0019bd002c93"
+}

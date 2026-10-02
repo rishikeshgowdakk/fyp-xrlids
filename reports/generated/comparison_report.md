@@ -54,7 +54,34 @@ Status: `EMPIRICALLY OBSERVED`.
 | **Fusion** vs **LSTM** | `f1` | 0.9603 | 0.9603 | +0.0000 | [0.0000, 0.0000] | 1.0000 | ❌ NO |
 
 ---
-## 3. Historical Single-Day Comparison: CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-001`)
+## 3. Full Multi-File Benchmark Comparison: UNSW-NB15 (`EXP-P1-UNSWNB15-R10-MULTI-001`)
+
+> [!NOTE]
+> Evaluated on the aligned test slice (24,496 rows across both published partitions).
+> The 8-row discrepancy from the 24,504 tabular test set is due to file-boundary sequence isolation (2 files * 4 boundary rows).
+> Evaluated under the native 4-feature contract fallback (Decision D-002: missing TCP flags/IAT features not fabricated).
+
+| Model | Model Family | Accuracy | Precision | Recall | F1 Score | Specificity | FPR | ROC-AUC | PR-AUC |
+| --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **MAJORITY** | `prior_baseline` | 0.5498 | 0.0000 | 0.0000 | 0.0000 | 1.0000 | 0.0000 | 0.5000 | 0.4502 |
+| **LOGISTIC_REGRESSION** | `linear_baseline` | 0.6069 | 0.6727 | 0.2471 | 0.3614 | 0.9015 | 0.0985 | 0.6279 | 0.5693 |
+| **DECISION_TREE** | `tree_baseline` | 0.8019 | 0.7042 | 0.9655 | 0.8144 | 0.6679 | 0.3321 | 0.9115 | 0.8702 |
+| **RANDOM_FOREST** | `ensemble` | 0.8590 | 0.7966 | 0.9223 | 0.8548 | 0.8072 | 0.1928 | 0.9487 | 0.9323 |
+| **LSTM** | `temporal_recurrent` | 0.8683 | 0.8086 | 0.9269 | 0.8637 | 0.8204 | 0.1796 | 0.9334 | 0.8903 |
+| **FUSION** | `ensemble_fusion` | 0.8996 | 0.8334 | 0.9711 | 0.8970 | 0.8410 | 0.1590 | 0.9674 | 0.9538 |
+
+### Paired Non-Parametric Bootstrap Comparisons (UNSW-NB15, B=1,000)
+
+| Comparison (A vs B) | Metric | Estimate A | Estimate B | Δ (A - B) | 95% Bootstrap CI | p-value | Significant? |
+| --- | --- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **LR** vs **DT** | `f1` | 0.3614 | 0.8144 | -0.4530 | [-0.4641, -0.4430] | 0.0000 | ✅ YES |
+| **DT** vs **RF** | `f1` | 0.8144 | 0.8548 | -0.0404 | [-0.0440, -0.0366] | 0.0000 | ✅ YES |
+| **RF** vs **LSTM** | `f1` | 0.8548 | 0.8637 | -0.0089 | [-0.0143, -0.0042] | 0.0000 | ✅ YES |
+| **Fusion** vs **RF** | `f1` | 0.8970 | 0.8548 | +0.0421 | [0.0389, 0.0457] | 0.0000 | ✅ YES |
+| **Fusion** vs **LSTM** | `f1` | 0.8970 | 0.8637 | +0.0332 | [0.0295, 0.0367] | 0.0000 | ✅ YES |
+
+---
+## 4. Historical Single-Day Comparison: CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-001`)
 
 | Model | Accuracy | Precision | Recall | F1 Score | Specificity | FPR | ROC-AUC | PR-AUC |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |

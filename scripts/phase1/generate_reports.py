@@ -412,10 +412,54 @@ def generate_comparison_report() -> str:
                 f"{comp.get('p_value', 1.0):.4f} | {sig} |"
             )
 
+    unsw_multi_metrics = _load_json(RESULTS_DIR / "EXP-P1-UNSWNB15-R10-MULTI-001" / "test_metrics.json") or {}
+    unsw_multi_comparisons = _load_json(RESULTS_DIR / "EXP-P1-UNSWNB15-R10-MULTI-001" / "model_comparisons.json") or []
+
     lines += [
         "",
         "---",
-        "## 3. Historical Single-Day Comparison: CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-001`)",
+        "## 3. Full Multi-File Benchmark Comparison: UNSW-NB15 (`EXP-P1-UNSWNB15-R10-MULTI-001`)",
+        "",
+        "> [!NOTE]",
+        "> Evaluated on the aligned test slice (24,496 rows across both published partitions).",
+        "> The 8-row discrepancy from the 24,504 tabular test set is due to file-boundary sequence isolation (2 files * 4 boundary rows).",
+        "> Evaluated under the native 4-feature contract fallback (Decision D-002: missing TCP flags/IAT features not fabricated).",
+        "",
+        "| Model | Model Family | Accuracy | Precision | Recall | F1 Score | Specificity | FPR | ROC-AUC | PR-AUC |",
+        "| --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |",
+    ]
+    unsw_aligned_models = unsw_multi_metrics.get("aligned", {}).get("models", {})
+    for model_name in ["majority", "logistic_regression", "decision_tree", "random_forest", "lstm", "fusion"]:
+        m = unsw_aligned_models.get(model_name, {})
+        if m:
+            lines.append(
+                f"| **{model_name.upper()}** | `{m.get('family', 'baseline')}` | "
+                f"{m.get('accuracy', 0):.4f} | {m.get('precision', 0):.4f} | "
+                f"{m.get('recall', 0):.4f} | {m.get('f1', 0):.4f} | {m.get('specificity', 0):.4f} | "
+                f"{m.get('fpr', 0):.4f} | {m.get('roc_auc', 0):.4f} | {m.get('pr_auc', 0):.4f} |"
+            )
+
+    if unsw_multi_comparisons:
+        lines += [
+            "",
+            "### Paired Non-Parametric Bootstrap Comparisons (UNSW-NB15, B=1,000)",
+            "",
+            "| Comparison (A vs B) | Metric | Estimate A | Estimate B | Δ (A - B) | 95% Bootstrap CI | p-value | Significant? |",
+            "| --- | --- | :---: | :---: | :---: | :---: | :---: | :---: |",
+        ]
+        for comp in unsw_multi_comparisons:
+            sig = "✅ YES" if comp.get("is_statistically_significant") else "❌ NO"
+            lines.append(
+                f"| **{comp.get('model_a')}** vs **{comp.get('model_b')}** | `{comp.get('metric')}` | "
+                f"{comp.get('estimate_a', 0.0):.4f} | {comp.get('estimate_b', 0.0):.4f} | "
+                f"{comp.get('delta', 0.0):+.4f} | [{comp.get('ci_lower', 0.0):.4f}, {comp.get('ci_upper', 0.0):.4f}] | "
+                f"{comp.get('p_value', 1.0):.4f} | {sig} |"
+            )
+
+    lines += [
+        "",
+        "---",
+        "## 4. Historical Single-Day Comparison: CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-001`)",
         "",
         "| Model | Accuracy | Precision | Recall | F1 Score | Specificity | FPR | ROC-AUC | PR-AUC |",
         "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
@@ -692,9 +736,9 @@ def generate_phase1_final_report() -> str:
         "| TreeSHAP Explainability | `EMPIRICALLY OBSERVED` | Evaluated on multi-file RF; top drivers `flow_duration_ms` / `packet_length_std` (CSE), `packet_length_std` (CIC) |",
         "| Platt Probability Calibration | `EMPIRICALLY OBSERVED` | Evaluated on multi-file validation sets; Brier score reduced across all benchmark models |",
         "| Paired Bootstrap Hypothesis Testing | `EMPIRICALLY OBSERVED` | Non-parametric paired bootstrap (B=1000) confirms statistically significant differences on aligned test sets |",
-        "| Supervised LSTM (CIC-IDS2017 & CSE-CIC-IDS2018) | `EMPIRICALLY OBSERVED` | Validated on both multi-file populations: CIC-IDS2017 (acc 0.9867, F1 0.9633, FPR 0.0068, p=0.0000) and CSE-CIC-IDS2018 (acc 0.9912, F1 0.9603, FPR 0.0026, p=0.0000) |",
-        "| RF + LSTM Score Fusion (CIC-IDS2017 & CSE-CIC-IDS2018) | `EMPIRICALLY OBSERVED` | Validated on both multi-file populations: CIC-IDS2017 (alpha=0.50, acc 0.9906, F1 0.9745, p=0.0000) and CSE-CIC-IDS2018 (alpha=0.00, acc 0.9912, F1 0.9603, matching LSTM boundary) |",
-        "| Supervised LSTM & Fusion (UNSW-NB15) | `PENDING EXECUTION` | Memory-safe streaming pipeline ready; pending execution under 4-feature domain-shift contract |",
+        "| Supervised LSTM (All 3 Domains) | `EMPIRICALLY OBSERVED` | Validated on all multi-file populations: CIC-IDS2017 (acc 0.9867, F1 0.9633), CSE-CIC-IDS2018 (acc 0.9912, F1 0.9603), and UNSW-NB15 (acc 0.8683, F1 0.8637, p=0.0000) |",
+        "| RF + LSTM Score Fusion (All 3 Domains) | `EMPIRICALLY OBSERVED` | Validated across all benchmarks: CIC-IDS2017 (alpha=0.50, F1 0.9745), CSE-CIC-IDS2018 (alpha=0.00, F1 0.9603), and UNSW-NB15 (alpha=0.60, acc 0.8996, F1 0.8970, p=0.0000) |",
+        "| Multi-File UNSW-NB15 Benchmark | `EMPIRICALLY OBSERVED` | Full 2-file benchmark under 4-feature contract fallback (`EXP-P1-UNSWNB15-R10-MULTI-001`, Fusion acc 0.8996, F1 0.8970, ROC-AUC 0.9674) |",
         "| Historical Single-Day CSE-CIC-IDS2018 Baselines | `HISTORICAL EVIDENCE (SINGLE-DAY RUNS ONLY)` | Evaluated on single day Thursday-01-03-2018 (`EXP-P1-CSE2018-R10-001`); superseded by full 10-file multi-day run |",
         "| Multi-Seed Robustness Evaluation | `PARTIAL` | Runner supports multi-seed loop; full-dataset runs executed with seed 42 only |",
         "| Cross-Dataset Transfer Evaluation | `PARTIAL` | Programmatic 4-feature contract evaluated source-side in `EXP-P1-TRANSFER-CSE-TO-UNSW-001` |",
@@ -702,23 +746,23 @@ def generate_phase1_final_report() -> str:
         "| Decision Gate D-003 (Threshold Objective) | `RESEARCH DECISION REQUIRED` | OPEN pending operational deployment cost matrix (FP vs FN cost trade-off) |",
         "",
         "> [!NOTE]",
-        "> **Aligned Population Accounting**: Direct baseline ladder comparisons and paired statistical hypothesis tests are evaluated exclusively on identical aligned test sets. The boundary discrepancy between tabular and sequence test sets (32 rows dropped in CIC-IDS2017, 40 rows dropped in CSE-CIC-IDS2018) is mathematically proven by file-boundary isolation: $T - 1 = 4$ context steps cannot cross disjoint capture file boundaries ($N_{files} \\times 4$ dropped rows).",
+        "> **Aligned Population Accounting**: Direct baseline ladder comparisons and paired statistical hypothesis tests are evaluated exclusively on identical aligned test sets. The boundary discrepancy between tabular and sequence test sets (32 rows dropped in CIC-IDS2017, 40 rows dropped in CSE-CIC-IDS2018, 8 rows dropped in UNSW-NB15) is mathematically proven by file-boundary isolation: $T - 1 = 4$ context steps cannot cross disjoint capture file boundaries ($N_{files} \\times 4$ dropped rows).",
         "",
         "---",
         "## 2. Answers to Core Research Questions",
         "",
         "### RQ1: Can flow-level ML distinguish benign and malicious traffic?",
-        "> **Answer**: **Demonstrated on In-Domain Baseline Ladders across CIC-IDS2017 and CSE-CIC-IDS2018 (with Critical Caveats)**.",
+        "> **Answer**: **Demonstrated on In-Domain Baseline Ladders across CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15 (with Critical Caveats)**.",
         "> On macroscopic high-volume attacks (DoS, DDoS, PortScan, Brute Force), flow-level behavioral features provide strong discrimination:",
         "> - On **CIC-IDS2017** (all 8 files, 355,833 aligned test rows), Random Forest achieves **0.9815 Test Accuracy**, **0.9512 F1**, and **0.9968 ROC-AUC**.",
         "> - On **CSE-CIC-IDS2018** (all 10 files, 1,662,419 aligned test rows), Random Forest achieves **0.9723 Test Accuracy**, **0.8861 F1**, and **0.9902 ROC-AUC**.",
-        "> - On **UNSW-NB15** (both files, 24,504 aligned test rows, 4 native flow features), Random Forest achieves **0.8588 Test Accuracy**, **0.8546 F1**, and **0.9485 ROC-AUC**.",
+        "> - On **UNSW-NB15** (both files, 24,496 aligned test rows, 4 native flow features), Random Forest achieves **0.8590 Test Accuracy**, **0.8548 F1**, and **0.9487 ROC-AUC**.",
         ">",
-        "> **Crucial Negative Finding**: Aggregate metrics mask severe blindspots on stealthy low-footprint attacks. In CSE-CIC-IDS2018, Random Forest exhibits an **89.30% error rate on Infiltration** (10.70% recall, 6,275 missed attacks out of 7,027). In CIC-IDS2017, Random Forest exhibits an **84.11% error rate on Web Attack - Brute Force** (15.89% recall) and a **97.22% error rate on Web Attack - XSS** (2.78% recall). Coarse flow statistics cannot reliably separate stealthy payload attacks from benign browsing.",
+        "> **Crucial Negative Finding**: Aggregate metrics mask severe blindspots on stealthy low-footprint attacks. In CSE-CIC-IDS2018, Random Forest exhibits an **89.30% error rate on Infiltration** (10.70% recall, 6,275 missed attacks out of 7,027). In CIC-IDS2017, Random Forest exhibits an **84.11% error rate on Web Attack - Brute Force** (15.89% recall) and a **97.22% error rate on Web Attack - XSS** (2.78% recall). In UNSW-NB15, Random Forest exhibits a **22.33% error rate on Analysis** (77.67% recall), a **21.02% error rate on Fuzzers** (78.98% recall), and a **15.66% error rate on Backdoor** (84.34% recall). Coarse flow statistics cannot reliably separate stealthy payload attacks from benign browsing.",
         "",
         "### RQ2: Does temporal sequence information improve detection?",
-        "> **Answer**: **Demonstrated on Both CIC-IDS2017 and CSE-CIC-IDS2018 Multi-File Benchmarks**.",
-        "> On both full multi-file datasets, Supervised Sequence LSTM ($T=5$, stride=1, file-bounded sequence isolation) demonstrates statistically significant superiority over Random Forest:",
+        "> **Answer**: **Demonstrated Across All Three Multi-File Benchmarks**.",
+        "> On all three full multi-file datasets, Supervised Sequence LSTM ($T=5$, stride=1, file-bounded sequence isolation) demonstrates statistically significant superiority over Random Forest:",
         "> - On **CSE-CIC-IDS2018** (all 10 files, 1,662,419 aligned test rows):",
         ">   - **Test Accuracy**: **0.9912** (vs RF 0.9723)",
         ">   - **Test F1**: **0.9603** (vs RF 0.8861), with paired bootstrap confirming statistical significance ($\\Delta \\text{F1} = -0.0743$, 95% CI $[-0.0752, -0.0734]$, $p = 0.0000$)",
@@ -728,21 +772,27 @@ def generate_phase1_final_report() -> str:
         ">   - **Test Accuracy**: **0.9867** (vs RF 0.9815)",
         ">   - **Test F1**: **0.9633** (vs RF 0.9512), with paired bootstrap confirming statistical significance ($\\Delta \\text{F1} = -0.0121$, 95% CI $[-0.0134, -0.0109]$, $p = 0.0000$)",
         ">   - **False Positive Rate**: **0.0068** (1,982 false alarms) vs RF 0.0204 (5,951 false alarms), achieving a **66.7% reduction in false alarm rate**.",
+        "> - On **UNSW-NB15** (both files, 24,496 aligned test rows, 4 native flow features):",
+        ">   - **Test Accuracy**: **0.8683** (vs RF 0.8590)",
+        ">   - **Test F1**: **0.8637** (vs RF 0.8548), with paired bootstrap confirming statistical significance ($\\Delta \\text{F1} = -0.0089$, 95% CI $[-0.0143, -0.0042]$, $p = 0.0000$)",
+        ">   - **False Positive Rate**: **0.1796** (2,419 false alarms) vs RF 0.1928 (2,597 false alarms).",
+        ">   - **ROC-AUC**: **0.9334**; **PR-AUC**: **0.8903**.",
         ">",
         "> **Methodological Limitation & Scope Boundaries**:",
         "> 1. *Capture Arrival Order vs. Physical Packet Timeline*: CSV row arrival order within capture files reflects flow exporter buffer arrival order rather than continuous physical packet timestamps. Sequence models evaluate flow-to-flow context dynamics rather than millisecond packet-level transitions.",
         "> 2. *Stealthy Attack Blindspots*: Temporal context does *not* overcome the lack of packet payload inspection. For low-footprint application-layer attacks, stealthy single-flow attacks remain undetectable without payload visibility.",
         "",
         "### RQ3: Does RF + LSTM score fusion improve over individual models?",
-        "> **Answer**: **Demonstrated on Multi-File Benchmarks**.",
+        "> **Answer**: **Demonstrated on Multi-File Benchmarks Across All Three Domains**.",
         "> - On **CIC-IDS2017** (355,833 aligned test rows), score fusion ($S_{\\text{fusion}} = 0.50 S_{\\text{RF}} + 0.50 S_{\\text{LSTM}}$) delivers statistically significant F1 improvements over RF ($\\Delta = +0.0234$, $p=0.0000$) and LSTM ($\\Delta = +0.0113$, $p=0.0000$), achieving **0.9906 Accuracy**, **0.9745 F1**, **0.9989 ROC-AUC**, and rescuing 78.72% of model disagreement samples with 0 dual-correct degradations.",
         "> - On **CSE-CIC-IDS2018** (1,662,419 aligned test rows), validation tuning yields $\\alpha=0.00$, where Fusion directly adopts the superior sequence decision boundary of the LSTM (which achieved 0.9603 F1 and 0.0026 FPR compared to RF's 0.8861 F1 and 0.0259 FPR).",
+        "> - On **UNSW-NB15** (24,496 aligned test rows), validation tuning yields $\\alpha=0.60$, where Score Fusion ($S_{\\text{fusion}} = 0.60 S_{\\text{RF}} + 0.40 S_{\\text{LSTM}}$) delivers statistically significant F1 improvements over both Random Forest ($\\Delta = +0.0421$, 95% CI $[+0.0389, +0.0457]$, $p = 0.0000$) and LSTM ($\\Delta = +0.0332$, 95% CI $[+0.0295, +0.0367]$, $p = 0.0000$), achieving **0.8996 Accuracy**, **0.8970 F1**, **0.9674 ROC-AUC**, and rescuing 538 false negatives ($857 \\to 319$).",
         ">",
         "> **Scope & Unresolved Vulnerabilities**: Fusion succeeds where complementary trade-offs exist (RF high recall + LSTM false-positive suppression). When one model dominates across all operating points or both fail on payload-hidden attacks, fusion cannot fabricate unobserved signals.",
         "",
         "### RQ4: How does feature quantity affect performance?",
         "> **Answer**: **Demonstrated Across Evaluated Contracts**.",
-        "> On CIC-IDS2017 and CSE-CIC-IDS2018, the 10-feature in-domain contract (R10) provides comprehensive behavioral flow coverage with identical semantic mappings and units. On UNSW-NB15, only 4 genuine flow features are supported natively (`flow_duration_ms`, `flow_packets_per_s`, `flow_bytes_per_s`, `packet_length_mean`). Missing TCP flag and IAT features cannot be fabricated. Models trained on the 4-feature contract achieve viable baseline performance (0.8588 accuracy on UNSW-NB15), but lack flag-based state transition discrimination.",
+        "> On CIC-IDS2017 and CSE-CIC-IDS2018, the 10-feature in-domain contract (R10) provides comprehensive behavioral flow coverage with identical semantic mappings and units. On UNSW-NB15, only 4 genuine flow features are supported natively (`flow_duration_ms`, `flow_packets_per_s`, `flow_bytes_per_s`, `packet_length_mean`). Missing TCP flag and IAT features cannot be fabricated. Models trained on the 4-feature contract achieve viable baseline performance (0.8590 accuracy on UNSW-NB15), but lack flag-based state transition discrimination.",
         "",
         "### RQ5: How well does the detector transfer between datasets?",
         "> **Answer**: **Partial Evidence (Severe Domain Shift Observed)**.",
@@ -773,7 +823,7 @@ def generate_phase1_final_report() -> str:
         "---",
         "## 4. Exactly One Recommended Next Action",
         "",
-        "> Execute Task 3: Full UNSW-NB15 benchmark with documented 4-feature contract fallback and cross-dataset domain-shift evaluation.",
+        "> Execute Task 4: Cross-dataset generalization and transferability experiments using the frozen 10-feature representation and 4-feature contract fallback across all domain transfer pairs.",
         "",
     ]
     return "\n".join(lines)

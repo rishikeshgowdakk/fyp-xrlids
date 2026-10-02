@@ -3,7 +3,7 @@
 Last updated: 2026-10-02
 Project: **XRL-IDARS v1** · Repository: `fyp-xrlids`
 Phase: **1 — Data + Research + Model Foundation**
-Overall: **FOUNDATION REPAIRED & EVIDENCE RECONCILED — all 20 dataset CSVs physically present, SHA-256 verified, audited per-file; memory-bounded streaming pipelines, pre-flight gate, baseline ladder, and error analysis active; multi-file in-domain baseline experiments executed; Supervised LSTM and RF+LSTM Fusion empirically demonstrated on full multi-file populations for both CIC-IDS2017 (`EXP-P1-CIC2017-R10-001`) and CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-MULTI-001`); UNSW-NB15 domain-shift benchmarks pending.**
+Overall: **FOUNDATION REPAIRED & EVIDENCE RECONCILED — all 20 dataset CSVs physically present, SHA-256 verified, audited per-file; memory-bounded streaming pipelines, pre-flight gate, baseline ladder, and error analysis active; multi-file in-domain baseline experiments executed; Supervised LSTM and RF+LSTM Fusion empirically demonstrated on full multi-file populations for CIC-IDS2017 (`EXP-P1-CIC2017-R10-001`), CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-MULTI-001`), and UNSW-NB15 (`EXP-P1-UNSWNB15-R10-MULTI-001`); cross-dataset transfer benchmarks pending.**
 
 Legend: ✅ done / verified · 🟡 implemented / empirically observed on partial data · ⛔ blocked on research decision · ⬜ planned / not started
 
@@ -57,9 +57,9 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Splits / leakage (real data) | ✅ VALIDATED | Policy A feature-dedup split passes L-01/L-02 cleanly (0 cross-split duplicate vectors) |
 | CIC-IDS2017 Multi-File Baselines | ✅ EMPIRICALLY OBSERVED | Executed across all 8 files (2,830,743 raw rows -> 1,779,322 modeling rows); baseline ladder evaluated (`EXP-P1-CIC2017-R10-001`, RF test acc=0.9815, F1=0.9512) |
 | CSE-CIC-IDS2018 Multi-File Baselines | ✅ EMPIRICALLY OBSERVED | Executed across all 10 files (16,233,002 raw rows -> 8,312,295 modeling rows); baseline ladder evaluated (`EXP-P1-CSE2018-R10-MULTI-001`, RF test acc=0.9723, F1=0.8861, ROC-AUC=0.9902) |
-| UNSW-NB15 Multi-File Baselines | ✅ EMPIRICALLY OBSERVED | Executed across all 2 files (257,673 raw rows -> 122,520 modeling rows); native 4-feature contract evaluated (`EXP-P1-UNSW-NATIVE-001`, RF test acc=0.8588, F1=0.8546) |
-| Supervised LSTM (Multi-file) | ✅ EMPIRICALLY OBSERVED (CIC-IDS2017 & CSE-CIC-IDS2018) | Full multi-file training executed on CIC-IDS2017 (acc=0.9867, F1=0.9633, FPR=0.0068; $\Delta \text{F1}=+0.0121$ over RF, $p=0.0000$) and CSE-CIC-IDS2018 (acc=0.9912, F1=0.9603, FPR=0.0026; $\Delta \text{F1}=+0.0743$ over RF, $p=0.0000$); UNSW pending |
-| Score Fusion (Multi-file) | ✅ EMPIRICALLY OBSERVED (CIC-IDS2017 & CSE-CIC-IDS2018) | Tuned fusion evaluated on CIC-IDS2017 ($\alpha=0.50$, acc=0.9906, F1=0.9745, ROC-AUC=0.9989; $\Delta \text{F1}=+0.0234$ over RF, $p=0.0000$) and CSE-CIC-IDS2018 ($\alpha=0.00$, acc=0.9912, F1=0.9603, ROC-AUC=0.9966, matching LSTM's superior decision boundary); UNSW pending |
+| UNSW-NB15 Multi-File Baselines | ✅ EMPIRICALLY OBSERVED | Executed across both files (257,673 raw rows -> 122,520 modeling rows); full baseline ladder, Supervised LSTM, and RF+LSTM Fusion evaluated under native 4-feature contract (`EXP-P1-UNSWNB15-R10-MULTI-001`, Fusion test acc=0.8996, F1=0.8970, ROC-AUC=0.9674) |
+| Supervised LSTM (Multi-file) | ✅ EMPIRICALLY OBSERVED (ALL 3 DOMAINS) | Full multi-file training executed on CIC-IDS2017 (F1=0.9633), CSE-CIC-IDS2018 (F1=0.9603), and UNSW-NB15 (F1=0.8637, outperforming RF with $p=0.0000$) |
+| Score Fusion (Multi-file) | ✅ EMPIRICALLY OBSERVED (ALL 3 DOMAINS) | Tuned fusion evaluated on CIC-IDS2017 ($\alpha=0.50$, F1=0.9745), CSE-CIC-IDS2018 ($\alpha=0.00$, F1=0.9603), and UNSW-NB15 ($\alpha=0.60$, F1=0.8970; $\Delta \text{F1}=+0.0421$ over RF, $\Delta \text{F1}=+0.0332$ over LSTM, $p=0.0000$) |
 | Multi-seed evaluation | 🟡 PARTIAL | Runner supports multi-seed loop and aggregate metrics; full multi-file runs executed with seed 42 only |
 | Cross-dataset transfer | 🟡 PARTIAL | Programmatic 4-feature contract evaluated source-side in `EXP-P1-TRANSFER-CSE-TO-UNSW-001` |
 | SHAP (real data) | ✅ EMPIRICALLY OBSERVED | TreeSHAP evaluated on CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15 Random Forest models |
