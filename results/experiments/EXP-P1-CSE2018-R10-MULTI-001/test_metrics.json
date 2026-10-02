@@ -1,0 +1,471 @@
+{
+  "native": {
+    "majority": {
+      "threshold": 0.5,
+      "positive_class": 1,
+      "score_definition": "P(class=1) or a comparable continuous detector score",
+      "confusion": {
+        "tn": 1475298,
+        "fp": 0,
+        "fn": 187161,
+        "tp": 0
+      },
+      "population": 1662459,
+      "positive_support": 187161,
+      "negative_support": 1475298,
+      "accuracy": 0.8874191784579349,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "macro_f1": 0.47017598877159705,
+      "weighted_f1": 0.8344863793726758,
+      "balanced_accuracy": 0.5,
+      "specificity": 1.0,
+      "fpr": 0.0,
+      "fnr": 1.0,
+      "per_class": {
+        "benign": {
+          "precision": 0.8874191784579349,
+          "recall": 1.0,
+          "f1": 0.9403519775431941,
+          "support": 1475298
+        },
+        "attack": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 187161
+        }
+      },
+      "roc_auc": 0.5,
+      "pr_auc": 0.1125808215420651,
+      "reason": null,
+      "family": "prior_baseline"
+    },
+    "logistic_regression": {
+      "threshold": 0.5,
+      "positive_class": 1,
+      "score_definition": "P(class=1) or a comparable continuous detector score",
+      "confusion": {
+        "tn": 1128566,
+        "fp": 346732,
+        "fn": 34581,
+        "tp": 152580
+      },
+      "population": 1662459,
+      "positive_support": 187161,
+      "negative_support": 1475298,
+      "accuracy": 0.7706331404263203,
+      "precision": 0.3055804787387445,
+      "recall": 0.8152339429688877,
+      "f1": 0.44453314259992743,
+      "macro_f1": 0.6500056373028555,
+      "weighted_f1": 0.809213607489877,
+      "balanced_accuracy": 0.7901044418124725,
+      "specificity": 0.7649749406560573,
+      "fpr": 0.23502505934394272,
+      "fnr": 0.18476605703111226,
+      "per_class": {
+        "benign": {
+          "precision": 0.9702694500351202,
+          "recall": 0.7649749406560573,
+          "f1": 0.8554781320057837,
+          "support": 1475298
+        },
+        "attack": {
+          "precision": 0.3055804787387445,
+          "recall": 0.8152339429688877,
+          "f1": 0.44453314259992743,
+          "support": 187161
+        }
+      },
+      "roc_auc": 0.8849618404901922,
+      "pr_auc": 0.6122786323234279,
+      "reason": null,
+      "family": "linear_baseline"
+    },
+    "decision_tree": {
+      "threshold": 0.5,
+      "positive_class": 1,
+      "score_definition": "P(class=1) or a comparable continuous detector score",
+      "confusion": {
+        "tn": 1416474,
+        "fp": 58824,
+        "fn": 8491,
+        "tp": 178670
+      },
+      "population": 1662459,
+      "positive_support": 187161,
+      "negative_support": 1475298,
+      "accuracy": 0.9595087758555249,
+      "precision": 0.7523137426629726,
+      "recall": 0.9546326424842783,
+      "f1": 0.841483086270031,
+      "macro_f1": 0.9091365611040756,
+      "weighted_f1": 0.9615570683841357,
+      "balanced_accuracy": 0.9573800100697523,
+      "specificity": 0.9601273776552263,
+      "fpr": 0.039872622344773734,
+      "fnr": 0.04536735751572176,
+      "per_class": {
+        "benign": {
+          "precision": 0.9940412571536845,
+          "recall": 0.9601273776552263,
+          "f1": 0.9767900359381201,
+          "support": 1475298
+        },
+        "attack": {
+          "precision": 0.7523137426629726,
+          "recall": 0.9546326424842783,
+          "f1": 0.841483086270031,
+          "support": 187161
+        }
+      },
+      "roc_auc": 0.9833058955228009,
+      "pr_auc": 0.9516315264678027,
+      "reason": null,
+      "family": "tree_baseline"
+    },
+    "random_forest": {
+      "threshold": 0.5,
+      "positive_class": 1,
+      "score_definition": "P(class=1) or a comparable continuous detector score",
+      "confusion": {
+        "tn": 1437059,
+        "fp": 38239,
+        "fn": 7864,
+        "tp": 179297
+      },
+      "population": 1662459,
+      "positive_support": 187161,
+      "negative_support": 1475298,
+      "accuracy": 0.9722681882681017,
+      "precision": 0.8242176007649309,
+      "recall": 0.9579826993871586,
+      "f1": 0.8860802032137624,
+      "macro_f1": 0.9351463497298829,
+      "weighted_f1": 0.9731646820766269,
+      "balanced_accuracy": 0.9660315951219606,
+      "specificity": 0.9740804908567625,
+      "fpr": 0.025919509143237502,
+      "fnr": 0.04201730061284135,
+      "per_class": {
+        "benign": {
+          "precision": 0.9945574954513147,
+          "recall": 0.9740804908567625,
+          "f1": 0.9842124962460033,
+          "support": 1475298
+        },
+        "attack": {
+          "precision": 0.8242176007649309,
+          "recall": 0.9579826993871586,
+          "f1": 0.8860802032137624,
+          "support": 187161
+        }
+      },
+      "roc_auc": 0.9901786041594952,
+      "pr_auc": 0.9675713644008033,
+      "reason": null,
+      "family": "ensemble"
+    },
+    "lstm": {
+      "threshold": 0.5,
+      "positive_class": 1,
+      "score_definition": "P(class=1) or a comparable continuous detector score",
+      "confusion": {
+        "tn": 1471466,
+        "fp": 3792,
+        "fn": 10777,
+        "tp": 176384
+      },
+      "population": 1662419,
+      "positive_support": 187161,
+      "negative_support": 1475258,
+      "accuracy": 0.9912362647443274,
+      "precision": 0.9789539117307522,
+      "recall": 0.9424185594221018,
+      "f1": 0.9603388713905759,
+      "macro_f1": 0.9777063765111997,
+      "weighted_f1": 0.991163291550886,
+      "balanced_accuracy": 0.9699240807831346,
+      "specificity": 0.9974296021441673,
+      "fpr": 0.0025703978558326746,
+      "fnr": 0.05758144057789817,
+      "per_class": {
+        "benign": {
+          "precision": 0.9927292623409252,
+          "recall": 0.9974296021441673,
+          "f1": 0.9950738816318236,
+          "support": 1475258
+        },
+        "attack": {
+          "precision": 0.9789539117307522,
+          "recall": 0.9424185594221018,
+          "f1": 0.9603388713905759,
+          "support": 187161
+        }
+      },
+      "roc_auc": 0.996551512975272,
+      "pr_auc": 0.9865181273742982,
+      "reason": null,
+      "family": "temporal_recurrent"
+    }
+  },
+  "aligned": {
+    "population_size": 1662419,
+    "models": {
+      "majority": {
+        "threshold": 0.5,
+        "positive_class": 1,
+        "score_definition": "P(class=1) or a comparable continuous detector score",
+        "confusion": {
+          "tn": 1475258,
+          "fp": 0,
+          "fn": 187161,
+          "tp": 0
+        },
+        "population": 1662419,
+        "positive_support": 187161,
+        "negative_support": 1475258,
+        "accuracy": 0.8874164696144594,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "macro_f1": 0.4701752283616191,
+        "weighted_f1": 0.8344824825056807,
+        "balanced_accuracy": 0.5,
+        "specificity": 1.0,
+        "fpr": 0.0,
+        "fnr": 1.0,
+        "per_class": {
+          "benign": {
+            "precision": 0.8874164696144594,
+            "recall": 1.0,
+            "f1": 0.9403504567232382,
+            "support": 1475258
+          },
+          "attack": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 187161
+          }
+        },
+        "roc_auc": 0.5,
+        "pr_auc": 0.11258353038554059,
+        "reason": null,
+        "family": "prior_baseline"
+      },
+      "logistic_regression": {
+        "threshold": 0.5,
+        "positive_class": 1,
+        "score_definition": "P(class=1) or a comparable continuous detector score",
+        "confusion": {
+          "tn": 1128539,
+          "fp": 346719,
+          "fn": 34581,
+          "tp": 152580
+        },
+        "population": 1662419,
+        "positive_support": 187161,
+        "negative_support": 1475258,
+        "accuracy": 0.7706354414861717,
+        "precision": 0.30558843498585014,
+        "recall": 0.8152339429688877,
+        "f1": 0.44454156105235554,
+        "macro_f1": 0.6500104751415816,
+        "weighted_f1": 0.8092145577655108,
+        "balanced_accuracy": 0.7901056615983086,
+        "specificity": 0.7649773802277297,
+        "fpr": 0.23502261977227035,
+        "fnr": 0.18476605703111226,
+        "per_class": {
+          "benign": {
+            "precision": 0.9702687598872,
+            "recall": 0.7649773802277297,
+            "f1": 0.8554793892308077,
+            "support": 1475258
+          },
+          "attack": {
+            "precision": 0.30558843498585014,
+            "recall": 0.8152339429688877,
+            "f1": 0.44454156105235554,
+            "support": 187161
+          }
+        },
+        "roc_auc": 0.8849623849355436,
+        "pr_auc": 0.6122838148030935,
+        "reason": null,
+        "family": "linear_baseline"
+      },
+      "decision_tree": {
+        "threshold": 0.5,
+        "positive_class": 1,
+        "score_definition": "P(class=1) or a comparable continuous detector score",
+        "confusion": {
+          "tn": 1416438,
+          "fp": 58820,
+          "fn": 8491,
+          "tp": 178670
+        },
+        "population": 1662419,
+        "positive_support": 187161,
+        "negative_support": 1475258,
+        "accuracy": 0.9595102077153834,
+        "precision": 0.7523264137437365,
+        "recall": 0.9546326424842783,
+        "f1": 0.8414910126197749,
+        "macro_f1": 0.9091409097786982,
+        "weighted_f1": 0.9615582784328809,
+        "balanced_accuracy": 0.9573808252136479,
+        "specificity": 0.9601290079430175,
+        "fpr": 0.03987099205698257,
+        "fnr": 0.04536735751572176,
+        "per_class": {
+          "benign": {
+            "precision": 0.9940411066095223,
+            "recall": 0.9601290079430175,
+            "f1": 0.9767908069376217,
+            "support": 1475258
+          },
+          "attack": {
+            "precision": 0.7523264137437365,
+            "recall": 0.9546326424842783,
+            "f1": 0.8414910126197749,
+            "support": 187161
+          }
+        },
+        "roc_auc": 0.9833062153838875,
+        "pr_auc": 0.9516342827100175,
+        "reason": null,
+        "family": "tree_baseline"
+      },
+      "random_forest": {
+        "threshold": 0.5,
+        "positive_class": 1,
+        "score_definition": "P(class=1) or a comparable continuous detector score",
+        "confusion": {
+          "tn": 1437020,
+          "fp": 38238,
+          "fn": 7864,
+          "tp": 179297
+        },
+        "population": 1662419,
+        "positive_support": 187161,
+        "negative_support": 1475258,
+        "accuracy": 0.972268122537098,
+        "precision": 0.8242213896614338,
+        "recall": 0.9579826993871586,
+        "f1": 0.8860823927095894,
+        "macro_f1": 0.9351474021488966,
+        "weighted_f1": 0.9731645876260495,
+        "balanced_accuracy": 0.9660315826562205,
+        "specificity": 0.9740804659252822,
+        "fpr": 0.025919534074717778,
+        "fnr": 0.04201730061284135,
+        "per_class": {
+          "benign": {
+            "precision": 0.9945573485483956,
+            "recall": 0.9740804659252822,
+            "f1": 0.9842124115882036,
+            "support": 1475258
+          },
+          "attack": {
+            "precision": 0.8242213896614338,
+            "recall": 0.9579826993871586,
+            "f1": 0.8860823927095894,
+            "support": 187161
+          }
+        },
+        "roc_auc": 0.9901786773627602,
+        "pr_auc": 0.9675721434347193,
+        "reason": null,
+        "family": "ensemble"
+      },
+      "lstm": {
+        "threshold": 0.5,
+        "positive_class": 1,
+        "score_definition": "P(class=1) or a comparable continuous detector score",
+        "confusion": {
+          "tn": 1471466,
+          "fp": 3792,
+          "fn": 10777,
+          "tp": 176384
+        },
+        "population": 1662419,
+        "positive_support": 187161,
+        "negative_support": 1475258,
+        "accuracy": 0.9912362647443274,
+        "precision": 0.9789539117307522,
+        "recall": 0.9424185594221018,
+        "f1": 0.9603388713905759,
+        "macro_f1": 0.9777063765111997,
+        "weighted_f1": 0.991163291550886,
+        "balanced_accuracy": 0.9699240807831346,
+        "specificity": 0.9974296021441673,
+        "fpr": 0.0025703978558326746,
+        "fnr": 0.05758144057789817,
+        "per_class": {
+          "benign": {
+            "precision": 0.9927292623409252,
+            "recall": 0.9974296021441673,
+            "f1": 0.9950738816318236,
+            "support": 1475258
+          },
+          "attack": {
+            "precision": 0.9789539117307522,
+            "recall": 0.9424185594221018,
+            "f1": 0.9603388713905759,
+            "support": 187161
+          }
+        },
+        "roc_auc": 0.996551512975272,
+        "pr_auc": 0.9865181273742982,
+        "reason": null,
+        "family": "temporal_recurrent"
+      },
+      "fusion": {
+        "threshold": 0.5,
+        "positive_class": 1,
+        "score_definition": "P(class=1) or a comparable continuous detector score",
+        "confusion": {
+          "tn": 1471466,
+          "fp": 3792,
+          "fn": 10777,
+          "tp": 176384
+        },
+        "population": 1662419,
+        "positive_support": 187161,
+        "negative_support": 1475258,
+        "accuracy": 0.9912362647443274,
+        "precision": 0.9789539117307522,
+        "recall": 0.9424185594221018,
+        "f1": 0.9603388713905759,
+        "macro_f1": 0.9777063765111997,
+        "weighted_f1": 0.991163291550886,
+        "balanced_accuracy": 0.9699240807831346,
+        "specificity": 0.9974296021441673,
+        "fpr": 0.0025703978558326746,
+        "fnr": 0.05758144057789817,
+        "per_class": {
+          "benign": {
+            "precision": 0.9927292623409252,
+            "recall": 0.9974296021441673,
+            "f1": 0.9950738816318236,
+            "support": 1475258
+          },
+          "attack": {
+            "precision": 0.9789539117307522,
+            "recall": 0.9424185594221018,
+            "f1": 0.9603388713905759,
+            "support": 187161
+          }
+        },
+        "roc_auc": 0.996551512975272,
+        "pr_auc": 0.9865181273742982,
+        "reason": null,
+        "family": "ensemble_fusion"
+      }
+    }
+  }
+}

@@ -37,6 +37,7 @@ models/dqn/*
 *.joblib
 *.pt
 *.pth
+results/**/predictions_test.csv
 
 # Generated figures are regenerated from results; generated Markdown reports ARE committed
 # so the repository contains readable evidence derived from the result artifacts.

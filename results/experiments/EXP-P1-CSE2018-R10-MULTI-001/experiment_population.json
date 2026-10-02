@@ -1,0 +1,511 @@
+{
+  "dataset": "cse_cic_ids2018",
+  "feature_contract": {
+    "feature_count": 10,
+    "features": [
+      "flow_duration_ms",
+      "flow_packets_per_s",
+      "flow_bytes_per_s",
+      "packet_length_mean",
+      "packet_length_std",
+      "syn_count",
+      "ack_count",
+      "rst_count",
+      "fin_count",
+      "syn_ack_ratio"
+    ]
+  },
+  "population_config": {
+    "dataset": "cse_cic_ids2018",
+    "files": "all_verified",
+    "exclude_files": [],
+    "file_order": "manifest",
+    "require_verified_checksums": true,
+    "require_schema_validated": true,
+    "duplicate_policy": "deduplicate_features",
+    "duplicate_conflict_policy": "reject_conflicts",
+    "sample_limit": null,
+    "sample_strategy": "stratified",
+    "seed": 42
+  },
+  "files": [
+    {
+      "filename": "Friday-02-03-2018_TrafficForML_CICFlowMeter.csv",
+      "relative_path": "data/raw/cse_cic_ids2018/Friday-02-03-2018_TrafficForML_CICFlowMeter.csv",
+      "sha256": "d96f38e7496aba83475031e6fb8c6fdf1abf6aa1b71325a917798f3c7de93de1",
+      "size_bytes": 352368373,
+      "raw_rows": 1048575,
+      "provenance_class": "recognized_mirror",
+      "status": "verified",
+      "accounting": {
+        "raw_rows": 1048575,
+        "removed_unknown_label": 0,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 1501,
+        "removed_non_finite": 4044,
+        "final_modeling_rows": 1043030
+      }
+    },
+    {
+      "filename": "Friday-16-02-2018_TrafficForML_CICFlowMeter.csv",
+      "relative_path": "data/raw/cse_cic_ids2018/Friday-16-02-2018_TrafficForML_CICFlowMeter.csv",
+      "sha256": "1a4919faa0c49c7af97230b0c2d076eba23ee6dd81103a3801d51ac316355d8b",
+      "size_bytes": 333723605,
+      "raw_rows": 1048575,
+      "provenance_class": "recognized_mirror",
+      "status": "verified",
+      "accounting": {
+        "raw_rows": 1048575,
+        "removed_unknown_label": 1,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 136696,
+        "removed_non_finite": 0,
+        "final_modeling_rows": 911878
+      }
+    },
+    {
+      "filename": "Friday-23-02-2018_TrafficForML_CICFlowMeter.csv",
+      "relative_path": "data/raw/cse_cic_ids2018/Friday-23-02-2018_TrafficForML_CICFlowMeter.csv",
+      "sha256": "d0a7f5059d9823b6e9b392b759e306481a3502d190dea7a1b5502ae079ea069b",
+      "size_bytes": 382840456,
+      "raw_rows": 1048575,
+      "provenance_class": "recognized_mirror",
+      "status": "verified",
+      "accounting": {
+        "raw_rows": 1048575,
+        "removed_unknown_label": 0,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 769,
+        "removed_non_finite": 5704,
+        "final_modeling_rows": 1042102
+      }
+    },
+    {
+      "filename": "Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv",
+      "relative_path": "data/raw/cse_cic_ids2018/Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv",
+      "sha256": "7287a4d7740a1dddbf330ceb2beb6a4889d33ba63674558a68b5eb50d16711df",
+      "size_bytes": 4054925350,
+      "raw_rows": 7948748,
+      "provenance_class": "recognized_mirror",
+      "status": "verified",
+      "accounting": {
+        "raw_rows": 7948748,
+        "removed_unknown_label": 0,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 2,
+        "removed_non_finite": 59452,
+        "final_modeling_rows": 7889294
+      }
+    },
+    {
+      "filename": "Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv",
+      "relative_path": "data/raw/cse_cic_ids2018/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv",
+      "sha256": "b0534c5d7d8b41e03df71c6966c995d116a8ed28e61f377c8b14cdf5d28f4edf",
+      "size_bytes": 107842858,
+      "raw_rows": 331125,
+      "provenance_class": "recognized_mirror",
+      "status": "verified",
+      "accounting": {
+        "raw_rows": 331125,
+        "removed_unknown_label": 2,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 91,
+        "removed_non_finite": 2917,
+        "final_modeling_rows": 328115
+      }
+    },
+    {
+      "filename": "Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv",
+      "relative_path": "data/raw/cse_cic_ids2018/Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv",
+      "sha256": "fa2947a8256d81ee9103ae16139d62d0e17aa23e696ee80d9e76fb51c01c9c4b",
+      "size_bytes": 375945899,
+      "raw_rows": 1048575,
+      "provenance_class": "recognized_mirror",
+      "status": "verified",
+      "accounting": {
+        "raw_rows": 1048575,
+        "removed_unknown_label": 0,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 1217,
+        "removed_non_finite": 8022,
+        "final_modeling_rows": 1039336
+      }
+    },
+    {
+      "filename": "Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv",
+      "relative_path": "data/raw/cse_cic_ids2018/Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv",
+      "sha256": "da33c927018274f9d49b145baa00e4ce0526c25b3b890b34c489e247b5e24544",
+      "size_bytes": 382636202,
+      "raw_rows": 1048575,
+      "provenance_class": "recognized_mirror",
+      "status": "verified",
+      "accounting": {
+        "raw_rows": 1048575,
+        "removed_unknown_label": 0,
+        "removed_invalid": 9,
+        "removed_exact_duplicates": 872,
+        "removed_non_finite": 5608,
+        "final_modeling_rows": 1042086
+      }
+    },
+    {
+      "filename": "Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv",
+      "relative_path": "data/raw/cse_cic_ids2018/Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv",
+      "sha256": "acff8bc61376ee031d80878ee6099e0b1a87a1bd711d8068298421418c9f8147",
+      "size_bytes": 358223333,
+      "raw_rows": 1048575,
+      "provenance_class": "recognized_mirror",
+      "status": "verified",
+      "accounting": {
+        "raw_rows": 1048575,
+        "removed_unknown_label": 0,
+        "removed_invalid": 5,
+        "removed_exact_duplicates": 224603,
+        "removed_non_finite": 3823,
+        "final_modeling_rows": 820144
+      }
+    },
+    {
+      "filename": "Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv",
+      "relative_path": "data/raw/cse_cic_ids2018/Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv",
+      "sha256": "a5f4a1c2689e0aa6566c03a58466de9c407c0be0cbd3cc69306544026611be04",
+      "size_bytes": 328893673,
+      "raw_rows": 1048575,
+      "provenance_class": "recognized_mirror",
+      "status": "verified",
+      "accounting": {
+        "raw_rows": 1048575,
+        "removed_unknown_label": 0,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 17523,
+        "removed_non_finite": 0,
+        "final_modeling_rows": 1031052
+      }
+    },
+    {
+      "filename": "Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv",
+      "relative_path": "data/raw/cse_cic_ids2018/Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv",
+      "sha256": "f15e2a12304446058a0186c8ad67de2bd15735a9ba5c70c9a1f4c4242ab06771",
+      "size_bytes": 209249758,
+      "raw_rows": 613104,
+      "provenance_class": "recognized_mirror",
+      "status": "verified",
+      "accounting": {
+        "raw_rows": 613104,
+        "removed_unknown_label": 7,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 348,
+        "removed_non_finite": 6101,
+        "final_modeling_rows": 606648
+      }
+    }
+  ],
+  "accounting": {
+    "per_file": {
+      "Friday-02-03-2018_TrafficForML_CICFlowMeter.csv": {
+        "raw_rows": 1048575,
+        "removed_unknown_label": 0,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 1501,
+        "removed_non_finite": 4044,
+        "final_modeling_rows": 1043030
+      },
+      "Friday-16-02-2018_TrafficForML_CICFlowMeter.csv": {
+        "raw_rows": 1048575,
+        "removed_unknown_label": 1,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 136696,
+        "removed_non_finite": 0,
+        "final_modeling_rows": 911878
+      },
+      "Friday-23-02-2018_TrafficForML_CICFlowMeter.csv": {
+        "raw_rows": 1048575,
+        "removed_unknown_label": 0,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 769,
+        "removed_non_finite": 5704,
+        "final_modeling_rows": 1042102
+      },
+      "Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv": {
+        "raw_rows": 7948748,
+        "removed_unknown_label": 0,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 2,
+        "removed_non_finite": 59452,
+        "final_modeling_rows": 7889294
+      },
+      "Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv": {
+        "raw_rows": 331125,
+        "removed_unknown_label": 2,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 91,
+        "removed_non_finite": 2917,
+        "final_modeling_rows": 328115
+      },
+      "Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv": {
+        "raw_rows": 1048575,
+        "removed_unknown_label": 0,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 1217,
+        "removed_non_finite": 8022,
+        "final_modeling_rows": 1039336
+      },
+      "Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv": {
+        "raw_rows": 1048575,
+        "removed_unknown_label": 0,
+        "removed_invalid": 9,
+        "removed_exact_duplicates": 872,
+        "removed_non_finite": 5608,
+        "final_modeling_rows": 1042086
+      },
+      "Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv": {
+        "raw_rows": 1048575,
+        "removed_unknown_label": 0,
+        "removed_invalid": 5,
+        "removed_exact_duplicates": 224603,
+        "removed_non_finite": 3823,
+        "final_modeling_rows": 820144
+      },
+      "Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv": {
+        "raw_rows": 1048575,
+        "removed_unknown_label": 0,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 17523,
+        "removed_non_finite": 0,
+        "final_modeling_rows": 1031052
+      },
+      "Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv": {
+        "raw_rows": 613104,
+        "removed_unknown_label": 7,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 348,
+        "removed_non_finite": 6101,
+        "final_modeling_rows": 606648
+      }
+    },
+    "aggregate": {
+      "raw_rows": 16233002,
+      "removed_unknown_label": 10,
+      "removed_invalid": 14,
+      "removed_exact_duplicates": 383622,
+      "removed_non_finite": 95671,
+      "removed_feature_duplicates": 2944601,
+      "removed_label_conflicts": 4496789,
+      "final_modeling_rows": 8312295
+    },
+    "reconciled": true,
+    "formula": "raw_rows - (removed_unknown_label + removed_invalid + removed_exact_duplicates + removed_non_finite + removed_feature_duplicates + removed_label_conflicts) == final_modeling_rows"
+  },
+  "duplicate_conflict_analysis": {
+    "total_unique_vectors_with_duplicates": 919077,
+    "total_conflicting_vectors": 122481,
+    "total_conflicting_rows": 4496789,
+    "benign_attack_conflicts": 10,
+    "family_conflicts": 10,
+    "policy_applied": "reject_conflicts",
+    "rows_dropped": 4496789,
+    "conflict_examples": [
+      {
+        "hash": 2154660917470,
+        "row_count": 3,
+        "binary_labels": [
+          0,
+          1
+        ],
+        "label_families": [
+          "BENIGN",
+          "INFILTERATION"
+        ],
+        "sample_indices": [
+          1035008,
+          15437213,
+          15696819
+        ]
+      },
+      {
+        "hash": 4281011426003,
+        "row_count": 18,
+        "binary_labels": [
+          1,
+          0
+        ],
+        "label_families": [
+          "DOS ATTACKS-HULK",
+          "BENIGN",
+          "DDOS ATTACK-HOIC"
+        ],
+        "sample_indices": [
+          1113205,
+          1145173,
+          1217750
+        ]
+      },
+      {
+        "hash": 7488106510512,
+        "row_count": 2,
+        "binary_labels": [
+          0,
+          1
+        ],
+        "label_families": [
+          "BENIGN",
+          "INFILTERATION"
+        ],
+        "sample_indices": [
+          15213473,
+          15587499
+        ]
+      },
+      {
+        "hash": 20407103121151,
+        "row_count": 91,
+        "binary_labels": [
+          0,
+          1
+        ],
+        "label_families": [
+          "BENIGN",
+          "INFILTERATION"
+        ],
+        "sample_indices": [
+          926939,
+          2231478,
+          2433064
+        ]
+      },
+      {
+        "hash": 318752909227277,
+        "row_count": 2,
+        "binary_labels": [
+          0,
+          1
+        ],
+        "label_families": [
+          "BENIGN",
+          "INFILTERATION"
+        ],
+        "sample_indices": [
+          15176412,
+          15550437
+        ]
+      },
+      {
+        "hash": 333849305239243,
+        "row_count": 2,
+        "binary_labels": [
+          1,
+          0
+        ],
+        "label_families": [
+          "DDOS ATTACK-HOIC",
+          "BENIGN"
+        ],
+        "sample_indices": [
+          14365889,
+          14640818
+        ]
+      },
+      {
+        "hash": 579304062106387,
+        "row_count": 9,
+        "binary_labels": [
+          1,
+          0
+        ],
+        "label_families": [
+          "DOS ATTACKS-HULK",
+          "DDOS ATTACK-HOIC",
+          "BENIGN"
+        ],
+        "sample_indices": [
+          1210973,
+          1250403,
+          1332197
+        ]
+      },
+      {
+        "hash": 641161476111062,
+        "row_count": 118,
+        "binary_labels": [
+          1,
+          0
+        ],
+        "label_families": [
+          "DOS ATTACKS-HULK",
+          "BENIGN",
+          "DDOS ATTACK-HOIC"
+        ],
+        "sample_indices": [
+          1063571,
+          1064327,
+          1073152
+        ]
+      },
+      {
+        "hash": 657835470414285,
+        "row_count": 2,
+        "binary_labels": [
+          0,
+          1
+        ],
+        "label_families": [
+          "BENIGN",
+          "INFILTERATION"
+        ],
+        "sample_indices": [
+          15191204,
+          15565230
+        ]
+      },
+      {
+        "hash": 664330470298830,
+        "row_count": 2,
+        "binary_labels": [
+          0,
+          1
+        ],
+        "label_families": [
+          "BENIGN",
+          "INFILTERATION"
+        ],
+        "sample_indices": [
+          15473525,
+          15733120
+        ]
+      }
+    ]
+  },
+  "population_summary": {
+    "total_modeling_rows": 8312295,
+    "benign_count": 7376490,
+    "attack_count": 935805,
+    "attack_fraction": 0.1125808215420651,
+    "attack_families": {
+      "BENIGN": 7376490,
+      "DDOS ATTACKS-LOIC-HTTP": 535326,
+      "DDOS ATTACK-HOIC": 111966,
+      "DOS ATTACKS-HULK": 97442,
+      "SSH-BRUTEFORCE": 89513,
+      "DOS ATTACKS-GOLDENEYE": 41208,
+      "INFILTERATION": 34807,
+      "BOT": 15214,
+      "DOS ATTACKS-SLOWLORIS": 8156,
+      "DDOS ATTACK-LOIC-UDP": 1730,
+      "BRUTE FORCE -WEB": 272,
+      "BRUTE FORCE -XSS": 118,
+      "SQL INJECTION": 53
+    },
+    "rows_per_file": {
+      "Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv": 4508582,
+      "Friday-23-02-2018_TrafficForML_CICFlowMeter.csv": 646346,
+      "Friday-02-03-2018_TrafficForML_CICFlowMeter.csv": 551930,
+      "Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv": 551117,
+      "Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv": 548619,
+      "Friday-16-02-2018_TrafficForML_CICFlowMeter.csv": 541403,
+      "Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv": 431673,
+      "Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv": 248718,
+      "Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv": 150073,
+      "Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv": 133834
+    }
+  }
+}

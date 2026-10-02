@@ -3,7 +3,7 @@
 Last updated: 2026-10-02
 Project: **XRL-IDARS v1** · Repository: `fyp-xrlids`
 Phase: **1 — Data + Research + Model Foundation**
-Overall: **FOUNDATION REPAIRED & EVIDENCE RECONCILED — all 20 dataset CSVs physically present, SHA-256 verified, audited per-file; memory-bounded streaming pipelines, pre-flight gate, baseline ladder, and error analysis active; multi-file in-domain baseline experiments executed; Supervised LSTM and RF+LSTM Fusion empirically demonstrated on full multi-file CIC-IDS2017 (`EXP-P1-CIC2017-R10-001`); CSE-2018 10-file and UNSW-NB15 LSTM/Fusion pending.**
+Overall: **FOUNDATION REPAIRED & EVIDENCE RECONCILED — all 20 dataset CSVs physically present, SHA-256 verified, audited per-file; memory-bounded streaming pipelines, pre-flight gate, baseline ladder, and error analysis active; multi-file in-domain baseline experiments executed; Supervised LSTM and RF+LSTM Fusion empirically demonstrated on full multi-file populations for both CIC-IDS2017 (`EXP-P1-CIC2017-R10-001`) and CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-MULTI-001`); UNSW-NB15 domain-shift benchmarks pending.**
 
 Legend: ✅ done / verified · 🟡 implemented / empirically observed on partial data · ⛔ blocked on research decision · ⬜ planned / not started
 
@@ -44,7 +44,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Dataset audit module | ✅ | `src/xrlids/datasets/audit.py` + tests |
 | CLI | ✅ | `src/xrlids/cli.py` |
 | Report generation from artifacts | ✅ | `scripts/phase1/generate_reports.py` (dynamic git hashes, live manifests) |
-| Test suite | ✅ | 180 unit and integration tests passing (0 failures) |
+| Test suite | ✅ | 187 unit and integration tests passing (0 failures) |
 | SHAP explainability module | ✅ | `src/xrlids/explainability/shap_analysis.py` + tests |
 | Cross-dataset transfer module | ✅ | `src/xrlids/features/registry.py` + `run_experiment.py` (4-feature contract) |
 
@@ -56,14 +56,14 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Dataset audit (real files) | ✅ COMPLETED | All 20 files audited via chunked streaming with per-file JSON artifacts in `results/audits/` |
 | Splits / leakage (real data) | ✅ VALIDATED | Policy A feature-dedup split passes L-01/L-02 cleanly (0 cross-split duplicate vectors) |
 | CIC-IDS2017 Multi-File Baselines | ✅ EMPIRICALLY OBSERVED | Executed across all 8 files (2,830,743 raw rows -> 1,779,322 modeling rows); baseline ladder evaluated (`EXP-P1-CIC2017-R10-001`, RF test acc=0.9815, F1=0.9512) |
+| CSE-CIC-IDS2018 Multi-File Baselines | ✅ EMPIRICALLY OBSERVED | Executed across all 10 files (16,233,002 raw rows -> 8,312,295 modeling rows); baseline ladder evaluated (`EXP-P1-CSE2018-R10-MULTI-001`, RF test acc=0.9723, F1=0.8861, ROC-AUC=0.9902) |
 | UNSW-NB15 Multi-File Baselines | ✅ EMPIRICALLY OBSERVED | Executed across all 2 files (257,673 raw rows -> 122,520 modeling rows); native 4-feature contract evaluated (`EXP-P1-UNSW-NATIVE-001`, RF test acc=0.8588, F1=0.8546) |
-| CSE-CIC-IDS2018 Baselines | 🟡 EMPIRICALLY OBSERVED | Historical single-day runs executed (`EXP-P1-CSE2018-R10-001`, `EXP-P1-CSE2018-POLICY-B-001`); full 10-file multi-day run pending |
-| Supervised LSTM (Multi-file) | ✅ EMPIRICALLY OBSERVED (CIC-IDS2017) | Full multi-file training executed on CIC-IDS2017 (1,067,557 sequences, 355,833 test rows; acc=0.9867, F1=0.9633, FPR=0.0068; $\Delta \text{F1}=+0.0121$ over RF, $p=0.0000$); CSE-2018/UNSW pending |
-| Score Fusion (Multi-file) | ✅ EMPIRICALLY OBSERVED (CIC-IDS2017) | Tuned $\alpha=0.50$ fusion evaluated on CIC-IDS2017 (acc=0.9906, F1=0.9745, FPR=0.0075, ROC-AUC=0.9989; $\Delta \text{F1}=+0.0234$ over RF, $p=0.0000$); CSE-2018/UNSW pending |
+| Supervised LSTM (Multi-file) | ✅ EMPIRICALLY OBSERVED (CIC-IDS2017 & CSE-CIC-IDS2018) | Full multi-file training executed on CIC-IDS2017 (acc=0.9867, F1=0.9633, FPR=0.0068; $\Delta \text{F1}=+0.0121$ over RF, $p=0.0000$) and CSE-CIC-IDS2018 (acc=0.9912, F1=0.9603, FPR=0.0026; $\Delta \text{F1}=+0.0743$ over RF, $p=0.0000$); UNSW pending |
+| Score Fusion (Multi-file) | ✅ EMPIRICALLY OBSERVED (CIC-IDS2017 & CSE-CIC-IDS2018) | Tuned fusion evaluated on CIC-IDS2017 ($\alpha=0.50$, acc=0.9906, F1=0.9745, ROC-AUC=0.9989; $\Delta \text{F1}=+0.0234$ over RF, $p=0.0000$) and CSE-CIC-IDS2018 ($\alpha=0.00$, acc=0.9912, F1=0.9603, ROC-AUC=0.9966, matching LSTM's superior decision boundary); UNSW pending |
 | Multi-seed evaluation | 🟡 PARTIAL | Runner supports multi-seed loop and aggregate metrics; full multi-file runs executed with seed 42 only |
 | Cross-dataset transfer | 🟡 PARTIAL | Programmatic 4-feature contract evaluated source-side in `EXP-P1-TRANSFER-CSE-TO-UNSW-001` |
-| SHAP (real data) | 🟡 EMPIRICALLY OBSERVED | TreeSHAP evaluated on CIC-IDS2017 and UNSW-NB15 Random Forest models |
-| Calibration (real data) | 🟡 EMPIRICALLY OBSERVED | Platt scaling evaluated on CIC-IDS2017 and UNSW-NB15 models |
+| SHAP (real data) | ✅ EMPIRICALLY OBSERVED | TreeSHAP evaluated on CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15 Random Forest models |
+| Calibration (real data) | ✅ EMPIRICALLY OBSERVED | Platt scaling evaluated on CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15 models |
 | Threshold objective | 🟡 CANDIDATES EVALUATED | Evaluated across 0.00–1.00; neutral 0.5 baseline reported; operational freeze gated on D-003 |
 
 ## Research decisions status
@@ -79,7 +79,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 ## Explicitly not claimed
 
 - No claims of universal performance or production readiness across all three benchmark domains.
-- No claims that RQ2 or RQ3 have been empirically demonstrated on multi-file CSE-CIC-IDS2018 or UNSW-NB15 (executed and demonstrated on CIC-IDS2017 `EXP-P1-CIC2017-R10-001`; CSE/UNSW runs pending).
+- No claims that RQ2 or RQ3 have been empirically demonstrated on UNSW-NB15 (executed and demonstrated on CIC-IDS2017 `EXP-P1-CIC2017-R10-001` and CSE-CIC-IDS2018 `EXP-P1-CSE2018-R10-MULTI-001`; UNSW runs pending).
 - No claims that sequence models capture true physical packet arrival timelines; sequence ordering represents capture flow arrival order within sample partitions.
 - No claims of three-seed empirical averaging; full multi-file experiments reflect single-seed (seed=42) execution.
 - No final threshold frozen (D-003 remains open; reporting uses neutral 0.5 baseline).

@@ -28,7 +28,33 @@ Status: `EMPIRICALLY OBSERVED`.
 | **Fusion** vs **LSTM** | `f1` | 0.9745 | 0.9633 | +0.0113 | [0.0104, 0.0120] | 0.0000 | ✅ YES |
 
 ---
-## 2. Historical Single-Day Comparison: CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-001`)
+## 2. Full Multi-File Benchmark Comparison: CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-MULTI-001`)
+
+> [!NOTE]
+> Evaluated on the aligned test slice (1,662,419 rows across all 10 capture days).
+> The 40-row discrepancy from the 1,662,459 tabular test set is due to file-boundary sequence isolation (10 files * 4 boundary rows).
+
+| Model | Model Family | Accuracy | Precision | Recall | F1 Score | Specificity | FPR | ROC-AUC | PR-AUC |
+| --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **MAJORITY** | `prior_baseline` | 0.8874 | 0.0000 | 0.0000 | 0.0000 | 1.0000 | 0.0000 | 0.5000 | 0.1126 |
+| **LOGISTIC_REGRESSION** | `linear_baseline` | 0.7706 | 0.3056 | 0.8152 | 0.4445 | 0.7650 | 0.2350 | 0.8850 | 0.6123 |
+| **DECISION_TREE** | `tree_baseline` | 0.9595 | 0.7523 | 0.9546 | 0.8415 | 0.9601 | 0.0399 | 0.9833 | 0.9516 |
+| **RANDOM_FOREST** | `ensemble` | 0.9723 | 0.8242 | 0.9580 | 0.8861 | 0.9741 | 0.0259 | 0.9902 | 0.9676 |
+| **LSTM** | `temporal_recurrent` | 0.9912 | 0.9790 | 0.9424 | 0.9603 | 0.9974 | 0.0026 | 0.9966 | 0.9865 |
+| **FUSION** | `ensemble_fusion` | 0.9912 | 0.9790 | 0.9424 | 0.9603 | 0.9974 | 0.0026 | 0.9966 | 0.9865 |
+
+### Paired Non-Parametric Bootstrap Comparisons (CSE-CIC-IDS2018, B=1,000)
+
+| Comparison (A vs B) | Metric | Estimate A | Estimate B | Δ (A - B) | 95% Bootstrap CI | p-value | Significant? |
+| --- | --- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **LR** vs **DT** | `f1` | 0.4445 | 0.8415 | -0.3969 | [-0.3984, -0.3957] | 0.0000 | ✅ YES |
+| **DT** vs **RF** | `f1` | 0.8415 | 0.8861 | -0.0446 | [-0.0452, -0.0439] | 0.0000 | ✅ YES |
+| **RF** vs **LSTM** | `f1` | 0.8861 | 0.9603 | -0.0743 | [-0.0752, -0.0734] | 0.0000 | ✅ YES |
+| **Fusion** vs **RF** | `f1` | 0.9603 | 0.8861 | +0.0743 | [0.0734, 0.0752] | 0.0000 | ✅ YES |
+| **Fusion** vs **LSTM** | `f1` | 0.9603 | 0.9603 | +0.0000 | [0.0000, 0.0000] | 1.0000 | ❌ NO |
+
+---
+## 3. Historical Single-Day Comparison: CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-001`)
 
 | Model | Accuracy | Precision | Recall | F1 Score | Specificity | FPR | ROC-AUC | PR-AUC |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -42,7 +68,7 @@ Status: `EMPIRICALLY OBSERVED`.
 3. **Score Fusion (alpha=0.30)** outperforms both individual models on **Accuracy (0.7978)**, **Precision (0.7640)**, **ROC-AUC (0.7452)**, and **PR-AUC (0.5151)**.
 
 ---
-## 3. Policy Comparison: Leakage Inflation in Policy B
+## 4. Policy Comparison: Leakage Inflation in Policy B
 
 Under Policy B (retaining duplicates), the test set contains flows that also exist in the training set.
 The table below breaks down performance on the duplicate subset vs the unique subset:

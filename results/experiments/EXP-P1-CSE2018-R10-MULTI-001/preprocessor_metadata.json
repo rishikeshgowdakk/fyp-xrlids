@@ -1,0 +1,86 @@
+{
+  "preprocessor_version": "1.0.0",
+  "dataset": "cse_cic_ids2018",
+  "feature_list": [
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean",
+    "packet_length_std",
+    "syn_count",
+    "ack_count",
+    "rst_count",
+    "fin_count",
+    "syn_ack_ratio"
+  ],
+  "n_features": 10,
+  "feature_order": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "scaler_type": "StandardScaler",
+  "missing_policy": "median_train",
+  "n_train_rows": 4987377,
+  "fitted_at": "2026-10-02T19:18:49.511659+00:00",
+  "git_commit": "09c6bb8fd46b64c8fe29927980b4fc46088c5245",
+  "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+  "scaler_params": {
+    "mean": [
+      20353.622204194504,
+      317.92474875677703,
+      32115.849371614055,
+      118.95873927716123,
+      199.71426279848814,
+      0.02225558645356066,
+      0.18974543131590013,
+      0.2876514047363975,
+      0.0012653946152456491,
+      0.02225558645356066
+    ],
+    "scale": [
+      37534.6350813954,
+      11776.850966717957,
+      2059683.627825114,
+      123.3283324210685,
+      179.14356390005503,
+      0.14751364453896715,
+      0.3920996080215372,
+      0.4526677303382413,
+      0.035549871894471806,
+      0.14751364453896715
+    ],
+    "var": [
+      1408848830.6935182,
+      138694218.69228566,
+      4242296646730.8223,
+      15209.877577761574,
+      32092.416486813097,
+      0.021760275325168752,
+      0.15374210261064314,
+      0.20490807408957473,
+      0.0012637933917133567,
+      0.021760275325168752
+    ]
+  },
+  "imputation_medians": {
+    "flow_duration_ms": 2175.0458984375,
+    "flow_packets_per_s": 6.336822986602783,
+    "flow_bytes_per_s": 784.048583984375,
+    "packet_length_mean": 103.01388549804688,
+    "packet_length_std": 189.31358337402344,
+    "syn_count": 0.0,
+    "ack_count": 0.0,
+    "rst_count": 0.0,
+    "fin_count": 0.0,
+    "syn_ack_ratio": 0.0
+  },
+  "preprocessor_hash": "d2a6dc2e9fbbd6dfa8988034d7e2971b86dc1dd76a3d88d5b98e7afe727b720c"
+}

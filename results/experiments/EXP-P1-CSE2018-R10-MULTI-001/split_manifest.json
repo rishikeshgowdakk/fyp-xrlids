@@ -1,0 +1,55 @@
+{
+  "dataset": "cse_cic_ids2018",
+  "methodology": "stratified_random",
+  "rationale": "Multi-file split with duplicate_policy=deduplicate_features",
+  "duplicate_policy": "deduplicate_features",
+  "duplicate_accounting": {
+    "policy": "deduplicate_features",
+    "input_rows": 8312295,
+    "duplicate_rows_dropped": 0,
+    "unique_rows_retained": 8312295,
+    "duplicate_fraction": 0.0
+  },
+  "ordering_basis": "arrival_order",
+  "checks_performed": [
+    "feature_deduplication_audit",
+    "train_val_test_disjointness",
+    "class_stratification_audit",
+    "exact_duplicate_leakage_audit"
+  ],
+  "checks_not_performed": [
+    "strict_timestamp_monotonic_ordering (timestamps absent or non-monotonic in source data)"
+  ],
+  "ratios": {
+    "train": 0.6,
+    "validation": 0.2,
+    "test": 0.2
+  },
+  "seed": 42,
+  "stratified": true,
+  "group_column": null,
+  "time_column": null,
+  "counts": {
+    "train": 4987377,
+    "validation": 1662459,
+    "test": 1662459
+  },
+  "class_distribution": {
+    "train": {
+      "benign": 4425894,
+      "attack": 561483,
+      "attack_fraction": 0.1125808215420651
+    },
+    "validation": {
+      "benign": 1475298,
+      "attack": 187161,
+      "attack_fraction": 0.1125808215420651
+    },
+    "test": {
+      "benign": 1475298,
+      "attack": 187161,
+      "attack_fraction": 0.1125808215420651
+    }
+  },
+  "split_config_hash": "17ed21c579d06350a2a6093f545a5193c328f04b9acab39d918f0019bd002c93"
+}

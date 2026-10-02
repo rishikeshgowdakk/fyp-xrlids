@@ -111,17 +111,17 @@ The results confirm that **`data/manifests/dataset_registry.yaml` is the canonic
 
 ## 6. Model Evidence Matrix
 
-| Model Architecture | Implementation Status | Unit Test Status | CIC-IDS2017 Multi-File Status | UNSW-NB15 Multi-File Status | CSE-CIC-IDS2018 Status |
+| Model Architecture | Implementation Status | Unit Test Status | CIC-IDS2017 Multi-File Status | UNSW-NB15 Multi-File Status | CSE-CIC-IDS2018 Multi-File Status |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Majority Class** | ✅ Implemented | ✅ Passing | ✅ Empirically Executed | ✅ Empirically Executed | 🟡 Historical single-file only |
-| **Logistic Regression**| ✅ Implemented | ✅ Passing | ✅ Empirically Executed | ✅ Empirically Executed | 🟡 Historical single-file only |
-| **Decision Tree** | ✅ Implemented | ✅ Passing | ✅ Empirically Executed | ✅ Empirically Executed | 🟡 Historical single-file only |
-| **Random Forest** | ✅ Implemented | ✅ Passing | ✅ Empirically Executed | ✅ Empirically Executed | 🟡 Historical single-file only |
-| **Supervised LSTM** | ✅ Implemented | ✅ Passing | ✅ Empirically Executed | ⛔ **NOT DEMONSTRATED** | 🟡 Historical single-file only |
-| **RF + LSTM Fusion** | ✅ Implemented | ✅ Passing | ✅ Empirically Executed | ⛔ **NOT DEMONSTRATED** | 🟡 Historical single-file only |
+| **Majority Class** | ✅ Implemented | ✅ Passing | ✅ Empirically Executed | ✅ Empirically Executed | ✅ Empirically Executed (`EXP-P1-CSE2018-R10-MULTI-001`) |
+| **Logistic Regression**| ✅ Implemented | ✅ Passing | ✅ Empirically Executed | ✅ Empirically Executed | ✅ Empirically Executed (`EXP-P1-CSE2018-R10-MULTI-001`) |
+| **Decision Tree** | ✅ Implemented | ✅ Passing | ✅ Empirically Executed | ✅ Empirically Executed | ✅ Empirically Executed (`EXP-P1-CSE2018-R10-MULTI-001`) |
+| **Random Forest** | ✅ Implemented | ✅ Passing | ✅ Empirically Executed | ✅ Empirically Executed | ✅ Empirically Executed (`EXP-P1-CSE2018-R10-MULTI-001`) |
+| **Supervised LSTM** | ✅ Implemented | ✅ Passing | ✅ Empirically Executed | ⛔ **NOT DEMONSTRATED** | ✅ Empirically Executed (`EXP-P1-CSE2018-R10-MULTI-001`) |
+| **RF + LSTM Fusion** | ✅ Implemented | ✅ Passing | ✅ Empirically Executed | ⛔ **NOT DEMONSTRATED** | ✅ Empirically Executed (`EXP-P1-CSE2018-R10-MULTI-001`) |
 
 > [!NOTE]
-> Supervised LSTM and RF+LSTM Fusion have now been empirically executed on the complete multi-file CIC-IDS2017 dataset (`EXP-P1-CIC2017-R10-001`, 1,067,557 sequences, 355,833 aligned test samples). Research Questions RQ2 and RQ3 are empirically demonstrated on CIC-IDS2017. Their execution on multi-file UNSW-NB15 and CSE-CIC-IDS2018 remains pending.
+> Supervised LSTM and RF+LSTM Fusion have now been empirically executed and validated on the complete multi-file populations of both CIC-IDS2017 (`EXP-P1-CIC2017-R10-001`, 1,067,557 sequences, 355,833 aligned test samples) and CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-MULTI-001`, 10 capture days, 16,233,002 raw rows, 8,312,295 modeling rows, 1,662,419 aligned test samples). Research Questions RQ2 and RQ3 are empirically demonstrated on both CIC-IDS2017 and CSE-CIC-IDS2018. Execution on UNSW-NB15 remains pending.
 
 ---
 
@@ -178,11 +178,11 @@ The paired bootstrap comparison (`src/xrlids/evaluation/statistics.py`) tests th
 
 ## 11. Remaining Scientific Blockers & Next Research Tasks
 
-1. **Multi-File CSE-CIC-IDS2018 & UNSW-NB15 Sequence Modeling**:
-   - Supervised LSTM and Fusion have been empirically executed and validated on the multi-file CIC-IDS2017 population (`EXP-P1-CIC2017-R10-001`). Multi-file sequence training on UNSW-NB15 and CSE-CIC-IDS2018 remains pending.
-2. **CSE-CIC-IDS2018 Multi-File Execution**:
-   - The full 10-file CSE-CIC-IDS2018 dataset (16.23M rows) has been audited and verified, but multi-file training requires running the updated runner under the 10-GiB memory budget.
+1. **Multi-File Sequence Modeling (CIC-IDS2017 & CSE-CIC-IDS2018 Complete)**:
+   - Supervised LSTM and Fusion have been empirically executed and validated on the complete multi-file populations of CIC-IDS2017 (`EXP-P1-CIC2017-R10-001`) and CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-MULTI-001`). Multi-file sequence training on UNSW-NB15 remains pending.
+2. **UNSW-NB15 Benchmark & Transfer Evaluation**:
+   - The UNSW-NB15 benchmark must be evaluated with the frozen 10-feature audit documentation and auxiliary 4-feature contract fallback, followed by cross-dataset OOD experiments.
 3. **Decision D-003 (Operational Threshold)**:
-   - Remains OPEN. The trade-off between false alarm rate ($0.75\%$ on Benign under Fusion in CIC-IDS2017) and low-footprint attack detection ($15.89\%$ on Brute Force, $2.78\%$ on XSS) requires explicit operational cost matrices.
+   - Remains OPEN. The trade-off between false alarm rate ($0.26\%$ on Benign under Fusion/LSTM in CSE-CIC-IDS2018, $0.75\%$ in CIC-IDS2017) and low-footprint attack detection ($10.70\%$ on Infiltration, $15.89\%$ on Web Brute Force) requires explicit operational cost matrices.
 4. **Multi-Seed Full Runs**:
    - Seeds 123 and 456 must be executed across full populations to substantiate variance and stability claims.

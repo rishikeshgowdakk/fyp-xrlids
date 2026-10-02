@@ -1,0 +1,612 @@
+{
+  "status": "COMPUTED",
+  "methodology": "TreeSHAP (path-dependent tree explanation on RandomForestClassifier)",
+  "explained_population": {
+    "background_samples": 100,
+    "explained_samples": 200,
+    "features_analyzed": 10,
+    "expected_base_value": 0.13839147269954227
+  },
+  "global_importance": [
+    {
+      "rank": 1,
+      "feature": "flow_duration_ms",
+      "mean_abs_shap": 0.04882722984453116
+    },
+    {
+      "rank": 2,
+      "feature": "packet_length_std",
+      "mean_abs_shap": 0.047968340451384914
+    },
+    {
+      "rank": 3,
+      "feature": "packet_length_mean",
+      "mean_abs_shap": 0.041746002585758335
+    },
+    {
+      "rank": 4,
+      "feature": "flow_packets_per_s",
+      "mean_abs_shap": 0.03870388661316321
+    },
+    {
+      "rank": 5,
+      "feature": "ack_count",
+      "mean_abs_shap": 0.02867017362435643
+    },
+    {
+      "rank": 6,
+      "feature": "rst_count",
+      "mean_abs_shap": 0.02509120549850182
+    },
+    {
+      "rank": 7,
+      "feature": "flow_bytes_per_s",
+      "mean_abs_shap": 0.024930593714830702
+    },
+    {
+      "rank": 8,
+      "feature": "syn_ack_ratio",
+      "mean_abs_shap": 0.000616992171998383
+    },
+    {
+      "rank": 9,
+      "feature": "syn_count",
+      "mean_abs_shap": 0.0006118596222695187
+    },
+    {
+      "rank": 10,
+      "feature": "fin_count",
+      "mean_abs_shap": 0.0
+    }
+  ],
+  "class_specific_patterns": {
+    "attack_mean_shap": {
+      "flow_duration_ms": 0.12438077244254353,
+      "flow_packets_per_s": 0.11946059573812651,
+      "flow_bytes_per_s": 0.06840487960576024,
+      "packet_length_mean": 0.16843299498507416,
+      "packet_length_std": 0.15554221452918363,
+      "syn_count": 3.650147632594821e-05,
+      "ack_count": 0.1112720882877119,
+      "rst_count": 0.06329147102158776,
+      "fin_count": 0.0,
+      "syn_ack_ratio": 0.0001364718702113151
+    },
+    "benign_mean_shap": {
+      "flow_duration_ms": -0.023211939884550316,
+      "flow_packets_per_s": -0.0024154130402531653,
+      "flow_bytes_per_s": -0.003281125037655716,
+      "packet_length_mean": -0.014076420204256255,
+      "packet_length_std": -0.022771520475005445,
+      "syn_count": 0.00039277596702100645,
+      "ack_count": -0.0009287661252808506,
+      "rst_count": -0.010276406117716142,
+      "fin_count": 0.0,
+      "syn_ack_ratio": 0.0003992341940969696
+    }
+  },
+  "family_specific_patterns": {
+    "BENIGN": [
+      {
+        "rank": 1,
+        "feature": "flow_duration_ms",
+        "mean_abs_shap": 0.038333
+      },
+      {
+        "rank": 2,
+        "feature": "packet_length_std",
+        "mean_abs_shap": 0.033162
+      },
+      {
+        "rank": 3,
+        "feature": "flow_packets_per_s",
+        "mean_abs_shap": 0.027636
+      },
+      {
+        "rank": 4,
+        "feature": "packet_length_mean",
+        "mean_abs_shap": 0.024471
+      },
+      {
+        "rank": 5,
+        "feature": "rst_count",
+        "mean_abs_shap": 0.019882
+      }
+    ],
+    "BOT": [
+      {
+        "rank": 1,
+        "feature": "rst_count",
+        "mean_abs_shap": 0.190054
+      },
+      {
+        "rank": 2,
+        "feature": "flow_duration_ms",
+        "mean_abs_shap": 0.188319
+      },
+      {
+        "rank": 3,
+        "feature": "packet_length_mean",
+        "mean_abs_shap": 0.166492
+      },
+      {
+        "rank": 4,
+        "feature": "flow_packets_per_s",
+        "mean_abs_shap": 0.117027
+      },
+      {
+        "rank": 5,
+        "feature": "packet_length_std",
+        "mean_abs_shap": 0.105343
+      }
+    ],
+    "DDOS ATTACK-HOIC": [
+      {
+        "rank": 1,
+        "feature": "packet_length_std",
+        "mean_abs_shap": 0.234335
+      },
+      {
+        "rank": 2,
+        "feature": "flow_duration_ms",
+        "mean_abs_shap": 0.185746
+      },
+      {
+        "rank": 3,
+        "feature": "flow_packets_per_s",
+        "mean_abs_shap": 0.148328
+      },
+      {
+        "rank": 4,
+        "feature": "flow_bytes_per_s",
+        "mean_abs_shap": 0.122166
+      },
+      {
+        "rank": 5,
+        "feature": "packet_length_mean",
+        "mean_abs_shap": 0.089601
+      }
+    ],
+    "DDOS ATTACKS-LOIC-HTTP": [
+      {
+        "rank": 1,
+        "feature": "packet_length_mean",
+        "mean_abs_shap": 0.197843
+      },
+      {
+        "rank": 2,
+        "feature": "ack_count",
+        "mean_abs_shap": 0.172495
+      },
+      {
+        "rank": 3,
+        "feature": "packet_length_std",
+        "mean_abs_shap": 0.136958
+      },
+      {
+        "rank": 4,
+        "feature": "flow_packets_per_s",
+        "mean_abs_shap": 0.130022
+      },
+      {
+        "rank": 5,
+        "feature": "flow_duration_ms",
+        "mean_abs_shap": 0.086825
+      }
+    ],
+    "DOS ATTACKS-GOLDENEYE": [
+      {
+        "rank": 1,
+        "feature": "packet_length_std",
+        "mean_abs_shap": 0.254652
+      },
+      {
+        "rank": 2,
+        "feature": "packet_length_mean",
+        "mean_abs_shap": 0.181061
+      },
+      {
+        "rank": 3,
+        "feature": "flow_packets_per_s",
+        "mean_abs_shap": 0.116405
+      },
+      {
+        "rank": 4,
+        "feature": "flow_duration_ms",
+        "mean_abs_shap": 0.100471
+      },
+      {
+        "rank": 5,
+        "feature": "flow_bytes_per_s",
+        "mean_abs_shap": 0.084297
+      }
+    ],
+    "DOS ATTACKS-HULK": [
+      {
+        "rank": 1,
+        "feature": "flow_duration_ms",
+        "mean_abs_shap": 0.183705
+      },
+      {
+        "rank": 2,
+        "feature": "packet_length_mean",
+        "mean_abs_shap": 0.166513
+      },
+      {
+        "rank": 3,
+        "feature": "packet_length_std",
+        "mean_abs_shap": 0.16389
+      },
+      {
+        "rank": 4,
+        "feature": "ack_count",
+        "mean_abs_shap": 0.160177
+      },
+      {
+        "rank": 5,
+        "feature": "flow_packets_per_s",
+        "mean_abs_shap": 0.073759
+      }
+    ],
+    "INFILTERATION": [
+      {
+        "rank": 1,
+        "feature": "rst_count",
+        "mean_abs_shap": 0.032592
+      },
+      {
+        "rank": 2,
+        "feature": "flow_duration_ms",
+        "mean_abs_shap": 0.01687
+      },
+      {
+        "rank": 3,
+        "feature": "packet_length_std",
+        "mean_abs_shap": 0.012061
+      },
+      {
+        "rank": 4,
+        "feature": "flow_bytes_per_s",
+        "mean_abs_shap": 0.008684
+      },
+      {
+        "rank": 5,
+        "feature": "flow_packets_per_s",
+        "mean_abs_shap": 0.004912
+      }
+    ],
+    "SSH-BRUTEFORCE": [
+      {
+        "rank": 1,
+        "feature": "flow_duration_ms",
+        "mean_abs_shap": 0.187657
+      },
+      {
+        "rank": 2,
+        "feature": "packet_length_mean",
+        "mean_abs_shap": 0.183746
+      },
+      {
+        "rank": 3,
+        "feature": "packet_length_std",
+        "mean_abs_shap": 0.182304
+      },
+      {
+        "rank": 4,
+        "feature": "flow_packets_per_s",
+        "mean_abs_shap": 0.137337
+      },
+      {
+        "rank": 5,
+        "feature": "flow_bytes_per_s",
+        "mean_abs_shap": 0.111015
+      }
+    ]
+  },
+  "local_explanations": [
+    {
+      "sample_category": "highest_attack_probability",
+      "sample_index": 132,
+      "predicted_probability": 0.9999978228197112,
+      "true_label": 1,
+      "label_family": "BOT",
+      "feature_values": {
+        "flow_duration_ms": -0.5417958416168569,
+        "flow_packets_per_s": 0.00694398829017849,
+        "flow_bytes_per_s": -0.0029786856922984608,
+        "packet_length_mean": -0.5034020817308587,
+        "packet_length_std": -0.4706147773615443,
+        "syn_count": -0.1508713754793146,
+        "ack_count": -0.48392150217471736,
+        "rst_count": 1.5736677203195444,
+        "fin_count": -0.03559491350635288,
+        "syn_ack_ratio": -0.1508713754793146
+      },
+      "shap_attributions": {
+        "flow_duration_ms": 0.18831895988924846,
+        "flow_packets_per_s": 0.11702671068059527,
+        "flow_bytes_per_s": 0.0861995960269903,
+        "packet_length_mean": 0.1664921633783705,
+        "packet_length_std": 0.10534281310952234,
+        "syn_count": -8.081694795237127e-05,
+        "ack_count": 0.00825966960961285,
+        "rst_count": 0.19005383788340333,
+        "fin_count": 0.0,
+        "syn_ack_ratio": -6.572604345365107e-06
+      },
+      "top_positive_features": [
+        [
+          "rst_count",
+          0.19005383788340333
+        ],
+        [
+          "flow_duration_ms",
+          0.18831895988924846
+        ],
+        [
+          "packet_length_mean",
+          0.1664921633783705
+        ]
+      ],
+      "top_negative_features": [
+        [
+          "syn_count",
+          -8.081694795237127e-05
+        ],
+        [
+          "syn_ack_ratio",
+          -6.572604345365107e-06
+        ]
+      ]
+    },
+    {
+      "sample_category": "highest_attack_probability",
+      "sample_index": 163,
+      "predicted_probability": 0.9995416817619664,
+      "true_label": 1,
+      "label_family": "SSH-BRUTEFORCE",
+      "feature_values": {
+        "flow_duration_ms": -0.5338615697926397,
+        "flow_packets_per_s": -0.015147112758103865,
+        "flow_bytes_per_s": -0.008397466741289092,
+        "packet_length_mean": -0.12255330713996479,
+        "packet_length_std": 0.02252956807734253,
+        "syn_count": -0.1508713754793146,
+        "ack_count": -0.48392150217471736,
+        "rst_count": -0.6354581638091571,
+        "fin_count": -0.03559491350635288,
+        "syn_ack_ratio": -0.1508713754793146
+      },
+      "shap_attributions": {
+        "flow_duration_ms": 0.18183781781819333,
+        "flow_packets_per_s": 0.1325883023587529,
+        "flow_bytes_per_s": 0.10618697598859957,
+        "packet_length_mean": 0.1917769692480121,
+        "packet_length_std": 0.1870158744796715,
+        "syn_count": 9.152755977083871e-05,
+        "ack_count": 0.011253063179284198,
+        "rst_count": 0.05030172608855054,
+        "fin_count": 0.0,
+        "syn_ack_ratio": 9.797306217819824e-05
+      },
+      "top_positive_features": [
+        [
+          "packet_length_mean",
+          0.1917769692480121
+        ],
+        [
+          "packet_length_std",
+          0.1870158744796715
+        ],
+        [
+          "flow_duration_ms",
+          0.18183781781819333
+        ]
+      ],
+      "top_negative_features": []
+    },
+    {
+      "sample_category": "highest_attack_probability",
+      "sample_index": 189,
+      "predicted_probability": 0.9994679735164117,
+      "true_label": 1,
+      "label_family": "SSH-BRUTEFORCE",
+      "feature_values": {
+        "flow_duration_ms": -0.5321301822522841,
+        "flow_packets_per_s": -0.016948522605497618,
+        "flow_bytes_per_s": -0.009729095705051911,
+        "packet_length_mean": -0.15495964962238293,
+        "packet_length_std": 0.012902940682534851,
+        "syn_count": -0.1508713754793146,
+        "ack_count": -0.48392150217471736,
+        "rst_count": -0.6354581638091571,
+        "fin_count": -0.03559491350635288,
+        "syn_ack_ratio": -0.1508713754793146
+      },
+      "shap_attributions": {
+        "flow_duration_ms": 0.19050531148595445,
+        "flow_packets_per_s": 0.15057834825581576,
+        "flow_bytes_per_s": 0.12102400946089563,
+        "packet_length_mean": 0.16940395070830852,
+        "packet_length_std": 0.17294097253269833,
+        "syn_count": 4.7589234957285955e-05,
+        "ack_count": 0.010827798876581909,
+        "rst_count": 0.04564382900460231,
+        "fin_count": 0.0,
+        "syn_ack_ratio": 0.00010470749223827625
+      },
+      "top_positive_features": [
+        [
+          "flow_duration_ms",
+          0.19050531148595445
+        ],
+        [
+          "packet_length_std",
+          0.17294097253269833
+        ],
+        [
+          "packet_length_mean",
+          0.16940395070830852
+        ]
+      ],
+      "top_negative_features": []
+    },
+    {
+      "sample_category": "lowest_attack_probability",
+      "sample_index": 172,
+      "predicted_probability": 9.986647370017767e-05,
+      "true_label": 0,
+      "label_family": "BENIGN",
+      "feature_values": {
+        "flow_duration_ms": -0.535778678947895,
+        "flow_packets_per_s": -0.02629791626427475,
+        "flow_bytes_per_s": -0.015590617842330125,
+        "packet_length_mean": -0.9591638050107796,
+        "packet_length_std": -1.111605174109187,
+        "syn_count": -0.1508713754793146,
+        "ack_count": 2.0664508510286352,
+        "rst_count": -0.6354581638091571,
+        "fin_count": -0.03559491350635288,
+        "syn_ack_ratio": -0.1508713754793146
+      },
+      "shap_attributions": {
+        "flow_duration_ms": 0.013081933097198881,
+        "flow_packets_per_s": -0.011281707095679518,
+        "flow_bytes_per_s": -0.007581778934409291,
+        "packet_length_mean": -0.04570327568691091,
+        "packet_length_std": -0.05239563514179551,
+        "syn_count": -0.0005484110431461886,
+        "ack_count": -0.007192132897307264,
+        "rst_count": -0.026217292945472134,
+        "fin_count": 0.0,
+        "syn_ack_ratio": -0.0004533078415443015
+      },
+      "top_positive_features": [
+        [
+          "flow_duration_ms",
+          0.013081933097198881
+        ]
+      ],
+      "top_negative_features": [
+        [
+          "packet_length_std",
+          -0.05239563514179551
+        ],
+        [
+          "packet_length_mean",
+          -0.04570327568691091
+        ],
+        [
+          "rst_count",
+          -0.026217292945472134
+        ]
+      ]
+    },
+    {
+      "sample_category": "lowest_attack_probability",
+      "sample_index": 96,
+      "predicted_probability": 0.00016268947525720188,
+      "true_label": 0,
+      "label_family": "BENIGN",
+      "feature_values": {
+        "flow_duration_ms": 2.592791408448869,
+        "flow_packets_per_s": -0.02695893372479684,
+        "flow_bytes_per_s": -0.015459522584748756,
+        "packet_length_mean": 4.065312123964661,
+        "packet_length_std": 2.734955171872031,
+        "syn_count": -0.1508713754793146,
+        "ack_count": -0.48392150217471736,
+        "rst_count": -0.6354581638091571,
+        "fin_count": -0.03559491350635288,
+        "syn_ack_ratio": -0.1508713754793146
+      },
+      "shap_attributions": {
+        "flow_duration_ms": -0.04464044296318363,
+        "flow_packets_per_s": -0.018800345186891648,
+        "flow_bytes_per_s": 0.0031689272263579937,
+        "packet_length_mean": -0.01572924724946013,
+        "packet_length_std": -0.036061970908069015,
+        "syn_count": -0.00019189889736253462,
+        "ack_count": 0.00017539537242399205,
+        "rst_count": -0.025987740271956453,
+        "fin_count": 0.0,
+        "syn_ack_ratio": -0.00016146268892043735
+      },
+      "top_positive_features": [
+        [
+          "flow_bytes_per_s",
+          0.0031689272263579937
+        ],
+        [
+          "ack_count",
+          0.00017539537242399205
+        ]
+      ],
+      "top_negative_features": [
+        [
+          "flow_duration_ms",
+          -0.04464044296318363
+        ],
+        [
+          "packet_length_std",
+          -0.036061970908069015
+        ],
+        [
+          "rst_count",
+          -0.025987740271956453
+        ]
+      ]
+    },
+    {
+      "sample_category": "lowest_attack_probability",
+      "sample_index": 139,
+      "predicted_probability": 0.00032165739461778294,
+      "true_label": 0,
+      "label_family": "BENIGN",
+      "feature_values": {
+        "flow_duration_ms": -0.4053169930614702,
+        "flow_packets_per_s": -0.026863580854378902,
+        "flow_bytes_per_s": -0.01556163196872745,
+        "packet_length_mean": -0.669061965797258,
+        "packet_length_std": -0.6699356222271191,
+        "syn_count": -0.1508713754793146,
+        "ack_count": -0.48392150217471736,
+        "rst_count": -0.6354581638091571,
+        "fin_count": -0.03559491350635288,
+        "syn_ack_ratio": -0.1508713754793146
+      },
+      "shap_attributions": {
+        "flow_duration_ms": -0.004870797768477146,
+        "flow_packets_per_s": -0.005209379065131401,
+        "flow_bytes_per_s": -0.021782193354572287,
+        "packet_length_mean": -0.04734920170266818,
+        "packet_length_std": -0.04578108190296291,
+        "syn_count": -0.00020745053102018572,
+        "ack_count": -0.0023133334054472243,
+        "rst_count": -0.010445616809932546,
+        "fin_count": 0.0,
+        "syn_ack_ratio": -0.00011076225960096053
+      },
+      "top_positive_features": [],
+      "top_negative_features": [
+        [
+          "packet_length_mean",
+          -0.04734920170266818
+        ],
+        [
+          "packet_length_std",
+          -0.04578108190296291
+        ],
+        [
+          "flow_bytes_per_s",
+          -0.021782193354572287
+        ]
+      ]
+    }
+  ],
+  "scientific_caveats": {
+    "causality": "SHAP attributions quantify additive contributions to the model output relative to expected background. SHAP does NOT prove causality in network traffic.",
+    "test_isolation": "The test set was evaluated post-hoc and never used for feature or model tuning.",
+    "stability": "Attributions are specific to the Random Forest model and training distribution."
+  }
+}
