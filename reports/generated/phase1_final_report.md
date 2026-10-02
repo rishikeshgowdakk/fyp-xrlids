@@ -2,7 +2,7 @@
 
 - **Platform**: XRL-IDARS (Intrusion Detection and Autonomous Response System)
 - **Phase**: 1 (Empirical Research Platform & Explainability)
-- **Git Commit**: `eb045961c97ec223465584a995dd9cb3798cb060 (dirty)`
+- **Git Commit**: `99f6419f4476f21d4bcd8db41930f3976ef9313b`
 - **Environment**: Python 3.14.4 · PyTorch 2.14.0+cpu · Scikit-Learn 1.9.1 · SHAP 0.52.0
 - **Verified Test Suite**: 180 passing tests (0 failures)
 
