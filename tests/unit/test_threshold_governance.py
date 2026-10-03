@@ -119,3 +119,23 @@ def test_no_unsupported_false_alarm_claim_in_governance_docs():
             content = p.read_text(encoding="utf-8")
             assert "below 1.2%" not in content, f"Unsupported claim 'below 1.2%' found in {p}"
             assert "<1.2%" not in content, f"Unsupported claim '<1.2%' found in {p}"
+
+
+def test_governance_framework_resolved_operational_selection_open():
+    """Verify that governance framework is resolved while operational threshold selection remains open."""
+    dec_log = Path("docs/03_DECISIONS/DECISION_LOG.md").read_text(encoding="utf-8")
+    assert "operational threshold selection remains open" in dec_log.lower()
+    assert "proposed candidate" in dec_log.lower()
+
+    status = Path("PROJECT_STATUS.md").read_text(encoding="utf-8")
+    assert "operational threshold selection remains open" in status.lower()
+
+
+def test_demo_report_explicit_disclaimer():
+    """Verify that demo report includes the mandatory PCAP-only disclaimer for 0.40."""
+    report_path = Path("results/demo/demo_report.md")
+    if report_path.exists():
+        content = report_path.read_text(encoding="utf-8")
+        assert "small demonstration pcap only" in content.lower()
+        assert "not an empirically selected optimum" in content.lower()
+

@@ -1,7 +1,7 @@
 # XRL-IDARS — Demonstration & Live Replay Verification Report
 
 ## 1. Executive Summary
-- **Run Timestamp (UTC):** `2026-10-03T13:50:40.097894+00:00`
+- **Run Timestamp (UTC):** `2026-10-03T14:06:13.408854+00:00`
 - **Source Traffic (PCAP):** `data/demo/sample_traffic.pcap`
 - **Model Identifier:** `results/experiments/EXP-P1-CIC2017-R10-001`
 - **Research Reporting Baseline Threshold:** `0.5` (Frozen for literature comparability)
@@ -27,7 +27,7 @@
 - **False Negative Rate (FNR):** `0.3333` (33.33%)
 
 ### 2.2 Proposed Phase 2 Operational Candidate ($\\tau_{\\text{ops}} = 0.40$)
-> *Note: $\\tau_{\\text{ops}}=0.40$ is a proposed operational policy parameter for Phase 2 autonomous response, not an empirically selected optimum.*
+> *Note: $\\tau_{\\text{ops}}=0.40$ is strictly a proposed operational policy candidate for Phase 2 autonomous response, NOT an empirically selected optimum. These metrics evaluate the small demonstration PCAP only and must never be presented as evidence that 0.40 is generally superior or achieves guaranteed performance across network domains. Operational threshold selection remains open under Decision D-003 pending deployment loss and cost evidence.*
 
 | | Predicted Benign | Predicted Attack | Total |
 |---|---|---|---|
@@ -57,10 +57,10 @@
 - **Flow #5 Score**: `0.4692` (model posterior estimate / tree ensemble vote fraction).
 - **Research Baseline ($\\tau = 0.50$)**: `0.4692 < 0.50` -> Predicted as **BENIGN** (`INCORRECT` / False Negative relative to attack ground truth).
 - **Proposed Operational Candidate ($\\tau_{\\text{ops}} = 0.40$)**: `0.4692 >= 0.40` -> Predicted as **ATTACK** (`CORRECT` / True Positive).
-- **Operational Insight**: This demonstrates the asymmetric trade-off under decision gate D-003. Shifting threshold below 0.50 captures borderline attack patterns that evade fixed neutral boundaries.
+- **Operational Insight**: This demonstrates the asymmetric trade-off under decision gate D-003. Shifting threshold below 0.50 captures borderline attack patterns that evade fixed neutral boundaries on this demonstration sample flow, illustrating threshold sensitivity. Operational threshold selection remains open pending deployment-specific cost matrices.
 
 ## 4. Verification & Operational Contracts
 - **R10 Semantic Feature Parity:** Streaming flow accumulator produces exact 10 R10 features matching canonical definitions within `atol <= 1e-4`.
-- **D-003 Threshold Governance:** Research baseline frozen at 0.50; operational threshold selection remains open pending deployment-specific cost matrix.
+- **D-003 Threshold Governance:** Governance framework resolved; research baseline frozen at 0.50; operational threshold selection remains open pending deployment-specific cost matrices.
 - **D-006 Flow Completion Policy:** Flow aggregation enforced at 120.0s idle timeout or TCP FIN/RST packet.
 - **Safety Guarantee:** Pure observational execution; zero firewall modifications or network mutations.

@@ -2,9 +2,9 @@
 
 - **Platform**: XRL-IDARS (Intrusion Detection and Autonomous Response System)
 - **Phase**: 1 (Empirical Research Platform & Explainability)
-- **Git Commit**: `9a614bdefa7329bc160edd6ba8bc5f7455a232d4 (dirty)`
+- **Git Commit**: `7ce56092b1ec2827a87cd4095cbbe5868d580129 (dirty)`
 - **Environment**: Python 3.14.4 · PyTorch 2.14.0+cpu · Scikit-Learn 1.9.1 · SHAP 0.52.0
-- **Verified Test Suite**: 214 passing tests (0 failures)
+- **Verified Test Suite**: 216 passing tests (0 failures)
 
 ---
 ## 1. Research Status Taxonomy
@@ -34,7 +34,7 @@ All claims and findings adhere strictly to four evidentiary tiers: `VERIFIED`, `
 | Multi-Seed Robustness Evaluation | `PARTIAL` | Runner supports multi-seed loop; full-dataset runs executed with seed 42 only |
 | Cross-Dataset Transfer Evaluation | `EMPIRICALLY OBSERVED` | Evaluated across 6 transfer directions: Primary R10 (`CIC ↔ CSE`), Auxiliary R4 (`UNSW ↔ CIC`, `UNSW ↔ CSE`); severe domain collapse observed |
 | Decision Gate D-002 (Feature Contract) | `FROZEN` | R10 frozen for CIC-IDS2017/CSE-CIC-IDS2018; 4-feature contract for cross-dataset transfer |
-| Decision Gate D-003 (Threshold Objective) | `RESOLVED` | Two-tier framework: Research baseline tau=0.50 frozen, Operational policy tau_ops=0.40 proposed candidate / continuous posterior risk scoring |
+| Decision Gate D-003 (Threshold Objective) | `FRAMEWORK RESOLVED` | Governance framework resolved; operational threshold selection remains open. Research baseline tau=0.50 frozen; tau_ops=0.40 proposed candidate only |
 | Decision Gate D-004 (Dataset Acquisition) | `RESOLVED` | All 20 canonical CSV files verified and audited |
 | Decision Gate D-005 (Cross-Dataset Normalization) | `RESOLVED` | Strict source-only preprocessing fit (zero target data leakage) under frozen semantic contracts |
 | Decision Gate D-006 (Flow Completion Policy) | `RESOLVED` | Option D: Hybrid flow completion policy (TCP FIN/RST completion, 120.0s idle timeout fallback) |
@@ -123,7 +123,7 @@ All claims and findings adhere strictly to four evidentiary tiers: `VERIFIED`, `
 2. **Decision D-002 (Primary Feature Rung Freeze)**:
    - **Status**: **FROZEN**. R10 frozen as Main Cross-Dataset 10-Feature Contract for CIC-IDS2017 and CSE-CIC-IDS2018; 4-feature contract established for cross-dataset transfer with UNSW-NB15.
 3. **Decision D-003 (Threshold Selection Objective)**:
-   - **Status**: **RESOLVED (TWO-TIER FRAMEWORK)**. Preserves research baseline $\tau=0.50$ for academic literature comparison. Designates $\tau_{\text{ops}}=0.40$ as a proposed Phase 2 operational candidate under asymmetric operational loss ($C_{\text{FN}} \ge 5 \cdot C_{\text{FP}}$) pending deployment cost evidence, with RL receiving continuous posterior risk scores.
+   - **Status**: **GOVERNANCE FRAMEWORK RESOLVED; OPERATIONAL SELECTION OPEN**. Research baseline $\tau=0.50$ is frozen for academic literature comparison. Designates $\tau_{\text{ops}}=0.40$ strictly as a proposed Phase 2 operational candidate under asymmetric operational loss ($C_{\text{FN}} \ge 5 \cdot C_{\text{FP}}$) pending deployment loss evidence, NOT an empirically selected optimum. Validation candidates ({$\tau=0.50, 0.75, 0.47, 0.20$}) remain exploratory options.
 4. **Decision D-004 (Dataset Acquisition)**:
    - **Status**: **RESOLVED**. All 20 physical CSV files acquired, verified against canonical manifest, and audited.
 5. **Decision D-005 (Cross-Dataset Normalisation)**:

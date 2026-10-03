@@ -25,7 +25,10 @@ from xrlids.evaluation.metrics import binary_metrics
 DECISION_ID = "D-003"
 DECISION_STATUS = "OPEN - USER DECISION REQUIRED"
 RESEARCH_BASELINE_THRESHOLD: float = 0.50
-OPERATIONAL_THRESHOLD: float = 0.40
+# Note: PROPOSED_OPERATIONAL_CANDIDATE_THRESHOLD is strictly a proposed Phase 2 operational candidate,
+# NOT an empirically selected optimum. Operational threshold selection remains open under D-003.
+PROPOSED_OPERATIONAL_CANDIDATE_THRESHOLD: float = 0.40
+OPERATIONAL_THRESHOLD: float = PROPOSED_OPERATIONAL_CANDIDATE_THRESHOLD  # backwards compatibility alias
 
 OBJECTIVES: tuple[str, ...] = (
     "max_f1",
