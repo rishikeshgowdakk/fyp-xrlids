@@ -86,3 +86,20 @@ def test_phase2a_artifact_integrity():
         fpath = artifact_dir / fname
         assert fpath.is_file(), f"Missing artifact: {fname}"
         assert fpath.stat().st_size > 0, f"Empty artifact: {fname}"
+
+
+def test_phase2a_artifact_provenance_and_cooldown_reconciliation():
+    """Verify artifact provenance contains 4adc69a and cooldown semantics are reconciled."""
+    import json
+    artifact_dir = Path("results/phase2/EXP-P2A-BASELINES-001")
+    target_sha = "4adc69a853787c02ae67dd34ec3357667b4a0c7e"
+
+    # Check JSON artifacts
+    for jname in ["experiment_config.json", "population_metadata.json", "baseline_metrics.json", "comparisons.json", "safety_override_summary.json"]:
+        data = json.loads((artifact_dir / jname).read_text(encoding="utf-8"))
+        assert data["metadata"]["git_commit"] == target_sha, f"Mismatched git_commit in {jname}"
+
+    # Check Markdown report
+    report_text = (artifact_dir / "phase2a_report.md").read_text(encoding="utf-8")
+    assert target_sha in report_text
+    assert "30-step cooldown window (corresponding to T_cool = 30.0 s" in report_text or "W_{\\text{cooldown}} = 30$-step cooldown window" in report_text
