@@ -1,0 +1,61 @@
+# Auxiliary Cross-Dataset Transfer Experiment: CSE-CIC-IDS2018 (Source) -> UNSW-NB15 (Target)
+# XRL-IDARS Phase 1 (repo: fyp-xrlids)
+
+experiment:
+  id: EXP-P1-TRANSFER-CSE-TO-UNSW-R4-001
+  phase: 1
+  research_question: RQ5_CROSS_DATASET_TRANSFER
+  hypothesis: >
+    Models trained on CSE-CIC-IDS2018 under the verified 4-feature common transfer contract can be
+    evaluated out-of-domain on UNSW-NB15 traffic without fabricating missing features.
+  status: ready_for_execution
+
+source:
+  dataset: cse_cic_ids2018
+  contract: transfer_common_4
+  feature_count: 4
+
+target:
+  dataset: unsw_nb15
+  contract: transfer_common_4
+  feature_count: 4
+
+split:
+  methodology: stratified_random
+  duplicate_policy: deduplicate_features
+  duplicate_conflict_policy: reject_conflicts
+  train: 0.6
+  validation: 0.2
+  test: 0.2
+  seed: 42
+
+preprocessing:
+  scaler: StandardScaler
+  fit_on: source_train_only
+
+models:
+  random_forest:
+    n_estimators: 100
+    max_depth: 16
+    min_samples_leaf: 2
+    class_weight: balanced_subsample
+    random_state: 42
+    n_jobs: 4
+  lstm:
+    seq_len: 5
+    stride: 1
+    label_rule: last
+    hidden_size: 32
+    num_layers: 2
+    dropout: 0.2
+    learning_rate: 0.001
+    batch_size: 4096
+    epochs: 3
+    patience: 2
+    seed: 42
+  fusion:
+    tune_metric: roc_auc
+    alignment: inner
+
+outputs:
+  results_dir: results/experiments/EXP-P1-TRANSFER-CSE-TO-UNSW-R4-001

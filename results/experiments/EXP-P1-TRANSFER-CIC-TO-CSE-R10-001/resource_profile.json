@@ -1,0 +1,10 @@
+{
+  "peak_rss_mib": 6115.89,
+  "start_rss_mib": 430.63,
+  "end_rss_mib": 4837.65,
+  "rss_delta_mib": 4407.02,
+  "duration_s": 622.2608,
+  "cpu_count": 12,
+  "disk_bytes": 44758,
+  "disk_mib": 0.043
+}

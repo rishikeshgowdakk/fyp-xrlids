@@ -1,0 +1,275 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P1-TRANSFER-UNSW-TO-CSE-R4-001",
+    "git_commit": "07138caac5398765d66d60987d8170f05d34e766",
+    "dataset_sha256": "d96f38e7496aba83475031e6fb8c6fdf1abf6aa1b71325a917798f3c7de93de1",
+    "feature_schema_hash": "7b2e3edf447d34b7d00c8f2a877c51599af42fd42e5ff63e6811c6b22eda12a4",
+    "seed": 42,
+    "created_at": "2026-10-02T23:32:26.461075+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "07138caac5398765d66d60987d8170f05d34e766",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {
+      "config_hash": "a49846442dc3fe8dec9b99b2dedec3d3489c88170379e720fd46d5e662a67a58",
+      "execution_commit": "07138caac5398765d66d60987d8170f05d34e766"
+    }
+  },
+  "experiment_id": "EXP-P1-TRANSFER-UNSW-TO-CSE-R4-001",
+  "research_question": "RQ5_CROSS_DATASET_TRANSFER",
+  "hypothesis": "Models trained on UNSW-NB15 under the verified 4-feature common transfer contract can be evaluated out-of-domain on CSE-CIC-IDS2018 traffic without fabricating unsupported TCP or IAT features.",
+  "dataset": "cse_cic_ids2018",
+  "dataset_sha256": "d96f38e7496aba83475031e6fb8c6fdf1abf6aa1b71325a917798f3c7de93de1",
+  "dataset_version": "target_cse_cic_ids2018",
+  "input_files": [
+    "Friday-02-03-2018_TrafficForML_CICFlowMeter.csv",
+    "Friday-16-02-2018_TrafficForML_CICFlowMeter.csv",
+    "Friday-23-02-2018_TrafficForML_CICFlowMeter.csv",
+    "Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv",
+    "Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv",
+    "Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv",
+    "Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv",
+    "Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv",
+    "Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv",
+    "Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv"
+  ],
+  "rows_total": 8312295,
+  "rows_train": 4987377,
+  "rows_validation": 1662459,
+  "rows_test": 1662459,
+  "feature_contract": "transfer_common_4",
+  "feature_list": [
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean"
+  ],
+  "feature_schema_hash": "7b2e3edf447d34b7d00c8f2a877c51599af42fd42e5ff63e6811c6b22eda12a4",
+  "preprocessing": {
+    "scaler": "StandardScaler",
+    "fit_on": "source_train_only",
+    "source_dataset": "unsw_nb15",
+    "target_dataset": "cse_cic_ids2018"
+  },
+  "split_id": null,
+  "model": {
+    "name": "cross_dataset_transfer_suite",
+    "source_models": {
+      "majority": "MajorityClassDetector",
+      "logistic_regression": "LogisticRegressionDetector",
+      "decision_tree": "DecisionTreeDetector",
+      "random_forest": "RandomForestDetector",
+      "lstm": "LSTMDetector",
+      "fusion": "ScoreFusion(alpha=0.60)"
+    }
+  },
+  "hyperparameters": {
+    "source_dataset": "unsw_nb15",
+    "target_dataset": "cse_cic_ids2018",
+    "contract": "transfer_common_4",
+    "frozen_alpha": 0.6,
+    "threshold": 0.5
+  },
+  "random_seed": 42,
+  "threshold": 0.5,
+  "threshold_decision_id": "D-003",
+  "metrics": {
+    "aligned_population": 1662419,
+    "rf": {
+      "threshold": 0.5,
+      "positive_class": 1,
+      "score_definition": "P(class=1) or a comparable continuous detector score",
+      "confusion": {
+        "tn": 520378,
+        "fp": 954880,
+        "fn": 174625,
+        "tp": 12536
+      },
+      "population": 1662419,
+      "positive_support": 187161,
+      "negative_support": 1475258,
+      "accuracy": 0.32056539296049913,
+      "precision": 0.012958230998867086,
+      "recall": 0.06697976608374608,
+      "f1": 0.021715312187926834,
+      "macro_f1": 0.25063434654732364,
+      "weighted_f1": 0.42800835478546095,
+      "balanced_accuracy": 0.20985835553956497,
+      "specificity": 0.3527369449953839,
+      "fpr": 0.6472630550046161,
+      "fnr": 0.9330202339162539,
+      "per_class": {
+        "benign": {
+          "precision": 0.748742091760755,
+          "recall": 0.3527369449953839,
+          "f1": 0.47955338090672045,
+          "support": 1475258
+        },
+        "attack": {
+          "precision": 0.012958230998867086,
+          "recall": 0.06697976608374608,
+          "f1": 0.021715312187926834,
+          "support": 187161
+        }
+      },
+      "roc_auc": 0.17927958069612507,
+      "pr_auc": 0.06636352871451048,
+      "reason": null
+    },
+    "lstm": {
+      "threshold": 0.5,
+      "positive_class": 1,
+      "score_definition": "P(class=1) or a comparable continuous detector score",
+      "confusion": {
+        "tn": 726745,
+        "fp": 748513,
+        "fn": 169048,
+        "tp": 18113
+      },
+      "population": 1662419,
+      "positive_support": 187161,
+      "negative_support": 1475258,
+      "accuracy": 0.4480567173498378,
+      "precision": 0.02362690542715744,
+      "recall": 0.09677764064094549,
+      "f1": 0.03798122641638018,
+      "macro_f1": 0.3254981493177044,
+      "weighted_f1": 0.5482757317673919,
+      "balanced_accuracy": 0.29469997403053566,
+      "specificity": 0.49262230742012586,
+      "fpr": 0.5073776925798742,
+      "fnr": 0.9032223593590545,
+      "per_class": {
+        "benign": {
+          "precision": 0.8112867593294433,
+          "recall": 0.49262230742012586,
+          "f1": 0.6130150722190286,
+          "support": 1475258
+        },
+        "attack": {
+          "precision": 0.02362690542715744,
+          "recall": 0.09677764064094549,
+          "f1": 0.03798122641638018,
+          "support": 187161
+        }
+      },
+      "roc_auc": 0.22509010320612394,
+      "pr_auc": 0.06792752059543666,
+      "reason": null
+    },
+    "fusion": {
+      "threshold": 0.5,
+      "positive_class": 1,
+      "score_definition": "P(class=1) or a comparable continuous detector score",
+      "confusion": {
+        "tn": 661897,
+        "fp": 813361,
+        "fn": 173564,
+        "tp": 13597
+      },
+      "population": 1662419,
+      "positive_support": 187161,
+      "negative_support": 1475258,
+      "accuracy": 0.4063319776783109,
+      "precision": 0.016442189325213616,
+      "recall": 0.07264868215066173,
+      "f1": 0.026815393459741904,
+      "macro_f1": 0.2998540365920524,
+      "weighted_f1": 0.5114133709733364,
+      "balanced_accuracy": 0.2606569662839384,
+      "specificity": 0.44866525041721517,
+      "fpr": 0.5513347495827848,
+      "fnr": 0.9273513178493382,
+      "per_class": {
+        "benign": {
+          "precision": 0.7922536180623632,
+          "recall": 0.44866525041721517,
+          "f1": 0.5728926797243629,
+          "support": 1475258
+        },
+        "attack": {
+          "precision": 0.016442189325213616,
+          "recall": 0.07264868215066173,
+          "f1": 0.026815393459741904,
+          "support": 187161
+        }
+      },
+      "roc_auc": 0.14229476486666398,
+      "pr_auc": 0.0629963855988099,
+      "reason": null
+    }
+  },
+  "confusion_matrix": {
+    "tn": 520378,
+    "fp": 954880,
+    "fn": 174625,
+    "tp": 12536
+  },
+  "training_duration_s": 57.452,
+  "hardware": null,
+  "resource_profile": {
+    "peak_rss_mib": 6115.89,
+    "start_rss_mib": 4693.66,
+    "end_rss_mib": 4864.06,
+    "rss_delta_mib": 170.4,
+    "duration_s": 57.452,
+    "cpu_count": 12,
+    "disk_bytes": 0,
+    "disk_mib": 0.0
+  },
+  "status": "EMPIRICALLY_OBSERVED",
+  "result_interpretation": "Under strict scientific isolation, detector trained on unsw_nb15 achieves 0.0268 F1 on target cse_cic_ids2018 under contract transfer_common_4 (degradation \u0394F1 = -0.8702 vs source reference).",
+  "limitations": [
+    "Zero target domain training or adaptation performed (pure out-of-domain transfer).",
+    "Disparate background network topology and flow collection sensors introduce significant covariate shift.",
+    "Decision D-003 (operational threshold) evaluated at neutral 0.5 baseline."
+  ],
+  "artifacts": {
+    "test_metrics": "test_metrics.json",
+    "transfer_comparison": "transfer_comparison.json",
+    "distribution_shift": "distribution_shift.json",
+    "error_analysis": "error_analysis.json",
+    "resource_profile": "resource_profile.json",
+    "experiment_card": "experiment_card.md"
+  },
+  "git_commit": "07138caac5398765d66d60987d8170f05d34e766",
+  "execution_commit": "07138caac5398765d66d60987d8170f05d34e766",
+  "artifact_generation_commit": null,
+  "repository_head_commit": null,
+  "aligned_population_accounting": {},
+  "software_environment": {
+    "python_version": "3.14.4",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "machine": "x86_64",
+    "processor_count": null,
+    "cuda_available": false,
+    "cuda_version": null,
+    "git_commit": "07138caac5398765d66d60987d8170f05d34e766",
+    "packages": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.6",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1",
+      "torch": "2.14.0+cpu",
+      "shap": "0.52.0",
+      "matplotlib": "3.11.2",
+      "PyYAML": "6.0.3"
+    }
+  }
+}

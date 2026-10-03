@@ -1,0 +1,32 @@
+{
+  "experiment_id": "EXP-P1-TRANSFER-CIC-TO-CSE-R10-001",
+  "git_commit": "07138caac5398765d66d60987d8170f05d34e766",
+  "dataset_sha256": "d96f38e7496aba83475031e6fb8c6fdf1abf6aa1b71325a917798f3c7de93de1",
+  "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+  "seed": 42,
+  "created_at": "2026-10-02T23:30:50.197037+00:00",
+  "software_environment": {
+    "python_version": "3.14.4",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "machine": "x86_64",
+    "processor_count": null,
+    "cuda_available": false,
+    "cuda_version": null,
+    "git_commit": "07138caac5398765d66d60987d8170f05d34e766",
+    "packages": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.6",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1",
+      "torch": "2.14.0+cpu",
+      "shap": "0.52.0",
+      "matplotlib": "3.11.2",
+      "PyYAML": "6.0.3"
+    }
+  },
+  "artifact_version": "1",
+  "extra": {
+    "config_hash": "aa41eb7b23f9eb8c8c8e9842c961b8d7ae66e56c6ed50af152e65fd204139908",
+    "execution_commit": "07138caac5398765d66d60987d8170f05d34e766"
+  }
+}

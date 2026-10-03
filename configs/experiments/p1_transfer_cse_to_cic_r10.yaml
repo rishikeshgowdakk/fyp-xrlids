@@ -1,0 +1,51 @@
+# Primary Cross-Dataset Transfer Experiment: CSE-CIC-IDS2018 (Source) -> CIC-IDS2017 (Target)
+# XRL-IDARS Phase 1 (repo: fyp-xrlids)
+
+experiment:
+  id: EXP-P1-TRANSFER-CSE-TO-CIC-R10-001
+  phase: 1
+  research_question: RQ5_CROSS_DATASET_TRANSFER
+  hypothesis: >
+    Models trained on CSE-CIC-IDS2018 under the frozen 10-feature R10 contract can be evaluated
+    out-of-domain on CIC-IDS2017 traffic under strict scientific isolation (source-only
+    scaler fit, frozen source weights, frozen alpha).
+  status: ready_for_execution
+
+source:
+  dataset: cse_cic_ids2018
+  experiment_id: EXP-P1-CSE2018-R10-MULTI-001
+  contract: R10
+  feature_count: 10
+
+target:
+  dataset: cicids2017
+  contract: R10
+  feature_count: 10
+
+split:
+  methodology: stratified_random
+  duplicate_policy: deduplicate_features
+  duplicate_conflict_policy: reject_conflicts
+  train: 0.6
+  validation: 0.2
+  test: 0.2
+  seed: 42
+
+preprocessing:
+  scaler: StandardScaler
+  fit_on: source_train_only
+
+models:
+  random_forest:
+    frozen_from: results/experiments/EXP-P1-CSE2018-R10-MULTI-001/random_forest.joblib
+  lstm:
+    frozen_from: results/experiments/EXP-P1-CSE2018-R10-MULTI-001/lstm.pt
+    seq_len: 5
+    stride: 1
+    label_rule: last
+  fusion:
+    frozen_alpha: 0.0
+    alignment: inner
+
+outputs:
+  results_dir: results/experiments/EXP-P1-TRANSFER-CSE-TO-CIC-R10-001

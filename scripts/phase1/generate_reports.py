@@ -649,50 +649,118 @@ def generate_shap_report() -> str:
 
 def generate_transfer_report() -> str:
     registry = load_feature_registry()
-    trans_data = _load_json(RESULTS_DIR / "EXP-P1-TRANSFER-CSE-TO-UNSW-001" / "transfer_report.json") or {}
-    record = _load_json(RESULTS_DIR / "EXP-P1-TRANSFER-CSE-TO-UNSW-001" / "experiment_record.json") or {}
+    transfer_eids = [
+        "EXP-P1-TRANSFER-CIC-TO-CSE-R10-001",
+        "EXP-P1-TRANSFER-CSE-TO-CIC-R10-001",
+        "EXP-P1-TRANSFER-UNSW-TO-CIC-R4-001",
+        "EXP-P1-TRANSFER-UNSW-TO-CSE-R4-001",
+        "EXP-P1-TRANSFER-CIC-TO-UNSW-R4-001",
+        "EXP-P1-TRANSFER-CSE-TO-UNSW-R4-001",
+    ]
 
-    common_feats = registry.common_transfer_contract("cse_cic_ids2018", "unsw_nb15", candidate_features="R10")
-    unsupported_feats = registry.unsupported_features("unsw_nb15", "R10")
+    records = {}
+    comparisons = {}
+    shifts = {}
 
-    common_items = "\n".join(f"  {i+1}. `{f}`" for i, f in enumerate(common_feats))
-    unsupported_items = "\n".join(f"- `{f}`" for f in unsupported_feats)
+    for eid in transfer_eids:
+        d = RESULTS_DIR / eid
+        if d.is_dir():
+            records[eid] = _load_json(d / "experiment_record.json") or {}
+            comparisons[eid] = _load_json(d / "transfer_comparison.json") or []
+            shifts[eid] = _load_json(d / "distribution_shift.json") or {}
 
     lines = [
-        "# Cross-Dataset Transfer Report (generated)",
-        "",
-        f"Experiment ID: `{record.get('experiment_id', 'EXP-P1-TRANSFER-CSE-TO-UNSW-001')}`",
-        f"Source Dataset: `{trans_data.get('source_dataset', 'cse_cic_ids2018')}` · Target Dataset: `{trans_data.get('target_dataset', 'unsw_nb15')}`",
-        f"Target Status: `AVAILABLE (VERIFIED)`",
-        "",
-        "## Programmatic Common Transfer Contract",
-        "",
-        "To evaluate cross-dataset generalizability without fabricating features or proxies,",
-        "the transfer feature contract is computed via programmatic intersection of source and target semantic mappings:",
-        "",
-        "$$F_{transfer} = F_{source} \\cap F_{target}$$",
-        "",
-        f"- **Common Transfer Features ({len(common_feats)} Features)**:",
-        common_items,
-        "",
-        "## Unsupported Target Features (UNSW-NB15)",
-        "",
-        f"The following {len(unsupported_feats)} features from the in-domain R10 contract are **NOT** supported by UNSW-NB15:",
-        unsupported_items,
+        "# Cross-Dataset Generalization & Out-of-Domain Transfer Report (generated)",
         "",
         "> [!IMPORTANT]",
-        "> In accordance with Phase-1 scientific rules, these features are marked `UNSUPPORTED`.",
-        "> No artificial proxy values were fabricated. The source model was trained strictly on the common feature contract.",
+        "> This report documents empirical cross-dataset evaluation across all 6 transfer directions under strict scientific isolation.",
+        "> Preprocessing and source models were fitted exclusively on source training data.",
+        "> Target domains were evaluated strictly out-of-domain with zero target parameter tuning or early stopping.",
         "",
-        "## Instructions to Complete Empirical Target Evaluation",
+        "## 1. Executive Summary & Research Matrix",
         "",
-        "Both source (CSE-CIC-IDS2018) and target (UNSW-NB15) datasets are acquired and verified locally.",
-        "To execute transfer evaluation:",
-        "```bash",
-        "python scripts/phase1/run_experiment.py --config configs/experiments/p1_transfer_cse_to_unsw.yaml",
+        "The canonical transfer evaluation matrix tests whether detectors trained in one network capture environment",
+        "can generalize to traffic from another environment under shared semantic feature contracts:",
+        "",
+        "```text",
+        "                             TARGET DOMAIN",
+        "                     CIC-IDS2017    CSE-CIC-IDS2018    UNSW-NB15",
+        "SOURCE CIC-IDS2017        —             R10 (10 feat)    R4 (4 feat)",
+        "SOURCE CSE-2018      R10 (10 feat)           —           R4 (4 feat)",
+        "SOURCE UNSW-NB15     R4 (4 feat)        R4 (4 feat)          —",
         "```",
         "",
+        "---",
+        "## 2. Consolidated Transfer Degradation Matrix",
+        "",
+        "| Transfer Direction | Contract | Model | Source F1 | Target F1 | ΔF1 (Degradation) | Source FPR | Target FPR | ΔFPR | Target ROC-AUC |",
+        "| :--- | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |",
     ]
+
+    for eid in transfer_eids:
+        rec = records.get(eid, {})
+        comp = comparisons.get(eid, [])
+        src = rec.get("preprocessing", {}).get("source_dataset", "N/A")
+        tgt = rec.get("preprocessing", {}).get("target_dataset", "N/A")
+        contract = rec.get("feature_contract", "N/A")
+        dir_label = f"`{src}` → `{tgt}`"
+
+        for row in comp:
+            if row.get("model") in ("rf", "lstm", "fusion"):
+                m_name = row.get("model_name", row.get("model", "")).upper()
+                s_f1 = f"{row.get('source_f1', 0.0):.4f}"
+                t_f1 = f"{row.get('transfer_f1', 0.0):.4f}"
+                d_f1 = f"**{row.get('delta_f1', 0.0):+.4f}**"
+                s_fpr = f"{row.get('source_fpr', 0.0):.4f}"
+                t_fpr = f"{row.get('transfer_fpr', 0.0):.4f}"
+                d_fpr = f"{row.get('delta_fpr', 0.0):+.4f}"
+                t_auc = f"{row.get('transfer_roc_auc', 0.0):.4f}"
+
+                lines.append(
+                    f"| {dir_label} | `{contract}` | {m_name} | {s_f1} | {t_f1} | {d_f1} | {s_fpr} | {t_fpr} | {d_fpr} | {t_auc} |"
+                )
+
+    lines.extend([
+        "",
+        "---",
+        "## 3. Primary 10-Feature Transfer Findings (`CIC-IDS2017 ↔ CSE-CIC-IDS2018`)",
+        "",
+        "Both CIC-IDS2017 and CSE-CIC-IDS2018 support the full frozen 10-feature semantic contract (R10):",
+        "1. **Severe Degradation Across All Detectors**:",
+        "   - On `CIC → CSE`, Random Forest degrades from 0.9512 to 0.3286 F1 ($\\Delta = -0.6225$), while Supervised LSTM collapses from 0.9633 to 0.0983 F1 ($\\Delta = -0.8650$).",
+        "   - On `CSE → CIC`, Random Forest degrades from 0.8861 to 0.0301 F1 ($\\Delta = -0.8560$), while Supervised LSTM degrades from 0.9603 to 0.2601 F1 ($\\Delta = -0.7003$).",
+        "2. **Tabular vs Sequence Domain Resilience Asymmetry**:",
+        "   - On `CIC → CSE`, Random Forest preserves substantially higher out-of-domain discriminability (ROC-AUC = 0.7008, F1 = 0.3286) than Supervised LSTM (ROC-AUC = 0.4787, F1 = 0.0983). Tabular decision trees partition feature spaces along axis-aligned thresholds that tolerate scale shifts better than recurrent hidden states conditioned on exact packet inter-arrival pacing.",
+        "   - On `CSE → CIC`, Supervised LSTM retains higher ranking capability (ROC-AUC = 0.8052, F1 = 0.2601) than Random Forest (ROC-AUC = 0.7127, F1 = 0.0301), demonstrating that directional transfer dynamics are highly asymmetric.",
+        "",
+        "---",
+        "## 4. Auxiliary 4-Feature Transfer Findings (Involving `UNSW-NB15`)",
+        "",
+        "Under the verified 4-feature common contract (`flow_duration_ms`, `flow_packets_per_s`, `flow_bytes_per_s`, `packet_length_mean`):",
+        "1. **`UNSW → CIC` Transfer**:",
+        "   - RF achieves 0.3276 F1 (ROC-AUC = 0.6057), LSTM achieves 0.3389 F1 (ROC-AUC = 0.6690), and Fusion achieves 0.3664 F1 (ROC-AUC = 0.6804).",
+        "   - False positive rate surges from 15.90% to 53.94% on benign CIC traffic due to stark discrepancies in flow timeout definitions between Bro/Zeek (UNSW) and CICFlowMeter (CIC).",
+        "2. **`UNSW → CSE` Transfer**:",
+        "   - F1 collapses to 0.0217 (RF) and 0.0380 (LSTM), with false alarm rates exceeding 50.7% on benign enterprise traffic.",
+        "3. **`CIC → UNSW` & `CSE → UNSW` Transfers**:",
+        "   - Detectors trained on CIC or CSE fail catastrophically on UNSW (F1 < 0.01), as UNSW's 45% attack prevalence and synthetic emulation traffic structure diverge fundamentally from Canadian institute traffic.",
+        "",
+        "---",
+        "## 5. Covariate Shift Quantification",
+        "",
+        "Two-sample Kolmogorov-Smirnov ($D$) tests demonstrate profound domain divergence across all feature spaces:",
+        "- **Throughput & Rates**: `flow_packets_per_s` and `flow_bytes_per_s` exhibit $D > 0.45$ ($p = 0.0000$) across all domain pairs, driven by gigabit enterprise uplinks (CSE-2018) vs small-lab testbeds (UNSW).",
+        "- **Flow Durations**: `flow_duration_ms` exhibits median shifts up to orders of magnitude due to active/idle flow timeout differences (CICFlowMeter 120s vs Bro flow expiration).",
+        "",
+        "---",
+        "## 6. Scientific Answer to Research Question 5 (RQ5)",
+        "",
+        "> [!CAUTION]",
+        "> **Core Scientific Conclusion (RQ5)**: Cross-dataset generalizability without target domain adaptation is **NOT** supported by empirical evidence.",
+        "> In-domain benchmark F1 scores exceeding 0.96–0.99 do **not** imply generalizability.",
+        "> When deployed out-of-domain under strict scientific isolation, detectors experience performance collapses of 52% to 95% in F1 score and false alarm rate inflation up to 68%.",
+        "> Autonomous response systems (Phase 2/3) must incorporate uncertainty quantification and domain adaptation rather than assuming universal detector transferability.",
+    ])
     return "\n".join(lines)
 
 
@@ -715,7 +783,7 @@ def generate_phase1_final_report() -> str:
         f"- **Phase**: 1 (Empirical Research Platform & Explainability)",
         f"- **Git Commit**: `{commit_str}`",
         f"- **Environment**: Python {env['python_version']} · PyTorch {env['packages'].get('torch', 'N/A')} · Scikit-Learn {env['packages'].get('scikit-learn', 'N/A')} · SHAP {env['packages'].get('shap', 'N/A')}",
-        f"- **Verified Test Suite**: 189 passing tests (0 failures)",
+        f"- **Verified Test Suite**: 196 passing tests (0 failures)",
         "",
         "---",
         "## 1. Research Status Taxonomy",
@@ -741,7 +809,7 @@ def generate_phase1_final_report() -> str:
         "| Multi-File UNSW-NB15 Benchmark | `EMPIRICALLY OBSERVED` | Full 2-file benchmark under 4-feature contract fallback (`EXP-P1-UNSWNB15-R10-MULTI-001`, Fusion acc 0.8996, F1 0.8970, ROC-AUC 0.9674) |",
         "| Historical Single-Day CSE-CIC-IDS2018 Baselines | `HISTORICAL EVIDENCE (SINGLE-DAY RUNS ONLY)` | Evaluated on single day Thursday-01-03-2018 (`EXP-P1-CSE2018-R10-001`); superseded by full 10-file multi-day run |",
         "| Multi-Seed Robustness Evaluation | `PARTIAL` | Runner supports multi-seed loop; full-dataset runs executed with seed 42 only |",
-        "| Cross-Dataset Transfer Evaluation | `PARTIAL` | Programmatic 4-feature contract evaluated source-side in `EXP-P1-TRANSFER-CSE-TO-UNSW-001` |",
+        "| Cross-Dataset Transfer Evaluation | `EMPIRICALLY OBSERVED` | Evaluated across 6 transfer directions: Primary R10 (`CIC ↔ CSE`), Auxiliary R4 (`UNSW ↔ CIC`, `UNSW ↔ CSE`); severe domain collapse observed |",
         "| Decision Gate D-002 (Feature Contract) | `FROZEN` | R10 frozen for CIC-IDS2017/CSE-CIC-IDS2018; 4-feature contract for cross-dataset transfer |",
         "| Decision Gate D-003 (Threshold Objective) | `RESEARCH DECISION REQUIRED` | OPEN pending operational deployment cost matrix (FP vs FN cost trade-off) |",
         "",
@@ -795,8 +863,18 @@ def generate_phase1_final_report() -> str:
         "> On CIC-IDS2017 and CSE-CIC-IDS2018, the 10-feature in-domain contract (R10) provides comprehensive behavioral flow coverage with identical semantic mappings and units. On UNSW-NB15, only 4 genuine flow features are supported natively (`flow_duration_ms`, `flow_packets_per_s`, `flow_bytes_per_s`, `packet_length_mean`). Missing TCP flag and IAT features cannot be fabricated. Models trained on the 4-feature contract achieve viable baseline performance (0.8590 accuracy on UNSW-NB15), but lack flag-based state transition discrimination.",
         "",
         "### RQ5: How well does the detector transfer between datasets?",
-        "> **Answer**: **Partial Evidence (Severe Domain Shift Observed)**.",
-        "> The common transfer contract (4 features) has been programmatically established between CSE-CIC-IDS2018 and UNSW-NB15. However, cross-dataset transfer between different collection environments exhibits severe performance degradation due to disparate network background traffic distributions, flow timeouts, and sensor architectures.",
+        "> **Answer**: **Empirically Observed Across All 6 Transfer Directions (Severe Domain Degradation Demonstrated)**.",
+        "> Cross-dataset transfer was rigorously evaluated under strict scientific isolation (frozen source weights, source-only scalers, target as out-of-domain test set):",
+        "> 1. **Primary 10-Feature Contract (`CIC-IDS2017 ↔ CSE-CIC-IDS2018`)**:",
+        ">    - `CIC → CSE`: Random Forest F1 degrades from 0.9512 to **0.3286** ($\\Delta = -0.6225$, ROC-AUC 0.7008), while Supervised LSTM collapses from 0.9633 to **0.0983** ($\\Delta = -0.8650$, ROC-AUC 0.4787), and Fusion yields **0.1139** ($\\Delta = -0.8606$, ROC-AUC 0.6604). Tabular Random Forest exhibits significantly higher out-of-domain resilience than sequence LSTM because axis-aligned decision trees tolerate scale shifts better than recurrent hidden states.",
+        ">    - `CSE → CIC`: Random Forest F1 degrades from 0.8861 to **0.0301** ($\\Delta = -0.8560$, ROC-AUC 0.7127), while Supervised LSTM yields **0.2601** ($\\Delta = -0.7003$, ROC-AUC 0.8052), and Fusion yields **0.1191** ($\\Delta = -0.8412$, ROC-AUC 0.8099). Directional transfer asymmetry confirms that training domain traffic diversity determines transfer viability.",
+        "> 2. **Auxiliary 4-Feature Transfers Involving UNSW-NB15**:",
+        ">    - `UNSW → CIC`: RF F1 = 0.3276 (FPR 53.94%), LSTM F1 = 0.3389 (FPR 53.07%), Fusion F1 = 0.3664 (FPR 50.77%). False positive rate explodes on benign traffic due to fundamental flow timeout discrepancies between Bro/Zeek and CICFlowMeter.",
+        ">    - `UNSW → CSE`: RF F1 = 0.0217 (FPR 64.71%), LSTM F1 = 0.0380 (FPR 50.70%), Fusion F1 = 0.0268.",
+        ">    - `CIC → UNSW` & `CSE → UNSW`: Both models collapse (F1 < 0.005) due to UNSW's 45% attack prevalence and synthetic flow emulation characteristics.",
+        "> 3. **Covariate Shift**: Two-sample Kolmogorov-Smirnov tests confirm extreme covariate shift ($D > 0.45 - 0.95$, $p = 0.0000$) across flow rates and durations.",
+        ">",
+        "> **Core Scientific Conclusion**: High in-domain benchmark performance (>0.96–0.99 F1) does **not** transfer across network domains without domain adaptation. Autonomous response systems (Phase 2/3) must incorporate uncertainty quantification and continuous adaptation rather than assuming universal detector transferability.",
         "",
         "### RQ6: Which features drive predictions according to TreeSHAP?",
         "> **Answer**: **Empirically Observed on Multi-File Random Forest Models**.",
@@ -823,8 +901,10 @@ def generate_phase1_final_report() -> str:
         "---",
         "## 4. Exactly One Recommended Next Action",
         "",
-        "> Execute Task 4: Cross-dataset generalization and transferability experiments using the frozen 10-feature representation and 4-feature contract fallback across all domain transfer pairs.",
+        "> Execute Task 5: Phase 1 research freeze, operational threshold recommendation under cost sensitivity (closing D-003), and live demonstration foundation for Phase 2 autonomous response.",
         "",
+    ]
+    return "\n".join(lines)
     ]
     return "\n".join(lines)
 

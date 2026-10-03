@@ -1,0 +1,279 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P1-TRANSFER-CSE-TO-CIC-R10-001",
+    "git_commit": "07138caac5398765d66d60987d8170f05d34e766",
+    "dataset_sha256": "6ff1580f5f81c0ae28a26f7631721018577f5f7c5e0feac28b795fcfe7b411ee",
+    "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+    "seed": 42,
+    "created_at": "2026-10-02T23:31:08.076507+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "07138caac5398765d66d60987d8170f05d34e766",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {
+      "config_hash": "fab671bc4cb27458a2bbcf77c891a8ec345a62246f101b52f5f2c9fd278ccb59",
+      "execution_commit": "07138caac5398765d66d60987d8170f05d34e766"
+    }
+  },
+  "experiment_id": "EXP-P1-TRANSFER-CSE-TO-CIC-R10-001",
+  "research_question": "RQ5_CROSS_DATASET_TRANSFER",
+  "hypothesis": "Models trained on CSE-CIC-IDS2018 under the frozen 10-feature R10 contract can be evaluated out-of-domain on CIC-IDS2017 traffic under strict scientific isolation (source-only scaler fit, frozen source weights, frozen alpha).",
+  "dataset": "cicids2017",
+  "dataset_sha256": "6ff1580f5f81c0ae28a26f7631721018577f5f7c5e0feac28b795fcfe7b411ee",
+  "dataset_version": "target_cicids2017",
+  "input_files": [
+    "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+    "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+    "Friday-WorkingHours-Morning.pcap_ISCX.csv",
+    "Monday-WorkingHours.pcap_ISCX.csv",
+    "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+    "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+    "Tuesday-WorkingHours.pcap_ISCX.csv",
+    "Wednesday-workingHours.pcap_ISCX.csv"
+  ],
+  "rows_total": 1779322,
+  "rows_train": 1067593,
+  "rows_validation": 355864,
+  "rows_test": 355865,
+  "feature_contract": "R10",
+  "feature_list": [
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean",
+    "packet_length_std",
+    "syn_count",
+    "ack_count",
+    "rst_count",
+    "fin_count",
+    "syn_ack_ratio"
+  ],
+  "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+  "preprocessing": {
+    "scaler": "StandardScaler",
+    "fit_on": "source_train_only",
+    "source_dataset": "cse_cic_ids2018",
+    "target_dataset": "cicids2017"
+  },
+  "split_id": null,
+  "model": {
+    "name": "cross_dataset_transfer_suite",
+    "source_models": {
+      "majority": "MajorityClassDetector",
+      "logistic_regression": "LogisticRegressionDetector",
+      "decision_tree": "DecisionTreeDetector",
+      "random_forest": "RandomForestDetector",
+      "lstm": "LSTMDetector",
+      "fusion": "ScoreFusion(alpha=0.50)"
+    }
+  },
+  "hyperparameters": {
+    "source_dataset": "cse_cic_ids2018",
+    "target_dataset": "cicids2017",
+    "contract": "R10",
+    "frozen_alpha": 0.5,
+    "threshold": 0.5
+  },
+  "random_seed": 42,
+  "threshold": 0.5,
+  "threshold_decision_id": "D-003",
+  "metrics": {
+    "aligned_population": 355833,
+    "rf": {
+      "threshold": 0.5,
+      "positive_class": 1,
+      "score_definition": "P(class=1) or a comparable continuous detector score",
+      "confusion": {
+        "tn": 283791,
+        "fp": 7222,
+        "fn": 63720,
+        "tp": 1100
+      },
+      "population": 355833,
+      "positive_support": 64820,
+      "negative_support": 291013,
+      "accuracy": 0.8006311949706745,
+      "precision": 0.13217976447969237,
+      "recall": 0.016970070965751313,
+      "f1": 0.030078477482157993,
+      "macro_f1": 0.45948768547135066,
+      "weighted_f1": 0.7324510052946932,
+      "balanced_accuracy": 0.4960766551012432,
+      "specificity": 0.9751832392367351,
+      "fpr": 0.02481676076326487,
+      "fnr": 0.9830299290342487,
+      "per_class": {
+        "benign": {
+          "precision": 0.8166388977615097,
+          "recall": 0.9751832392367351,
+          "f1": 0.8888968934605433,
+          "support": 291013
+        },
+        "attack": {
+          "precision": 0.13217976447969237,
+          "recall": 0.016970070965751313,
+          "f1": 0.030078477482157993,
+          "support": 64820
+        }
+      },
+      "roc_auc": 0.7126530561913282,
+      "pr_auc": 0.3154282039527899,
+      "reason": null
+    },
+    "lstm": {
+      "threshold": 0.5,
+      "positive_class": 1,
+      "score_definition": "P(class=1) or a comparable continuous detector score",
+      "confusion": {
+        "tn": 286914,
+        "fp": 4099,
+        "fn": 54519,
+        "tp": 10301
+      },
+      "population": 355833,
+      "positive_support": 64820,
+      "negative_support": 291013,
+      "accuracy": 0.8352654194523835,
+      "precision": 0.7153472222222222,
+      "recall": 0.15891700092564023,
+      "f1": 0.2600605907599091,
+      "macro_f1": 0.583687998962553,
+      "weighted_f1": 0.7894088127813403,
+      "balanced_accuracy": 0.5724158597560476,
+      "specificity": 0.9859147185864549,
+      "fpr": 0.014085281413545099,
+      "fnr": 0.8410829990743598,
+      "per_class": {
+        "benign": {
+          "precision": 0.8403229916264684,
+          "recall": 0.9859147185864549,
+          "f1": 0.9073154071651968,
+          "support": 291013
+        },
+        "attack": {
+          "precision": 0.7153472222222222,
+          "recall": 0.15891700092564023,
+          "f1": 0.2600605907599091,
+          "support": 64820
+        }
+      },
+      "roc_auc": 0.8051674319427418,
+      "pr_auc": 0.5333369072017257,
+      "reason": null
+    },
+    "fusion": {
+      "threshold": 0.5,
+      "positive_class": 1,
+      "score_definition": "P(class=1) or a comparable continuous detector score",
+      "confusion": {
+        "tn": 287895,
+        "fp": 3118,
+        "fn": 60518,
+        "tp": 4302
+      },
+      "population": 355833,
+      "positive_support": 64820,
+      "negative_support": 291013,
+      "accuracy": 0.8211632985136286,
+      "precision": 0.5797843665768194,
+      "recall": 0.06636840481332922,
+      "f1": 0.1191029900332226,
+      "macro_f1": 0.5097912412890494,
+      "weighted_f1": 0.7581407412407379,
+      "balanced_accuracy": 0.5278270534133207,
+      "specificity": 0.9892857020133121,
+      "fpr": 0.01071429798668788,
+      "fnr": 0.9336315951866708,
+      "per_class": {
+        "benign": {
+          "precision": 0.8263038405570401,
+          "recall": 0.9892857020133121,
+          "f1": 0.9004794925448761,
+          "support": 291013
+        },
+        "attack": {
+          "precision": 0.5797843665768194,
+          "recall": 0.06636840481332922,
+          "f1": 0.1191029900332226,
+          "support": 64820
+        }
+      },
+      "roc_auc": 0.8098759287389498,
+      "pr_auc": 0.45436826761076665,
+      "reason": null
+    }
+  },
+  "confusion_matrix": {
+    "tn": 283791,
+    "fp": 7222,
+    "fn": 63720,
+    "tp": 1100
+  },
+  "training_duration_s": 17.7981,
+  "hardware": null,
+  "resource_profile": {
+    "peak_rss_mib": 6115.89,
+    "start_rss_mib": 4646.47,
+    "end_rss_mib": 4678.28,
+    "rss_delta_mib": 31.8,
+    "duration_s": 17.7981,
+    "cpu_count": 12,
+    "disk_bytes": 0,
+    "disk_mib": 0.0
+  },
+  "status": "EMPIRICALLY_OBSERVED",
+  "result_interpretation": "Under strict scientific isolation, detector trained on cse_cic_ids2018 achieves 0.1191 F1 on target cicids2017 under contract R10 (degradation \u0394F1 = -0.8412 vs source reference).",
+  "limitations": [
+    "Zero target domain training or adaptation performed (pure out-of-domain transfer).",
+    "Disparate background network topology and flow collection sensors introduce significant covariate shift.",
+    "Decision D-003 (operational threshold) evaluated at neutral 0.5 baseline."
+  ],
+  "artifacts": {
+    "test_metrics": "test_metrics.json",
+    "transfer_comparison": "transfer_comparison.json",
+    "distribution_shift": "distribution_shift.json",
+    "error_analysis": "error_analysis.json",
+    "resource_profile": "resource_profile.json",
+    "experiment_card": "experiment_card.md"
+  },
+  "git_commit": "07138caac5398765d66d60987d8170f05d34e766",
+  "execution_commit": "07138caac5398765d66d60987d8170f05d34e766",
+  "artifact_generation_commit": null,
+  "repository_head_commit": null,
+  "aligned_population_accounting": {},
+  "software_environment": {
+    "python_version": "3.14.4",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "machine": "x86_64",
+    "processor_count": null,
+    "cuda_available": false,
+    "cuda_version": null,
+    "git_commit": "07138caac5398765d66d60987d8170f05d34e766",
+    "packages": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.6",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1",
+      "torch": "2.14.0+cpu",
+      "shap": "0.52.0",
+      "matplotlib": "3.11.2",
+      "PyYAML": "6.0.3"
+    }
+  }
+}
