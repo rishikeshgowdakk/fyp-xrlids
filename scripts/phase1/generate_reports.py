@@ -905,8 +905,6 @@ def generate_phase1_final_report() -> str:
         "",
     ]
     return "\n".join(lines)
-    ]
-    return "\n".join(lines)
 
 
 def main() -> int:

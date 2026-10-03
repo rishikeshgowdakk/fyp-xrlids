@@ -176,13 +176,51 @@ The paired bootstrap comparison (`src/xrlids/evaluation/statistics.py`) tests th
 
 ---
 
-## 11. Remaining Scientific Blockers & Next Research Tasks
+## 11. Cross-Dataset Generalization & Out-of-Domain Transfer (Task 4 Completed)
 
-1. **Multi-File Sequence Modeling (CIC-IDS2017, CSE-CIC-IDS2018, & UNSW-NB15 Complete)**:
-   - Supervised LSTM and Fusion have been empirically executed and validated on the complete multi-file populations of CIC-IDS2017 (`EXP-P1-CIC2017-R10-001`), CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-MULTI-001`), and UNSW-NB15 (`EXP-P1-UNSWNB15-R10-MULTI-001`). Sequence modeling is now empirically validated across all three benchmarks.
-2. **Cross-Dataset Generalization & OOD Transfer (Task 4)**:
-   - Cross-dataset OOD transfer experiments must now be executed across compatible representations (10-feature representation between CIC-IDS2017 and CSE-CIC-IDS2018, and 4-feature contract involving UNSW-NB15).
-3. **Decision D-003 (Operational Threshold)**:
-   - Remains OPEN. The trade-off between false alarm rate ($0.26\%$ on Benign under Fusion/LSTM in CSE-CIC-IDS2018, $0.75\%$ in CIC-IDS2017) and low-footprint attack detection ($10.70\%$ on Infiltration, $15.89\%$ on Web Brute Force) requires explicit operational cost matrices.
+Cross-dataset evaluation was executed across all 6 directional pairs under strict scientific isolation:
+- Scalers fitted strictly on source training partitions.
+- Detectors (Random Forest, Supervised LSTM, Score Fusion) frozen without target parameter updates or target validation early-stopping.
+- Target domains evaluated strictly out-of-domain.
+
+### Transfer Matrix & Artifact Suites
+
+1. `EXP-P1-TRANSFER-CIC-TO-CSE-R10-001` (CIC-IDS2017 → CSE-CIC-IDS2018, R10):
+   - RF: Source F1 0.9512 → Target F1 **0.3286** ($\Delta = -0.6225$, Target ROC-AUC 0.7008, FPR 0.0486)
+   - LSTM: Source F1 0.9633 → Target F1 **0.0983** ($\Delta = -0.8650$, Target ROC-AUC 0.4787, FPR 0.0635)
+   - Fusion: Source F1 0.9745 → Target F1 **0.1139** ($\Delta = -0.8606$, Target ROC-AUC 0.6604, FPR 0.0159)
+   - *Key finding*: Tabular RF displays greater out-of-domain resilience than Supervised LSTM. Axis-aligned decision tree splits tolerate monotonic scale shifts better than recurrent hidden states conditioned on fine-grained inter-packet timing.
+2. `EXP-P1-TRANSFER-CSE-TO-CIC-R10-001` (CSE-CIC-IDS2018 → CIC-IDS2017, R10):
+   - RF: Source F1 0.8861 → Target F1 **0.0301** ($\Delta = -0.8560$, Target ROC-AUC 0.7127, FPR 0.0248)
+   - LSTM: Source F1 0.9603 → Target F1 **0.2601** ($\Delta = -0.7003$, Target ROC-AUC 0.8052, FPR 0.0141)
+   - Fusion: Source F1 0.9603 → Target F1 **0.1191** ($\Delta = -0.8412$, Target ROC-AUC 0.8099, FPR 0.0107)
+   - *Key finding*: Asymmetric transfer dynamics show that source dataset diversity fundamentally governs cross-domain discrimination.
+3. `EXP-P1-TRANSFER-UNSW-TO-CIC-R4-001` (UNSW-NB15 → CIC-IDS2017, R4):
+   - RF: Target F1 0.3276 (FPR 68.58%, ROC-AUC 0.6057); LSTM: Target F1 0.3389 (FPR 31.78%, ROC-AUC 0.6690); Fusion: Target F1 0.3664 (FPR 53.94%, ROC-AUC 0.6804).
+   - False positive rates explode on benign traffic due to flow timeout discrepancies between Bro/Zeek and CICFlowMeter.
+4. `EXP-P1-TRANSFER-UNSW-TO-CSE-R4-001` (UNSW-NB15 → CSE-CIC-IDS2018, R4):
+   - RF F1 = 0.0217 (FPR 64.73%); LSTM F1 = 0.0380 (FPR 50.74%); Fusion F1 = 0.0268 (FPR 55.13%).
+5. `EXP-P1-TRANSFER-CIC-TO-UNSW-R4-001` (CIC-IDS2017 → UNSW-NB15, R4):
+   - RF F1 = 0.0016; LSTM F1 = 0.0051; Fusion F1 = 0.0004.
+6. `EXP-P1-TRANSFER-CSE-TO-UNSW-R4-001` (CSE-CIC-IDS2018 → UNSW-NB15, R4):
+   - RF F1 = 0.0026; LSTM F1 = 0.0048; Fusion F1 = 0.0019.
+
+### Covariate Shift & Scientific Conclusion (RQ5)
+- Two-sample Kolmogorov-Smirnov tests ($D > 0.45 - 0.95$, $p = 0.0000$) demonstrate severe covariate shift in flow throughput and durations.
+- **RQ5 Answer**: Universal cross-network generalization is disproven. Unadapted detectors experience 52% to 95% F1 collapses. Phase 2 autonomous response agents must not assume universal detector transferability.
+
+---
+
+## 12. Remaining Scientific Blockers & Next Research Tasks
+
+1. **In-Domain Benchmarks & Sequence Modeling (Tasks 1–3 Complete)**:
+   - Supervised LSTM and Fusion empirically validated across all three multi-file populations (CIC-IDS2017, CSE-CIC-IDS2018, UNSW-NB15).
+2. **Cross-Dataset Generalization (Task 4 Complete)**:
+   - Full 6-direction transfer matrix evaluated under strict isolation, generating empirical evidence for RQ5.
+3. **Decision D-003 (Operational Threshold - Next in Task 5)**:
+   - Remains OPEN pending operational cost matrix ($C_{\text{FP}}$ vs $C_{\text{FN}}$). Task 5 will establish cost-sensitive operating points and operational freeze.
 4. **Multi-Seed Full Runs**:
-   - Seeds 123 and 456 must be executed across full populations to substantiate variance and stability claims.
+   - Seeds 123 and 456 across full populations to evaluate multi-seed variance.
+5. **Phase 1 Research Freeze & Live Demonstration Foundation (Task 5)**:
+   - Consolidate final deliverables, freeze Phase 1 artifacts, and lay the foundation for Phase 2 autonomous response.
+
