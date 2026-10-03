@@ -89,8 +89,9 @@ def test_phase2a_artifact_integrity():
 
 
 def test_phase2a_artifact_provenance_and_cooldown_reconciliation():
-    """Verify artifact provenance contains 4adc69a and cooldown semantics are reconciled."""
+    """Verify artifact provenance contains 4adc69a, cooldown semantics are reconciled, and embedded config matches source YAML."""
     import json
+    import yaml
     artifact_dir = Path("results/phase2/EXP-P2A-BASELINES-001")
     target_sha = "4adc69a853787c02ae67dd34ec3357667b4a0c7e"
 
@@ -103,3 +104,20 @@ def test_phase2a_artifact_provenance_and_cooldown_reconciliation():
     report_text = (artifact_dir / "phase2a_report.md").read_text(encoding="utf-8")
     assert target_sha in report_text
     assert "30-step cooldown window (corresponding to T_cool = 30.0 s" in report_text or "W_{\\text{cooldown}} = 30$-step cooldown window" in report_text
+
+    # Check embedded configuration matches source YAML safety-gate timing fields
+    source_yaml_path = Path("configs/experiments/p2a_cicids2017_baselines.yaml")
+    assert source_yaml_path.is_file(), "Source YAML config missing"
+    with open(source_yaml_path, encoding="utf-8") as f:
+        source_cfg = yaml.safe_load(f)
+
+    exp_cfg = json.loads((artifact_dir / "experiment_config.json").read_text(encoding="utf-8"))
+    embedded_sg = exp_cfg["config_yaml"]["safety_gate"]
+    source_sg = source_cfg["safety_gate"]
+
+    for timing_field in ["action_cooldown_steps", "step_duration_seconds", "cooldown_seconds"]:
+        assert timing_field in source_sg, f"Missing {timing_field} in source YAML safety_gate"
+        assert timing_field in embedded_sg, f"Missing {timing_field} in embedded config_yaml safety_gate"
+        assert embedded_sg[timing_field] == source_sg[timing_field], (
+            f"Divergence in {timing_field}: source YAML has {source_sg[timing_field]} but embedded config has {embedded_sg[timing_field]}"
+        )
