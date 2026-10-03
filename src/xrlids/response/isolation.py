@@ -153,3 +153,130 @@ def partition_policy_development_population(
     provenance_splits = {"D_pol_train": prov_train, "D_pol_val": prov_val}
 
     return features_splits, label_splits, provenance_splits, manifest
+
+
+def load_or_build_policy_flows(
+    split_name: str,
+    *,
+    experiment_dir: str | Path = "results/experiments/EXP-P1-CIC2017-R10-001",
+    cache_dir: str | Path = "data/processed/phase2_cache",
+    seed: int = 42,
+) -> list[Any]:
+    """Load or construct and cache standardized FlowRecord objects for the specified split.
+
+    Strict Anti-Leakage Invariant:
+    If split_name == 'D_pol_test', this function raises a RuntimeError unless explicit
+    final test access is permitted.
+    """
+    import joblib
+    from pathlib import Path
+    from xrlids.datasets.population import PopulationConfig, load_dataset_population
+    from xrlids.features.registry import load_feature_registry
+    from xrlids.labels.contract import load_label_contract
+    from xrlids.response.detector import FrozenDetector
+    from xrlids.response.environment import FlowRecord
+    from xrlids.splitting.splitter import SplitConfig, build_splits
+
+    valid_splits = ("D_pol_train", "D_pol_val", "D_pol_test")
+    if split_name not in valid_splits:
+        raise ValueError(f"Unknown split_name '{split_name}'. Must be one of {valid_splits}")
+
+    cache_path = Path(cache_dir)
+    cache_file = cache_path / f"{split_name.lower()}_flows.joblib"
+    if cache_file.exists():
+        loaded: list[Any] = joblib.load(cache_file)
+        return loaded
+
+    cache_path.mkdir(parents=True, exist_ok=True)
+    exp_dir = Path(experiment_dir)
+    detector = FrozenDetector.load(exp_dir)
+
+    registry = load_feature_registry()
+    contract = load_label_contract()
+    pop_cfg = PopulationConfig(
+        dataset="cicids2017",
+        files="all_verified",
+        duplicate_policy="deduplicate_features",
+        duplicate_conflict_policy="reject_conflicts",
+        seed=seed,
+    )
+    feature_names = registry.rung_features("R10")
+    population = load_dataset_population(pop_cfg, feature_names, contract=contract, registry=registry)
+
+    split_config = SplitConfig(
+        train=0.6,
+        validation=0.2,
+        test=0.2,
+        seed=seed,
+        methodology="stratified_random",
+        duplicate_policy="deduplicate_features",
+    )
+    split_res = build_splits(
+        population.features,
+        population.labels,
+        feature_names,
+        split_config,
+        dataset="cicids2017",
+        provenance=population.provenance,
+        run_leakage_audit=True,
+    )
+
+    feat_splits, label_splits, _, _ = partition_policy_development_population(
+        val_features=split_res.splits["validation"],
+        val_labels=split_res.label_splits["validation"],
+        val_provenance=split_res.provenance_splits.get("validation"),
+        dataset="cicids2017",
+        source_experiment_id=exp_dir.name,
+        phase1_test_row_count=len(split_res.splits["test"]),
+        train_fraction=0.60,
+        seed=seed,
+    )
+
+    # Cache both training and validation flows together to save time on subsequent runs
+    for s_name in ("D_pol_train", "D_pol_val"):
+        s_file = cache_path / f"{s_name.lower()}_flows.joblib"
+        if not s_file.exists():
+            X_s = feat_splits[s_name]
+            y_s = label_splits[s_name]
+            scores_s = detector.predict_score(X_s)
+            flows_s: list[FlowRecord] = []
+            n_endpoints = 250
+            for i in range(len(X_s)):
+                host_id = f"host_{i % n_endpoints}"
+                flow_bytes = float(X_s.iloc[i].get("flow_bytes_per_s", 0.0))
+                flows_s.append(
+                    FlowRecord(
+                        flow_id=i,
+                        host_id=host_id,
+                        attack_score=float(scores_s[i]),
+                        true_label=int(y_s.iloc[i]),
+                        flow_bytes_per_s=flow_bytes,
+                    )
+                )
+            joblib.dump(flows_s, s_file)
+
+    # If D_pol_test was requested, build and cache it
+    test_file = cache_path / "d_pol_test_flows.joblib"
+    if split_name == "D_pol_test" and not test_file.exists():
+        X_test = split_res.splits["test"]
+        y_test = split_res.label_splits["test"]
+        scores_test = detector.predict_score(X_test)
+        flows_test: list[FlowRecord] = []
+        n_endpoints = 250
+        for i in range(len(X_test)):
+            host_id = f"host_{i % n_endpoints}"
+            flow_bytes = float(X_test.iloc[i].get("flow_bytes_per_s", 0.0))
+            flows_test.append(
+                FlowRecord(
+                    flow_id=i,
+                    host_id=host_id,
+                    attack_score=float(scores_test[i]),
+                    true_label=int(y_test.iloc[i]),
+                    flow_bytes_per_s=flow_bytes,
+                )
+            )
+        joblib.dump(flows_test, test_file)
+
+    final_loaded: list[Any] = joblib.load(cache_path / f"{split_name.lower()}_flows.joblib")
+    return final_loaded
+

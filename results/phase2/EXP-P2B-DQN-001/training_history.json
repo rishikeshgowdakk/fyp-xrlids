@@ -1,0 +1,1105 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P2B-DQN-001",
+    "git_commit": "5d6257d998c7bd9d44f24a250c477675cf607833",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": 42,
+    "created_at": "2026-10-03T19:09:35.703355+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "5d6257d998c7bd9d44f24a250c477675cf607833",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "stage_2b1_3action": {
+    "total_steps": 50000,
+    "episodes_completed": 500,
+    "training_time_seconds": 511.80994033813477,
+    "checkpoint_summary": {
+      "selection_metric": "mean_cost_per_flow",
+      "maximize": false,
+      "best_step": 10000,
+      "best_metric_value": 2.0437333333333334,
+      "best_checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_010000.pt",
+      "evaluated_checkpoints_count": 10,
+      "history": [
+        {
+          "step": 5000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_005000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.1566,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 32349.0,
+            "mean_cost_per_flow": 2.1566,
+            "false_quarantine_rate": 0.0,
+            "business_availability_score_pct": 96.34729083988013,
+            "action_chattering_index": 0.029801986799119943,
+            "mitigation_delay_steps": 39.4050046339203,
+            "action_counts": {
+              "ALLOW": 11928,
+              "ALERT": 2478,
+              "RATE_LIMIT": 594,
+              "ISOLATE": 0
+            },
+            "override_counts": {},
+            "contained_attacks": 554,
+            "uncontained_attacks": 2099
+          }
+        },
+        {
+          "step": 10000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_010000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.0437333333333334,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 30656.0,
+            "mean_cost_per_flow": 2.0437333333333334,
+            "false_quarantine_rate": 0.0,
+            "business_availability_score_pct": 96.46877784077104,
+            "action_chattering_index": 0.03133542236149076,
+            "mitigation_delay_steps": 39.429101019462465,
+            "action_counts": {
+              "ALLOW": 11925,
+              "ALERT": 2477,
+              "RATE_LIMIT": 598,
+              "ISOLATE": 0
+            },
+            "override_counts": {},
+            "contained_attacks": 561,
+            "uncontained_attacks": 2092
+          }
+        },
+        {
+          "step": 15000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_015000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.2292666666666667,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 33439.0,
+            "mean_cost_per_flow": 2.2292666666666667,
+            "false_quarantine_rate": 0.0,
+            "business_availability_score_pct": 98.03191058556735,
+            "action_chattering_index": 0.029468631242082804,
+            "mitigation_delay_steps": 40.16913809082484,
+            "action_counts": {
+              "ALLOW": 12149,
+              "ALERT": 2291,
+              "RATE_LIMIT": 560,
+              "ISOLATE": 0
+            },
+            "override_counts": {},
+            "contained_attacks": 524,
+            "uncontained_attacks": 2129
+          }
+        },
+        {
+          "step": 20000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_020000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.0719333333333334,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 31079.0,
+            "mean_cost_per_flow": 2.0719333333333334,
+            "false_quarantine_rate": 0.0,
+            "business_availability_score_pct": 96.86563537701466,
+            "action_chattering_index": 0.03053536902460164,
+            "mitigation_delay_steps": 39.70852641334569,
+            "action_counts": {
+              "ALLOW": 11979,
+              "ALERT": 2445,
+              "RATE_LIMIT": 576,
+              "ISOLATE": 0
+            },
+            "override_counts": {},
+            "contained_attacks": 544,
+            "uncontained_attacks": 2109
+          }
+        },
+        {
+          "step": 25000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_025000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.1039333333333334,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 31559.0,
+            "mean_cost_per_flow": 2.1039333333333334,
+            "false_quarantine_rate": 0.0,
+            "business_availability_score_pct": 98.21009152020734,
+            "action_chattering_index": 0.029335289019267952,
+            "mitigation_delay_steps": 40.195551436515295,
+            "action_counts": {
+              "ALLOW": 12151,
+              "ALERT": 2296,
+              "RATE_LIMIT": 553,
+              "ISOLATE": 0
+            },
+            "override_counts": {},
+            "contained_attacks": 522,
+            "uncontained_attacks": 2131
+          }
+        },
+        {
+          "step": 30000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_030000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.1296,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 31944.0,
+            "mean_cost_per_flow": 2.1296,
+            "false_quarantine_rate": 0.0,
+            "business_availability_score_pct": 98.42876812181096,
+            "action_chattering_index": 0.029401960130675378,
+            "mitigation_delay_steps": 40.21964782205746,
+            "action_counts": {
+              "ALLOW": 12182,
+              "ALERT": 2265,
+              "RATE_LIMIT": 553,
+              "ISOLATE": 0
+            },
+            "override_counts": {},
+            "contained_attacks": 519,
+            "uncontained_attacks": 2134
+          }
+        },
+        {
+          "step": 35000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_035000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.0926,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 31389.0,
+            "mean_cost_per_flow": 2.0926,
+            "false_quarantine_rate": 0.0,
+            "business_availability_score_pct": 98.27488458734915,
+            "action_chattering_index": 0.03006867124474965,
+            "mitigation_delay_steps": 40.03475440222428,
+            "action_counts": {
+              "ALLOW": 12157,
+              "ALERT": 2279,
+              "RATE_LIMIT": 564,
+              "ISOLATE": 0
+            },
+            "override_counts": {},
+            "contained_attacks": 529,
+            "uncontained_attacks": 2124
+          }
+        },
+        {
+          "step": 40000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_040000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.1275333333333335,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 31913.0,
+            "mean_cost_per_flow": 2.1275333333333335,
+            "false_quarantine_rate": 0.0,
+            "business_availability_score_pct": 98.48546205556006,
+            "action_chattering_index": 0.029268617907860523,
+            "mitigation_delay_steps": 40.28869323447637,
+            "action_counts": {
+              "ALLOW": 12189,
+              "ALERT": 2264,
+              "RATE_LIMIT": 547,
+              "ISOLATE": 0
+            },
+            "override_counts": {},
+            "contained_attacks": 516,
+            "uncontained_attacks": 2137
+          }
+        },
+        {
+          "step": 45000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_045000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.1384666666666665,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 32077.0,
+            "mean_cost_per_flow": 2.1384666666666665,
+            "false_quarantine_rate": 0.0,
+            "business_availability_score_pct": 98.66364299020005,
+            "action_chattering_index": 0.029201946796453097,
+            "mitigation_delay_steps": 40.38183503243744,
+            "action_counts": {
+              "ALLOW": 12213,
+              "ALERT": 2245,
+              "RATE_LIMIT": 542,
+              "ISOLATE": 0
+            },
+            "override_counts": {},
+            "contained_attacks": 512,
+            "uncontained_attacks": 2141
+          }
+        },
+        {
+          "step": 50000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_050000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.2538462619251685,
+          "all_metrics": {
+            "total_steps": 142346,
+            "total_cost": 320826.0,
+            "mean_cost_per_flow": 2.2538462619251685,
+            "false_quarantine_rate": 0.0,
+            "business_availability_score_pct": 98.53802676562043,
+            "action_chattering_index": 0.028269345603990307,
+            "mitigation_delay_steps": 40.810248198558845,
+            "action_counts": {
+              "ALLOW": 115100,
+              "ALERT": 22222,
+              "RATE_LIMIT": 5024,
+              "ISOLATE": 0
+            },
+            "override_counts": {},
+            "contained_attacks": 4807,
+            "uncontained_attacks": 21121
+          }
+        }
+      ]
+    },
+    "history": [
+      {
+        "step": 5000,
+        "epsilon": 0.905019,
+        "beta": 0.459988,
+        "loss": 0.6017273664474487,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 32349.0,
+          "mean_cost_per_flow": 2.1566,
+          "false_quarantine_rate": 0.0,
+          "business_availability_score_pct": 96.34729083988013,
+          "action_chattering_index": 0.029801986799119943,
+          "mitigation_delay_steps": 39.4050046339203,
+          "action_counts": {
+            "ALLOW": 11928,
+            "ALERT": 2478,
+            "RATE_LIMIT": 594,
+            "ISOLATE": 0
+          },
+          "override_counts": {},
+          "contained_attacks": 554,
+          "uncontained_attacks": 2099
+        },
+        "is_best": true,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_005000.pt"
+      },
+      {
+        "step": 10000,
+        "epsilon": 0.810019,
+        "beta": 0.519988,
+        "loss": 1.1976609230041504,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 30656.0,
+          "mean_cost_per_flow": 2.0437333333333334,
+          "false_quarantine_rate": 0.0,
+          "business_availability_score_pct": 96.46877784077104,
+          "action_chattering_index": 0.03133542236149076,
+          "mitigation_delay_steps": 39.429101019462465,
+          "action_counts": {
+            "ALLOW": 11925,
+            "ALERT": 2477,
+            "RATE_LIMIT": 598,
+            "ISOLATE": 0
+          },
+          "override_counts": {},
+          "contained_attacks": 561,
+          "uncontained_attacks": 2092
+        },
+        "is_best": true,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_010000.pt"
+      },
+      {
+        "step": 15000,
+        "epsilon": 0.7150190000000001,
+        "beta": 0.5799880000000001,
+        "loss": 1.4547703266143799,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 33439.0,
+          "mean_cost_per_flow": 2.2292666666666667,
+          "false_quarantine_rate": 0.0,
+          "business_availability_score_pct": 98.03191058556735,
+          "action_chattering_index": 0.029468631242082804,
+          "mitigation_delay_steps": 40.16913809082484,
+          "action_counts": {
+            "ALLOW": 12149,
+            "ALERT": 2291,
+            "RATE_LIMIT": 560,
+            "ISOLATE": 0
+          },
+          "override_counts": {},
+          "contained_attacks": 524,
+          "uncontained_attacks": 2129
+        },
+        "is_best": false,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_015000.pt"
+      },
+      {
+        "step": 20000,
+        "epsilon": 0.6200190000000001,
+        "beta": 0.639988,
+        "loss": 0.2656177878379822,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 31079.0,
+          "mean_cost_per_flow": 2.0719333333333334,
+          "false_quarantine_rate": 0.0,
+          "business_availability_score_pct": 96.86563537701466,
+          "action_chattering_index": 0.03053536902460164,
+          "mitigation_delay_steps": 39.70852641334569,
+          "action_counts": {
+            "ALLOW": 11979,
+            "ALERT": 2445,
+            "RATE_LIMIT": 576,
+            "ISOLATE": 0
+          },
+          "override_counts": {},
+          "contained_attacks": 544,
+          "uncontained_attacks": 2109
+        },
+        "is_best": false,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_020000.pt"
+      },
+      {
+        "step": 25000,
+        "epsilon": 0.525019,
+        "beta": 0.699988,
+        "loss": 0.828935444355011,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 31559.0,
+          "mean_cost_per_flow": 2.1039333333333334,
+          "false_quarantine_rate": 0.0,
+          "business_availability_score_pct": 98.21009152020734,
+          "action_chattering_index": 0.029335289019267952,
+          "mitigation_delay_steps": 40.195551436515295,
+          "action_counts": {
+            "ALLOW": 12151,
+            "ALERT": 2296,
+            "RATE_LIMIT": 553,
+            "ISOLATE": 0
+          },
+          "override_counts": {},
+          "contained_attacks": 522,
+          "uncontained_attacks": 2131
+        },
+        "is_best": false,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_025000.pt"
+      },
+      {
+        "step": 30000,
+        "epsilon": 0.43001900000000004,
+        "beta": 0.759988,
+        "loss": 0.7936332821846008,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 31944.0,
+          "mean_cost_per_flow": 2.1296,
+          "false_quarantine_rate": 0.0,
+          "business_availability_score_pct": 98.42876812181096,
+          "action_chattering_index": 0.029401960130675378,
+          "mitigation_delay_steps": 40.21964782205746,
+          "action_counts": {
+            "ALLOW": 12182,
+            "ALERT": 2265,
+            "RATE_LIMIT": 553,
+            "ISOLATE": 0
+          },
+          "override_counts": {},
+          "contained_attacks": 519,
+          "uncontained_attacks": 2134
+        },
+        "is_best": false,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_030000.pt"
+      },
+      {
+        "step": 35000,
+        "epsilon": 0.33501899999999996,
+        "beta": 0.819988,
+        "loss": 0.7570246458053589,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 31389.0,
+          "mean_cost_per_flow": 2.0926,
+          "false_quarantine_rate": 0.0,
+          "business_availability_score_pct": 98.27488458734915,
+          "action_chattering_index": 0.03006867124474965,
+          "mitigation_delay_steps": 40.03475440222428,
+          "action_counts": {
+            "ALLOW": 12157,
+            "ALERT": 2279,
+            "RATE_LIMIT": 564,
+            "ISOLATE": 0
+          },
+          "override_counts": {},
+          "contained_attacks": 529,
+          "uncontained_attacks": 2124
+        },
+        "is_best": false,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_035000.pt"
+      },
+      {
+        "step": 40000,
+        "epsilon": 0.24001899999999998,
+        "beta": 0.879988,
+        "loss": 0.5987607836723328,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 31913.0,
+          "mean_cost_per_flow": 2.1275333333333335,
+          "false_quarantine_rate": 0.0,
+          "business_availability_score_pct": 98.48546205556006,
+          "action_chattering_index": 0.029268617907860523,
+          "mitigation_delay_steps": 40.28869323447637,
+          "action_counts": {
+            "ALLOW": 12189,
+            "ALERT": 2264,
+            "RATE_LIMIT": 547,
+            "ISOLATE": 0
+          },
+          "override_counts": {},
+          "contained_attacks": 516,
+          "uncontained_attacks": 2137
+        },
+        "is_best": false,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_040000.pt"
+      },
+      {
+        "step": 45000,
+        "epsilon": 0.145019,
+        "beta": 0.939988,
+        "loss": 0.33598920702934265,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 32077.0,
+          "mean_cost_per_flow": 2.1384666666666665,
+          "false_quarantine_rate": 0.0,
+          "business_availability_score_pct": 98.66364299020005,
+          "action_chattering_index": 0.029201946796453097,
+          "mitigation_delay_steps": 40.38183503243744,
+          "action_counts": {
+            "ALLOW": 12213,
+            "ALERT": 2245,
+            "RATE_LIMIT": 542,
+            "ISOLATE": 0
+          },
+          "override_counts": {},
+          "contained_attacks": 512,
+          "uncontained_attacks": 2141
+        },
+        "is_best": false,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_045000.pt"
+      },
+      {
+        "step": 50000,
+        "epsilon": 0.050019000000000036,
+        "beta": 0.999988,
+        "loss": 0.6123906373977661,
+        "val_metrics": {
+          "total_steps": 142346,
+          "total_cost": 320826.0,
+          "mean_cost_per_flow": 2.2538462619251685,
+          "false_quarantine_rate": 0.0,
+          "business_availability_score_pct": 98.53802676562043,
+          "action_chattering_index": 0.028269345603990307,
+          "mitigation_delay_steps": 40.810248198558845,
+          "action_counts": {
+            "ALLOW": 115100,
+            "ALERT": 22222,
+            "RATE_LIMIT": 5024,
+            "ISOLATE": 0
+          },
+          "override_counts": {},
+          "contained_attacks": 4807,
+          "uncontained_attacks": 21121
+        },
+        "is_best": false,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/checkpoint_step_050000.pt"
+      }
+    ]
+  },
+  "stage_2b2_4action": {
+    "total_steps": 50000,
+    "episodes_completed": 1690,
+    "training_time_seconds": 395.6516318321228,
+    "checkpoint_summary": {
+      "selection_metric": "mean_cost_per_flow",
+      "maximize": false,
+      "best_step": 45000,
+      "best_metric_value": 2.2416,
+      "best_checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_045000.pt",
+      "evaluated_checkpoints_count": 10,
+      "history": [
+        {
+          "step": 5000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_005000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.459,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 36885.0,
+            "mean_cost_per_flow": 2.459,
+            "false_quarantine_rate": 0.005426419373127075,
+            "business_availability_score_pct": 97.37588078075646,
+            "action_chattering_index": 0.11034068937929195,
+            "mitigation_delay_steps": 28.436051899907323,
+            "action_counts": {
+              "ALLOW": 12052,
+              "ALERT": 1757,
+              "RATE_LIMIT": 495,
+              "ISOLATE": 696
+            },
+            "override_counts": {
+              "BLAST_RADIUS_CIRCUIT_BREAKER": 1495
+            },
+            "contained_attacks": 1097,
+            "uncontained_attacks": 1556
+          }
+        },
+        {
+          "step": 10000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_010000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.8438666666666665,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 42658.0,
+            "mean_cost_per_flow": 2.8438666666666665,
+            "false_quarantine_rate": 0.014497448772981291,
+            "business_availability_score_pct": 90.24054426176399,
+            "action_chattering_index": 0.11327421828121875,
+            "mitigation_delay_steps": 27.16357738646895,
+            "action_counts": {
+              "ALLOW": 11157,
+              "ALERT": 2427,
+              "RATE_LIMIT": 739,
+              "ISOLATE": 677
+            },
+            "override_counts": {
+              "BLAST_RADIUS_CIRCUIT_BREAKER": 1901
+            },
+            "contained_attacks": 1194,
+            "uncontained_attacks": 1459
+          }
+        },
+        {
+          "step": 15000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_015000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.311933333333333,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 34679.0,
+            "mean_cost_per_flow": 2.311933333333333,
+            "false_quarantine_rate": 0.004049566696363489,
+            "business_availability_score_pct": 97.33538511379282,
+            "action_chattering_index": 0.11174078271884792,
+            "mitigation_delay_steps": 27.880908248378127,
+            "action_counts": {
+              "ALLOW": 12038,
+              "ALERT": 1714,
+              "RATE_LIMIT": 561,
+              "ISOLATE": 687
+            },
+            "override_counts": {
+              "BLAST_RADIUS_CIRCUIT_BREAKER": 1438
+            },
+            "contained_attacks": 1162,
+            "uncontained_attacks": 1491
+          }
+        },
+        {
+          "step": 20000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_020000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.2661333333333333,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 33992.0,
+            "mean_cost_per_flow": 2.2661333333333333,
+            "false_quarantine_rate": 0.003401636024945331,
+            "business_availability_score_pct": 97.37588078075646,
+            "action_chattering_index": 0.10914060937395827,
+            "mitigation_delay_steps": 28.140871177015754,
+            "action_counts": {
+              "ALLOW": 12041,
+              "ALERT": 1738,
+              "RATE_LIMIT": 565,
+              "ISOLATE": 656
+            },
+            "override_counts": {
+              "BLAST_RADIUS_CIRCUIT_BREAKER": 994
+            },
+            "contained_attacks": 1141,
+            "uncontained_attacks": 1512
+          }
+        },
+        {
+          "step": 25000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_025000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.374,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 35610.0,
+            "mean_cost_per_flow": 2.374,
+            "false_quarantine_rate": 0.005345428039199806,
+            "business_availability_score_pct": 96.7279501093383,
+            "action_chattering_index": 0.10640709380625375,
+            "mitigation_delay_steps": 28.393419833178868,
+            "action_counts": {
+              "ALLOW": 11964,
+              "ALERT": 1780,
+              "RATE_LIMIT": 592,
+              "ISOLATE": 664
+            },
+            "override_counts": {
+              "BLAST_RADIUS_CIRCUIT_BREAKER": 1238
+            },
+            "contained_attacks": 1149,
+            "uncontained_attacks": 1504
+          }
+        },
+        {
+          "step": 30000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_030000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.356133333333333,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 35342.0,
+            "mean_cost_per_flow": 2.356133333333333,
+            "false_quarantine_rate": 0.004697497367781647,
+            "business_availability_score_pct": 97.45687211468372,
+            "action_chattering_index": 0.11274084938995933,
+            "mitigation_delay_steps": 27.7483781278962,
+            "action_counts": {
+              "ALLOW": 12055,
+              "ALERT": 1676,
+              "RATE_LIMIT": 581,
+              "ISOLATE": 688
+            },
+            "override_counts": {
+              "BLAST_RADIUS_CIRCUIT_BREAKER": 1393
+            },
+            "contained_attacks": 1172,
+            "uncontained_attacks": 1481
+          }
+        },
+        {
+          "step": 35000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_035000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.333266666666667,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 34999.0,
+            "mean_cost_per_flow": 2.333266666666667,
+            "false_quarantine_rate": 0.003401636024945331,
+            "business_availability_score_pct": 97.98331578521098,
+            "action_chattering_index": 0.11207413827588505,
+            "mitigation_delay_steps": 27.906858202038926,
+            "action_counts": {
+              "ALLOW": 12128,
+              "ALERT": 1659,
+              "RATE_LIMIT": 514,
+              "ISOLATE": 699
+            },
+            "override_counts": {
+              "BLAST_RADIUS_CIRCUIT_BREAKER": 1534
+            },
+            "contained_attacks": 1146,
+            "uncontained_attacks": 1507
+          }
+        },
+        {
+          "step": 40000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_040000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.3532,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 35298.0,
+            "mean_cost_per_flow": 2.3532,
+            "false_quarantine_rate": 0.005183445371345266,
+            "business_availability_score_pct": 96.7279501093383,
+            "action_chattering_index": 0.11060737382492167,
+            "mitigation_delay_steps": 27.72011121408712,
+            "action_counts": {
+              "ALLOW": 11962,
+              "ALERT": 1754,
+              "RATE_LIMIT": 595,
+              "ISOLATE": 689
+            },
+            "override_counts": {
+              "BLAST_RADIUS_CIRCUIT_BREAKER": 1479
+            },
+            "contained_attacks": 1182,
+            "uncontained_attacks": 1471
+          }
+        },
+        {
+          "step": 45000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_045000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.2416,
+          "all_metrics": {
+            "total_steps": 15000,
+            "total_cost": 33624.0,
+            "mean_cost_per_flow": 2.2416,
+            "false_quarantine_rate": 0.0027537053535271728,
+            "business_availability_score_pct": 97.81323398396373,
+            "action_chattering_index": 0.11074071604773651,
+            "mitigation_delay_steps": 27.995829471733085,
+            "action_counts": {
+              "ALLOW": 12099,
+              "ALERT": 1658,
+              "RATE_LIMIT": 564,
+              "ISOLATE": 679
+            },
+            "override_counts": {
+              "BLAST_RADIUS_CIRCUIT_BREAKER": 1259
+            },
+            "contained_attacks": 1177,
+            "uncontained_attacks": 1476
+          }
+        },
+        {
+          "step": 50000,
+          "checkpoint_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_050000.pt",
+          "metric_name": "mean_cost_per_flow",
+          "metric_value": 2.4160636758321274,
+          "all_metrics": {
+            "total_steps": 142346,
+            "total_cost": 343917.0,
+            "mean_cost_per_flow": 2.4160636758321274,
+            "false_quarantine_rate": 0.0028689721520727034,
+            "business_availability_score_pct": 98.20045010221787,
+            "action_chattering_index": 0.11260669500158067,
+            "mitigation_delay_steps": 28.52931757170442,
+            "action_counts": {
+              "ALLOW": 114702,
+              "ALERT": 15914,
+              "RATE_LIMIT": 5192,
+              "ISOLATE": 6538
+            },
+            "override_counts": {
+              "BLAST_RADIUS_CIRCUIT_BREAKER": 13191
+            },
+            "contained_attacks": 11122,
+            "uncontained_attacks": 14806
+          }
+        }
+      ]
+    },
+    "history": [
+      {
+        "step": 5000,
+        "epsilon": 0.905019,
+        "beta": 0.459988,
+        "loss": 2.082766532897949,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 36885.0,
+          "mean_cost_per_flow": 2.459,
+          "false_quarantine_rate": 0.005426419373127075,
+          "business_availability_score_pct": 97.37588078075646,
+          "action_chattering_index": 0.11034068937929195,
+          "mitigation_delay_steps": 28.436051899907323,
+          "action_counts": {
+            "ALLOW": 12052,
+            "ALERT": 1757,
+            "RATE_LIMIT": 495,
+            "ISOLATE": 696
+          },
+          "override_counts": {
+            "BLAST_RADIUS_CIRCUIT_BREAKER": 1495
+          },
+          "contained_attacks": 1097,
+          "uncontained_attacks": 1556
+        },
+        "is_best": true,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_005000.pt"
+      },
+      {
+        "step": 10000,
+        "epsilon": 0.810019,
+        "beta": 0.519988,
+        "loss": 2.461528778076172,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 42658.0,
+          "mean_cost_per_flow": 2.8438666666666665,
+          "false_quarantine_rate": 0.014497448772981291,
+          "business_availability_score_pct": 90.24054426176399,
+          "action_chattering_index": 0.11327421828121875,
+          "mitigation_delay_steps": 27.16357738646895,
+          "action_counts": {
+            "ALLOW": 11157,
+            "ALERT": 2427,
+            "RATE_LIMIT": 739,
+            "ISOLATE": 677
+          },
+          "override_counts": {
+            "BLAST_RADIUS_CIRCUIT_BREAKER": 1901
+          },
+          "contained_attacks": 1194,
+          "uncontained_attacks": 1459
+        },
+        "is_best": false,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_010000.pt"
+      },
+      {
+        "step": 15000,
+        "epsilon": 0.7150190000000001,
+        "beta": 0.5799880000000001,
+        "loss": 4.658462047576904,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 34679.0,
+          "mean_cost_per_flow": 2.311933333333333,
+          "false_quarantine_rate": 0.004049566696363489,
+          "business_availability_score_pct": 97.33538511379282,
+          "action_chattering_index": 0.11174078271884792,
+          "mitigation_delay_steps": 27.880908248378127,
+          "action_counts": {
+            "ALLOW": 12038,
+            "ALERT": 1714,
+            "RATE_LIMIT": 561,
+            "ISOLATE": 687
+          },
+          "override_counts": {
+            "BLAST_RADIUS_CIRCUIT_BREAKER": 1438
+          },
+          "contained_attacks": 1162,
+          "uncontained_attacks": 1491
+        },
+        "is_best": true,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_015000.pt"
+      },
+      {
+        "step": 20000,
+        "epsilon": 0.6200190000000001,
+        "beta": 0.639988,
+        "loss": 2.0342886447906494,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 33992.0,
+          "mean_cost_per_flow": 2.2661333333333333,
+          "false_quarantine_rate": 0.003401636024945331,
+          "business_availability_score_pct": 97.37588078075646,
+          "action_chattering_index": 0.10914060937395827,
+          "mitigation_delay_steps": 28.140871177015754,
+          "action_counts": {
+            "ALLOW": 12041,
+            "ALERT": 1738,
+            "RATE_LIMIT": 565,
+            "ISOLATE": 656
+          },
+          "override_counts": {
+            "BLAST_RADIUS_CIRCUIT_BREAKER": 994
+          },
+          "contained_attacks": 1141,
+          "uncontained_attacks": 1512
+        },
+        "is_best": true,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_020000.pt"
+      },
+      {
+        "step": 25000,
+        "epsilon": 0.525019,
+        "beta": 0.699988,
+        "loss": 2.061922788619995,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 35610.0,
+          "mean_cost_per_flow": 2.374,
+          "false_quarantine_rate": 0.005345428039199806,
+          "business_availability_score_pct": 96.7279501093383,
+          "action_chattering_index": 0.10640709380625375,
+          "mitigation_delay_steps": 28.393419833178868,
+          "action_counts": {
+            "ALLOW": 11964,
+            "ALERT": 1780,
+            "RATE_LIMIT": 592,
+            "ISOLATE": 664
+          },
+          "override_counts": {
+            "BLAST_RADIUS_CIRCUIT_BREAKER": 1238
+          },
+          "contained_attacks": 1149,
+          "uncontained_attacks": 1504
+        },
+        "is_best": false,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_025000.pt"
+      },
+      {
+        "step": 30000,
+        "epsilon": 0.43001900000000004,
+        "beta": 0.759988,
+        "loss": 1.0903408527374268,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 35342.0,
+          "mean_cost_per_flow": 2.356133333333333,
+          "false_quarantine_rate": 0.004697497367781647,
+          "business_availability_score_pct": 97.45687211468372,
+          "action_chattering_index": 0.11274084938995933,
+          "mitigation_delay_steps": 27.7483781278962,
+          "action_counts": {
+            "ALLOW": 12055,
+            "ALERT": 1676,
+            "RATE_LIMIT": 581,
+            "ISOLATE": 688
+          },
+          "override_counts": {
+            "BLAST_RADIUS_CIRCUIT_BREAKER": 1393
+          },
+          "contained_attacks": 1172,
+          "uncontained_attacks": 1481
+        },
+        "is_best": false,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_030000.pt"
+      },
+      {
+        "step": 35000,
+        "epsilon": 0.33501899999999996,
+        "beta": 0.819988,
+        "loss": 1.0120277404785156,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 34999.0,
+          "mean_cost_per_flow": 2.333266666666667,
+          "false_quarantine_rate": 0.003401636024945331,
+          "business_availability_score_pct": 97.98331578521098,
+          "action_chattering_index": 0.11207413827588505,
+          "mitigation_delay_steps": 27.906858202038926,
+          "action_counts": {
+            "ALLOW": 12128,
+            "ALERT": 1659,
+            "RATE_LIMIT": 514,
+            "ISOLATE": 699
+          },
+          "override_counts": {
+            "BLAST_RADIUS_CIRCUIT_BREAKER": 1534
+          },
+          "contained_attacks": 1146,
+          "uncontained_attacks": 1507
+        },
+        "is_best": false,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_035000.pt"
+      },
+      {
+        "step": 40000,
+        "epsilon": 0.24001899999999998,
+        "beta": 0.879988,
+        "loss": 0.550623893737793,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 35298.0,
+          "mean_cost_per_flow": 2.3532,
+          "false_quarantine_rate": 0.005183445371345266,
+          "business_availability_score_pct": 96.7279501093383,
+          "action_chattering_index": 0.11060737382492167,
+          "mitigation_delay_steps": 27.72011121408712,
+          "action_counts": {
+            "ALLOW": 11962,
+            "ALERT": 1754,
+            "RATE_LIMIT": 595,
+            "ISOLATE": 689
+          },
+          "override_counts": {
+            "BLAST_RADIUS_CIRCUIT_BREAKER": 1479
+          },
+          "contained_attacks": 1182,
+          "uncontained_attacks": 1471
+        },
+        "is_best": false,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_040000.pt"
+      },
+      {
+        "step": 45000,
+        "epsilon": 0.145019,
+        "beta": 0.939988,
+        "loss": 0.9135332107543945,
+        "val_metrics": {
+          "total_steps": 15000,
+          "total_cost": 33624.0,
+          "mean_cost_per_flow": 2.2416,
+          "false_quarantine_rate": 0.0027537053535271728,
+          "business_availability_score_pct": 97.81323398396373,
+          "action_chattering_index": 0.11074071604773651,
+          "mitigation_delay_steps": 27.995829471733085,
+          "action_counts": {
+            "ALLOW": 12099,
+            "ALERT": 1658,
+            "RATE_LIMIT": 564,
+            "ISOLATE": 679
+          },
+          "override_counts": {
+            "BLAST_RADIUS_CIRCUIT_BREAKER": 1259
+          },
+          "contained_attacks": 1177,
+          "uncontained_attacks": 1476
+        },
+        "is_best": true,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_045000.pt"
+      },
+      {
+        "step": 50000,
+        "epsilon": 0.050019000000000036,
+        "beta": 0.999988,
+        "loss": 0.6603593826293945,
+        "val_metrics": {
+          "total_steps": 142346,
+          "total_cost": 343917.0,
+          "mean_cost_per_flow": 2.4160636758321274,
+          "false_quarantine_rate": 0.0028689721520727034,
+          "business_availability_score_pct": 98.20045010221787,
+          "action_chattering_index": 0.11260669500158067,
+          "mitigation_delay_steps": 28.52931757170442,
+          "action_counts": {
+            "ALLOW": 114702,
+            "ALERT": 15914,
+            "RATE_LIMIT": 5192,
+            "ISOLATE": 6538
+          },
+          "override_counts": {
+            "BLAST_RADIUS_CIRCUIT_BREAKER": 13191
+          },
+          "contained_attacks": 11122,
+          "uncontained_attacks": 14806
+        },
+        "is_best": false,
+        "checkpoint": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/checkpoint_step_050000.pt"
+      }
+    ]
+  }
+}

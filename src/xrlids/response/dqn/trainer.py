@@ -163,7 +163,7 @@ class DqnTrainer:
 
                 # Optimize network
                 loss_val = None
-                if len(self.replay_buffer) >= self.config.warmup_steps:
+                if len(self.replay_buffer) >= max(self.config.warmup_steps, self.config.batch_size):
                     batch, tree_indices, weights = self.replay_buffer.sample(
                         batch_size=self.config.batch_size,
                         beta=beta,
@@ -173,7 +173,8 @@ class DqnTrainer:
 
                 # Evaluation check
                 if step % self.config.eval_interval_steps == 0 or step == self.config.total_steps:
-                    val_metrics = self.evaluate_validation()
+                    val_sample_limit = 15000 if step < self.config.total_steps else None
+                    val_metrics = self.evaluate_validation(sample_limit=val_sample_limit)
                     is_best, cp_path = self.checkpoint_manager.register_evaluation(
                         step=step,
                         metrics=val_metrics,

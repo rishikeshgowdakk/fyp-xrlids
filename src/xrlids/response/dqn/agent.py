@@ -97,6 +97,16 @@ class DqnAgent:
         selected_action = self.action_space[action_idx]
         return selected_action, q_vals, margin
 
+    def get_q_values(self, state: np.ndarray) -> dict[Action, float]:
+        """Compute Q-values for all candidate actions in action space."""
+        _, q_vals, _ = self.select_action(state, epsilon=0.0)
+        return {self.action_space[i]: float(q_vals[i]) for i in range(len(self.action_space))}
+
+    def get_decision_margin(self, state: np.ndarray) -> float:
+        """Compute difference between top and second-top Q-values."""
+        _, _, margin = self.select_action(state, epsilon=0.0)
+        return margin
+
     def train_step(
         self,
         batch: dict[str, torch.Tensor],

@@ -99,6 +99,9 @@ class StepLog:
         }
 
 
+StepRecord = StepLog
+
+
 @dataclass
 class EpisodeSummary:
     """Consolidated summary of an offline simulation replay episode."""

@@ -30,6 +30,7 @@ class StateBuilder:
     cooldown_max_steps: int = 30
     step_duration_s: float = 1.0  # Nominal decision step duration (30 steps = 30.0s cooldown)
     volumetric_scale_log_max: float = 8.0  # 10^8 bytes/s (100 MB/s) normalized to 1.0
+    disabled_dimensions: Sequence[int] = ()  # For state component ablation experiments
 
     # Internal causal memory buffers (updated strictly step-by-step)
     _score_history: deque[float] = field(init=False)
@@ -108,6 +109,10 @@ class StateBuilder:
         s5 = float(np.clip(np.log10(1.0 + bps) / self.volumetric_scale_log_max, 0.0, 1.0))
 
         state_vector = np.array([s0, s1, s2, s3, s4, s5], dtype=np.float32)
+        if self.disabled_dimensions:
+            for dim in self.disabled_dimensions:
+                if 0 <= dim < 6:
+                    state_vector[dim] = 0.0
         return state_vector
 
     def update_history(
