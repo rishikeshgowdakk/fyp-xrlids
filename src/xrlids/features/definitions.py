@@ -474,3 +474,24 @@ def feature_spec(name: str) -> FeatureSpec:
     if name not in FEATURES:
         raise KeyError(f"unknown canonical feature '{name}'")
     return FEATURES[name]
+
+
+R10_FEATURES: tuple[str, ...] = (
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean",
+    "packet_length_std",
+    "syn_count",
+    "ack_count",
+    "rst_count",
+    "fin_count",
+    "syn_ack_ratio",
+)
+
+R4_FEATURES: tuple[str, ...] = (
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean",
+)
