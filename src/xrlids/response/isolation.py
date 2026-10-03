@@ -280,3 +280,80 @@ def load_or_build_policy_flows(
     final_loaded: list[Any] = joblib.load(cache_path / f"{split_name.lower()}_flows.joblib")
     return final_loaded
 
+
+def load_or_build_policy_features(
+    split_name: str,
+    *,
+    experiment_dir: str | Path = "results/experiments/EXP-P1-CIC2017-R10-001",
+    cache_dir: str | Path = "data/processed/phase2_cache",
+    seed: int = 42,
+) -> np.ndarray:
+    """Load or extract raw feature matrix corresponding to the specified split flows."""
+    import joblib
+    from pathlib import Path
+    from xrlids.datasets.population import PopulationConfig, load_dataset_population
+    from xrlids.features.registry import load_feature_registry
+    from xrlids.labels.contract import load_label_contract
+    from xrlids.splitting.splitter import SplitConfig, build_splits
+
+    cache_path = Path(cache_dir)
+    cache_file = cache_path / f"{split_name.lower()}_features.joblib"
+    if cache_file.exists():
+        return joblib.load(cache_file)
+
+    cache_path.mkdir(parents=True, exist_ok=True)
+    exp_dir = Path(experiment_dir)
+    registry = load_feature_registry()
+    contract = load_label_contract()
+    pop_cfg = PopulationConfig(
+        dataset="cicids2017",
+        files="all_verified",
+        duplicate_policy="deduplicate_features",
+        duplicate_conflict_policy="reject_conflicts",
+        seed=seed,
+    )
+    feature_names = registry.rung_features("R10")
+    population = load_dataset_population(pop_cfg, feature_names, contract=contract, registry=registry)
+
+    split_config = SplitConfig(
+        train=0.6,
+        validation=0.2,
+        test=0.2,
+        seed=seed,
+        methodology="stratified_random",
+        duplicate_policy="deduplicate_features",
+    )
+    split_res = build_splits(
+        population.features,
+        population.labels,
+        feature_names,
+        split_config,
+        dataset="cicids2017",
+        provenance=population.provenance,
+        run_leakage_audit=True,
+    )
+
+    feat_splits, _, _, _ = partition_policy_development_population(
+        val_features=split_res.splits["validation"],
+        val_labels=split_res.label_splits["validation"],
+        val_provenance=split_res.provenance_splits.get("validation"),
+        dataset="cicids2017",
+        source_experiment_id=exp_dir.name,
+        phase1_test_row_count=len(split_res.splits["test"]),
+        train_fraction=0.60,
+        seed=seed,
+    )
+
+    for s_name in ("D_pol_train", "D_pol_val"):
+        s_file = cache_path / f"{s_name.lower()}_features.joblib"
+        mat = feat_splits[s_name][feature_names].to_numpy(dtype=np.float32)
+        joblib.dump(mat, s_file)
+
+    if split_name == "D_pol_test":
+        t_file = cache_path / "d_pol_test_features.joblib"
+        mat_test = split_res.splits["test"][feature_names].to_numpy(dtype=np.float32)
+        joblib.dump(mat_test, t_file)
+
+    return joblib.load(cache_path / f"{split_name.lower()}_features.joblib")
+
+

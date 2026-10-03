@@ -39,14 +39,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from xrlids.artifacts.metadata import ArtifactMetadata, write_json_artifact
 from xrlids.response.costs import CostRegime, ResearchCostEngine
-from xrlids.response.dqn import DqnAgent, DqnPolicy, set_seed
+from xrlids.response.dqn import CheckpointManager, DqnAgent, DqnPolicy, set_seed
 from xrlids.response.environment import FlowRecord, OfflineResponseSimulator
 from xrlids.response.explainability import (
     ActionAuditCard,
     AutonomousResponseAuditor,
     audit_card_to_markdown,
 )
-from xrlids.response.isolation import load_or_build_policy_flows
+from xrlids.response.isolation import (
+    load_or_build_policy_features,
+    load_or_build_policy_flows,
+)
 from xrlids.response.safety import DeterministicSafetyGate
 from xrlids.response.state import StateBuilder
 from xrlids.response.types import Action, ActionSpaceMode, EpisodeSummary
@@ -92,19 +95,6 @@ def parse_args() -> argparse.Namespace:
         help="Git commit SHA to record in metadata",
     )
     return parser.parse_args()
-
-
-def extract_flow_feature_matrix(flows: list[FlowRecord], feature_names: list[str]) -> np.ndarray:
-    """Extract raw 2D feature matrix from a list of FlowRecord instances."""
-    n_flows = len(flows)
-    n_feats = len(feature_names)
-    matrix = np.zeros((n_flows, n_feats), dtype=np.float32)
-
-    for i, flow in enumerate(flows):
-        for j, feat_name in enumerate(feature_names):
-            matrix[i, j] = flow.features.get(feat_name, 0.0)
-
-    return matrix
 
 
 def generate_markdown_report(
@@ -258,23 +248,27 @@ def main() -> int:
     if not ckpt_path.exists():
         raise FileNotFoundError(f"DQN checkpoint not found: {ckpt_path}")
 
-    agent = DqnAgent(input_dim=6, action_mode=ActionSpaceMode.FOUR_ACTION)
-    agent_ckpt = DqnAgent(input_dim=6, action_mode=ActionSpaceMode.FOUR_ACTION)
-    agent.checkpoint_manager.load_checkpoint(ckpt_path, agent.online_net)
-    print(f"      DQN agent checkpoint loaded from {ckpt_path.name}")
+    mode_str = config.get("audit_configuration", {}).get("action_mode", "4-action")
+    action_mode = ActionSpaceMode.FOUR_ACTION if "4" in mode_str else ActionSpaceMode.THREE_ACTION
+    agent = DqnAgent(input_dim=6, action_mode=action_mode)
+    cm = CheckpointManager(checkpoint_dir=ckpt_path.parent)
+    cm.load_checkpoint(ckpt_path, agent.online_net)
+    print(f"      DQN agent checkpoint loaded from {ckpt_path.name} (mode: {action_mode.value})")
 
-    # 4. Load validation flows
-    print("\n[3/5] Loading D_pol_val flows for audit evaluation...")
+    # 4. Load validation flows and feature matrix
+    print("\n[3/5] Loading D_pol_val flows and feature matrix for audit evaluation...")
     val_flows = load_or_build_policy_flows("D_pol_val", seed=args.seed)
+    val_features_mat = load_or_build_policy_features("D_pol_val", seed=args.seed)
     if args.sample_limit:
         print(f"      Applying sample limit: {args.sample_limit:,} flows")
         val_flows = val_flows[:args.sample_limit]
-    print(f"      D_pol_val flows loaded: {len(val_flows):,}")
+        val_features_mat = val_features_mat[:args.sample_limit]
+    print(f"      D_pol_val flows loaded: {len(val_flows):,}, features shape: {val_features_mat.shape}")
 
     # 5. Execute simulation run with DQN policy
     print("\n[4/5] Executing response simulation with DQN candidate policy...")
     cost_engine = ResearchCostEngine(regime=CostRegime.STANDARD_ENTERPRISE)
-    safety_gate = DeterministicSafetyGate(action_mode=ActionSpaceMode.FOUR_ACTION)
+    safety_gate = DeterministicSafetyGate(action_mode=action_mode)
     state_builder = StateBuilder()
 
     sim = OfflineResponseSimulator(
@@ -282,7 +276,7 @@ def main() -> int:
         cost_engine=cost_engine,
         safety_gate=safety_gate,
         state_builder=state_builder,
-        action_mode=ActionSpaceMode.FOUR_ACTION,
+        action_mode=action_mode,
         random_seed=args.seed,
     )
 
@@ -292,7 +286,6 @@ def main() -> int:
 
     # 6. Run Explainability Auditor
     print("\n[5/5] Generating dual-layer Action Decision Audit Cards (100% intervention coverage)...")
-    flow_features_mat = extract_flow_feature_matrix(val_flows, feature_names)
     host_ids = [f.host_id for f in val_flows]
 
     auditor = AutonomousResponseAuditor(
@@ -304,7 +297,7 @@ def main() -> int:
 
     audit_cards, audit_metrics = auditor.audit_simulation_run(
         step_records=summary.step_logs,
-        flow_features=flow_features_mat,
+        flow_features=val_features_mat,
         host_ids=host_ids,
         audit_only_interventions=config["audit_configuration"].get("audit_only_interventions", True),
     )

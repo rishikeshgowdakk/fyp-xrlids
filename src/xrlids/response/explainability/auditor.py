@@ -61,23 +61,27 @@ class AutonomousResponseAuditor:
         self,
         feature_vector: np.ndarray,
         detector_score: float,
+        precomputed_shap: np.ndarray | None = None,
     ) -> PerceptionLayerAttribution:
         """Compute TreeSHAP local feature attribution for a single flow."""
         feat_2d = np.atleast_2d(feature_vector)
-        # Compute shap values
-        shap_values = self.tree_explainer.shap_values(feat_2d)
-
-        # For binary classification, shap_values can be (N, M, 2) or list of 2 arrays of (N, M)
-        if isinstance(shap_values, list):
-            # Attack class is index 1
-            att_shap = shap_values[1][0]
-        elif isinstance(shap_values, np.ndarray):
-            if shap_values.ndim == 3:
-                att_shap = shap_values[0, :, 1]
-            else:
-                att_shap = shap_values[0]
+        if precomputed_shap is not None:
+            att_shap = precomputed_shap
         else:
-            att_shap = np.zeros(len(self.feature_names))
+            # Compute shap values
+            shap_values = self.tree_explainer.shap_values(feat_2d)
+
+            # For binary classification, shap_values can be (N, M, 2) or list of 2 arrays of (N, M)
+            if isinstance(shap_values, list):
+                # Attack class is index 1
+                att_shap = shap_values[1][0]
+            elif isinstance(shap_values, np.ndarray):
+                if shap_values.ndim == 3:
+                    att_shap = shap_values[0, :, 1]
+                else:
+                    att_shap = shap_values[0]
+            else:
+                att_shap = np.zeros(len(self.feature_names))
 
         # Rank features by absolute SHAP attribution
         ranked_indices = np.argsort(np.abs(att_shap))[::-1][: self.top_k_features]
@@ -131,19 +135,21 @@ class AutonomousResponseAuditor:
         step_record: StepRecord,
         raw_features: np.ndarray | None = None,
         host_id: str | None = None,
+        precomputed_shap: np.ndarray | None = None,
     ) -> ActionAuditCard:
         """Create complete ActionAuditCard for a single simulation step."""
         ts = datetime.now(timezone.utc).isoformat()
         flow_id = step_record.flow_id
         target_host = host_id or "host-standard"
 
-        prop_act = step_record.proposed_action.value
-        enf_act = step_record.enforced_action.value
+        prop_act = step_record.proposed_action.name if hasattr(step_record.proposed_action, "name") else str(step_record.proposed_action)
+        enf_act = step_record.enforced_action.name if hasattr(step_record.enforced_action, "name") else str(step_record.enforced_action)
 
         # Layer 1: Perception
         score = getattr(step_record, "attack_score", getattr(step_record, "detector_score", 0.0))
-        if raw_features is not None:
-            perception = self.explain_perception(raw_features, score)
+        if raw_features is not None or precomputed_shap is not None:
+            feat_arr = raw_features if raw_features is not None else np.zeros(len(self.feature_names))
+            perception = self.explain_perception(feat_arr, score, precomputed_shap=precomputed_shap)
         else:
             perception = PerceptionLayerAttribution(
                 detector_score=score,
@@ -209,24 +215,47 @@ class AutonomousResponseAuditor:
         overruled_count = 0
         total_margin = 0.0
 
+        # Identify all target steps to audit
+        target_step_indices: list[int] = []
         for idx, rec in enumerate(step_records):
             is_intervention = rec.enforced_action != Action.ALLOW
             if is_intervention:
                 non_allow_count += 1
-
             if rec.overridden:
                 overruled_count += 1
 
             if audit_only_interventions and not is_intervention:
                 continue
 
-            if max_cards is not None and len(cards) >= max_cards:
-                continue
+            target_step_indices.append(idx)
 
+        # Apply card limit if specified
+        steps_to_audit = target_step_indices
+        if max_cards is not None and len(steps_to_audit) > max_cards:
+            steps_to_audit = steps_to_audit[:max_cards]
+
+        # Batched TreeSHAP precomputation across all audited steps
+        precomputed_shaps: dict[int, np.ndarray] = {}
+        if flow_features is not None and len(steps_to_audit) > 0:
+            batch_X = flow_features[steps_to_audit]
+            raw_shap = self.tree_explainer.shap_values(batch_X)
+            if isinstance(raw_shap, list):
+                attack_shap_mat = raw_shap[1]
+            elif isinstance(raw_shap, np.ndarray) and raw_shap.ndim == 3:
+                attack_shap_mat = raw_shap[:, :, 1]
+            else:
+                attack_shap_mat = np.asarray(raw_shap)
+
+            for local_idx, step_idx in enumerate(steps_to_audit):
+                precomputed_shaps[step_idx] = attack_shap_mat[local_idx]
+
+        for idx in steps_to_audit:
+            rec = step_records[idx]
             feats = flow_features[idx] if flow_features is not None and idx < len(flow_features) else None
             host = host_ids[idx] if host_ids is not None and idx < len(host_ids) else None
+            p_shap = precomputed_shaps.get(idx)
 
-            card = self.audit_step(rec, raw_features=feats, host_id=host)
+            card = self.audit_step(rec, raw_features=feats, host_id=host, precomputed_shap=p_shap)
             cards.append(card)
             total_margin += card.policy_layer.decision_margin
 
