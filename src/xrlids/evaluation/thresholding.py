@@ -24,6 +24,8 @@ from xrlids.evaluation.metrics import binary_metrics
 
 DECISION_ID = "D-003"
 DECISION_STATUS = "OPEN - USER DECISION REQUIRED"
+RESEARCH_BASELINE_THRESHOLD: float = 0.50
+OPERATIONAL_THRESHOLD: float = 0.40
 
 OBJECTIVES: tuple[str, ...] = (
     "max_f1",
