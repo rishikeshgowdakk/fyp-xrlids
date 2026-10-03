@@ -1,0 +1,93 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P2C-SENSITIVITY-001",
+    "git_commit": "021c4d3466911d9018ffa5b636de3b534879906f",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": 42,
+    "created_at": "2026-10-03T20:09:27.474560+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "021c4d3466911d9018ffa5b636de3b534879906f",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "sweeps": [
+    {
+      "parameter_name": "Action Cooldown Steps",
+      "parameter_value": "15 steps (15.0s)",
+      "total_overrides": 12582,
+      "override_rate": 0.0883902603515378,
+      "mean_cost_per_flow": 2.3575513186180155,
+      "action_chattering_index": 0.11147564017000948,
+      "false_quarantine_rate": 0.0027658953082856604,
+      "interpretation": "Cooldown window of 15 steps prevents rapid de-escalation."
+    },
+    {
+      "parameter_name": "Action Cooldown Steps",
+      "parameter_value": "30 steps (30.0s)",
+      "total_overrides": 12582,
+      "override_rate": 0.0883902603515378,
+      "mean_cost_per_flow": 2.3575513186180155,
+      "action_chattering_index": 0.11147564017000948,
+      "false_quarantine_rate": 0.0027658953082856604,
+      "interpretation": "Cooldown window of 30 steps prevents rapid de-escalation."
+    },
+    {
+      "parameter_name": "Action Cooldown Steps",
+      "parameter_value": "60 steps (60.0s)",
+      "total_overrides": 12582,
+      "override_rate": 0.0883902603515378,
+      "mean_cost_per_flow": 2.3575513186180155,
+      "action_chattering_index": 0.11147564017000948,
+      "false_quarantine_rate": 0.0027658953082856604,
+      "interpretation": "Cooldown window of 60 steps prevents rapid de-escalation."
+    },
+    {
+      "parameter_name": "Blast Radius Threshold",
+      "parameter_value": "2.0% max quarantined endpoints",
+      "total_overrides": 16320,
+      "override_rate": 0.11465021848172763,
+      "mean_cost_per_flow": 2.263821954954828,
+      "action_chattering_index": 0.06385190909410236,
+      "false_quarantine_rate": 0.0010651273857994468,
+      "interpretation": "Circuit breaker clamps isolation when active quarantines reach 2.0%."
+    },
+    {
+      "parameter_name": "Blast Radius Threshold",
+      "parameter_value": "5.0% max quarantined endpoints",
+      "total_overrides": 12582,
+      "override_rate": 0.0883902603515378,
+      "mean_cost_per_flow": 2.3575513186180155,
+      "action_chattering_index": 0.11147564017000948,
+      "false_quarantine_rate": 0.0027658953082856604,
+      "interpretation": "Circuit breaker clamps isolation when active quarantines reach 5.0%."
+    },
+    {
+      "parameter_name": "Blast Radius Threshold",
+      "parameter_value": "10.0% max quarantined endpoints",
+      "total_overrides": 5841,
+      "override_rate": 0.04103381900439774,
+      "mean_cost_per_flow": 2.5296741741952706,
+      "action_chattering_index": 0.19719695106958446,
+      "false_quarantine_rate": 0.0059183287807727325,
+      "interpretation": "Circuit breaker clamps isolation when active quarantines reach 10.0%."
+    }
+  ]
+}

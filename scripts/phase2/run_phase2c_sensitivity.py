@@ -129,6 +129,13 @@ def run_ablation_training(
         random_seed=seed,
     )
 
+    best_pt = checkpoint_dir / "best_model.pt"
+    if best_pt.exists():
+        cm = CheckpointManager(checkpoint_dir=checkpoint_dir)
+        cm.load_checkpoint(best_pt, agent.online_net)
+        print(f"      Reusing trained ablation checkpoint: {best_pt}")
+        return agent, {"status": "reused_checkpoint"}
+
     trainer = DqnTrainer(
         agent=agent,
         train_flows=train_flows,
@@ -464,9 +471,8 @@ def main() -> int:
     for cool_steps in config["safety_gate_sensitivity"]["cooldown_steps_sweep"]:
         sg = DeterministicSafetyGate(
             action_mode=ActionSpaceMode.FOUR_ACTION,
-            action_cooldown_steps=cool_steps,
-            step_duration_seconds=1.0,
-            cooldown_seconds=float(cool_steps),
+            cooldown_steps=cool_steps,
+            step_duration_s=1.0,
         )
         res = evaluate_agent_custom(agent_4, val_flows, std_cost_engine, sg, seed=args.seed)
         tot_overrides = sum(res.override_counts.values())

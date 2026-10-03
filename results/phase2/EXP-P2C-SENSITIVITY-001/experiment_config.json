@@ -1,0 +1,117 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P2C-SENSITIVITY-001",
+    "git_commit": "021c4d3466911d9018ffa5b636de3b534879906f",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": 42,
+    "created_at": "2026-10-03T20:09:27.474560+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "021c4d3466911d9018ffa5b636de3b534879906f",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "config_yaml": {
+    "experiment": {
+      "id": "EXP-P2C-SENSITIVITY-001",
+      "phase": "2C",
+      "research_question": "RQ7_ablation_sensitivity",
+      "description": "Phase 2C comprehensive sensitivity and ablation study investigating cost regime shifts, state vector component importance (6 ablations), action-space dimensionality (3 vs 4 actions), and downstream safety gate parameter sensitivity.\n",
+      "status": "ready_for_execution"
+    },
+    "parent_dqn_experiment": {
+      "id": "EXP-P2B-DQN-001"
+    },
+    "cost_regimes": [
+      "standard_enterprise",
+      "high_availability",
+      "high_security_enclave"
+    ],
+    "state_ablations": [
+      {
+        "id": "full_state",
+        "name": "Full 6D Causal State",
+        "disabled_dimensions": []
+      },
+      {
+        "id": "ablate_current_score",
+        "name": "Ablate S_t (Dimension 0)",
+        "disabled_dimensions": [
+          0
+        ]
+      },
+      {
+        "id": "ablate_score_trajectory",
+        "name": "Ablate Delta S_t (Dimension 1)",
+        "disabled_dimensions": [
+          1
+        ]
+      },
+      {
+        "id": "ablate_alert_density",
+        "name": "Ablate N_alert (Dimension 2)",
+        "disabled_dimensions": [
+          2
+        ]
+      },
+      {
+        "id": "ablate_previous_action",
+        "name": "Ablate a_(t-1) (Dimension 3)",
+        "disabled_dimensions": [
+          3
+        ]
+      },
+      {
+        "id": "ablate_cooldown_state",
+        "name": "Ablate c_t (Dimension 4)",
+        "disabled_dimensions": [
+          4
+        ]
+      },
+      {
+        "id": "ablate_volumetric_context",
+        "name": "Ablate v_t (Dimension 5)",
+        "disabled_dimensions": [
+          5
+        ]
+      }
+    ],
+    "safety_gate_sensitivity": {
+      "cooldown_steps_sweep": [
+        15,
+        30,
+        60
+      ],
+      "blast_radius_sweep": [
+        0.02,
+        0.05,
+        0.1
+      ]
+    },
+    "training": {
+      "ablation_training_steps": 10000,
+      "batch_size": 64,
+      "learning_rate": 0.001,
+      "gamma": 0.95,
+      "seed": 42
+    }
+  },
+  "git_commit": "021c4d3466911d9018ffa5b636de3b534879906f"
+}

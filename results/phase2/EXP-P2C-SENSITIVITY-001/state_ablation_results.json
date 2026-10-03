@@ -1,0 +1,136 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P2C-SENSITIVITY-001",
+    "git_commit": "021c4d3466911d9018ffa5b636de3b534879906f",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": 42,
+    "created_at": "2026-10-03T20:09:27.474560+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "021c4d3466911d9018ffa5b636de3b534879906f",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "ablations": [
+    {
+      "condition_id": "full_state",
+      "condition_name": "Full 6D Causal State",
+      "disabled_dimensions": [],
+      "total_cost": 348930.0,
+      "mean_cost_per_flow": 2.4512806822812023,
+      "false_quarantine_rate": 0.0052826882440859665,
+      "business_availability_score_pct": 88.21745778144273,
+      "action_chattering_index": 0.11357617057149882,
+      "mitigation_delay_steps": 26.865115621909293,
+      "contained_attacks": 12049,
+      "uncontained_attacks": 13879
+    },
+    {
+      "condition_id": "ablate_current_score",
+      "condition_name": "Ablate S_t (Dimension 0)",
+      "disabled_dimensions": [
+        0
+      ],
+      "total_cost": 354454.0,
+      "mean_cost_per_flow": 2.4900875331937673,
+      "false_quarantine_rate": 0.004836021921008779,
+      "business_availability_score_pct": 96.15093885825216,
+      "action_chattering_index": 0.11245916611050616,
+      "mitigation_delay_steps": 28.506475768850375,
+      "contained_attacks": 11049,
+      "uncontained_attacks": 14879
+    },
+    {
+      "condition_id": "ablate_score_trajectory",
+      "condition_name": "Ablate Delta S_t (Dimension 1)",
+      "disabled_dimensions": [
+        1
+      ],
+      "total_cost": 354135.0,
+      "mean_cost_per_flow": 2.487846514830062,
+      "false_quarantine_rate": 0.004062945592605954,
+      "business_availability_score_pct": 97.79071964816437,
+      "action_chattering_index": 0.10218834521760511,
+      "mitigation_delay_steps": 30.20849620873169,
+      "contained_attacks": 10319,
+      "uncontained_attacks": 15609
+    },
+    {
+      "condition_id": "ablate_alert_density",
+      "condition_name": "Ablate N_alert (Dimension 2)",
+      "disabled_dimensions": [
+        2
+      ],
+      "total_cost": 355862.0,
+      "mean_cost_per_flow": 2.499978924592191,
+      "false_quarantine_rate": 0.002662818464498617,
+      "business_availability_score_pct": 98.51569344946658,
+      "action_chattering_index": 0.11207278091959676,
+      "mitigation_delay_steps": 28.78561672867706,
+      "contained_attacks": 11034,
+      "uncontained_attacks": 14894
+    },
+    {
+      "condition_id": "ablate_previous_action",
+      "condition_name": "Ablate a_(t-1) (Dimension 3)",
+      "disabled_dimensions": [
+        3
+      ],
+      "total_cost": 372660.0,
+      "mean_cost_per_flow": 2.617987158051508,
+      "false_quarantine_rate": 0.003702176639351303,
+      "business_availability_score_pct": 98.20903983920012,
+      "action_chattering_index": 0.09251466507429133,
+      "mitigation_delay_steps": 35.522064710592005,
+      "contained_attacks": 6443,
+      "uncontained_attacks": 19485
+    },
+    {
+      "condition_id": "ablate_cooldown_state",
+      "condition_name": "Ablate c_t (Dimension 4)",
+      "disabled_dimensions": [
+        4
+      ],
+      "total_cost": 348930.0,
+      "mean_cost_per_flow": 2.4512806822812023,
+      "false_quarantine_rate": 0.0052826882440859665,
+      "business_availability_score_pct": 88.21745778144273,
+      "action_chattering_index": 0.11357617057149882,
+      "mitigation_delay_steps": 26.865115621909293,
+      "contained_attacks": 12049,
+      "uncontained_attacks": 13879
+    },
+    {
+      "condition_id": "ablate_volumetric_context",
+      "condition_name": "Ablate v_t (Dimension 5)",
+      "disabled_dimensions": [
+        5
+      ],
+      "total_cost": 344995.0,
+      "mean_cost_per_flow": 2.4236367723715455,
+      "false_quarantine_rate": 0.004475252967754128,
+      "business_availability_score_pct": 94.50772217354705,
+      "action_chattering_index": 0.11436299132389617,
+      "mitigation_delay_steps": 27.80629209249753,
+      "contained_attacks": 11541,
+      "uncontained_attacks": 14387
+    }
+  ]
+}
