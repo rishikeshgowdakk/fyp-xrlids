@@ -44,7 +44,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Dataset audit module | ✅ | `src/xrlids/datasets/audit.py` + tests |
 | CLI | ✅ | `src/xrlids/cli.py` |
 | Report generation from artifacts | ✅ | `scripts/phase1/generate_reports.py` (dynamic git hashes, live manifests) |
-| Test suite | ✅ | 217 unit and integration tests passing (0 failures); Phase 1 freeze verification: 216 tests |
+| Test suite | ✅ | 257 unit and integration tests passing (0 failures); Phase 2A baseline ladder verified |
 | SHAP explainability module | ✅ | `src/xrlids/explainability/shap_analysis.py` + tests |
 | Cross-dataset transfer module | ✅ | `src/xrlids/experiments/transfer.py` + `scripts/phase1/run_transfer.py` + configs (6 directions executed) |
 | Pure-Python PCAP reader / writer | ✅ | `src/xrlids/demo/pcap.py` (zero external C-dependencies) + tests |
@@ -52,6 +52,8 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Live Feature Parity Verifier | ✅ | `src/xrlids/demo/extractor.py` + `tests/integration/test_feature_parity.py` ($\text{atol} \le 10^{-4}$) |
 | PCAP Replay Demonstration Engine | ✅ | `src/xrlids/demo/replay.py` + `scripts/demo/run_replay_demo.py` + `results/demo/` |
 | Safe Observational Live Lab Monitor | ✅ | `src/xrlids/demo/live_lab.py` (alert-only, zero network mutation) + tests |
+| Autonomous Response Simulation & Safety Gate | ✅ | `src/xrlids/response/` (causal 6D state, deterministic safety gate, consequence engine, research cost matrix) + tests |
+| Autonomous Response Baseline Ladder (Phase 2A) | ✅ | `src/xrlids/response/baselines.py`, `runner.py`, `scripts/phase2/run_phase2a_baselines.py` + tests |
 
 ## Empirical status
 
@@ -71,6 +73,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Calibration (real data) | ✅ EMPIRICALLY OBSERVED | Platt scaling evaluated on CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15 models |
 | Threshold objective | ✅ FRAMEWORK RESOLVED | D-003 governance framework resolved; operational threshold selection remains open. Research reporting baseline frozen at $\tau = 0.50$; $\tau_{\text{ops}} = 0.40$ designated strictly as proposed Phase 2 operational candidate pending deployment loss evidence |
 | Live Replay & Demonstration Foundation | ✅ EMPIRICALLY OBSERVED & VERIFIED | End-to-end packet replay, flow accumulation, R10 feature parity ($\text{atol} \le 10^{-4}$), RF model inference, and demonstration artifacts verified in `results/demo/` |
+| Autonomous Response Baseline Ladder (Phase 2A) | ✅ EMPIRICALLY OBSERVED & VERIFIED | Evaluated across 24 configurations (4 baselines x 3 cost regimes x 2 action modes) on 142,346 $D_{\text{pol\_val}}$ flows (`EXP-P2A-BASELINES-001`, B=1000 bootstrap tests); D-003 preserved, D_pol_test strictly untouched |
 
 ## Research decisions status
 
@@ -92,4 +95,6 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 - No claims of three-seed empirical averaging; full multi-file experiments reflect single-seed (seed=42) execution.
 - Live lab monitor is strictly observational/alert-only; no system packet dropping, firewall mutation, or iptables manipulation is performed.
 - Auxiliary event list `UNSW-NB15_LIST_EVENTS.csv` is absent (`DATA_NOT_AVAILABLE`); modeling relies solely on the two verified train/test partitions.
+- No reinforcement learning or DQN algorithms are implemented in Phase 2A; Phase 2A establishes strictly the deterministic baseline ladder.
+- No real system firewall, socket, or network mutations are performed; all response consequences and states are entirely simulated offline.
 - `CLAIMS_REGISTRY.md` records only scoped, traceable empirical claims directly supported by committed `results/` artifacts.
