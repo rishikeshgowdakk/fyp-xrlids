@@ -44,7 +44,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Dataset audit module | ✅ | `src/xrlids/datasets/audit.py` + tests |
 | CLI | ✅ | `src/xrlids/cli.py` |
 | Report generation from artifacts | ✅ | `scripts/phase1/generate_reports.py` (dynamic git hashes, live manifests) |
-| Test suite | ✅ | 209 unit and integration tests passing (0 failures) |
+| Test suite | ✅ | 214 unit and integration tests passing (0 failures) |
 | SHAP explainability module | ✅ | `src/xrlids/explainability/shap_analysis.py` + tests |
 | Cross-dataset transfer module | ✅ | `src/xrlids/experiments/transfer.py` + `scripts/phase1/run_transfer.py` + configs (6 directions executed) |
 | Pure-Python PCAP reader / writer | ✅ | `src/xrlids/demo/pcap.py` (zero external C-dependencies) + tests |
@@ -69,7 +69,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Cross-dataset transfer | ✅ EMPIRICALLY OBSERVED | Executed across all 6 directions: Primary R10 (CIC ↔ CSE) and Auxiliary R4 (UNSW ↔ CIC, UNSW ↔ CSE); severe domain degradation demonstrated (ΔF1 -0.52 to -0.95), answering RQ5 |
 | SHAP (real data) | ✅ EMPIRICALLY OBSERVED | TreeSHAP evaluated on CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15 Random Forest models |
 | Calibration (real data) | ✅ EMPIRICALLY OBSERVED | Platt scaling evaluated on CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15 models |
-| Threshold objective | ✅ DECIDED (TWO-TIER CONTRACT) | D-003 resolved: Research reporting baseline fixed at $\tau = 0.50$; operational autonomous response cost-sensitive threshold frozen at $\tau_{\text{ops}} = 0.40$ (improving stealth attack recall while preserving $<1.2\%$ false alarms) |
+| Threshold objective | ✅ DECIDED (TWO-TIER FRAMEWORK) | D-003 resolved: Research reporting baseline frozen at $\tau = 0.50$; operational autonomous response threshold $\tau_{\text{ops}} = 0.40$ designated as proposed Phase 2 candidate pending deployment cost evidence |
 | Live Replay & Demonstration Foundation | ✅ EMPIRICALLY OBSERVED & VERIFIED | End-to-end packet replay, flow accumulation, R10 feature parity ($\text{atol} \le 10^{-4}$), RF model inference, and demonstration artifacts verified in `results/demo/` |
 
 ## Research decisions status
@@ -78,7 +78,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | --- | --- | --- |
 | D-001 | Normalization & Cleaning contract | RESOLVED: Canonical column contract established with preserved raw provenance |
 | D-002 | Feature contract R10/R15/R20 | RESOLVED: R10 frozen as Main Cross-Dataset 10-Feature Contract for CIC-IDS2017/CSE-CIC-IDS2018; UNSW-NB15 blocked on 6 missing features (auxiliary fallback) |
-| D-003 | Threshold objective | RESOLVED: Two-tier threshold contract (Research reporting baseline $\tau = 0.50$; Operational autonomous response policy $\tau_{\text{ops}} = 0.40$ / continuous calibrated probability scoring) |
+| D-003 | Threshold objective | RESOLVED: Two-tier framework (Research reporting baseline $\tau = 0.50$ frozen; Operational policy $\tau_{\text{ops}} = 0.40$ proposed candidate / continuous posterior risk scoring) |
 | D-004 | Dataset acquisition | RESOLVED: All 20 modeling files acquired, verified, and audited |
 | D-005 | Cross-dataset normalisation | RESOLVED: Strict source-only preprocessing fit (zero target data leakage) under frozen semantic contracts (R10 for CIC ↔ CSE, R4 for UNSW) |
 | D-006 | Flow timeout / completion policy | RESOLVED: Option D (Hybrid flow completion policy: TCP FIN/RST completion, 120.0s idle timeout fallback) |

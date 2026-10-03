@@ -36,12 +36,12 @@ Status values: `OPEN` (awaiting user) · `DECIDED` · `SUPERSEDED`
 
 ## D-003 — Primary operational objective for threshold selection
 
-- **Status:** **DECIDED (TWO-TIER THRESHOLD CONTRACT)**
+- **Status:** **DECIDED (RESEARCH BASELINE FROZEN AT 0.50; OPERATIONAL CANDIDATE PENDING PHASE 2 COST EVIDENCE)**
 - **Date decided:** 2026-10-03
-- **Evidence gathered:** `threshold_candidates.json` evaluated across all benchmark models; cost-sensitive curve analysis ($C_{\text{FP}} : C_{\text{FN}} \in \{1:1, 1:5, 1:10, 1:50\}$); per-attack error rates (Infiltration recall 10.70%, Web attacks 2.78% at $\tau=0.50$).
-- **Decision:** Establish a two-tier operational threshold architecture:
-  1. **Research Reporting Baseline ($\tau = 0.50$)**: Preserved across all academic benchmark tables, paired bootstrap hypothesis tests, and final reports to ensure direct comparability with published IDS literature.
-  2. **Operational Autonomous Response Policy ($\tau_{\text{ops}} = 0.40$, Cost-Sensitive Parameterization)**: For Phase 2 autonomous response deployment under asymmetric operational loss ($C_{\text{FN}} \ge 5 \cdot C_{\text{FP}}$), the operational threshold shifts to $\tau=0.40$, improving stealth attack recall while maintaining benign false alarms below 1.2%. Furthermore, the Phase 2 RL agent receives continuous calibrated posterior probabilities $P(\text{attack} \mid x, s)$ rather than hard binary outputs, enabling dynamic cost-weighted response.
+- **Evidence gathered:** `results/experiments/EXP-P1-CIC2017-R10-001/threshold_candidates.json` evaluated across validation data candidates: max-F1 ($\tau=0.50$, F1=0.9743), min-FPR subject to recall $\ge 0.95$ ($\tau=0.75$, FPR=0.0038), min-FNR subject to FPR $\le 0.01$ ($\tau=0.47$, FNR=0.0125, FPR=0.0097), and cost-sensitive candidate with $C_{\text{FP}}=1, C_{\text{FN}}=10$ ($\tau=0.20$); `decision_status` remains `OPEN - USER DECISION REQUIRED` in committed artifacts; per-attack family error analysis reveals stealth attack blindspots (Infiltration recall 10.70%, Web attacks 2.78% at $\tau=0.50$).
+- **Decision:** Establish a two-tier threshold governance framework:
+  1. **Research Reporting Baseline ($\tau = 0.50$)**: Formally frozen across all academic benchmark tables, paired bootstrap hypothesis tests, cross-dataset transfer evaluations, and final reports to ensure direct comparability with published IDS literature.
+  2. **Operational Autonomous Response Policy (Proposed Candidate $\tau_{\text{ops}} = 0.40$, Pending Phase 2 Deployment Cost Evidence)**: Proposed as an operational policy candidate under asymmetric operational loss ($C_{\text{FN}} \ge 5 \cdot C_{\text{FP}}$) to improve stealth attack recall. Note: $\tau_{\text{ops}}=0.40$ is a proposed operational policy candidate, NOT an empirically selected validation optimum (the validation cost-sensitive sweep with $C_{\text{FP}}=1, C_{\text{FN}}=10$ yielded $\tau=0.20$, and selection remains open pending real-world deployment loss matrices). Model outputs are treated as posterior attack score estimates; Phase 2 RL agents will receive continuous risk scores $S \in [0, 1]$ rather than uncalibrated probabilities or hard binary outputs.
 - **Artifacts:** `src/xrlids/evaluation/thresholding.py`, `results/experiments/*/threshold_candidates.json`.
 
 ---

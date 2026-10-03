@@ -126,17 +126,21 @@ def demo_ground_truth_resolver(flow: Flow) -> int | None:
 
 
 def format_flow_event_console(ev: FlowPredictionEvent) -> None:
-    """Print nicely formatted streaming flow event line."""
-    v_color = "\033[92m" if ev.verdict == "CORRECT" else ("\033[91m" if ev.verdict == "INCORRECT" else "\033[93m")
+    """Print nicely formatted streaming flow event line showing dual-threshold predictions."""
+    v_res_col = "\033[92m" if ev.verdict_research == "CORRECT" else ("\033[91m" if ev.verdict_research == "INCORRECT" else "\033[93m")
+    v_ops_col = "\033[92m" if ev.verdict_operational == "CORRECT" else ("\033[91m" if ev.verdict_operational == "INCORRECT" else "\033[93m")
     reset = "\033[0m"
-    p_color = "\033[91m" if ev.prediction_label == "ATTACK" else "\033[92m"
+
+    p_res_col = "\033[91m" if ev.pred_research_label == "ATTACK" else "\033[92m"
+    p_ops_col = "\033[91m" if ev.pred_operational_label == "ATTACK" else "\033[92m"
 
     print(
-        f"Flow #{ev.flow_id:<3} | {ev.protocol_name:<4} | "
+        f"Flow #{ev.flow_id:<2} | {ev.protocol_name:<4} | "
         f"{ev.src_endpoint:<21} -> {ev.dst_endpoint:<21} | "
-        f"Pkts: {ev.packet_count:<3} | Dur: {ev.duration_ms:>7.1f}ms | "
-        f"Pred: {p_color}{ev.prediction_label:<6}{reset} ({ev.confidence:.2f}) | "
-        f"Truth: {ev.ground_truth_label:<6} | {v_color}{ev.verdict}{reset}"
+        f"Pkts: {ev.packet_count:<2} | Dur: {ev.duration_ms:>6.1f}ms | "
+        f"Score: {ev.attack_score:.4f} | Truth: {ev.ground_truth_label:<6} | "
+        f"Res (0.50): {p_res_col}{ev.pred_research_label:<6}{reset} ({v_res_col}{ev.verdict_research}{reset}) | "
+        f"Ops (0.40): {p_ops_col}{ev.pred_operational_label:<6}{reset} ({v_ops_col}{ev.verdict_operational}{reset})"
     )
 
 
@@ -145,7 +149,8 @@ def main() -> int:
     parser.add_argument("--pcap", type=str, default="data/demo/sample_traffic.pcap", help="Input PCAP file path")
     parser.add_argument("--model-dir", type=str, default="results/experiments/EXP-P1-CIC2017-R10-001", help="Model directory")
     parser.add_argument("--output-dir", type=str, default="results/demo", help="Output artifact directory")
-    parser.add_argument("--threshold", type=float, default=0.50, help="Classification decision threshold (D-003)")
+    parser.add_argument("--research-threshold", type=float, default=0.50, help="Research baseline decision threshold (D-003)")
+    parser.add_argument("--operational-threshold", type=float, default=0.40, help="Proposed operational candidate threshold (D-003)")
     parser.add_argument("--generate-sample", action="store_true", help="Force regenerate synthetic sample PCAP")
 
     args = parser.parse_args()
@@ -157,10 +162,11 @@ def main() -> int:
     print("=" * 80)
     print("XRL-IDARS — Reproducible Live Inference & Replay Demonstration")
     print("=" * 80)
-    print(f"Target PCAP:        {pcap_path}")
-    print(f"Model Directory:    {args.model_dir}")
-    print(f"Decision Threshold: {args.threshold} (D-003 Baseline Contract)")
-    print(f"Output Directory:   {args.output_dir}")
+    print(f"Target PCAP:            {pcap_path}")
+    print(f"Model Directory:        {args.model_dir}")
+    print(f"Research Threshold:     {args.research_threshold} (Frozen Baseline for Academic Comparison)")
+    print(f"Operational Candidate:  {args.operational_threshold} (Proposed Phase 2 Operational Parameter)")
+    print(f"Output Directory:       {args.output_dir}")
     print("-" * 80)
     print("Streaming flow classification in progress...")
     print("-" * 80)
@@ -168,11 +174,16 @@ def main() -> int:
     try:
         engine = ReplayEngine(
             model_path=args.model_dir if Path(args.model_dir).exists() else None,
-            threshold=args.threshold,
+            research_threshold=args.research_threshold,
+            operational_candidate_threshold=args.operational_threshold,
         )
     except Exception as exc:
         print(f"Warning: Could not load model from {args.model_dir} ({exc}). Using heuristic fallback.")
-        engine = ReplayEngine(model=None, threshold=args.threshold)
+        engine = ReplayEngine(
+            model=None,
+            research_threshold=args.research_threshold,
+            operational_candidate_threshold=args.operational_threshold,
+        )
 
     summary = engine.replay_pcap(
         pcap_file=pcap_path,
@@ -182,8 +193,10 @@ def main() -> int:
 
     json_path, md_path = save_demo_artifacts(summary, output_dir=args.output_dir)
 
-    cm = summary.confusion_matrix
-    m = summary.metrics
+    cm_r = summary.confusion_matrix_research
+    m_r = summary.metrics_research
+    cm_o = summary.confusion_matrix_operational
+    m_o = summary.metrics_operational
 
     print("-" * 80)
     print("DEMONSTRATION EXECUTION COMPLETE")
@@ -191,12 +204,15 @@ def main() -> int:
     print(f"Packets Processed: {summary.total_packets}")
     print(f"Completed Flows:   {summary.total_flows}")
     print(f"Evaluated Flows:   {summary.evaluated_flows}")
-    print(f"Confusion Matrix:  TP={cm['tp']}, FP={cm['fp']}, TN={cm['tn']}, FN={cm['fn']}")
-    print(f"Accuracy:          {m['accuracy'] * 100:.2f}%")
-    print(f"Precision:         {m['precision'] * 100:.2f}%")
-    print(f"Recall (TPR):      {m['recall'] * 100:.2f}%")
-    print(f"F1-Score:          {m['f1']:.4f}")
-    print(f"False Alarm (FPR): {m['fpr'] * 100:.2f}%")
+    print("\n--- Research Baseline Threshold (tau = 0.50) ---")
+    print(f"Confusion Matrix:  TP={cm_r['tp']}, FP={cm_r['fp']}, TN={cm_r['tn']}, FN={cm_r['fn']}")
+    print(f"Accuracy:          {m_r['accuracy'] * 100:.2f}% | Precision: {m_r['precision'] * 100:.2f}% | Recall: {m_r['recall'] * 100:.2f}% | F1: {m_r['f1']:.4f}")
+    print(f"False Alarm (FPR): {m_r['fpr'] * 100:.2f}% | Miss Rate (FNR): {m_r['fnr'] * 100:.2f}%")
+    print("\n--- Proposed Phase 2 Operational Candidate (tau_ops = 0.40) ---")
+    print(f"Confusion Matrix:  TP={cm_o['tp']}, FP={cm_o['fp']}, TN={cm_o['tn']}, FN={cm_o['fn']}")
+    print(f"Accuracy:          {m_o['accuracy'] * 100:.2f}% | Precision: {m_o['precision'] * 100:.2f}% | Recall: {m_o['recall'] * 100:.2f}% | F1: {m_o['f1']:.4f}")
+    print(f"False Alarm (FPR): {m_o['fpr'] * 100:.2f}% | Miss Rate (FNR): {m_o['fnr'] * 100:.2f}%")
+    print("-" * 80)
     print(f"Artifacts Saved:   {json_path}")
     print(f"                   {md_path}")
     print("=" * 80)
