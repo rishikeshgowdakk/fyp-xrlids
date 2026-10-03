@@ -1,0 +1,28 @@
+experiment:
+  id: EXP-P2E-EXPLAINABILITY-001
+  spec: SPEC-P2-AUTONOMOUS-RESPONSE-001
+  stage: "Phase 2E - Explainability and Safety Invariant Audit Harness"
+  research_question: RQ7.3
+  target_criterion: "100% of non-ALLOW actions accompanied by valid TreeSHAP + Q-margin audit records"
+
+parent_experiment:
+  id: EXP-P1-CIC2017-R10-001
+  detector_artifact: results/experiments/EXP-P1-CIC2017-R10-001/random_forest.joblib
+  preprocessor_artifact: results/experiments/EXP-P1-CIC2017-R10-001/preprocessor.joblib
+
+parent_dqn_experiment:
+  id: EXP-P2B-DQN-001
+  model_checkpoint: results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/best_model.pt
+
+audit_configuration:
+  dataset: D_pol_val
+  action_mode: 4-action
+  cost_regime: standard_enterprise
+  top_k_shap_features: 3
+  audit_only_interventions: true
+  max_saved_markdown_cards: 10
+  safety_invariants_audited:
+    - CRITICAL_INFRASTRUCTURE_EXEMPTION
+    - MANDATORY_ACTION_COOLDOWN
+    - BLAST_RADIUS_CIRCUIT_BREAKER
+    - ACTION_MODE_CLAMP

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass, field
+from typing import ClassVar, Sequence
 import numpy as np
 
 from xrlids.response.types import Action
@@ -24,13 +25,15 @@ from xrlids.response.types import Action
 class StateBuilder:
     """Constructs the strictly causal, minimum justified 6D state representation."""
 
+    default_disabled_dimensions: ClassVar[tuple[int, ...]] = ()
+
     score_trajectory_k: int = 5
     alert_density_window_w: int = 20
     alert_threshold: float = 0.50
     cooldown_max_steps: int = 30
     step_duration_s: float = 1.0  # Nominal decision step duration (30 steps = 30.0s cooldown)
     volumetric_scale_log_max: float = 8.0  # 10^8 bytes/s (100 MB/s) normalized to 1.0
-    disabled_dimensions: Sequence[int] = ()  # For state component ablation experiments
+    disabled_dimensions: Sequence[int] | None = None  # For state component ablation experiments
 
     # Internal causal memory buffers (updated strictly step-by-step)
     _score_history: deque[float] = field(init=False)
@@ -39,6 +42,8 @@ class StateBuilder:
     _cooldown_remaining: int = field(default=0, init=False)
 
     def __post_init__(self) -> None:
+        if self.disabled_dimensions is None:
+            self.disabled_dimensions = self.default_disabled_dimensions
         self.reset()
 
     def reset(self) -> None:

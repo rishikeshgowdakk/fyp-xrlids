@@ -1,0 +1,54 @@
+# Phase 2C Validation, Ablation, and Sensitivity Benchmark
+# XRL-IDARS Phase 2C (SPEC-P2-AUTONOMOUS-RESPONSE-001)
+
+experiment:
+  id: EXP-P2C-SENSITIVITY-001
+  phase: "2C"
+  research_question: RQ7_ablation_sensitivity
+  description: >
+    Phase 2C comprehensive sensitivity and ablation study investigating cost regime shifts,
+    state vector component importance (6 ablations), action-space dimensionality (3 vs 4 actions),
+    and downstream safety gate parameter sensitivity.
+  status: ready_for_execution
+
+parent_dqn_experiment:
+  id: EXP-P2B-DQN-001
+
+cost_regimes:
+  - standard_enterprise
+  - high_availability
+  - high_security_enclave
+
+state_ablations:
+  - id: full_state
+    name: Full 6D Causal State
+    disabled_dimensions: []
+  - id: ablate_current_score
+    name: Ablate S_t (Dimension 0)
+    disabled_dimensions: [0]
+  - id: ablate_score_trajectory
+    name: Ablate Delta S_t (Dimension 1)
+    disabled_dimensions: [1]
+  - id: ablate_alert_density
+    name: Ablate N_alert (Dimension 2)
+    disabled_dimensions: [2]
+  - id: ablate_previous_action
+    name: Ablate a_(t-1) (Dimension 3)
+    disabled_dimensions: [3]
+  - id: ablate_cooldown_state
+    name: Ablate c_t (Dimension 4)
+    disabled_dimensions: [4]
+  - id: ablate_volumetric_context
+    name: Ablate v_t (Dimension 5)
+    disabled_dimensions: [5]
+
+safety_gate_sensitivity:
+  cooldown_steps_sweep: [15, 30, 60]
+  blast_radius_sweep: [0.02, 0.05, 0.10]
+
+training:
+  ablation_training_steps: 10000
+  batch_size: 64
+  learning_rate: 0.001
+  gamma: 0.95
+  seed: 42

@@ -1,0 +1,38 @@
+experiment:
+  id: EXP-P2-FINAL-TEST-001
+  stage: "Final Comparative Evaluation on Held-Out D_pol_test"
+  spec: SPEC-P2-AUTONOMOUS-RESPONSE-001
+  research_questions:
+    - RQ7 (Primary RL Advantage vs Baselines)
+    - RQ7.1 (Action Chattering Elimination)
+    - RQ7.2 (Out-of-Domain Safety Bounds)
+    - RQ7.3 (Dual-Layer Explainability)
+
+population:
+  dataset: cicids2017
+  d_pol_test_rows: 355865
+  strict_isolation: true
+  authoritative_note: >
+    Evaluates strictly once on the held-out Phase 1 test split (355,865 tabular flows).
+
+parent_experiments:
+  phase1_detector: EXP-P1-CIC2017-R10-001
+  phase2a_baselines: EXP-P2A-BASELINES-001
+  phase2b_dqn: EXP-P2B-DQN-001
+  selected_model_checkpoint: results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/best_model.pt
+  action_mode: 4-action
+
+evaluation:
+  cost_regimes:
+    - standard_enterprise
+    - high_availability
+    - high_security_enclave
+  n_bootstraps: 1000
+  ci_level: 0.95
+  seed: 42
+
+pre_registered_targets:
+  relative_cost_reduction_pct: 15.0
+  p_value_threshold: 0.01
+  action_chattering_index_max: 0.01
+  false_quarantine_rate_max: 0.02

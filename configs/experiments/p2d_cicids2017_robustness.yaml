@@ -1,0 +1,38 @@
+# Phase 2D Cross-Dataset Robustness and Failure Injection Benchmark
+# XRL-IDARS Phase 2D (SPEC-P2-AUTONOMOUS-RESPONSE-001)
+
+experiment:
+  id: EXP-P2D-ROBUSTNESS-001
+  phase: "2D"
+  research_question: RQ7_RQ8_robustness
+  description: >
+    Phase 2D empirical robustness, covariate shift, and failure injection stress tests:
+    1. Out-of-domain transfer evaluation (CIC -> CSE)
+    2. Stealth attack campaign containment (Infiltration and Web Attacks)
+    3. Benign traffic burst stress testing (10x volumetric surge)
+    4. Continuous detector score jitter (Gaussian perturbation across multiple sigma levels)
+  status: ready_for_execution
+
+parent_dqn_experiment:
+  id: EXP-P2B-DQN-001
+
+transfer_evaluation:
+  source_dataset: cicids2017
+  target_dataset: csecicids2018
+  sample_size: 50000
+
+stealth_evaluation:
+  target_families:
+    - INFILTRATION
+    - WEB ATTACK - BRUTE FORCE
+    - WEB ATTACK - XSS
+    - WEB ATTACK - SQL INJECTION
+
+benign_burst_stress:
+  multiplier: 10.0
+  sample_size: 20000
+
+score_jitter:
+  sigma_levels: [0.02, 0.05, 0.10, 0.20]
+  sample_size: 20000
+  seed: 42
