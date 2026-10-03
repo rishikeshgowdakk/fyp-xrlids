@@ -1,0 +1,687 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P2-FINAL-TEST-001",
+    "git_commit": "c2097fa548ed96f519c4f2886c6c01653349e649",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": 42,
+    "created_at": "2026-10-03T21:38:58.503545+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "c2097fa548ed96f519c4f2886c6c01653349e649",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "runs": [
+    {
+      "action_mode": "3-action",
+      "cost_regime": "standard_enterprise",
+      "policy_name": "DQN_Candidate_3-action",
+      "total_steps": 355865,
+      "total_cost": 505610.5,
+      "mean_cost_per_flow": 1.4207929973444986,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 96.51291037468432,
+      "action_chattering_index": 0.0019389429669761482,
+      "mitigation_delay_steps": 31.66196623634558,
+      "action_counts": {
+        "ALLOW": 281262,
+        "ALERT": 10764,
+        "RATE_LIMIT": 63839,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 60449,
+      "uncontained_attacks": 4371
+    },
+    {
+      "action_mode": "3-action",
+      "cost_regime": "standard_enterprise",
+      "policy_name": "Baseline_0_Always_ALLOW",
+      "total_steps": 355865,
+      "total_cost": 6482000.0,
+      "mean_cost_per_flow": 18.214772455847022,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 100.0,
+      "action_chattering_index": 0.0,
+      "mitigation_delay_steps": 50.0,
+      "action_counts": {
+        "ALLOW": 355865,
+        "ALERT": 0,
+        "RATE_LIMIT": 0,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 0,
+      "uncontained_attacks": 64820
+    },
+    {
+      "action_mode": "3-action",
+      "cost_regime": "standard_enterprise",
+      "policy_name": "Baseline_1_Single_Threshold_tau_0.50",
+      "total_steps": 355865,
+      "total_cost": 601835.0,
+      "mean_cost_per_flow": 1.6911890745085918,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 97.95529900874436,
+      "action_chattering_index": 0.035682170716903085,
+      "mitigation_delay_steps": 3.4728897715988083,
+      "action_counts": {
+        "ALLOW": 285734,
+        "ALERT": 0,
+        "RATE_LIMIT": 70131,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 64180,
+      "uncontained_attacks": 640
+    },
+    {
+      "action_mode": "3-action",
+      "cost_regime": "standard_enterprise",
+      "policy_name": "Baseline_2_Two_Tier_0.40_0.75",
+      "total_steps": 355865,
+      "total_cost": 569978.0,
+      "mean_cost_per_flow": 1.601669172298484,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 97.8206119328626,
+      "action_chattering_index": 0.029384821167637076,
+      "mitigation_delay_steps": 4.936643495531281,
+      "action_counts": {
+        "ALLOW": 285255,
+        "ALERT": 2448,
+        "RATE_LIMIT": 68162,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 63467,
+      "uncontained_attacks": 1353
+    },
+    {
+      "action_mode": "3-action",
+      "cost_regime": "standard_enterprise",
+      "policy_name": "Baseline_3_Heuristic_State_Machine",
+      "total_steps": 355865,
+      "total_cost": 1624454.0,
+      "mean_cost_per_flow": 4.564804068958734,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 73.0206669071793,
+      "action_chattering_index": 0.11365858867432502,
+      "mitigation_delay_steps": 4.085998013902681,
+      "action_counts": {
+        "ALLOW": 212853,
+        "ALERT": 12953,
+        "RATE_LIMIT": 130059,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 64279,
+      "uncontained_attacks": 541
+    },
+    {
+      "action_mode": "3-action",
+      "cost_regime": "high_availability",
+      "policy_name": "DQN_Candidate_3-action",
+      "total_steps": 355865,
+      "total_cost": 538160.5,
+      "mean_cost_per_flow": 1.5122602672361711,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 96.51291037468432,
+      "action_chattering_index": 0.0019389429669761482,
+      "mitigation_delay_steps": 31.66196623634558,
+      "action_counts": {
+        "ALLOW": 281262,
+        "ALERT": 10764,
+        "RATE_LIMIT": 63839,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 60449,
+      "uncontained_attacks": 4371
+    },
+    {
+      "action_mode": "3-action",
+      "cost_regime": "high_availability",
+      "policy_name": "Baseline_0_Always_ALLOW",
+      "total_steps": 355865,
+      "total_cost": 3241000.0,
+      "mean_cost_per_flow": 9.107386227923511,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 100.0,
+      "action_chattering_index": 0.0,
+      "mitigation_delay_steps": 50.0,
+      "action_counts": {
+        "ALLOW": 355865,
+        "ALERT": 0,
+        "RATE_LIMIT": 0,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 0,
+      "uncontained_attacks": 64820
+    },
+    {
+      "action_mode": "3-action",
+      "cost_regime": "high_availability",
+      "policy_name": "Baseline_1_Single_Threshold_tau_0.50",
+      "total_steps": 355865,
+      "total_cost": 659100.0,
+      "mean_cost_per_flow": 1.8521068382673205,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 97.95529900874436,
+      "action_chattering_index": 0.035682170716903085,
+      "mitigation_delay_steps": 3.4728897715988083,
+      "action_counts": {
+        "ALLOW": 285734,
+        "ALERT": 0,
+        "RATE_LIMIT": 70131,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 64180,
+      "uncontained_attacks": 640
+    },
+    {
+      "action_mode": "3-action",
+      "cost_regime": "high_availability",
+      "policy_name": "Baseline_2_Two_Tier_0.40_0.75",
+      "total_steps": 355865,
+      "total_cost": 612753.0,
+      "mean_cost_per_flow": 1.721869248169952,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 97.8206119328626,
+      "action_chattering_index": 0.029384821167637076,
+      "mitigation_delay_steps": 4.936643495531281,
+      "action_counts": {
+        "ALLOW": 285255,
+        "ALERT": 2448,
+        "RATE_LIMIT": 68162,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 63467,
+      "uncontained_attacks": 1353
+    },
+    {
+      "action_mode": "3-action",
+      "cost_regime": "high_availability",
+      "policy_name": "Baseline_3_Heuristic_State_Machine",
+      "total_steps": 355865,
+      "total_cost": 2594654.0,
+      "mean_cost_per_flow": 7.291118823149228,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 73.0206669071793,
+      "action_chattering_index": 0.11365858867432502,
+      "mitigation_delay_steps": 4.085998013902681,
+      "action_counts": {
+        "ALLOW": 212853,
+        "ALERT": 12953,
+        "RATE_LIMIT": 130059,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 64279,
+      "uncontained_attacks": 541
+    },
+    {
+      "action_mode": "3-action",
+      "cost_regime": "high_security_enclave",
+      "policy_name": "DQN_Candidate_3-action",
+      "total_steps": 355865,
+      "total_cost": 891946.5,
+      "mean_cost_per_flow": 2.506418164191477,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 96.51291037468432,
+      "action_chattering_index": 0.0019389429669761482,
+      "mitigation_delay_steps": 31.66196623634558,
+      "action_counts": {
+        "ALLOW": 281262,
+        "ALERT": 10764,
+        "RATE_LIMIT": 63839,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 60449,
+      "uncontained_attacks": 4371
+    },
+    {
+      "action_mode": "3-action",
+      "cost_regime": "high_security_enclave",
+      "policy_name": "Baseline_0_Always_ALLOW",
+      "total_steps": 355865,
+      "total_cost": 32410000.0,
+      "mean_cost_per_flow": 91.0738622792351,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 100.0,
+      "action_chattering_index": 0.0,
+      "mitigation_delay_steps": 50.0,
+      "action_counts": {
+        "ALLOW": 355865,
+        "ALERT": 0,
+        "RATE_LIMIT": 0,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 0,
+      "uncontained_attacks": 64820
+    },
+    {
+      "action_mode": "3-action",
+      "cost_regime": "high_security_enclave",
+      "policy_name": "Baseline_1_Single_Threshold_tau_0.50",
+      "total_steps": 355865,
+      "total_cost": 1055045.0,
+      "mean_cost_per_flow": 2.9647338175993707,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 97.95529900874436,
+      "action_chattering_index": 0.035682170716903085,
+      "mitigation_delay_steps": 3.4728897715988083,
+      "action_counts": {
+        "ALLOW": 285734,
+        "ALERT": 0,
+        "RATE_LIMIT": 70131,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 64180,
+      "uncontained_attacks": 640
+    },
+    {
+      "action_mode": "3-action",
+      "cost_regime": "high_security_enclave",
+      "policy_name": "Baseline_2_Two_Tier_0.40_0.75",
+      "total_steps": 355865,
+      "total_cost": 1004496.0,
+      "mean_cost_per_flow": 2.8226883790201343,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 97.8206119328626,
+      "action_chattering_index": 0.029384821167637076,
+      "mitigation_delay_steps": 4.936643495531281,
+      "action_counts": {
+        "ALLOW": 285255,
+        "ALERT": 2448,
+        "RATE_LIMIT": 68162,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 63467,
+      "uncontained_attacks": 1353
+    },
+    {
+      "action_mode": "3-action",
+      "cost_regime": "high_security_enclave",
+      "policy_name": "Baseline_3_Heuristic_State_Machine",
+      "total_steps": 355865,
+      "total_cost": 1357458.0,
+      "mean_cost_per_flow": 3.8145307911708093,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 73.0206669071793,
+      "action_chattering_index": 0.11365858867432502,
+      "mitigation_delay_steps": 4.085998013902681,
+      "action_counts": {
+        "ALLOW": 212853,
+        "ALERT": 12953,
+        "RATE_LIMIT": 130059,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 64279,
+      "uncontained_attacks": 541
+    },
+    {
+      "action_mode": "4-action",
+      "cost_regime": "standard_enterprise",
+      "policy_name": "DQN_Candidate_4-action",
+      "total_steps": 355865,
+      "total_cost": 1895196.5,
+      "mean_cost_per_flow": 5.325605215460919,
+      "false_quarantine_rate": 0.001961895926746723,
+      "business_availability_score_pct": 96.51943857479084,
+      "action_chattering_index": 0.021446395252118788,
+      "mitigation_delay_steps": 23.5545183714002,
+      "action_counts": {
+        "ALLOW": 281243,
+        "ALERT": 62138,
+        "RATE_LIMIT": 7059,
+        "ISOLATE": 5425
+      },
+      "override_counts": {
+        "BLAST_RADIUS_CIRCUIT_BREAKER": 55244
+      },
+      "contained_attacks": 10285,
+      "uncontained_attacks": 54535
+    },
+    {
+      "action_mode": "4-action",
+      "cost_regime": "standard_enterprise",
+      "policy_name": "Baseline_0_Always_ALLOW",
+      "total_steps": 355865,
+      "total_cost": 6482000.0,
+      "mean_cost_per_flow": 18.214772455847022,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 100.0,
+      "action_chattering_index": 0.0,
+      "mitigation_delay_steps": 50.0,
+      "action_counts": {
+        "ALLOW": 355865,
+        "ALERT": 0,
+        "RATE_LIMIT": 0,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 0,
+      "uncontained_attacks": 64820
+    },
+    {
+      "action_mode": "4-action",
+      "cost_regime": "standard_enterprise",
+      "policy_name": "Baseline_1_Single_Threshold_tau_0.50",
+      "total_steps": 355865,
+      "total_cost": 2661646.0,
+      "mean_cost_per_flow": 7.4793699858092255,
+      "false_quarantine_rate": 0.005542098300950025,
+      "business_availability_score_pct": 97.95529900874436,
+      "action_chattering_index": 0.023020030123867545,
+      "mitigation_delay_steps": 30.335849056603774,
+      "action_counts": {
+        "ALLOW": 285734,
+        "ALERT": 63388,
+        "RATE_LIMIT": 0,
+        "ISOLATE": 6743
+      },
+      "override_counts": {
+        "BLAST_RADIUS_CIRCUIT_BREAKER": 63388
+      },
+      "contained_attacks": 5130,
+      "uncontained_attacks": 59690
+    },
+    {
+      "action_mode": "4-action",
+      "cost_regime": "standard_enterprise",
+      "policy_name": "Baseline_2_Two_Tier_0.40_0.75",
+      "total_steps": 355865,
+      "total_cost": 2206220.5,
+      "mean_cost_per_flow": 6.199599567251626,
+      "false_quarantine_rate": 0.0031232283667474102,
+      "business_availability_score_pct": 97.8206119328626,
+      "action_chattering_index": 0.02696535755232336,
+      "mitigation_delay_steps": 28.57795431976167,
+      "action_counts": {
+        "ALLOW": 285255,
+        "ALERT": 62194,
+        "RATE_LIMIT": 2448,
+        "ISOLATE": 5968
+      },
+      "override_counts": {
+        "BLAST_RADIUS_CIRCUIT_BREAKER": 62194
+      },
+      "contained_attacks": 5859,
+      "uncontained_attacks": 58961
+    },
+    {
+      "action_mode": "4-action",
+      "cost_regime": "standard_enterprise",
+      "policy_name": "Baseline_3_Heuristic_State_Machine",
+      "total_steps": 355865,
+      "total_cost": 3257720.0,
+      "mean_cost_per_flow": 9.154370337066021,
+      "false_quarantine_rate": 0.03682248449552475,
+      "business_availability_score_pct": 64.65563744438145,
+      "action_chattering_index": 0.10733032844007823,
+      "mitigation_delay_steps": 42.57437934458788,
+      "action_counts": {
+        "ALLOW": 188495,
+        "ALERT": 125085,
+        "RATE_LIMIT": 28384,
+        "ISOLATE": 13901
+      },
+      "override_counts": {
+        "BLAST_RADIUS_CIRCUIT_BREAKER": 113874
+      },
+      "contained_attacks": 3280,
+      "uncontained_attacks": 61540
+    },
+    {
+      "action_mode": "4-action",
+      "cost_regime": "high_availability",
+      "policy_name": "DQN_Candidate_4-action",
+      "total_steps": 355865,
+      "total_cost": 1937476.5,
+      "mean_cost_per_flow": 5.444414314416984,
+      "false_quarantine_rate": 0.001961895926746723,
+      "business_availability_score_pct": 96.51943857479084,
+      "action_chattering_index": 0.021446395252118788,
+      "mitigation_delay_steps": 23.5545183714002,
+      "action_counts": {
+        "ALLOW": 281243,
+        "ALERT": 62138,
+        "RATE_LIMIT": 7059,
+        "ISOLATE": 5425
+      },
+      "override_counts": {
+        "BLAST_RADIUS_CIRCUIT_BREAKER": 55244
+      },
+      "contained_attacks": 10285,
+      "uncontained_attacks": 54535
+    },
+    {
+      "action_mode": "4-action",
+      "cost_regime": "high_availability",
+      "policy_name": "Baseline_0_Always_ALLOW",
+      "total_steps": 355865,
+      "total_cost": 3241000.0,
+      "mean_cost_per_flow": 9.107386227923511,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 100.0,
+      "action_chattering_index": 0.0,
+      "mitigation_delay_steps": 50.0,
+      "action_counts": {
+        "ALLOW": 355865,
+        "ALERT": 0,
+        "RATE_LIMIT": 0,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 0,
+      "uncontained_attacks": 64820
+    },
+    {
+      "action_mode": "4-action",
+      "cost_regime": "high_availability",
+      "policy_name": "Baseline_1_Single_Threshold_tau_0.50",
+      "total_steps": 355865,
+      "total_cost": 2726426.0,
+      "mean_cost_per_flow": 7.661405308192713,
+      "false_quarantine_rate": 0.005542098300950025,
+      "business_availability_score_pct": 97.95529900874436,
+      "action_chattering_index": 0.023020030123867545,
+      "mitigation_delay_steps": 30.335849056603774,
+      "action_counts": {
+        "ALLOW": 285734,
+        "ALERT": 63388,
+        "RATE_LIMIT": 0,
+        "ISOLATE": 6743
+      },
+      "override_counts": {
+        "BLAST_RADIUS_CIRCUIT_BREAKER": 63388
+      },
+      "contained_attacks": 5130,
+      "uncontained_attacks": 59690
+    },
+    {
+      "action_mode": "4-action",
+      "cost_regime": "high_availability",
+      "policy_name": "Baseline_2_Two_Tier_0.40_0.75",
+      "total_steps": 355865,
+      "total_cost": 2257830.5,
+      "mean_cost_per_flow": 6.344626473522263,
+      "false_quarantine_rate": 0.0031232283667474102,
+      "business_availability_score_pct": 97.8206119328626,
+      "action_chattering_index": 0.02696535755232336,
+      "mitigation_delay_steps": 28.57795431976167,
+      "action_counts": {
+        "ALLOW": 285255,
+        "ALERT": 62194,
+        "RATE_LIMIT": 2448,
+        "ISOLATE": 5968
+      },
+      "override_counts": {
+        "BLAST_RADIUS_CIRCUIT_BREAKER": 62194
+      },
+      "contained_attacks": 5859,
+      "uncontained_attacks": 58961
+    },
+    {
+      "action_mode": "4-action",
+      "cost_regime": "high_availability",
+      "policy_name": "Baseline_3_Heuristic_State_Machine",
+      "total_steps": 355865,
+      "total_cost": 4309160.0,
+      "mean_cost_per_flow": 12.108973908645133,
+      "false_quarantine_rate": 0.03682248449552475,
+      "business_availability_score_pct": 64.65563744438145,
+      "action_chattering_index": 0.10733032844007823,
+      "mitigation_delay_steps": 42.57437934458788,
+      "action_counts": {
+        "ALLOW": 188495,
+        "ALERT": 125085,
+        "RATE_LIMIT": 28384,
+        "ISOLATE": 13901
+      },
+      "override_counts": {
+        "BLAST_RADIUS_CIRCUIT_BREAKER": 113874
+      },
+      "contained_attacks": 3280,
+      "uncontained_attacks": 61540
+    },
+    {
+      "action_mode": "4-action",
+      "cost_regime": "high_security_enclave",
+      "policy_name": "DQN_Candidate_4-action",
+      "total_steps": 355865,
+      "total_cost": 2445511.5,
+      "mean_cost_per_flow": 6.8720202885925845,
+      "false_quarantine_rate": 0.001961895926746723,
+      "business_availability_score_pct": 96.51943857479084,
+      "action_chattering_index": 0.021446395252118788,
+      "mitigation_delay_steps": 23.5545183714002,
+      "action_counts": {
+        "ALLOW": 281243,
+        "ALERT": 62138,
+        "RATE_LIMIT": 7059,
+        "ISOLATE": 5425
+      },
+      "override_counts": {
+        "BLAST_RADIUS_CIRCUIT_BREAKER": 55244
+      },
+      "contained_attacks": 10285,
+      "uncontained_attacks": 54535
+    },
+    {
+      "action_mode": "4-action",
+      "cost_regime": "high_security_enclave",
+      "policy_name": "Baseline_0_Always_ALLOW",
+      "total_steps": 355865,
+      "total_cost": 32410000.0,
+      "mean_cost_per_flow": 91.0738622792351,
+      "false_quarantine_rate": 0.0,
+      "business_availability_score_pct": 100.0,
+      "action_chattering_index": 0.0,
+      "mitigation_delay_steps": 50.0,
+      "action_counts": {
+        "ALLOW": 355865,
+        "ALERT": 0,
+        "RATE_LIMIT": 0,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 0,
+      "uncontained_attacks": 64820
+    },
+    {
+      "action_mode": "4-action",
+      "cost_regime": "high_security_enclave",
+      "policy_name": "Baseline_1_Single_Threshold_tau_0.50",
+      "total_steps": 355865,
+      "total_cost": 3333591.0,
+      "mean_cost_per_flow": 9.367571972517668,
+      "false_quarantine_rate": 0.005542098300950025,
+      "business_availability_score_pct": 97.95529900874436,
+      "action_chattering_index": 0.023020030123867545,
+      "mitigation_delay_steps": 30.335849056603774,
+      "action_counts": {
+        "ALLOW": 285734,
+        "ALERT": 63388,
+        "RATE_LIMIT": 0,
+        "ISOLATE": 6743
+      },
+      "override_counts": {
+        "BLAST_RADIUS_CIRCUIT_BREAKER": 63388
+      },
+      "contained_attacks": 5130,
+      "uncontained_attacks": 59690
+    },
+    {
+      "action_mode": "4-action",
+      "cost_regime": "high_security_enclave",
+      "policy_name": "Baseline_2_Two_Tier_0.40_0.75",
+      "total_steps": 355865,
+      "total_cost": 2849589.5,
+      "mean_cost_per_flow": 8.007501440152867,
+      "false_quarantine_rate": 0.0031232283667474102,
+      "business_availability_score_pct": 97.8206119328626,
+      "action_chattering_index": 0.02696535755232336,
+      "mitigation_delay_steps": 28.57795431976167,
+      "action_counts": {
+        "ALLOW": 285255,
+        "ALERT": 62194,
+        "RATE_LIMIT": 2448,
+        "ISOLATE": 5968
+      },
+      "override_counts": {
+        "BLAST_RADIUS_CIRCUIT_BREAKER": 62194
+      },
+      "contained_attacks": 5859,
+      "uncontained_attacks": 58961
+    },
+    {
+      "action_mode": "4-action",
+      "cost_regime": "high_security_enclave",
+      "policy_name": "Baseline_3_Heuristic_State_Machine",
+      "total_steps": 355865,
+      "total_cost": 3217105.0,
+      "mean_cost_per_flow": 9.040239978643587,
+      "false_quarantine_rate": 0.03682248449552475,
+      "business_availability_score_pct": 64.65563744438145,
+      "action_chattering_index": 0.10733032844007823,
+      "mitigation_delay_steps": 42.57437934458788,
+      "action_counts": {
+        "ALLOW": 188495,
+        "ALERT": 125085,
+        "RATE_LIMIT": 28384,
+        "ISOLATE": 13901
+      },
+      "override_counts": {
+        "BLAST_RADIUS_CIRCUIT_BREAKER": 113874
+      },
+      "contained_attacks": 3280,
+      "uncontained_attacks": 61540
+    }
+  ]
+}

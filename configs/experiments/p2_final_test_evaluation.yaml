@@ -19,8 +19,11 @@ parent_experiments:
   phase1_detector: EXP-P1-CIC2017-R10-001
   phase2a_baselines: EXP-P2A-BASELINES-001
   phase2b_dqn: EXP-P2B-DQN-001
-  selected_model_checkpoint: results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/best_model.pt
-  action_mode: 4-action
+  model_checkpoint_3action: results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/best_model.pt
+  model_checkpoint_4action: results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/best_model.pt
+  action_modes:
+    - 3-action
+    - 4-action
 
 evaluation:
   cost_regimes:

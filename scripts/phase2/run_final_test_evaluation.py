@@ -154,15 +154,15 @@ def generate_markdown_report(
         "",
         "## 2. Final Multi-Regime Performance Matrix on Held-Out Test Data",
         "",
-        "| Cost Regime | Policy | Total Cost | Mean Cost/Flow | False Quarantine (FQR) | Availability (BAS) | Chattering (ACI) | Contained | Uncontained |",
-        "|:---|:---|---:|---:|---:|---:|---:|---:|---:|",
+        "| Cost Regime | Action Space | Policy | Total Cost | Mean Cost/Flow | False Quarantine (FQR) | Availability (BAS) | Chattering (ACI) | Contained | Uncontained |",
+        "|:---|:---:|:---|---:|---:|---:|---:|---:|---:|---:|",
     ]
 
     for r in test_results:
         fqr_str = f"{r['false_quarantine_rate'] * 100:.2f}%"
         bas_str = f"{r['business_availability_score_pct']:.2f}%"
         lines.append(
-            f"| {r['cost_regime']} | `{r['policy_name']}` | "
+            f"| {r['cost_regime']} | `{r.get('action_mode', 'N/A')}` | `{r['policy_name']}` | "
             f"{r['total_cost']:,.1f} | {r['mean_cost_per_flow']:.4f} | "
             f"{fqr_str} | {bas_str} | {r['action_chattering_index']:.4f} | "
             f"{r['contained_attacks']:,} | {r['uncontained_attacks']:,} |"
@@ -174,14 +174,14 @@ def generate_markdown_report(
         "",
         "## 3. Paired Bootstrap Hypothesis Testing on Held-Out Test Data (B=1,000)",
         "",
-        "| Cost Regime | Comparison | Mean Cost Delta | 95% Bootstrap CI | Relative Cost Reduction ($\\Delta \\mathcal{C}_{\\text{rel}}$) | p-value | Significance | Superior Policy |",
-        "|:---|:---|---:|:---:|---:|---:|:---:|:---:|",
+        "| Cost Regime | Action Space | Comparison | Mean Cost Delta | 95% Bootstrap CI | Relative Cost Reduction ($\\Delta \\mathcal{C}_{\\text{rel}}$) | p-value | Significance | Superior Policy |",
+        "|:---|:---:|:---|---:|:---:|---:|---:|:---:|:---:|",
     ])
 
     for b in bootstrap_results:
         p_str = "p < 0.001 ***" if b["p_value"] < 0.001 else f"p = {b['p_value']:.4f}"
         lines.append(
-            f"| {b['cost_regime']} | `{b['candidate_name']}` vs `{b['baseline_name']}` | "
+            f"| {b['cost_regime']} | `{b.get('action_mode', 'N/A')}` | `{b['candidate_name']}` vs `{b['baseline_name']}` | "
             f"{b['mean_paired_difference']:+.4f} | [{b['ci_lower']:+.4f}, {b['ci_upper']:+.4f}] | "
             f"{b['relative_cost_reduction_pct']:+.2f}% | {b['p_value']:.4f} | {p_str} | `{b['superior_policy']}` |"
         )
@@ -198,21 +198,31 @@ def generate_markdown_report(
 
     # Extract primary standard enterprise comparison vs best baseline
     std_comps = [c for c in bootstrap_results if c["cost_regime"] in ("standard_enterprise", CostRegime.STANDARD_ENTERPRISE.value)]
-    vs_b1 = [c for c in std_comps if "Baseline_1" in c["baseline_name"]]
-    b1_rel_red = vs_b1[0]["relative_cost_reduction_pct"] if vs_b1 else 0.0
-    b1_pval = vs_b1[0]["p_value"] if vs_b1 else 1.0
+    b1_3 = [c for c in std_comps if c.get("action_mode") == "3-action" and "Baseline_1" in c["baseline_name"]]
+    b1_4 = [c for c in std_comps if c.get("action_mode") == "4-action" and "Baseline_1" in c["baseline_name"]]
 
-    dqn_std = next((r for r in test_results if r["cost_regime"] in ("standard_enterprise", CostRegime.STANDARD_ENTERPRISE.value) and "DQN" in r["policy_name"]), None)
-    obs_fqr = dqn_std["false_quarantine_rate"] if dqn_std else 1.0
-    obs_aci = dqn_std["action_chattering_index"] if dqn_std else 1.0
+    b1_3_rel = b1_3[0]["relative_cost_reduction_pct"] if b1_3 else 0.0
+    b1_3_p = b1_3[0]["p_value"] if b1_3 else 1.0
+    b1_4_rel = b1_4[0]["relative_cost_reduction_pct"] if b1_4 else 0.0
+    b1_4_p = b1_4[0]["p_value"] if b1_4 else 1.0
 
-    crit_rq7 = b1_rel_red >= 15.0 and b1_pval < 0.01
-    crit_rq71 = obs_aci < 0.01
-    crit_rq72 = obs_fqr < 0.02
+    dqn_3_std = next((r for r in test_results if r["cost_regime"] in ("standard_enterprise", CostRegime.STANDARD_ENTERPRISE.value) and r.get("action_mode") == "3-action" and "DQN" in r["policy_name"]), None)
+    dqn_4_std = next((r for r in test_results if r["cost_regime"] in ("standard_enterprise", CostRegime.STANDARD_ENTERPRISE.value) and r.get("action_mode") == "4-action" and "DQN" in r["policy_name"]), None)
 
-    lines.append(f"| **RQ7** (Primary) | Relative Cost Reduction vs Best Baseline | $\\ge 15.0\\%$ with $p < 0.01$ | $\\Delta \\mathcal{{C}}_{{\\text{{rel}}}} = {b1_rel_red:+.2f}\\%$, $p={b1_pval:.4f}$ | {'PASS (H1 Supported)' if crit_rq7 else 'NOT SUPPORTED (H0 Upheld)'} |")
-    lines.append(f"| **RQ7.1** | Action Chattering Index (ACI) | $< 0.01$ ($\\le 1$ jump / 100 flows) | $\\text{{ACI}} = {obs_aci:.4f}$ | {'PASS' if crit_rq71 else 'FAIL'} |")
-    lines.append(f"| **RQ7.2** | False Quarantine Rate (FQR) | $< 2.0\\%$ | $\\text{{FQR}} = {obs_fqr*100:.2f}\\%$ | {'PASS' if crit_rq72 else 'FAIL'} |")
+    obs_fqr_3 = dqn_3_std["false_quarantine_rate"] if dqn_3_std else 1.0
+    obs_aci_3 = dqn_3_std["action_chattering_index"] if dqn_3_std else 1.0
+    obs_fqr_4 = dqn_4_std["false_quarantine_rate"] if dqn_4_std else 1.0
+    obs_aci_4 = dqn_4_std["action_chattering_index"] if dqn_4_std else 1.0
+
+    crit_rq7_3 = b1_3_rel >= 15.0 and b1_3_p < 0.01
+    crit_rq7_4 = b1_4_rel >= 15.0 and b1_4_p < 0.01
+    crit_rq71 = (obs_aci_3 < 0.01 and obs_aci_4 < 0.01)
+    crit_rq72 = (obs_fqr_3 < 0.02 and obs_fqr_4 < 0.02)
+
+    lines.append(f"| **RQ7 (3-Action)** | Relative Cost Reduction vs Baseline 1 (Standard) | $\\ge 15.0\\%$ with $p < 0.01$ | $\\Delta \\mathcal{{C}}_{{\\text{{rel}}}} = {b1_3_rel:+.2f}\\%$, $p={b1_3_p:.4f}$ | {'PASS (H1 Supported)' if crit_rq7_3 else 'NOT SUPPORTED (H0 Upheld)'} |")
+    lines.append(f"| **RQ7 (4-Action)** | Relative Cost Reduction vs Baseline 1 (Standard) | $\\ge 15.0\\%$ with $p < 0.01$ | $\\Delta \\mathcal{{C}}_{{\\text{{rel}}}} = {b1_4_rel:+.2f}\\%$, $p={b1_4_p:.4f}$ | {'PASS (H1 Supported)' if crit_rq7_4 else 'NOT SUPPORTED (H0 Upheld)'} |")
+    lines.append(f"| **RQ7.1** | Action Chattering Index (ACI) | $< 0.01$ ($\\le 1$ jump / 100 flows) | $\\text{{ACI}}_{{\\text{{3-act}}}} = {obs_aci_3:.4f}$, $\\text{{ACI}}_{{\\text{{4-act}}}} = {obs_aci_4:.4f}$ | {'PASS' if crit_rq71 else 'FAIL'} |")
+    lines.append(f"| **RQ7.2** | False Quarantine Rate (FQR) | $< 2.0\\%$ | $\\text{{FQR}}_{{\\text{{3-act}}}} = {obs_fqr_3*100:.2f}\\%$, $\\text{{FQR}}_{{\\text{{4-act}}}} = {obs_fqr_4*100:.2f}\\%$ | {'PASS' if crit_rq72 else 'FAIL'} |")
     lines.append(f"| **RQ7.3** | Safety Gate Invariant Enforcement | 100% compliance | 100% compliance (0 critical host isolations) | PASS |")
 
     lines.extend([
@@ -222,9 +232,9 @@ def generate_markdown_report(
         "## 5. Scientific Governance & Decision Governance",
         "",
         "1. **Primary Research Question Outcome (RQ7)**:",
-        f"   - Under the Standard Enterprise research cost regime on held-out test data, DQN achieves a relative cost reduction of **{b1_rel_red:+.2f}%** compared to the best deterministic baseline (Baseline 1: Single Threshold $\\tau=0.50$).",
-        f"   - Because the pre-registered threshold was $\\ge 15.0\\%$, the pre-registered criterion is formally recorded as: **{'PASS' if crit_rq7 else 'FAIL / NOT SUPPORTED'}**.",
-        "   - In accordance with pre-registered scientific neutrality, this negative finding is documented transparently without post-hoc rationalization.",
+        f"   - **3-Action Space**: Under the Standard Enterprise research cost regime on held-out test data, 3-action DQN achieves a relative cost reduction of **{b1_3_rel:+.2f}%** ($p={b1_3_p:.4f}$) compared to Baseline 1 (Single Threshold $\\tau=0.50$). Pre-registered $\\ge 15.0\\%$ target status: **{'PASS' if crit_rq7_3 else 'NOT SUPPORTED'}**.",
+        f"   - **4-Action Space**: Under the Standard Enterprise regime, 4-action DQN achieves a relative cost reduction of **{b1_4_rel:+.2f}%** ($p={b1_4_p:.4f}$) compared to Baseline 1. Pre-registered $\\ge 15.0\\%$ target status: **{'PASS' if crit_rq7_4 else 'NOT SUPPORTED (H0 Upheld)'}**.",
+        "   - In accordance with pre-registered scientific neutrality, all positive and negative findings are documented transparently without post-hoc rationalization.",
         "2. **Operational Threshold Status (Decision D-003 Alignment)**:",
         "   - Research threshold $\\tau_{\\text{research}} = 0.50$ remains strictly frozen for academic benchmarks.",
         "   - Proposed threshold $\\tau_{\\text{ops}} = 0.40$ remains an exploratory candidate and is NOT an empirically selected optimum.",
@@ -256,19 +266,22 @@ def main() -> int:
 
     set_seed(args.seed)
 
-    # 2. Load frozen DQN checkpoint
-    print("\n[1/5] Loading frozen Phase 2B DQN candidate checkpoint...")
-    ckpt_path = Path(config["parent_experiments"]["selected_model_checkpoint"])
-    if not ckpt_path.exists():
-        raise FileNotFoundError(f"Selected DQN checkpoint not found: {ckpt_path}")
+    # 2. Load frozen DQN checkpoints (both 3-action and 4-action)
+    print("\n[1/5] Loading frozen Phase 2B DQN candidate checkpoints...")
+    ckpt_path_3 = Path(config["parent_experiments"].get("model_checkpoint_3action", "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/best_model.pt"))
+    ckpt_path_4 = Path(config["parent_experiments"].get("model_checkpoint_4action", "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/best_model.pt"))
 
-    action_mode_str = config["parent_experiments"].get("action_mode", "4-action")
-    action_mode = ActionSpaceMode.FOUR_ACTION if action_mode_str == "4-action" else ActionSpaceMode.THREE_ACTION
+    if not ckpt_path_3.exists() or not ckpt_path_4.exists():
+        raise FileNotFoundError(f"DQN checkpoints missing: {ckpt_path_3} or {ckpt_path_4}")
 
-    agent = DqnAgent(input_dim=6, action_mode=action_mode)
     cm = CheckpointManager(checkpoint_dir=out_dir)
-    cm.load_checkpoint(ckpt_path, agent.online_net)
-    print(f"      DQN Agent ({action_mode.value}) loaded successfully from {ckpt_path.name}")
+    agent_3 = DqnAgent(input_dim=6, action_mode=ActionSpaceMode.THREE_ACTION)
+    cm.load_checkpoint(ckpt_path_3, agent_3.online_net)
+    print(f"      3-Action DQN loaded from {ckpt_path_3.name}")
+
+    agent_4 = DqnAgent(input_dim=6, action_mode=ActionSpaceMode.FOUR_ACTION)
+    cm.load_checkpoint(ckpt_path_4, agent_4.online_net)
+    print(f"      4-Action DQN loaded from {ckpt_path_4.name}")
 
     # 3. Load held-out D_pol_test flows (STRICTLY ONCE)
     print("\n[2/5] Loading completely held-out test flows (D_pol_test)...")
@@ -287,7 +300,7 @@ def main() -> int:
         "test_isolation_verified": True,
     }
 
-    # 4. Multi-Regime Evaluation
+    # 4. Multi-Regime Evaluation for both action spaces
     print("\n[3/5] Evaluating DQN and Deterministic Baselines across 3 cost regimes on test data...")
     regimes = [
         CostRegime.STANDARD_ENTERPRISE,
@@ -295,57 +308,65 @@ def main() -> int:
         CostRegime.HIGH_SECURITY_ENCLAVE,
     ]
 
-    dqn_policy = DqnPolicy(agent=agent, name=f"DQN_Candidate_{action_mode.value}", deterministic=True)
-    policies: list[ResponsePolicy] = [
-        dqn_policy,
-        AlwaysAllowPolicy(),
-        SingleThresholdPolicy(threshold=0.50, action_mode=action_mode),
-        TwoTierThresholdPolicy(tau_suspect=0.40, tau_isolate=0.75, action_mode=action_mode),
-        HeuristicStateMachinePolicy(action_mode=action_mode),
+    action_modes_to_eval = [
+        (ActionSpaceMode.THREE_ACTION, agent_3),
+        (ActionSpaceMode.FOUR_ACTION, agent_4),
     ]
 
     test_results: list[dict[str, Any]] = []
-    policy_cost_series: dict[str, dict[str, list[float]]] = {}
+    policy_cost_series: dict[str, dict[str, dict[str, list[float]]]] = {}
 
-    for regime in regimes:
-        reg_str = regime.value
-        cost_engine = ResearchCostEngine(regime=regime)
-        policy_cost_series[reg_str] = {}
+    for mode, agent in action_modes_to_eval:
+        mode_str = mode.value
+        policy_cost_series[mode_str] = {}
 
-        for pol in policies:
-            sg = DeterministicSafetyGate(action_mode=action_mode)
-            summary, costs = run_policy_evaluation(
-                policy=pol,
-                flows=test_flows,
-                cost_engine=cost_engine,
-                safety_gate=sg,
-                action_mode=action_mode,
-                seed=args.seed,
-            )
-            policy_cost_series[reg_str][pol.name] = costs
+        dqn_policy = DqnPolicy(agent=agent, name=f"DQN_Candidate_{mode_str}", deterministic=True)
+        policies: list[ResponsePolicy] = [
+            dqn_policy,
+            AlwaysAllowPolicy(),
+            SingleThresholdPolicy(threshold=0.50, action_mode=mode),
+            TwoTierThresholdPolicy(tau_suspect=0.40, tau_isolate=0.75, action_mode=mode),
+            HeuristicStateMachinePolicy(action_mode=mode),
+        ]
 
-            run_entry = {
-                "action_mode": action_mode.value,
-                "cost_regime": reg_str,
-                "policy_name": pol.name,
-                "total_steps": summary.total_steps,
-                "total_cost": summary.total_cost,
-                "mean_cost_per_flow": summary.mean_cost,
-                "false_quarantine_rate": summary.false_quarantine_rate,
-                "business_availability_score_pct": summary.business_availability_score,
-                "action_chattering_index": summary.action_chattering_index,
-                "mitigation_delay_steps": summary.mitigation_delay,
-                "action_counts": summary.action_counts,
-                "override_counts": summary.override_counts,
-                "contained_attacks": summary.contained_attacks,
-                "uncontained_attacks": summary.uncontained_attacks,
-            }
-            test_results.append(run_entry)
+        for regime in regimes:
+            reg_str = regime.value
+            cost_engine = ResearchCostEngine(regime=regime)
+            policy_cost_series[mode_str][reg_str] = {}
+
+            for pol in policies:
+                sg = DeterministicSafetyGate(action_mode=mode)
+                summary, costs = run_policy_evaluation(
+                    policy=pol,
+                    flows=test_flows,
+                    cost_engine=cost_engine,
+                    safety_gate=sg,
+                    action_mode=mode,
+                    seed=args.seed,
+                )
+                policy_cost_series[mode_str][reg_str][pol.name] = costs
+
+                run_entry = {
+                    "action_mode": mode_str,
+                    "cost_regime": reg_str,
+                    "policy_name": pol.name,
+                    "total_steps": summary.total_steps,
+                    "total_cost": summary.total_cost,
+                    "mean_cost_per_flow": summary.mean_cost,
+                    "false_quarantine_rate": summary.false_quarantine_rate,
+                    "business_availability_score_pct": summary.business_availability_score,
+                    "action_chattering_index": summary.action_chattering_index,
+                    "mitigation_delay_steps": summary.mitigation_delay,
+                    "action_counts": summary.action_counts,
+                    "override_counts": summary.override_counts,
+                    "contained_attacks": summary.contained_attacks,
+                    "uncontained_attacks": summary.uncontained_attacks,
+                }
+                test_results.append(run_entry)
 
     # 5. Paired Bootstrap Hypothesis Testing
     print("\n[4/5] Executing paired bootstrap hypothesis tests on test data (B=1,000 resamples)...")
     bootstrap_results: list[dict[str, Any]] = []
-    dqn_name = dqn_policy.name
     baseline_names = [
         "Baseline_0_Always_ALLOW",
         "Baseline_1_Single_Threshold_tau_0.50",
@@ -353,35 +374,39 @@ def main() -> int:
         "Baseline_3_Heuristic_State_Machine",
     ]
 
-    for reg in regimes:
-        reg_str = reg.value
-        dqn_costs = policy_cost_series[reg_str][dqn_name]
+    for mode, _ in action_modes_to_eval:
+        mode_str = mode.value
+        dqn_name = f"DQN_Candidate_{mode_str}"
 
-        for b_name in baseline_names:
-            b_costs = policy_cost_series[reg_str][b_name]
-            boot = paired_bootstrap_cost_comparison(
-                costs_baseline=b_costs,
-                costs_candidate=dqn_costs,
-                baseline_name=b_name,
-                candidate_name=dqn_name,
-                n_bootstraps=args.n_bootstraps,
-                ci_level=0.95,
-                seed=args.seed,
-            )
-            entry = {
-                "action_mode": action_mode.value,
-                "cost_regime": reg_str,
-                "candidate_name": dqn_name,
-                "baseline_name": b_name,
-                "mean_paired_difference": boot["mean_paired_difference"],
-                "ci_lower": boot["ci_lower"],
-                "ci_upper": boot["ci_upper"],
-                "p_value": boot["p_value"],
-                "relative_cost_reduction_pct": boot["relative_cost_reduction_pct"],
-                "statistically_significant": boot["is_significant"],
-                "superior_policy": boot.get("superior_policy", "equal"),
-            }
-            bootstrap_results.append(entry)
+        for reg in regimes:
+            reg_str = reg.value
+            dqn_costs = policy_cost_series[mode_str][reg_str][dqn_name]
+
+            for b_name in baseline_names:
+                b_costs = policy_cost_series[mode_str][reg_str][b_name]
+                boot = paired_bootstrap_cost_comparison(
+                    costs_baseline=b_costs,
+                    costs_candidate=dqn_costs,
+                    baseline_name=b_name,
+                    candidate_name=dqn_name,
+                    n_bootstraps=args.n_bootstraps,
+                    ci_level=0.95,
+                    seed=args.seed,
+                )
+                entry = {
+                    "action_mode": mode_str,
+                    "cost_regime": reg_str,
+                    "candidate_name": dqn_name,
+                    "baseline_name": b_name,
+                    "mean_paired_difference": boot["mean_paired_difference"],
+                    "ci_lower": boot["ci_lower"],
+                    "ci_upper": boot["ci_upper"],
+                    "p_value": boot["p_value"],
+                    "relative_cost_reduction_pct": boot["relative_cost_reduction_pct"],
+                    "statistically_significant": boot["is_significant"],
+                    "superior_policy": boot.get("superior_policy", "equal"),
+                }
+                bootstrap_results.append(entry)
 
     # 6. Write all artifacts
     print("\n[5/5] Generating and persisting final test benchmark artifacts...")

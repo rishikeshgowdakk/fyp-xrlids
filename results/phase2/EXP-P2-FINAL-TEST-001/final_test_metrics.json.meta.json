@@ -1,0 +1,29 @@
+{
+  "experiment_id": "EXP-P2-FINAL-TEST-001",
+  "git_commit": "c2097fa548ed96f519c4f2886c6c01653349e649",
+  "dataset_sha256": null,
+  "feature_schema_hash": null,
+  "seed": 42,
+  "created_at": "2026-10-03T21:38:58.503545+00:00",
+  "software_environment": {
+    "python_version": "3.14.4",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "machine": "x86_64",
+    "processor_count": null,
+    "cuda_available": false,
+    "cuda_version": null,
+    "git_commit": "c2097fa548ed96f519c4f2886c6c01653349e649",
+    "packages": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.6",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1",
+      "torch": "2.14.0+cpu",
+      "shap": "0.52.0",
+      "matplotlib": "3.11.2",
+      "PyYAML": "6.0.3"
+    }
+  },
+  "artifact_version": "1",
+  "extra": {}
+}
