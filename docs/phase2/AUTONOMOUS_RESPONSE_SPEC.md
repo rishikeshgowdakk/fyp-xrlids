@@ -92,7 +92,7 @@ $$\mathbf{s}_t = \Big[ S_t,\; \Delta S_t,\; N_{\text{alert}},\; a_{t-1},\; c_t,\
 | $s^{(1)}$ | $\Delta S_t$ | $[-1.0, 1.0]$ | **Risk Score Trajectory**: $S_t - \bar{S}_{t-k:t-1}$. Captures whether risk is accelerating (burst/campaign) or transient noise. | Buffer of past $k=5$ detector scores | Historical observations up to $t-1$; no leakage. |
 | $s^{(2)}$ | $N_{\text{alert}}$ | $[0.0, 1.0]$ | **Recent Alert Density**: Normalized fraction of flows exceeding baseline warning threshold ($\tau=0.50$) in window $W=20$. | Buffer of past $W$ flows | Historical count; reflects sustained hostile intent. |
 | $s^{(3)}$ | $a_{t-1}$ | $\{0, 1, 2, 3\}$ | **Previous Action State**: Encodes the action applied at step $t-1$ to prevent rapid policy oscillation / chattering. | Action History | Prior agent decision; strictly causal. |
-| $s^{(4)}$ | $c_t$ | $[0.0, 1.0]$ | **Cooldown Timer Fraction**: Remaining fraction of mandatory cooldown period before destructive actions (`ISOLATE`) can re-trigger. | Safety Gate State | Operational control variable; prevents flapping. |
+| $s^{(4)}$ | $c_t$ | $[0.0, 1.0]$ | **Cooldown Timer Fraction**: Remaining fraction of mandatory cooldown period ($c_t = \text{remaining\_steps} / W_{\text{cooldown}}$, where $W_{\text{cooldown}} = 30 \text{ steps} \equiv 30.0\,\text{s}$ at $\Delta t_{\text{step}} = 1.0\,\text{s}$) before disruptive actions can be de-escalated. | Safety Gate State | Operational control variable; prevents flapping. |
 | $s^{(5)}$ | $v_t$ | $[0.0, 1.0]$ | **Coarse Volumetric Scale**: $\min(1.0, \log_{10}(1 + \text{bytes/s}) / 8.0)$. Provides context on attack scale (DoS vs stealth payload). | R10 Feature (`flow_bytes_per_s`) | Direct flow measurement; normalized logarithmic rate. |
 
 ### 4.2 Explicit Rejection of State Candidates
@@ -213,8 +213,8 @@ Costs are expressed in dimensionless research loss units:
 ### 7.2 Dynamic Penalties for Policy Stability
 In addition to static state-action costs, the reward function penalizes unstable operational behavior:
 1. **Action Chattering Penalty ($C_{\text{chatter}}$)**:
-   $$C_{\text{chatter}} = \begin{cases} 10.0, & \text{if } |a_t - a_{t-1}| \ge 2 \text{ and } \Delta t < T_{\text{cooldown}} \\ 0.0, & \text{otherwise} \end{cases}$$
-   Penalizes rapid jumping between `ISOLATE` and `ALLOW`, preventing destructive oscillation.
+   $$C_{\text{chatter}} = \begin{cases} 10.0, & \text{if } |a_t - a_{t-1}| \ge 2 \text{ and endpoint under active cooldown } (c_t > 0, \text{ i.e., } \Delta t_{\text{steps}} < W_{\text{cooldown}}) \\ 0.0, & \text{otherwise} \end{cases}$$
+   Penalizes rapid jumping between `ISOLATE` and `ALLOW` during the 30-step ($30.0\,\text{s}$ nominal) cooldown window, preventing destructive oscillation.
 2. **Alert Fatigue Penalty ($C_{\text{fatigue}}$)**:
    $$C_{\text{fatigue}} = 0.5 \times \max(0, N_{\text{consecutive\_alerts}} - 5)$$
    Penalizes generating continuous uncontained alerts without taking mitigating action.
@@ -271,7 +271,7 @@ Baseline Ladder for Autonomous Response:
    - Escalates from `ALLOW` $\to$ `ALERT` on first suspect flow ($S_t \ge 0.40$).
    - Escalates to `RATE_LIMIT` if $\ge 3$ alerts occur within 10 flows.
    - Escalates to `ISOLATE` if $S_t \ge 0.85$ or if attack persists under rate-limiting.
-   - Enforces a 30-flow cooldown before de-escalation.
+   - Enforces a 30-step ($30.0\,\text{s}$ nominal) cooldown before de-escalation.
 
 ---
 
@@ -440,7 +440,9 @@ $$\text{Action}_{\text{proposed}} \sim \pi(s_t) \;\xrightarrow{\quad}\; \boxed{\
    - Flows targeting designated infrastructure endpoints (Default Gateway, Core DNS, Identity Provider, Health Monitors) **can never be isolated**:
      $$\text{If } \text{dst\_ip} \in \text{CRITICAL\_HOSTS} \land a_{\text{proposed}} = \text{ISOLATE} \implies a_{\text{enforced}} = \text{ALERT}$$
 2. **Mandatory Action Cooldown**:
-   - Once a disruptive action (`RATE_LIMIT` or `ISOLATE`) is executed on an endpoint, the action cannot be toggled back and forth within cooldown window $T_{\text{cool}} = 30$ seconds.
+   - Once a disruptive action (`RATE_LIMIT` or `ISOLATE`) is executed on an endpoint, the action cannot be toggled back to `ALLOW` within cooldown window $W_{\text{cooldown}} = 30$ discrete flow-arrival steps. Because source network flows (e.g. CIC-IDS2017) lack sub-second physical timestamp monotonicity (with timestamps absent or non-monotonic across files, as audited in Phase 1 split manifests), the offline simulation environment models decision epochs as discrete arrival steps with nominal step duration $\Delta t_{\text{step}} = 1.0\,\text{s}$, establishing the exact mathematical relation:
+     $$T_{\text{cool}} = W_{\text{cooldown}} \times \Delta t_{\text{step}} = 30 \text{ steps} \times 1.0\,\text{s/step} = 30.0\,\text{seconds}$$
+   - If an action change back to `ALLOW` is requested within this cooldown window, the safety gate maintains the previous disruptive action without extending the cooldown timer.
 3. **Blast Radius Circuit Breaker**:
    - The safety gate monitors the global fraction of currently isolated endpoints. If total isolated hosts exceed 5.0% of the active network inventory, all subsequent `ISOLATE` actions are automatically downgraded to `ALERT` and a high-priority operator alarm is raised.
 

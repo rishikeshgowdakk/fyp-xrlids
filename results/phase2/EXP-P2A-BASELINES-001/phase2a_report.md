@@ -2,8 +2,8 @@
 
 **Experiment ID**: `EXP-P2A-BASELINES-001`  
 **Parent Detector**: `EXP-P1-CIC2017-R10-001`  
-**Generated**: `2026-10-03T17:44:19.427759+00:00`  
-**Git Commit**: `16003221acd61ab69d8eb48800a0b7390300c8d8`  
+**Generated**: `2026-10-03T17:58:21.927218+00:00`  
+**Git Commit**: `4adc69a853787c02ae67dd34ec3357667b4a0c7e`  
 
 ---
 
@@ -119,15 +119,25 @@ Phase 2A implements and benchmarks the deterministic autonomous response baselin
 
 All candidate policy actions passed through the non-bypassable `DeterministicSafetyGate`:
 1. **Critical Infrastructure Exemption**: Host endpoints designated as critical infrastructure (gateways, DNS, auth) were never isolated.
-2. **Mandatory Action Cooldown**: Endpoints were protected against de-escalation oscillation within 30-step windows.
+2. **Mandatory Action Cooldown**: Endpoints were protected against de-escalation oscillation within a $W_{\text{cooldown}} = 30$-step cooldown window (corresponding to $T_{\text{cool}} = 30.0\,\text{s}$ under the discrete arrival epoch formulation $\Delta t_{\text{step}} = 1.0\,\text{s}$). If de-escalation was requested while cooldown was active, the safety gate maintained the previous action without resetting the cooldown timer.
 3. **Blast Radius Circuit Breaker**: Global quarantine limit capped at 5.0% of endpoint inventory.
 
 ---
 
-## 7. Next Steps for Phase 2B
+## 7. Scientific Conclusions & Scope Boundaries
+
+Phase 2A establishes strictly the deterministic baseline ladder and offline simulation environment:
+1. **Baseline Reference Only**: Evaluates fixed deterministic rules to establish reference cost baselines under controlled asymmetric loss regimes.
+2. **Heuristic Performance Interpretation**: Baseline 3's high operational cost under persistent suspicion reflects the penalty of static rule triggers under the defined penalty structure; it does **NOT** constitute proof or evidence that reinforcement learning will achieve superior or acceptable performance.
+3. **Simulated Consequences**: All mitigation actions, throughput reductions, and compromise containment are simulated offline without physical network mutations.
+4. **Threshold Governance (Decision D-003)**: Baseline 1 ($\tau=0.50$) and Baseline 2 ($\tau=0.40/0.75$) are experimental comparators only; operational deployment threshold selection remains open pending site-specific cost calibration.
+
+---
+
+## 8. Next Steps for Phase 2B
 
 With Phase 2A baselines frozen and fully quantified:
 1. Implement `DqnResponseAgent` architecture under `src/xrlids/response/dqn/`.
-2. Train agent strictly on $D_{\text{pol\_train}}$ using causal 6D state representation.
-3. Validate against $D_{\text{pol\_val}}$ across the 3 research cost regimes.
+2. Train agent strictly on $D_{\text{pol\_train}}$ (213,518 rows) using causal 6D state representation.
+3. Validate against $D_{\text{pol\_val}}$ (142,346 rows) across the 3 research cost regimes.
 4. Evaluate trained policy against the frozen Baseline 0–3 ladder.

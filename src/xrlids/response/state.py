@@ -28,6 +28,7 @@ class StateBuilder:
     alert_density_window_w: int = 20
     alert_threshold: float = 0.50
     cooldown_max_steps: int = 30
+    step_duration_s: float = 1.0  # Nominal decision step duration (30 steps = 30.0s cooldown)
     volumetric_scale_log_max: float = 8.0  # 10^8 bytes/s (100 MB/s) normalized to 1.0
 
     # Internal causal memory buffers (updated strictly step-by-step)

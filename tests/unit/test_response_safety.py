@@ -53,7 +53,11 @@ def test_safety_gate_3_action_clamp():
 
 def test_safety_gate_mandatory_cooldown():
     """Verify mandatory cooldown prevents toggling from disruptive action to ALLOW within cooldown window."""
-    gate = DeterministicSafetyGate(cooldown_steps=10)
+    default_gate = DeterministicSafetyGate(cooldown_steps=30, step_duration_s=1.0)
+    assert default_gate.cooldown_seconds == 30.0
+
+    gate = DeterministicSafetyGate(cooldown_steps=10, step_duration_s=1.0)
+    assert gate.cooldown_seconds == 10.0
 
     # Step 0: Apply RATE_LIMIT on host-A
     enforced, _, _ = gate.enforce_safety(0, "f0", "host-A", Action.RATE_LIMIT)

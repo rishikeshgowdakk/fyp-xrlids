@@ -44,8 +44,14 @@ class DeterministicSafetyGate:
     action_mode: ActionSpaceMode = ActionSpaceMode.FOUR_ACTION
     critical_hosts: frozenset[str] = DEFAULT_CRITICAL_HOSTS
     cooldown_steps: int = 30
+    step_duration_s: float = 1.0  # Nominal decision step duration (30 steps = 30.0s cooldown)
     blast_radius_threshold: float = 0.05  # 5% maximum simultaneous endpoint isolation
     min_hosts_for_circuit_breaker: int = 20  # Minimum host population before fraction triggers
+
+    @property
+    def cooldown_seconds(self) -> float:
+        """Physical operational duration corresponding to cooldown_steps under nominal 1.0s/step."""
+        return float(self.cooldown_steps * self.step_duration_s)
 
     # Internal state tracking (deterministic)
     _active_isolated_hosts: set[str] = field(default_factory=set, init=False)

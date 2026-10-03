@@ -27,6 +27,8 @@ population_isolation:
 
 safety_gate:
   action_cooldown_steps: 30
+  step_duration_seconds: 1.0  # Nominal decision step duration; 30 steps = 30.0s cooldown
+  cooldown_seconds: 30.0
   blast_radius_threshold: 0.05
   critical_hosts:
     - host_gateway
