@@ -5,7 +5,7 @@
 - **Target Research Question**: `RQ7` (Autonomous Response Intelligence)
 - **Author**: Lead Implementation / Research Engineering Agent
 - **Date**: `2026-10-03`
-- **Parent Governance**: Decision `D-003` (Threshold Governance & Operational Cost Integration), Decision `D-006` (Flow Completion Policy)
+- **Parent Governance**: Decision `D-003` (Threshold Governance: $\tau_{\text{research}} = 0.50$ frozen; $\tau_{\text{ops}} = 0.40$ proposed candidate only; operational threshold selection open), Decision `D-006` (Flow Completion Policy)
 - **Phase 1 Reference**: Frozen Phase 1 Multi-File Empirical Programme (`EXP-P1-CIC2017-R10-001`, `EXP-P1-CSE2018-R10-MULTI-001`, `EXP-P1-UNSWNB15-R10-MULTI-001`)
 
 ---
@@ -27,12 +27,12 @@ This specification establishes the complete theoretical, mathematical, architect
 Traditional intrusion detection systems rely on static scalar decision thresholds ($\tau \in [0, 1]$) applied to detector scores:
 $$\text{Action}_t = \begin{cases} \text{BLOCK/ALERT}, & \text{if } S_t \ge \tau \\ \text{ALLOW}, & \text{if } S_t < \tau \end{cases}$$
 Under asymmetric operational realities, static thresholding suffers from fundamental failure modes:
-1. **The Stealth Dilemma**: Setting $\tau$ high (e.g., $\tau = 0.75$) minimizes false alarms on benign enterprise traffic but allows low-footprint attacks (whose posterior scores frequently fall in $S_t \in [0.40, 0.60]$) to penetrate unimpeded.
+1. **The Stealth Dilemma**: Setting $\tau$ high (e.g., $\tau = 0.75$) minimizes false alarms on benign enterprise traffic but allows low-footprint attacks (whose continuous risk scores frequently fall in $S_t \in [0.40, 0.60]$) to penetrate unimpeded.
 2. **The Denial-of-Service Dilemma**: Lowering $\tau$ (e.g., to proposed candidate $\tau_{\text{ops}} = 0.40$) improves stealth recall but risks automated disruption cascades on benign operational bursts, quarantining critical servers or disrupting legitimate business transactions.
 3. **Stateless Disconnection**: Static thresholds evaluate each flow in isolation, disregarding attack history, target criticality, past actions, and mitigation efficacy over time.
 
 ### 2.2 Formal Research Problem
-Given a frozen intrusion detector generating a continuous posterior attack risk score $S_t \in [0, 1]$ for network flows arriving sequentially, determine whether a sequential decision policy $\pi(a_t \mid s_t)$ can optimize cumulative operational utility:
+Given a frozen intrusion detector generating a continuous attack risk score $S_t \in [0, 1]$ for network flows arriving sequentially, determine whether a sequential decision policy $\pi(a_t \mid s_t)$ can optimize cumulative operational utility:
 $$\max_{\pi} \mathbb{E} \left[ \sum_{t=0}^T \gamma^t R(s_t, a_t, y_t) \right]$$
 where $R(s_t, a_t, y_t)$ reflects explicit asymmetric operational costs for false alarms, missed compromises, service disruptions, and action oscillations.
 
@@ -41,7 +41,7 @@ where $R(s_t, a_t, y_t)$ reflects explicit asymmetric operational costs for fals
 - **Alternative Hypothesis ($H_1$)**: Conditioned on dynamic sequence state (score trajectory, alert density, cooldown timer, previous action), a learned response policy achieves lower cumulative cost by selectively applying intermediate throttling and targeted quarantines without triggering false-quarantine cascades.
 
 > [!IMPORTANT]
-> **No Assumption of RL Superiority**: Reinforcement learning is treated strictly as an empirical hypothesis, not an assumed solution. RL introduces training instability, sample inefficiency, action chattering, and policy opacity. If simple deterministic policies achieve equivalent or superior cost profiles, the project will formally recommend the deterministic solution.
+> **No Assumption of RL Superiority & Neutral Acceptance of $H_0$**: Reinforcement learning is treated strictly as an empirical hypothesis, not an assumed solution. RL introduces training instability, sample inefficiency, action chattering, and policy opacity. If simple deterministic policies achieve equivalent or superior cost profiles, the Null Hypothesis will be formally accepted, and the project will recommend the deterministic baseline.
 
 ---
 
@@ -73,7 +73,7 @@ The response layer operates strictly downstream of the frozen Phase 1 detection 
 
 ### Invariants of the Detector Interface:
 1. **Read-Only Model Weights**: The Phase 1 tabular Random Forest, sequence LSTM, and score fusion weights are immutable. The response policy cannot backpropagate gradients into, retrain, or modify Phase 1 models.
-2. **Continuous Output Contract**: The detector emits a continuous attack score $S_t \in [0, 1]$ (ensemble vote fraction or calibrated posterior). The detector does NOT emit hard binary decisions; binary thresholding is replaced by policy action selection.
+2. **Continuous Output Contract**: The detector emits a continuous attack risk score $S_t \in [0, 1]$ (such as tree-vote fraction from Random Forest or sigmoid-activated sequence output from LSTM; calibrated probability is reported only where an explicit Platt calibration artifact is applied). The detector does NOT emit hard binary decisions; binary thresholding is replaced by policy action selection.
 3. **Zero Target Data Leakage**: In cross-dataset evaluations, detectors remain frozen on source data; the response policy must operate directly on unadapted out-of-domain detector scores.
 
 ---
@@ -133,13 +133,28 @@ The simulator models the state transitions and cost consequences of actions math
 
 ## 6. Offline Response Simulator Design
 
-To enable reproducible, zero-risk RL training and evaluation, an **Offline Response Simulator** will execute against ordered flow streams from Phase 1 test datasets.
+To enable reproducible, zero-risk RL training and evaluation, an **Offline Response Simulator** will execute against ordered flow streams from designated policy partitions.
+
+The dataset isolation protocol strictly follows:
+```text
+Phase 1 detector:
+    frozen
+
+Policy-development population:
+    designated policy-training portion (D_pol_train)
+    designated policy-validation portion (D_pol_val)
+
+Final policy test population:
+    completely untouched until final evaluation (D_pol_test)
+```
+
+The simulator engine supports replaying any configured flow split, but the experimental protocol strictly confines RL policy exploration, training, and hyperparameter tuning to the designated policy-development partitions (`D_pol_train` and `D_pol_val`). The final policy test population remains completely untouched until final benchmark evaluation. Under no circumstances may future flows or ground-truth labels enter the current policy state.
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                   Offline Replay Simulator                       │
 │                                                                  │
-│  [Ordered Flow Dataset (CIC / CSE / UNSW Test Partitions)]       │
+│  [Ordered Flow Stream (Designated Policy Split: D_pol_train/val)]│
 │                            │                                     │
 │                            ▼                                     │
 │  Flow Extractor ──► Frozen Detector ──► Attack Risk Score S_t    │
@@ -163,26 +178,37 @@ To enable reproducible, zero-risk RL training and evaluation, an **Offline Respo
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-### Simulation Execution Rules:
+### 6.1 Simulation Execution Rules
 1. **Time-Series Ordering**: Flows are ingested strictly in chronological capture order within each source capture session.
 2. **Session / Host Grouping**: Flows are partitioned by endpoint identifier (`src_ip` or session ID), modeling response impact on specific hosts.
-3. **Delayed Consequences**: A missed attack flow increases the risk of subsequent flows within the same session by compounding compromise state.
+3. **Temporal Causality**: The state builder observes only flows up to step $t$; future flows and future labels are strictly inaccessible.
 4. **Offline Evaluation Guarantee**: The simulation operates entirely in memory on pre-recorded dataset artifacts.
+
+### 6.2 Simulated Transition Assumptions & Modeling Boundaries
+All state progression, endpoint compromise, and action consequences inside the simulator are explicit **simulated transition assumptions**:
+1. **Delayed Compromise Accumulation**: The model assumption that an unmitigated attack flow ($a_t=\text{ALLOW}, y_t=1$) compounds compromise state or elevates subsequent risk within that session is a **simulated transition assumption**, NOT an empirical property directly observed or recorded in the Phase 1 static CSV records.
+2. **Simulated Action Consequences**: Actions such as `RATE_LIMIT` (assumed to throttle flow throughput by 90%) and `ISOLATE` (assumed to terminate session communication) are idealized **simulated transition assumptions**. They require sensitivity analysis across transition parameters.
+3. **No Empirical Claim of Physical Dynamics**: The Phase 1 datasets provide ground-truth labeled flows; the downstream consequence engine, host compromise progression, and mitigation feedback loops are synthetic modeling constructs. They do not constitute empirical proof that physical enterprise networks exhibit these exact state dynamics.
 
 ---
 
-## 7. Cost & Reward Model (Resolving Decision D-003)
+## 7. Cost & Reward Model: Illustrative Research Cost Framework
 
-Decision `D-003` established that a single operational threshold cannot be frozen without an explicit operational cost matrix. Phase 2 formalizes this cost matrix to govern the RL reward function.
+Under Decision `D-003`, research reporting threshold $\tau_{\text{research}} = 0.50$ is frozen for benchmark reporting, $\tau_{\text{ops}} = 0.40$ is strictly a proposed Phase 2 operational candidate, and operational threshold selection remains explicitly OPEN pending deployment-specific cost/loss evidence.
 
-### 7.1 Baseline Research Cost Matrix ($C_{\text{base}}$)
+Therefore, the Phase 2 cost model is formulated NOT as a selection or resolution of a real-world deployment threshold, but as **an illustrative research cost framework used to evaluate response policies under controlled asymmetric-loss regimes**. It does NOT select or resolve the real deployment threshold.
 
-Costs are expressed in dimensionless operational loss units reflecting enterprise risk priorities:
+### 7.1 Illustrative Baseline Research Cost Matrix ($C_{\text{base}}$)
+
+> [!IMPORTANT]
+> **Research Assumptions Only**: The specific numerical loss values below (e.g., missed attack = 100.0, benign isolation = 60.0, rate-limit degradation = 15.0, alert triage = 1.0) are explicit **research assumptions** established to create controlled asymmetric loss gradients. They do **NOT** represent real, empirically calibrated enterprise financial costs. Any physical production deployment would require site-specific risk assessments and empirical cost calibration before deployment.
+
+Costs are expressed in dimensionless research loss units:
 
 | Ground Truth ($y_t$) | `ALLOW` ($a=0$) | `ALERT` ($a=1$) | `RATE_LIMIT` ($a=2$) | `ISOLATE` ($a=3$) |
 |:---|:---:|:---:|:---:|:---:|
-| **Benign ($y=0$)** | **0.0** (Ideal) | **1.0** (Triage overhead) | **15.0** (Degraded service) | **60.0** (False outage / denial of service) |
-| **Attack ($y=1$)** | **100.0** (Undetected breach) | **12.0** (Audit logged, but uncontained) | **6.0** (Attack throttled / mitigated) | **2.0** (Attack completely contained) |
+| **Benign ($y=0$)** | **0.0** (Ideal baseline) | **1.0** (Research assumption: triage overhead) | **15.0** (Research assumption: degraded service) | **60.0** (Research assumption: false outage / DoS) |
+| **Attack ($y=1$)** | **100.0** (Research assumption: uncontained breach) | **12.0** (Research assumption: logged, but uncontained) | **6.0** (Research assumption: attack throttled) | **2.0** (Research assumption: attack contained) |
 
 ### 7.2 Dynamic Penalties for Policy Stability
 In addition to static state-action costs, the reward function penalizes unstable operational behavior:
@@ -196,14 +222,17 @@ In addition to static state-action costs, the reward function penalizes unstable
 ### 7.3 Composite Step Reward
 $$R(s_t, a_t, y_t) = -\Big[ C(a_t, y_t) + C_{\text{chatter}}(a_t, a_{t-1}) + C_{\text{fatigue}} \Big]$$
 
-### 7.4 Sensitivity Analysis across Three Cost Regimes
-To prevent overfitting to arbitrary cost coefficients, Phase 2 evaluations must test across three distinct operational regimes:
+### 7.4 Multi-Regime Sensitivity Analysis
 
-| Cost Regime | $C(\text{ALLOW}, \text{Atk})$ | $C(\text{ISO}, \text{Ben})$ | $C(\text{RL}, \text{Ben})$ | Operational Persona |
+Because numerical loss parameters are research assumptions rather than universal physical constants, Phase 2 evaluations must conduct sensitivity analysis across three distinct asymmetric loss regimes rather than overfitting to a single arbitrary matrix:
+
+| Cost Regime | $C(\text{ALLOW}, \text{Atk})$ | $C(\text{ISO}, \text{Ben})$ | $C(\text{RL}, \text{Ben})$ | Parameterized Research Model |
 |:---|:---:|:---:|:---:|:---|
-| **Regime A: High Availability** | 50.0 | 120.0 | 30.0 | Critical infrastructure, healthcare, ecommerce; zero tolerance for false outages. |
-| **Regime B: Standard Enterprise (Default)** | 100.0 | 60.0 | 15.0 | Corporate enterprise IT; balanced mitigation vs availability. |
-| **Regime C: High Security Enclave** | 500.0 | 25.0 | 5.0 | Defense/banking data center; zero tolerance for uncontained breach. |
+| **Regime A: High Availability** | 50.0 | 120.0 | 30.0 | Parameterized model prioritizing uptime; high penalty for false outages. |
+| **Regime B: Standard Enterprise (Default)** | 100.0 | 60.0 | 15.0 | Balanced parameterized model between mitigation and availability. |
+| **Regime C: High Security Enclave** | 500.0 | 25.0 | 5.0 | Parameterized model prioritizing containment; high penalty for uncontained breaches. |
+
+These regimes are parameterized research assumptions. They demonstrate that optimal policy behavior depends fundamentally on external operational loss parameters rather than intrinsic model properties, reaffirming that operational threshold selection remains an open, deployment-specific decision.
 
 ---
 
@@ -213,28 +242,30 @@ Before evaluating any reinforcement learning agent, Phase 2 establishes **four d
 
 ```
 Baseline Ladder for Autonomous Response:
-┌────────────────────────────────────────────────────────┐
-│ Level 0: Always-ALLOW Policy (Zero Automated Defense)  │
-├────────────────────────────────────────────────────────┤
-│ Level 1: Static Single-Threshold Policy (τ = 0.50)     │
-├────────────────────────────────────────────────────────┤
-│ Level 2: Two-Tier Static Threshold Policy (0.40 / 0.75)│
-├────────────────────────────────────────────────────────┤
-│ Level 3: Deterministic Rule-Based State Machine        │
-├────────────────────────────────────────────────────────┤
-│ Level 4: Candidate RL Agent (DQN)                      │
-└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│ Level 0: Always-ALLOW Policy (Zero Automated Defense)                  │
+├────────────────────────────────────────────────────────────────────────┤
+│ Level 1: Deterministic Single-Threshold Policy (τ = 0.50 Research)     │
+├────────────────────────────────────────────────────────────────────────┤
+│ Level 2: Exploratory Two-Tier Static Threshold Policy (0.40 / 0.75)    │
+├────────────────────────────────────────────────────────────────────────┤
+│ Level 3: Deterministic Rule-Based State Machine                        │
+├────────────────────────────────────────────────────────────────────────┤
+│ Level 4: Candidate RL Agent (DQN)                                      │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 1. **Baseline 0 (Always-ALLOW)**:
    $$a_t = \text{ALLOW} \quad \forall t$$
    Measures raw unmitigated breach damage across the evaluation dataset.
-2. **Baseline 1 (Standard Fixed Threshold $\tau = 0.50$)**:
+2. **Baseline 1 (Deterministic Single-Threshold Policy, $\tau = 0.50$)**:
    $$a_t = \begin{cases} \text{ISOLATE}, & \text{if } S_t \ge 0.50 \\ \text{ALLOW}, & \text{if } S_t < 0.50 \end{cases}$$
-   The standard academic benchmark baseline.
-3. **Baseline 2 (Two-Tier Static Threshold Policy)**:
-   Reflects Decision `D-003` candidate operating points:
-   $$a_t = \begin{cases} \text{ISOLATE}, & \text{if } S_t \ge 0.75 \text{ (High confidence attack)} \\ \text{RATE\_LIMIT}, & \text{if } 0.40 \le S_t < 0.75 \text{ (Suspect flow)} \\ \text{ALLOW}, & \text{if } S_t < 0.40 \text{ (Probable benign)} \end{cases}$$
+   Evaluates response actions under the frozen academic research reporting boundary ($\tau = 0.50$). This serves as a standard experimental baseline comparator, not an operational deployment recommendation.
+3. **Baseline 2 (Exploratory Two-Tier Static Threshold Policy, $\tau_1 = 0.40, \tau_2 = 0.75$)**:
+   Evaluates an exploratory two-tier tiered response baseline using proposed candidate operating points:
+   $$a_t = \begin{cases} \text{ISOLATE}, & \text{if } S_t \ge 0.75 \text{ (High confidence attack; min-FPR candidate)} \\ \text{RATE\_LIMIT}, & \text{if } 0.40 \le S_t < 0.75 \text{ (Suspect flow; proposed Phase 2 candidate)} \\ \text{ALLOW}, & \text{if } S_t < 0.40 \text{ (Low risk / baseline benign)} \end{cases}$$
+   > [!NOTE]
+   > Neither Baseline 1 ($\tau = 0.50$) nor Baseline 2 ($\tau = 0.40 / 0.75$) constitutes a Decision `D-003` deployment-threshold decision. These baselines are experimental comparators for evaluating multi-tier graded actions against single thresholds; operational threshold selection remains open.
 4. **Baseline 3 (Heuristic State Machine / Rule Engine)**:
    Deterministic rule engine with memory:
    - Escalates from `ALLOW` $\to$ `ALERT` on first suspect flow ($S_t \ge 0.40$).
@@ -294,7 +325,19 @@ Autonomous response evaluation cannot rely on classification accuracy or ROC-AUC
 
 ## 11. Experimental Isolation & Anti-Leakage Protocol
 
-To ensure rigorous scientific validity:
+To ensure rigorous scientific validity, the evaluation protocol establishes an unambiguous three-tier population hierarchy:
+
+```text
+Phase 1 detector:
+    frozen
+
+Policy-development population:
+    designated policy-training portion (D_pol_train)
+    designated policy-validation portion (D_pol_val)
+
+Final policy test population:
+    completely untouched until final evaluation (D_pol_test)
+```
 
 ```
 Dataset Partitioning Strategy for Phase 2:
@@ -311,9 +354,9 @@ Dataset Partitioning Strategy for Phase 2:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-1. **Zero Detector Retraining**: Detectors produce frozen feature representations.
-2. **Strict Test Isolation**: The test datasets (355,833 CIC flows; 1,662,419 CSE flows; 24,496 UNSW flows) are **never seen** during RL exploration, policy training, or hyperparameter selection. They are evaluated strictly once during the final benchmarking run.
-3. **Temporal Causality**: State vectors and replay buffers are constructed sequentially; no future flow observations are accessible to current policy decisions.
+1. **Zero Detector Retraining**: Detectors produce frozen feature representations with fixed parameters.
+2. **Strict Final Test Isolation**: The final policy test population (355,833 CIC flows; 1,662,419 CSE flows; 24,496 UNSW flows) remains **completely untouched and unseen** during RL exploration, policy training, baseline tuning, or hyperparameter selection. It is evaluated strictly once during the final comparative study.
+3. **Temporal Causality & Information Isolation**: State vectors and replay buffers are constructed sequentially from historical observations only; no future flows, future timestamps, or ground-truth labels are accessible to the agent during policy execution.
 
 ---
 
@@ -405,7 +448,12 @@ $$\text{Action}_{\text{proposed}} \sim \pi(s_t) \;\xrightarrow{\quad}\; \boxed{\
 
 ## 15. Formally Defined Phase 2 Research Questions
 
-| Question ID | Formulation | Empirical Success Criteria |
+> [!IMPORTANT]
+> **Pre-Registered Proposed Research Study Criteria**: The quantitative targets below ($\Delta \mathcal{C}_{\text{rel}} \ge 15.0\%$, $p < 0.01$, $\text{ACI} < 0.01$, $\text{FQR} < 2.0\%$) are **pre-registered proposed research study criteria**, NOT empirically established facts or guaranteed performance promises. They serve as objective benchmarks to test whether reinforcement learning justifies its operational complexity.
+>
+> **Neutral Null Hypothesis Acceptance**: The experimental framework is designed with strict scientific neutrality. If empirical evaluation demonstrates that deterministic baseline policies (such as the heuristic state machine or exploratory two-tier threshold) achieve equivalent or superior cost profiles compared to the learned policy, the Null Hypothesis ($H_0$) will be formally accepted, and the project will recommend the simpler deterministic solution.
+
+| Question ID | Formulation | Pre-Registered Proposed Research Study Criteria |
 |:---|:---|:---|
 | **RQ7** (Primary) | Can an autonomous reinforcement learning policy achieve lower cumulative operational cost than fixed-threshold and rule-based baselines under asymmetric cost matrices? | $\Delta \mathcal{C}_{\text{rel}} \ge 15.0\%$ cost reduction over best deterministic baseline with $p < 0.01$ (paired bootstrap). |
 | **RQ7.1** | Can stateful action representations and cooldown invariants eliminate action chattering? | Action Chattering Index (ACI) $< 0.01$ (less than 1 chattering transition per 100 flows). |
