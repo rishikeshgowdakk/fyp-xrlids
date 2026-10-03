@@ -1,10 +1,10 @@
 {
   "experiment_id": "EXP-P2E-EXPLAINABILITY-001",
-  "git_commit": "211ca14f507439708c8efd8a1bdff7b7df132e0c",
+  "git_commit": "39996f9da7674ac5e27b0a99f68f3f13dc856f5c",
   "dataset_sha256": null,
   "feature_schema_hash": null,
   "seed": 42,
-  "created_at": "2026-10-03T20:50:58.142308+00:00",
+  "created_at": "2026-10-03T21:09:04.500485+00:00",
   "software_environment": {
     "python_version": "3.14.4",
     "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
@@ -12,7 +12,7 @@
     "processor_count": null,
     "cuda_available": false,
     "cuda_version": null,
-    "git_commit": "211ca14f507439708c8efd8a1bdff7b7df132e0c",
+    "git_commit": "39996f9da7674ac5e27b0a99f68f3f13dc856f5c",
     "packages": {
       "numpy": "2.5.3",
       "pandas": "3.0.6",

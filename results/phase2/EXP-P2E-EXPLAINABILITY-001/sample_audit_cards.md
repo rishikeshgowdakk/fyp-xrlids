@@ -1,9 +1,9 @@
 ### Action Decision Audit Card: `0`
 
-- **Timestamp**: `2026-10-03T20:50:51.286079+00:00`
+- **Timestamp**: `2026-10-03T21:08:58.314513+00:00`
 - **Target Host**: `host_0`
-- **Proposed Action**: `3`
-- **Enforced Action**: `3`
+- **Proposed Action**: `ISOLATE`
+- **Enforced Action**: `ISOLATE`
 
 #### Layer 1: Perception Explainability (TreeSHAP)
 - **Detector Risk Score ($S_t$)**: `0.9934`
@@ -21,6 +21,7 @@
   - Threat velocity accelerating rapidly (rate-of-change delta=+1.00)
   - Destination endpoint is designated critical infrastructure (isolation strictly prohibited)
   - Endpoint active cooldown in effect (8 steps remaining)
+  - High cumulative threat density and persistent attack pattern justify complete endpoint containment
 
 #### Deterministic Safety Invariants
 - **Invariants Checked**: `CRITICAL_INFRASTRUCTURE_EXEMPTION`, `MANDATORY_ACTION_COOLDOWN`, `BLAST_RADIUS_CIRCUIT_BREAKER`
@@ -31,10 +32,10 @@
 
 ### Action Decision Audit Card: `2`
 
-- **Timestamp**: `2026-10-03T20:50:51.286853+00:00`
+- **Timestamp**: `2026-10-03T21:08:58.315176+00:00`
 - **Target Host**: `host_2`
-- **Proposed Action**: `3`
-- **Enforced Action**: `1`
+- **Proposed Action**: `ISOLATE`
+- **Enforced Action**: `ALERT`
 
 #### Layer 1: Perception Explainability (TreeSHAP)
 - **Detector Risk Score ($S_t$)**: `0.9970`
@@ -53,6 +54,7 @@
   - Threat velocity accelerating rapidly (rate-of-change delta=+0.67)
   - Destination endpoint is standard network asset (isolation permissible if justified)
   - Endpoint active cooldown in effect (8 steps remaining)
+  - Threat score elevated but risk does not warrant disruptive traffic containment
 
 #### Deterministic Safety Invariants
 - **Invariants Checked**: `CRITICAL_INFRASTRUCTURE_EXEMPTION`, `MANDATORY_ACTION_COOLDOWN`, `BLAST_RADIUS_CIRCUIT_BREAKER`
@@ -64,10 +66,10 @@
 
 ### Action Decision Audit Card: `6`
 
-- **Timestamp**: `2026-10-03T20:50:51.287128+00:00`
+- **Timestamp**: `2026-10-03T21:08:58.315432+00:00`
 - **Target Host**: `host_6`
-- **Proposed Action**: `3`
-- **Enforced Action**: `1`
+- **Proposed Action**: `ISOLATE`
+- **Enforced Action**: `ALERT`
 
 #### Layer 1: Perception Explainability (TreeSHAP)
 - **Detector Risk Score ($S_t$)**: `0.9840`
@@ -86,6 +88,7 @@
   - Threat velocity accelerating rapidly (rate-of-change delta=+0.43)
   - Destination endpoint is standard network asset (isolation permissible if justified)
   - Endpoint active cooldown in effect (15 steps remaining)
+  - Threat score elevated but risk does not warrant disruptive traffic containment
 
 #### Deterministic Safety Invariants
 - **Invariants Checked**: `CRITICAL_INFRASTRUCTURE_EXEMPTION`, `MANDATORY_ACTION_COOLDOWN`, `BLAST_RADIUS_CIRCUIT_BREAKER`
@@ -97,10 +100,10 @@
 
 ### Action Decision Audit Card: `18`
 
-- **Timestamp**: `2026-10-03T20:50:51.287351+00:00`
+- **Timestamp**: `2026-10-03T21:08:58.315656+00:00`
 - **Target Host**: `host_18`
-- **Proposed Action**: `3`
-- **Enforced Action**: `1`
+- **Proposed Action**: `ISOLATE`
+- **Enforced Action**: `ALERT`
 
 #### Layer 1: Perception Explainability (TreeSHAP)
 - **Detector Risk Score ($S_t$)**: `0.9951`
@@ -119,6 +122,7 @@
   - Threat velocity accelerating rapidly (rate-of-change delta=+0.21)
   - Destination endpoint is standard network asset (isolation permissible if justified)
   - Endpoint active cooldown in effect (8 steps remaining)
+  - Threat score elevated but risk does not warrant disruptive traffic containment
 
 #### Deterministic Safety Invariants
 - **Invariants Checked**: `CRITICAL_INFRASTRUCTURE_EXEMPTION`, `MANDATORY_ACTION_COOLDOWN`, `BLAST_RADIUS_CIRCUIT_BREAKER`
@@ -130,10 +134,10 @@
 
 ### Action Decision Audit Card: `21`
 
-- **Timestamp**: `2026-10-03T20:50:51.287562+00:00`
+- **Timestamp**: `2026-10-03T21:08:58.315866+00:00`
 - **Target Host**: `host_21`
-- **Proposed Action**: `3`
-- **Enforced Action**: `1`
+- **Proposed Action**: `ISOLATE`
+- **Enforced Action**: `ALERT`
 
 #### Layer 1: Perception Explainability (TreeSHAP)
 - **Detector Risk Score ($S_t$)**: `0.9724`
@@ -152,6 +156,7 @@
   - Threat velocity accelerating rapidly (rate-of-change delta=+0.19)
   - Destination endpoint is standard network asset (isolation permissible if justified)
   - Endpoint active cooldown in effect (10 steps remaining)
+  - Threat score elevated but risk does not warrant disruptive traffic containment
 
 #### Deterministic Safety Invariants
 - **Invariants Checked**: `CRITICAL_INFRASTRUCTURE_EXEMPTION`, `MANDATORY_ACTION_COOLDOWN`, `BLAST_RADIUS_CIRCUIT_BREAKER`
@@ -163,10 +168,10 @@
 
 ### Action Decision Audit Card: `24`
 
-- **Timestamp**: `2026-10-03T20:50:51.287768+00:00`
+- **Timestamp**: `2026-10-03T21:08:58.316077+00:00`
 - **Target Host**: `host_24`
-- **Proposed Action**: `3`
-- **Enforced Action**: `1`
+- **Proposed Action**: `ISOLATE`
+- **Enforced Action**: `ALERT`
 
 #### Layer 1: Perception Explainability (TreeSHAP)
 - **Detector Risk Score ($S_t$)**: `0.9964`
@@ -185,6 +190,7 @@
   - Threat velocity accelerating rapidly (rate-of-change delta=+0.19)
   - Destination endpoint is standard network asset (isolation permissible if justified)
   - Endpoint active cooldown in effect (8 steps remaining)
+  - Threat score elevated but risk does not warrant disruptive traffic containment
 
 #### Deterministic Safety Invariants
 - **Invariants Checked**: `CRITICAL_INFRASTRUCTURE_EXEMPTION`, `MANDATORY_ACTION_COOLDOWN`, `BLAST_RADIUS_CIRCUIT_BREAKER`
@@ -196,10 +202,10 @@
 
 ### Action Decision Audit Card: `25`
 
-- **Timestamp**: `2026-10-03T20:50:51.287974+00:00`
+- **Timestamp**: `2026-10-03T21:08:58.316301+00:00`
 - **Target Host**: `host_25`
-- **Proposed Action**: `2`
-- **Enforced Action**: `2`
+- **Proposed Action**: `RATE_LIMIT`
+- **Enforced Action**: `RATE_LIMIT`
 
 #### Layer 1: Perception Explainability (TreeSHAP)
 - **Detector Risk Score ($S_t$)**: `0.9798`
@@ -219,6 +225,7 @@
   - Persistent attack burst detected (3+ consecutive elevated flows)
   - Destination endpoint is designated critical infrastructure (isolation strictly prohibited)
   - Endpoint active cooldown in effect (15 steps remaining)
+  - Suspicious velocity or critical infrastructure status indicates rate-limiting to preserve availability
 
 #### Deterministic Safety Invariants
 - **Invariants Checked**: `CRITICAL_INFRASTRUCTURE_EXEMPTION`, `MANDATORY_ACTION_COOLDOWN`, `BLAST_RADIUS_CIRCUIT_BREAKER`
@@ -229,10 +236,10 @@
 
 ### Action Decision Audit Card: `28`
 
-- **Timestamp**: `2026-10-03T20:50:51.288182+00:00`
+- **Timestamp**: `2026-10-03T21:08:58.316508+00:00`
 - **Target Host**: `host_28`
-- **Proposed Action**: `3`
-- **Enforced Action**: `1`
+- **Proposed Action**: `ISOLATE`
+- **Enforced Action**: `ALERT`
 
 #### Layer 1: Perception Explainability (TreeSHAP)
 - **Detector Risk Score ($S_t$)**: `0.9853`
@@ -251,6 +258,7 @@
   - Threat velocity accelerating rapidly (rate-of-change delta=+0.24)
   - Destination endpoint is standard network asset (isolation permissible if justified)
   - Endpoint active cooldown in effect (19 steps remaining)
+  - Threat score elevated but risk does not warrant disruptive traffic containment
 
 #### Deterministic Safety Invariants
 - **Invariants Checked**: `CRITICAL_INFRASTRUCTURE_EXEMPTION`, `MANDATORY_ACTION_COOLDOWN`, `BLAST_RADIUS_CIRCUIT_BREAKER`
@@ -262,10 +270,10 @@
 
 ### Action Decision Audit Card: `56`
 
-- **Timestamp**: `2026-10-03T20:50:51.288380+00:00`
+- **Timestamp**: `2026-10-03T21:08:58.316734+00:00`
 - **Target Host**: `host_56`
-- **Proposed Action**: `3`
-- **Enforced Action**: `3`
+- **Proposed Action**: `ISOLATE`
+- **Enforced Action**: `ISOLATE`
 
 #### Layer 1: Perception Explainability (TreeSHAP)
 - **Detector Risk Score ($S_t$)**: `0.9927`
@@ -283,6 +291,7 @@
   - Exponentially smoothed threat density is elevated (EWMA=0.988)
   - Destination endpoint is designated critical infrastructure (isolation strictly prohibited)
   - Endpoint active cooldown in effect (8 steps remaining)
+  - High cumulative threat density and persistent attack pattern justify complete endpoint containment
 
 #### Deterministic Safety Invariants
 - **Invariants Checked**: `CRITICAL_INFRASTRUCTURE_EXEMPTION`, `MANDATORY_ACTION_COOLDOWN`, `BLAST_RADIUS_CIRCUIT_BREAKER`
@@ -293,10 +302,10 @@
 
 ### Action Decision Audit Card: `63`
 
-- **Timestamp**: `2026-10-03T20:50:51.288577+00:00`
+- **Timestamp**: `2026-10-03T21:08:58.316941+00:00`
 - **Target Host**: `host_63`
-- **Proposed Action**: `3`
-- **Enforced Action**: `3`
+- **Proposed Action**: `ISOLATE`
+- **Enforced Action**: `ISOLATE`
 
 #### Layer 1: Perception Explainability (TreeSHAP)
 - **Detector Risk Score ($S_t$)**: `0.9910`
@@ -314,6 +323,7 @@
   - Exponentially smoothed threat density is elevated (EWMA=0.956)
   - Destination endpoint is designated critical infrastructure (isolation strictly prohibited)
   - Endpoint active cooldown in effect (8 steps remaining)
+  - High cumulative threat density and persistent attack pattern justify complete endpoint containment
 
 #### Deterministic Safety Invariants
 - **Invariants Checked**: `CRITICAL_INFRASTRUCTURE_EXEMPTION`, `MANDATORY_ACTION_COOLDOWN`, `BLAST_RADIUS_CIRCUIT_BREAKER`
