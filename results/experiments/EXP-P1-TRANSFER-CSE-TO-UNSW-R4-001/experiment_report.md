@@ -31,7 +31,7 @@ Active features evaluated (4):
 ### Isolation Guarantees
 1. **Zero Preprocessor Leakage**: Preprocessor parameters (means, scales, medians) were learned exclusively from the source training population. The target dataset never fitted the preprocessor.
 2. **Frozen Model Weights**: Detectors (Majority, LR, DT, RF, LSTM) were trained exclusively on source data. No fine-tuning or adaptation was performed on target data.
-3. **Frozen Decision Parameters**: Fusion weight $\alpha$ and calibration mappings were tuned exclusively on source validation data; target test ground truth was never inspected during tuning.
+3. **Decision Parameters & Isolation**: Fusion weight $\alpha$ was selected using source validation data. Decision threshold 0.50 was fixed as the neutral baseline (threshold optimization remains OPEN under D-003). Target data was never used to tune either parameter.
 4. **Sequence Safety**: LSTM sequence windows ($T=5$, stride=1, label_rule='last') were strictly isolated by target source capture file, with no synthetic sequences crossing capture boundaries.
 
 ---

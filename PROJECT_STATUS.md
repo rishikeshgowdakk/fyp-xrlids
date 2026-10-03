@@ -80,6 +80,8 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 
 - No claims of universal performance or production readiness across arbitrary networks.
 - No claims that intrusion detectors generalize out-of-domain without target adaptation; empirical evaluation across all 6 cross-dataset pairs demonstrates 52% to 95% F1 degradation under unadapted transfer (answering RQ5).
+- No claims that decision threshold 0.50 was tuned on validation data; 0.50 was fixed as the neutral baseline while fusion alpha was source-validation tuned; threshold selection remains open under D-003.
+- In auxiliary transfers involving UNSW-NB15, source models were trained under the common 4-feature (R4) contract; original 10-feature models were not directly evaluated on UNSW due to missing features.
 - No claims that sequence models capture true physical packet arrival timelines; sequence ordering represents capture flow arrival order within sample partitions.
 - No claims of three-seed empirical averaging; full multi-file experiments reflect single-seed (seed=42) execution.
 - No final threshold frozen (D-003 remains open; reporting uses neutral 0.5 baseline).

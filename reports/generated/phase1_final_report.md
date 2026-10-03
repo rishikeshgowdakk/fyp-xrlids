@@ -2,7 +2,7 @@
 
 - **Platform**: XRL-IDARS (Intrusion Detection and Autonomous Response System)
 - **Phase**: 1 (Empirical Research Platform & Explainability)
-- **Git Commit**: `524d474535adc6b0c33bff3856cb3e9b20571be2 (dirty)`
+- **Git Commit**: `5a195354b5534597f44ed20d4672be59770eba86 (dirty)`
 - **Environment**: Python 3.14.4 · PyTorch 2.14.0+cpu · Scikit-Learn 1.9.1 · SHAP 0.52.0
 - **Verified Test Suite**: 196 passing tests (0 failures)
 
@@ -85,15 +85,19 @@
 
 ### RQ5: How well does the detector transfer between datasets?
 > **Answer**: **Empirically Observed Across All 6 Transfer Directions (Severe Domain Degradation Demonstrated)**.
-> Cross-dataset transfer was rigorously evaluated under strict scientific isolation (frozen source weights, source-only scalers, target as out-of-domain test set):
+> Cross-dataset transfer was rigorously evaluated under strict scientific isolation:
+> - Scalers were fitted strictly on source training partitions; models were frozen without target fine-tuning.
+> - Fusion weight $\alpha$ was selected using source validation data; decision threshold 0.50 was FIXED as the neutral baseline (threshold optimization remains OPEN under Decision Gate D-003); target data was never used to tune either parameter.
+>
 > 1. **Primary 10-Feature Contract (`CIC-IDS2017 ↔ CSE-CIC-IDS2018`)**:
->    - `CIC → CSE`: Random Forest F1 degrades from 0.9512 to **0.3286** ($\Delta = -0.6225$, ROC-AUC 0.7008), while Supervised LSTM collapses from 0.9633 to **0.0983** ($\Delta = -0.8650$, ROC-AUC 0.4787), and Fusion yields **0.1139** ($\Delta = -0.8606$, ROC-AUC 0.6604). Tabular Random Forest exhibits significantly higher out-of-domain resilience than sequence LSTM because axis-aligned decision trees tolerate scale shifts better than recurrent hidden states.
->    - `CSE → CIC`: Random Forest F1 degrades from 0.8861 to **0.0301** ($\Delta = -0.8560$, ROC-AUC 0.7127), while Supervised LSTM yields **0.2601** ($\Delta = -0.7003$, ROC-AUC 0.8052), and Fusion yields **0.1191** ($\Delta = -0.8412$, ROC-AUC 0.8099). Directional transfer asymmetry confirms that training domain traffic diversity determines transfer viability.
+>    - `CIC → CSE`: Random Forest F1 degrades from 0.9512 to **0.3286** ($\Delta = -0.6225$, ROC-AUC 0.7008), while Supervised LSTM collapses from 0.9633 to **0.0983** ($\Delta = -0.8650$, ROC-AUC 0.4787), and Fusion yields **0.1139** ($\Delta = -0.8606$, ROC-AUC 0.6604). Tabular Random Forest exhibits significantly higher out-of-domain ranking discriminability than sequence LSTM. A plausible explanation is that axis-aligned decision tree splits may tolerate monotonic scale shifts better than recurrent hidden states conditioned on fine-grained packet inter-arrival dynamics; however, this interpretation is not directly established by the transfer experiment itself.
+>    - `CSE → CIC`: Random Forest F1 degrades from 0.8861 to **0.0301** ($\Delta = -0.8560$, ROC-AUC 0.7127), while Supervised LSTM yields **0.2601** ($\Delta = -0.7003$, ROC-AUC 0.8052), and Fusion yields **0.1191** ($\Delta = -0.8412$, ROC-AUC 0.8099). Directional transfer asymmetry confirms that source dataset traffic diversity and sample distributions govern cross-domain discrimination.
 > 2. **Auxiliary 4-Feature Transfers Involving UNSW-NB15**:
->    - `UNSW → CIC`: RF F1 = 0.3276 (FPR 53.94%), LSTM F1 = 0.3389 (FPR 53.07%), Fusion F1 = 0.3664 (FPR 50.77%). False positive rate explodes on benign traffic due to fundamental flow timeout discrepancies between Bro/Zeek and CICFlowMeter.
->    - `UNSW → CSE`: RF F1 = 0.0217 (FPR 64.71%), LSTM F1 = 0.0380 (FPR 50.70%), Fusion F1 = 0.0268.
->    - `CIC → UNSW` & `CSE → UNSW`: Both models collapse (F1 < 0.005) due to UNSW's 45% attack prevalence and synthetic flow emulation characteristics.
-> 3. **Covariate Shift**: Two-sample Kolmogorov-Smirnov tests confirm extreme covariate shift ($D > 0.45 - 0.95$, $p = 0.0000$) across flow rates and durations.
+>    - *Provenance*: For transfers to UNSW (`CIC → UNSW` and `CSE → UNSW`), source reference models were trained and evaluated strictly under the 4-feature (R4) contract rather than reusing R10 models.
+>    - `UNSW → CIC`: RF F1 = 0.3276 (FPR 68.58%), LSTM F1 = 0.3389 (FPR 31.78%), Fusion F1 = 0.3664 (FPR 53.94%). Elevated false alarm rates on benign traffic may be consistent with flow exporter discrepancies (e.g., Bro/Zeek vs CICFlowMeter flow timeouts), though exporter effects were not independently isolated.
+>    - `UNSW → CSE`: RF F1 = 0.0217 (FPR 64.73%), LSTM F1 = 0.0380 (FPR 50.74%), Fusion F1 = 0.0268.
+>    - `CIC → UNSW` & `CSE → UNSW`: Both models collapse (F1 < 0.005). Plausible contributing factors include extreme class prevalence differences (UNSW ~45% attack vs CIC/CSE ~11–18%) and synthetic attack generation characteristics.
+> 3. **Covariate Shift**: Two-sample Kolmogorov-Smirnov tests confirm statistically significant distribution shift ($p = 0.0000$). The largest KS statistics occur in UNSW-involving transfers (reaching $D \approx 0.57$), whereas CIC ↔ CSE primary R10 transfers exhibit maximum $D \approx 0.29$.
 >
 > **Core Scientific Conclusion**: High in-domain benchmark performance (>0.96–0.99 F1) does **not** transfer across network domains without domain adaptation. Autonomous response systems (Phase 2/3) must incorporate uncertainty quantification and continuous adaptation rather than assuming universal detector transferability.
 

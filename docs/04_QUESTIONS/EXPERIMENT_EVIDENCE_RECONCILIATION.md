@@ -179,9 +179,10 @@ The paired bootstrap comparison (`src/xrlids/evaluation/statistics.py`) tests th
 ## 11. Cross-Dataset Generalization & Out-of-Domain Transfer (Task 4 Completed)
 
 Cross-dataset evaluation was executed across all 6 directional pairs under strict scientific isolation:
-- Scalers fitted strictly on source training partitions.
-- Detectors (Random Forest, Supervised LSTM, Score Fusion) frozen without target parameter updates or target validation early-stopping.
-- Target domains evaluated strictly out-of-domain.
+- Scalers fitted strictly on source training partitions; detectors frozen without target fine-tuning.
+- Fusion weight $\alpha$ was selected using source validation data.
+- The decision threshold 0.50 was FIXED as the neutral baseline (threshold optimization remains OPEN under Decision Gate D-003).
+- Target data was never used to tune either parameter.
 
 ### Transfer Matrix & Artifact Suites
 
@@ -189,24 +190,29 @@ Cross-dataset evaluation was executed across all 6 directional pairs under stric
    - RF: Source F1 0.9512 → Target F1 **0.3286** ($\Delta = -0.6225$, Target ROC-AUC 0.7008, FPR 0.0486)
    - LSTM: Source F1 0.9633 → Target F1 **0.0983** ($\Delta = -0.8650$, Target ROC-AUC 0.4787, FPR 0.0635)
    - Fusion: Source F1 0.9745 → Target F1 **0.1139** ($\Delta = -0.8606$, Target ROC-AUC 0.6604, FPR 0.0159)
-   - *Key finding*: Tabular RF displays greater out-of-domain resilience than Supervised LSTM. Axis-aligned decision tree splits tolerate monotonic scale shifts better than recurrent hidden states conditioned on fine-grained inter-packet timing.
+   - *Findings & Interpretation*: Tabular RF displays greater out-of-domain ranking discriminability than Supervised LSTM. A plausible explanation is that axis-aligned decision tree splits may tolerate monotonic scale shifts better than recurrent hidden states conditioned on fine-grained timing dynamics; however, this interpretation is not directly established by the transfer experiment itself.
 2. `EXP-P1-TRANSFER-CSE-TO-CIC-R10-001` (CSE-CIC-IDS2018 → CIC-IDS2017, R10):
    - RF: Source F1 0.8861 → Target F1 **0.0301** ($\Delta = -0.8560$, Target ROC-AUC 0.7127, FPR 0.0248)
    - LSTM: Source F1 0.9603 → Target F1 **0.2601** ($\Delta = -0.7003$, Target ROC-AUC 0.8052, FPR 0.0141)
    - Fusion: Source F1 0.9603 → Target F1 **0.1191** ($\Delta = -0.8412$, Target ROC-AUC 0.8099, FPR 0.0107)
-   - *Key finding*: Asymmetric transfer dynamics show that source dataset diversity fundamentally governs cross-domain discrimination.
+   - *Findings & Interpretation*: Asymmetric transfer dynamics show that source dataset diversity fundamentally governs cross-domain discrimination.
 3. `EXP-P1-TRANSFER-UNSW-TO-CIC-R4-001` (UNSW-NB15 → CIC-IDS2017, R4):
+   - Evaluated under the verified 4-feature contract (`flow_duration_ms`, `flow_packets_per_s`, `flow_bytes_per_s`, `packet_length_mean`).
    - RF: Target F1 0.3276 (FPR 68.58%, ROC-AUC 0.6057); LSTM: Target F1 0.3389 (FPR 31.78%, ROC-AUC 0.6690); Fusion: Target F1 0.3664 (FPR 53.94%, ROC-AUC 0.6804).
-   - False positive rates explode on benign traffic due to flow timeout discrepancies between Bro/Zeek and CICFlowMeter.
+   - Elevated false positive rates on benign traffic may be consistent with flow exporter discrepancies (e.g., Bro/Zeek vs CICFlowMeter flow timeouts), though exporter effects were not experimentally isolated.
 4. `EXP-P1-TRANSFER-UNSW-TO-CSE-R4-001` (UNSW-NB15 → CSE-CIC-IDS2018, R4):
+   - Evaluated under the verified 4-feature contract.
    - RF F1 = 0.0217 (FPR 64.73%); LSTM F1 = 0.0380 (FPR 50.74%); Fusion F1 = 0.0268 (FPR 55.13%).
 5. `EXP-P1-TRANSFER-CIC-TO-UNSW-R4-001` (CIC-IDS2017 → UNSW-NB15, R4):
+   - *Provenance*: Source reference models were trained and evaluated strictly under the 4-feature contract rather than reusing R10 models.
    - RF F1 = 0.0016; LSTM F1 = 0.0051; Fusion F1 = 0.0004.
 6. `EXP-P1-TRANSFER-CSE-TO-UNSW-R4-001` (CSE-CIC-IDS2018 → UNSW-NB15, R4):
+   - *Provenance*: Source reference models were trained and evaluated strictly under the 4-feature contract rather than reusing R10 models.
    - RF F1 = 0.0026; LSTM F1 = 0.0048; Fusion F1 = 0.0019.
+   - Near-zero F1 (<0.005) on UNSW may be explained by the combination of extreme class prevalence divergence (UNSW ~45% attack vs CIC/CSE ~11–18%) and synthetic attack generation characteristics (IXIA PerfectStorm), but this causal attribution remains an interpretation rather than an experimentally isolated factor.
 
 ### Covariate Shift & Scientific Conclusion (RQ5)
-- Two-sample Kolmogorov-Smirnov tests ($D > 0.45 - 0.95$, $p = 0.0000$) demonstrate severe covariate shift in flow throughput and durations.
+- Two-sample Kolmogorov-Smirnov tests confirm statistically significant distribution shift ($p = 0.0000$). The largest KS statistics occur in UNSW-involving transfers (reaching $D \approx 0.57$), whereas CIC ↔ CSE primary R10 transfers exhibit maximum $D \approx 0.29$.
 - **RQ5 Answer**: Universal cross-network generalization is disproven. Unadapted detectors experience 52% to 95% F1 collapses. Phase 2 autonomous response agents must not assume universal detector transferability.
 
 ---
