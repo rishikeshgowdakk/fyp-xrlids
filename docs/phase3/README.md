@@ -25,7 +25,8 @@ The most operationally important phase. Everything here is gated on earlier evid
 | Enforcement readiness gate | PreconditionGate, cryptographic provenance, fail-closed authorization | Phase 3H | ✅ VERIFIED & AUDITED (18/18 Scenarios Pass) |
 | Isolated lab namespace loop | Topology creation, isolation verification, 16-stage execution, zero host mutation | Phase 3I | ✅ VERIFIED & AUDITED (`EXP-P3I-ISOLATED-LAB-001`, 16/16 Stages, 16/16 Scenarios) |
 | Multi-flow soak & concurrency | Multi-flow traffic model, striped per-target locks, Scenarios A–D, 12 failure injections | Phase 3J | ✅ VERIFIED & AUDITED (`EXP-P3J-CONCURRENCY-001`, 192 tx, 12/12 Scenarios) |
-| Final operational report | Evidence-driven summary | Final Closure | ⬜ Planned |
+| Pre-production security & stress audit | Long soak (10k flows), resource stability, socket stress, attack-surface audit, provenance audit | Phase 3K | 🟡 In Progress (`EXP-P3K-STRESS-SECURITY-001`) |
+| Final operational report | Evidence-driven summary and final synthesis | Final Closure | ⬜ Planned (Scheduled for project final closure after Phase 3K) |
 
 ## Flow Completion Policy (Decision D-006)
  
@@ -83,8 +84,8 @@ Live Network / Controlled PCAP
   - Dual-mode isolated lab network namespace topology (`xrlids_att_01`, `xrlids_vic_01`, `veth_xrl_*`), host cryptographic baseline comparison (0 host mutations guaranteed), 16-stage end-to-end execution, and 16-scenario failure injection matrix documented in [`PHASE3I_ISOLATED_LAB_REPORT.md`](PHASE3I_ISOLATED_LAB_REPORT.md).
 - **Phase 3J — Multi-Flow Soak + Concurrency + Shared-State Transaction Stress**:
   - Multi-flow synthetic workload generation (120 flows, 2,863 packets across 6 victim endpoints in `10.200.1.0/24`), fine-grained striped per-target locks (`TargetLockManager`), Scenarios A–D, sustained soak workload, 12 concurrent failure injection scenarios, and 0 host mutations documented in [`PHASE3J_CONCURRENCY_REPORT.md`](PHASE3J_CONCURRENCY_REPORT.md).
-
-
+- **Phase 3K — Formal Pre-Production Security & Stress Audit**:
+  - Sustained 10,000+ flow soak, resource stability monitoring (RSS, CPU, threads, processes, netns), kernel/socket backpressure, comprehensive 24-point security attack surface audit, cryptographic provenance tamper resistance, and failure containment.
 
 ## Enforcement precondition chain (§75)
 
@@ -105,5 +106,5 @@ predictions generated, latency, throughput, stability and action distribution in
 
 Scapy ✓ · Flow builder ✓ · Live feature parity ✓ · Replay/live distinction ✓ ·
 Performance profiling ✓ · Observability ✓ · Safety layer ✓ · Dry-run ✓ ·
-Controlled enforcement ✓ · Rollback ✓ · Controlled network experiment ✓ · Final report ✓
+Controlled enforcement ✓ · Rollback ✓ · Controlled network experiment ✓ · Final report ⬜ (Planned after Phase 3K)
 
