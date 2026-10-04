@@ -1,0 +1,171 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P3-BURST-1000-001",
+    "git_commit": "724969ae24b17e6fc09d8a7646c2e81de4d46dc6",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": 42,
+    "created_at": "2026-10-04T13:13:39.930723+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "724969ae24b17e6fc09d8a7646c2e81de4d46dc6",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "run_summary": {
+    "experiment_id": "EXP-P3-BURST-1000-001",
+    "git_commit": "724969ae24b17e6fc09d8a7646c2e81de4d46dc6",
+    "timestamp": "2026-10-04T13:13:39.930386+00:00",
+    "status": "COMPLETED",
+    "zero_network_mutation_guaranteed": true,
+    "all_packets_consumed": true,
+    "packet_accounting": {
+      "expected_packets": 1000,
+      "processed_packets": 1000,
+      "dropped_packets": 0,
+      "malformed_packets": 0
+    },
+    "flow_accounting": {
+      "flows_evaluated": 270,
+      "audit_cards_generated": 270
+    },
+    "throughput": {
+      "packets_generated": 1000,
+      "packets_processed": 1000,
+      "packets_dropped": 0,
+      "malformed_packets": 0,
+      "flows_processed": 270,
+      "flows_completed_fin_rst": 90,
+      "flows_completed_timeout": 0,
+      "active_flows_remaining": 0,
+      "processing_duration_s": 13.651102,
+      "wall_duration_s": 13.654166,
+      "effective_packets_per_second": 73.25,
+      "effective_flows_per_second": 19.78
+    },
+    "latency_summary": {
+      "packet_capture": {
+        "count": 1000,
+        "min_us": 0.32,
+        "mean_us": 1.4,
+        "p50_us": 0.54,
+        "p95_us": 6.74,
+        "p99_us": 10.25,
+        "max_us": 26.55,
+        "unit": "microseconds"
+      },
+      "flow_assembly": {
+        "count": 1000,
+        "min_us": 4.04,
+        "mean_us": 22.78,
+        "p50_us": 13.73,
+        "p95_us": 75.48,
+        "p99_us": 125.52,
+        "max_us": 202.32,
+        "unit": "microseconds"
+      },
+      "feature_construction": {
+        "count": 270,
+        "min_us": 596.7,
+        "mean_us": 1060.65,
+        "p50_us": 1015.53,
+        "p95_us": 1727.88,
+        "p99_us": 2057.6,
+        "max_us": 2196.2,
+        "unit": "microseconds"
+      },
+      "detector_inference": {
+        "count": 270,
+        "min_us": 35012.66,
+        "mean_us": 47803.62,
+        "p50_us": 47613.99,
+        "p95_us": 70761.25,
+        "p99_us": 83275.98,
+        "max_us": 108835.46,
+        "unit": "microseconds"
+      },
+      "policy_evaluation": {
+        "count": 270,
+        "min_us": 782.79,
+        "mean_us": 1265.26,
+        "p50_us": 1225.32,
+        "p95_us": 1894.1,
+        "p99_us": 2578.16,
+        "max_us": 3745.9,
+        "unit": "microseconds"
+      },
+      "safety_gate": {
+        "count": 270,
+        "min_us": 10.05,
+        "mean_us": 17.9,
+        "p50_us": 16.24,
+        "p95_us": 30.59,
+        "p99_us": 49.4,
+        "max_us": 69.54,
+        "unit": "microseconds"
+      },
+      "flow_pipeline_e2e": {
+        "count": 270,
+        "min_us": 36897.1,
+        "mean_us": 50421.44,
+        "p50_us": 49960.89,
+        "p95_us": 74971.03,
+        "p99_us": 87836.95,
+        "max_us": 112128.71,
+        "unit": "microseconds"
+      },
+      "packet_processing_total": {
+        "count": 1000,
+        "min_us": 4.37,
+        "mean_us": 4610.34,
+        "p50_us": 14.16,
+        "p95_us": 49900.23,
+        "p99_us": 66253.23,
+        "max_us": 92186.68,
+        "unit": "microseconds"
+      }
+    },
+    "action_distribution": {
+      "proposed": {
+        "ALLOW": 42,
+        "ALERT": 228,
+        "RATE_LIMIT": 0,
+        "ISOLATE": 0
+      },
+      "enforced": {
+        "ALLOW": 42,
+        "ALERT": 228,
+        "RATE_LIMIT": 0,
+        "ISOLATE": 0
+      },
+      "total_decisions": 270,
+      "override_rate": 0.0
+    },
+    "safety_metrics": {
+      "mode": "DRY_RUN",
+      "zero_network_mutation_guaranteed": true,
+      "total_safety_overrides": 0,
+      "inference_failures": 0,
+      "firewall_rules_mutated": 0,
+      "packets_dropped_by_system": 0,
+      "routes_modified": 0,
+      "endpoints_isolated_in_hardware": 0
+    }
+  }
+}

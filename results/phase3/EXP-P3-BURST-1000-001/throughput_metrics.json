@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P3-BURST-1000-001",
+    "git_commit": "724969ae24b17e6fc09d8a7646c2e81de4d46dc6",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": 42,
+    "created_at": "2026-10-04T13:13:39.930723+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "724969ae24b17e6fc09d8a7646c2e81de4d46dc6",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "throughput_metrics": {
+    "packets_generated": 1000,
+    "packets_processed": 1000,
+    "packets_dropped": 0,
+    "malformed_packets": 0,
+    "flows_processed": 270,
+    "flows_completed_fin_rst": 90,
+    "flows_completed_timeout": 0,
+    "active_flows_remaining": 0,
+    "processing_duration_s": 13.651102,
+    "wall_duration_s": 13.654166,
+    "effective_packets_per_second": 73.25,
+    "effective_flows_per_second": 19.78
+  }
+}

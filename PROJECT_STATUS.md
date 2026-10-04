@@ -65,6 +65,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Dry-Run Autonomous Pipeline Runner (Phase 3B/3C) | ✅ | `src/xrlids/live/runner.py` (strict zero network mutation, fail-safe invariants) + tests |
 | Controlled Response Safety & Rollback Architecture | ✅ | `docs/phase3/CONTROLLED_RESPONSE_SAFETY.md` (atomic rollback specification) |
 | Controlled Traffic Taxonomy Specification | ✅ | `docs/phase3/CONTROLLED_UNSEEN_TRAFFIC.md` (8 distinct traffic tiers) |
+| Controlled 1000-Packet Burst Experiment (Phase 3E) | ✅ | `src/xrlids/live/burst.py`, `scripts/phase3/run_burst_experiment.py`, `results/phase3/EXP-P3-BURST-1000-001/` |
 
 ## Empirical status
 
@@ -85,6 +86,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Threshold objective | ✅ FRAMEWORK RESOLVED | D-003 governance framework resolved; operational threshold selection remains open. Research reporting baseline frozen at $\tau = 0.50$; $\tau_{\text{ops}} = 0.40$ designated strictly as proposed Phase 2 operational candidate pending deployment loss evidence |
 | Live Replay & Demonstration Foundation | ✅ EMPIRICALLY OBSERVED & VERIFIED | End-to-end packet replay, flow accumulation, R10 feature parity ($\text{atol} \le 10^{-4}$), RF model inference, and demonstration artifacts verified in `results/demo/` |
 | Autonomous Response Baseline Ladder (Phase 2A) | ✅ EMPIRICALLY OBSERVED & VERIFIED | Evaluated across 24 configurations (4 baselines x 3 cost regimes x 2 action modes) on 142,346 $D_{\text{pol\_val}}$ flows (`EXP-P2A-BASELINES-001`, B=1000 bootstrap tests); D-003 preserved, D_pol_test strictly untouched |
+| Controlled 1000-Packet Traffic Burst (Phase 3E) | ✅ EMPIRICALLY OBSERVED & VERIFIED | Executed across 1000 packets (800 benign + 200 attack) in `LiveMode.DRY_RUN` (`EXP-P3-BURST-1000-001`, `REPORT-P3E-BURST-1000-001`); 100% consumed, 0 drops, 0 mutations, component latencies P50/P95/P99 profiled |
 
 ## Research decisions status
 
