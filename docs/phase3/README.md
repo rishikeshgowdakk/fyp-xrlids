@@ -17,12 +17,13 @@ The most operationally important phase. Everything here is gated on earlier evid
 | Observability | Logs, metrics, health checks, error counters | Phase 3F | ✅ EMPIRICALLY OBSERVED & DOCUMENTED (`EXP-P3F-OBSERVABILITY-001`) |
 | Safety layer | Deterministic gate for every autonomous action | Cross-cutting | ✅ Reusable (`xrlids.response.safety`) |
 | Dry-run mode | Log-only enforcement with guaranteed zero network mutation | Phase 3B/3C | ✅ Implemented (`LiveMode.DRY_RUN`) |
-| Controlled enforcement | Real actuation in an isolated lab (strictly locked behind rollback) | Controlled Lab | 🔒 LOCKED (Simulated Rollback Verified; Physical Netns Pending) |
+| Controlled enforcement | Real actuation in an isolated lab (strictly locked behind rollback) | Controlled Lab | ✅ EMPIRICALLY VERIFIED IN ISOLATED LAB (`EXP-P3I-ISOLATED-LAB-001`) |
 | Rollback specification | Atomic rollback, state snapshot, failure handling | Phase 3G | ✅ EMPIRICALLY OBSERVED & AUDITED (`EXP-P3G-ROLLBACK-001`) |
 | Traffic burst case | "1000 packets from one click" experiment execution | Lab Experiment | ✅ EXECUTED & COMMITTED (`EXP-P3-BURST-1000-001`) |
 | Failure injection | Fail-safe behaviour for every dependency | Robustness | ✅ VERIFIED & AUDITED (6/6 Scenarios Pass) |
 | Atomic rollback harness | Formal transaction lifecycle, SHA-256 snapshots, auto-compensation | Phase 3G | ✅ VERIFIED & AUDITED (12/12 Scenarios Pass) |
 | Enforcement readiness gate | PreconditionGate, cryptographic provenance, fail-closed authorization | Phase 3H | ✅ VERIFIED & AUDITED (18/18 Scenarios Pass) |
+| Isolated lab namespace loop | Topology creation, isolation verification, 16-stage execution, zero host mutation | Phase 3I | ✅ VERIFIED & AUDITED (`EXP-P3I-ISOLATED-LAB-001`, 16/16 Stages, 16/16 Scenarios) |
 | Final operational report | Evidence-driven summary | Final Closure | ⬜ Planned |
 
 ## Flow Completion Policy (Decision D-006)
@@ -77,6 +78,8 @@ Live Network / Controlled PCAP
   - Atomic transaction lifecycle (`IDLE -> SNAPSHOT -> VALIDATE -> PREPARE -> APPLY -> VERIFY -> COMMITTED`), SHA-256 snapshots, auto-compensation rollback, watchdog TTL monitoring, and permanent safety locking documented in [`PHASE3G_ROLLBACK_REPORT.md`](PHASE3G_ROLLBACK_REPORT.md).
 - **Phase 3H — Enforcement Readiness, Evidence Provenance & Non-Bypassable Activation Gate**:
   - Non-bypassable fail-closed `PreconditionGate`, SHA-256 evidence validation, exact commit binding, signed time-bounded `LabActivationAuthorization`, and `READY != ENFORCEMENT` invariant documented in [`PHASE3H_ENFORCEMENT_GATE_REPORT.md`](PHASE3H_ENFORCEMENT_GATE_REPORT.md).
+- **Phase 3I — Isolated Lab Network Namespace & Controlled Response Loop**:
+  - Dual-mode isolated lab network namespace topology (`xrlids_att_01`, `xrlids_vic_01`, `veth_xrl_*`), host cryptographic baseline comparison (0 host mutations guaranteed), 16-stage end-to-end execution, and 16-scenario failure injection matrix documented in [`PHASE3I_ISOLATED_LAB_REPORT.md`](PHASE3I_ISOLATED_LAB_REPORT.md).
 
 
 

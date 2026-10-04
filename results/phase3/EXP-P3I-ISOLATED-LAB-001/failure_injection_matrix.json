@@ -1,0 +1,196 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P3I-ISOLATED-LAB-001",
+    "git_commit": "d28f358bd31d3aeba97455e0bd2617d626447dfa",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": null,
+    "created_at": "2026-10-04T14:48:07.260679+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "d28f358bd31d3aeba97455e0bd2617d626447dfa",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "total_scenarios_evaluated": 16,
+  "total_scenarios_passed": 16,
+  "all_scenarios_passed": true,
+  "scenarios": [
+    {
+      "scenario_id": "SCEN-01",
+      "name": "ILLEGAL_NAMESPACE_PREFIX",
+      "category": "TOPOLOGY",
+      "description": "Forbid namespaces without required prefix",
+      "passed": true,
+      "duration_ms": 11.268,
+      "actual_outcome": "Rejected illegal namespace prefix with ValueError",
+      "error_message": "Security invariant violated: namespace unauthorized_ns does not have required prefix xrlids_"
+    },
+    {
+      "scenario_id": "SCEN-02",
+      "name": "ILLEGAL_INTERFACE_PREFIX",
+      "category": "TOPOLOGY",
+      "description": "Forbid interfaces without required prefix",
+      "passed": true,
+      "duration_ms": 9.501,
+      "actual_outcome": "Rejected illegal interface prefix with ValueError",
+      "error_message": "Security invariant violated: interface eth99 does not have required prefix veth_xrl_"
+    },
+    {
+      "scenario_id": "SCEN-03",
+      "name": "ROUTING_COLLISION_DETECTION",
+      "category": "ISOLATION",
+      "description": "Detect routing collision with host",
+      "passed": true,
+      "duration_ms": 16.377,
+      "actual_outcome": "Route collision detected; isolation rejected",
+      "error_message": null
+    },
+    {
+      "scenario_id": "SCEN-04",
+      "name": "MISSING_AUTHORIZATION",
+      "category": "AUTHORIZATION",
+      "description": "Reject mutation when authorization is missing",
+      "passed": true,
+      "duration_ms": 15.554,
+      "actual_outcome": "Rejected due to missing authorization",
+      "error_message": "Target validation failed: Missing LabActivationAuthorization: authorization is missing"
+    },
+    {
+      "scenario_id": "SCEN-05",
+      "name": "EXPIRED_AUTHORIZATION",
+      "category": "AUTHORIZATION",
+      "description": "Reject mutation when authorization is expired",
+      "passed": true,
+      "duration_ms": 14.99,
+      "actual_outcome": "Rejected due to expired authorization token",
+      "error_message": "Target validation failed: authorization has expired"
+    },
+    {
+      "scenario_id": "SCEN-06",
+      "name": "MISMATCHED_LAB_ID",
+      "category": "AUTHORIZATION",
+      "description": "Reject authorization targeting wrong lab",
+      "passed": true,
+      "duration_ms": 13.506,
+      "actual_outcome": "Rejected due to mismatched lab environment ID",
+      "error_message": "Target validation failed: authorized lab mismatch: 'WRONG-LAB-99' != 'LAB-ISOLATED-NETNS-01'"
+    },
+    {
+      "scenario_id": "SCEN-07",
+      "name": "MISMATCHED_BACKEND_ID",
+      "category": "AUTHORIZATION",
+      "description": "Reject authorization for wrong backend",
+      "passed": true,
+      "duration_ms": 9.925,
+      "actual_outcome": "Rejected due to mismatched actuator backend ID",
+      "error_message": "Target validation failed: Authorization backend mismatch: 'WRONG-BACKEND-99' != 'LAB_NETNS_ACTUATOR_V1'"
+    },
+    {
+      "scenario_id": "SCEN-08",
+      "name": "FORBIDDEN_HOST_TARGET",
+      "category": "SAFETY",
+      "description": "Strictly forbid host network interface targets",
+      "passed": true,
+      "duration_ms": 10.772,
+      "actual_outcome": "Rejected forbidden host target with ValueError",
+      "error_message": "Target 'wlo1' is FORBIDDEN host target: SECURITY VIOLATION: Forbidden host target attempted (wlo1, xrlids_vic_01, veth_xrl_vic)"
+    },
+    {
+      "scenario_id": "SCEN-09",
+      "name": "OUTSIDE_SUBNET_TARGET",
+      "category": "SAFETY",
+      "description": "Strictly forbid IPs outside lab subnet",
+      "passed": true,
+      "duration_ms": 14.121,
+      "actual_outcome": "Rejected outside subnet target with ValueError",
+      "error_message": "Target host '192.168.1.1' is outside isolated lab subnet 10.200.1.0/24"
+    },
+    {
+      "scenario_id": "SCEN-10",
+      "name": "SNAPSHOT_GENERATION_FAILURE",
+      "category": "TRANSACTION",
+      "description": "Abort transaction if snapshot fails",
+      "passed": true,
+      "duration_ms": 14.574,
+      "actual_outcome": "Transaction ABORTED safely prior to mutation",
+      "error_message": "Snapshot creation failed: NetnsActuator: snapshot generation failed"
+    },
+    {
+      "scenario_id": "SCEN-11",
+      "name": "SNAPSHOT_DIGEST_CORRUPTION",
+      "category": "INTEGRITY",
+      "description": "Abort transaction on snapshot digest corruption",
+      "passed": true,
+      "duration_ms": 11.957,
+      "actual_outcome": "Transaction ABORTED due to snapshot digest corruption",
+      "error_message": "Snapshot validation failed: corrupted baseline digest"
+    },
+    {
+      "scenario_id": "SCEN-12",
+      "name": "MUTATION_TIMEOUT",
+      "category": "TRANSACTION",
+      "description": "Rollback on mutation timeout",
+      "passed": true,
+      "duration_ms": 8.583,
+      "actual_outcome": "Mutation timeout triggered automatic rollback to clean state",
+      "error_message": "Mutation error: NetnsActuator execution timeout"
+    },
+    {
+      "scenario_id": "SCEN-13",
+      "name": "PARTIAL_MUTATION",
+      "category": "VERIFICATION",
+      "description": "Rollback on partial mutation",
+      "passed": true,
+      "duration_ms": 6.537,
+      "actual_outcome": "Partial mutation detected and rolled back to clean state",
+      "error_message": "Post-action state verification failed"
+    },
+    {
+      "scenario_id": "SCEN-14",
+      "name": "POST_VERIFICATION_FAILURE",
+      "category": "VERIFICATION",
+      "description": "Rollback on post-action verification failure",
+      "passed": true,
+      "duration_ms": 6.283,
+      "actual_outcome": "Verification failure triggered automatic rollback to clean state",
+      "error_message": "Post-action state verification failed"
+    },
+    {
+      "scenario_id": "SCEN-15",
+      "name": "ROLLBACK_EXECUTION_FAILURE",
+      "category": "FAIL_SAFE",
+      "description": "Fail closed to SAFETY_LOCKED on rollback failure",
+      "passed": true,
+      "duration_ms": 7.521,
+      "actual_outcome": "Rollback failure escalated to permanent SAFETY_LOCKED fail-closed state",
+      "error_message": "Mutation error: NetnsActuator mutation failure"
+    },
+    {
+      "scenario_id": "SCEN-16",
+      "name": "TTL_WATCHDOG_CLEANUP",
+      "category": "LIFECYCLE",
+      "description": "Automatically cleanup lab topology when TTL expires",
+      "passed": true,
+      "duration_ms": 28.86,
+      "actual_outcome": "TTL watchdog expired and automatically executed cleanup",
+      "error_message": null
+    }
+  ]
+}

@@ -32,6 +32,25 @@ from xrlids.enforcement.gate import (
     PreconditionType,
 )
 
+from xrlids.enforcement.lab import (
+    ATTACKER_IP,
+    ATTACKER_NS,
+    FORBIDDEN_HOST_TARGETS,
+    LAB_BACKEND_ID,
+    LAB_ENVIRONMENT_ID,
+    LAB_INTERFACE_PREFIX,
+    LAB_NAMESPACE_PREFIX,
+    LAB_SUBNET,
+    VETH_ATTACKER,
+    VETH_VICTIM,
+    VICTIM_IP,
+    VICTIM_NS,
+    HostNetworkBaseline,
+    IsolatedLabEnvironment,
+    LabResourceManifest,
+    NetnsActuatorBackend,
+)
+
 __all__ = [
     "PreconditionType",
     "EligibilityStatus",
@@ -60,4 +79,20 @@ __all__ = [
     "REASON_AUTHORIZATION_SIGNATURE_INVALID",
     "REASON_CONFIGURATION_BYPASS_ATTEMPT",
     "REASON_INTERNAL_EVALUATION_EXCEPTION",
+    "HostNetworkBaseline",
+    "LabResourceManifest",
+    "IsolatedLabEnvironment",
+    "NetnsActuatorBackend",
+    "LAB_ENVIRONMENT_ID",
+    "LAB_BACKEND_ID",
+    "LAB_NAMESPACE_PREFIX",
+    "LAB_INTERFACE_PREFIX",
+    "LAB_SUBNET",
+    "ATTACKER_IP",
+    "VICTIM_IP",
+    "ATTACKER_NS",
+    "VICTIM_NS",
+    "VETH_ATTACKER",
+    "VETH_VICTIM",
+    "FORBIDDEN_HOST_TARGETS",
 ]

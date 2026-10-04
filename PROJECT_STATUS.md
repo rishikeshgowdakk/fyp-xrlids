@@ -66,7 +66,8 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Controlled Response Safety & Rollback Architecture | ✅ | `docs/phase3/CONTROLLED_RESPONSE_SAFETY.md` (atomic rollback specification) |
 | Controlled Traffic Taxonomy Specification | ✅ | `docs/phase3/CONTROLLED_UNSEEN_TRAFFIC.md` (8 distinct traffic tiers) |
 | Controlled 1000-Packet Burst Experiment (Phase 3E) | ✅ | `src/xrlids/live/burst.py`, `scripts/phase3/run_burst_experiment.py`, `results/phase3/EXP-P3-BURST-1000-001/` |
-| Observability, Health Engine & Bounded Flow Queue (Phase 3F) | ✅ | `src/xrlids/live/observability.py` (HealthState, BoundedFlowQueue, FailureInjectionHarness) + tests |
+| Enforcement Readiness & Activation Gate (Phase 3H) | ✅ | `src/xrlids/enforcement/gate.py` (PreconditionGate, LabActivationAuthorization, EnforcementEligibility) + tests |
+| Isolated Lab Network Namespace Topology & Response Loop (Phase 3I) | ✅ | `src/xrlids/enforcement/lab.py` (HostNetworkBaseline, IsolatedLabEnvironment, NetnsActuatorBackend) + tests |
 
 ## Empirical status
 
@@ -91,6 +92,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Live Observability & Fault Injection (Phase 3F) | ✅ EMPIRICALLY OBSERVED & AUDITED | Multi-condition execution on 1000 packets (nominal, queue backpressure, and 6 failure injection scenarios) in `LiveMode.DRY_RUN` (`EXP-P3F-OBSERVABILITY-001`, `REPORT-P3F-OBSERVABILITY-001`); 6/6 failure scenarios verified, fail-safe invariant proven, zero network mutations |
 | Atomic Rollback & Response Transaction Harness (Phase 3G) | ✅ EMPIRICALLY OBSERVED & AUDITED | Evaluated across 12 deterministic scenarios (`EXP-P3G-ROLLBACK-001`, `REPORT-P3G-ROLLBACK-001`); atomic lifecycle, SHA-256 snapshots, auto-compensation rollback, watchdog TTL monitoring, idempotency, and permanent `SAFETY_LOCKED` latch verified under zero network mutation |
 | Enforcement Readiness & Activation Gating (Phase 3H) | ✅ EMPIRICALLY OBSERVED & AUDITED | Evaluated across 18 deterministic scenarios (`EXP-P3H-ENFORCEMENT-GATE-001`, `REPORT-P3H-ENFORCEMENT-GATE-001`); fail-closed PreconditionGate, SHA-256 evidence validation, exact commit binding, signed LabActivationAuthorization, and non-bypassability verified; READY != ENFORCEMENT enforced with 0 host network mutations |
+| Isolated Lab Namespace & Response Loop (Phase 3I) | ✅ EMPIRICALLY OBSERVED & AUDITED | Evaluated across 16 sequential stages and 16 failure injection scenarios (`EXP-P3I-ISOLATED-LAB-001`, `REPORT-P3I-ISOLATED-LAB-001`); dual-mode topology, host cryptographic baseline comparison (0 host mutations guaranteed), verified rollback, and deterministic cleanup verified |
 
 
 
