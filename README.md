@@ -7,25 +7,40 @@
 | Project | XRL-IDARS v1 |
 | Repository | `fyp-xrlids` |
 | Python package | `xrlids` |
-| Strategy | 3 phases / 3 weeks: data foundation → ML platform → live validation |
-| Current phase | Phase 1 — Data + Research + Model Foundation |
-| Phase 1 status | **PARTIALLY COMPLETE** — implementation complete, empirical programme pending datasets |
-| Status detail | See [`PROJECT_STATUS.md`](PROJECT_STATUS.md) and [`docs/phase1/PHASE1_REVIEW.md`](docs/phase1/PHASE1_REVIEW.md) |
+| Phase 1 — Data + Research + Model Foundation | **COMPLETE & FROZEN** |
+| Phase 2 — ML Platform + Autonomous Response | **COMPLETE & FROZEN** |
+| Phase 3 — Live Capture + Laboratory Validation | **COMPLETE (LABORATORY VALIDATION)** |
+| Final Synthesis & Project Closure | **COMPLETE** |
+| Status detail | See [`PROJECT_STATUS.md`](PROJECT_STATUS.md) and [`docs/final/FINAL_RESEARCH_REPORT.md`](docs/final/FINAL_RESEARCH_REPORT.md) |
 
-> **No metrics are reported in this README.** No dataset is present in the repository, so no
-> detection result exists yet. Historical numbers from the previous project are quarantined in
-> [`docs/04_QUESTIONS/HISTORICAL_RESULTS.md`](docs/04_QUESTIONS/HISTORICAL_RESULTS.md) and are
-> **not** results of this repository.
+> **Operational Scope & Safety Boundary:**
+> - **Offline Research Benchmarking:** VALIDATED & SCIENTIFICALLY FROZEN (`11f32f658cde525300f8bc46088a0143e8329c21`)
+> - **Isolated Laboratory Response:** VALIDATED & AUDITED (`10.200.1.0/24` network namespace, 0 host mutations)
+> - **Production Deployment:** NOT VALIDATED (Strictly out of scope; zero host network mutations performed)
 
-> **Build rule:** this repository is *designed to record the research before the research starts*.
-> No result without an artifact. No artifact without code. No code experiment without a config.
-> No metric without a test population. No final claim without evidence.
+---
+
+## Primary Navigation
+
+The complete research outcomes, experimental evidence, and verification procedures are documented in the following authoritative artifacts:
+
+| Document | Purpose |
+|:---|:---|
+| [`PROJECT_STATUS.md`](PROJECT_STATUS.md) | Authoritative milestone, empirical status, and implementation matrix |
+| [`docs/final/FINAL_RESEARCH_REPORT.md`](docs/final/FINAL_RESEARCH_REPORT.md) | Comprehensive 10-section final research synthesis |
+| [`docs/final/REPRODUCIBILITY_MAP.md`](docs/final/REPRODUCIBILITY_MAP.md) | Environment setup, execution commands, and artifact regeneration paths |
+| [`docs/final/EXPERIMENT_INDEX.md`](docs/final/EXPERIMENT_INDEX.md) | Master registry of all empirical experiments across Phases 1, 2, and 3 |
+| [`docs/final/DECISION_INDEX.md`](docs/final/DECISION_INDEX.md) | Governance and architecture decision log (D-001 through D-006) |
+| [`docs/final/RELEASE_AUDIT.md`](docs/final/RELEASE_AUDIT.md) | Formal pre-release audit, verification checklist, and integrity bounds |
+| [`docs/final/V1.0.0_RELEASE_NOTES.md`](docs/final/V1.0.0_RELEASE_NOTES.md) | Official release notes for XRL-IDARS v1.0.0 |
+| [`docs/viva/FINAL_VIVA_GUIDE.md`](docs/viva/FINAL_VIVA_GUIDE.md) | Comprehensive viva defense questions, methodology justifications, and empirical answers |
+| [`docs/03_DECISIONS/CLAIMS_REGISTRY.md`](docs/03_DECISIONS/CLAIMS_REGISTRY.md) | 34 traceably verified research claims (CLAIM-001 through CLAIM-034) |
 
 ---
 
 ## What this system is
 
-XRL-IDARS classifies **network traffic and flow behavior** — not people. The end-to-end target pipeline:
+XRL-IDARS classifies **network traffic and flow behavior** — not people. The end-to-end pipeline:
 
 ```text
 Network Traffic
@@ -57,7 +72,7 @@ Random Forest            LSTM
           ▼       ▼       ▼
         ALLOW   ALERT   BLOCK
                           │
-                    Safety Layer
+                    Safety Gate
                           │
                     Controlled Action
                           │
@@ -82,17 +97,15 @@ DATA + METHOD + MODEL + EVIDENCE + EXPLANATION + SYSTEM + SAFETY + LIMITATIONS
 | [`docs/03_DECISIONS/`](docs/03_DECISIONS/) | Decision log, claims registry, assumptions |
 | [`docs/04_QUESTIONS/`](docs/04_QUESTIONS/) | Open questions, historical results |
 | [`docs/phase1/`](docs/phase1/) | Dataset provenance, audits, schemas, features, methods |
-| [`docs/phase2/`](docs/phase2/) | Platform, API, model cards |
-| [`docs/phase3/`](docs/phase3/) | Live capture, parity, safety, operations |
-| [`docs/experiments/`](docs/experiments/) | Experiment registry and cards |
-| [`docs/failures/`](docs/failures/) | Failure investigations |
-| [`docs/viva/`](docs/viva/) | Professor/viva question mapping |
-| [`configs/`](configs/) | All machine-readable experiment configuration |
-| [`data/manifests/`](data/manifests/) | Dataset registry with checksums |
-| [`src/`](src/) | Source code |
-| [`services/`](services/) | ML API, backend, frontend |
-| [`tests/`](tests/) | Unit through system tests |
-| [`results/`](results/) | Generated machine-readable evidence |
+| [`docs/phase2/`](docs/phase2/) | Platform, API, model cards, response policies |
+| [`docs/phase3/`](docs/phase3/) | Live capture, parity, safety, operations, laboratory experiments |
+| [`docs/final/`](docs/final/) | Final research report, reproducibility map, release audit, indexes |
+| [`docs/viva/`](docs/viva/) | Viva defense questions and answers |
+| [`configs/`](configs/) | All machine-readable experiment configurations |
+| [`data/manifests/`](data/manifests/) | Dataset registry with cryptographic SHA-256 checksums |
+| [`src/`](src/) | Source code package (`xrlids`) |
+| [`tests/`](tests/) | Unit through integration and system tests (386 passing) |
+| [`results/`](results/) | Generated machine-readable evidence, metrics, and sidecars |
 | [`reports/`](reports/) | Generated human-readable reports and figures |
 
 ---
@@ -111,37 +124,40 @@ A research result is complete only when all three exist:
 
 ## Tracing a claim
 
-The repository must let an outsider ask **"where did this number come from?"** and navigate:
+The repository allows external auditors to trace **"where did this number come from?"**:
 
 ```text
-README → Experiment card → Config → Dataset manifest → Split
-       → Model artifact → Prediction artifact → Metric implementation
-       → Result → Git commit
+README → Claims Registry → Experiment Card → Config → Dataset Manifest → Split
+       → Model Artifact → Prediction Artifact → Metric Implementation
+       → Result JSON → Git Commit
 ```
 
-Ask **"why did you make this decision?"**:
+To examine **"why did you make this decision?"**:
 
 ```text
-Decision ID → Options → Evidence → Trade-offs → Final decision
+Decision ID → Options → Evidence → Trade-offs → Final Decision (D-001 to D-006)
 ```
 
-Ask **"what happens when it fails?"**:
+To verify **"what happens when it fails?"**:
 
 ```text
-Failure mode → Detection → Impact → Mitigation → Experiment → Result
+Failure Mode → Detection → Impact → Mitigation → Experiment → Result
 ```
 
 ---
 
-## Start here
+## Reproducibility & Quickstart
 
-1. Read [`docs/00_PROJECT/PROJECT_SCOPE.md`](docs/00_PROJECT/PROJECT_SCOPE.md).
-2. Read [`docs/00_PROJECT/RESEARCH_QUESTIONS.md`](docs/00_PROJECT/RESEARCH_QUESTIONS.md).
-3. Read [`PROJECT_STATUS.md`](PROJECT_STATUS.md) for exactly what is done and what is blocked.
-4. For setup/reproduction instructions see [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md).
+For full environment setup, dataset verification, and reproduction workflows, see [`docs/final/REPRODUCIBILITY_MAP.md`](docs/final/REPRODUCIBILITY_MAP.md).
 
-## Nothing here is a final result yet
+Quick verification:
+```bash
+# 1. Activate environment
+source .venv/bin/activate
 
-No metrics are committed in this README by hand. Final numbers are generated by
-`scripts/reporting/` from result JSON and rendered into reports, so documentation
-cannot drift from evidence.
+# 2. Run complete test suite (386 passing tests)
+pytest -q
+
+# 3. Inspect final research synthesis
+cat docs/final/FINAL_RESEARCH_REPORT.md
+```

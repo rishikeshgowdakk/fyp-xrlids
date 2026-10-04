@@ -2,7 +2,9 @@
 
 > **Scope:** Final Release Verification, Integrity Audit, and Governance Closure Checklist.  
 > **Status:** AUDITED, COMPLETED & VERIFIED  
-> **Date:** October 4, 2026
+> **Date:** October 5, 2026  
+> **Release Tag:** `v1.0.0`  
+> **Research Closure Baseline:** `31c47308703ec22727078e3a62f518ab33b3173d`
 
 ---
 
@@ -10,7 +12,7 @@
 
 | Verification Item | Target Standard | Observed Status | Audit Verdict |
 |:---|:---|:---|:---:|
-| **Root README Integrity** | Root `README.md` must NOT be modified | Unmodified throughout final synthesis | **PASS** |
+| **Root README Consistency** | Concise navigation, phase completion, scope bounds | Updated with all synthesis links & scope | **PASS** |
 | **Phase 1 Scientific Freeze** | No empirical artifacts or code altered | Baseline commit `11f32f6` preserved | **PASS** |
 | **Phase 2 Scientific Freeze** | No empirical artifacts or weights altered | Baseline commit `11f32f6` preserved | **PASS** |
 | **Claims Registry Integrity** | All claims trace to artifacts; no unbacked claims | `CLAIMS_REGISTRY.md` audited (CLAIM-001–034) | **PASS** |
@@ -19,9 +21,10 @@
 | **Reproducibility Map** | Complete reproduction commands and env details | `docs/final/REPRODUCIBILITY_MAP.md` complete | **PASS** |
 | **Viva & Defense Guide** | Direct, evidence-grounded defense answers | `docs/viva/FINAL_VIVA_GUIDE.md` complete | **PASS** |
 | **Final Research Report** | Comprehensive synthesis covering all phases | `docs/final/FINAL_RESEARCH_REPORT.md` complete | **PASS** |
+| **Official Release Notes** | Full v1.0.0 notes with scope, findings, limitations | `docs/final/V1.0.0_RELEASE_NOTES.md` complete | **PASS** |
 | **Phase 3 Documentation Status** | Phase 3K complete; final report linked | `docs/phase3/README.md` fully reconciled | **PASS** |
 | **Project Status Table** | Phase 1 & 2 frozen, Phase 3 complete | `PROJECT_STATUS.md` fully reconciled | **PASS** |
-| **Full Test Suite Execution** | All repository tests pass (0 failures) | `.venv/bin/pytest -q` (386 passed) | **PASS** |
+| **Full Test Suite Execution** | All repository tests pass (0 failures) | `.venv/bin/pytest -q` (386 passed in 40.11s) | **PASS** |
 | **Host Network Integrity** | Zero host network mutations | SHA-256 baseline `pre == post` verified | **PASS** |
 | **Working Tree Cleanliness** | No untracked junk, secrets, or temp namespaces | Clean working tree verified | **PASS** |
 
@@ -54,5 +57,18 @@
 | [✗] Enterprise Production Deployment        --> STRICTLY UNVALIDATED & OUT OF SCOPE     |
 +-----------------------------------------------------------------------------------------+
 ```
+
+---
+
+## 4. Release Packaging & Verification Summary
+
+| Item | Value |
+|:---|:---|
+| **Release Identifier** | `XRL-IDARS v1.0.0` |
+| **Research Baseline Commit** | `31c47308703ec22727078e3a62f518ab33b3173d` |
+| **Git Release Tag** | `v1.0.0` |
+| **Test Suite Verification** | 386 passed, 0 failed, 3 warnings in 40.11s (100% pass) |
+| **Working Tree Status** | Clean (0 untracked files, 0 residual namespaces) |
+| **Final Release Declaration** | **XRL-IDARS v1.0.0 RELEASE CANDIDATE VERIFIED** |
 
 **Final Audit Approval:** All deliverables, reports, test suites, and registries are verified and internally consistent. XRL-IDARS v1 is formally ready for project closure.

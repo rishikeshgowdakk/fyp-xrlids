@@ -2,7 +2,16 @@
 
 Last updated: 2026-10-04
 Project: **XRL-IDARS v1** · Repository: `fyp-xrlids`
-Phase: **PHASE 1 — SCIENTIFICALLY FROZEN · PHASE 2 — SCIENTIFICALLY FROZEN · PHASE 3 — LABORATORY VALIDATION COMPLETE · FINAL SYNTHESIS & CLOSURE COMPLETE**
+
+```text
+PHASE 1 — SCIENTIFICALLY FROZEN
+PHASE 2 — SCIENTIFICALLY FROZEN
+PHASE 3 — LABORATORY VALIDATION COMPLETE
+FINAL SYNTHESIS — COMPLETE
+PRODUCTION DEPLOYMENT — NOT VALIDATED
+```
+
+Phase: **PHASE 1 — SCIENTIFICALLY FROZEN · PHASE 2 — SCIENTIFICALLY FROZEN · PHASE 3 — LABORATORY VALIDATION COMPLETE · FINAL SYNTHESIS — COMPLETE · PRODUCTION DEPLOYMENT — NOT VALIDATED**
 Overall: **Phase 1 Research Frozen & Demonstration Foundation Verified (`EXP-P1-CIC2017-R10-001`). Phase 2 Scientifically Frozen (`11f32f658cde525300f8bc46088a0143e8329c21`) under pre-registered audit criteria across all stages 2A through 2E and held-out test evaluation (`EXP-P2-FINAL-TEST-001`). Phase 3 Laboratory Validation Complete across all subphases 3A through 3K (`EXP-P3K-STRESS-SECURITY-001`). Final research synthesis complete (`docs/final/FINAL_RESEARCH_REPORT.md`). Production deployment is not validated.**
 
 Legend: ✅ done / verified · 🟡 implemented / empirically observed on partial data · ⛔ blocked on research decision · ⬜ planned / not started
@@ -44,7 +53,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Dataset audit module | ✅ | `src/xrlids/datasets/audit.py` + tests |
 | CLI | ✅ | `src/xrlids/cli.py` |
 | Report generation from artifacts | ✅ | `scripts/phase1/generate_reports.py` (dynamic git hashes, live manifests) |
-| Test suite | ✅ | 257 unit and integration tests passing (0 failures); Phase 2A baseline ladder verified |
+| Test suite | ✅ | 386 unit and integration tests passing (0 failures); full Phase 1, Phase 2, and Phase 3 verification suite |
 | SHAP explainability module | ✅ | `src/xrlids/explainability/shap_analysis.py` + tests |
 | Cross-dataset transfer module | ✅ | `src/xrlids/experiments/transfer.py` + `scripts/phase1/run_transfer.py` + configs (6 directions executed) |
 | Pure-Python PCAP reader / writer | ✅ | `src/xrlids/demo/pcap.py` (zero external C-dependencies) + tests |

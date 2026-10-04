@@ -2,7 +2,7 @@
 
 > **Purpose:** Authoritative reproduction guide for researchers, auditors, and examination committees.  
 > **Status:** AUDITED & FROZEN  
-> **Repository Commit Baseline:** `f600bfb4c94665de4c94ce743b680d8bc25a33f9`
+> **Repository Commit Baseline:** `31c47308703ec22727078e3a62f518ab33b3173d` (`v1.0.0`)
 
 ---
 
