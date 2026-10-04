@@ -1,11 +1,11 @@
 {
   "metadata": {
     "experiment_id": "EXP-P2E-EXPLAINABILITY-001",
-    "git_commit": "39996f9da7674ac5e27b0a99f68f3f13dc856f5c",
+    "git_commit": "7ab8cf3a075ab852162194302bdc594c695ded05",
     "dataset_sha256": null,
     "feature_schema_hash": null,
     "seed": 42,
-    "created_at": "2026-10-03T21:09:04.500485+00:00",
+    "created_at": "2026-10-03T22:21:06.849926+00:00",
     "software_environment": {
       "python_version": "3.14.4",
       "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
@@ -13,7 +13,7 @@
       "processor_count": null,
       "cuda_available": false,
       "cuda_version": null,
-      "git_commit": "39996f9da7674ac5e27b0a99f68f3f13dc856f5c",
+      "git_commit": "7ab8cf3a075ab852162194302bdc594c695ded05",
       "packages": {
         "numpy": "2.5.3",
         "pandas": "3.0.6",
@@ -32,42 +32,42 @@
     {
       "rank": 1,
       "feature": "packet_length_std",
-      "mean_abs_shap": 0.2158985098526098,
-      "top1_pct": 98.67225220107923,
+      "mean_abs_shap": 0.2159013291097775,
+      "top1_pct": 98.67220506266197,
       "description": "Standard deviation of packet byte lengths"
     },
     {
       "rank": 2,
       "feature": "flow_packets_per_s",
-      "mean_abs_shap": 0.12275853729068696,
-      "top1_pct": 0.09585345072422607,
+      "mean_abs_shap": 0.12276289553037492,
+      "top1_pct": 0.0958568537650442,
       "description": "Packet rate per second across session"
     },
     {
       "rank": 3,
       "feature": "flow_duration_ms",
-      "mean_abs_shap": 0.07314198897528262,
-      "top1_pct": 1.0827889804032944,
+      "mean_abs_shap": 0.07314458570155717,
+      "top1_pct": 1.0828274221606844,
       "description": "Total duration of bi-directional flow session"
     },
     {
       "rank": 4,
       "feature": "flow_bytes_per_s",
-      "mean_abs_shap": 0.05451251616621152,
+      "mean_abs_shap": 0.05451445149891171,
       "top1_pct": 0.0,
       "description": "Byte transfer rate per second across session"
     },
     {
       "rank": 5,
       "feature": "packet_length_mean",
-      "mean_abs_shap": 0.004363939528364832,
-      "top1_pct": 0.14910536779324055,
+      "mean_abs_shap": 0.004360357068481751,
+      "top1_pct": 0.14911066141229098,
       "description": "Mean byte length of observed IP packets"
     },
     {
       "rank": 6,
       "feature": "ack_count",
-      "mean_abs_shap": 0.002654950166911991,
+      "mean_abs_shap": 0.0026538150946905387,
       "top1_pct": 0.0,
       "description": "Count of TCP ACK packets observed in window"
     },

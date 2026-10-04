@@ -1,9 +1,9 @@
 ### Action Decision Audit Card: `0`
 
-- **Timestamp**: `2026-10-03T21:08:58.314513+00:00`
+- **Timestamp**: `2026-10-03T22:20:57.000645+00:00`
 - **Target Host**: `host_0`
 - **Proposed Action**: `ISOLATE`
-- **Enforced Action**: `ISOLATE`
+- **Enforced Action**: `ALERT`
 
 #### Layer 1: Perception Explainability (TreeSHAP)
 - **Detector Risk Score ($S_t$)**: `0.9934`
@@ -14,28 +14,28 @@
 
 #### Layer 2: Response Policy Explainability
 - **Action Q-Values**:
-  - `ALERT: -16.96`, `ALLOW: -94.06`, `ISOLATE: -10.45`, `RATE_LIMIT: -29.78`
-- **Decision Margin**: `+6.51`
+  - `ALERT: -19.72`, `ALLOW: -108.84`, `ISOLATE: -12.36`, `RATE_LIMIT: -22.56`
+- **Decision Margin**: `+7.36`
 - **Driving State Factors**:
   - Instantaneous attack risk is severe (S_t=0.993 >= 0.75)
-  - Threat velocity accelerating rapidly (rate-of-change delta=+1.00)
-  - Destination endpoint is designated critical infrastructure (isolation strictly prohibited)
-  - Endpoint active cooldown in effect (8 steps remaining)
-  - High cumulative threat density and persistent attack pattern justify complete endpoint containment
+  - Recent alert density is elevated (N_alert=100.0% of past 20 flows >= 0.50)
+  - Destination endpoint is designated critical infrastructure (isolation strictly prohibited by safety gate)
+  - Threat score elevated but risk does not warrant disruptive traffic containment
 
 #### Deterministic Safety Invariants
 - **Invariants Checked**: `CRITICAL_INFRASTRUCTURE_EXEMPTION`, `MANDATORY_ACTION_COOLDOWN`, `BLAST_RADIUS_CIRCUIT_BREAKER`
-- **Action Overruled**: `NO`
+- **Action Overruled**: `YES`
+- **Override Reason**: `CRITICAL_INFRASTRUCTURE_EXEMPTION`
 
 
 ---
 
 ### Action Decision Audit Card: `2`
 
-- **Timestamp**: `2026-10-03T21:08:58.315176+00:00`
+- **Timestamp**: `2026-10-03T22:20:57.001983+00:00`
 - **Target Host**: `host_2`
 - **Proposed Action**: `ISOLATE`
-- **Enforced Action**: `ALERT`
+- **Enforced Action**: `ISOLATE`
 
 #### Layer 1: Perception Explainability (TreeSHAP)
 - **Detector Risk Score ($S_t$)**: `0.9970`
@@ -46,27 +46,26 @@
 
 #### Layer 2: Response Policy Explainability
 - **Action Q-Values**:
-  - `ALERT: -19.22`, `ALLOW: -105.37`, `ISOLATE: -12.79`, `RATE_LIMIT: -22.74`
-- **Decision Margin**: `+6.43`
+  - `ALERT: -15.21`, `ALLOW: -82.14`, `ISOLATE: -10.86`, `RATE_LIMIT: -32.79`
+- **Decision Margin**: `+4.34`
 - **Driving State Factors**:
   - Instantaneous attack risk is severe (S_t=0.997 >= 0.75)
-  - Moderate sustained threat background present (EWMA=0.500)
-  - Threat velocity accelerating rapidly (rate-of-change delta=+0.67)
-  - Destination endpoint is standard network asset (isolation permissible if justified)
-  - Endpoint active cooldown in effect (8 steps remaining)
-  - Threat score elevated but risk does not warrant disruptive traffic containment
+  - Threat velocity accelerating rapidly (rate-of-change delta=+0.50 over 5-flow window)
+  - Recent alert density is elevated (N_alert=66.7% of past 20 flows >= 0.50)
+  - Endpoint active cooldown in effect (30 steps remaining)
+  - Destination endpoint is standard network inventory (isolation permissible if justified)
+  - High cumulative threat density and persistent attack pattern justify complete endpoint containment
 
 #### Deterministic Safety Invariants
 - **Invariants Checked**: `CRITICAL_INFRASTRUCTURE_EXEMPTION`, `MANDATORY_ACTION_COOLDOWN`, `BLAST_RADIUS_CIRCUIT_BREAKER`
-- **Action Overruled**: `YES`
-- **Override Reason**: `BLAST_RADIUS_CIRCUIT_BREAKER`
+- **Action Overruled**: `NO`
 
 
 ---
 
 ### Action Decision Audit Card: `6`
 
-- **Timestamp**: `2026-10-03T21:08:58.315432+00:00`
+- **Timestamp**: `2026-10-03T22:20:57.002605+00:00`
 - **Target Host**: `host_6`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ALERT`
@@ -84,10 +83,9 @@
 - **Decision Margin**: `+4.07`
 - **Driving State Factors**:
   - Instantaneous attack risk is severe (S_t=0.984 >= 0.75)
-  - Exponentially smoothed threat density is elevated (EWMA=0.784)
-  - Threat velocity accelerating rapidly (rate-of-change delta=+0.43)
-  - Destination endpoint is standard network asset (isolation permissible if justified)
-  - Endpoint active cooldown in effect (15 steps remaining)
+  - Threat velocity accelerating rapidly (rate-of-change delta=+0.78 over 5-flow window)
+  - Moderate sustained threat background present (N_alert=42.9%)
+  - Destination endpoint is standard network inventory (isolation permissible if justified)
   - Threat score elevated but risk does not warrant disruptive traffic containment
 
 #### Deterministic Safety Invariants
@@ -100,7 +98,7 @@
 
 ### Action Decision Audit Card: `18`
 
-- **Timestamp**: `2026-10-03T21:08:58.315656+00:00`
+- **Timestamp**: `2026-10-03T22:20:57.003026+00:00`
 - **Target Host**: `host_18`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ALERT`
@@ -118,10 +116,9 @@
 - **Decision Margin**: `+0.85`
 - **Driving State Factors**:
   - Instantaneous attack risk is severe (S_t=0.995 >= 0.75)
-  - Exponentially smoothed threat density is elevated (EWMA=0.995)
-  - Threat velocity accelerating rapidly (rate-of-change delta=+0.21)
-  - Destination endpoint is standard network asset (isolation permissible if justified)
-  - Endpoint active cooldown in effect (8 steps remaining)
+  - Threat velocity accelerating rapidly (rate-of-change delta=+0.99 over 5-flow window)
+  - Moderate sustained threat background present (N_alert=21.1%)
+  - Destination endpoint is standard network inventory (isolation permissible if justified)
   - Threat score elevated but risk does not warrant disruptive traffic containment
 
 #### Deterministic Safety Invariants
@@ -134,7 +131,7 @@
 
 ### Action Decision Audit Card: `21`
 
-- **Timestamp**: `2026-10-03T21:08:58.315866+00:00`
+- **Timestamp**: `2026-10-03T22:20:57.003449+00:00`
 - **Target Host**: `host_21`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ALERT`
@@ -152,10 +149,8 @@
 - **Decision Margin**: `+0.40`
 - **Driving State Factors**:
   - Instantaneous attack risk is severe (S_t=0.972 >= 0.75)
-  - Exponentially smoothed threat density is elevated (EWMA=0.773)
-  - Threat velocity accelerating rapidly (rate-of-change delta=+0.19)
-  - Destination endpoint is standard network asset (isolation permissible if justified)
-  - Endpoint active cooldown in effect (10 steps remaining)
+  - Threat velocity accelerating rapidly (rate-of-change delta=+0.77 over 5-flow window)
+  - Destination endpoint is standard network inventory (isolation permissible if justified)
   - Threat score elevated but risk does not warrant disruptive traffic containment
 
 #### Deterministic Safety Invariants
@@ -168,7 +163,7 @@
 
 ### Action Decision Audit Card: `24`
 
-- **Timestamp**: `2026-10-03T21:08:58.316077+00:00`
+- **Timestamp**: `2026-10-03T22:20:57.003832+00:00`
 - **Target Host**: `host_24`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ALERT`
@@ -186,10 +181,8 @@
 - **Decision Margin**: `+0.45`
 - **Driving State Factors**:
   - Instantaneous attack risk is severe (S_t=0.996 >= 0.75)
-  - Exponentially smoothed threat density is elevated (EWMA=0.800)
-  - Threat velocity accelerating rapidly (rate-of-change delta=+0.19)
-  - Destination endpoint is standard network asset (isolation permissible if justified)
-  - Endpoint active cooldown in effect (8 steps remaining)
+  - Threat velocity accelerating rapidly (rate-of-change delta=+0.80 over 5-flow window)
+  - Destination endpoint is standard network inventory (isolation permissible if justified)
   - Threat score elevated but risk does not warrant disruptive traffic containment
 
 #### Deterministic Safety Invariants
@@ -202,7 +195,7 @@
 
 ### Action Decision Audit Card: `25`
 
-- **Timestamp**: `2026-10-03T21:08:58.316301+00:00`
+- **Timestamp**: `2026-10-03T22:20:57.004219+00:00`
 - **Target Host**: `host_25`
 - **Proposed Action**: `RATE_LIMIT`
 - **Enforced Action**: `RATE_LIMIT`
@@ -220,11 +213,11 @@
 - **Decision Margin**: `+4.33`
 - **Driving State Factors**:
   - Instantaneous attack risk is severe (S_t=0.980 >= 0.75)
-  - Exponentially smoothed threat density is elevated (EWMA=0.585)
-  - Threat velocity accelerating rapidly (rate-of-change delta=+0.24)
-  - Persistent attack burst detected (3+ consecutive elevated flows)
-  - Destination endpoint is designated critical infrastructure (isolation strictly prohibited)
-  - Endpoint active cooldown in effect (15 steps remaining)
+  - Threat velocity accelerating rapidly (rate-of-change delta=+0.58 over 5-flow window)
+  - Moderate sustained threat background present (N_alert=23.8%)
+  - Previous action state: ALERT (monitoring active)
+  - Endpoint active cooldown in effect (30 steps remaining)
+  - Destination endpoint is standard network inventory (isolation permissible if justified)
   - Suspicious velocity or critical infrastructure status indicates rate-limiting to preserve availability
 
 #### Deterministic Safety Invariants
@@ -236,7 +229,7 @@
 
 ### Action Decision Audit Card: `28`
 
-- **Timestamp**: `2026-10-03T21:08:58.316508+00:00`
+- **Timestamp**: `2026-10-03T22:20:57.004585+00:00`
 - **Target Host**: `host_28`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ALERT`
@@ -254,10 +247,10 @@
 - **Decision Margin**: `+0.26`
 - **Driving State Factors**:
   - Instantaneous attack risk is severe (S_t=0.985 >= 0.75)
-  - Exponentially smoothed threat density is elevated (EWMA=0.590)
-  - Threat velocity accelerating rapidly (rate-of-change delta=+0.24)
-  - Destination endpoint is standard network asset (isolation permissible if justified)
-  - Endpoint active cooldown in effect (19 steps remaining)
+  - Threat velocity accelerating rapidly (rate-of-change delta=+0.59 over 5-flow window)
+  - Moderate sustained threat background present (N_alert=23.8%)
+  - Elevated flow byte volume detected (v_t=0.65, heavy transfer)
+  - Destination endpoint is standard network inventory (isolation permissible if justified)
   - Threat score elevated but risk does not warrant disruptive traffic containment
 
 #### Deterministic Safety Invariants
@@ -270,7 +263,7 @@
 
 ### Action Decision Audit Card: `56`
 
-- **Timestamp**: `2026-10-03T21:08:58.316734+00:00`
+- **Timestamp**: `2026-10-03T22:20:57.004988+00:00`
 - **Target Host**: `host_56`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ISOLATE`
@@ -288,9 +281,9 @@
 - **Decision Margin**: `+0.50`
 - **Driving State Factors**:
   - Instantaneous attack risk is severe (S_t=0.993 >= 0.75)
-  - Exponentially smoothed threat density is elevated (EWMA=0.988)
-  - Destination endpoint is designated critical infrastructure (isolation strictly prohibited)
-  - Endpoint active cooldown in effect (8 steps remaining)
+  - Threat velocity accelerating rapidly (rate-of-change delta=+0.99 over 5-flow window)
+  - Endpoint active cooldown in effect (30 steps remaining)
+  - Destination endpoint is standard network inventory (isolation permissible if justified)
   - High cumulative threat density and persistent attack pattern justify complete endpoint containment
 
 #### Deterministic Safety Invariants
@@ -302,7 +295,7 @@
 
 ### Action Decision Audit Card: `63`
 
-- **Timestamp**: `2026-10-03T21:08:58.316941+00:00`
+- **Timestamp**: `2026-10-03T22:20:57.005655+00:00`
 - **Target Host**: `host_63`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ISOLATE`
@@ -320,9 +313,9 @@
 - **Decision Margin**: `+1.38`
 - **Driving State Factors**:
   - Instantaneous attack risk is severe (S_t=0.991 >= 0.75)
-  - Exponentially smoothed threat density is elevated (EWMA=0.956)
-  - Destination endpoint is designated critical infrastructure (isolation strictly prohibited)
-  - Endpoint active cooldown in effect (8 steps remaining)
+  - Threat velocity accelerating rapidly (rate-of-change delta=+0.96 over 5-flow window)
+  - Endpoint active cooldown in effect (30 steps remaining)
+  - Destination endpoint is standard network inventory (isolation permissible if justified)
   - High cumulative threat density and persistent attack pattern justify complete endpoint containment
 
 #### Deterministic Safety Invariants

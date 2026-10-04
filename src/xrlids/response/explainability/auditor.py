@@ -34,6 +34,7 @@ class AutonomousResponseAuditor:
         feature_names: list[str],
         agent: Any,
         top_k_features: int = 3,
+        critical_hosts: frozenset[str] | None = None,
     ) -> None:
         """Initialize auditor with frozen detector and policy agent.
 
@@ -47,11 +48,14 @@ class AutonomousResponseAuditor:
             DqnAgent instance for computing Q-values and decision margins.
         top_k_features: int
             Number of top SHAP-attributed features to include in audit card.
+        critical_hosts: frozenset[str] | None
+            Designated critical infrastructure endpoints exempt from isolation.
         """
         self.detector_rf_model = detector_rf_model
         self.feature_names = feature_names
         self.agent = agent
         self.top_k_features = top_k_features
+        self.critical_hosts = critical_hosts or frozenset()
 
         # Initialize TreeExplainer on frozen Random Forest
         # Use TreeExplainer for fast exact tree shap computation
@@ -105,6 +109,8 @@ class AutonomousResponseAuditor:
         self,
         state: np.ndarray,
         enforced_action: str,
+        *,
+        is_critical: bool = False,
     ) -> PolicyLayerExplainability:
         """Decompose Q-values and identify driving state factors."""
         q_vals_dict = self.agent.get_q_values(state)
@@ -122,6 +128,7 @@ class AutonomousResponseAuditor:
             state=state,
             enforced_action=enforced_action,
             q_values=q_dict_str,
+            is_critical=is_critical,
         )
 
         return PolicyLayerExplainability(
@@ -141,6 +148,7 @@ class AutonomousResponseAuditor:
         ts = datetime.now(timezone.utc).isoformat()
         flow_id = step_record.flow_id
         target_host = host_id or "host-standard"
+        is_crit = target_host in self.critical_hosts
 
         prop_act = step_record.proposed_action.name if hasattr(step_record.proposed_action, "name") else str(step_record.proposed_action)
         enf_act = step_record.enforced_action.name if hasattr(step_record.enforced_action, "name") else str(step_record.enforced_action)
@@ -157,7 +165,7 @@ class AutonomousResponseAuditor:
             )
 
         # Layer 2: Policy
-        policy = self.explain_policy(step_record.state, enf_act)
+        policy = self.explain_policy(step_record.state, enf_act, is_critical=is_crit)
 
         # Safety Gate
         safety = SafetyGateAudit(

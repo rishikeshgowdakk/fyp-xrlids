@@ -26,3 +26,17 @@ audit_configuration:
     - MANDATORY_ACTION_COOLDOWN
     - BLAST_RADIUS_CIRCUIT_BREAKER
     - ACTION_MODE_CLAMP
+
+safety_gate:
+  action_cooldown_steps: 30
+  step_duration_seconds: 1.0
+  cooldown_seconds: 30.0
+  blast_radius_threshold: 0.05
+  critical_hosts:
+    - host_0
+    - host_1
+    - host_gateway
+    - host_dns
+    - 10.0.0.1
+    - 10.0.0.2
+

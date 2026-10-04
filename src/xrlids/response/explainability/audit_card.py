@@ -57,29 +57,31 @@ def explain_state_factors(
     state: np.ndarray,
     enforced_action: str,
     q_values: dict[str, float] | None = None,
+    *,
+    is_critical: bool = False,
 ) -> list[str]:
     """Generate human-readable explanations of what state factors drove policy decision.
 
-    State dimensions:
-    0: detector_score (S_t in [0, 1])
-    1: ewma_score (in [0, 1])
-    2: delta_score (rate of change in [-1, 1])
-    3: consecutive_attacks (count normalized min(n, 10)/10)
-    4: destination_critical (0 or 1)
-    5: cooldown_remaining (steps normalized min(c, 30)/30)
+    State dimensions (SPEC-P2-AUTONOMOUS-RESPONSE-001 Section 4):
+    0: S_t (Instantaneous detector risk score in [0, 1])
+    1: ΔS_t (Score trajectory / rate-of-change in [-1, 1] relative to past 5 flows)
+    2: N_alert (Recent alert density in [0, 1] over past 20 flows)
+    3: a_(t-1) (Normalized previous action state in [0, 1])
+    4: c_t (Remaining cooldown timer fraction in [0, 1])
+    5: v_t (Normalized logarithmic volumetric throughput in [0, 1])
     """
     factors: list[str] = []
     if len(state) < 6:
         return ["State vector contains insufficient dimensions for interpretation"]
 
     s_curr = float(state[0])
-    s_ewma = float(state[1])
-    s_delta = float(state[2])
-    s_consec = float(state[3])
-    s_crit = float(state[4])
-    s_cool = float(state[5])
+    s_traj = float(state[1])
+    s_alert = float(state[2])
+    s_prev = float(state[3])
+    s_cool = float(state[4])
+    s_vol = float(state[5])
 
-    # Perception threat score
+    # 1. Perception threat score (Dimension 0)
     if s_curr >= 0.75:
         factors.append(f"Instantaneous attack risk is severe (S_t={s_curr:.3f} >= 0.75)")
     elif s_curr >= 0.50:
@@ -89,41 +91,51 @@ def explain_state_factors(
     else:
         factors.append(f"Instantaneous score is benign (S_t={s_curr:.3f} < 0.40)")
 
-    # Historical moving average
-    if s_ewma >= 0.50:
-        factors.append(f"Exponentially smoothed threat density is elevated (EWMA={s_ewma:.3f})")
-    elif s_ewma >= 0.30:
-        factors.append(f"Moderate sustained threat background present (EWMA={s_ewma:.3f})")
+    # 2. Score trajectory / rate of change (Dimension 1)
+    if s_traj > 0.15:
+        factors.append(f"Threat velocity accelerating rapidly (rate-of-change delta={s_traj:+.2f} over 5-flow window)")
+    elif s_traj < -0.15:
+        factors.append(f"Threat velocity decelerating (rate-of-change delta={s_traj:+.2f} over 5-flow window)")
 
-    # Rate of change
-    if s_delta > 0.15:
-        factors.append(f"Threat velocity accelerating rapidly (rate-of-change delta={s_delta:+.2f})")
-    elif s_delta < -0.15:
-        factors.append(f"Threat velocity decelerating (rate-of-change delta={s_delta:+.2f})")
+    # 3. Recent alert density (Dimension 2)
+    if s_alert >= 0.50:
+        factors.append(f"Recent alert density is elevated (N_alert={s_alert*100:.1f}% of past 20 flows >= 0.50)")
+    elif s_alert >= 0.20:
+        factors.append(f"Moderate sustained threat background present (N_alert={s_alert*100:.1f}%)")
 
-    # Consecutive attack bursts
-    consec_count = int(round(s_consec * 10))
-    if consec_count >= 3:
-        factors.append(f"Persistent attack burst detected ({consec_count}+ consecutive elevated flows)")
+    # 4. Previous action state (Dimension 3)
+    # Normalized: ALLOW=0.0, ALERT=0.333, RATE_LIMIT=0.667, ISOLATE=1.0
+    if s_prev >= 0.85:
+        factors.append("Previous action state: ISOLATE (endpoint previously contained)")
+    elif s_prev >= 0.50:
+        factors.append("Previous action state: RATE_LIMIT (traffic previously throttled)")
+    elif s_prev >= 0.20:
+        factors.append("Previous action state: ALERT (monitoring active)")
 
-    # Destination criticality
-    if s_crit > 0.5:
-        factors.append("Destination endpoint is designated critical infrastructure (isolation strictly prohibited)")
-    else:
-        factors.append("Destination endpoint is standard network asset (isolation permissible if justified)")
-
-    # Active cooldown
+    # 5. Remaining cooldown timer (Dimension 4)
     cooldown_steps = int(round(s_cool * 30))
     if cooldown_steps > 0:
         factors.append(f"Endpoint active cooldown in effect ({cooldown_steps} steps remaining)")
 
-    # Action rationale
+    # 6. Volumetric scale (Dimension 5)
+    if s_vol >= 0.60:
+        factors.append(f"Elevated flow byte volume detected (v_t={s_vol:.2f}, heavy transfer)")
+
+    # 7. Endpoint criticality (Safety Gate context)
+    if is_critical:
+        factors.append("Destination endpoint is designated critical infrastructure (isolation strictly prohibited by safety gate)")
+    else:
+        factors.append("Destination endpoint is standard network inventory (isolation permissible if justified)")
+
+    # 8. Action rationale
     if enforced_action == "ISOLATE":
         factors.append("High cumulative threat density and persistent attack pattern justify complete endpoint containment")
     elif enforced_action == "RATE_LIMIT":
         factors.append("Suspicious velocity or critical infrastructure status indicates rate-limiting to preserve availability")
     elif enforced_action == "ALERT":
         factors.append("Threat score elevated but risk does not warrant disruptive traffic containment")
+    elif enforced_action == "ALLOW":
+        factors.append("Traffic profile conforms to normal operational patterns")
 
     return factors
 

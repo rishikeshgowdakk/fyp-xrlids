@@ -268,7 +268,19 @@ def main() -> int:
     # 5. Execute simulation run with DQN policy
     print("\n[4/5] Executing response simulation with DQN candidate policy...")
     cost_engine = ResearchCostEngine(regime=CostRegime.STANDARD_ENTERPRISE)
-    safety_gate = DeterministicSafetyGate(action_mode=action_mode)
+    sg_cfg = config.get("safety_gate", {})
+    crit_hosts = frozenset(sg_cfg.get("critical_hosts", ["host_0", "host_1", "host_gateway", "host_dns"]))
+    cooldown_steps = int(sg_cfg.get("action_cooldown_steps", 30))
+    step_duration_s = float(sg_cfg.get("step_duration_seconds", 1.0))
+    blast_radius_threshold = float(sg_cfg.get("blast_radius_threshold", 0.05))
+
+    safety_gate = DeterministicSafetyGate(
+        action_mode=action_mode,
+        critical_hosts=crit_hosts,
+        cooldown_steps=cooldown_steps,
+        step_duration_s=step_duration_s,
+        blast_radius_threshold=blast_radius_threshold,
+    )
     state_builder = StateBuilder()
 
     sim = OfflineResponseSimulator(
@@ -293,6 +305,7 @@ def main() -> int:
         feature_names=feature_names,
         agent=agent,
         top_k_features=config["audit_configuration"].get("top_k_shap_features", 3),
+        critical_hosts=crit_hosts,
     )
 
     audit_cards, audit_metrics = auditor.audit_simulation_run(
