@@ -33,10 +33,11 @@ Each condition was trained from scratch under identical hyperparameters on $D_{\
 | `ablate_volumetric_context` | Ablate v_t (Dimension 5) | 344,995.0 | 2.4236 | 0.45% | 94.51% | 0.1144 | 27.8 steps | -1.13% |
 
 **Key Findings from State Ablation**:
-- **Detector Score ($S_t$, Dim 0)**: Most critical state component; ablating $S_t$ leads to catastrophic cost elevation.
-- **Previous Action ($a_{t-1}$, Dim 3)**: Critical for action stability; removing $a_{t-1}$ increases policy chattering (ACI).
-- **Cooldown Fraction ($c_t$, Dim 4)**: Essential for stateful awareness of downstream safety gate constraints.
-- **Trajectory ($\Delta S_t$, Dim 1) & Alert Density ($N_{\text{alert}}$, Dim 2)**: Provide temporal context for distinguishing transient spikes from sustained campaigns.
+- **Previous Action ($a_{t-1}$, Dim 3)**: Most influential single component; ablating $a_{t-1}$ produces the largest cost degradation (+6.80%) and increases mitigation delay from 26.9 to 35.5 steps.
+- **Alert Density ($N_{\text{alert}}$, Dim 2) & Trajectory ($\Delta S_t$, Dim 1)**: Provide modest benefit (+1.99% and +1.49% cost increase upon ablation), supporting temporal awareness of ongoing attacks.
+- **Detector Score ($S_t$, Dim 0)**: Ablating $S_t$ leads to a modest +1.58% cost increase, indicating that temporal and action state partially compensate in this fixed replay trace.
+- **Cooldown State ($c_t$, Dim 4)**: Ablating $c_t$ produces zero change in cost (0.00%) on this population, indicating that the downstream Deterministic Safety Gate enforces cooldown constraints regardless of whether the policy explicitly observes $c_t$.
+- **Volumetric Context ($v_t$, Dim 5)**: Ablating $v_t$ slightly reduces total cost (-1.13%), demonstrating that byte volume is largely redundant or introduces minor variance in policy decision-making on this benchmark.
 
 ---
 
@@ -84,7 +85,7 @@ Evaluated on the frozen 4-action DQN under Standard Enterprise regime:
 
 ## 6. Scientific Conclusions
 
-1. **State Minimality Validated**: The full 6D causal state vector outperforms all ablated variants. Each component provides distinct, non-redundant operational information.
+1. **Empirical State Contribution**: State ablation shows that response cost is most heavily driven by previous action context ($a_{t-1}$, +6.80% cost upon ablation) and temporal attack patterns ($N_{\text{alert}}$ and $\Delta S_t$). Volumetric context ($v_t$) proved slightly noisy/redundant (-1.13% cost when removed), while cooldown state ($c_t$) showed zero impact (0.00%) due to downstream deterministic safety gate enforcement.
 2. **Regime-Dependent Action Selection**: Under High Availability, the policy shifts away from isolation toward rate-limiting; under High Security, isolation is triggered rapidly.
 3. **3-Action Safety Boundary**: 3-action DQN achieves zero false quarantines (FQR=0.0%) by construction, providing an important fallback option for risk-averse environments.
 4. **Safety Invariant Robustness**: Even under tightened blast-radius thresholds (2%), the safety gate intervenes cleanly without policy instability.

@@ -2,50 +2,54 @@
 
 **Document Identifier**: `REPORT-P2-AUTONOMOUS-RESPONSE-001`  
 **Specification Reference**: [`SPEC-P2-AUTONOMOUS-RESPONSE-001`](AUTONOMOUS_RESPONSE_SPEC.md)  
-**Parent Detector Benchmark**: `EXP-P1-CIC2017-R10-001` (Random Forest, 10 Features, $\tau=0.50$ Frozen)  
+**Parent Detector Benchmark**: `EXP-P1-CIC2017-R10-001` (Random Forest, 10 Features, $\tau_{\text{research}}=0.50$ Frozen)  
 **Authoritative Test Population**: Held-Out $D_{\text{pol\_test}}$ (`355,865` Tabular Flows)  
 **Date**: October 4, 2026  
-**Status**: `COMPLETED & SCIENTIFICALLY FROZEN`  
+**Status**: `AUDITED UNDER PRE-REGISTERED CRITERIA — PENDING FINAL SCIENTIFIC FREEZE`  
 
 ---
 
 ## Executive Summary & Epistemological Taxonomy
 
-This report synthesizes the complete empirical research programme for Phase 2 of XRL-IDARS (Intrusion Detection and Autonomous Response System), executing the five-stage research roadmap defined in [`SPEC-P2-AUTONOMOUS-RESPONSE-001`](AUTONOMOUS_RESPONSE_SPEC.md):
+This report synthesizes the empirical research programme for Phase 2 of XRL-IDARS (Intrusion Detection and Autonomous Response System), executing the five-stage research roadmap defined in [`SPEC-P2-AUTONOMOUS-RESPONSE-001`](AUTONOMOUS_RESPONSE_SPEC.md):
 - **Phase 2A**: Reproducible Offline Response Environment & Deterministic Baseline Ladder (`EXP-P2A-BASELINES-001`)
 - **Phase 2B**: Deep Q-Network (Dueling DQN + PER) Candidate Benchmark (`EXP-P2B-DQN-001`)
 - **Phase 2C**: State Feature Ablation & Sensitivity Study (`EXP-P2C-SENSITIVITY-001`)
 - **Phase 2D**: Cross-Dataset Domain Shift & Failure Injection Stress Tests (`EXP-P2D-ROBUSTNESS-001`)
 - **Phase 2E**: Dual-Layer Explainability Engine & Safety Invariant Audit Harness (`EXP-P2E-EXPLAINABILITY-001`)
-- **Final Benchmark**: Single, Authoritative Evaluation on Completely Held-Out $D_{\text{pol\_test}}$ (`EXP-P2-FINAL-TEST-001`)
+- **Final Comparative Evaluation**: Single, Authoritative Pass on Completely Held-Out $D_{\text{pol\_test}}$ (`EXP-P2-FINAL-TEST-001`)
 
 ### Strict Epistemological Distinctions
 
-To preserve scientific integrity, all findings throughout this report are categorized under three distinct epistemological tiers:
+To ensure scientific integrity, all findings throughout this report are categorized under three distinct epistemological tiers:
 1. **EMPIRICALLY OBSERVED**: Direct, reproducible measurements computed on benchmark traffic populations (e.g., flow counts, false quarantine rates, action chattering transitions, TreeSHAP attributions, and paired bootstrap statistics).
-2. **SIMULATED RESEARCH ASSUMPTIONS**: Synthetic cost matrices ($C_{\text{miss}}=100, C_{\text{FP}}=60$, etc.) and state transition dynamics adopted strictly as controlled research instruments to evaluate policy behavior under asymmetric loss. They do **not** represent verified enterprise accounting data or physical operational losses.
-3. **PROPOSED RESEARCH STUDY CRITERIA**: Pre-registered quantitative hypothesis thresholds ($\Delta \mathcal{C}_{\text{rel}} \ge 15.0\%$, $p < 0.01$, $\text{ACI} < 0.01$, $\text{FQR} < 2.0\%$). These serve as objective criteria to test whether reinforcement learning justifies its operational overhead; they are **not** guaranteed commercial promises.
+2. **SIMULATED RESEARCH ASSUMPTIONS**: Parameterized cost models ($C_{\text{miss}}=100, C_{\text{FP}}=60$, etc.) and state transition dynamics adopted strictly as controlled research instruments to evaluate policy behavior under asymmetric loss. They do **not** represent verified enterprise accounting data or physical operational losses.
+3. **PROPOSED STUDY CRITERIA**: Pre-registered quantitative hypothesis thresholds ($\Delta \mathcal{C}_{\text{rel}} \ge 15.0\%$, $p < 0.01$, $\text{ACI} < 0.01$, $\text{FQR} < 2.0\%$). These serve as objective criteria to test whether reinforcement learning justifies its operational overhead; they are **not** commercial guarantees.
 
 ---
 
-## Key Empirical Findings & Pre-Registered Criteria Outcomes
+## Pre-Registered Criteria Outcomes & Hypothesis Status
 
-The single, final comparative evaluation was executed on the completely held-out test split ($D_{\text{pol\_test}}$, 355,865 tabular flows) with all model weights, threshold parameters, and baseline configurations frozen:
+The final comparative evaluation was executed on the completely held-out test split ($D_{\text{pol\_test}}$, 355,865 tabular flows) with all model weights, threshold parameters, and baseline configurations frozen prior to evaluation:
 
-| Research Question | Pre-Registered Proposed Study Criterion | Empirical Result ($D_{\text{pol\_test}}$) | Formal Research Status |
-|:---|:---|:---|:---:|
-| **RQ7 (3-Action)** | $\Delta \mathcal{C}_{\text{rel}} \ge 15.0\%$ cost reduction vs Baseline 1 ($\tau=0.50$), $p < 0.01$ | $\mathbf{\Delta \mathcal{C}_{\text{rel}} = +15.99\%}$, $p = 0.0000$ (95% CI: $[+15.24\%, +16.71\%]$) | **PASS** (H1 Supported) |
-| **RQ7 (4-Action)** | $\Delta \mathcal{C}_{\text{rel}} \ge 15.0\%$ cost reduction vs Baseline 1 ($\tau=0.50$), $p < 0.01$ | $\mathbf{\Delta \mathcal{C}_{\text{rel}} = +28.80\%}$, $p = 0.0000$ (95% CI: $[+28.18\%, +29.38\%]$) | **PASS** (H1 Supported) |
-| **RQ7.1** | Action Chattering Index (ACI) $< 0.01$ ($\le 1$ toggle per 100 flows) | $\text{ACI}_{\text{3-act}} = \mathbf{0.0019}$, $\text{ACI}_{\text{4-act}} = \mathbf{0.0214}$ | **PARTIAL / FAIL** (3-act passes; 4-act fails) |
-| **RQ7.2** | False Quarantine Rate (FQR) $< 2.0\%$ under out-of-domain transfer | $\text{FQR}_{\text{transfer}} = \mathbf{0.51\%}$, $\text{BAS} = \mathbf{97.69\%}$ on CSE-2018 | **PASS** (Safe Bounds Maintained) |
-| **RQ7.3** | 100% of non-ALLOW actions accompanied by valid TreeSHAP + Q-margin Audit Cards | **100.00% Coverage** across all 28,168 non-ALLOW interventions | **PASS** (Mandate Fully Met) |
+| Research Question | Pre-Registered Target Criterion | Best Deterministic Comparator | Empirical Result on $D_{\text{pol\_test}}$ | Independent Classification | Formal Hypothesis Status |
+|:---|:---|:---|:---|:---:|:---:|
+| **RQ7 (3-Action)** | $\Delta \mathcal{C}_{\text{rel}} \ge 15.0\%$ cost reduction vs best deterministic baseline, $p < 0.01$ | Baseline 2: Two-Tier ($\tau=0.40/0.75$) | $\Delta \mathcal{C}_{\text{rel}} = \mathbf{+11.29\%}$ ($p < 0.001$, 95% CI: $[-0.1919, -0.1691]$; vs B1: $+15.99\%$) | **NOT MET** | **$H_0$ Upheld** (Statistically significant improvement below 15% effect size) |
+| **RQ7 (4-Action)** | $\Delta \mathcal{C}_{\text{rel}} \ge 15.0\%$ cost reduction vs best deterministic baseline, $p < 0.01$ | Baseline 2: Two-Tier ($\tau=0.40/0.75$) | $\Delta \mathcal{C}_{\text{rel}} = \mathbf{+14.10\%}$ ($p < 0.001$, 95% CI: $[-0.9147, -0.8312]$; vs B1: $+28.80\%$) | **NOT MET** | **$H_0$ Upheld** (Statistically significant improvement below 15% effect size) |
+| **RQ7.1** | Action Chattering Index (ACI) $< 0.01$ ($\le 1$ jump per 100 flows) | N/A | $\text{ACI}_{\text{3-act}} = \mathbf{0.0019}$, $\text{ACI}_{\text{4-act}} = \mathbf{0.0214}$ | **PARTIAL** | 3-action **PASS**; 4-action **FAIL** |
+| **RQ7.2** | Out-of-domain transfer safety bound: $\text{FQR} < 2.0\%$ | N/A | $\text{FQR}_{\text{transfer}} = \mathbf{0.51\%}$, $\text{BAS} = \mathbf{97.69\%}$ on CSE-CIC-IDS2018 | **PASS** | $H_1$ Supported |
+| **RQ7.2 (Noise)** | Continuous score jitter stability: $\text{ACI} < 0.05$ across $\sigma \in [0.0, 0.20]$ | N/A | $\text{ACI} \approx \mathbf{0.106 - 0.111} > 0.05$ across all $\sigma$; $\text{FQR} \le 0.53\%$ | **FAIL** | Negative Robustness Finding |
+| **RQ7.3** | 100% of non-ALLOW actions accompanied by valid TreeSHAP + Q-margin Audit Cards | N/A | **100.00% Coverage** across all 28,168 non-ALLOW interventions | **PASS** | Mandate Fully Met |
 
-> [!NOTE]
-> **Transparent Negative Finding (RQ7.1)**: While the 3-action DQN policy easily met the pre-registered chattering bound ($\text{ACI} = 0.0019 \ll 0.01$), the 4-action DQN policy exhibited an $\text{ACI}$ of $0.0214$ on held-out test data. This occurs because the policy frequently transitions between `RATE_LIMIT` and `ISOLATE` in response to dynamic flow rates during high-volume DDoS bursts. In accordance with pre-registered scientific neutrality, this finding is documented openly without post-hoc rationalization.
+> [!IMPORTANT]
+> **Resolution of RQ7 Hypothesis Testing**:
+> In accordance with pre-registered scientific methodology, RQ7 requires comparing the learned policy against the **BEST** deterministic baseline. On held-out test data across all cost regimes, Baseline 2 (Two-Tier Graded Threshold) is the lowest-cost deterministic comparator (achieving 569,978.0 in 3-action and 2,206,220.5 in 4-action).
+> While the DQN candidate achieves statistically significant cost reductions over Baseline 2 ($p < 0.001$), the relative effect sizes ($+11.29\%$ in 3-action, $+14.10\%$ in 4-action) fall below the pre-registered effect size threshold ($\ge 15.0\%$).
+> Therefore, **$H_0$ is upheld regarding the pre-registered effect size criterion**. We report this negative finding with full transparency and do not redefine the comparator post-hoc to Baseline 1 (Single Threshold) merely to manufacture an artificial pass.
 
 ---
 
-## 1. System Architecture & Research Methodology
+## 1. System Architecture & Simulator Causality Audit
 
 The Phase 2 research architecture couples the frozen Phase 1 perception engine with an offline response simulation environment:
 
@@ -59,7 +63,7 @@ The Phase 2 research architecture couples the frozen Phase 1 perception engine w
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
 │ Causal State Vector Builder (dim=6, zero target leakage)    │
-│ s_t = [S_t, S_ewma, S_delta, ConsecAttacks, IsCritical, Cool]│
+│ s_t = [S_t, ΔS_t, N_alert, a_(t-1), c_t, v_t]              │
 └──────────────────────────────┬──────────────────────────────┘
                                │ State s_t
                                ▼
@@ -94,12 +98,17 @@ The Phase 2 research architecture couples the frozen Phase 1 perception engine w
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Simulation-Only Boundary & Strict Safety Guarantees
+### Forensic Simulator Causality Audit
 
-As mandated by project governance:
-- **Zero Physical Network Mutations**: The response simulator operates entirely offline against ordered flow replay streams. No packet drops, socket kills, `iptables`, `nftables`, `tc`, or eBPF operations are performed.
-- **Zero Detector Retraining**: Phase 1 detector weights and preprocessor scalers were strictly frozen.
-- **Zero Target / Label Leakage**: Ground-truth labels are isolated exclusively within the consequence evaluation engine. Neither the state builder nor the policy agent has access to true labels or future arrivals.
+A rigorous forensic audit of `src/xrlids/response/environment.py` established the exact causal boundary of the response simulator:
+1. **Contextual Sequential Process**: The simulator operates as a contextual sequential decision process evaluated over an ordered, exogenous network flow trace.
+2. **Action Feedback to State**: Action selection causally influences future policy-observable state through three mechanisms:
+   - Previous action normalization $a_{t-1}$ (Dimension 3);
+   - Host active cooldown fraction $c_t$ (Dimension 4);
+   - Downstream safety gate tracking (active isolated host population bounding blast radius).
+3. **Exogenous Flow Trace**: The incoming flow sequence $[x_0, x_1, \dots, x_N]$ is an exogenous historical trace. Actions taken at step $t$ do not mutate the packet headers, arrival times, or flow features of future incoming traffic.
+4. **Internal Consequence Tracking**: The simulator maintains hidden state `_host_compromise_state` for cumulative operational cost accounting and mitigation delay tracking. This internal variable tracks breach escalation under `ALLOW` and `ALERT`, but is strictly isolated from the observation vector $s_t$.
+5. **No Target Leakage**: True binary labels $y \in \{0, 1\}$ are accessed exclusively by the cost engine for simulated consequence evaluation; they are never observed by the state builder or policy network.
 
 ---
 
@@ -116,154 +125,153 @@ Phase 1 CIC-IDS2017 Deduplicated Population (1,779,322 Rows)
 └── Test Split (20%): D_pol_test (355,865 rows) ─────────────► Strictly Held-Out Final Evaluation
 ```
 
-### Authoritative Resolution of Historical Row Count Discrepancy
+### Authoritative Resolution of Row Count Provenance
 
-Phase 1 documentation occasionally referenced `355,833` test flows alongside `355,865` test rows. The final audit establishes the exact mathematical provenance:
-- The full deduplicated tabular flow population of the test split in `split_manifest.json` contains exactly **355,865** flows.
-- When generating sequence-aligned inputs ($T=5$) for recurrent models (LSTM and Fusion), the first 4 boundary flows per file across the 8 capture files were dropped ($8 \times 4 = 32$ flows), resulting in $355,865 - 32 = 355,833$ sequences.
-- Because Phase 2 consumes tabular flow features from the primary Random Forest detector, **355,865** is the authoritative, verified population count for tabular policy evaluation.
-- Held-out $D_{\text{pol\_test}}$ was accessed **strictly once** after freezing all policy weights, baseline hyperparameters, and sensitivity configurations.
+- **355,865 Tabular Flows**: The full deduplicated test population recorded in `split_manifest.json` contains exactly 355,865 flows. Because Phase 2 consumes tabular flow features from the primary Random Forest detector, **355,865** is the authoritative population count for all Phase 2 held-out tabular policy evaluations.
+- **355,833 Sequence Rows (Historical Phase 1 Note)**: In Phase 1 sequence evaluations (Supervised LSTM and Score Fusion), sequence construction with window $T=5$ dropped the first 4 boundary flows per file across 8 capture files ($8 \times 4 = 32$ boundary drops), yielding $355,865 - 32 = 355,833$ sequences.
+- **Zero Test Contamination**: Held-out $D_{\text{pol\_test}}$ was accessed strictly once after freezing all policy weights, baseline hyperparameters, and sensitivity configurations.
 
 ---
 
-## 3. Phase 2A: Deterministic Baseline Ladder
+## 3. Phase 2A: Deterministic Baseline Ladder (Validation Population)
 
-Phase 2A established the non-RL baseline cost benchmarks across three research cost regimes:
+Phase 2A established empirical reference baselines on the policy development validation split ($D_{\text{pol\_val}}$, 142,346 flows) across three research cost regimes:
 
-| Policy | Policy Type | Enforced Action Space | Standard Enterprise Total Cost | High Availability Total Cost | High Security Enclave Total Cost | Availability (BAS) | Action Chattering (ACI) |
+| Policy Identifier | Policy Name & Description | Action Mode | Standard Enterprise Total Cost | High Availability Total Cost | High Security Enclave Total Cost | Business Availability (BAS) | Action Chattering (ACI) |
 |:---|:---|:---:|---:|---:|---:|---:|---:|
-| **Baseline 0** | Always ALLOW | Passive | 6,482,000.0 | 3,241,000.0 | 32,410,000.0 | 100.00% | 0.0000 |
-| **Baseline 1** | Single Threshold ($\tau=0.50$) | 3-action | 601,835.0 | 659,100.0 | 1,055,045.0 | 97.96% | 0.0357 |
-| **Baseline 1** | Single Threshold ($\tau=0.50$) | 4-action | 2,661,646.0 | 2,726,426.0 | 3,333,591.0 | 97.96% | 0.0230 |
-| **Baseline 2** | Two-Tier ($\tau=0.40/0.75$) | 3-action | 569,978.0 | 612,753.0 | 1,004,496.0 | 97.82% | 0.0294 |
-| **Baseline 2** | Two-Tier ($\tau=0.40/0.75$) | 4-action | 2,206,220.5 | 2,257,830.5 | 2,849,589.5 | 97.82% | 0.0270 |
-| **Baseline 3** | Heuristic State Machine | 3-action | 1,624,454.0 | 2,594,654.0 | 1,357,458.0 | 73.02% | 0.1137 |
-| **Baseline 3** | Heuristic State Machine | 4-action | 3,257,720.0 | 4,309,160.0 | 3,217,105.0 | 64.66% | 0.1073 |
+| **Baseline 0** | Always ALLOW (Passive reference lower bound) | Passive | 2,593,000.0 | 1,296,500.0 | 12,965,000.0 | 100.00% | 0.0000 |
+| **Baseline 1** | Single Threshold ($\tau=0.50$, Binary comparator) | 3-action | 240,735.0 | 263,640.0 | 422,019.0 | 97.96% | 0.0357 |
+| **Baseline 1** | Single Threshold ($\tau=0.50$, Binary comparator) | 4-action | 1,064,658.0 | 1,090,570.0 | 1,333,436.0 | 97.96% | 0.0230 |
+| **Baseline 2** | Two-Tier Threshold ($\tau_{\text{suspect}}=0.40, \tau_{\text{isolate}}=0.75$) | 3-action | **227,992.0** | **245,102.0** | **401,798.5** | 97.82% | 0.0294 |
+| **Baseline 2** | Two-Tier Threshold ($\tau_{\text{suspect}}=0.40, \tau_{\text{isolate}}=0.75$) | 4-action | **882,488.5** | **903,132.5** | **1,139,836.0** | 97.82% | 0.0270 |
+| **Baseline 3** | Heuristic State Machine (Escalation comparator) | 3-action | 649,781.5 | 1,037,861.5 | 542,983.5 | 73.02% | 0.1137 |
+| **Baseline 3** | Heuristic State Machine (Escalation comparator) | 4-action | 1,303,088.0 | 1,723,664.0 | 1,286,842.0 | 64.66% | 0.1073 |
 
 ### Baseline Insights:
-1. **Always ALLOW (Baseline 0)** incurs catastrophic operational penalties ($6.48\text{M}$ cost in Standard Enterprise, $32.41\text{M}$ in High-Security) due to unmitigated attack flows.
-2. **Two-Tier Threshold (Baseline 2)** outperforms Single-Threshold (Baseline 1) in 3-action mode ($569.9\text{k}$ vs $601.8\text{k}$) by graded containment: rate-limiting suspect flows ($\tau \in [0.40, 0.75]$) while reserving disruptive isolation for high-threat flows ($\tau \ge 0.75$).
-3. **Heuristic State Machine (Baseline 3)** achieves high attack containment but suffers severe business availability penalties ($\text{BAS} = 64.66\% - 73.02\%$) due to aggressive escalation without proportional de-escalation dampening.
+1. **Always ALLOW (Baseline 0)** incurs severe uncontained compromise penalties ($2.59\text{M}$ cost in Standard Enterprise, $12.97\text{M}$ in Enclave).
+2. **Two-Tier Threshold (Baseline 2)** consistently achieved the lowest cumulative cost among all deterministic baselines across all cost regimes, demonstrating the value of graded escalation (throttling suspect traffic while isolating severe threats).
+3. **Heuristic State Machine (Baseline 3)** suffers substantial availability penalties ($\text{BAS} = 64.66\% - 73.02\%$) due to aggressive escalation without proportionate de-escalation dampening.
 
 ---
 
-## 4. Phase 2B: Deep Reinforcement Learning Candidate (DQN)
+## 4. Phase 2B: DQN Architecture & Training Configuration
 
-To evaluate whether autonomous RL can optimize response policies beyond fixed heuristics, a **Dueling Deep Q-Network** with **Prioritized Experience Replay (PER)** was implemented and trained on $D_{\text{pol\_train}}$:
+The Deep Q-Network candidate policy was trained on $D_{\text{pol\_train}}$ (213,519 flows). The parameters below reflect the authoritative machine-generated record in `results/phase2/EXP-P2B-DQN-001/training_config.json`:
 
 ```text
-Dueling Architecture:
-Input State s_t (dim=6)
-  └── Linear(6 -> 128) + ReLU
-        └── Linear(128 -> 128) + ReLU
-              ├── Value Stream:       Linear(128 -> 64) + ReLU -> Linear(64 -> 1)        [V(s)]
-              └── Advantage Stream:   Linear(128 -> 64) + ReLU -> Linear(64 -> |A|)      [A(s, a)]
+Dueling DQN Network Architecture:
+Input State s_t (dim=6): [S_t, ΔS_t, N_alert, a_(t-1), c_t, v_t]
+  └── Linear(6 -> 64) -> LayerNorm -> LeakyReLU(negative_slope=0.01)
+        └── Linear(64 -> 64) -> LayerNorm -> LeakyReLU(negative_slope=0.01)
+              ├── Value Stream:       Linear(64 -> 32) -> LeakyReLU -> Linear(32 -> 1)        [V(s)]
+              └── Advantage Stream:   Linear(64 -> 32) -> LeakyReLU -> Linear(32 -> |A|)      [A(s, a)]
 Q(s, a) = V(s) + (A(s, a) - (1/|A|) * SUM_a' A(s, a'))
 ```
 
-### Hyperparameters:
-- **Optimizer**: Adam ($\eta = 10^{-4}$)
-- **Replay Buffer**: Prioritized Experience Replay ($N=50,000$, $\alpha=0.6, \beta_0=0.4 \to 1.0$)
-- **Exploration**: $\epsilon$-greedy ($\epsilon_0 = 1.0 \to 0.05$ over 20,000 steps)
-- **Target Updates**: Polyak soft updates ($\tau = 0.005$)
-- **Discount Factor**: $\gamma = 0.99$
-- **Training Duration**: 50,000 environment steps per action mode
+### Authoritative Training Hyperparameters:
+- **State Representation Dimension**: 6
+- **Hidden Layer Topology**: `[64, 64]` with `LayerNorm` and `LeakyReLU`
+- **Architecture**: Dueling DQN with mean-subtracted advantage stream
+- **Optimizer**: Adam ($\text{learning\_rate} = 0.001$)
+- **Discount Factor**: $\gamma = 0.95$
+- **Exploration Schedule**: $\epsilon$-greedy ($\epsilon_0 = 1.0 \to 0.05$ decayed linearly over 50,000 steps)
+- **Replay Buffer**: Prioritized Experience Replay ($N=100,000$ capacity, $\alpha=0.6$, $\beta_0=0.4 \to 1.0$)
+- **Target Network Update**: Polyak soft updates ($\tau = 0.005$ per step)
+- **Training Steps**: 50,000 environment steps per action mode
+- **Batch Size**: 64 transitions
 
 ### Validation Checkpoint Selection ($D_{\text{pol\_val}}$):
-- **3-Action DQN**: Best checkpoint selected at step 30,000 (Validation cost: $203,639.5$).
-- **4-Action DQN**: Best checkpoint selected at step 40,000 (Validation cost: $739,788.0$).
+- **3-Action Mode**: Checkpoint at step 30,000 achieved minimum validation cost ($203,639.5$).
+- **4-Action Mode**: Checkpoint at step 40,000 achieved minimum validation cost ($739,788.0$).
 
 ---
 
 ## 5. Phase 2C: State Feature Ablation & Sensitivity Study
 
-To identify which state features drive response performance and verify stability across parameter regimes, Phase 2C conducted exhaustive ablation and sensitivity sweeps (`EXP-P2C-SENSITIVITY-001`):
+Phase 2C evaluated the empirical contributions of individual state features and safety gate parameters on $D_{\text{pol\_val}}$ (`EXP-P2C-SENSITIVITY-001`):
 
-### State Feature Ablation (Ranking Dimensions by Performance Degradation):
+### State Feature Ablation (Authoritative Artifact: `state_ablation_results.json`)
 
-Each ablation condition masked one state dimension to 0 and trained for 10,000 steps:
+Each ablation condition masked one state dimension to 0 and evaluated on $D_{\text{pol\_val}}$:
 
-| Condition | Masked State Feature | Total Validation Cost | Cost Delta vs Full | Degradation % | Inferred Feature Role |
-|:---|:---|---:|---:|---:|:---|
-| `full_model` | *(None - All 6 features active)* | 203,639.5 | 0.0 | Baseline | Reference optimal state representation |
-| `ablate_ewma_score` | Dim 1: $S_{\text{ewma}}$ (threat background) | 203,674.5 | +35.0 | +0.02% | Secondary temporal baseline |
-| `ablate_consec_attacks`| Dim 3: Consecutive attack count | 203,940.5 | +301.0 | +0.15% | Burst detection indicator |
-| `ablate_delta_score` | Dim 2: $S_{\text{delta}}$ (rate-of-change) | 204,188.5 | +549.0 | +0.27% | Attack acceleration indicator |
-| `ablate_dest_critical` | Dim 4: Destination criticality flag | 204,611.5 | +972.0 | +0.48% | Critical host avoidance indicator |
-| `ablate_detector_score`| Dim 0: Instantaneous score $S_t$ | 206,861.5 | +3,222.0 | **+1.58%** | **Primary threat risk signal** |
-| `ablate_prev_action` | Historical action state $a_{t-1}$ | 217,495.5 | +13,856.0 | **+6.80%** | **State transition stability anchor** |
+| Condition ID | Ablated Component | Total Cost | Mean Cost/Flow | FQR | BAS | ACI | Mitigation Delay | Delta Cost vs Full | Empirical Interpretation |
+|:---|:---|---:|---:|---:|---:|---:|---:|---:|:---|
+| `full_state` | Full 6D Causal State | 348,930.0 | 2.4513 | 0.53% | 88.22% | 0.1136 | 26.9 steps | 0.00% | Reference 6D representation |
+| `ablate_volumetric_context` | Ablate $v_t$ (Dim 5) | 344,995.0 | 2.4236 | 0.45% | 94.51% | 0.1144 | 27.8 steps | **-1.13%** | Volumetric feature is slightly redundant/noisy |
+| `ablate_cooldown_state` | Ablate $c_t$ (Dim 4) | 348,930.0 | 2.4513 | 0.53% | 88.22% | 0.1136 | 26.9 steps | **+0.00%** | Safety gate enforces cooldown downstream |
+| `ablate_score_trajectory` | Ablate $\Delta S_t$ (Dim 1) | 354,135.0 | 2.4878 | 0.41% | 97.79% | 0.1022 | 30.2 steps | **+1.49%** | Rate-of-change provides modest benefit |
+| `ablate_current_score` | Ablate $S_t$ (Dim 0) | 354,454.0 | 2.4901 | 0.48% | 96.15% | 0.1125 | 28.5 steps | **+1.58%** | Threat score provides modest benefit |
+| `ablate_alert_density` | Ablate $N_{\text{alert}}$ (Dim 2) | 355,862.0 | 2.5000 | 0.27% | 98.52% | 0.1121 | 28.8 steps | **+1.99%** | Alert memory aids persistent burst tracking |
+| `ablate_previous_action` | Ablate $a_{t-1}$ (Dim 3) | 372,660.0 | 2.6180 | 0.37% | 98.21% | 0.0925 | 35.5 steps | **+6.80%** | **Highest impact**: feedback anchors policy dynamics |
 
-**Ablation Insights**:
-1. Masking the instantaneous detector score ($S_t$, Dim 0) causes the largest individual perceptual degradation (+1.58% cost), proving that the policy directly leverages fine-grained continuous scores.
-2. Masking the previous action feedback ($a_{t-1}$) produces severe policy instability (+6.80% cost), confirming that stateful Markov representations are essential for cooldown-aware decision making.
-
-### Safety Gate Parameter Sensitivity:
-- **Cooldown Window Sweep ($W_{\text{cool}} \in \{15, 30, 60\}$ steps)**:
-  - $W_{\text{cool}} = 15$: Total cost $750,210.0$; ACI increases to $0.0248$.
-  - $W_{\text{cool}} = 30$ (Nominal): Total cost $739,788.0$; ACI controlled at $0.0214$.
-  - $W_{\text{cool}} = 60$: Total cost $745,890.0$; slight increase due to prolonged containment of recovered hosts.
-- **Blast Radius Circuit Breaker Sweep ($\text{BR}_{\text{thresh}} \in \{2\%, 5\%, 10\%\}$)**:
-  - At $2\%$ threshold: Circuit breaker triggers on **11.47%** of flows during heavy attack bursts, forcing downgrades to `ALERT` to protect network availability.
-  - At $5\%$ threshold (Nominal): Circuit breaker triggers on **8.84%** of flows, perfectly bounding network-wide disruption.
-  - At $10\%$ threshold: Circuit breaker triggers on **3.12%** of flows, granting greater isolation freedom in isolated environments.
+### Reconciled Ablation Conclusions:
+1. **Previous Action Feedback ($a_{t-1}$)** is the single most influential state dimension (+6.80% cost increase, mitigation delay increases from 26.9 to 35.5 steps).
+2. **Volumetric Context ($v_t$)** is redundant in this benchmark; removing it slightly improves policy cost (-1.13%).
+3. **Cooldown State ($c_t$)** produces identical cost (+0.00%) on this replay trace because the downstream `DeterministicSafetyGate` enforces cooldown constraints regardless of whether the policy network observes $c_t$.
+4. **All features are NOT strictly necessary**: The hypothesis that every 6D dimension is required for optimal performance is **refuted** by the empirical data.
 
 ---
 
 ## 6. Phase 2D: Cross-Dataset Robustness & Failure Injection
 
-Phase 1 proved that intrusion detectors suffer severe out-of-domain degradation (RQ5 transfer collapse) and stealth attack blindspots (RQ1). Phase 2D evaluated whether autonomous response intelligence maintains safe bounds under these real-world failure modes (`EXP-P2D-ROBUSTNESS-001`):
+Phase 2D evaluated response policy stability across out-of-domain transfer, stealth campaigns, traffic surges, and sensor jitter (`EXP-P2D-ROBUSTNESS-001`):
 
-| Robustness Stress Test | Failure Mode Simulated | Observed Policy Behavior | Safe Bound Metric | Status |
+| Robustness Stress Test | Simulated Stress Condition | Observed Policy Behavior | Safe Bound Metric | Status |
 |:---|:---|:---|:---|:---:|
-| **1. Out-of-Domain Transfer** (`CIC → CSE`) | Covariate shift where detector F1 collapsed to 0.3286 | Policy de-escalated to `ALERT` (12.4%) and `ALLOW` (87.1%); zero false isolation storm. | $\text{FQR} = \mathbf{0.51\%} < 2.0\%$, $\text{BAS} = \mathbf{97.69\%}$ | **PASS** |
-| **2. Stealth Attack Campaigns** | Infiltration/Web flows hovering in $S_t \in [0.40, 0.55]$ | Temporal escalation: Policy escalated to `RATE_LIMIT` on 100% of stealth sequences. | Contained **100%** of stealth campaigns | **PASS** |
-| **3. Benign Traffic Spikes** | 10x packet rate bursts injected into benign flows | Rate-limiting remained bounded at 0.07%; zero false quarantine cascades. | $\text{FQR} = \mathbf{0.20\%}$, $\text{BAS} = \mathbf{96.52\%}$ | **PASS** |
-| **4. Adversarial Score Jitter** | Gaussian noise $\mathcal{N}(0, \sigma^2)$ added to $S_t$ ($\sigma \le 0.20$) | Chattering increased gracefully from $\text{ACI}=0.0214$ ($\sigma=0$) to $0.0381$ ($\sigma=0.20$). | $\text{ACI} < \mathbf{0.05}$ across all jitter levels | **PASS** |
+| **1. Out-of-Domain Transfer** (`CIC → CSE`) | Covariate shift (Phase 1 detector F1 collapsed to 0.3286) | Policy safely de-escalated to `ALERT` (12.4%) and `ALLOW` (87.1%); zero quarantine cascades. | $\text{FQR} = \mathbf{0.51\%} < 2.0\%$, $\text{BAS} = \mathbf{97.69\%}$ | **PASS** |
+| **2. Stealth Attack Campaigns** | Low-footprint attacks hovering in $S_t \in [0.40, 0.55]$ | Temporal escalation: Policy escalated to `RATE_LIMIT` on repeated sequences. | Contained **100%** of stealth sequences | **PASS** |
+| **3. Benign Volumetric Spikes** | 10x packet/byte volume injected into benign flows | Rate-limiting bounded at 0.07%; zero disruption storms. | $\text{FQR} = \mathbf{0.20\%}$, $\text{BAS} = \mathbf{96.52\%}$ | **PASS** |
+| **4. Sensor Score Jitter** | Gaussian noise $\mathcal{N}(0, \sigma^2)$ on $S_t$ ($\sigma \le 0.20$) | Chattering index remained elevated ($\text{ACI} \approx 0.106 - 0.111$). | $\text{ACI} < 0.05$ target | **FAIL** (Negative Finding) |
+
+### Reconciled Sensor Jitter Findings (Negative Finding):
+- As recorded in `score_jitter_robustness.json`, Action Chattering Index (ACI) ranged between $0.1059$ and $0.1113$ across all noise levels $\sigma \in [0.00, 0.20]$, failing the pre-registered stability criterion ($\text{ACI} < 0.05$).
+- However, False Quarantine Rate remained tightly bounded ($\text{FQR} \le 0.53\% < 2.0\%$), indicating that noise-induced action toggles occurred predominantly between non-disruptive actions (`ALLOW` and `ALERT`) rather than wrongful endpoint isolations.
 
 ---
 
-## 7. Phase 2E: Dual-Layer Explainability Engine & Safety Invariant Audit
+## 7. Phase 2E: Dual-Layer Explainability & Safety Invariant Audit
 
-To ensure autonomous response actions are fully transparent and accountable, Phase 2E implemented the **Dual-Layer Explainability Architecture** (`EXP-P2E-EXPLAINABILITY-001`):
+Phase 2E demonstrated transparent decision provenance for all autonomous response interventions (`EXP-P2E-EXPLAINABILITY-001`):
 
+### Dual-Layer Audit Architecture:
 ```text
-Intervention Triggered (e.g. Host host_0 -> ISOLATE)
+Intervention Triggered (e.g. Host host_0 -> Proposed: ISOLATE -> Enforced: ALERT)
 │
 ├── Layer 1: Perception Attribution (TreeSHAP)
-│   "Why was this flow flagged as dangerous?"
-│   - S_t = 0.9934
+│   "Why was this flow flagged as anomalous?"
+│   - Detector Score S_t = 0.9934
 │   - packet_length_std:  SHAP +0.2107 (Value: 1425.15)
 │   - flow_packets_per_s: SHAP -0.1378 (Value: 0.16)
 │   - flow_bytes_per_s:   SHAP -0.1143 (Value: 138.44)
 │
 ├── Layer 2: Response Policy Explainability (Q-Decomposition)
-│   "Why did the agent choose ISOLATE over RATE_LIMIT or ALERT?"
-│   - Q(ALLOW) = -94.06, Q(ALERT) = -16.96, Q(RATE_LIMIT) = -29.78, Q(ISOLATE) = -10.45
-│   - Decision Margin: +6.51 advantage over next-best action (ALERT)
+│   "Why did the agent propose ISOLATE over RATE_LIMIT or ALERT?"
+│   - Q(ALLOW) = -108.84, Q(ALERT) = -19.72, Q(RATE_LIMIT) = -22.56, Q(ISOLATE) = -12.36
+│   - Decision Margin: +7.36 Q-value advantage over next-best action
 │   - Driving State Factors:
 │     * Instantaneous attack risk is severe (S_t=0.993 >= 0.75)
-│     * Threat velocity accelerating rapidly (rate-of-change delta=+1.00)
-│     * Endpoint active cooldown in effect (8 steps remaining)
-│     * High cumulative threat density justifies complete endpoint containment
+│     * Recent alert density is elevated (N_alert=100.0% of past 20 flows >= 0.50)
+│     * Destination endpoint is designated critical infrastructure (isolation strictly prohibited)
 │
-└── Safety Invariant Verification
+└── Safety Invariant Verification (Deterministic Safety Gate)
     - Invariants Checked: CRITICAL_INFRASTRUCTURE_EXEMPTION, MANDATORY_ACTION_COOLDOWN, BLAST_RADIUS_CIRCUIT_BREAKER
-    - Overruled: NO (Action approved and executed)
+    - Action Overruled: YES
+    - Override Reason: CRITICAL_INFRASTRUCTURE_EXEMPTION
+    - Enforced Action: ALERT
 ```
 
-### Pre-Registered RQ7.3 Audit Verification:
-- **Evaluated Flow Population ($D_{\text{pol\_val}}$)**: 142,346 flows
-- **Autonomous Interventions (Non-ALLOW)**: 28,168 actions
-- **Action Decision Audit Cards Generated**: **28,168 cards**
-- **Audit Coverage**: **100.00%** (Pre-registered target $\ge 99.99\%$ met; **RQ7.3 PASS**)
-- **Mean Decision Margin**: $+1.98$ Q-value advantage across all executed interventions.
-- **Safety Overrides Logged**: 12,582 interventions safely downgraded to `ALERT` by the Blast Radius Circuit Breaker to prevent network-wide availability collapse.
+### Safety Invariant Audit Results:
+- **Evaluated Validation Population ($D_{\text{pol\_val}}$)**: 142,346 flows
+- **Interventions Audited (Non-ALLOW)**: 28,168 actions
+- **Audit Cards Generated**: **28,168 cards** (100.00% coverage, **RQ7.3 PASS**)
+- **Mean Decision Margin**: $+1.98$ Q-value advantage across interventions
+- **Critical Infrastructure Exemptions**: Zero unauthorized isolations of designated critical hosts (`host_0`, `host_1`, gateway, DNS). Every proposed isolation on a critical host was intercepted and safely downgraded to `ALERT`.
 
 ---
 
 ## 8. Final Authoritative Benchmark on Held-Out Test Data ($D_{\text{pol\_test}}$)
 
-The final comparative benchmark was executed strictly once on the held-out test split population ($D_{\text{pol\_test}}$, 355,865 tabular flows) across all three cost regimes with $B=1,000$ paired bootstrap resamples:
+The final comparative benchmark was executed strictly once on the held-out test split ($D_{\text{pol\_test}}$, 355,865 tabular flows) with $B=1,000$ paired bootstrap resamples:
 
 ### Performance Matrix on Held-Out Test Data:
 
@@ -280,109 +288,76 @@ The final comparative benchmark was executed strictly once on the held-out test 
 | Standard Enterprise | `4-action` | `Baseline_2_Two_Tier_0.40_0.75` | 2,206,220.5 | 6.1996 | 0.31% | 97.82% | 0.0270 | 5,859 | 58,961 |
 | Standard Enterprise | `4-action` | `Baseline_3_Heuristic_State_Machine` | 3,257,720.0 | 9.1544 | 3.68% | 64.66% | 0.1073 | 3,280 | 61,540 |
 | **High Availability** | `3-action` | `DQN_Candidate_3-action` | **538,160.5** | **1.5123** | 0.00% | 96.51% | 0.0019 | 60,449 | 4,371 |
-| High Availability | `3-action` | `Baseline_1_Single_Threshold_tau_0.50` | 659,100.0 | 1.8521 | 0.00% | 97.96% | 0.0357 | 64,180 | 640 |
+| High Availability | `3-action` | `Baseline_2_Two_Tier_0.40_0.75` | 612,753.0 | 1.7219 | 0.00% | 97.82% | 0.0294 | 63,467 | 1,353 |
 | **High Availability** | `4-action` | `DQN_Candidate_4-action` | **1,937,476.5** | **5.4444** | 0.20% | 96.52% | 0.0214 | 10,285 | 54,535 |
-| High Availability | `4-action` | `Baseline_1_Single_Threshold_tau_0.50` | 2,726,426.0 | 7.6614 | 0.55% | 97.96% | 0.0230 | 5,130 | 59,690 |
+| High Availability | `4-action` | `Baseline_2_Two_Tier_0.40_0.75` | 2,257,830.5 | 6.3446 | 0.31% | 97.82% | 0.0270 | 5,859 | 58,961 |
 | **High Security Enclave** | `3-action` | `DQN_Candidate_3-action` | **891,946.5** | **2.5064** | 0.00% | 96.51% | 0.0019 | 60,449 | 4,371 |
-| High Security Enclave | `3-action` | `Baseline_1_Single_Threshold_tau_0.50` | 1,055,045.0 | 2.9647 | 0.00% | 97.96% | 0.0357 | 64,180 | 640 |
+| High Security Enclave | `3-action` | `Baseline_2_Two_Tier_0.40_0.75` | 1,004,496.0 | 2.8227 | 0.00% | 97.82% | 0.0294 | 63,467 | 1,353 |
 | **High Security Enclave** | `4-action` | `DQN_Candidate_4-action` | **2,445,511.5** | **6.8720** | 0.20% | 96.52% | 0.0214 | 10,285 | 54,535 |
-| High Security Enclave | `4-action` | `Baseline_1_Single_Threshold_tau_0.50` | 3,333,591.0 | 9.3676 | 0.55% | 97.96% | 0.0230 | 5,130 | 59,690 |
+| High Security Enclave | `4-action` | `Baseline_2_Two_Tier_0.40_0.75` | 2,849,589.5 | 8.0075 | 0.31% | 97.82% | 0.0270 | 5,859 | 58,961 |
 
 ---
 
 ## 9. Paired Bootstrap Hypothesis Testing ($B=1,000$ Resamples)
 
-To verify whether observed cost advantages over baselines are statistically significant, paired bootstrap difference distributions were computed across 1,000 resamples:
-
-| Cost Regime | Action Space | Comparison Pair | Mean Cost Delta | 95% Bootstrap CI | Relative Cost Reduction ($\Delta \mathcal{C}_{\text{rel}}$) | Two-Sided p-value | Significance | Superior Policy |
+| Cost Regime | Action Space | Comparison Pair | Mean Cost Delta | 95% Bootstrap CI | Relative Cost Reduction ($\Delta \mathcal{C}_{\text{rel}}$) | p-value | Significance | Superior Policy |
 |:---|:---:|:---|---:|:---:|---:|---:|:---:|:---:|
-| Standard Enterprise | `3-action` | `DQN_Candidate` vs `Always_ALLOW` | -16.7940 | [-16.9164, -16.6855] | **+92.20%** | $p < 0.001$ | *** | `DQN_Candidate_3-action` |
-| Standard Enterprise | `3-action` | `DQN_Candidate` vs `Single_Threshold (0.50)` | -0.2704 | [-0.2825, -0.2576] | **+15.99%** | $p < 0.001$ | *** | `DQN_Candidate_3-action` |
-| Standard Enterprise | `3-action` | `DQN_Candidate` vs `Two_Tier (0.40/0.75)` | -0.1809 | [-0.1919, -0.1691] | **+11.29%** | $p < 0.001$ | *** | `DQN_Candidate_3-action` |
-| Standard Enterprise | `3-action` | `DQN_Candidate` vs `Heuristic_State_Machine` | -3.1440 | [-3.1694, -3.1185] | **+68.88%** | $p < 0.001$ | *** | `DQN_Candidate_3-action` |
-| Standard Enterprise | `4-action` | `DQN_Candidate` vs `Always_ALLOW` | -12.8892 | [-12.9887, -12.8015] | **+70.76%** | $p < 0.001$ | *** | `DQN_Candidate_4-action` |
-| Standard Enterprise | `4-action` | `DQN_Candidate` vs `Single_Threshold (0.50)` | -2.1538 | [-2.1959, -2.1081] | **+28.80%** | $p < 0.001$ | *** | `DQN_Candidate_4-action` |
-| Standard Enterprise | `4-action` | `DQN_Candidate` vs `Two_Tier (0.40/0.75)` | -0.8740 | [-0.9147, -0.8312] | **+14.10%** | $p < 0.001$ | *** | `DQN_Candidate_4-action` |
-| Standard Enterprise | `4-action` | `DQN_Candidate` vs `Heuristic_State_Machine` | -3.8288 | [-3.8825, -3.7719] | **+41.82%** | $p < 0.001$ | *** | `DQN_Candidate_4-action` |
-| High Availability | `3-action` | `DQN_Candidate` vs `Single_Threshold (0.50)` | -0.3398 | [-0.3504, -0.3293] | **+18.35%** | $p < 0.001$ | *** | `DQN_Candidate_3-action` |
-| High Availability | `4-action` | `DQN_Candidate` vs `Single_Threshold (0.50)` | -2.2170 | [-2.2662, -2.1636] | **+28.94%** | $p < 0.001$ | *** | `DQN_Candidate_4-action` |
-| High Security | `3-action` | `DQN_Candidate` vs `Single_Threshold (0.50)` | -0.4583 | [-0.5120, -0.3962] | **+15.46%** | $p < 0.001$ | *** | `DQN_Candidate_3-action` |
-| High Security | `4-action` | `DQN_Candidate` vs `Single_Threshold (0.50)` | -2.4956 | [-2.5604, -2.4224] | **+26.64%** | $p < 0.001$ | *** | `DQN_Candidate_4-action` |
+| Standard Enterprise | `3-action` | `DQN_Candidate` vs `Baseline_2 (Two-Tier)` | -0.1809 | [-0.1919, -0.1691] | **+11.29%** | $p < 0.001$ | *** | `DQN_Candidate_3-action` |
+| Standard Enterprise | `3-action` | `DQN_Candidate` vs `Baseline_1 (Single-Threshold)` | -0.2704 | [-0.2825, -0.2576] | **+15.99%** | $p < 0.001$ | *** | `DQN_Candidate_3-action` |
+| Standard Enterprise | `3-action` | `DQN_Candidate` vs `Baseline_0 (Always-ALLOW)` | -16.7940 | [-16.9164, -16.6855] | **+92.20%** | $p < 0.001$ | *** | `DQN_Candidate_3-action` |
+| Standard Enterprise | `4-action` | `DQN_Candidate` vs `Baseline_2 (Two-Tier)` | -0.8740 | [-0.9147, -0.8312] | **+14.10%** | $p < 0.001$ | *** | `DQN_Candidate_4-action` |
+| Standard Enterprise | `4-action` | `DQN_Candidate` vs `Baseline_1 (Single-Threshold)` | -2.1538 | [-2.1959, -2.1081] | **+28.80%** | $p < 0.001$ | *** | `DQN_Candidate_4-action` |
+| Standard Enterprise | `4-action` | `DQN_Candidate` vs `Baseline_0 (Always-ALLOW)` | -12.8892 | [-12.9887, -12.8015] | **+70.76%** | $p < 0.001$ | *** | `DQN_Candidate_4-action` |
+| High Availability | `3-action` | `DQN_Candidate` vs `Baseline_2 (Two-Tier)` | -0.2096 | [-0.2187, -0.2002] | **+12.17%** | $p < 0.001$ | *** | `DQN_Candidate_3-action` |
+| High Availability | `4-action` | `DQN_Candidate` vs `Baseline_2 (Two-Tier)` | -0.9002 | [-0.9429, -0.8547] | **+14.19%** | $p < 0.001$ | *** | `DQN_Candidate_4-action` |
+| High Security | `3-action` | `DQN_Candidate` vs `Baseline_2 (Two-Tier)` | -0.3163 | [-0.3693, -0.2615] | **+11.20%** | $p < 0.001$ | *** | `DQN_Candidate_3-action` |
+| High Security | `4-action` | `DQN_Candidate` vs `Baseline_2 (Two-Tier)` | -1.1355 | [-1.1998, -1.0700] | **+14.18%** | $p < 0.001$ | *** | `DQN_Candidate_4-action` |
 
 ---
 
-## 10. Pre-Registered Hypotheses & Research Question Resolution
+## 10. Formal Research Hypotheses Resolution
 
-### RQ7: Primary Autonomous Reinforcement Learning Cost Advantage
-- **Hypothesis Formulation**: Can an autonomous reinforcement learning policy achieve $\ge 15.0\%$ relative cost reduction over deterministic baselines with $p < 0.01$?
-- **3-Action Space Evaluation**: On held-out test data, 3-action DQN achieves a **+15.99%** cost reduction vs Baseline 1 ($\tau=0.50$, $p = 0.0000$, 95% CI $[+15.24\%, +16.71\%]$). **H1 is SUPPORTED (PASS)**.
-- **4-Action Space Evaluation**: On held-out test data, 4-action DQN achieves a **+28.80%** cost reduction vs Baseline 1 ($\tau=0.50$, $p = 0.0000$, 95% CI $[+28.18\%, +29.38\%]$). **H1 is SUPPORTED (PASS)**.
-- **Comparison vs Two-Tier Baseline**: Relative to Baseline 2 (Two-Tier), 3-action DQN achieves $+11.29\%$ and 4-action DQN achieves $+14.10\%$. While statistically significant ($p < 0.001$), these comparisons do not cross the pre-registered $15.0\%$ margin against the multi-threshold heuristic.
-
-### RQ7.1: Action Chattering Elimination via Cooldown Invariants
-- **Hypothesis Formulation**: Can stateful representations and mandatory cooldown eliminate action chattering ($\text{ACI} < 0.01$)?
-- **Evaluation**: 3-action DQN achieved $\text{ACI} = 0.0019$ ($< 0.01$, PASS). However, 4-action DQN exhibited $\text{ACI} = 0.0214$ ($> 0.01$) due to transitions between `RATE_LIMIT` and `ISOLATE` under bursty DDoS streams. **FORMALLY RECORDED AS PARTIAL PASS / FAIL**.
-
-### RQ7.2: Out-of-Domain Safety Bounds Under Domain Shift
-- **Hypothesis Formulation**: Does the response policy maintain safe bounds ($\text{FQR} < 2.0\%$) under cross-dataset domain shift without retraining?
-- **Evaluation**: Evaluated on unadapted CSE-CIC-IDS2018 traffic (where Phase 1 detector F1 collapsed to 0.3286), the policy maintained $\text{FQR} = 0.51\%$ and $\text{BAS} = 97.69\%$. **H1 is SUPPORTED (PASS)**.
-
-### RQ7.3: Dual-Layer Explainability Architecture
-- **Hypothesis Formulation**: Does the dual-layer architecture expose perception vs policy drivers for 100% of automated responses?
-- **Evaluation**: 100.00% of non-ALLOW actions across the 28,168 interventions on $D_{\text{pol\_val}}$ generated structured Action Decision Audit Cards combining TreeSHAP and Q-value margins. **MANDATE FULLY MET (PASS)**.
+### RQ7 Formal Resolution:
+- **Null Hypothesis ($H_0$)**: An autonomous reinforcement learning response policy achieves less than 15.0% relative cost reduction ($\Delta \mathcal{C}_{\text{rel}} < 15.0\%$) over the best deterministic baseline under standard enterprise loss conditions, or the improvement is not statistically significant ($p \ge 0.01$).
+- **Alternative Hypothesis ($H_1$)**: The autonomous response policy achieves $\Delta \mathcal{C}_{\text{rel}} \ge 15.0\%$ with $p < 0.01$ over the best deterministic baseline.
+- **Empirical Resolution**:
+  - In 3-action mode, DQN achieves $\Delta \mathcal{C}_{\text{rel}} = +11.29\%$ ($p < 0.001$) vs Baseline 2.
+  - In 4-action mode, DQN achieves $\Delta \mathcal{C}_{\text{rel}} = +14.10\%$ ($p < 0.001$) vs Baseline 2.
+  - While both cost reductions are statistically significant with $p < 0.001$ and confidence intervals excluding zero, neither crosses the pre-registered 15.0% effect-size threshold.
+  - **Status: $H_0$ is UPHELD**. The autonomous policy provides statistically significant cost reduction, but does not meet the pre-registered target effect size over the best multi-tier deterministic heuristic.
 
 ---
 
-## 11. Scientific Governance & Decision Log Reconciliation (D-003 Alignment)
+## 11. Scientific Governance & Decision Log Alignment (D-003 Reconciliation)
 
-This report strictly maintains alignment with repository governance decisions:
-
-1. **Academic Research Reporting Threshold ($\tau=0.50$)**:
-   - $\tau_{\text{research}} = 0.50$ remains strictly frozen for academic benchmark reporting, published comparisons, bootstrap comparisons, and Phase 1 reports.
+This report strictly adheres to repository governance:
+1. **Academic Reporting Baseline ($\tau_{\text{research}}=0.50$)**:
+   - Strictly frozen for benchmark comparisons and published reporting.
 2. **Operational Threshold Candidate ($\tau_{\text{ops}}=0.40$)**:
-   - $\tau_{\text{ops}} = 0.40$ is strictly a proposed Phase 2 operational candidate.
-   - It is **not** an empirically selected optimum.
-   - It is **not** justified as the deployment threshold.
-   - It must **not** be described as producing a guaranteed or generally improved FPR/recall.
-3. **Open Operational Decision Status**:
-   - The reinforcement learning policy and simulated cost matrix are research artifacts evaluated under controlled asymmetric loss regimes.
-   - Real enterprise operating threshold selection remains an **OPEN DECISION** pending site-specific cost matrix calibration and operational loss modeling.
+   - Proposed operational candidate only; NOT an empirically selected optimum.
+   - Does NOT guarantee universally improved FPR or recall across arbitrary deployments.
+3. **Open Operational Decision**:
+   - The reinforcement learning response policy evaluated here is an illustrative research model under simulated loss matrices.
+   - Production deployment threshold selection remains an **OPEN DECISION** pending site-specific cost calibration and operational risk modeling.
 
 ---
 
-## 12. Artifact Provenance & Reproducibility Index
+## 12. Scientific Limitations & Future Research
 
-All empirical findings in this report are verified by structured, committed JSON artifacts with cryptographic `.meta.json` sidecars:
+1. **Offline Exogenous Replay**: Evaluated on replay streams where actions do not alter incoming packet generation dynamics.
+2. **Simulated Loss Model**: Cost values reflect parameterized research assumptions rather than real enterprise accounting ledgers.
+3. **Sensor Noise Vulnerability**: Continuous score jitter revealed elevated action chattering ($\text{ACI} \approx 0.11 > 0.05$), indicating a need for explicit hysteresis smoothing in future policy iterations.
+4. **Single-Domain Development**: Policy training was performed on CIC-IDS2017; multi-dataset meta-learning remains future work.
 
-| Research Stage | Directory Path | Primary Artifacts | Git Commit Verified |
+---
+
+## 13. Reproducibility & Provenance Index
+
+| Stage | Directory | Primary Artifacts | Provenance Git Commit |
 |:---|:---|:---|:---:|
-| **Phase 2A** | `results/phase2/EXP-P2A-BASELINES-001/` | `baseline_metrics.json`, `experiment_config.json`, `phase2a_report.md` | `7922420` |
-| **Phase 2B** | `results/phase2/EXP-P2B-DQN-001/` | `validation_metrics.json`, `baseline_comparisons.json`, `phase2b_report.md` | `8e89a8d` |
-| **Phase 2C** | `results/phase2/EXP-P2C-SENSITIVITY-001/` | `state_ablation_results.json`, `cost_regime_sensitivity.json`, `phase2c_report.md`| `f59e929` |
-| **Phase 2D** | `results/phase2/EXP-P2D-ROBUSTNESS-001/` | `transfer_robustness.json`, `stealth_campaign_results.json`, `phase2d_report.md`| `211ca14` |
-| **Phase 2E** | `results/phase2/EXP-P2E-EXPLAINABILITY-001/` | `audit_records.json`, `safety_audit_metrics.json`, `sample_audit_cards.md` | `c2097fa` |
-| **Final Test** | `results/phase2/EXP-P2-FINAL-TEST-001/` | `final_test_metrics.json`, `final_test_bootstrap.json`, `population_accounting.json`| `57ecee1` |
-
-### Independent Reproduction Commands:
-```bash
-# Verify test suite
-.venv/bin/pytest -q
-
-# Reproduce Phase 2A Baselines
-.venv/bin/python scripts/phase2/run_phase2a_baselines.py --seed 42
-
-# Reproduce Phase 2B DQN Training & Checkpoints
-.venv/bin/python scripts/phase2/run_phase2b_dqn.py --seed 42
-
-# Reproduce Phase 2C Sensitivity & State Ablation
-.venv/bin/python scripts/phase2/run_phase2c_sensitivity.py --seed 42
-
-# Reproduce Phase 2D Robustness & Failure Injection
-.venv/bin/python scripts/phase2/run_phase2d_robustness.py --seed 42
-
-# Reproduce Phase 2E Explainability & Safety Invariant Audit
-.venv/bin/python scripts/phase2/run_phase2e_explainability.py --seed 42
-
-# Reproduce Final Test Evaluation on D_pol_test
-.venv/bin/python scripts/phase2/run_final_test_evaluation.py --seed 42
-```
+| **Phase 2A** | `results/phase2/EXP-P2A-BASELINES-001/` | `baseline_metrics.json`, `experiment_config.json` | `7922420` |
+| **Phase 2B** | `results/phase2/EXP-P2B-DQN-001/` | `training_config.json`, `validation_metrics.json` | `8e89a8d` |
+| **Phase 2C** | `results/phase2/EXP-P2C-SENSITIVITY-001/` | `state_ablation_results.json`, `cost_regime_sensitivity.json` | `f59e929` |
+| **Phase 2D** | `results/phase2/EXP-P2D-ROBUSTNESS-001/` | `transfer_robustness.json`, `score_jitter_robustness.json` | `211ca14` |
+| **Phase 2E** | `results/phase2/EXP-P2E-EXPLAINABILITY-001/` | `audit_records.json`, `safety_audit_metrics.json` | Live Reconciled |
+| **Final Test**| `results/phase2/EXP-P2-FINAL-TEST-001/` | `final_test_metrics.json`, `final_test_bootstrap.json` | `57ecee1` |
