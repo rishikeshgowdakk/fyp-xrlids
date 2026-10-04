@@ -33,6 +33,17 @@ from xrlids.response.metrics import (
 )
 from xrlids.response.safety import DeterministicSafetyGate
 from xrlids.response.state import StateBuilder
+from xrlids.response.transaction import (
+    ActuatorBackend,
+    ControlledResponseTransactionManager,
+    RollbackBackend,
+    RollbackResult,
+    SimulatedActuatorBackend,
+    StateSnapshot,
+    TransactionRecord,
+    TransactionState,
+    TransactionWatchdog,
+)
 from xrlids.response.types import (
     Action,
     ActionSpaceMode,
@@ -70,4 +81,14 @@ __all__ = [
     "compute_relative_cost_reduction",
     "evaluate_response_run",
     "paired_bootstrap_cost_comparison",
+    "TransactionState",
+    "StateSnapshot",
+    "RollbackResult",
+    "RollbackBackend",
+    "ActuatorBackend",
+    "SimulatedActuatorBackend",
+    "ControlledResponseTransactionManager",
+    "TransactionRecord",
+    "TransactionWatchdog",
 ]
+

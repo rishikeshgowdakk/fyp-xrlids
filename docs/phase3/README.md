@@ -17,10 +17,11 @@ The most operationally important phase. Everything here is gated on earlier evid
 | Observability | Logs, metrics, health checks, error counters | Phase 3F | ✅ EMPIRICALLY OBSERVED & DOCUMENTED (`EXP-P3F-OBSERVABILITY-001`) |
 | Safety layer | Deterministic gate for every autonomous action | Cross-cutting | ✅ Reusable (`xrlids.response.safety`) |
 | Dry-run mode | Log-only enforcement with guaranteed zero network mutation | Phase 3B/3C | ✅ Implemented (`LiveMode.DRY_RUN`) |
-| Controlled enforcement | Real actuation in an isolated lab (strictly locked behind rollback) | Controlled Lab | 🔒 LOCKED (Pending Rollback Verification) |
-| Rollback specification | Atomic rollback, state snapshot, failure handling | Safety Spec | ✅ Documented (`CONTROLLED_RESPONSE_SAFETY.md`) |
+| Controlled enforcement | Real actuation in an isolated lab (strictly locked behind rollback) | Controlled Lab | 🔒 LOCKED (Simulated Rollback Verified; Physical Netns Pending) |
+| Rollback specification | Atomic rollback, state snapshot, failure handling | Phase 3G | ✅ EMPIRICALLY OBSERVED & AUDITED (`EXP-P3G-ROLLBACK-001`) |
 | Traffic burst case | "1000 packets from one click" experiment execution | Lab Experiment | ✅ EXECUTED & COMMITTED (`EXP-P3-BURST-1000-001`) |
 | Failure injection | Fail-safe behaviour for every dependency | Robustness | ✅ VERIFIED & AUDITED (6/6 Scenarios Pass) |
+| Atomic rollback harness | Formal transaction lifecycle, SHA-256 snapshots, auto-compensation | Phase 3G | ✅ VERIFIED & AUDITED (12/12 Scenarios Pass) |
 | Final operational report | Evidence-driven summary | Final Closure | ⬜ Planned |
 
 ## Flow Completion Policy (Decision D-006)
@@ -70,7 +71,10 @@ Live Network / Controlled PCAP
 - **Phase 3E — Performance Profiling**:
   - Component-level latency profiling (P50, P95, P99).
 - **Phase 3F — Observability & Safety Audit**:
-  - Structured audit logging, health metrics, and rollback specification documented in [`CONTROLLED_RESPONSE_SAFETY.md`](CONTROLLED_RESPONSE_SAFETY.md).
+  - Structured audit logging, health metrics, and backpressure handling documented in [`PHASE3F_OBSERVABILITY_REPORT.md`](PHASE3F_OBSERVABILITY_REPORT.md).
+- **Phase 3G — Atomic Rollback & Controlled Response Transaction Harness**:
+  - Atomic transaction lifecycle (`IDLE -> SNAPSHOT -> VALIDATE -> PREPARE -> APPLY -> VERIFY -> COMMITTED`), SHA-256 snapshots, auto-compensation rollback, watchdog TTL monitoring, and permanent safety locking documented in [`PHASE3G_ROLLBACK_REPORT.md`](PHASE3G_ROLLBACK_REPORT.md).
+
 
 ## Enforcement precondition chain (§75)
 

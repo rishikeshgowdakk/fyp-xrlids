@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P3G-ROLLBACK-001",
+    "git_commit": "bab43665fff76f5623cdd0dc0755d309c1b93027",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": null,
+    "created_at": "2026-10-04T13:59:49.556074+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "bab43665fff76f5623cdd0dc0755d309c1b93027",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "experiment_id": "EXP-P3G-ROLLBACK-001",
+  "git_commit": "bab43665fff76f5623cdd0dc0755d309c1b93027",
+  "created_at": "2026-10-04T13:59:49.556074+00:00",
+  "operational_mode": "LiveMode.CONTROLLED_ENFORCEMENT (SIMULATED_BACKEND_ONLY)",
+  "zero_network_mutation_guaranteed": true,
+  "host_firewall_mutations_prohibited": true,
+  "total_scenarios_evaluated": 12,
+  "scenarios": [
+    "scenario_1_nominal_isolate",
+    "scenario_2_nominal_rate_limit",
+    "scenario_3_nominal_allow",
+    "scenario_4_critical_infrastructure_exemption",
+    "scenario_5_mutation_exception_rollback",
+    "scenario_6_actuator_timeout_rollback",
+    "scenario_7_partial_mutation_rollback",
+    "scenario_8_verification_failure_rollback",
+    "scenario_9_snapshot_corruption_abort",
+    "scenario_10_rollback_failure_safety_lock",
+    "scenario_11_watchdog_ttl_rollback",
+    "scenario_12_rollback_idempotency"
+  ],
+  "default_watchdog_ttl_s": 60.0
+}

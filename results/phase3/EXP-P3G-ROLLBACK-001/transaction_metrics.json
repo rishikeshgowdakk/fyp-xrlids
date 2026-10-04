@@ -1,0 +1,451 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P3G-ROLLBACK-001",
+    "git_commit": "bab43665fff76f5623cdd0dc0755d309c1b93027",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": null,
+    "created_at": "2026-10-04T13:59:49.556074+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "bab43665fff76f5623cdd0dc0755d309c1b93027",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "experiment_id": "EXP-P3G-ROLLBACK-001",
+  "total_transactions_executed": 13,
+  "status_distribution": {
+    "IDLE": 0,
+    "SNAPSHOT": 0,
+    "VALIDATE": 0,
+    "PREPARE": 0,
+    "APPLY": 0,
+    "VERIFY": 0,
+    "COMMITTED": 6,
+    "ROLLING_BACK": 0,
+    "ROLLED_BACK": 4,
+    "ABORTED": 1,
+    "SAFETY_LOCKED": 2
+  },
+  "mean_execution_time_ms": 0.049,
+  "max_execution_time_ms": 0.116,
+  "transaction_records": [
+    {
+      "transaction_id": "TX-0001",
+      "target_host": "192.168.1.101",
+      "proposed_action": "ISOLATE",
+      "enforced_action": "ISOLATE",
+      "state": "COMMITTED",
+      "snapshot": {
+        "snapshot_id": "SNAP-0001",
+        "timestamp": "2026-10-04T13:59:49.556204+00:00",
+        "target_host": "192.168.1.101",
+        "action": "ISOLATE",
+        "baseline_state": {
+          "rules": {},
+          "rate_limits": {},
+          "isolated_hosts": [],
+          "active_qdiscs": {}
+        },
+        "state_digest": "61efdfac0e7ebcc5140cfee394dfb7166c8db9749eab2abf4099b39768210c0b",
+        "metadata": {
+          "simulated_backend": true,
+          "zero_network_mutation": true
+        }
+      },
+      "rollback_result": null,
+      "execution_time_ms": 0.116,
+      "error_message": null,
+      "audit_card_generated": true,
+      "override_reason": null
+    },
+    {
+      "transaction_id": "TX-0001",
+      "target_host": "192.168.1.102",
+      "proposed_action": "RATE_LIMIT",
+      "enforced_action": "RATE_LIMIT",
+      "state": "COMMITTED",
+      "snapshot": {
+        "snapshot_id": "SNAP-0001",
+        "timestamp": "2026-10-04T13:59:49.556392+00:00",
+        "target_host": "192.168.1.102",
+        "action": "RATE_LIMIT",
+        "baseline_state": {
+          "rules": {},
+          "rate_limits": {},
+          "isolated_hosts": [],
+          "active_qdiscs": {}
+        },
+        "state_digest": "61efdfac0e7ebcc5140cfee394dfb7166c8db9749eab2abf4099b39768210c0b",
+        "metadata": {
+          "simulated_backend": true,
+          "zero_network_mutation": true
+        }
+      },
+      "rollback_result": null,
+      "execution_time_ms": 0.045,
+      "error_message": null,
+      "audit_card_generated": true,
+      "override_reason": null
+    },
+    {
+      "transaction_id": "TX-0001",
+      "target_host": "192.168.1.103",
+      "proposed_action": "ALLOW",
+      "enforced_action": "ALLOW",
+      "state": "COMMITTED",
+      "snapshot": {
+        "snapshot_id": "SNAP-0001",
+        "timestamp": "2026-10-04T13:59:49.556496+00:00",
+        "target_host": "192.168.1.103",
+        "action": "ALLOW",
+        "baseline_state": {
+          "rules": {},
+          "rate_limits": {},
+          "isolated_hosts": [],
+          "active_qdiscs": {}
+        },
+        "state_digest": "61efdfac0e7ebcc5140cfee394dfb7166c8db9749eab2abf4099b39768210c0b",
+        "metadata": {
+          "simulated_backend": true,
+          "zero_network_mutation": true
+        }
+      },
+      "rollback_result": null,
+      "execution_time_ms": 0.023,
+      "error_message": null,
+      "audit_card_generated": true,
+      "override_reason": null
+    },
+    {
+      "transaction_id": "TX-0001",
+      "target_host": "192.168.10.1",
+      "proposed_action": "ISOLATE",
+      "enforced_action": "ALERT",
+      "state": "COMMITTED",
+      "snapshot": {
+        "snapshot_id": "SNAP-0001",
+        "timestamp": "2026-10-04T13:59:49.556562+00:00",
+        "target_host": "192.168.10.1",
+        "action": "ISOLATE",
+        "baseline_state": {
+          "rules": {},
+          "rate_limits": {},
+          "isolated_hosts": [],
+          "active_qdiscs": {}
+        },
+        "state_digest": "61efdfac0e7ebcc5140cfee394dfb7166c8db9749eab2abf4099b39768210c0b",
+        "metadata": {
+          "simulated_backend": true,
+          "zero_network_mutation": true
+        }
+      },
+      "rollback_result": null,
+      "execution_time_ms": 0.028,
+      "error_message": "Safety gate override: CRITICAL_INFRASTRUCTURE_EXEMPTION",
+      "audit_card_generated": true,
+      "override_reason": "CRITICAL_INFRASTRUCTURE_EXEMPTION"
+    },
+    {
+      "transaction_id": "TX-0001",
+      "target_host": "192.168.1.105",
+      "proposed_action": "ISOLATE",
+      "enforced_action": "ISOLATE",
+      "state": "ROLLED_BACK",
+      "snapshot": {
+        "snapshot_id": "SNAP-0001",
+        "timestamp": "2026-10-04T13:59:49.556625+00:00",
+        "target_host": "192.168.1.105",
+        "action": "ISOLATE",
+        "baseline_state": {
+          "rules": {},
+          "rate_limits": {},
+          "isolated_hosts": [],
+          "active_qdiscs": {}
+        },
+        "state_digest": "61efdfac0e7ebcc5140cfee394dfb7166c8db9749eab2abf4099b39768210c0b",
+        "metadata": {
+          "simulated_backend": true,
+          "zero_network_mutation": true
+        }
+      },
+      "rollback_result": {
+        "success": true,
+        "transaction_id": "TX-0001",
+        "snapshot_id": "SNAP-0001",
+        "rollback_attempts": 1,
+        "restoration_verified": true,
+        "failure_reason": null,
+        "final_safety_state": "RESTORED"
+      },
+      "execution_time_ms": 0.069,
+      "error_message": "Mutation error: Simulated actuator mutation exception",
+      "audit_card_generated": false,
+      "override_reason": null
+    },
+    {
+      "transaction_id": "TX-0001",
+      "target_host": "192.168.1.106",
+      "proposed_action": "RATE_LIMIT",
+      "enforced_action": "RATE_LIMIT",
+      "state": "ROLLED_BACK",
+      "snapshot": {
+        "snapshot_id": "SNAP-0001",
+        "timestamp": "2026-10-04T13:59:49.556730+00:00",
+        "target_host": "192.168.1.106",
+        "action": "RATE_LIMIT",
+        "baseline_state": {
+          "rules": {},
+          "rate_limits": {},
+          "isolated_hosts": [],
+          "active_qdiscs": {}
+        },
+        "state_digest": "61efdfac0e7ebcc5140cfee394dfb7166c8db9749eab2abf4099b39768210c0b",
+        "metadata": {
+          "simulated_backend": true,
+          "zero_network_mutation": true
+        }
+      },
+      "rollback_result": {
+        "success": true,
+        "transaction_id": "TX-0001",
+        "snapshot_id": "SNAP-0001",
+        "rollback_attempts": 1,
+        "restoration_verified": true,
+        "failure_reason": null,
+        "final_safety_state": "RESTORED"
+      },
+      "execution_time_ms": 0.057,
+      "error_message": "Mutation error: Simulated actuator execution timeout",
+      "audit_card_generated": false,
+      "override_reason": null
+    },
+    {
+      "transaction_id": "TX-0001",
+      "target_host": "192.168.1.107",
+      "proposed_action": "ISOLATE",
+      "enforced_action": "ISOLATE",
+      "state": "ROLLED_BACK",
+      "snapshot": {
+        "snapshot_id": "SNAP-0001",
+        "timestamp": "2026-10-04T13:59:49.556817+00:00",
+        "target_host": "192.168.1.107",
+        "action": "ISOLATE",
+        "baseline_state": {
+          "rules": {},
+          "rate_limits": {},
+          "isolated_hosts": [],
+          "active_qdiscs": {}
+        },
+        "state_digest": "61efdfac0e7ebcc5140cfee394dfb7166c8db9749eab2abf4099b39768210c0b",
+        "metadata": {
+          "simulated_backend": true,
+          "zero_network_mutation": true
+        }
+      },
+      "rollback_result": {
+        "success": true,
+        "transaction_id": "TX-0001",
+        "snapshot_id": "SNAP-0001",
+        "rollback_attempts": 1,
+        "restoration_verified": true,
+        "failure_reason": null,
+        "final_safety_state": "RESTORED"
+      },
+      "execution_time_ms": 0.059,
+      "error_message": "Post-action state verification failed",
+      "audit_card_generated": false,
+      "override_reason": null
+    },
+    {
+      "transaction_id": "TX-0001",
+      "target_host": "192.168.1.108",
+      "proposed_action": "RATE_LIMIT",
+      "enforced_action": "RATE_LIMIT",
+      "state": "ROLLED_BACK",
+      "snapshot": {
+        "snapshot_id": "SNAP-0001",
+        "timestamp": "2026-10-04T13:59:49.556907+00:00",
+        "target_host": "192.168.1.108",
+        "action": "RATE_LIMIT",
+        "baseline_state": {
+          "rules": {},
+          "rate_limits": {},
+          "isolated_hosts": [],
+          "active_qdiscs": {}
+        },
+        "state_digest": "61efdfac0e7ebcc5140cfee394dfb7166c8db9749eab2abf4099b39768210c0b",
+        "metadata": {
+          "simulated_backend": true,
+          "zero_network_mutation": true
+        }
+      },
+      "rollback_result": {
+        "success": true,
+        "transaction_id": "TX-0001",
+        "snapshot_id": "SNAP-0001",
+        "rollback_attempts": 1,
+        "restoration_verified": true,
+        "failure_reason": null,
+        "final_safety_state": "RESTORED"
+      },
+      "execution_time_ms": 0.065,
+      "error_message": "Post-action state verification failed",
+      "audit_card_generated": false,
+      "override_reason": null
+    },
+    {
+      "transaction_id": "TX-0001",
+      "target_host": "192.168.1.109",
+      "proposed_action": "ISOLATE",
+      "enforced_action": "ALLOW",
+      "state": "ABORTED",
+      "snapshot": {
+        "snapshot_id": "SNAP-0001",
+        "timestamp": "2026-10-04T13:59:49.557001+00:00",
+        "target_host": "192.168.1.109",
+        "action": "ISOLATE",
+        "baseline_state": {
+          "rules": {},
+          "rate_limits": {},
+          "isolated_hosts": [],
+          "active_qdiscs": {}
+        },
+        "state_digest": "corrupted_digest_hash_0000000000",
+        "metadata": {
+          "simulated_backend": true,
+          "zero_network_mutation": true
+        }
+      },
+      "rollback_result": null,
+      "execution_time_ms": 0.042,
+      "error_message": "Snapshot validation failed: corrupted baseline digest",
+      "audit_card_generated": false,
+      "override_reason": null
+    },
+    {
+      "transaction_id": "TX-0001",
+      "target_host": "192.168.1.110",
+      "proposed_action": "ISOLATE",
+      "enforced_action": "ISOLATE",
+      "state": "SAFETY_LOCKED",
+      "snapshot": {
+        "snapshot_id": "SNAP-0001",
+        "timestamp": "2026-10-04T13:59:49.557073+00:00",
+        "target_host": "192.168.1.110",
+        "action": "ISOLATE",
+        "baseline_state": {
+          "rules": {},
+          "rate_limits": {},
+          "isolated_hosts": [],
+          "active_qdiscs": {}
+        },
+        "state_digest": "61efdfac0e7ebcc5140cfee394dfb7166c8db9749eab2abf4099b39768210c0b",
+        "metadata": {
+          "simulated_backend": true,
+          "zero_network_mutation": true
+        }
+      },
+      "rollback_result": {
+        "success": false,
+        "transaction_id": "TX-0001",
+        "snapshot_id": "SNAP-0001",
+        "rollback_attempts": 1,
+        "restoration_verified": false,
+        "failure_reason": "Simulated rollback failure during state restoration",
+        "final_safety_state": "SAFETY_LOCKED"
+      },
+      "execution_time_ms": 0.065,
+      "error_message": "Mutation error: Simulated actuator mutation exception",
+      "audit_card_generated": false,
+      "override_reason": null
+    },
+    {
+      "transaction_id": "TX-0002",
+      "target_host": "192.168.1.110",
+      "proposed_action": "ALLOW",
+      "enforced_action": "ALLOW",
+      "state": "SAFETY_LOCKED",
+      "snapshot": null,
+      "rollback_result": null,
+      "execution_time_ms": 0.001,
+      "error_message": "Transaction rejected: System is in SAFETY_LOCKED state (Rollback failed for TX-0001: Simulated rollback failure during state restoration)",
+      "audit_card_generated": false,
+      "override_reason": null
+    },
+    {
+      "transaction_id": "TX-0001",
+      "target_host": "192.168.1.111",
+      "proposed_action": "ISOLATE",
+      "enforced_action": "ISOLATE",
+      "state": "COMMITTED",
+      "snapshot": {
+        "snapshot_id": "SNAP-0001",
+        "timestamp": "2026-10-04T13:59:49.557183+00:00",
+        "target_host": "192.168.1.111",
+        "action": "ISOLATE",
+        "baseline_state": {
+          "rules": {},
+          "rate_limits": {},
+          "isolated_hosts": [],
+          "active_qdiscs": {}
+        },
+        "state_digest": "61efdfac0e7ebcc5140cfee394dfb7166c8db9749eab2abf4099b39768210c0b",
+        "metadata": {
+          "simulated_backend": true,
+          "zero_network_mutation": true
+        }
+      },
+      "rollback_result": null,
+      "execution_time_ms": 0.039,
+      "error_message": null,
+      "audit_card_generated": true,
+      "override_reason": null
+    },
+    {
+      "transaction_id": "TX-0001",
+      "target_host": "192.168.1.112",
+      "proposed_action": "ISOLATE",
+      "enforced_action": "ISOLATE",
+      "state": "COMMITTED",
+      "snapshot": {
+        "snapshot_id": "SNAP-0001",
+        "timestamp": "2026-10-04T13:59:49.557303+00:00",
+        "target_host": "192.168.1.112",
+        "action": "ISOLATE",
+        "baseline_state": {
+          "rules": {},
+          "rate_limits": {},
+          "isolated_hosts": [],
+          "active_qdiscs": {}
+        },
+        "state_digest": "61efdfac0e7ebcc5140cfee394dfb7166c8db9749eab2abf4099b39768210c0b",
+        "metadata": {
+          "simulated_backend": true,
+          "zero_network_mutation": true
+        }
+      },
+      "rollback_result": null,
+      "execution_time_ms": 0.03,
+      "error_message": null,
+      "audit_card_generated": true,
+      "override_reason": null
+    }
+  ]
+}

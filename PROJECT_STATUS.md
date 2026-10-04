@@ -89,6 +89,8 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Autonomous Response Baseline Ladder (Phase 2A) | ✅ EMPIRICALLY OBSERVED & VERIFIED | Evaluated across 24 configurations (4 baselines x 3 cost regimes x 2 action modes) on 142,346 $D_{\text{pol\_val}}$ flows (`EXP-P2A-BASELINES-001`, B=1000 bootstrap tests); D-003 preserved, D_pol_test strictly untouched |
 | Controlled 1000-Packet Traffic Burst (Phase 3E) | ✅ EMPIRICALLY OBSERVED & VERIFIED | Executed across 1000 packets (800 benign + 200 attack) in `LiveMode.DRY_RUN` (`EXP-P3-BURST-1000-001`, `REPORT-P3E-BURST-1000-001`); 100% consumed, 0 synthetic drops, 0 mutations, 270/270 audit cards, component latencies P50/P95/P99 profiled |
 | Live Observability & Fault Injection (Phase 3F) | ✅ EMPIRICALLY OBSERVED & AUDITED | Multi-condition execution on 1000 packets (nominal, queue backpressure, and 6 failure injection scenarios) in `LiveMode.DRY_RUN` (`EXP-P3F-OBSERVABILITY-001`, `REPORT-P3F-OBSERVABILITY-001`); 6/6 failure scenarios verified, fail-safe invariant proven, zero network mutations |
+| Atomic Rollback & Response Transaction Harness (Phase 3G) | ✅ EMPIRICALLY OBSERVED & AUDITED | Evaluated across 12 deterministic scenarios (`EXP-P3G-ROLLBACK-001`, `REPORT-P3G-ROLLBACK-001`); atomic lifecycle, SHA-256 snapshots, auto-compensation rollback, watchdog TTL monitoring, idempotency, and permanent `SAFETY_LOCKED` latch verified under zero network mutation |
+
 
 ## Research decisions status
 
