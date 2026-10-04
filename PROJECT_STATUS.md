@@ -1,9 +1,9 @@
 # PROJECT STATUS
 
-Last updated: 2026-10-03
+Last updated: 2026-10-04
 Project: **XRL-IDARS v1** · Repository: `fyp-xrlids`
-Phase: **1 — Data + Research + Model Foundation (RESEARCH FROZEN & DEMONSTRATION FOUNDATION VERIFIED)**
-Overall: **PHASE 1 RESEARCH FROZEN & DEMONSTRATION FOUNDATION VERIFIED — All 20 dataset CSVs physically present, SHA-256 verified, audited per-file; memory-bounded streaming pipelines, pre-flight gate, baseline ladder, and error analysis active; multi-file in-domain baseline experiments executed; Supervised LSTM and RF+LSTM Fusion empirically demonstrated on full multi-file populations for CIC-IDS2017 (`EXP-P1-CIC2017-R10-001`), CSE-CIC-IDS2018 (`EXP-P1-CSE2018-R10-MULTI-001`), and UNSW-NB15 (`EXP-P1-UNSWNB15-R10-MULTI-001`); full cross-dataset generalization matrix (6 directions) completed answering RQ5 under frozen R10 and R4 contracts; Decisions D-001 through D-006 governed (with D-003 governance framework resolved and operational threshold selection remaining open); pure-Python streaming PCAP replay, flow accumulation, inference engine, observational live lab monitor, and strict numerical feature parity ($\text{atol} \le 10^{-4}$) implemented and verified.**
+Phase: **Phase 1 FROZEN · Phase 2 SCIENTIFICALLY FROZEN · Phase 3 IN PROGRESS (Live Network Validation & Controlled Response)**
+Overall: **Phase 1 Research Frozen & Demonstration Foundation Verified (`EXP-P1-CIC2017-R10-001`). Phase 2 Scientifically Frozen (`11f32f658cde525300f8bc46088a0143e8329c21`) under pre-registered audit criteria across all stages 2A through 2E and held-out test evaluation (`EXP-P2-FINAL-TEST-001`). Phase 3 Active: Live Network Validation + Controlled Response foundation implemented (PacketCaptureService, LiveFlowBuilder under D-006, multi-topology Live Feature Parity, Dry-Run Pipeline Runner with strict zero network mutation, and Rollback & Safety Specification).**
 
 Legend: ✅ done / verified · 🟡 implemented / empirically observed on partial data · ⛔ blocked on research decision · ⬜ planned / not started
 
@@ -54,6 +54,17 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Safe Observational Live Lab Monitor | ✅ | `src/xrlids/demo/live_lab.py` (alert-only, zero network mutation) + tests |
 | Autonomous Response Simulation & Safety Gate | ✅ | `src/xrlids/response/` (causal 6D state, deterministic safety gate, consequence engine, research cost matrix) + tests |
 | Autonomous Response Baseline Ladder (Phase 2A) | ✅ | `src/xrlids/response/baselines.py`, `runner.py`, `scripts/phase2/run_phase2a_baselines.py` + tests |
+| Deep Q-Network Autonomous Response Policy (Phase 2B) | ✅ | `src/xrlids/response/dqn/`, `results/phase2/EXP-P2B-DQN-001` (Dueling DQN + PER) |
+| State Feature Ablation & Sensitivity Matrix (Phase 2C) | ✅ | `results/phase2/EXP-P2C-SENSITIVITY-001` (6 single-dim + joint ablations) |
+| Cross-Dataset Robustness & Score Jitter Stress (Phase 2D) | ✅ | `results/phase2/EXP-P2D-ROBUSTNESS-001` (transfer safety & noise sweep) |
+| Dual-Layer Explainability Engine & Audit Cards (Phase 2E) | ✅ | `src/xrlids/response/explainability/`, `results/phase2/EXP-P2E-EXPLAINABILITY-001` (28,167 cards) |
+| Held-Out Final Test Evaluation (EXP-P2-FINAL-TEST-001) | ✅ | Single authoritative evaluation on 355,865 $D_{\text{pol\_test}}$ flows |
+| PacketCaptureService (Phase 3A) | ✅ | `src/xrlids/live/capture.py` (AF_PACKET raw socket / PCAP / synthetic streams) + tests |
+| Live Flow Construction under D-006 (Phase 3B) | ✅ | `src/xrlids/live/flow_builder.py` (5-tuple, FIN/RST teardown, 120s idle timeout) + tests |
+| Live Feature Parity Verification Harness (Phase 3C) | ✅ | `src/xrlids/live/parity.py`, `docs/phase3/LIVE_FEATURE_PARITY.md` ($\text{atol} \le 10^{-4}$) + tests |
+| Dry-Run Autonomous Pipeline Runner (Phase 3B/3C) | ✅ | `src/xrlids/live/runner.py` (strict zero network mutation, fail-safe invariants) + tests |
+| Controlled Response Safety & Rollback Architecture | ✅ | `docs/phase3/CONTROLLED_RESPONSE_SAFETY.md` (atomic rollback specification) |
+| Controlled Traffic Taxonomy Specification | ✅ | `docs/phase3/CONTROLLED_UNSEEN_TRAFFIC.md` (8 distinct traffic tiers) |
 
 ## Empirical status
 
@@ -93,8 +104,9 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 - In auxiliary transfers involving UNSW-NB15, source models were trained under the common 4-feature (R4) contract; original 10-feature models were not directly evaluated on UNSW due to missing features.
 - No claims that sequence models capture true physical packet arrival timelines; sequence ordering represents capture flow arrival order within sample partitions.
 - No claims of three-seed empirical averaging; full multi-file experiments reflect single-seed (seed=42) execution.
-- Live lab monitor is strictly observational/alert-only; no system packet dropping, firewall mutation, or iptables manipulation is performed.
+- Live lab monitor and Phase 3 dry-run pipelines are strictly observational / non-disruptive; ZERO system firewall, socket, routing, or interface mutations are performed.
 - Auxiliary event list `UNSW-NB15_LIST_EVENTS.csv` is absent (`DATA_NOT_AVAILABLE`); modeling relies solely on the two verified train/test partitions.
-- No reinforcement learning or DQN algorithms are implemented in Phase 2A; Phase 2A establishes strictly the deterministic baseline ladder.
-- No real system firewall, socket, or network mutations are performed; all response consequences and states are entirely simulated offline.
+- Phase 2 offline response research and held-out evaluation is scientifically frozen (`11f32f658cde525300f8bc46088a0143e8329c21`); all cost models and state transitions were evaluated offline under pre-registered audit criteria.
+- Real controlled enforcement remains strictly locked pending verification of the complete rollback precondition chain; no real iptables or nftables mutations are executed.
+- No claims of operational detection accuracy are made on unmanaged live network traffic in the absence of independent ground-truth labeling (§64).
 - `CLAIMS_REGISTRY.md` records only scoped, traceable empirical claims directly supported by committed `results/` artifacts.
