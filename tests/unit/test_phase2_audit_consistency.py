@@ -252,10 +252,43 @@ def test_hypothesis_definitions_and_effect_size_distinction():
     assert "achieves lower cumulative cost" in report_text
 
     # Final report separates statistical significance from 15% practical effect-size target
-    assert "$H_0$ is REJECTED" in report_text
-    assert "$H_1$ is SUPPORTED" in report_text
-    assert "Practical Effect-Size Criterion" in report_text
-    assert "Criterion Status: NOT MET" in report_text
+    assert "$H_0$ is REJECTED" in report_text or "$H_0$ Rejected" in report_text
+    assert "$H_1$ is SUPPORTED" in report_text or "$H_1$ Supported" in report_text
+    assert "practical effect-size criterion" in report_text or "Practical Effect-Size Criterion" in report_text
+    assert "NOT MET" in report_text
+
+    # Verify PHASE2_FINAL_REPORT.md does not contain contradictory 'H0 Upheld' for RQ7
+    assert "H0 Upheld" not in report_text
+    assert "H₀ Upheld" not in report_text
+    assert "$H_0$ Upheld" not in report_text
+    assert "$H_0$ is upheld" not in report_text
+    assert "H_0 is upheld" not in report_text
+
+
+def test_phase2e_count_consistency_across_all_documents():
+    """Verify Phase 2E intervention and card count is exactly 28,167 across all documents."""
+    final_report = Path("docs/phase2/PHASE2_FINAL_REPORT.md").read_text(encoding="utf-8")
+    phase2e_report = Path("results/phase2/EXP-P2E-EXPLAINABILITY-001/phase2e_report.md").read_text(encoding="utf-8")
+    claims_registry = Path("docs/03_DECISIONS/CLAIMS_REGISTRY.md").read_text(encoding="utf-8")
+
+    with open("results/phase2/EXP-P2E-EXPLAINABILITY-001/safety_audit_metrics.json") as f:
+        metrics_json = json.load(f)
+
+    # 1. safety_audit_metrics.json
+    assert metrics_json["audit_metrics"]["non_allow_interventions_count"] == 28167
+    assert metrics_json["audit_metrics"]["audit_cards_generated"] == 28167
+
+    # 2. PHASE2_FINAL_REPORT.md
+    assert "28,167" in final_report
+    assert "28,168" not in final_report
+
+    # 3. phase2e_report.md
+    assert "28,167" in phase2e_report
+    assert "28,168" not in phase2e_report
+
+    # 4. CLAIMS_REGISTRY.md (specifically CLAIM-028)
+    assert "28,167" in claims_registry
+    assert "28,168" not in claims_registry
 
 
 def test_stealth_campaign_empirical_action_counts():

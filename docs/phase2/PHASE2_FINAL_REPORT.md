@@ -5,7 +5,7 @@
 **Parent Detector Benchmark**: `EXP-P1-CIC2017-R10-001` (Random Forest, 10 Features, $\tau_{\text{research}}=0.50$ Frozen)  
 **Authoritative Test Population**: Held-Out $D_{\text{pol\_test}}$ (`355,865` Tabular Flows)  
 **Date**: October 4, 2026  
-**Status**: `AUDITED UNDER PRE-REGISTERED CRITERIA — PENDING FINAL SCIENTIFIC FREEZE`  
+**Status**: `SCIENTIFICALLY FROZEN — AUDITED UNDER PRE-REGISTERED CRITERIA`  
 
 ---
 
@@ -34,18 +34,18 @@ The final comparative evaluation was executed on the completely held-out test sp
 
 | Research Question | Pre-Registered Target Criterion | Best Deterministic Comparator | Empirical Result on $D_{\text{pol\_test}}$ | Independent Classification | Formal Hypothesis Status |
 |:---|:---|:---|:---|:---:|:---:|
-| **RQ7 (3-Action)** | $\Delta \mathcal{C}_{\text{rel}} \ge 15.0\%$ cost reduction vs best deterministic baseline, $p < 0.01$ | Baseline 2: Two-Tier ($\tau=0.40/0.75$) | $\Delta \mathcal{C}_{\text{rel}} = \mathbf{+11.29\%}$ ($p < 0.001$, 95% CI: $[-0.1919, -0.1691]$; vs B1: $+15.99\%$) | **NOT MET** | **$H_0$ Upheld** (Statistically significant improvement below 15% effect size) |
-| **RQ7 (4-Action)** | $\Delta \mathcal{C}_{\text{rel}} \ge 15.0\%$ cost reduction vs best deterministic baseline, $p < 0.01$ | Baseline 2: Two-Tier ($\tau=0.40/0.75$) | $\Delta \mathcal{C}_{\text{rel}} = \mathbf{+14.10\%}$ ($p < 0.001$, 95% CI: $[-0.9147, -0.8312]$; vs B1: $+28.80\%$) | **NOT MET** | **$H_0$ Upheld** (Statistically significant improvement below 15% effect size) |
+| **RQ7 (3-Action)** | $\Delta \mathcal{C}_{\text{rel}} \ge 15.0\%$ cost reduction vs best deterministic baseline, $p < 0.01$ | Baseline 2: Two-Tier ($\tau=0.40/0.75$) | $\Delta \mathcal{C}_{\text{rel}} = \mathbf{+11.29\%}$ ($p < 0.001$, 95% CI: $[-0.1919, -0.1691]$; vs B1: $+15.99\%$) | **NOT MET** | **$H_0$ Rejected / $H_1$ Supported** for statistical cost reduction; practical effect-size criterion **NOT MET** |
+| **RQ7 (4-Action)** | $\Delta \mathcal{C}_{\text{rel}} \ge 15.0\%$ cost reduction vs best deterministic baseline, $p < 0.01$ | Baseline 2: Two-Tier ($\tau=0.40/0.75$) | $\Delta \mathcal{C}_{\text{rel}} = \mathbf{+14.10\%}$ ($p < 0.001$, 95% CI: $[-0.9147, -0.8312]$; vs B1: $+28.80\%$) | **NOT MET** | **$H_0$ Rejected / $H_1$ Supported** for statistical cost reduction; practical effect-size criterion **NOT MET** |
 | **RQ7.1** | Action Chattering Index (ACI) $< 0.01$ ($\le 1$ jump per 100 flows) | N/A | $\text{ACI}_{\text{3-act}} = \mathbf{0.0019}$, $\text{ACI}_{\text{4-act}} = \mathbf{0.0214}$ | **PARTIAL** | 3-action **PASS**; 4-action **FAIL** |
 | **RQ7.2** | Out-of-domain transfer safety bound: $\text{FQR} < 2.0\%$ | N/A | $\text{FQR}_{\text{transfer}} = \mathbf{0.51\%}$, $\text{BAS} = \mathbf{97.69\%}$ on CSE-CIC-IDS2018 | **PASS** | $H_1$ Supported |
 | **RQ7.2 (Noise)** | Continuous score jitter stability: $\text{ACI} < 0.05$ across $\sigma \in [0.0, 0.20]$ | N/A | $\text{ACI} \approx \mathbf{0.106 - 0.111} > 0.05$ across all $\sigma$; $\text{FQR} \le 0.53\%$ | **FAIL** | Negative Robustness Finding |
-| **RQ7.3** | 100% of non-ALLOW actions accompanied by valid TreeSHAP + Q-margin Audit Cards | N/A | **100.00% Coverage** across all 28,168 non-ALLOW interventions | **PASS** | Mandate Fully Met |
+| **RQ7.3** | 100% of non-ALLOW actions accompanied by valid TreeSHAP + Q-margin Audit Cards | N/A | **100.00% Coverage** across all 28,167 non-ALLOW interventions | **PASS** | Mandate Fully Met |
 
 > [!IMPORTANT]
 > **Resolution of RQ7 Hypothesis Testing**:
 > In accordance with pre-registered scientific methodology, RQ7 requires comparing the learned policy against the **BEST** deterministic baseline. On held-out test data across all cost regimes, Baseline 2 (Two-Tier Graded Threshold) is the lowest-cost deterministic comparator (achieving 569,978.0 in 3-action and 2,206,220.5 in 4-action).
 > While the DQN candidate achieves statistically significant cost reductions over Baseline 2 ($p < 0.001$), the relative effect sizes ($+11.29\%$ in 3-action, $+14.10\%$ in 4-action) fall below the pre-registered effect size threshold ($\ge 15.0\%$).
-> Therefore, **$H_0$ is upheld regarding the pre-registered effect size criterion**. We report this negative finding with full transparency and do not redefine the comparator post-hoc to Baseline 1 (Single Threshold) merely to manufacture an artificial pass.
+> Therefore, **the pre-registered practical effect-size criterion is NOT MET. This does not reverse the statistical hypothesis result: $H_0$ is rejected and $H_1$ is supported for the operational cost reduction component**. We report this negative finding with full transparency and do not redefine the comparator post-hoc to Baseline 1 (Single Threshold) merely to manufacture an artificial pass.
 
 ---
 
