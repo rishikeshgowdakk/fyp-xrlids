@@ -43,14 +43,14 @@ The experiment executes on a reproducible, deterministic synthetic traffic burst
 | **Total Packets Ingested** | 1,000 | **1,000** | **100.00% Consumed** |
 | **Benign Packets** | 800 | **800** | Match |
 | **Attack Packets** | 200 | **200** | Match |
-| **Packets Dropped by Capture** | 0 | **0** | Clean Ingestion |
+| **Capture-Path Packet Drops** | 0 | **0** | Synthetic Ingestion |
 | **Malformed / Corrupted Frames** | 0 | **0** | Clean Parse |
 | **Completed Flows Evaluated** | — | **270** | Full Flush |
 | **Flows Terminated via FIN/RST** | — | **90** | D-006 Verified |
 | **Active Flows Remaining** | 0 | **0** | Clean Teardown |
-| **Audit Cards Generated** | — | **270** | **100.00% Coverage** |
+| **Audit Cards Generated** | — | **270** | **270 / 270 (100.00% Coverage)** |
 
-All 1,000 packets were ingested and assembled into bidirectional flows without packet loss, parser crash, or memory overflow.
+No packet loss occurred in the exercised synthetic capture path. Kernel/interface drop behavior was not evaluated by this experiment. All 1,000 packets were cleanly parsed and assembled into bidirectional flows.
 
 ---
 
@@ -96,7 +96,7 @@ Latencies were measured using high-resolution monotonic clocks (`time.perf_count
 |:---|:---|:---:|:---:|
 | **Operating Mode** | Strict `LiveMode.DRY_RUN` | `LiveMode.DRY_RUN` | **PASS** |
 | **Firewall Rules Mutated** | Exactly 0 (no iptables/nftables) | **0** | **PASS** |
-| **Packets Dropped by System** | Exactly 0 (no kernel socket drops) | **0** | **PASS** |
+| **Packets Dropped by System** | Exactly 0 (no system socket/actuator drops in DRY_RUN) | **0** | **PASS** |
 | **Routing Changes** | Exactly 0 (no IP routing mutations) | **0** | **PASS** |
 | **Hardware Endpoint Isolations** | Exactly 0 | **0** | **PASS** |
 | **Audit Card Generation** | 100% of decisions recorded | **270 / 270 (100.00%)** | **PASS** |
@@ -118,7 +118,7 @@ Latencies were measured using high-resolution monotonic clocks (`time.perf_count
 
 ## 7. Key Findings
 
-1. **Deterministic Execution**: The 1000-packet burst executes deterministically with zero packet loss, zero malformed frame errors, and complete flow accounting.
+1. **Deterministic Execution**: The 1000-packet burst executes deterministically with zero packet loss in the synthetic capture path, zero malformed frame errors, and complete flow accounting (270/270 audit cards generated).
 2. **Causal Stream-to-Decision Feasibility**: The complete bridge from streaming packets to 5-tuple flow construction, R10 feature calculation, frozen Random Forest scoring, 6D causal state construction, Dueling DQN inference, and deterministic safety filtering operates end-to-end without architectural breaks.
 3. **CPU Latency Profile**: In an unbatched single-threaded CPU environment, the end-to-end flow evaluation latency is approximately $50\,\text{ms}$ per completed flow (dominated by Random Forest tree-traversal at $47.6\,\text{ms}$), achieving an effective throughput of $73.3\,\text{pkts/s}$ ($19.8\,\text{flows/s}$).
 4. **Non-Enforcement Verification**: The dry-run engine operated with absolute zero physical system mutations.
@@ -129,5 +129,7 @@ Latencies were measured using high-resolution monotonic clocks (`time.perf_count
 
 In accordance with strict scientific reporting standards:
 1. **Not Real-World Live Accuracy**: This experiment tests pipeline mechanics on controlled synthetic burst packets. It does **not** measure or claim detection accuracy on unknown live networks.
-2. **Not Production SLAs**: Single-threaded unbatched Python execution ($73.3\,\text{pkts/s}$) is sufficient for scientific validation and lab demonstrations, but does not represent high-speed multi-gigabit hardware line-rate processing.
-3. **Controlled Ground Truth**: Flow counts and packet topologies are known by construction; ambient enterprise networks exhibit much higher flow concurrency, packet fragmentation, and out-of-order delivery.
+2. **Capture Path Scope**: No packet loss occurred in the exercised synthetic capture path. Kernel/interface drop behavior and OS ring buffer drops were not evaluated by this experiment.
+3. **Memory Instrumentation Scope**: Heap memory growth and garbage collection pauses were not directly profiled; no claim of zero memory growth is made.
+4. **Not Production SLAs**: Single-threaded unbatched Python execution ($73.3\,\text{pkts/s}$) is sufficient for scientific validation and lab demonstrations, but does not represent high-speed multi-gigabit hardware line-rate processing.
+5. **Controlled Ground Truth**: Flow counts and packet topologies are known by construction; ambient enterprise networks exhibit much higher flow concurrency, packet fragmentation, and out-of-order delivery.
