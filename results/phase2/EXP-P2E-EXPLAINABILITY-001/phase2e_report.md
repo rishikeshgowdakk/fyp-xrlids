@@ -4,8 +4,8 @@
 **Research Question**: `RQ7.3` (Dual-Layer Explainability Architecture)  
 **Parent Detector**: `EXP-P1-CIC2017-R10-001`  
 **Parent Policy Model**: `EXP-P2B-DQN-001`  
-**Generated**: `2026-10-03T22:21:07.066824+00:00`  
-**Git Commit**: `7ab8cf3a075ab852162194302bdc594c695ded05`  
+**Generated**: `2026-10-04T09:02:30.444993+00:00`  
+**Git Commit**: `f9df81220b002628b048db24f7661bbbe341fa0e`  
 
 ---
 
@@ -76,7 +76,7 @@ The following sample audit cards illustrate the dual-layer attribution format fo
 
 ### Action Decision Audit Card: `0`
 
-- **Timestamp**: `2026-10-03T22:20:57.000645+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.171881+00:00`
 - **Target Host**: `host_0`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ALERT`
@@ -108,7 +108,7 @@ The following sample audit cards illustrate the dual-layer attribution format fo
 
 ### Action Decision Audit Card: `2`
 
-- **Timestamp**: `2026-10-03T22:20:57.001983+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.173145+00:00`
 - **Target Host**: `host_2`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ISOLATE`
@@ -141,7 +141,7 @@ The following sample audit cards illustrate the dual-layer attribution format fo
 
 ### Action Decision Audit Card: `6`
 
-- **Timestamp**: `2026-10-03T22:20:57.002605+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.173675+00:00`
 - **Target Host**: `host_6`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ALERT`
@@ -174,7 +174,7 @@ The following sample audit cards illustrate the dual-layer attribution format fo
 
 ### Action Decision Audit Card: `18`
 
-- **Timestamp**: `2026-10-03T22:20:57.003026+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.174067+00:00`
 - **Target Host**: `host_18`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ALERT`
@@ -207,7 +207,7 @@ The following sample audit cards illustrate the dual-layer attribution format fo
 
 ### Action Decision Audit Card: `21`
 
-- **Timestamp**: `2026-10-03T22:20:57.003449+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.174498+00:00`
 - **Target Host**: `host_21`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ALERT`
@@ -239,7 +239,7 @@ The following sample audit cards illustrate the dual-layer attribution format fo
 
 ### Action Decision Audit Card: `24`
 
-- **Timestamp**: `2026-10-03T22:20:57.003832+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.174911+00:00`
 - **Target Host**: `host_24`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ALERT`
@@ -271,7 +271,7 @@ The following sample audit cards illustrate the dual-layer attribution format fo
 
 ### Action Decision Audit Card: `25`
 
-- **Timestamp**: `2026-10-03T22:20:57.004219+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.175340+00:00`
 - **Target Host**: `host_25`
 - **Proposed Action**: `RATE_LIMIT`
 - **Enforced Action**: `RATE_LIMIT`
@@ -305,7 +305,7 @@ The following sample audit cards illustrate the dual-layer attribution format fo
 
 ### Action Decision Audit Card: `28`
 
-- **Timestamp**: `2026-10-03T22:20:57.004585+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.175704+00:00`
 - **Target Host**: `host_28`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ALERT`
@@ -339,7 +339,7 @@ The following sample audit cards illustrate the dual-layer attribution format fo
 
 ### Action Decision Audit Card: `56`
 
-- **Timestamp**: `2026-10-03T22:20:57.004988+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.176068+00:00`
 - **Target Host**: `host_56`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ISOLATE`
@@ -371,7 +371,7 @@ The following sample audit cards illustrate the dual-layer attribution format fo
 
 ### Action Decision Audit Card: `63`
 
-- **Timestamp**: `2026-10-03T22:20:57.005655+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.176520+00:00`
 - **Target Host**: `host_63`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ISOLATE`

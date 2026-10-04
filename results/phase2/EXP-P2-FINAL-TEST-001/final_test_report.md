@@ -101,8 +101,8 @@ RL exploration, policy training, baseline tuning, and hyperparameter selection s
 
 | Research Question | Pre-Registered Target Criterion | Specification Target | Observed Empirical Result | Status |
 |:---|:---|:---:|:---:|:---:|
-| **RQ7 (3-Action)** | Relative Cost Reduction vs Best Deterministic Baseline (Baseline 2: Two-Tier) | $\ge 15.0\%$ with $p < 0.01$ | $\Delta \mathcal{C}_{\text{rel}} = +11.29\%$ ($p < 0.001$; vs B1: $+15.99\%$) | NOT MET / H0 UPHELD (Statistically significant improvement below 15% threshold) |
-| **RQ7 (4-Action)** | Relative Cost Reduction vs Best Deterministic Baseline (Baseline 2: Two-Tier) | $\ge 15.0\%$ with $p < 0.01$ | $\Delta \mathcal{C}_{\text{rel}} = +14.10\%$ ($p < 0.001$; vs B1: $+28.80\%$) | NOT MET / H0 UPHELD (Statistically significant improvement below 15% threshold) |
+| **RQ7 (3-Action)** | Relative Cost Reduction vs Best Deterministic Baseline (Baseline 2: Two-Tier) | $\ge 15.0\%$ with $p < 0.01$ | $\Delta \mathcal{C}_{\text{rel}} = +11.29\%$ ($p < 0.001$; vs B1: $+15.99\%$) | Statistically Significant ($p < 0.001$, H1 Supported) / Practical Criterion NOT MET (< 15.0%) |
+| **RQ7 (4-Action)** | Relative Cost Reduction vs Best Deterministic Baseline (Baseline 2: Two-Tier) | $\ge 15.0\%$ with $p < 0.01$ | $\Delta \mathcal{C}_{\text{rel}} = +14.10\%$ ($p < 0.001$; vs B1: $+28.80\%$) | Statistically Significant ($p < 0.001$, H1 Supported) / Practical Criterion NOT MET (< 15.0%) |
 | **RQ7.1** | Action Chattering Index (ACI) | $< 0.01$ ($\le 1$ jump / 100 flows) | $\text{ACI}_{\text{3-act}} = 0.0019$, $\text{ACI}_{\text{4-act}} = 0.0214$ | FAIL |
 | **RQ7.2** | False Quarantine Rate (FQR) | $< 2.0\%$ | $\text{FQR}_{\text{3-act}} = 0.00\%$, $\text{FQR}_{\text{4-act}} = 0.20\%$ | PASS |
 | **RQ7.3** | Safety Gate Invariant Enforcement | 100% compliance | 100% compliance (0 critical host isolations) | PASS |
@@ -112,10 +112,18 @@ RL exploration, policy training, baseline tuning, and hyperparameter selection s
 ## 5. Scientific Governance & Decision Governance
 
 1. **Primary Research Question Outcome (RQ7)**:
+   - **Formal Hypotheses Definition**:
+     - $H_0$: A reinforcement learning response policy does NOT achieve a statistically significant reduction in cumulative operational cost or mitigation latency compared with the best deterministic baseline.
+     - $H_1$: A learned response policy achieves lower cumulative cost under the tested conditions.
    - **Best Deterministic Baseline**: Across held-out test evaluations, Baseline 2 (Two-Tier Graded Threshold, $\tau_{\text{suspect}}=0.40, \tau_{\text{isolate}}=0.75$) proved to be the strongest deterministic comparator, achieving lower cumulative cost than Baseline 1 and Baseline 3.
-   - **3-Action Space**: Under Standard Enterprise cost regime on held-out test data, 3-action DQN achieves a relative cost reduction of **+11.29%** ($p < 0.001$, 95% CI [-0.1919, -0.1691]) compared to Baseline 2 (and **+15.99%** vs Baseline 1). While the improvement is statistically significant, it does not meet the pre-registered $\ge 15.0\%$ effect-size target. **Pre-registered Status: NOT MET / H0 UPHELD**.
-   - **4-Action Space**: Under Standard Enterprise regime, 4-action DQN achieves a relative cost reduction of **+14.10%** ($p < 0.001$, 95% CI [-0.9147, -0.8312]) compared to Baseline 2 (and **+28.80%** vs Baseline 1). While statistically significant, it falls below the pre-registered $\ge 15.0\%$ target. **Pre-registered Status: NOT MET / H0 UPHELD**.
-   - **Scientific Neutrality**: We report these negative findings with full transparency. H0 is upheld regarding the pre-registered effect size threshold ($\ge 15.0\%$). We do not redefine 'best baseline' post-hoc to claim an artificial pass.
+   - **Statistical Hypothesis Result ($p < 0.001$)**:
+     - 3-Action Space: DQN achieves a statistically significant relative cost reduction of **+11.29%** ($p < 0.001$, 95% CI [-0.1919, -0.1691]) vs Baseline 2 (and **+15.99%** vs Baseline 1).
+     - 4-Action Space: DQN achieves a statistically significant relative cost reduction of **+14.10%** ($p < 0.001$, 95% CI [-0.9147, -0.8312]) vs Baseline 2 (and **+28.80%** vs Baseline 1).
+     - **Statistical Decision**: Because $p < 0.001$ and empirical bootstrap confidence intervals strictly exclude zero, **$H_0$ is REJECTED** and **$H_1$ is SUPPORTED** for the operational cost reduction component.
+   - **Pre-Registered Practical Effect-Size Target ($\Delta \mathcal{C}_{\text{rel}} \ge 15.0\%$)**:
+     - While the cost reductions are statistically significant, neither action space crosses the pre-registered $\ge 15.0\%$ practical effect-size target over the best deterministic baseline.
+     - **Practical Criterion Status: NOT MET**.
+   - **Scientific Neutrality**: We report these negative findings with full transparency. Statistical significance and practical effect size are evaluated independently without post-hoc redefinition of the hypothesis.
 2. **Operational Threshold Status (Decision D-003 Alignment)**:
    - Research threshold $\tau_{\text{research}} = 0.50$ remains strictly frozen for academic benchmarks.
    - Proposed threshold $\tau_{\text{ops}} = 0.40$ remains an exploratory candidate and is NOT an empirically selected optimum.

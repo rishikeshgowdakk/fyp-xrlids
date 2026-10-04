@@ -37,12 +37,12 @@ Phase 2D tests the autonomous response policy against the critical empirical fai
 
 Evaluated on empirical low-footprint attack sequences from Phase 1:
 
-| Attack Family | Total Samples | Mean Score | Median Score | Max Score | Escalation Rate (% Non-ALLOW) | Mitigation Delay |
-|:---|---:|---:|---:|---:|---:|---:|
-| `INFILTRATION` | 20 | 0.3574 | 0.3596 | 0.5252 | 10.00% | 50.0 steps |
-| `WEB ATTACK - BRUTE FORCE` | 100 | 0.4468 | 0.4465 | 0.5951 | 30.00% | 8.0 steps |
-| `WEB ATTACK - XSS` | 50 | 0.4126 | 0.4072 | 0.5385 | 46.00% | 1.0 steps |
-| `WEB ATTACK - SQL INJECTION` | 10 | 0.3896 | 0.3814 | 0.5575 | 10.00% | 50.0 steps |
+| Attack Family | Total Samples | Mean Score | Median Score | Max Score | Escalation Rate (% Non-ALLOW) | Mitigation Delay | Action Breakdown (ALLOW / ALERT / RL / ISOLATE) |
+|:---|---:|---:|---:|---:|---:|---:|:---|
+| `INFILTRATION` | 20 | 0.3574 | 0.3596 | 0.5252 | 10.00% | 50.0 steps | 18 ALLOW / 2 ALERT / 0 RL / 0 ISOLATE |
+| `WEB ATTACK - BRUTE FORCE` | 100 | 0.4468 | 0.4465 | 0.5951 | 30.00% | 8.0 steps | 70 ALLOW / 6 ALERT / 0 RL / 24 ISOLATE |
+| `WEB ATTACK - XSS` | 50 | 0.4126 | 0.4072 | 0.5385 | 46.00% | 1.0 steps | 27 ALLOW / 2 ALERT / 0 RL / 21 ISOLATE |
+| `WEB ATTACK - SQL INJECTION` | 10 | 0.3896 | 0.3814 | 0.5575 | 10.00% | 50.0 steps | 9 ALLOW / 1 ALERT / 0 RL / 0 ISOLATE |
 
 ---
 
@@ -75,6 +75,6 @@ Perturbed detector score $S'_t = \text{clip}(S_t + \mathcal{N}(0, \sigma^2), 0.0
 ## 6. Scientific Findings & Robustness Conclusions
 
 1. **Covariate Shift Safety**: When exposed to unadapted cross-domain score distributions (CIC $\to$ CSE), the downstream policy maintained a False Quarantine Rate below the 2.0% pre-registered safety threshold, avoiding catastrophic false isolation cascades.
-2. **Stealth Attack Dynamics**: State memory ($N_{\text{alert}}$ and previous action) facilitates progressive escalation on repeated low-confidence attack flows, whereas single-threshold policies miss 100% of sub-0.50 stealth attacks.
+2. **Stealth Attack Dynamics**: State memory ($N_{\text{alert}}$ and previous action) facilitates progressive escalation on repeated low-confidence attack flows, achieving 10% to 46% non-ALLOW interventions across attack families. Infiltration (10%) and SQL Injection (10%) triggered ALERT but zero disruptive containment (`RATE_LIMIT` or `ISOLATE`), leaving mitigation latency at the maximum 50-step window. Web Attack Brute Force and XSS escalated to `ISOLATE` (24% and 42% respectively) with faster containment (8.0 and 1.0 steps). Zero stealth sequences triggered `RATE_LIMIT`.
 3. **Volumetric Isolation Invariance**: Benign traffic surges alone do not trigger false quarantines because the policy and safety gate require elevated risk scores $S_t$ before escalating to disruptive actions.
 4. **Sensor Jitter Instability (Negative Finding)**: Action Chattering Index (ACI) remained between 0.106 and 0.111 across all noise levels, failing the pre-registered stability criterion (ACI < 0.05). However, False Quarantine Rate remained contained (FQR <= 0.53% < 2.0%), demonstrating that noise-induced flips predominantly manifested as oscillations between non-disruptive actions (ALLOW/ALERT) rather than wrongful endpoint isolations.

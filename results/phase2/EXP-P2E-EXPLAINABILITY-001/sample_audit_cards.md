@@ -1,6 +1,6 @@
 ### Action Decision Audit Card: `0`
 
-- **Timestamp**: `2026-10-03T22:20:57.000645+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.171881+00:00`
 - **Target Host**: `host_0`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ALERT`
@@ -32,7 +32,7 @@
 
 ### Action Decision Audit Card: `2`
 
-- **Timestamp**: `2026-10-03T22:20:57.001983+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.173145+00:00`
 - **Target Host**: `host_2`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ISOLATE`
@@ -65,7 +65,7 @@
 
 ### Action Decision Audit Card: `6`
 
-- **Timestamp**: `2026-10-03T22:20:57.002605+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.173675+00:00`
 - **Target Host**: `host_6`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ALERT`
@@ -98,7 +98,7 @@
 
 ### Action Decision Audit Card: `18`
 
-- **Timestamp**: `2026-10-03T22:20:57.003026+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.174067+00:00`
 - **Target Host**: `host_18`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ALERT`
@@ -131,7 +131,7 @@
 
 ### Action Decision Audit Card: `21`
 
-- **Timestamp**: `2026-10-03T22:20:57.003449+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.174498+00:00`
 - **Target Host**: `host_21`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ALERT`
@@ -163,7 +163,7 @@
 
 ### Action Decision Audit Card: `24`
 
-- **Timestamp**: `2026-10-03T22:20:57.003832+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.174911+00:00`
 - **Target Host**: `host_24`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ALERT`
@@ -195,7 +195,7 @@
 
 ### Action Decision Audit Card: `25`
 
-- **Timestamp**: `2026-10-03T22:20:57.004219+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.175340+00:00`
 - **Target Host**: `host_25`
 - **Proposed Action**: `RATE_LIMIT`
 - **Enforced Action**: `RATE_LIMIT`
@@ -229,7 +229,7 @@
 
 ### Action Decision Audit Card: `28`
 
-- **Timestamp**: `2026-10-03T22:20:57.004585+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.175704+00:00`
 - **Target Host**: `host_28`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ALERT`
@@ -263,7 +263,7 @@
 
 ### Action Decision Audit Card: `56`
 
-- **Timestamp**: `2026-10-03T22:20:57.004988+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.176068+00:00`
 - **Target Host**: `host_56`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ISOLATE`
@@ -295,7 +295,7 @@
 
 ### Action Decision Audit Card: `63`
 
-- **Timestamp**: `2026-10-03T22:20:57.005655+00:00`
+- **Timestamp**: `2026-10-04T09:02:20.176520+00:00`
 - **Target Host**: `host_63`
 - **Proposed Action**: `ISOLATE`
 - **Enforced Action**: `ISOLATE`

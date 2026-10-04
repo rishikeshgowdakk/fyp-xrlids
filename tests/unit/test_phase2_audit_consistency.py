@@ -232,3 +232,129 @@ def test_simulator_causal_transition_semantics():
     # But incoming flow 2 features remain exogenous:
     assert sim.flows[1].attack_score == 0.85
     assert sim.flows[1].true_label == 1
+
+
+def test_hypothesis_definitions_and_effect_size_distinction():
+    """Verify H0/H1 are defined around statistical significance and 15% effect-size is separated."""
+    spec_path = Path("docs/phase2/AUTONOMOUS_RESPONSE_SPEC.md")
+    report_path = Path("docs/phase2/PHASE2_FINAL_REPORT.md")
+    assert spec_path.exists() and report_path.exists()
+
+    spec_text = spec_path.read_text(encoding="utf-8")
+    report_text = report_path.read_text(encoding="utf-8")
+
+    # Authoritative H0: does not achieve a statistically significant reduction
+    assert "does not achieve a statistically significant reduction in cumulative operational cost" in spec_text
+    assert "does NOT achieve a statistically significant reduction in cumulative operational cost" in report_text
+
+    # Authoritative H1: achieves lower cumulative cost
+    assert "achieves lower cumulative cost" in spec_text
+    assert "achieves lower cumulative cost" in report_text
+
+    # Final report separates statistical significance from 15% practical effect-size target
+    assert "$H_0$ is REJECTED" in report_text
+    assert "$H_1$ is SUPPORTED" in report_text
+    assert "Practical Effect-Size Criterion" in report_text
+    assert "Criterion Status: NOT MET" in report_text
+
+
+def test_stealth_campaign_empirical_action_counts():
+    """Verify stealth campaign action counts match stealth_campaign_results.json."""
+    stealth_file = Path("results/phase2/EXP-P2D-ROBUSTNESS-001/stealth_campaign_results.json")
+    assert stealth_file.exists()
+
+    with open(stealth_file) as f:
+        data = json.load(f)
+
+    families = {fam["family_name"]: fam for fam in data["families"]}
+
+    # Infiltration (20 flows)
+    infil = families["INFILTRATION"]
+    assert infil["sample_count"] == 20
+    assert infil["action_counts"] == {"ALLOW": 18, "ALERT": 2, "RATE_LIMIT": 0, "ISOLATE": 0}
+    assert infil["mitigation_delay_steps"] == 50.0
+
+    # Web Attack - Brute Force (100 flows)
+    bf = families["WEB ATTACK - BRUTE FORCE"]
+    assert bf["sample_count"] == 100
+    assert bf["action_counts"] == {"ALLOW": 70, "ALERT": 6, "RATE_LIMIT": 0, "ISOLATE": 24}
+    assert bf["mitigation_delay_steps"] == 8.0
+
+    # Web Attack - XSS (50 flows)
+    xss = families["WEB ATTACK - XSS"]
+    assert xss["sample_count"] == 50
+    assert xss["action_counts"] == {"ALLOW": 27, "ALERT": 2, "RATE_LIMIT": 0, "ISOLATE": 21}
+    assert xss["mitigation_delay_steps"] == 1.0
+
+    # Web Attack - SQL Injection (10 flows)
+    sqli = families["WEB ATTACK - SQL INJECTION"]
+    assert sqli["sample_count"] == 10
+    assert sqli["action_counts"] == {"ALLOW": 9, "ALERT": 1, "RATE_LIMIT": 0, "ISOLATE": 0}
+    assert sqli["mitigation_delay_steps"] == 50.0
+
+    # Zero RATE_LIMIT actions across all stealth families
+    for name, fam in families.items():
+        assert fam["action_counts"]["RATE_LIMIT"] == 0, f"RATE_LIMIT must be 0 for {name}"
+
+    # Infiltration and SQL Injection trigger zero disruptive isolations
+    assert infil["action_counts"]["ISOLATE"] == 0
+    assert sqli["action_counts"]["ISOLATE"] == 0
+
+
+def test_phase2a_baseline_ladder_artifact_consistency():
+    """Verify Phase 2A baseline costs strictly match baseline_metrics.json on D_pol_val."""
+    b_file = Path("results/phase2/EXP-P2A-BASELINES-001/baseline_metrics.json")
+    assert b_file.exists()
+
+    with open(b_file) as f:
+        data = json.load(f)
+
+    runs = data["runs"]
+    for r in runs:
+        assert r["total_flows"] == 142346
+
+    # Standard Enterprise
+    std_3 = {r["policy_name"]: r["total_cost"] for r in runs if r["cost_regime"] == "standard_enterprise" and r["action_mode"] == "3-action"}
+    std_4 = {r["policy_name"]: r["total_cost"] for r in runs if r["cost_regime"] == "standard_enterprise" and r["action_mode"] == "4-action"}
+
+    assert std_3["Baseline_0_Always_ALLOW"] == 2592800.0
+    assert std_3["Baseline_1_Single_Threshold_tau_0.50"] == 440536.0
+    assert std_3["Baseline_2_Two_Tier_0.40_0.75"] == 427527.0
+    assert std_3["Baseline_3_Heuristic_State_Machine"] == 1806318.0
+
+    assert std_4["Baseline_0_Always_ALLOW"] == 2592800.0
+    assert std_4["Baseline_1_Single_Threshold_tau_0.50"] == 371678.5
+    assert std_4["Baseline_2_Two_Tier_0.40_0.75"] == 376299.0
+    assert std_4["Baseline_3_Heuristic_State_Machine"] == 1196420.0
+
+
+def test_phase2e_audit_metrics_and_provenance():
+    """Verify Phase 2E audit counts and metadata from clean rerun match safety_audit_metrics.json."""
+    audit_metrics_file = Path("results/phase2/EXP-P2E-EXPLAINABILITY-001/safety_audit_metrics.json")
+    assert audit_metrics_file.exists()
+
+    with open(audit_metrics_file) as f:
+        data = json.load(f)
+
+    # Git commit provenance
+    assert data["metadata"]["git_commit"].startswith("f9df812")
+
+    # Audit coverage metrics
+    metrics = data["audit_metrics"]
+    assert metrics["total_steps_evaluated"] == 142346
+    assert metrics["non_allow_interventions_count"] == 28167
+    assert metrics["audit_cards_generated"] == 28167
+    assert metrics["audit_coverage_pct"] == 100.0
+    assert metrics["safety_overrides_logged"] == 12573
+    assert metrics["rq7_3_pass"] is True
+
+    # Safety gate summary
+    gate = data["safety_gate_summary"]
+    assert gate["total_evaluations"] == 142346
+    assert gate["total_overrides"] == 12573
+    assert gate["active_isolated_hosts_count"] == 10
+    assert gate["active_rate_limited_hosts_count"] == 10
+    assert gate["known_hosts_count"] == 250
+    assert gate["reasons"]["CRITICAL_INFRASTRUCTURE_EXEMPTION"] == 147
+    assert gate["reasons"]["BLAST_RADIUS_CIRCUIT_BREAKER"] == 12426
+
