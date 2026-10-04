@@ -2,8 +2,8 @@
 
 Last updated: 2026-10-04
 Project: **XRL-IDARS v1** · Repository: `fyp-xrlids`
-Phase: **Phase 1 FROZEN · Phase 2 SCIENTIFICALLY FROZEN · Phase 3 IN PROGRESS (Live Network Validation & Controlled Response)**
-Overall: **Phase 1 Research Frozen & Demonstration Foundation Verified (`EXP-P1-CIC2017-R10-001`). Phase 2 Scientifically Frozen (`11f32f658cde525300f8bc46088a0143e8329c21`) under pre-registered audit criteria across all stages 2A through 2E and held-out test evaluation (`EXP-P2-FINAL-TEST-001`). Phase 3 Active: Live Network Validation + Controlled Response foundation implemented (PacketCaptureService, LiveFlowBuilder under D-006, multi-topology Live Feature Parity, Dry-Run Pipeline Runner with strict zero network mutation, and Rollback & Safety Specification).**
+Phase: **PHASE 1 — SCIENTIFICALLY FROZEN · PHASE 2 — SCIENTIFICALLY FROZEN · PHASE 3 — LABORATORY VALIDATION COMPLETE · FINAL SYNTHESIS & CLOSURE COMPLETE**
+Overall: **Phase 1 Research Frozen & Demonstration Foundation Verified (`EXP-P1-CIC2017-R10-001`). Phase 2 Scientifically Frozen (`11f32f658cde525300f8bc46088a0143e8329c21`) under pre-registered audit criteria across all stages 2A through 2E and held-out test evaluation (`EXP-P2-FINAL-TEST-001`). Phase 3 Laboratory Validation Complete across all subphases 3A through 3K (`EXP-P3K-STRESS-SECURITY-001`). Final research synthesis complete (`docs/final/FINAL_RESEARCH_REPORT.md`). Production deployment is not validated.**
 
 Legend: ✅ done / verified · 🟡 implemented / empirically observed on partial data · ⛔ blocked on research decision · ⬜ planned / not started
 
@@ -121,6 +121,6 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 - Live lab monitor and Phase 3 dry-run pipelines are strictly observational / non-disruptive; ZERO system firewall, socket, routing, or interface mutations are performed.
 - Auxiliary event list `UNSW-NB15_LIST_EVENTS.csv` is absent (`DATA_NOT_AVAILABLE`); modeling relies solely on the two verified train/test partitions.
 - Phase 2 offline response research and held-out evaluation is scientifically frozen (`11f32f658cde525300f8bc46088a0143e8329c21`); all cost models and state transitions were evaluated offline under pre-registered audit criteria.
-- Real controlled enforcement remains strictly locked pending verification of the complete rollback precondition chain; no real iptables or nftables mutations are executed.
+- Controlled response enforcement has been validated strictly within an isolated laboratory Linux network namespace environment (10.200.1.0/24); production deployment is not validated and remains strictly out of scope.
 - No claims of operational detection accuracy are made on unmanaged live network traffic in the absence of independent ground-truth labeling (§64).
 - `CLAIMS_REGISTRY.md` records only scoped, traceable empirical claims directly supported by committed `results/` artifacts.

@@ -18,10 +18,10 @@ Phase 3K represents the final pre-production security and high-volume stress eva
 
 | Audit Dimension | Target Invariant | Observed Metric | Verdict |
 |:---|:---|:---|:---:|
-| **Sustained Soak Workload** | 10,000 flows processed without crash/error | 10,000 flows (222,838 packets) in 10 batches | **PASS** |
-| **Error Rate Under Soak** | 0.0% unhandled transaction exceptions | 0.0% unhandled exceptions | **PASS** |
-| **Resource Drift / Memory Leak** | < 50 MiB RSS growth over 10k flows | 12.05 MiB growth (7.36% drift) | **PASS** |
-| **Multi-Tier Ingestion Stress** | Zero capture-path drops across all 4 tiers | 0 drops (Low, Nominal, High, Overload) | **PASS** |
+| **Sustained Controlled Workload** | 10,000-flow stress workload processed without crash | 10,000 flows (222,838 packets) in 10 batches | **PASS** |
+| **Error Rate Under Workload** | 0.0% unhandled transaction exceptions | 0.0% unhandled exceptions | **PASS** |
+| **Resource Drift / Memory Leak** | < 50 MiB RSS growth over 10k flows | Bounded growth: 12.05 MiB (7.36%); no leak detected | **PASS** |
+| **Multi-Tier Ingestion Stress** | Zero capture-path drops across all 4 tiers | 0 capture drops (1,808 shed via backpressure in overload) | **PASS** |
 | **Adversarial Attack Surface** | 24+ attack vectors rejected (fail-closed) | 29 / 29 scenarios rejected (100.0%) | **PASS** |
 | **Cryptographic Provenance** | 100% tamper detection and gate locking | 8 / 8 scenarios locked (`is_ready=False`) | **PASS** |
 | **Rollback Stress Resilience** | 100% rollback success, 0 residual rules | 100 / 100 transactions, 0 state leaks | **PASS** |
@@ -75,11 +75,15 @@ The Phase 3K audit suite operates under strict containment guarantees. All netwo
 
 ---
 
-## 3. 10,000-Flow Sustained Soak Workload Results
+## 3. 10,000-Flow Sustained Controlled Stress Workload Results
 
-To verify operational stability and prevent resource exhaustion under sustained traffic, XRL-IDARS was subjected to a 10,000-flow synthetic workload partitioned into 10 deterministic batches of 1,000 flows each.
+To verify operational stability and prevent resource exhaustion under high-volume traffic, XRL-IDARS was subjected to a 10,000-flow synthetic workload partitioned into 10 deterministic batches of 1,000 flows each. 
 
-### 3.1 Soak Execution Summary
+> [!NOTE]
+> **Workload Characterization:**  
+> The 10,000-flow workload completed in 0.638 seconds of active processing time. It is characterized as a sustained high-volume controlled stress workload rather than a multi-day or long-duration soak run.
+
+### 3.1 Controlled Workload Execution Summary
 - **Total Flows Processed:** 10,000
 - **Total Ingested Packets:** 222,838
 - **Benign Flows:** 6,533 (65.33%)
@@ -94,8 +98,8 @@ To verify operational stability and prevent resource exhaustion under sustained 
 - **Effective Packet Throughput:** 349,096.19 packets/second
 - **Unhandled Exceptions / Errors:** 0 (0.00%)
 
-### 3.2 Transaction Response Latency Under Soak Load
-During the soak run, autonomous response transactions (`RATE_LIMIT` and compensation rollbacks) were continuously executed against detected attack flows:
+### 3.2 Transaction Response Latency Under Stress Workload
+During the workload execution, autonomous response transactions (`RATE_LIMIT` and compensation rollbacks) were continuously executed against detected attack flows:
 
 | Percentile | Latency (ms) | Operational Interpretation |
 |:---|:---:|:---|
@@ -136,7 +140,8 @@ RSS (MiB)
       +-----------------------------------------------------------------
         Start  Socket  Audit  B1    B3    B5    B7    B9   Rollback  End
 ```
-The memory drift of 12.05 MiB across 10,000 flows and 222,838 packets demonstrates that state snapshots, flow tables, and packet buffers are strictly garbage-collected and bounded without lingering heap retention.
+**Empirical Memory Assessment:**  
+Bounded RSS growth of 12.05 MiB was observed during the tested 10,000-flow workload. No memory leak was detected during the tested workload under the defined monitoring procedure. *(Note: this empirical observation confirms bounded heap growth across the tested workload but does not mathematically prove the absence of all possible memory leaks over unbounded operational timescales.)*
 
 ---
 
@@ -152,8 +157,8 @@ Ingestion capacity was tested across four distinct packet arrival tiers using [`
 | **OVERLOAD** | 50,000 | 10,000 | 8,192 | 0 | **1,808** | 328,013.87 | 0.0030 | Overflow (8,092) |
 
 ### Key Observations:
-1. **Zero Capture-Path Drops:** At all rates up to 50,000 pps, zero raw capture-path or malformed frame drops occurred.
-2. **Controlled Backpressure Engagement:** In the `OVERLOAD` tier (10,000 packets at 50k pps target), the socket buffer filled to its configured capacity (8,192 packets). The system engaged graceful application backpressure, shedding exactly 1,808 excess packets while maintaining processing continuity without crashing or exhausting host memory.
+1. **Zero Capture-Path Drops:** At all rates up to 50,000 pps, zero raw capture-path or malformed frame drops occurred (`capture_path_drops = 0`, `malformed_packets = 0`).
+2. **Controlled Backpressure Shedding:** In the `OVERLOAD` tier (10,000 packets at 50k pps target), the socket buffer filled to its configured capacity (8,192 packets). The system engaged graceful application backpressure, intentionally shedding exactly 1,808 excess packets while maintaining processing continuity without crashing or exhausting host memory. (This overload behavior is classified as intentional application backpressure shedding, not zero packet loss).
 
 ---
 

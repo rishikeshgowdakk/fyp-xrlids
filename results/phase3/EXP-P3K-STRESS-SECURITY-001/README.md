@@ -10,7 +10,7 @@
 - **Zero Host Mutation Guaranteed**: `True`
 - **Attack Scenarios Passed**: 29/29
 - **Provenance Tamper Tests Passed**: 8/8
-- **Soak Failure Injections Passed**: 12/12
+- **Workload Failure Injections Passed**: 12/12
 - **Rollback Success Rate**: 100.0%
 - **Peak RSS**: 1049.45 MiB
 - **RSS Growth**: 12.05 MiB
