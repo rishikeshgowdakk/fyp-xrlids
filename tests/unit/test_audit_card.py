@@ -21,14 +21,17 @@ from xrlids.response.types import Action, ActionSpaceMode, StepRecord
 
 def test_explain_state_factors():
     # Test state with high threat, acceleration, critical host
-    state = np.array([0.82, 0.65, 0.25, 0.40, 1.0, 0.5])
-    factors = explain_state_factors(state, enforced_action="RATE_LIMIT")
+    # 6D state contract: [S_t, Delta S_t, N_alert, a_(t-1), c_t, v_t]
+    state = np.array([0.82, 0.65, 0.25, 0.40, 1.0, 0.70])
+    factors = explain_state_factors(state, enforced_action="RATE_LIMIT", is_critical=True)
 
     assert any("Instantaneous attack risk is severe" in f for f in factors)
-    assert any("Exponentially smoothed threat density is elevated" in f for f in factors)
     assert any("Threat velocity accelerating rapidly" in f for f in factors)
+    assert any("Moderate sustained threat background present" in f for f in factors)
+    assert any("Previous action state: ALERT" in f for f in factors)
+    assert any("Endpoint active cooldown in effect" in f for f in factors)
+    assert any("Elevated flow byte volume detected" in f for f in factors)
     assert any("critical infrastructure" in f for f in factors)
-    assert any("cooldown" in f for f in factors)
 
 
 def test_audit_card_to_markdown():
