@@ -1,0 +1,84 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P3F-OBSERVABILITY-001",
+    "git_commit": "2bd1507a865f746a82afb9f0d5251a1189932b0c",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": null,
+    "created_at": "2026-10-04T13:43:09.165721+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "2bd1507a865f746a82afb9f0d5251a1189932b0c",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "experiment_id": "EXP-P3F-OBSERVABILITY-001",
+  "nominal_queue": {
+    "capacity": 1000,
+    "current_depth": 0,
+    "high_watermark": 180,
+    "enqueue_count": 270,
+    "dequeue_count": 270,
+    "overflow_count": 0,
+    "backpressure_drops": 0,
+    "oldest_item_age_s": 0.0,
+    "queue_latency_us": {
+      "count": 270,
+      "min_us": 4.29,
+      "mean_us": 6318810.44,
+      "p50_us": 4460914.33,
+      "p95_us": 18081745.9,
+      "p99_us": 19428045.17,
+      "max_us": 19726144.52,
+      "unit": "microseconds"
+    },
+    "drop_events_count": 0
+  },
+  "pressure_queue": {
+    "capacity": 25,
+    "current_depth": 0,
+    "high_watermark": 25,
+    "enqueue_count": 115,
+    "dequeue_count": 115,
+    "overflow_count": 155,
+    "backpressure_drops": 155,
+    "oldest_item_age_s": 0.0,
+    "queue_latency_us": {
+      "count": 115,
+      "min_us": 3.36,
+      "mean_us": 209793.79,
+      "p50_us": 9.79,
+      "p95_us": 1378526.84,
+      "p99_us": 1632733.97,
+      "max_us": 1710073.86,
+      "unit": "microseconds"
+    },
+    "drop_events_count": 155
+  },
+  "saturation_test": {
+    "scenario": "queue_saturation",
+    "queue_capacity": 10,
+    "burst_flows_count": 35,
+    "accepted_count": 10,
+    "rejected_count": 25,
+    "high_watermark": 10,
+    "overflow_count": 25,
+    "pass": true
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P3F-OBSERVABILITY-001",
+    "git_commit": "2bd1507a865f746a82afb9f0d5251a1189932b0c",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": null,
+    "created_at": "2026-10-04T13:43:09.165721+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "2bd1507a865f746a82afb9f0d5251a1189932b0c",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "experiment_id": "EXP-P3F-OBSERVABILITY-001",
+  "git_commit": "2bd1507a865f746a82afb9f0d5251a1189932b0c",
+  "created_at": "2026-10-04T13:43:09.165721+00:00",
+  "operational_mode": "LiveMode.DRY_RUN",
+  "zero_network_mutation_guaranteed": true,
+  "nominal_execution": {
+    "packets_captured": 1000,
+    "synthetic_capture_drops": 0,
+    "flows_processed": 270,
+    "audit_cards_generated": 270,
+    "audit_coverage_pct": 100.0,
+    "health_state": "HEALTHY",
+    "queue_high_watermark": 180,
+    "backpressure_drops": 0
+  },
+  "pressure_execution": {
+    "flows_processed": 270,
+    "backpressure_drops": 155,
+    "health_state": "DEGRADED",
+    "reasons": [
+      "Backpressure drops observed: 155 dropped items"
+    ]
+  },
+  "failure_injection_summary": {
+    "total_scenarios_evaluated": 6,
+    "total_scenarios_passed": 6,
+    "all_passed": true,
+    "zero_disruptive_actions_on_failure": true,
+    "enforcement_lock_preserved": true
+  }
+}

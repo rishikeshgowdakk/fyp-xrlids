@@ -29,6 +29,8 @@ class FlowBuilderStats:
     flows_completed_fin_rst: int = 0
     flows_completed_timeout: int = 0
     total_flows_completed: int = 0
+    flow_builder_errors: int = 0
+    max_active_flow_watermark: int = 0
 
     def to_dict(self) -> dict[str, int]:
         return {
@@ -37,6 +39,8 @@ class FlowBuilderStats:
             "flows_completed_fin_rst": self.flows_completed_fin_rst,
             "flows_completed_timeout": self.flows_completed_timeout,
             "total_flows_completed": self.total_flows_completed,
+            "flow_builder_errors": self.flow_builder_errors,
+            "max_active_flow_watermark": self.max_active_flow_watermark,
         }
 
 
@@ -74,22 +78,28 @@ class LiveFlowBuilder:
             del self.active_flows[k]
 
         # 2. Map to canonical bidirectional 5-tuple
-        key, is_fwd = FlowKey.from_packet(pkt)
-        if key not in self.active_flows:
-            flow = Flow(key=key, start_time=pkt.timestamp, last_time=pkt.timestamp)
-            self.active_flows[key] = flow
-        else:
-            flow = self.active_flows[key]
+        try:
+            key, is_fwd = FlowKey.from_packet(pkt)
+            if key not in self.active_flows:
+                flow = Flow(key=key, start_time=pkt.timestamp, last_time=pkt.timestamp)
+                self.active_flows[key] = flow
+            else:
+                flow = self.active_flows[key]
 
-        flow.add_packet(pkt, is_fwd)
+            flow.add_packet(pkt, is_fwd)
 
-        # 3. Check TCP FIN/RST completion
-        if flow.is_closed:
-            completed.append(flow)
-            del self.active_flows[key]
-            self.stats.flows_completed_fin_rst += 1
+            # 3. Check TCP FIN/RST completion
+            if flow.is_closed:
+                completed.append(flow)
+                del self.active_flows[key]
+                self.stats.flows_completed_fin_rst += 1
+        except Exception as err:
+            self.stats.flow_builder_errors += 1
 
         self.stats.active_flows_count = len(self.active_flows)
+        self.stats.max_active_flow_watermark = max(
+            self.stats.max_active_flow_watermark, self.stats.active_flows_count
+        )
         self.stats.total_flows_completed += len(completed)
         return completed
 

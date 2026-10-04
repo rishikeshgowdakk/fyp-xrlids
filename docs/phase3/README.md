@@ -14,13 +14,13 @@ The most operationally important phase. Everything here is gated on earlier evid
 | Replay vs live distinction | Separate, non-combinable conclusions | Phase 3D | ✅ Documented (`CONTROLLED_UNSEEN_TRAFFIC.md`) |
 | `CONTROLLED_UNSEEN_TRAFFIC.md` | Distinguish synthetic rows / controlled packets / replay / held-out / cross-dataset / live | Phase 3D | ✅ Documented |
 | Performance profiling | P50/P95/P99 latency per component + end-to-end | Phase 3E | ✅ EMPIRICALLY OBSERVED (`EXP-P3-BURST-1000-001`) |
-| Observability | Logs, metrics, health checks, error counters | Phase 3F | 🟡 Implemented (Audit Logger) |
+| Observability | Logs, metrics, health checks, error counters | Phase 3F | ✅ EMPIRICALLY OBSERVED & DOCUMENTED (`EXP-P3F-OBSERVABILITY-001`) |
 | Safety layer | Deterministic gate for every autonomous action | Cross-cutting | ✅ Reusable (`xrlids.response.safety`) |
 | Dry-run mode | Log-only enforcement with guaranteed zero network mutation | Phase 3B/3C | ✅ Implemented (`LiveMode.DRY_RUN`) |
 | Controlled enforcement | Real actuation in an isolated lab (strictly locked behind rollback) | Controlled Lab | 🔒 LOCKED (Pending Rollback Verification) |
 | Rollback specification | Atomic rollback, state snapshot, failure handling | Safety Spec | ✅ Documented (`CONTROLLED_RESPONSE_SAFETY.md`) |
 | Traffic burst case | "1000 packets from one click" experiment execution | Lab Experiment | ✅ EXECUTED & COMMITTED (`EXP-P3-BURST-1000-001`) |
-| Failure injection | Fail-safe behaviour for every dependency | Robustness | 🟡 Tested (Fail-safe Invariants) |
+| Failure injection | Fail-safe behaviour for every dependency | Robustness | ✅ VERIFIED & AUDITED (6/6 Scenarios Pass) |
 | Final operational report | Evidence-driven summary | Final Closure | ⬜ Planned |
 
 ## Flow Completion Policy (Decision D-006)

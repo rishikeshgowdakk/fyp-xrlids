@@ -66,6 +66,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Controlled Response Safety & Rollback Architecture | ✅ | `docs/phase3/CONTROLLED_RESPONSE_SAFETY.md` (atomic rollback specification) |
 | Controlled Traffic Taxonomy Specification | ✅ | `docs/phase3/CONTROLLED_UNSEEN_TRAFFIC.md` (8 distinct traffic tiers) |
 | Controlled 1000-Packet Burst Experiment (Phase 3E) | ✅ | `src/xrlids/live/burst.py`, `scripts/phase3/run_burst_experiment.py`, `results/phase3/EXP-P3-BURST-1000-001/` |
+| Observability, Health Engine & Bounded Flow Queue (Phase 3F) | ✅ | `src/xrlids/live/observability.py` (HealthState, BoundedFlowQueue, FailureInjectionHarness) + tests |
 
 ## Empirical status
 
@@ -87,6 +88,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Live Replay & Demonstration Foundation | ✅ EMPIRICALLY OBSERVED & VERIFIED | End-to-end packet replay, flow accumulation, R10 feature parity ($\text{atol} \le 10^{-4}$), RF model inference, and demonstration artifacts verified in `results/demo/` |
 | Autonomous Response Baseline Ladder (Phase 2A) | ✅ EMPIRICALLY OBSERVED & VERIFIED | Evaluated across 24 configurations (4 baselines x 3 cost regimes x 2 action modes) on 142,346 $D_{\text{pol\_val}}$ flows (`EXP-P2A-BASELINES-001`, B=1000 bootstrap tests); D-003 preserved, D_pol_test strictly untouched |
 | Controlled 1000-Packet Traffic Burst (Phase 3E) | ✅ EMPIRICALLY OBSERVED & VERIFIED | Executed across 1000 packets (800 benign + 200 attack) in `LiveMode.DRY_RUN` (`EXP-P3-BURST-1000-001`, `REPORT-P3E-BURST-1000-001`); 100% consumed, 0 synthetic drops, 0 mutations, 270/270 audit cards, component latencies P50/P95/P99 profiled |
+| Live Observability & Fault Injection (Phase 3F) | ✅ EMPIRICALLY OBSERVED & AUDITED | Multi-condition execution on 1000 packets (nominal, queue backpressure, and 6 failure injection scenarios) in `LiveMode.DRY_RUN` (`EXP-P3F-OBSERVABILITY-001`, `REPORT-P3F-OBSERVABILITY-001`); 6/6 failure scenarios verified, fail-safe invariant proven, zero network mutations |
 
 ## Research decisions status
 

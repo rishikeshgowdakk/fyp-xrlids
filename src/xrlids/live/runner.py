@@ -213,6 +213,16 @@ class LatencyTracker:
         }
 
 
+from xrlids.live.observability import (
+    BackpressureDropEvent,
+    BoundedFlowQueue,
+    HealthConfig,
+    HealthMonitor,
+    HealthReport,
+    HealthState,
+)
+
+
 class LivePipelineRunner:
     """Executes the live network validation pipeline under safe operational constraints."""
 
@@ -226,6 +236,8 @@ class LivePipelineRunner:
         state_builder: StateBuilder | None = None,
         explainer: Any | None = None,
         mode: LiveMode = LiveMode.OBSERVE,
+        queue_capacity: int = 1000,
+        health_config: HealthConfig | None = None,
     ) -> None:
         if mode == LiveMode.CONTROLLED_ENFORCEMENT:
             raise RuntimeError(
@@ -242,8 +254,23 @@ class LivePipelineRunner:
         self.state_builder = state_builder or StateBuilder()
         self.explainer = explainer
         self.mode = mode
+        self.queue_capacity = queue_capacity
+        self.flow_queue = BoundedFlowQueue(capacity=queue_capacity)
+        self.health_monitor = HealthMonitor(config=health_config)
         self.auditor = DryRunAuditor()
         self.latency_tracker = LatencyTracker()
+        self.error_counts: dict[str, int] = {
+            "detector_failures": 0,
+            "policy_failures": 0,
+            "safety_gate_failures": 0,
+            "audit_write_failures": 0,
+            "capture_errors": 0,
+            "failsafe_allow_events": 0,
+            "failsafe_alert_events": 0,
+            "enforcement_lock_violations": 0,
+            "backpressure_drops": 0,
+        }
+        self._latest_audit_timestamp: str | None = None
         self._flow_index = 0
         self._start_time: float = 0.0
         self._stop_time: float = 0.0
@@ -255,6 +282,18 @@ class LivePipelineRunner:
 
         self.auditor = DryRunAuditor()
         self.latency_tracker = LatencyTracker()
+        self.flow_queue = BoundedFlowQueue(capacity=self.queue_capacity)
+        self.error_counts = {
+            "detector_failures": 0,
+            "policy_failures": 0,
+            "safety_gate_failures": 0,
+            "audit_write_failures": 0,
+            "capture_errors": 0,
+            "failsafe_allow_events": 0,
+            "failsafe_alert_events": 0,
+            "enforcement_lock_violations": 0,
+            "backpressure_drops": 0,
+        }
         self._flow_index = 0
         self.safety_gate.reset()
         self.state_builder.reset()
@@ -272,7 +311,16 @@ class LivePipelineRunner:
             self.latency_tracker.record("flow_assembly", t_fa_end - t_fa_start)
 
             for flow in completed_flows:
-                self._process_flow(flow)
+                self._flow_index += 1
+                flow_id = self._flow_index
+                if not self.flow_queue.enqueue(flow, flow_id=flow_id):
+                    self.error_counts["backpressure_drops"] += 1
+
+            while not self.flow_queue.is_empty():
+                item = self.flow_queue.dequeue()
+                if item is not None:
+                    q_flow, q_wait_s, q_flow_id = item
+                    self._process_flow(q_flow, q_flow_id=q_flow_id)
 
             t_pkt_end = time.perf_counter()
             self.latency_tracker.record("packet_processing", t_pkt_end - t_pkt_start)
@@ -280,19 +328,32 @@ class LivePipelineRunner:
 
         # Flush any remaining active flows at stream completion
         for flow in self.flow_builder.flush_all():
-            self._process_flow(flow)
+            self._flow_index += 1
+            flow_id = self._flow_index
+            if not self.flow_queue.enqueue(flow, flow_id=flow_id):
+                self.error_counts["backpressure_drops"] += 1
+
+        while not self.flow_queue.is_empty():
+            item = self.flow_queue.dequeue()
+            if item is not None:
+                q_flow, q_wait_s, q_flow_id = item
+                self._process_flow(q_flow, q_flow_id=q_flow_id)
 
         self._stop_time = time.perf_counter()
         return self.get_report()
 
-    def _process_flow(self, flow: Flow) -> None:
+    def _process_flow(self, flow: Flow, q_flow_id: int | None = None) -> None:
         """Process a completed flow through detector, state builder, and response policy."""
         import time
         import pandas as pd
 
         t_flow_pipeline_start = time.perf_counter()
-        self._flow_index += 1
-        flow_id = self._flow_index
+        if q_flow_id is not None:
+            flow_id = q_flow_id
+        else:
+            self._flow_index += 1
+            flow_id = self._flow_index
+
         src_ep = f"{flow.source_first_ip}:{flow.source_first_port}"
         dst_ep = f"{flow.dest_first_ip}:{flow.dest_first_port}"
 
@@ -305,6 +366,8 @@ class LivePipelineRunner:
         except Exception as err:
             logger.error("Feature calculation error for flow %d: %s", flow_id, err)
             self.auditor.inference_failures += 1
+            self.error_counts["detector_failures"] += 1
+            self.error_counts["failsafe_allow_events"] += 1
             return
         t_feat_end = time.perf_counter()
         self.latency_tracker.record("feature_construction", t_feat_end - t_feat_start)
@@ -332,6 +395,8 @@ class LivePipelineRunner:
             except Exception as err:
                 logger.error("Detector inference error for flow %d: %s", flow_id, err)
                 self.auditor.inference_failures += 1
+                self.error_counts["detector_failures"] += 1
+                self.error_counts["failsafe_allow_events"] += 1
                 score = 0.0  # Fail-safe default
         t_det_end = time.perf_counter()
         self.latency_tracker.record("detector_inference", t_det_end - t_det_start)
@@ -352,6 +417,8 @@ class LivePipelineRunner:
         except Exception as err:
             logger.error("State construction error for flow %d: %s", flow_id, err)
             self.auditor.inference_failures += 1
+            self.error_counts["policy_failures"] += 1
+            self.error_counts["failsafe_allow_events"] += 1
             state_vec = np.zeros(6, dtype=np.float32)
 
         # 4. Response Policy Action Proposal
@@ -373,6 +440,8 @@ class LivePipelineRunner:
             except Exception as err:
                 logger.error("Policy inference error for flow %d: %s", flow_id, err)
                 self.auditor.inference_failures += 1
+                self.error_counts["policy_failures"] += 1
+                self.error_counts["failsafe_allow_events"] += 1
                 proposed_action = Action.ALLOW  # Fail-safe default
         t_pol_end = time.perf_counter()
         self.latency_tracker.record("policy_evaluation", t_pol_end - t_pol_start)
@@ -381,7 +450,7 @@ class LivePipelineRunner:
         t_sg_start = time.perf_counter()
         try:
             enforced_action, override_applied, override_reason = self.safety_gate.enforce_safety(
-                step=self._flow_index,
+                step=flow_id,
                 flow_id=flow_id,
                 host_id=flow.source_first_ip,
                 proposed_action=proposed_action,
@@ -389,6 +458,8 @@ class LivePipelineRunner:
         except Exception as err:
             logger.error("Safety gate error for flow %d: %s", flow_id, err)
             self.auditor.inference_failures += 1
+            self.error_counts["safety_gate_failures"] += 1
+            self.error_counts["failsafe_allow_events"] += 1
             enforced_action = Action.ALLOW  # Fail-safe default
             override_applied = True
             override_reason = f"Safety gate exception: {err}"
@@ -423,14 +494,29 @@ class LivePipelineRunner:
             r10_features=r10_dict,
             top_explanations=top_explanations,
         )
-        self.auditor.record(card)
+        try:
+            self.auditor.record(card)
+            self._latest_audit_timestamp = card.timestamp
+        except Exception as err:
+            logger.error("Audit write failure for flow %d: %s", flow_id, err)
+            self.error_counts["audit_write_failures"] += 1
 
         t_flow_pipeline_end = time.perf_counter()
         self.latency_tracker.record("flow_pipeline", t_flow_pipeline_end - t_flow_pipeline_start)
 
     def get_report(self) -> dict[str, Any]:
-        """Compile execution statistics, audit counts, latency distributions, and zero-mutation verification."""
+        """Compile execution statistics, audit counts, latency distributions, and observability report."""
         dur_s = max(0.0, self._stop_time - self._start_time)
+        queue_stats = self.flow_queue.stats()
+        health_rep = self.health_monitor.evaluate(
+            queue_stats=queue_stats,
+            error_counts=self.error_counts,
+            auditor_summary=self.auditor.summary(),
+        )
+
+        safety_sum = self.safety_gate.summary()
+        reasons = safety_sum.get("reasons", {})
+
         return {
             "mode": self.mode.value,
             "flows_processed": self._flow_index,
@@ -440,4 +526,48 @@ class LivePipelineRunner:
             "auditor_summary": self.auditor.summary(),
             "latency_summary": self.latency_tracker.summary(),
             "zero_network_mutation_guaranteed": True,
+            "health_report": health_rep.to_dict(),
+            "queue_metrics": queue_stats,
+            "capture_metrics": {
+                "packets_captured": self.capture_service.stats.packets_captured,
+                "malformed_packets": self.capture_service.stats.malformed_packets,
+                "capture_errors": self.capture_service.stats.errors,
+                "capture_duration_s": round(self.capture_service.stats.duration_s, 6),
+                "packets_per_second": round(self.capture_service.stats.packets_per_second, 2),
+                "source_type": getattr(self.capture_service, "backend", "synthetic"),
+            },
+            "flow_builder_metrics": {
+                "active_flows": self.flow_builder.stats.active_flows_count,
+                "completed_flows": self.flow_builder.stats.total_flows_completed,
+                "fin_rst_completions": self.flow_builder.stats.flows_completed_fin_rst,
+                "timeout_completions": self.flow_builder.stats.flows_completed_timeout,
+                "flow_builder_errors": self.flow_builder.stats.flow_builder_errors,
+                "max_active_flow_watermark": self.flow_builder.stats.max_active_flow_watermark,
+            },
+            "processing_metrics": {
+                "flows_awaiting_processing": self.flow_queue.current_depth,
+                "flows_processed": self._flow_index,
+                "inference_failures": self.error_counts.get("detector_failures", 0),
+                "policy_failures": self.error_counts.get("policy_failures", 0),
+                "safety_gate_failures": self.error_counts.get("safety_gate_failures", 0),
+                "processing_latency_us": self.latency_tracker.summary().get("detector_inference", {}),
+                "queue_latency_us": queue_stats.get("queue_latency_us", {}),
+                "end_to_end_latency_us": self.latency_tracker.summary().get("flow_pipeline_e2e", {}),
+            },
+            "safety_metrics": {
+                "safety_gate_summary": safety_sum,
+                "safety_overrides": safety_sum.get("total_overrides", 0),
+                "critical_host_overrides": reasons.get("CRITICAL_INFRASTRUCTURE_EXEMPTION", 0),
+                "blast_radius_interventions": reasons.get("BLAST_RADIUS_CIRCUIT_BREAKER", 0),
+                "cooldown_interventions": reasons.get("MANDATORY_ACTION_COOLDOWN", 0),
+                "failsafe_allow_events": self.error_counts.get("failsafe_allow_events", 0),
+                "failsafe_alert_events": self.error_counts.get("failsafe_alert_events", 0),
+                "enforcement_lock_violations": self.error_counts.get("enforcement_lock_violations", 0),
+            },
+            "audit_metrics": {
+                "audit_cards_generated": len(self.auditor.audit_cards),
+                "audit_write_failures": self.error_counts.get("audit_write_failures", 0),
+                "audit_coverage_pct": round(len(self.auditor.audit_cards) / max(1, self._flow_index) * 100.0, 2),
+                "latest_successful_audit_timestamp": self._latest_audit_timestamp,
+            },
         }

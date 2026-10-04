@@ -1,0 +1,72 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P3F-OBSERVABILITY-001",
+    "git_commit": "2bd1507a865f746a82afb9f0d5251a1189932b0c",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": null,
+    "created_at": "2026-10-04T13:43:09.165721+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "2bd1507a865f746a82afb9f0d5251a1189932b0c",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "experiment_id": "EXP-P3F-OBSERVABILITY-001",
+  "git_commit": "2bd1507a865f746a82afb9f0d5251a1189932b0c",
+  "created_at": "2026-10-04T13:43:09.165721+00:00",
+  "operational_mode": "LiveMode.DRY_RUN",
+  "zero_network_mutation_guaranteed": true,
+  "conditions": {
+    "condition_1_nominal": {
+      "packet_count": 1000,
+      "queue_capacity": 1000,
+      "health_thresholds": {
+        "degraded_queue_fill_pct": 80.0,
+        "degraded_backpressure_drops": 1,
+        "failed_safe_error_threshold": 1,
+        "threshold_type": "experimental_observability_defaults_not_production_slas"
+      }
+    },
+    "condition_2_backpressure": {
+      "packet_count": 1000,
+      "queue_capacity": 1,
+      "health_thresholds": {
+        "degraded_queue_fill_pct": 50.0,
+        "degraded_backpressure_drops": 1,
+        "failed_safe_error_threshold": 1
+      }
+    },
+    "condition_3_failure_injection": {
+      "scenarios": [
+        "malformed_packet_injection",
+        "queue_saturation",
+        "detector_failure",
+        "policy_failure",
+        "safety_gate_failure",
+        "audit_persistence_failure"
+      ]
+    }
+  },
+  "models": {
+    "detector": "EXP-P1-CIC2017-R10-001 (RandomForestClassifier, 100 trees)",
+    "policy": "EXP-P2B-DQN-001 (Dueling DQN, 4 actions)",
+    "safety_gate": "DeterministicSafetyGate (cooldown=30s, blast_radius=5%, critical_host_exemption)"
+  }
+}
