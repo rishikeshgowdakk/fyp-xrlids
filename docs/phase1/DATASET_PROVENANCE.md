@@ -1,6 +1,7 @@
 # DATASET PROVENANCE
 
-Status: **All 3 datasets acquired and verified (20 CSV files physically present, verified against SHA-256 digests).**
+Status: **All 3 datasets acquired and verified (20 CSV files physically present, verified against SHA-256 digests).**  
+Comprehensive Overview: [`docs/DATASETS.md`](../DATASETS.md)  
 Authoritative machine record: [`../../data/manifests/dataset_registry.yaml`](../../data/manifests/dataset_registry.yaml)
 
 ## Provenance declared

@@ -65,6 +65,15 @@ def generate_dataset_manifest() -> str:
         "| --- | --- | --- | --- | --- | --- | --- |",
     ]
     detail_lines = []
+    summary_path = Path("results/audits/dataset_summary.json")
+    audit_summary_map = {}
+    if summary_path.exists():
+        try:
+            for item in json.loads(summary_path.read_text(encoding="utf-8")):
+                audit_summary_map[item.get("dataset")] = item
+        except Exception:
+            pass
+
     if DATA_MANIFEST.exists():
         data = yaml.safe_load(DATA_MANIFEST.read_text(encoding="utf-8")) or {}
         datasets = data.get("datasets", [])
@@ -79,8 +88,22 @@ def generate_dataset_manifest() -> str:
                 status = "AVAILABLE (VERIFIED)"
                 f_count = len(present_files)
                 f_first = present_files[0]
-                rows = f"{f_first.get('rows_total', 'N/A'):,}" if isinstance(f_first.get('rows_total'), int) else "N/A"
-                cols = f_first.get("columns_total", "N/A")
+                audit_item = audit_summary_map.get(key)
+                if audit_item and isinstance(audit_item.get("rows"), int):
+                    rows = f"{audit_item['rows']:,}"
+                elif isinstance(f_first.get("rows_total"), int):
+                    rows = f"{f_first['rows_total']:,}"
+                else:
+                    rows = "N/A"
+
+                if key == "cicids2017":
+                    cols = "79"
+                elif key == "cse_cic_ids2018":
+                    cols = "80-84"
+                elif key == "unsw_nb15":
+                    cols = "45"
+                else:
+                    cols = str(f_first.get("columns_total", "N/A"))
                 sha = f"`{f_first.get('sha256', 'N/A')[:16]}...`"
             else:
                 status = "DATA_NOT_AVAILABLE"
@@ -94,6 +117,8 @@ def generate_dataset_manifest() -> str:
                 f"### {i}. {name} (`{key}`)",
                 f"- **Status**: `{status}`.",
                 f"- **Files Present**: {len(present_files)} of {len(files)} registered files present on disk.",
+                f"- **Total Rows**: {rows}.",
+                f"- **Columns**: {cols}.",
                 f"- **Primary File**: `{Path(files[0].get('path', '')).name if files else 'N/A'}`.",
                 f"- **SHA-256**: `{files[0].get('sha256', 'N/A') if files else 'N/A'}`.",
                 f"- **Location**: `data/raw/{key}/`.",

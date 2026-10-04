@@ -363,6 +363,13 @@ To verify code plumbing on synthetic test fixtures:
 ```
 *(Note: Smoke tests execute on synthetic fixtures and do not evaluate research evidence).*
 
+### Datasets and Model Binaries Note
+
+In accordance with standard repository practices and `.gitignore`, the full raw benchmark datasets (comprising 19,321,418 rows across 20 CSV files, ~8.7 GB) and large intermediate model binaries (`*.pt`, `*.joblib`) are excluded from Git tracking to preserve repository portability. The repository includes:
+- A real packet capture trace (`data/demo/sample_traffic.pcap`) and the primary 26 MB demonstrator Random Forest model (`results/experiments/EXP-P1-CIC2017-R10-001/random_forest.joblib`) for immediate out-of-the-box local execution.
+- All configuration YAMLs, cryptographic manifests (`data/manifests/dataset_registry.yaml`), dataset schemas, label contracts, and feature extractors.
+- For full benchmark retraining, raw CSV files should be placed into `data/raw/{cicids2017,cse_cic_ids2018,unsw_nb15}/` as documented in [`docs/DATASETS.md`](docs/DATASETS.md).
+
 ---
 
 ## 12. Demo Outputs
@@ -384,7 +391,6 @@ fyp-xrlids/
 ├── reports/          # Generated human-readable markdown summaries and figures
 ├── results/          # Trained model binaries, evaluation metrics, and audit cards
 ├── scripts/          # Runnable demonstration, baseline, and experiment scripts
-├── services/         # API and monitoring service prototypes
 ├── src/              # Python source code package (`xrlids`)
 ├── tests/            # Unit, integration, and security verification test suite (386 tests)
 ├── README.md         # Repository documentation and system overview
@@ -403,6 +409,7 @@ fyp-xrlids/
 ## 14. Reproducibility
 
 Authoritative documentation and evidence resources:
+- [`docs/DATASETS.md`](docs/DATASETS.md): Authoritative dataset overview, acquisition environments, R10 feature selection rationale, and UNSW R4 fallback explanation.
 - [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md): Quickstart reproduction guide.
 - [`docs/final/REPRODUCIBILITY_MAP.md`](docs/final/REPRODUCIBILITY_MAP.md): Complete environment configuration, dependency pins, and reproduction commands.
 - [`docs/final/FINAL_RESEARCH_REPORT.md`](docs/final/FINAL_RESEARCH_REPORT.md): Comprehensive 10-section final research synthesis.
