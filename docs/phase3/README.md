@@ -22,6 +22,7 @@ The most operationally important phase. Everything here is gated on earlier evid
 | Traffic burst case | "1000 packets from one click" experiment execution | Lab Experiment | ✅ EXECUTED & COMMITTED (`EXP-P3-BURST-1000-001`) |
 | Failure injection | Fail-safe behaviour for every dependency | Robustness | ✅ VERIFIED & AUDITED (6/6 Scenarios Pass) |
 | Atomic rollback harness | Formal transaction lifecycle, SHA-256 snapshots, auto-compensation | Phase 3G | ✅ VERIFIED & AUDITED (12/12 Scenarios Pass) |
+| Enforcement readiness gate | PreconditionGate, cryptographic provenance, fail-closed authorization | Phase 3H | ✅ VERIFIED & AUDITED (18/18 Scenarios Pass) |
 | Final operational report | Evidence-driven summary | Final Closure | ⬜ Planned |
 
 ## Flow Completion Policy (Decision D-006)
@@ -74,6 +75,9 @@ Live Network / Controlled PCAP
   - Structured audit logging, health metrics, and backpressure handling documented in [`PHASE3F_OBSERVABILITY_REPORT.md`](PHASE3F_OBSERVABILITY_REPORT.md).
 - **Phase 3G — Atomic Rollback & Controlled Response Transaction Harness**:
   - Atomic transaction lifecycle (`IDLE -> SNAPSHOT -> VALIDATE -> PREPARE -> APPLY -> VERIFY -> COMMITTED`), SHA-256 snapshots, auto-compensation rollback, watchdog TTL monitoring, and permanent safety locking documented in [`PHASE3G_ROLLBACK_REPORT.md`](PHASE3G_ROLLBACK_REPORT.md).
+- **Phase 3H — Enforcement Readiness, Evidence Provenance & Non-Bypassable Activation Gate**:
+  - Non-bypassable fail-closed `PreconditionGate`, SHA-256 evidence validation, exact commit binding, signed time-bounded `LabActivationAuthorization`, and `READY != ENFORCEMENT` invariant documented in [`PHASE3H_ENFORCEMENT_GATE_REPORT.md`](PHASE3H_ENFORCEMENT_GATE_REPORT.md).
+
 
 
 ## Enforcement precondition chain (§75)

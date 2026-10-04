@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "git_commit": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
+    "created_at": "2026-10-04T14:30:00+00:00",
+    "experiment_id": "EXP-P3H-ENFORCEMENT-GATE-001"
+  },
+  "experiment_id": "EXP-P3-BURST-1000-001",
+  "precondition": "P2_PCAP_REPLAY",
+  "status": "PASS",
+  "packets_captured": 1000,
+  "capture_errors": 0,
+  "flows_processed": 270,
+  "zero_network_mutation_guaranteed": true
+}

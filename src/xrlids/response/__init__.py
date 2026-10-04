@@ -44,6 +44,16 @@ from xrlids.response.transaction import (
     TransactionState,
     TransactionWatchdog,
 )
+from xrlids.enforcement import (
+    AuthorizationStatus,
+    EligibilityStatus,
+    EnforcementEligibility,
+    LabActivationAuthorization,
+    PreconditionCheckResult,
+    PreconditionEvidence,
+    PreconditionGate,
+    PreconditionType,
+)
 from xrlids.response.types import (
     Action,
     ActionSpaceMode,
@@ -90,5 +100,14 @@ __all__ = [
     "ControlledResponseTransactionManager",
     "TransactionRecord",
     "TransactionWatchdog",
+    "PreconditionType",
+    "EligibilityStatus",
+    "AuthorizationStatus",
+    "PreconditionEvidence",
+    "LabActivationAuthorization",
+    "PreconditionCheckResult",
+    "EnforcementEligibility",
+    "PreconditionGate",
 ]
+
 

@@ -1,0 +1,67 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P3H-ENFORCEMENT-GATE-001",
+    "git_commit": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": null,
+    "created_at": "2026-10-04T14:30:00+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "experiment_id": "EXP-P3H-ENFORCEMENT-GATE-001",
+  "git_commit": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
+  "created_at": "2026-10-04T14:30:00+00:00",
+  "operational_mode": "LiveMode.OBSERVE / LiveMode.DRY_RUN",
+  "zero_network_mutation_guaranteed": true,
+  "total_scenarios_evaluated": 18,
+  "total_scenarios_passed": 18,
+  "all_scenarios_passed": true,
+  "ready_scenarios": [
+    "scenario_1_complete_valid_chain",
+    "scenario_18_valid_activation_boundary"
+  ],
+  "locked_scenarios": [
+    "scenario_2_feature_parity_failure",
+    "scenario_3_pcap_replay_failure",
+    "scenario_4_dry_run_failure",
+    "scenario_5_safety_invariant_failure",
+    "scenario_6_rollback_evidence_failure",
+    "scenario_7_missing_evidence",
+    "scenario_8_stale_evidence",
+    "scenario_9_wrong_commit",
+    "scenario_10_artifact_tampering",
+    "scenario_11_expired_authorization",
+    "scenario_12_wrong_lab_environment",
+    "scenario_13_wrong_actuator_backend",
+    "scenario_14_multiple_failures",
+    "scenario_15_malformed_evidence",
+    "scenario_16_internal_evaluation_failure",
+    "scenario_17_configuration_bypass_attempt"
+  ],
+  "zero_system_network_mutation": true,
+  "host_firewall_mutations": 0,
+  "routing_table_mutations": 0,
+  "traffic_control_mutations": 0,
+  "network_sockets_dropped": 0,
+  "real_actuator_executions": 0
+}

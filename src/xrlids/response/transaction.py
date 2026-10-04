@@ -164,6 +164,9 @@ class SimulatedActuatorBackend:
         self._snapshot_counter: int = 0
         self._rollback_counts: dict[str, int] = {}
         self._real_mutations_attempted: int = 0
+        self.backend_id: str = "SIMULATED_ACTUATOR_V1"
+        self.zero_network_mutation: bool = True
+        self.network_mutations_count: int = 0
 
         # Fault Injection Flags
         self.fail_snapshot: bool = False
@@ -173,6 +176,7 @@ class SimulatedActuatorBackend:
         self.partial_mutation: bool = False
         self.fail_verification: bool = False
         self.fail_rollback: bool = False
+
 
     def snapshot(self, target_host: str, action: str) -> StateSnapshot:
         """Create a hash-verified snapshot of the baseline simulated state."""
@@ -380,10 +384,16 @@ class ControlledResponseTransactionManager:
         backend: SimulatedActuatorBackend,
         safety_gate: DeterministicSafetyGate | None = None,
         default_ttl_s: float = 60.0,
+        eligibility: Any | None = None,
+        authorization: Any | None = None,
+        require_enforcement_readiness: bool = False,
     ) -> None:
         self.backend = backend
         self.safety_gate = safety_gate or DeterministicSafetyGate()
         self.default_ttl_s = default_ttl_s
+        self.eligibility = eligibility
+        self.authorization = authorization
+        self.require_enforcement_readiness = require_enforcement_readiness
 
         self._tx_counter: int = 0
         self._is_safety_locked: bool = False
@@ -422,7 +432,62 @@ class ControlledResponseTransactionManager:
         action_obj = action if isinstance(action, Action) else Action.from_token(str(action))
         action_name = action_obj.name
 
+        # Enforcement Precondition Gating Check (Phase 3H)
+        if self.require_enforcement_readiness:
+            is_ready = getattr(self.eligibility, "is_ready", False) if self.eligibility else False
+            if not is_ready:
+                reason = "PreconditionGate is not in READY state (enforcement strictly locked)"
+                rec = TransactionRecord(
+                    transaction_id=tx_id,
+                    target_host=target_host,
+                    proposed_action=action_name,
+                    enforced_action=Action.ALLOW.name,
+                    state=TransactionState.SAFETY_LOCKED,
+                    snapshot=None,
+                    rollback_result=None,
+                    execution_time_ms=(time.perf_counter() - t0) * 1000.0,
+                    error_message=f"Enforcement rejected: {reason}",
+                )
+                self._history.append(rec)
+                return rec
+
+            auth_status = getattr(self.authorization, "status", "") if self.authorization else ""
+            if not self.authorization or auth_status != "ACTIVE":
+                reason = "LabActivationAuthorization is missing or not ACTIVE"
+                rec = TransactionRecord(
+                    transaction_id=tx_id,
+                    target_host=target_host,
+                    proposed_action=action_name,
+                    enforced_action=Action.ALLOW.name,
+                    state=TransactionState.SAFETY_LOCKED,
+                    snapshot=None,
+                    rollback_result=None,
+                    execution_time_ms=(time.perf_counter() - t0) * 1000.0,
+                    error_message=f"Enforcement rejected: {reason}",
+                )
+                self._history.append(rec)
+                return rec
+
+            allowed_backend = getattr(self.authorization, "allowed_actuator_backend_id", "")
+            current_backend = getattr(self.backend, "backend_id", "")
+            if allowed_backend != current_backend:
+                reason = f"Actuator backend '{current_backend}' does not match authorized backend '{allowed_backend}'"
+                rec = TransactionRecord(
+                    transaction_id=tx_id,
+                    target_host=target_host,
+                    proposed_action=action_name,
+                    enforced_action=Action.ALLOW.name,
+                    state=TransactionState.SAFETY_LOCKED,
+                    snapshot=None,
+                    rollback_result=None,
+                    execution_time_ms=(time.perf_counter() - t0) * 1000.0,
+                    error_message=f"Enforcement rejected: {reason}",
+                )
+                self._history.append(rec)
+                return rec
+
         # If permanently locked due to a prior rollback failure, forbid all mutations
+
         if self._is_safety_locked:
             rec = TransactionRecord(
                 transaction_id=tx_id,

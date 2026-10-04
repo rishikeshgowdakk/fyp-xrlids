@@ -1,0 +1,95 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P3H-ENFORCEMENT-GATE-001",
+    "git_commit": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": null,
+    "created_at": "2026-10-04T14:30:00+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "experiment_id": "EXP-P3H-ENFORCEMENT-GATE-001",
+  "checks": {
+    "P1_FEATURE_PARITY": {
+      "precondition": "P1_FEATURE_PARITY",
+      "passed": true,
+      "status": "PASS",
+      "reason_code": null,
+      "details": "Evidence for P1_FEATURE_PARITY successfully verified with exact digest match and commit binding.",
+      "artifact_digest_verified": true,
+      "commit_verified": true,
+      "freshness_verified": true
+    },
+    "P2_PCAP_REPLAY": {
+      "precondition": "P2_PCAP_REPLAY",
+      "passed": true,
+      "status": "PASS",
+      "reason_code": null,
+      "details": "Evidence for P2_PCAP_REPLAY successfully verified with exact digest match and commit binding.",
+      "artifact_digest_verified": true,
+      "commit_verified": true,
+      "freshness_verified": true
+    },
+    "P3_DRY_RUN": {
+      "precondition": "P3_DRY_RUN",
+      "passed": true,
+      "status": "PASS",
+      "reason_code": null,
+      "details": "Evidence for P3_DRY_RUN successfully verified with exact digest match and commit binding.",
+      "artifact_digest_verified": true,
+      "commit_verified": true,
+      "freshness_verified": true
+    },
+    "P4_SAFETY_INVARIANTS": {
+      "precondition": "P4_SAFETY_INVARIANTS",
+      "passed": true,
+      "status": "PASS",
+      "reason_code": null,
+      "details": "Evidence for P4_SAFETY_INVARIANTS successfully verified with exact digest match and commit binding.",
+      "artifact_digest_verified": true,
+      "commit_verified": true,
+      "freshness_verified": true
+    },
+    "P5_ROLLBACK_HARNESS": {
+      "precondition": "P5_ROLLBACK_HARNESS",
+      "passed": true,
+      "status": "PASS",
+      "reason_code": null,
+      "details": "Evidence for P5_ROLLBACK_HARNESS successfully verified with exact digest match and commit binding.",
+      "artifact_digest_verified": true,
+      "commit_verified": true,
+      "freshness_verified": true
+    },
+    "P6_ACTIVATION_AUTHORIZATION": {
+      "precondition": "P6_ACTIVATION_AUTHORIZATION",
+      "passed": true,
+      "status": "PASS",
+      "reason_code": null,
+      "details": "Authorization token is valid, active, signed, and bound to target lab and commit.",
+      "artifact_digest_verified": true,
+      "commit_verified": true,
+      "freshness_verified": true
+    }
+  },
+  "all_preconditions_verified": true
+}
