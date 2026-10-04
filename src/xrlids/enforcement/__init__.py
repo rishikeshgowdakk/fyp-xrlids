@@ -50,6 +50,13 @@ from xrlids.enforcement.lab import (
     LabResourceManifest,
     NetnsActuatorBackend,
 )
+from xrlids.enforcement.concurrency import (
+    ConcurrencyHarness,
+    FlowSpec,
+    MultiFlowTrafficGenerator,
+    SoakWorkloadConfig,
+    compute_percentiles,
+)
 
 __all__ = [
     "PreconditionType",
@@ -95,4 +102,9 @@ __all__ = [
     "VETH_ATTACKER",
     "VETH_VICTIM",
     "FORBIDDEN_HOST_TARGETS",
+    "SoakWorkloadConfig",
+    "FlowSpec",
+    "MultiFlowTrafficGenerator",
+    "ConcurrencyHarness",
+    "compute_percentiles",
 ]

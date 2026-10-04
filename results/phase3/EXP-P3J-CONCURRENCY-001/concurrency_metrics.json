@@ -1,0 +1,196 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P3J-CONCURRENCY-001",
+    "git_commit": "ed9bd59e5ef24c4cef90aea131bcd1fa788c0690",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": null,
+    "created_at": "2026-10-04T15:30:20.649400+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "ed9bd59e5ef24c4cef90aea131bcd1fa788c0690",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "experiment_id": "EXP-P3J-CONCURRENCY-001",
+  "concurrency_level": 8,
+  "victim_count": 6,
+  "total_transactions_executed": 192,
+  "scenario_a_sequential": {
+    "scenario": "A_SEQUENTIAL_BASELINE",
+    "total_executed": 10,
+    "committed_count": 10,
+    "rollback_count": 10,
+    "clean_state_verified": true,
+    "tx_latency": {
+      "p50": 0.184,
+      "p95": 0.725,
+      "p99": 1.008,
+      "mean": 0.272,
+      "min": 0.11,
+      "max": 1.078
+    },
+    "contention_stats": {
+      "total_targets": 1,
+      "contention_counts": {
+        "10.200.1.3": 0
+      },
+      "total_wait_time_ms": {
+        "10.200.1.3": 0.0
+      },
+      "total_contention_events": 0
+    }
+  },
+  "scenario_b_two_victims": {
+    "scenario": "B_TWO_CONCURRENT_VICTIMS",
+    "v1_target": "10.200.1.3",
+    "v2_target": "10.200.1.4",
+    "v1_count": 6,
+    "v2_count": 6,
+    "total_records": 12,
+    "total_rollbacks": 12,
+    "all_rollbacks_successful": true,
+    "cross_contamination_detected": false,
+    "clean_state_verified": true,
+    "tx_latency": {
+      "p50": 0.409,
+      "p95": 0.48,
+      "p99": 0.485,
+      "mean": 0.41,
+      "min": 0.342,
+      "max": 0.487
+    },
+    "contention_stats": {
+      "total_targets": 2,
+      "contention_counts": {
+        "10.200.1.3": 0,
+        "10.200.1.4": 0
+      },
+      "total_wait_time_ms": {
+        "10.200.1.3": 0.0,
+        "10.200.1.4": 0.0
+      },
+      "total_contention_events": 0
+    }
+  },
+  "scenario_c_many_victims": {
+    "scenario": "C_MANY_CONCURRENT_VICTIMS",
+    "victim_count": 6,
+    "total_transactions": 24,
+    "max_concurrent_active_tx": 6,
+    "all_committed": true,
+    "all_rolled_back": true,
+    "clean_state_verified": true,
+    "tx_latency": {
+      "p50": 0.379,
+      "p95": 0.577,
+      "p99": 0.589,
+      "mean": 0.404,
+      "min": 0.283,
+      "max": 0.59
+    },
+    "contention_stats": {
+      "total_targets": 6,
+      "contention_counts": {
+        "10.200.1.3": 0,
+        "10.200.1.4": 0,
+        "10.200.1.5": 0,
+        "10.200.1.6": 0,
+        "10.200.1.7": 0,
+        "10.200.1.8": 0
+      },
+      "total_wait_time_ms": {
+        "10.200.1.3": 0.0,
+        "10.200.1.4": 0.0,
+        "10.200.1.5": 0.0,
+        "10.200.1.6": 0.0,
+        "10.200.1.7": 0.0,
+        "10.200.1.8": 0.0
+      },
+      "total_contention_events": 0
+    }
+  },
+  "scenario_d_overlapping_one_victim": {
+    "scenario": "D_OVERLAPPING_ONE_VICTIM",
+    "target_host": "10.200.1.3",
+    "total_transactions": 12,
+    "contention_events_detected": 0,
+    "contended_transactions_count": 0,
+    "lock_wait_stats_ms": {
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0
+    },
+    "clean_state_verified": true,
+    "tx_latency": {
+      "p50": 0.366,
+      "p95": 0.466,
+      "p99": 0.472,
+      "mean": 0.371,
+      "min": 0.265,
+      "max": 0.473
+    }
+  },
+  "soak_performance": {
+    "effective_throughput_fps": 1290.56,
+    "effective_packet_rate_pps": 30790.62,
+    "tx_latency_p50_ms": 0.359,
+    "tx_latency_p95_ms": 10.757,
+    "tx_latency_p99_ms": 13.406
+  },
+  "aggregate_tx_latency_percentiles_ms": {
+    "p50": 0.364,
+    "p95": 1.528,
+    "p99": 13.324,
+    "mean": 0.899,
+    "min": 0.026,
+    "max": 13.774
+  },
+  "aggregate_rollback_latency_percentiles_ms": {
+    "p50": 0.121,
+    "p95": 0.126,
+    "p99": 0.127,
+    "mean": 0.113,
+    "min": 0.091,
+    "max": 0.127
+  },
+  "lock_contention_summary": {
+    "total_targets": 6,
+    "contention_counts": {
+      "10.200.1.3": 0,
+      "10.200.1.4": 0,
+      "10.200.1.5": 10,
+      "10.200.1.6": 0,
+      "10.200.1.7": 0,
+      "10.200.1.8": 0
+    },
+    "total_wait_time_ms": {
+      "10.200.1.3": 0.0,
+      "10.200.1.4": 0.0,
+      "10.200.1.5": 101.118,
+      "10.200.1.6": 0.0,
+      "10.200.1.7": 0.0,
+      "10.200.1.8": 0.0
+    },
+    "total_contention_events": 10
+  }
+}

@@ -1,0 +1,134 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P3J-CONCURRENCY-001",
+    "git_commit": "ed9bd59e5ef24c4cef90aea131bcd1fa788c0690",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": null,
+    "created_at": "2026-10-04T15:30:20.649400+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "ed9bd59e5ef24c4cef90aea131bcd1fa788c0690",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "experiment_id": "EXP-P3J-CONCURRENCY-001",
+  "total_scenarios": 12,
+  "passed_scenarios": 12,
+  "failed_scenarios": 0,
+  "all_passed": true,
+  "scenarios": [
+    {
+      "scenario_id": "FAIL-P3J-001",
+      "name": "transaction_collision",
+      "injected_condition": "Two simultaneous transactions targeting the exact same victim IP",
+      "expected_behavior": "Target lock serializes requests cleanly without state collision",
+      "actual_behavior": "T1=COMMITTED, T2=COMMITTED",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-P3J-002",
+      "name": "shared_state_lock_contention",
+      "injected_condition": "Multi-threaded target lock contention under high load",
+      "expected_behavior": "Contention is tracked with accurate wait durations; state integrity preserved",
+      "actual_behavior": "Total contention events recorded: 10",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-P3J-003",
+      "name": "duplicate_transaction",
+      "injected_condition": "Duplicate transaction issued while active transaction exists on target",
+      "expected_behavior": "Duplicate transaction rejected safely with ABORTED state",
+      "actual_behavior": "State=ABORTED, Msg=Duplicate transaction rejected: active transaction TX-0181 in progress for 10.200.1.5",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-P3J-004",
+      "name": "stale_snapshot",
+      "injected_condition": "Target state altered between snapshot and mutation apply",
+      "expected_behavior": "Stale snapshot detected, transaction aborted before applying unverified mutation",
+      "actual_behavior": "State=ABORTED, Msg=Stale snapshot detected: target state was modified before mutation",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-P3J-005",
+      "name": "rollback_while_another_transaction_is_active",
+      "injected_condition": "Rollback executed on Target A while Target B remains mutated and active",
+      "expected_behavior": "Target A restored without impacting Target B active enforcement",
+      "actual_behavior": "A_rollback=True, B_maintained=True",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-P3J-006",
+      "name": "watchdog_expiry_during_concurrent_transaction",
+      "injected_condition": "Watchdog TTL expires on Target 1 while Target 2 is still valid",
+      "expected_behavior": "Expired transaction automatically rolled back; active transaction preserved",
+      "actual_behavior": "Expired=['TX-0186'], T2_intact=True",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-P3J-007",
+      "name": "victim_namespace_disappearance",
+      "injected_condition": "Target namespace validation failure (simulated netns deletion)",
+      "expected_behavior": "Fails closed, aborting transaction before any command execution",
+      "actual_behavior": "State=ABORTED, Msg=Snapshot creation failed: Target validation failed: Fault injection: target validation forced failure",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-P3J-008",
+      "name": "actuator_backend_failure",
+      "injected_condition": "Actuator apply_mutation raises unhandled RuntimeError",
+      "expected_behavior": "Automatic compensation rollback triggered; clean baseline verified",
+      "actual_behavior": "State=ROLLED_BACK, RollbackSuccess=True",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-P3J-009",
+      "name": "post_verification_mismatch",
+      "injected_condition": "verify_mutation returns False after actuator returns success",
+      "expected_behavior": "Automatic rollback engages immediately; transaction marked ROLLED_BACK",
+      "actual_behavior": "State=ROLLED_BACK, RollbackSuccess=True",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-P3J-010",
+      "name": "audit_persistence_failure",
+      "injected_condition": "Audit record write failure occurs prior to final transaction commit",
+      "expected_behavior": "Fails closed with automatic rollback; mutation not left unmonitored",
+      "actual_behavior": "State=ROLLED_BACK, RollbackSuccess=True",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-P3J-011",
+      "name": "authorization_expiry",
+      "injected_condition": "LabActivationAuthorization timestamp has expired",
+      "expected_behavior": "Transaction rejected with SAFETY_LOCKED state; zero mutation executed",
+      "actual_behavior": "State=SAFETY_LOCKED, Msg=Enforcement rejected: PreconditionGate is not in READY state (enforcement strictly locked)",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-P3J-012",
+      "name": "safety_gate_failure",
+      "injected_condition": "DeterministicSafetyGate raises exception during prepare stage",
+      "expected_behavior": "Transaction aborted safely; no mutation attempted",
+      "actual_behavior": "State=ABORTED, Msg=Safety gate evaluation failure (injected fault)",
+      "passed": true
+    }
+  ]
+}

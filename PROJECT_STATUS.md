@@ -68,6 +68,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Controlled 1000-Packet Burst Experiment (Phase 3E) | ✅ | `src/xrlids/live/burst.py`, `scripts/phase3/run_burst_experiment.py`, `results/phase3/EXP-P3-BURST-1000-001/` |
 | Enforcement Readiness & Activation Gate (Phase 3H) | ✅ | `src/xrlids/enforcement/gate.py` (PreconditionGate, LabActivationAuthorization, EnforcementEligibility) + tests |
 | Isolated Lab Network Namespace Topology & Response Loop (Phase 3I) | ✅ | `src/xrlids/enforcement/lab.py` (HostNetworkBaseline, IsolatedLabEnvironment, NetnsActuatorBackend) + tests |
+| Multi-Flow Soak & Shared-State Concurrency (Phase 3J) | ✅ | `src/xrlids/enforcement/concurrency.py`, `src/xrlids/response/transaction.py` (TargetLockManager, ConcurrencyHarness, MultiFlowTrafficGenerator) + tests |
 
 ## Empirical status
 
@@ -93,6 +94,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Atomic Rollback & Response Transaction Harness (Phase 3G) | ✅ EMPIRICALLY OBSERVED & AUDITED | Evaluated across 12 deterministic scenarios (`EXP-P3G-ROLLBACK-001`, `REPORT-P3G-ROLLBACK-001`); atomic lifecycle, SHA-256 snapshots, auto-compensation rollback, watchdog TTL monitoring, idempotency, and permanent `SAFETY_LOCKED` latch verified under zero network mutation |
 | Enforcement Readiness & Activation Gating (Phase 3H) | ✅ EMPIRICALLY OBSERVED & AUDITED | Evaluated across 18 deterministic scenarios (`EXP-P3H-ENFORCEMENT-GATE-001`, `REPORT-P3H-ENFORCEMENT-GATE-001`); fail-closed PreconditionGate, SHA-256 evidence validation, exact commit binding, signed LabActivationAuthorization, and non-bypassability verified; READY != ENFORCEMENT enforced with 0 host network mutations |
 | Isolated Lab Namespace & Response Loop (Phase 3I) | ✅ EMPIRICALLY OBSERVED & AUDITED | Evaluated across 16 sequential stages and 16 failure injection scenarios (`EXP-P3I-ISOLATED-LAB-001`, `REPORT-P3I-ISOLATED-LAB-001`); dual-mode topology, host cryptographic baseline comparison (0 host mutations guaranteed), verified rollback, and deterministic cleanup verified |
+| Multi-Flow Soak & Concurrency Stress (Phase 3J) | ✅ EMPIRICALLY OBSERVED & AUDITED | Evaluated across 192 total transactions (138 committed, 47 rolled back, 5 aborted, 2 safety locked), 120 flows, 2,863 packets, 12 concurrent failure injection scenarios (`EXP-P3J-CONCURRENCY-001`, `REPORT-P3J-CONCURRENCY-001`); striped per-target locking, target-scoped state rollback, and zero host network mutations verified |
 
 
 

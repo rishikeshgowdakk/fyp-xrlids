@@ -18,6 +18,7 @@ import json
 import logging
 import os
 import subprocess
+import threading
 import time
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -428,6 +429,7 @@ class NetnsActuatorBackend:
         # Snapshot counter and rollback tracking
         self._snapshot_counter: int = 0
         self._rollback_counts: dict[str, int] = {}
+        self._lock: threading.RLock = threading.RLock()
 
         # Granular fault injection flags
         self.fail_target_validation: bool = False
@@ -440,6 +442,7 @@ class NetnsActuatorBackend:
         self.fail_verification: bool = False
         self.fail_verify: bool = False
         self.fail_rollback: bool = False
+        self.inject_stale_snapshot: bool = False
 
     def validate_target(
         self,
@@ -628,49 +631,95 @@ class NetnsActuatorBackend:
     def rollback(self, snapshot: StateSnapshot, transaction_id: str = "") -> RollbackResult:
         """Atomically restore lab namespace state to snapshot baseline."""
         tx_key = transaction_id or snapshot.snapshot_id
-        self._rollback_counts[tx_key] = self._rollback_counts.get(tx_key, 0) + 1
-        attempts = self._rollback_counts[tx_key]
+        with self._lock:
+            self._rollback_counts[tx_key] = self._rollback_counts.get(tx_key, 0) + 1
+            attempts = self._rollback_counts[tx_key]
 
-        if self.fail_rollback:
+            if self.fail_rollback:
+                return RollbackResult(
+                    success=False,
+                    transaction_id=tx_key,
+                    snapshot_id=snapshot.snapshot_id,
+                    rollback_attempts=attempts,
+                    restoration_verified=False,
+                    failure_reason="NetnsActuator: rollback failed during lab restoration",
+                    final_safety_state="SAFETY_LOCKED",
+                )
+
+            target_namespace = snapshot.baseline_state.get("target_namespace", VICTIM_NS)
+            ns_state = self.lab_env._lab_netns_state.get(target_namespace, {})
+
+            base = snapshot.baseline_state
+            base_rules = base.get("rules", {})
+            base_limits = base.get("rate_limits", {})
+            target_host = snapshot.target_host
+
+            # Check idempotency first if attempts > 1
+            current_check = {
+                "target_namespace": target_namespace,
+                "target_host": base.get("target_host", snapshot.target_host),
+                "rules": dict(ns_state.get("rules", {})),
+                "rate_limits": dict(ns_state.get("rate_limits", {})),
+                "isolated": bool(ns_state.get("isolated", False)),
+            }
+            if attempts > 1 and dict_hash(current_check) == snapshot.state_digest:
+                return RollbackResult(
+                    success=True,
+                    transaction_id=tx_key,
+                    snapshot_id=snapshot.snapshot_id,
+                    rollback_attempts=attempts,
+                    restoration_verified=True,
+                    failure_reason=None,
+                    final_safety_state="IDEMPOTENT_NOOP",
+                )
+
+            # Target-scoped restoration:
+            if target_host in base_rules:
+                ns_state["rules"][target_host] = base_rules[target_host]
+            else:
+                ns_state.get("rules", {}).pop(target_host, None)
+
+            if target_host in base_limits:
+                ns_state["rate_limits"][target_host] = base_limits[target_host]
+            else:
+                ns_state.get("rate_limits", {}).pop(target_host, None)
+
+            # Update namespace isolated flag
+            if any(r == "DROP_ALL_TRAFFIC" for r in ns_state.get("rules", {}).values()):
+                ns_state["isolated"] = True
+            else:
+                ns_state["isolated"] = False
+
+            # Verify restoration
+            restored = {
+                "target_namespace": target_namespace,
+                "target_host": base.get("target_host", snapshot.target_host),
+                "rules": dict(ns_state.get("rules", {})),
+                "rate_limits": dict(ns_state.get("rate_limits", {})),
+                "isolated": bool(ns_state.get("isolated", False)),
+            }
+            restored_digest = dict_hash(restored)
+            full_match = (restored_digest == snapshot.state_digest)
+
+            target_match = (
+                ns_state.get("rules", {}).get(target_host) == base_rules.get(target_host)
+                and ns_state.get("rate_limits", {}).get(target_host) == base_limits.get(target_host)
+            )
+            verified = full_match or target_match
+
+            final_state = "RESTORED" if verified else "SAFETY_LOCKED"
+            if attempts > 1 and verified:
+                final_state = "IDEMPOTENT_NOOP"
+
             return RollbackResult(
-                success=False,
+                success=verified,
                 transaction_id=tx_key,
                 snapshot_id=snapshot.snapshot_id,
                 rollback_attempts=attempts,
-                restoration_verified=False,
-                failure_reason="NetnsActuator: rollback failed during lab restoration",
-                final_safety_state="SAFETY_LOCKED",
+                restoration_verified=verified,
+                failure_reason=None if verified else "Restoration digest mismatch in lab namespace",
+                final_safety_state=final_state,
             )
-
-        target_namespace = snapshot.baseline_state.get("target_namespace", VICTIM_NS)
-        ns_state = self.lab_env._lab_netns_state.get(target_namespace, {})
-
-        # Restore rules and limits from baseline
-        base = snapshot.baseline_state
-        ns_state["rules"] = dict(base.get("rules", {}))
-        ns_state["rate_limits"] = dict(base.get("rate_limits", {}))
-        ns_state["isolated"] = bool(base.get("isolated", False))
-
-        # Re-inspect and verify restored digest matches snapshot
-        restored = {
-            "target_namespace": target_namespace,
-            "target_host": base.get("target_host", snapshot.target_host),
-            "rules": dict(ns_state.get("rules", {})),
-            "rate_limits": dict(ns_state.get("rate_limits", {})),
-            "isolated": bool(ns_state.get("isolated", False)),
-        }
-        restored_digest = dict_hash(restored)
-        verified = (restored_digest == snapshot.state_digest)
-
-        return RollbackResult(
-            success=verified,
-            transaction_id=tx_key,
-            snapshot_id=snapshot.snapshot_id,
-            rollback_attempts=attempts,
-            restoration_verified=verified,
-            failure_reason=None if verified else "Restoration digest mismatch in lab namespace",
-            final_safety_state="RESTORED" if verified else "SAFETY_LOCKED",
-        )
 
     def verify_clean_state(self, target_namespace: str = VICTIM_NS) -> bool:
         """Verify whether the lab namespace is free of transient response rules."""

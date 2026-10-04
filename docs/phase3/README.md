@@ -24,6 +24,7 @@ The most operationally important phase. Everything here is gated on earlier evid
 | Atomic rollback harness | Formal transaction lifecycle, SHA-256 snapshots, auto-compensation | Phase 3G | ✅ VERIFIED & AUDITED (12/12 Scenarios Pass) |
 | Enforcement readiness gate | PreconditionGate, cryptographic provenance, fail-closed authorization | Phase 3H | ✅ VERIFIED & AUDITED (18/18 Scenarios Pass) |
 | Isolated lab namespace loop | Topology creation, isolation verification, 16-stage execution, zero host mutation | Phase 3I | ✅ VERIFIED & AUDITED (`EXP-P3I-ISOLATED-LAB-001`, 16/16 Stages, 16/16 Scenarios) |
+| Multi-flow soak & concurrency | Multi-flow traffic model, striped per-target locks, Scenarios A–D, 12 failure injections | Phase 3J | ✅ VERIFIED & AUDITED (`EXP-P3J-CONCURRENCY-001`, 192 tx, 12/12 Scenarios) |
 | Final operational report | Evidence-driven summary | Final Closure | ⬜ Planned |
 
 ## Flow Completion Policy (Decision D-006)
@@ -80,6 +81,8 @@ Live Network / Controlled PCAP
   - Non-bypassable fail-closed `PreconditionGate`, SHA-256 evidence validation, exact commit binding, signed time-bounded `LabActivationAuthorization`, and `READY != ENFORCEMENT` invariant documented in [`PHASE3H_ENFORCEMENT_GATE_REPORT.md`](PHASE3H_ENFORCEMENT_GATE_REPORT.md).
 - **Phase 3I — Isolated Lab Network Namespace & Controlled Response Loop**:
   - Dual-mode isolated lab network namespace topology (`xrlids_att_01`, `xrlids_vic_01`, `veth_xrl_*`), host cryptographic baseline comparison (0 host mutations guaranteed), 16-stage end-to-end execution, and 16-scenario failure injection matrix documented in [`PHASE3I_ISOLATED_LAB_REPORT.md`](PHASE3I_ISOLATED_LAB_REPORT.md).
+- **Phase 3J — Multi-Flow Soak + Concurrency + Shared-State Transaction Stress**:
+  - Multi-flow synthetic workload generation (120 flows, 2,863 packets across 6 victim endpoints in `10.200.1.0/24`), fine-grained striped per-target locks (`TargetLockManager`), Scenarios A–D, sustained soak workload, 12 concurrent failure injection scenarios, and 0 host mutations documented in [`PHASE3J_CONCURRENCY_REPORT.md`](PHASE3J_CONCURRENCY_REPORT.md).
 
 
 
