@@ -14,6 +14,7 @@ Provides:
 from __future__ import annotations
 
 import copy
+import ipaddress
 import json
 import logging
 import os
@@ -466,11 +467,30 @@ class NetnsActuatorBackend:
         ):
             return False, f"SECURITY VIOLATION: Forbidden host target attempted ({target_host}, {target_namespace}, {target_interface})"
 
-        # 2. IP Subnet Guard: Must be in 10.200.1.0/24
-        if not target_host.startswith("10.200.1."):
+        # 2. IP Address Validation & Subnet Guard
+        try:
+            ip_obj = ipaddress.IPv4Address(target_host)
+        except (ipaddress.AddressValueError, ValueError) as err:
+            return False, f"SECURITY VIOLATION: Malformed target IP '{target_host}': {err}"
+
+        lab_net = ipaddress.IPv4Network(LAB_SUBNET)
+        if ip_obj not in lab_net:
             return False, f"Target host '{target_host}' is outside isolated lab subnet {self.allowed_subnet}"
 
-        # 3. Namespace & Interface Allowlists
+        if ip_obj == lab_net.network_address:
+            return False, f"SECURITY VIOLATION: Network address '{target_host}' cannot be a target"
+        if ip_obj == lab_net.broadcast_address:
+            return False, f"SECURITY VIOLATION: Broadcast address '{target_host}' cannot be a target"
+        if target_host in ("10.200.1.1", "127.0.0.1"):
+            return False, f"SECURITY VIOLATION: Host/gateway IP '{target_host}' is a forbidden target"
+        if ip_obj.is_multicast or ip_obj.is_reserved or ip_obj.is_loopback:
+            return False, f"SECURITY VIOLATION: Special-use IP '{target_host}' is forbidden"
+
+        # 3. Namespace & Interface Allowlists & Prefix Enforcement
+        if not target_namespace.startswith(LAB_NAMESPACE_PREFIX):
+            return False, f"SECURITY VIOLATION: Unauthorized namespace '{target_namespace}' outside prefix '{LAB_NAMESPACE_PREFIX}'"
+        if not target_interface.startswith(LAB_INTERFACE_PREFIX):
+            return False, f"SECURITY VIOLATION: Unauthorized interface '{target_interface}' outside prefix '{LAB_INTERFACE_PREFIX}'"
         if target_namespace not in self.allowed_namespaces:
             return False, f"Unauthorized namespace '{target_namespace}'. Allowed: {sorted(list(self.allowed_namespaces))}"
         if target_interface not in self.allowed_interfaces:

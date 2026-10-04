@@ -57,6 +57,16 @@ from xrlids.enforcement.concurrency import (
     SoakWorkloadConfig,
     compute_percentiles,
 )
+from xrlids.enforcement.stress import (
+    ProvenanceAuditor,
+    ResourceMonitor,
+    RollbackStressHarness,
+    SecurityAttackSurfaceAuditor,
+    SecurityStressHarness,
+    SocketStressTester,
+    SoakFailureInjector,
+    StressWorkloadConfig,
+)
 
 __all__ = [
     "PreconditionType",
@@ -107,4 +117,12 @@ __all__ = [
     "MultiFlowTrafficGenerator",
     "ConcurrencyHarness",
     "compute_percentiles",
+    "StressWorkloadConfig",
+    "ResourceMonitor",
+    "SocketStressTester",
+    "SecurityAttackSurfaceAuditor",
+    "ProvenanceAuditor",
+    "RollbackStressHarness",
+    "SoakFailureInjector",
+    "SecurityStressHarness",
 ]

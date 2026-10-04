@@ -69,6 +69,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Enforcement Readiness & Activation Gate (Phase 3H) | ✅ | `src/xrlids/enforcement/gate.py` (PreconditionGate, LabActivationAuthorization, EnforcementEligibility) + tests |
 | Isolated Lab Network Namespace Topology & Response Loop (Phase 3I) | ✅ | `src/xrlids/enforcement/lab.py` (HostNetworkBaseline, IsolatedLabEnvironment, NetnsActuatorBackend) + tests |
 | Multi-Flow Soak & Shared-State Concurrency (Phase 3J) | ✅ | `src/xrlids/enforcement/concurrency.py`, `src/xrlids/response/transaction.py` (TargetLockManager, ConcurrencyHarness, MultiFlowTrafficGenerator) + tests |
+| Pre-Production Security & Stress Audit (Phase 3K) | ✅ | `src/xrlids/enforcement/stress.py`, `scripts/phase3/run_security_stress_experiment.py`, `results/phase3/EXP-P3K-STRESS-SECURITY-001/` (10k flows, 29 attacks, 8 tamper, 12 failure injections, 100 rollbacks) + tests |
 
 ## Empirical status
 
@@ -95,6 +96,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Enforcement Readiness & Activation Gating (Phase 3H) | ✅ EMPIRICALLY OBSERVED & AUDITED | Evaluated across 18 deterministic scenarios (`EXP-P3H-ENFORCEMENT-GATE-001`, `REPORT-P3H-ENFORCEMENT-GATE-001`); fail-closed PreconditionGate, SHA-256 evidence validation, exact commit binding, signed LabActivationAuthorization, and non-bypassability verified; READY != ENFORCEMENT enforced with 0 host network mutations |
 | Isolated Lab Namespace & Response Loop (Phase 3I) | ✅ EMPIRICALLY OBSERVED & AUDITED | Evaluated across 16 sequential stages and 16 failure injection scenarios (`EXP-P3I-ISOLATED-LAB-001`, `REPORT-P3I-ISOLATED-LAB-001`); dual-mode topology, host cryptographic baseline comparison (0 host mutations guaranteed), verified rollback, and deterministic cleanup verified |
 | Multi-Flow Soak & Concurrency Stress (Phase 3J) | ✅ EMPIRICALLY OBSERVED & AUDITED | Evaluated across 192 total transactions (185 committed, 3 rolled back, 4 aborted, 0 safety locked), 120 flows, 2,863 packets, 12 concurrent failure injection scenarios (`EXP-P3J-CONCURRENCY-001`, `REPORT-P3J-CONCURRENCY-001`); striped per-target locking, target-scoped state rollback, and zero host network mutations verified |
+| Pre-Production Security & Stress Audit (Phase 3K) | ✅ EMPIRICALLY OBSERVED & AUDITED | Evaluated across 10,000 flows (222,838 packets), 4 socket stress tiers, 29 adversarial attack surface vectors (29/29 pass), 8 cryptographic provenance tamper tests (8/8 pass), 100 mixed rollback stress transactions (100% success), 12 active soak failure scenarios (12/12 pass), zero host mutations verified (`EXP-P3K-STRESS-SECURITY-001`, `PHASE3K_SECURITY_STRESS_REPORT.md`) |
 
 
 

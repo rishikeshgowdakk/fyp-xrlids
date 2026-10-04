@@ -1,0 +1,134 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P3K-STRESS-SECURITY-001",
+    "git_commit": "4e06e71b8ec244211ea389fdff137d0e67c70847",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": null,
+    "created_at": "2026-10-04T16:12:54.832045+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "f3cecb68cf7dce34f768afb5e8cb1c902229e415",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "experiment_id": "EXP-P3K-STRESS-SECURITY-001",
+  "total_failure_scenarios": 12,
+  "passed_scenarios": 12,
+  "failed_scenarios": 0,
+  "all_passed": true,
+  "scenarios": [
+    {
+      "scenario_id": "FAIL-SOAK-001",
+      "name": "detector_inference_exception",
+      "injected_condition": "Detector model raises unhandled RuntimeError during scoring",
+      "expected_behavior": "Fails safe to default ALLOW score (0.0)",
+      "actual_behavior": "Default ALLOW score assigned; zero network mutation",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-SOAK-002",
+      "name": "dqn_policy_exception",
+      "injected_condition": "DQN Q-network evaluation raises tensor dimension mismatch",
+      "expected_behavior": "Fails safe to default non-disruptive ALLOW",
+      "actual_behavior": "Action clamped to ALLOW; zero disruption",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-SOAK-003",
+      "name": "capture_service_stream_exception",
+      "injected_condition": "Packet parser encounters truncated Ethernet frame",
+      "expected_behavior": "Frame skipped without crash; error counter incremented",
+      "actual_behavior": "Skipped cleanly; process continues uninterrupted",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-SOAK-004",
+      "name": "transaction_queue_saturation",
+      "injected_condition": "Ingestion rate exceeds worker processing capacity",
+      "expected_behavior": "Controlled backpressure engaged without memory leak",
+      "actual_behavior": "Backpressure verified; queue bounded",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-SOAK-005",
+      "name": "actuator_mutation_exception",
+      "injected_condition": "Actuator backend raises exception during iptables apply",
+      "expected_behavior": "Automatic compensation rollback triggered",
+      "actual_behavior": "State=ROLLED_BACK, RollbackSuccess=True",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-SOAK-006",
+      "name": "authorization_token_expiry",
+      "injected_condition": "Active authorization token reaches expiration timestamp",
+      "expected_behavior": "New transactions locked; enforcement denied",
+      "actual_behavior": "State=SAFETY_LOCKED",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-SOAK-007",
+      "name": "stale_pre_state_snapshot",
+      "injected_condition": "Target state altered between snapshot and mutation",
+      "expected_behavior": "Stale snapshot detected; transaction aborted",
+      "actual_behavior": "State=ABORTED",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-SOAK-008",
+      "name": "post_mutation_verification_mismatch",
+      "injected_condition": "verify_mutation returns False after actuator claims success",
+      "expected_behavior": "Automatic rollback engages immediately",
+      "actual_behavior": "State=ROLLED_BACK",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-SOAK-009",
+      "name": "audit_record_persistence_failure",
+      "injected_condition": "Audit logger fails to persist decision record before commit",
+      "expected_behavior": "Fails closed with rollback; unmonitored rule avoided",
+      "actual_behavior": "State=ROLLED_BACK",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-SOAK-010",
+      "name": "watchdog_ttl_timeout",
+      "injected_condition": "Transaction lifetime exceeds TTL threshold",
+      "expected_behavior": "Background watchdog rolls back stale transaction",
+      "actual_behavior": "Expired=['TX-0080']",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-SOAK-011",
+      "name": "unrecoverable_rollback_failure",
+      "injected_condition": "Actuator fails to restore baseline during rollback",
+      "expected_behavior": "Engages permanent SAFETY_LOCKED latch",
+      "actual_behavior": "Success=False, SafetyLocked=True",
+      "passed": true
+    },
+    {
+      "scenario_id": "FAIL-SOAK-012",
+      "name": "concurrent_target_lock_collision",
+      "injected_condition": "Concurrent transactions compete for same victim target lock",
+      "expected_behavior": "Clean serialization or safe duplicate rejection",
+      "actual_behavior": "State=ABORTED",
+      "passed": true
+    }
+  ]
+}

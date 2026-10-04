@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P3K-STRESS-SECURITY-001",
+    "git_commit": "4e06e71b8ec244211ea389fdff137d0e67c70847",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": null,
+    "created_at": "2026-10-04T16:12:54.832045+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "f3cecb68cf7dce34f768afb5e8cb1c902229e415",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "total_flows": 10000,
+  "batch_size": 1000,
+  "concurrency_level": 8,
+  "victim_pool": [
+    "10.200.1.3",
+    "10.200.1.4",
+    "10.200.1.5",
+    "10.200.1.6",
+    "10.200.1.7",
+    "10.200.1.8",
+    "10.200.1.9",
+    "10.200.1.10"
+  ],
+  "attack_ratio": 0.35,
+  "attack_families": [
+    "PortScan",
+    "DDoS",
+    "Infiltration",
+    "WebAttack"
+  ],
+  "random_seed": 42,
+  "target_transaction_rate_tps": 500.0,
+  "experiment_id": "EXP-P3K-STRESS-SECURITY-001"
+}

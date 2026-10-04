@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P3K-STRESS-SECURITY-001",
+    "git_commit": "4e06e71b8ec244211ea389fdff137d0e67c70847",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": null,
+    "created_at": "2026-10-04T16:12:54.832045+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "f3cecb68cf7dce34f768afb5e8cb1c902229e415",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "experiment_id": "EXP-P3K-STRESS-SECURITY-001",
+  "timestamp": "2026-10-04T16:12:54.831826+00:00",
+  "git_commit": "4e06e71b8ec244211ea389fdff137d0e67c70847",
+  "elapsed_seconds": 0.76,
+  "status": "PASS",
+  "zero_host_mutation": true,
+  "total_flows_processed": 10000,
+  "total_packets_processed": 222838,
+  "socket_stress_tiers_passed": 4,
+  "attack_scenarios_passed": 29,
+  "attack_scenarios_total": 29,
+  "provenance_tests_passed": 8,
+  "provenance_tests_total": 8,
+  "soak_failure_injections_passed": 12,
+  "soak_failure_injections_total": 12,
+  "rollback_stress_transactions": 100,
+  "rollback_success_rate": 1.0,
+  "peak_rss_mib": 1049.449,
+  "rss_growth_mib": 12.051,
+  "clean_cleanup_verified": true
+}

@@ -1,0 +1,122 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P3K-STRESS-SECURITY-001",
+    "git_commit": "4e06e71b8ec244211ea389fdff137d0e67c70847",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": null,
+    "created_at": "2026-10-04T16:12:54.832045+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "f3cecb68cf7dce34f768afb5e8cb1c902229e415",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "experiment_id": "EXP-P3K-STRESS-SECURITY-001",
+  "socket_stress_tiers": {
+    "LOW": {
+      "tier": "LOW",
+      "target_pps": 500.0,
+      "packets_submitted": 250,
+      "packets_received": 250,
+      "capture_path_drops": 0,
+      "malformed_packets": 0,
+      "synthetic_generator_loss": 0,
+      "socket_kernel_interface_loss": 0,
+      "application_backpressure_drops": 0,
+      "backlog_depth": 150,
+      "queue_overflow": false,
+      "effective_pps": 231017.95,
+      "processing_delay_ms": 0.0043,
+      "fail_safe_engaged": false
+    },
+    "NOMINAL": {
+      "tier": "NOMINAL",
+      "target_pps": 2000.0,
+      "packets_submitted": 1000,
+      "packets_received": 1000,
+      "capture_path_drops": 0,
+      "malformed_packets": 0,
+      "synthetic_generator_loss": 0,
+      "socket_kernel_interface_loss": 0,
+      "application_backpressure_drops": 0,
+      "backlog_depth": 900,
+      "queue_overflow": false,
+      "effective_pps": 261666.87,
+      "processing_delay_ms": 0.0038,
+      "fail_safe_engaged": false
+    },
+    "HIGH": {
+      "tier": "HIGH",
+      "target_pps": 10000.0,
+      "packets_submitted": 5000,
+      "packets_received": 5000,
+      "capture_path_drops": 0,
+      "malformed_packets": 0,
+      "synthetic_generator_loss": 0,
+      "socket_kernel_interface_loss": 0,
+      "application_backpressure_drops": 0,
+      "backlog_depth": 4900,
+      "queue_overflow": false,
+      "effective_pps": 284019.84,
+      "processing_delay_ms": 0.0035,
+      "fail_safe_engaged": false
+    },
+    "OVERLOAD": {
+      "tier": "OVERLOAD",
+      "target_pps": 50000.0,
+      "packets_submitted": 10000,
+      "packets_received": 8192,
+      "capture_path_drops": 0,
+      "malformed_packets": 0,
+      "synthetic_generator_loss": 0,
+      "socket_kernel_interface_loss": 0,
+      "application_backpressure_drops": 1808,
+      "backlog_depth": 8092,
+      "queue_overflow": true,
+      "effective_pps": 328013.87,
+      "processing_delay_ms": 0.003,
+      "fail_safe_engaged": true
+    }
+  },
+  "soak_workload": {
+    "total_flows": 10000,
+    "total_packets": 222838,
+    "benign_flows": 6533,
+    "attack_flows": 3467,
+    "attack_family_distribution": {
+      "PortScan": 871,
+      "DDoS": 881,
+      "Infiltration": 886,
+      "WebAttack": 829
+    },
+    "batches_executed": 10,
+    "elapsed_seconds": 0.638,
+    "flow_throughput_fps": 15665.92,
+    "packet_throughput_pps": 349096.19,
+    "transaction_latency_ms": {
+      "p50": 0.101,
+      "p95": 0.394,
+      "p99": 0.431,
+      "mean": 0.139,
+      "min": 0.084,
+      "max": 0.464
+    }
+  }
+}

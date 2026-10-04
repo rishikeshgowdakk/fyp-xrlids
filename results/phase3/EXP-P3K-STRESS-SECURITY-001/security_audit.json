@@ -1,0 +1,328 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P3K-STRESS-SECURITY-001",
+    "git_commit": "4e06e71b8ec244211ea389fdff137d0e67c70847",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": null,
+    "created_at": "2026-10-04T16:12:54.832045+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "f3cecb68cf7dce34f768afb5e8cb1c902229e415",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "experiment_id": "EXP-P3K-STRESS-SECURITY-001",
+  "total_attack_scenarios": 29,
+  "passed_scenarios": 29,
+  "failed_scenarios": 0,
+  "all_passed": true,
+  "scenarios": [
+    {
+      "scenario_id": "SEC-NS-001",
+      "category": "NAMESPACE",
+      "name": "Unauthorized namespace name",
+      "injected_payload": "prod_netns",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "SECURITY VIOLATION: Unauthorized namespace 'prod_netns' outside prefix 'xrlids_'",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-NS-002",
+      "category": "NAMESPACE",
+      "name": "Path traversal namespace",
+      "injected_payload": "../../../etc/netns",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "SECURITY VIOLATION: Unauthorized namespace '../../../etc/netns' outside prefix 'xrlids_'",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-NS-003",
+      "category": "NAMESPACE",
+      "name": "Namespace without xrlids_ prefix",
+      "injected_payload": "attacker_ns",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "SECURITY VIOLATION: Unauthorized namespace 'attacker_ns' outside prefix 'xrlids_'",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-IF-001",
+      "category": "INTERFACE",
+      "name": "Unauthorized interface",
+      "injected_payload": "docker0",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "SECURITY VIOLATION: Forbidden host target attempted (10.200.1.3, xrlids_vic_01, docker0)",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-IF-002",
+      "category": "INTERFACE",
+      "name": "Host physical interface",
+      "injected_payload": "eth0",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "SECURITY VIOLATION: Forbidden host target attempted (10.200.1.3, xrlids_vic_01, eth0)",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-IF-003",
+      "category": "INTERFACE",
+      "name": "Interface without veth_xrl_ prefix",
+      "injected_payload": "veth_prod_01",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "SECURITY VIOLATION: Unauthorized interface 'veth_prod_01' outside prefix 'veth_xrl_'",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-IP-001",
+      "category": "IP_TARGET",
+      "name": "Host loopback IP",
+      "injected_payload": "127.0.0.1",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "Target host '127.0.0.1' is outside isolated lab subnet 10.200.1.0/24",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-IP-002",
+      "category": "IP_TARGET",
+      "name": "Subnet gateway IP",
+      "injected_payload": "10.200.1.1",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "SECURITY VIOLATION: Host/gateway IP '10.200.1.1' is a forbidden target",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-IP-003",
+      "category": "IP_TARGET",
+      "name": "Outside lab subnet IP",
+      "injected_payload": "192.168.1.1",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "Target host '192.168.1.1' is outside isolated lab subnet 10.200.1.0/24",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-IP-004",
+      "category": "IP_TARGET",
+      "name": "Out of range IPv4 octet",
+      "injected_payload": "10.200.1.256",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "SECURITY VIOLATION: Malformed target IP '10.200.1.256': Octet 256 (> 255) not permitted in '10.200.1.256'",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-IP-005",
+      "category": "IP_TARGET",
+      "name": "Subnet network/broadcast address",
+      "injected_payload": "10.200.1.0 & 255",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "SECURITY VIOLATION: Network address '10.200.1.0' cannot be a target; SECURITY VIOLATION: Broadcast address '10.200.1.255' cannot be a target",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-IP-006",
+      "category": "IP_TARGET",
+      "name": "Multicast IP address",
+      "injected_payload": "224.0.0.1",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "Target host '224.0.0.1' is outside isolated lab subnet 10.200.1.0/24",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-AUTH-001",
+      "category": "AUTHORIZATION",
+      "name": "Missing authorization token",
+      "injected_payload": "None",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "Missing LabActivationAuthorization: authorization is missing",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-AUTH-002",
+      "category": "AUTHORIZATION",
+      "name": "Expired authorization timestamp",
+      "injected_payload": "expired_at < now",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "authorization has expired",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-AUTH-003",
+      "category": "AUTHORIZATION",
+      "name": "Mismatched lab environment ID",
+      "injected_payload": "LAB-PROD-01",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "authorized lab mismatch: 'LAB-PROD-01' != 'LAB-ISOLATED-NETNS-01'",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-AUTH-004",
+      "category": "AUTHORIZATION",
+      "name": "Mismatched backend actuator ID",
+      "injected_payload": "PROD_IPTABLES_ACTUATOR",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "Authorization backend mismatch: 'PROD_IPTABLES_ACTUATOR' != 'LAB_NETNS_ACTUATOR_V1'",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-AUTH-005",
+      "category": "AUTHORIZATION",
+      "name": "Forged commit SHA binding",
+      "injected_payload": "0000000000",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "Authorization scope 'ISOLATED_LAB_CONTROLLED_RESPONSE' is invalid or unauthorized. Permitted scopes: ['ISOLATED_LAB_CONTROLLED_RESPONSE_ONLY']",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-AUTH-006",
+      "category": "AUTHORIZATION",
+      "name": "Altered authorization payload",
+      "injected_payload": "scope modified post-signing",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "Signature verification failed",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-TX-001",
+      "category": "TRANSACTION",
+      "name": "Duplicate active transaction",
+      "injected_payload": "Parallel TX on 10.200.1.5",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "Duplicate transaction rejected: active transaction TX-ACTIVE-901 in progress for 10.200.1.5",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-TX-002",
+      "category": "TRANSACTION",
+      "name": "Stale pre-state snapshot",
+      "injected_payload": "Target state altered pre-apply",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "Stale snapshot detected: target state was modified before mutation",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-TX-003",
+      "category": "TRANSACTION",
+      "name": "Watchdog TTL expiration",
+      "injected_payload": "TTL=0.001s exceeded",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "Expired: ['TX-0003']",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-TX-004",
+      "category": "TRANSACTION",
+      "name": "Rollback committed transaction",
+      "injected_payload": "Clean compensation rollback",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "Restored: True",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-TX-005",
+      "category": "TRANSACTION",
+      "name": "Rollback twice (idempotency)",
+      "injected_payload": "Second rollback invocation",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "IDEMPOTENT_NOOP",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-TX-006",
+      "category": "TRANSACTION",
+      "name": "Rollback non-existent transaction",
+      "injected_payload": "Invalid TX ID",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "No snapshot found for transaction TX-NON-EXISTENT-999",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-GATE-001",
+      "category": "SAFETY_GATE",
+      "name": "Critical host isolation exemption (10.200.1.1)",
+      "injected_payload": "host=10.200.1.1, action=ISOLATE",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "Overridden to ALERT: CRITICAL_INFRASTRUCTURE_EXEMPTION",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-GATE-002",
+      "category": "SAFETY_GATE",
+      "name": "Secondary critical host exemption (10.200.1.254)",
+      "injected_payload": "host=10.200.1.254, action=ISOLATE",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "Overridden to ALERT: CRITICAL_INFRASTRUCTURE_EXEMPTION",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-GATE-003",
+      "category": "SAFETY_GATE",
+      "name": "Cooldown violation rejection",
+      "injected_payload": "step=3 within cooldown window",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "Action held at RATE_LIMIT: MANDATORY_ACTION_COOLDOWN",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-GATE-004",
+      "category": "SAFETY_GATE",
+      "name": "Blast radius circuit breaker",
+      "injected_payload": "Exceeded max isolation threshold (>5%)",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "Clamped to ALERT: BLAST_RADIUS_CIRCUIT_BREAKER",
+      "zero_host_mutation": true
+    },
+    {
+      "scenario_id": "SEC-GATE-005",
+      "category": "SAFETY_GATE",
+      "name": "3-Action mode forbidden ISOLATE clamp",
+      "injected_payload": "action_mode=THREE_ACTION, action=ISOLATE",
+      "expected_outcome": "FAIL_CLOSED_NO_HOST_MUTATION",
+      "passed": true,
+      "details": "Clamped to RATE_LIMIT: ACTION_MODE_3_ACTION_CLAMP",
+      "zero_host_mutation": true
+    }
+  ]
+}
