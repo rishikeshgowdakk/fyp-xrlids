@@ -378,25 +378,46 @@ Running the replay demonstration produces machine-readable and human-readable au
 - `results/demo/replay_summary.json`: Detailed execution metadata, flow counts, timing metrics, confusion matrices, and per-flow prediction logs.
 - `results/demo/demo_report.md`: Formatted Markdown summary showing per-flow classifications, research baseline ($\tau=0.50$) performance, and proposed operational candidate ($\tau=0.40$) metrics.
 
+### Web Demonstration Dashboard
+
+A lightweight, dark-themed React + Vite demonstration dashboard is provided in `services/frontend/` for interactive demonstration and viva defense:
+
+```bash
+cd services/frontend
+npm install
+npm run dev
+```
+
+The dashboard ingests `results/demo/replay_summary.json` (or a local static fallback) and visualizes:
+- **Pipeline Execution Trace**: Visual indicators for pipeline stages (evaluated PCAP demo vs offline lab harness)
+- **Top KPI Cards**: Ingested packets, detected flows, attacks, benign flows, average threat score, and benchmark test F1
+- **Interactive Flow Table**: Real-time multi-field search, protocol filtering (TCP/UDP), verdict filtering, and sorting
+- **Threat Score Distribution Chart**: Custom SVG chart plotting flow scores against the $\tau=0.50$ (research baseline) and $\tau=0.40$ (operational candidate) decision boundaries
+- **Network Summary**: Unique source/destination IP counters and protocol breakdown
+- **Flow Inspection Drawer**: Detailed panel displaying all 10 canonical R10 features, threshold comparison, autonomous response status, and explainability notes
+
+See [`services/frontend/README.md`](services/frontend/README.md) for full frontend documentation and execution options.
+
 ---
 
 ## 13. Repository Structure
 
 ```text
 fyp-xrlids/
-├── configs/          # Experiment, label, and feature configuration YAMLs
-├── data/             # Raw dataset CSVs, manifests, and sample PCAP traces
-├── docs/             # Technical architecture, decision log, research reports, and viva guide
-├── models/           # Top-level model placeholders (binaries stored in results/)
-├── reports/          # Generated human-readable markdown summaries and figures
-├── results/          # Trained model binaries, evaluation metrics, and audit cards
-├── scripts/          # Runnable demonstration, baseline, and experiment scripts
-├── src/              # Python source code package (`xrlids`)
-├── tests/            # Unit, integration, and security verification test suite (386 tests)
-├── README.md         # Repository documentation and system overview
-├── REPRODUCIBILITY.md# Quick reproduction instructions
-├── pyproject.toml    # Python package configuration and build metadata
-└── requirements.txt  # Pinned dependency specification
+├── configs/           # Experiment, label, and feature configuration YAMLs
+├── data/              # Raw dataset CSVs, manifests, and sample PCAP traces
+├── docs/              # Technical architecture, decision log, research reports, and viva guide
+├── models/            # Top-level model placeholders (binaries stored in results/)
+├── reports/           # Generated human-readable markdown summaries and figures
+├── results/           # Trained model binaries, evaluation metrics, and audit cards
+├── scripts/           # Runnable demonstration, baseline, and experiment scripts
+├── services/frontend/ # Demonstration & viva web dashboard (React + Vite)
+├── src/               # Python source code package (`xrlids`)
+├── tests/             # Unit, integration, and security verification test suite (386 tests)
+├── README.md          # Repository documentation and system overview
+├── REPRODUCIBILITY.md # Quick reproduction instructions
+├── pyproject.toml     # Python package configuration and build metadata
+└── requirements.txt   # Pinned dependency specification
 ```
 
 - **`src/xrlids/`**: Core library containing feature calculation, models, DQN agents, safety gate, transaction manager, and live pipeline.
