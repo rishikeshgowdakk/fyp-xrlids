@@ -1,7 +1,7 @@
 # Phase 3G Experiment Artifacts: Atomic Rollback & Controlled Response Transaction Harness
 
 **Experiment Identifier**: `EXP-P3G-ROLLBACK-001`  
-**Git Commit**: `bab43665fff76f5623cdd0dc0755d309c1b93027`  
+**Git Commit**: `47562ea3bfe87eacb59a9f88b460adc7b8955373`  
 **Operational Mode**: `LiveMode.CONTROLLED_ENFORCEMENT (SIMULATED_BACKEND_ONLY)`  
 **Zero System Mutation**: `VERIFIED (True)` (0 iptables, 0 nftables, 0 tc, 0 sockets)  
 

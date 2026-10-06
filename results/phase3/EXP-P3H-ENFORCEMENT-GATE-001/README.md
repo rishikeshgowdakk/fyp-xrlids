@@ -1,7 +1,7 @@
 # Phase 3H Experiment Artifacts: Enforcement Readiness, Evidence Provenance & Non-Bypassable Activation Gate
 
 **Experiment Identifier**: `EXP-P3H-ENFORCEMENT-GATE-001`  
-**Git Commit**: `7d92f90893d2c91cd3ced78bed501cd9e34def4b`  
+**Git Commit**: `47562ea3bfe87eacb59a9f88b460adc7b8955373`  
 **Operational Mode**: `LiveMode.OBSERVE / LiveMode.DRY_RUN`  
 **Zero System Mutation**: `VERIFIED (True)` (0 iptables, 0 nftables, 0 tc, 0 sockets)  
 

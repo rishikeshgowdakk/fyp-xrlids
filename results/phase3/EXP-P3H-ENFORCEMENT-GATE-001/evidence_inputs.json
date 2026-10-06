@@ -1,7 +1,7 @@
 {
   "metadata": {
     "experiment_id": "EXP-P3H-ENFORCEMENT-GATE-001",
-    "git_commit": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
+    "git_commit": "47562ea3bfe87eacb59a9f88b460adc7b8955373",
     "dataset_sha256": null,
     "feature_schema_hash": null,
     "seed": null,
@@ -13,7 +13,7 @@
       "processor_count": null,
       "cuda_available": false,
       "cuda_version": null,
-      "git_commit": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
+      "git_commit": "47562ea3bfe87eacb59a9f88b460adc7b8955373",
       "packages": {
         "numpy": "2.5.3",
         "pandas": "3.0.6",
@@ -29,17 +29,17 @@
     "extra": {}
   },
   "experiment_id": "EXP-P3H-ENFORCEMENT-GATE-001",
-  "git_commit": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
-  "target_commit_sha": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
+  "git_commit": "47562ea3bfe87eacb59a9f88b460adc7b8955373",
+  "target_commit_sha": "47562ea3bfe87eacb59a9f88b460adc7b8955373",
   "evidence_bundle": {
     "P1_FEATURE_PARITY": {
       "precondition": "P1_FEATURE_PARITY",
       "experiment_id": "EXP-P3-PARITY-001",
       "status": "PASS",
-      "commit_sha": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
+      "commit_sha": "47562ea3bfe87eacb59a9f88b460adc7b8955373",
       "artifact_id": "p1_feature_parity.json",
       "artifact_path": "/home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3H-ENFORCEMENT-GATE-001/evidence/p1_feature_parity.json",
-      "artifact_digest": "7915b105000175ffee5b8200fecaf0dd334a4634e40223396bb146eb95bab6a3",
+      "artifact_digest": "40aefa8ec02d701b8cbfdf7b52a3ecc6eb8c020359a88dd4a4800600bdbac9bc",
       "generated_at": "2026-10-04T14:30:00+00:00",
       "schema_version": "1.0",
       "metrics": {
@@ -49,17 +49,17 @@
       },
       "provenance": {
         "subphase": "Phase 3C",
-        "git_commit": "7d92f90893d2c91cd3ced78bed501cd9e34def4b"
+        "git_commit": "47562ea3bfe87eacb59a9f88b460adc7b8955373"
       }
     },
     "P2_PCAP_REPLAY": {
       "precondition": "P2_PCAP_REPLAY",
       "experiment_id": "EXP-P3-BURST-1000-001",
       "status": "PASS",
-      "commit_sha": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
+      "commit_sha": "47562ea3bfe87eacb59a9f88b460adc7b8955373",
       "artifact_id": "p2_pcap_replay.json",
       "artifact_path": "/home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3H-ENFORCEMENT-GATE-001/evidence/p2_pcap_replay.json",
-      "artifact_digest": "f04fd8cdbfdc3e5f1d08a4c2fc3c5a29a8543a2fa0085a67579efd538f41f7cb",
+      "artifact_digest": "3beddc4e6e5fef0b568c065ce272f3de8a33021cd33d3e5ab596003a2d8a46de",
       "generated_at": "2026-10-04T14:30:00+00:00",
       "schema_version": "1.0",
       "metrics": {
@@ -70,17 +70,17 @@
       },
       "provenance": {
         "subphase": "Phase 3E",
-        "git_commit": "7d92f90893d2c91cd3ced78bed501cd9e34def4b"
+        "git_commit": "47562ea3bfe87eacb59a9f88b460adc7b8955373"
       }
     },
     "P3_DRY_RUN": {
       "precondition": "P3_DRY_RUN",
       "experiment_id": "EXP-P3F-OBSERVABILITY-001",
       "status": "PASS",
-      "commit_sha": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
+      "commit_sha": "47562ea3bfe87eacb59a9f88b460adc7b8955373",
       "artifact_id": "p3_dry_run.json",
       "artifact_path": "/home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3H-ENFORCEMENT-GATE-001/evidence/p3_dry_run.json",
-      "artifact_digest": "5642a5a846471a64d7aef0c65e904aed70d4e538a9eb507237d78edb013fa9bd",
+      "artifact_digest": "5562adf4672d65fe28543d578e6aab1a1a8158f9d6bf7d5963e19f9fc1118b3e",
       "generated_at": "2026-10-04T14:30:00+00:00",
       "schema_version": "1.0",
       "metrics": {
@@ -91,17 +91,17 @@
       },
       "provenance": {
         "subphase": "Phase 3F",
-        "git_commit": "7d92f90893d2c91cd3ced78bed501cd9e34def4b"
+        "git_commit": "47562ea3bfe87eacb59a9f88b460adc7b8955373"
       }
     },
     "P4_SAFETY_INVARIANTS": {
       "precondition": "P4_SAFETY_INVARIANTS",
       "experiment_id": "EXP-P3F-OBSERVABILITY-001",
       "status": "PASS",
-      "commit_sha": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
+      "commit_sha": "47562ea3bfe87eacb59a9f88b460adc7b8955373",
       "artifact_id": "p4_safety_invariants.json",
       "artifact_path": "/home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3H-ENFORCEMENT-GATE-001/evidence/p4_safety_invariants.json",
-      "artifact_digest": "e47cc888930c009b0b118c1195d5a37cef8583233bcf2b6fe3b5a875929f7883",
+      "artifact_digest": "a924ffdeb6303c4bcd1f1aa3d2c81c42158119e8c1c61e97e8a4e60840aa4ae9",
       "generated_at": "2026-10-04T14:30:00+00:00",
       "schema_version": "1.0",
       "metrics": {
@@ -112,17 +112,17 @@
       },
       "provenance": {
         "subphase": "Phase 3F",
-        "git_commit": "7d92f90893d2c91cd3ced78bed501cd9e34def4b"
+        "git_commit": "47562ea3bfe87eacb59a9f88b460adc7b8955373"
       }
     },
     "P5_ROLLBACK_HARNESS": {
       "precondition": "P5_ROLLBACK_HARNESS",
       "experiment_id": "EXP-P3G-ROLLBACK-001",
       "status": "PASS",
-      "commit_sha": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
+      "commit_sha": "47562ea3bfe87eacb59a9f88b460adc7b8955373",
       "artifact_id": "p5_rollback_harness.json",
       "artifact_path": "/home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3H-ENFORCEMENT-GATE-001/evidence/p5_rollback_harness.json",
-      "artifact_digest": "cff911480d6d7e2f694ffd9d9c6ff9f3784389683bca8dc5074f525dbe6e51c4",
+      "artifact_digest": "ba3932e8b3cca7b6a49bdb770e0f3b09206861cd7d1d26cc3e30db675b45ee66",
       "generated_at": "2026-10-04T14:30:00+00:00",
       "schema_version": "1.0",
       "metrics": {
@@ -135,7 +135,7 @@
       },
       "provenance": {
         "subphase": "Phase 3G",
-        "git_commit": "7d92f90893d2c91cd3ced78bed501cd9e34def4b"
+        "git_commit": "47562ea3bfe87eacb59a9f88b460adc7b8955373"
       }
     }
   }

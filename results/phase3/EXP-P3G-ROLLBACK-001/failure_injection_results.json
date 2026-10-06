@@ -1,11 +1,11 @@
 {
   "metadata": {
     "experiment_id": "EXP-P3G-ROLLBACK-001",
-    "git_commit": "bab43665fff76f5623cdd0dc0755d309c1b93027",
+    "git_commit": "47562ea3bfe87eacb59a9f88b460adc7b8955373",
     "dataset_sha256": null,
     "feature_schema_hash": null,
     "seed": null,
-    "created_at": "2026-10-04T13:59:49.556074+00:00",
+    "created_at": "2026-10-06T17:53:54.268680+00:00",
     "software_environment": {
       "python_version": "3.14.4",
       "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
@@ -13,7 +13,7 @@
       "processor_count": null,
       "cuda_available": false,
       "cuda_version": null,
-      "git_commit": "bab43665fff76f5623cdd0dc0755d309c1b93027",
+      "git_commit": "47562ea3bfe87eacb59a9f88b460adc7b8955373",
       "packages": {
         "numpy": "2.5.3",
         "pandas": "3.0.6",
@@ -37,7 +37,7 @@
       "state": "COMMITTED",
       "snapshot": {
         "snapshot_id": "SNAP-0001",
-        "timestamp": "2026-10-04T13:59:49.556204+00:00",
+        "timestamp": "2026-10-06T17:53:54.268876+00:00",
         "target_host": "192.168.1.101",
         "action": "ISOLATE",
         "baseline_state": {
@@ -53,10 +53,32 @@
         }
       },
       "rollback_result": null,
-      "execution_time_ms": 0.116,
+      "execution_time_ms": 0.13,
       "error_message": null,
       "audit_card_generated": true,
-      "override_reason": null
+      "override_reason": null,
+      "lifecycle_timestamps": {
+        "transaction_created": 27608.554793428,
+        "authorization_started": 27608.554810366,
+        "authorization_passed": 27608.554810976,
+        "snapshot_created": 27608.554895956,
+        "safety_check_started": 27608.554897125,
+        "safety_check_passed": 27608.554908883,
+        "mutation_started": 27608.554910518,
+        "mutation_committed": 27608.55491391,
+        "post_verification_started": 27608.554914197,
+        "post_verification_passed": 27608.554916243,
+        "transaction_closed": 27608.554916513
+      },
+      "lifecycle_durations_ms": {
+        "total_lifecycle_ms": 0.123,
+        "authorization_ms": 0.001,
+        "snapshot_ms": 0.085,
+        "safety_check_ms": 0.012,
+        "mutation_ms": 0.003,
+        "verification_ms": 0.002
+      },
+      "lock_wait_time_ms": 0.0
     },
     "rollback": {
       "success": true,
@@ -78,7 +100,7 @@
       "state": "COMMITTED",
       "snapshot": {
         "snapshot_id": "SNAP-0001",
-        "timestamp": "2026-10-04T13:59:49.556392+00:00",
+        "timestamp": "2026-10-06T17:53:54.269130+00:00",
         "target_host": "192.168.1.102",
         "action": "RATE_LIMIT",
         "baseline_state": {
@@ -94,10 +116,32 @@
         }
       },
       "rollback_result": null,
-      "execution_time_ms": 0.045,
+      "execution_time_ms": 0.052,
       "error_message": null,
       "audit_card_generated": true,
-      "override_reason": null
+      "override_reason": null,
+      "lifecycle_timestamps": {
+        "transaction_created": 27608.555057834,
+        "authorization_started": 27608.555064398,
+        "authorization_passed": 27608.555064677,
+        "snapshot_created": 27608.555091331,
+        "safety_check_started": 27608.555092248,
+        "safety_check_passed": 27608.555096954,
+        "mutation_started": 27608.555097827,
+        "mutation_committed": 27608.555103429,
+        "post_verification_started": 27608.555103673,
+        "post_verification_passed": 27608.555105468,
+        "transaction_closed": 27608.555105668
+      },
+      "lifecycle_durations_ms": {
+        "total_lifecycle_ms": 0.048,
+        "authorization_ms": 0.0,
+        "snapshot_ms": 0.027,
+        "safety_check_ms": 0.005,
+        "mutation_ms": 0.006,
+        "verification_ms": 0.002
+      },
+      "lock_wait_time_ms": 0.0
     },
     "rollback": {
       "success": true,
@@ -119,7 +163,7 @@
       "state": "COMMITTED",
       "snapshot": {
         "snapshot_id": "SNAP-0001",
-        "timestamp": "2026-10-04T13:59:49.556496+00:00",
+        "timestamp": "2026-10-06T17:53:54.269245+00:00",
         "target_host": "192.168.1.103",
         "action": "ALLOW",
         "baseline_state": {
@@ -135,10 +179,26 @@
         }
       },
       "rollback_result": null,
-      "execution_time_ms": 0.023,
+      "execution_time_ms": 0.036,
       "error_message": null,
       "audit_card_generated": true,
-      "override_reason": null
+      "override_reason": null,
+      "lifecycle_timestamps": {
+        "transaction_created": 27608.555176957,
+        "authorization_started": 27608.555180885,
+        "authorization_passed": 27608.555181079,
+        "snapshot_created": 27608.555198334,
+        "safety_check_started": 27608.555198996,
+        "safety_check_passed": 27608.555209953,
+        "transaction_closed": 27608.555210502
+      },
+      "lifecycle_durations_ms": {
+        "total_lifecycle_ms": 0.034,
+        "authorization_ms": 0.0,
+        "snapshot_ms": 0.017,
+        "safety_check_ms": 0.011
+      },
+      "lock_wait_time_ms": 0.0
     },
     "zero_mutation_verified": true,
     "pass": true
@@ -152,7 +212,7 @@
       "state": "COMMITTED",
       "snapshot": {
         "snapshot_id": "SNAP-0001",
-        "timestamp": "2026-10-04T13:59:49.556562+00:00",
+        "timestamp": "2026-10-06T17:53:54.269325+00:00",
         "target_host": "192.168.10.1",
         "action": "ISOLATE",
         "baseline_state": {
@@ -168,10 +228,32 @@
         }
       },
       "rollback_result": null,
-      "execution_time_ms": 0.028,
+      "execution_time_ms": 0.036,
       "error_message": "Safety gate override: CRITICAL_INFRASTRUCTURE_EXEMPTION",
       "audit_card_generated": true,
-      "override_reason": "CRITICAL_INFRASTRUCTURE_EXEMPTION"
+      "override_reason": "CRITICAL_INFRASTRUCTURE_EXEMPTION",
+      "lifecycle_timestamps": {
+        "transaction_created": 27608.555258136,
+        "authorization_started": 27608.555261388,
+        "authorization_passed": 27608.555261553,
+        "snapshot_created": 27608.555278682,
+        "safety_check_started": 27608.555279143,
+        "safety_check_passed": 27608.555286618,
+        "mutation_started": 27608.55528727,
+        "mutation_committed": 27608.555289672,
+        "post_verification_started": 27608.555289912,
+        "post_verification_passed": 27608.555291661,
+        "transaction_closed": 27608.555291794
+      },
+      "lifecycle_durations_ms": {
+        "total_lifecycle_ms": 0.034,
+        "authorization_ms": 0.0,
+        "snapshot_ms": 0.017,
+        "safety_check_ms": 0.007,
+        "mutation_ms": 0.002,
+        "verification_ms": 0.002
+      },
+      "lock_wait_time_ms": 0.0
     },
     "override_reason": "CRITICAL_INFRASTRUCTURE_EXEMPTION",
     "pass": true
@@ -185,7 +267,7 @@
       "state": "ROLLED_BACK",
       "snapshot": {
         "snapshot_id": "SNAP-0001",
-        "timestamp": "2026-10-04T13:59:49.556625+00:00",
+        "timestamp": "2026-10-06T17:53:54.269399+00:00",
         "target_host": "192.168.1.105",
         "action": "ISOLATE",
         "baseline_state": {
@@ -209,10 +291,30 @@
         "failure_reason": null,
         "final_safety_state": "RESTORED"
       },
-      "execution_time_ms": 0.069,
+      "execution_time_ms": 0.085,
       "error_message": "Mutation error: Simulated actuator mutation exception",
       "audit_card_generated": false,
-      "override_reason": null
+      "override_reason": null,
+      "lifecycle_timestamps": {
+        "transaction_created": 27608.555332298,
+        "authorization_started": 27608.555335188,
+        "authorization_passed": 27608.555335328,
+        "snapshot_created": 27608.555351755,
+        "safety_check_started": 27608.555353527,
+        "safety_check_passed": 27608.555358266,
+        "mutation_started": 27608.555358839,
+        "rollback_started": 27608.555400013,
+        "rollback_completed": 27608.555413434,
+        "transaction_closed": 27608.555413594
+      },
+      "lifecycle_durations_ms": {
+        "total_lifecycle_ms": 0.081,
+        "authorization_ms": 0.0,
+        "snapshot_ms": 0.016,
+        "safety_check_ms": 0.005,
+        "rollback_ms": 0.013
+      },
+      "lock_wait_time_ms": 0.0
     },
     "rollback": {
       "success": true,
@@ -234,7 +336,7 @@
       "state": "ROLLED_BACK",
       "snapshot": {
         "snapshot_id": "SNAP-0001",
-        "timestamp": "2026-10-04T13:59:49.556730+00:00",
+        "timestamp": "2026-10-06T17:53:54.269523+00:00",
         "target_host": "192.168.1.106",
         "action": "RATE_LIMIT",
         "baseline_state": {
@@ -258,10 +360,30 @@
         "failure_reason": null,
         "final_safety_state": "RESTORED"
       },
-      "execution_time_ms": 0.057,
+      "execution_time_ms": 0.065,
       "error_message": "Mutation error: Simulated actuator execution timeout",
       "audit_card_generated": false,
-      "override_reason": null
+      "override_reason": null,
+      "lifecycle_timestamps": {
+        "transaction_created": 27608.555456706,
+        "authorization_started": 27608.555459951,
+        "authorization_passed": 27608.555460093,
+        "snapshot_created": 27608.555475876,
+        "safety_check_started": 27608.555476374,
+        "safety_check_passed": 27608.555478852,
+        "mutation_started": 27608.555479346,
+        "rollback_started": 27608.555507444,
+        "rollback_completed": 27608.555517787,
+        "transaction_closed": 27608.555517952
+      },
+      "lifecycle_durations_ms": {
+        "total_lifecycle_ms": 0.061,
+        "authorization_ms": 0.0,
+        "snapshot_ms": 0.016,
+        "safety_check_ms": 0.002,
+        "rollback_ms": 0.01
+      },
+      "lock_wait_time_ms": 0.0
     },
     "rollback": {
       "success": true,
@@ -283,7 +405,7 @@
       "state": "ROLLED_BACK",
       "snapshot": {
         "snapshot_id": "SNAP-0001",
-        "timestamp": "2026-10-04T13:59:49.556817+00:00",
+        "timestamp": "2026-10-06T17:53:54.269628+00:00",
         "target_host": "192.168.1.107",
         "action": "ISOLATE",
         "baseline_state": {
@@ -307,10 +429,33 @@
         "failure_reason": null,
         "final_safety_state": "RESTORED"
       },
-      "execution_time_ms": 0.059,
+      "execution_time_ms": 0.066,
       "error_message": "Post-action state verification failed",
       "audit_card_generated": false,
-      "override_reason": null
+      "override_reason": null,
+      "lifecycle_timestamps": {
+        "transaction_created": 27608.555560403,
+        "authorization_started": 27608.555564665,
+        "authorization_passed": 27608.555564802,
+        "snapshot_created": 27608.555579983,
+        "safety_check_started": 27608.555580419,
+        "safety_check_passed": 27608.555582966,
+        "mutation_started": 27608.555583462,
+        "mutation_committed": 27608.55558447,
+        "post_verification_started": 27608.555585873,
+        "rollback_started": 27608.555612919,
+        "rollback_completed": 27608.555622678,
+        "transaction_closed": 27608.555623005
+      },
+      "lifecycle_durations_ms": {
+        "total_lifecycle_ms": 0.063,
+        "authorization_ms": 0.0,
+        "snapshot_ms": 0.015,
+        "safety_check_ms": 0.003,
+        "mutation_ms": 0.001,
+        "rollback_ms": 0.01
+      },
+      "lock_wait_time_ms": 0.0
     },
     "rollback": {
       "success": true,
@@ -332,7 +477,7 @@
       "state": "ROLLED_BACK",
       "snapshot": {
         "snapshot_id": "SNAP-0001",
-        "timestamp": "2026-10-04T13:59:49.556907+00:00",
+        "timestamp": "2026-10-06T17:53:54.269731+00:00",
         "target_host": "192.168.1.108",
         "action": "RATE_LIMIT",
         "baseline_state": {
@@ -356,10 +501,33 @@
         "failure_reason": null,
         "final_safety_state": "RESTORED"
       },
-      "execution_time_ms": 0.065,
+      "execution_time_ms": 0.057,
       "error_message": "Post-action state verification failed",
       "audit_card_generated": false,
-      "override_reason": null
+      "override_reason": null,
+      "lifecycle_timestamps": {
+        "transaction_created": 27608.555664213,
+        "authorization_started": 27608.555667217,
+        "authorization_passed": 27608.555667343,
+        "snapshot_created": 27608.555681132,
+        "safety_check_started": 27608.555681568,
+        "safety_check_passed": 27608.555683687,
+        "mutation_started": 27608.555684139,
+        "mutation_committed": 27608.555687384,
+        "post_verification_started": 27608.555687526,
+        "rollback_started": 27608.555709238,
+        "rollback_completed": 27608.55571771,
+        "transaction_closed": 27608.555718032
+      },
+      "lifecycle_durations_ms": {
+        "total_lifecycle_ms": 0.054,
+        "authorization_ms": 0.0,
+        "snapshot_ms": 0.014,
+        "safety_check_ms": 0.002,
+        "mutation_ms": 0.003,
+        "rollback_ms": 0.008
+      },
+      "lock_wait_time_ms": 0.0
     },
     "rollback": {
       "success": true,
@@ -381,7 +549,7 @@
       "state": "ABORTED",
       "snapshot": {
         "snapshot_id": "SNAP-0001",
-        "timestamp": "2026-10-04T13:59:49.557001+00:00",
+        "timestamp": "2026-10-06T17:53:54.269824+00:00",
         "target_host": "192.168.1.109",
         "action": "ISOLATE",
         "baseline_state": {
@@ -397,10 +565,21 @@
         }
       },
       "rollback_result": null,
-      "execution_time_ms": 0.042,
+      "execution_time_ms": 0.04,
       "error_message": "Snapshot validation failed: corrupted baseline digest",
       "audit_card_generated": false,
-      "override_reason": null
+      "override_reason": null,
+      "lifecycle_timestamps": {
+        "transaction_created": 27608.555757338,
+        "authorization_started": 27608.555760217,
+        "authorization_passed": 27608.555760358,
+        "transaction_closed": 27608.555794875
+      },
+      "lifecycle_durations_ms": {
+        "total_lifecycle_ms": 0.038,
+        "authorization_ms": 0.0
+      },
+      "lock_wait_time_ms": 0.0
     },
     "zero_mutation_verified": true,
     "pass": true
@@ -414,7 +593,7 @@
       "state": "SAFETY_LOCKED",
       "snapshot": {
         "snapshot_id": "SNAP-0001",
-        "timestamp": "2026-10-04T13:59:49.557073+00:00",
+        "timestamp": "2026-10-06T17:53:54.269907+00:00",
         "target_host": "192.168.1.110",
         "action": "ISOLATE",
         "baseline_state": {
@@ -438,10 +617,30 @@
         "failure_reason": "Simulated rollback failure during state restoration",
         "final_safety_state": "SAFETY_LOCKED"
       },
-      "execution_time_ms": 0.065,
+      "execution_time_ms": 0.072,
       "error_message": "Mutation error: Simulated actuator mutation exception",
       "audit_card_generated": false,
-      "override_reason": null
+      "override_reason": null,
+      "lifecycle_timestamps": {
+        "transaction_created": 27608.555839769,
+        "authorization_started": 27608.555843303,
+        "authorization_passed": 27608.555843435,
+        "snapshot_created": 27608.555860233,
+        "safety_check_started": 27608.555860806,
+        "safety_check_passed": 27608.555863461,
+        "mutation_started": 27608.555863973,
+        "rollback_started": 27608.555887557,
+        "rollback_completed": 27608.555908494,
+        "transaction_closed": 27608.555908653
+      },
+      "lifecycle_durations_ms": {
+        "total_lifecycle_ms": 0.069,
+        "authorization_ms": 0.0,
+        "snapshot_ms": 0.017,
+        "safety_check_ms": 0.003,
+        "rollback_ms": 0.021
+      },
+      "lock_wait_time_ms": 0.0
     },
     "blocked_transaction": {
       "transaction_id": "TX-0002",
@@ -451,10 +650,21 @@
       "state": "SAFETY_LOCKED",
       "snapshot": null,
       "rollback_result": null,
-      "execution_time_ms": 0.001,
+      "execution_time_ms": 0.006,
       "error_message": "Transaction rejected: System is in SAFETY_LOCKED state (Rollback failed for TX-0001: Simulated rollback failure during state restoration)",
       "audit_card_generated": false,
-      "override_reason": null
+      "override_reason": null,
+      "lifecycle_timestamps": {
+        "transaction_created": 27608.555917106,
+        "authorization_started": 27608.555921402,
+        "authorization_passed": 27608.555921555,
+        "transaction_closed": 27608.555921908
+      },
+      "lifecycle_durations_ms": {
+        "total_lifecycle_ms": 0.005,
+        "authorization_ms": 0.0
+      },
+      "lock_wait_time_ms": 0.0
     },
     "manager_safety_locked": true,
     "lock_reason": "Rollback failed for TX-0001: Simulated rollback failure during state restoration",
@@ -469,7 +679,7 @@
       "state": "COMMITTED",
       "snapshot": {
         "snapshot_id": "SNAP-0001",
-        "timestamp": "2026-10-04T13:59:49.557183+00:00",
+        "timestamp": "2026-10-06T17:53:54.270041+00:00",
         "target_host": "192.168.1.111",
         "action": "ISOLATE",
         "baseline_state": {
@@ -488,7 +698,29 @@
       "execution_time_ms": 0.039,
       "error_message": null,
       "audit_card_generated": true,
-      "override_reason": null
+      "override_reason": null,
+      "lifecycle_timestamps": {
+        "transaction_created": 27608.555974727,
+        "authorization_started": 27608.555977792,
+        "authorization_passed": 27608.555977895,
+        "snapshot_created": 27608.555995516,
+        "safety_check_started": 27608.555995978,
+        "safety_check_passed": 27608.555998466,
+        "mutation_started": 27608.5559989,
+        "mutation_committed": 27608.556008992,
+        "post_verification_started": 27608.556009134,
+        "post_verification_passed": 27608.55601048,
+        "transaction_closed": 27608.556010696
+      },
+      "lifecycle_durations_ms": {
+        "total_lifecycle_ms": 0.036,
+        "authorization_ms": 0.0,
+        "snapshot_ms": 0.018,
+        "safety_check_ms": 0.002,
+        "mutation_ms": 0.01,
+        "verification_ms": 0.001
+      },
+      "lock_wait_time_ms": 0.0
     },
     "heartbeat_renewed": true,
     "expired_transactions": [

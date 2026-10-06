@@ -1,10 +1,10 @@
 {
   "experiment_id": "EXP-P3-BURST-1000-001",
-  "git_commit": "724969ae24b17e6fc09d8a7646c2e81de4d46dc6",
+  "git_commit": "47562ea3bfe87eacb59a9f88b460adc7b8955373",
   "dataset_sha256": null,
   "feature_schema_hash": null,
   "seed": 42,
-  "created_at": "2026-10-04T13:13:39.930723+00:00",
+  "created_at": "2026-10-06T17:56:19.843284+00:00",
   "software_environment": {
     "python_version": "3.14.4",
     "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
@@ -12,7 +12,7 @@
     "processor_count": null,
     "cuda_available": false,
     "cuda_version": null,
-    "git_commit": "724969ae24b17e6fc09d8a7646c2e81de4d46dc6",
+    "git_commit": "47562ea3bfe87eacb59a9f88b460adc7b8955373",
     "packages": {
       "numpy": "2.5.3",
       "pandas": "3.0.6",

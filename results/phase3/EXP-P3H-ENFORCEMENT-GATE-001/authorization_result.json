@@ -1,7 +1,7 @@
 {
   "metadata": {
     "experiment_id": "EXP-P3H-ENFORCEMENT-GATE-001",
-    "git_commit": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
+    "git_commit": "47562ea3bfe87eacb59a9f88b460adc7b8955373",
     "dataset_sha256": null,
     "feature_schema_hash": null,
     "seed": null,
@@ -13,7 +13,7 @@
       "processor_count": null,
       "cuda_available": false,
       "cuda_version": null,
-      "git_commit": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
+      "git_commit": "47562ea3bfe87eacb59a9f88b460adc7b8955373",
       "packages": {
         "numpy": "2.5.3",
         "pandas": "3.0.6",
@@ -31,14 +31,14 @@
   "experiment_id": "EXP-P3H-ENFORCEMENT-GATE-001",
   "authorization": {
     "authorization_id": "AUTH-LAB-ISOLATED-001",
-    "repository_commit_sha": "7d92f90893d2c91cd3ced78bed501cd9e34def4b",
+    "repository_commit_sha": "47562ea3bfe87eacb59a9f88b460adc7b8955373",
     "lab_environment_id": "LAB-ISOLATED-NETNS-01",
     "allowed_actuator_backend_id": "SIMULATED_ACTUATOR_V1",
     "scope": "ISOLATED_LAB_CONTROLLED_RESPONSE_ONLY",
     "issued_at": "2026-10-04T13:30:00+00:00",
     "expires_at": "2026-10-04T22:30:00+00:00",
     "status": "ACTIVE",
-    "auth_signature": "15c3ca99063d3d927bed0d637a64d36b51932ad4509af385250d680329befa64"
+    "auth_signature": "8699aa20ab549b05722bfe8850c4e8fcde437e1b25f75c55c999848a566e7583"
   },
   "signature_verified": true,
   "scope": "ISOLATED_LAB_CONTROLLED_RESPONSE_ONLY",
