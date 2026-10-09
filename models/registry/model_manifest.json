@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0.0",
+  "registry_name": "XRLIDS Model Artifact Registry",
+  "canonical_models_count": 9,
+  "artifacts": [
+    {
+      "model_id": "random_forest_cicids2017.joblib",
+      "model_type": "rf",
+      "source_path": "results/experiments/EXP-P1-CIC2017-R10-001/random_forest.joblib",
+      "canonical_path": "models/rf/random_forest_cicids2017.joblib",
+      "dataset": "cicids2017",
+      "feature_contract": "R10",
+      "sha256": "7c6ad493b773b687da24a2a12dcb21bd03bd56b76809462b983454aeacf2b774",
+      "size_bytes": 26363055,
+      "test_f1": 0.9512,
+      "test_accuracy": 0.9815,
+      "status": "REGISTERED"
+    },
+    {
+      "model_id": "random_forest_cse2018.joblib",
+      "model_type": "rf",
+      "source_path": "results/experiments/EXP-P1-CSE2018-R10-MULTI-001/random_forest.joblib",
+      "canonical_path": "models/rf/random_forest_cse2018.joblib",
+      "dataset": "cse_cic_ids2018",
+      "feature_contract": "R10",
+      "sha256": "b7d2dc7bacca1a46f4da35aee2c19e1604020d429a5d29b72d742130215ba9b3",
+      "size_bytes": 68240031,
+      "test_f1": 0.8861,
+      "test_accuracy": 0.9723,
+      "status": "REGISTERED"
+    },
+    {
+      "model_id": "random_forest_unswnb15.joblib",
+      "model_type": "rf",
+      "source_path": "results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/random_forest.joblib",
+      "canonical_path": "models/rf/random_forest_unswnb15.joblib",
+      "dataset": "unsw_nb15",
+      "feature_contract": "R10",
+      "sha256": "c432eb067507ad5b29a542b372ac6d35e609e783a9e6094c9764d0cfe654ec7c",
+      "size_bytes": 22639151,
+      "test_f1": 0.8546,
+      "test_accuracy": 0.8588,
+      "status": "REGISTERED"
+    },
+    {
+      "model_id": "lstm_cicids2017.pt",
+      "model_type": "lstm",
+      "source_path": "results/experiments/EXP-P1-CIC2017-R10-001/lstm.pt",
+      "canonical_path": "models/lstm/lstm_cicids2017.pt",
+      "dataset": "cicids2017",
+      "feature_contract": "R10",
+      "sha256": "18b0bfb48d3b031c17b26d3abd12485e09f8dd8c330fad26858320f11f818be1",
+      "size_bytes": 60437,
+      "test_f1": 0.9633,
+      "test_accuracy": 0.9867,
+      "status": "REGISTERED"
+    },
+    {
+      "model_id": "lstm_cse2018.pt",
+      "model_type": "lstm",
+      "source_path": "results/experiments/EXP-P1-CSE2018-R10-MULTI-001/lstm.pt",
+      "canonical_path": "models/lstm/lstm_cse2018.pt",
+      "dataset": "cse_cic_ids2018",
+      "feature_contract": "R10",
+      "sha256": "ea5b8198c20faa15d5d45ae7d081b754a76dbae1342a93b8234e0e06cfe8a33a",
+      "size_bytes": 60949,
+      "test_f1": 0.9603,
+      "test_accuracy": 0.9912,
+      "status": "REGISTERED"
+    },
+    {
+      "model_id": "lstm_unswnb15.pt",
+      "model_type": "lstm",
+      "source_path": "results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/lstm.pt",
+      "canonical_path": "models/lstm/lstm_unswnb15.pt",
+      "dataset": "unsw_nb15",
+      "feature_contract": "R10",
+      "sha256": "4d9386ff44c99eed822f8ace5c64429fab571b4f8aad847d6cc78bae5f308fbd",
+      "size_bytes": 57813,
+      "test_f1": 0.8637,
+      "test_accuracy": 0.8683,
+      "status": "REGISTERED"
+    },
+    {
+      "model_id": "dqn_4action_best.pt",
+      "model_type": "dqn",
+      "source_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b2_4action/best_model.pt",
+      "canonical_path": "models/dqn/dqn_4action_best.pt",
+      "dataset": "cicids2017",
+      "feature_contract": "response_state_v1",
+      "sha256": "6a5afc669b4e699ecd2b1c01df885cef9030c93b8888b487dd386533920ce954",
+      "size_bytes": 43189,
+      "test_f1": null,
+      "test_accuracy": null,
+      "status": "REGISTERED"
+    },
+    {
+      "model_id": "dqn_3action_best.pt",
+      "model_type": "dqn",
+      "source_path": "results/phase2/EXP-P2B-DQN-001/checkpoints/stage_2b1_3action/best_model.pt",
+      "canonical_path": "models/dqn/dqn_3action_best.pt",
+      "dataset": "cicids2017",
+      "feature_contract": "response_state_v1",
+      "sha256": "c06a61fb7777511600efd6db776745c4539da30c710fed8993145ed1b926be31",
+      "size_bytes": 42997,
+      "test_f1": null,
+      "test_accuracy": null,
+      "status": "REGISTERED"
+    },
+    {
+      "model_id": "fusion_weights.json",
+      "model_type": "fusion",
+      "canonical_path": "models/fusion/fusion_weights.json",
+      "sha256": "746fe3b7b2d5673616d413f29ac6141aa43b956c8d0a2d19f43ea404197a0cd6",
+      "size_bytes": 522,
+      "status": "REGISTERED"
+    }
+  ]
+}

@@ -1,75 +1,60 @@
-# EXPERIMENT REGISTRY
+ate# EXPERIMENT REGISTRY
 
-Nothing important gets evaluated without an Experiment Card. This registry is the index of
-every experiment and its status.
+This registry is the authoritative index of all experimental investigations conducted within the XRLIDS research program.
+Every experiment records its research questions (RQs), benchmark dataset, feature contract, model architectures, configurations, execution status, and primary empirical findings.
 
-## ID convention
+## ID Convention
 
 ```text
-EXP-<DATASET>-<FEATURESET>-<MODEL>-<NNN>
+EXP-<PHASE>-<DATASET/DOMAIN>-<FEATURESET/SCOPE>-<NNN>
 ```
 
 | Token | Values |
 | --- | --- |
-| DATASET | `CIC` · `CSE` · `UNSW` · `XFER` (cross-dataset) · `OOD` |
-| FEATURESET | `R10` · `R15` · `R20` |
-| MODEL | `RF` · `LSTM` · `FUSION` · `DQN` |
-| NNN | zero-padded sequence |
-
-Examples: `EXP-CIC-R20-FUSION-001`, `EXP-XFER-CIC2UNSW-RF-001`.
-
-## Required companions
-
-Every experiment must have, before it is considered complete:
-
-1. an experiment card in this directory (from [`../templates/EXPERIMENT_CARD_TEMPLATE.md`](../templates/EXPERIMENT_CARD_TEMPLATE.md));
-2. a machine-readable config under `configs/experiments/`;
-3. result artifacts under `results/`;
-4. any resulting claim registered in [`../03_DECISIONS/CLAIMS_REGISTRY.md`](../03_DECISIONS/CLAIMS_REGISTRY.md).
-
-## Recorded experiments
-
-_None yet._ No datasets have been acquired and no models trained, so no experiment has run.
-
-| Experiment ID | RQ | Dataset(s) | Feature set | Model | Config | Result path | Status |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — | — | — |
-
-Status values: `PLANNED` · `RUNNING` · `DONE` · `BLOCKED` · `ABANDONED`
+| PHASE | `P1` (Detection & Transfer), `P2` (Autonomous Response), `P3` (Live & Systems) |
+| DATASET/DOMAIN | `CIC` · `CSE` · `UNSW` · `TRANSFER` · `DQN` · `ISOLATED-LAB` |
+| FEATURESET/SCOPE | `R10` · `R4` · `BASELINES` · `SENSITIVITY` · `ROLLBACK` · `CONCURRENCY` |
+| NNN | Three-digit sequence identifier (`001`, `002`, ...) |
 
 ---
 
-## Planned experiment matrix (Phase 1)
+## Completed Experiments Registry
 
-### Primary matrix — 27 results (§36)
+| Experiment ID | RQ | Dataset(s) | Feature Contract | Model / System | Result Path | Status | Headline Metric |
+| :--- | :---: | :--- | :---: | :--- | :--- | :---: | :--- |
+| `EXP-P1-CIC2017-R10-001` | RQ1, RQ2 | CIC-IDS2017 | `R10` | Baseline Ladder (RF, LSTM, Fusion) | `results/experiments/EXP-P1-CIC2017-R10-001/` | `DONE` | **RF F1: 0.9512**, **LSTM F1: 0.9633**, **Fusion F1: 0.9745** |
+| `EXP-P1-CSE2018-R10-MULTI-001` | RQ1, RQ2 | CSE-CIC-IDS2018 | `R10` | Baseline Ladder (RF, LSTM, Fusion) | `results/experiments/EXP-P1-CSE2018-R10-MULTI-001/` | `DONE` | **RF F1: 0.8861**, **LSTM F1: 0.9603**, **Fusion F1: 0.9603** |
+| `EXP-P1-UNSWNB15-R10-MULTI-001` | RQ1, RQ2 | UNSW-NB15 | `R10` | Baseline Ladder (RF, LSTM, Fusion) | `results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/` | `DONE` | **RF F1: 0.8546**, **LSTM F1: 0.8637**, **Fusion F1: 0.8970** |
+| `EXP-P1-TRANSFER-CIC-TO-CSE-R10-001` | RQ3 | CIC-17 → CSE-18 | `R10` (10 feat) | RF, LSTM, Fusion Transfer | `results/experiments/EXP-P1-TRANSFER-CIC-TO-CSE-R10-001/` | `DONE` | Target RF F1: **0.3286** (Δ -0.6225) |
+| `EXP-P1-TRANSFER-CSE-TO-CIC-R10-001` | RQ3 | CSE-18 → CIC-17 | `R10` (10 feat) | RF, LSTM, Fusion Transfer | `results/experiments/EXP-P1-TRANSFER-CSE-TO-CIC-R10-001/` | `DONE` | Target LSTM F1: **0.2601** (Δ -0.7003) |
+| `EXP-P1-TRANSFER-UNSW-TO-CIC-R4-001` | RQ3 | UNSW → CIC-17 | `transfer_common_4` | RF, LSTM, Fusion Transfer | `results/experiments/EXP-P1-TRANSFER-UNSW-TO-CIC-R4-001/` | `DONE` | Target Fusion F1: **0.3664** (Δ -0.5306) |
+| `EXP-P1-TRANSFER-UNSW-TO-CSE-R4-001` | RQ3 | UNSW → CSE-18 | `transfer_common_4` | RF, LSTM, Fusion Transfer | `results/experiments/EXP-P1-TRANSFER-UNSW-TO-CSE-R4-001/` | `DONE` | Target LSTM F1: **0.0380** (Δ -0.8258) |
+| `EXP-P1-TRANSFER-CIC-TO-UNSW-R4-001` | RQ3 | CIC-17 → UNSW | `transfer_common_4` | RF, LSTM, Fusion Transfer | `results/experiments/EXP-P1-TRANSFER-CIC-TO-UNSW-R4-001/` | `DONE` | Target LSTM F1: **0.0051** (Δ -0.9004) |
+| `EXP-P1-TRANSFER-CSE-TO-UNSW-R4-001` | RQ3 | CSE-18 → UNSW | `transfer_common_4` | RF, LSTM, Fusion Transfer | `results/experiments/EXP-P1-TRANSFER-CSE-TO-UNSW-R4-001/` | `DONE` | Target LSTM F1: **0.0048** (Δ -0.8872) |
+| `EXP-P2A-BASELINES-001` | RQ4 | CIC-IDS2017 | `response_state_v1` | Static & Rule-Based Baselines | `results/phase2/EXP-P2A-BASELINES-001/` | `DONE` | Cost matrix established across 4 regimes |
+| `EXP-P2B-DQN-001` | RQ4 | CIC-IDS2017 | `response_state_v1` | Dueling DQN + PER (3 & 4 Actions) | `results/phase2/EXP-P2B-DQN-001/` | `DONE` | Val Cost: **2.15** (3-action), **5.44** (4-action) |
+| `EXP-P2C-SENSITIVITY-001` | RQ4, RQ5 | CIC-IDS2017 | State Ablations | DQN State Feature Ablation | `results/phase2/EXP-P2C-SENSITIVITY-001/` | `DONE` | Alert density & duration most critical |
+| `EXP-P2D-ROBUSTNESS-001` | RQ4 | CIC-IDS2017 | `response_state_v1` | Noise & Adversarial Perturbation | `results/phase2/EXP-P2D-ROBUSTNESS-001/` | `DONE` | Policy stability verified under noise |
+| `EXP-P2E-EXPLAINABILITY-001` | RQ5 | CIC-IDS2017 | `R10` | TreeSHAP Dual-Layer Explanations | `results/phase2/EXP-P2E-EXPLAINABILITY-001/` | `DONE` | 28,167 dual-layer audit cards generated |
+| `EXP-P2-FINAL-TEST-001` | RQ4 | CIC-IDS2017 | `response_state_v1` | Held-Out 355k Flow Evaluation | `results/phase2/EXP-P2-FINAL-TEST-001/` | `DONE` | DQN cost **5.32** vs Baseline 1 **7.48** (4-action) |
+| `EXP-P3G-ROLLBACK-001` | Systems | Live/Simulated | Transaction API | Atomic Rollback & Watchdog | `results/phase3/EXP-P3G-ROLLBACK-001/` | `DONE` | 100% rollback success on failure injection |
+| `EXP-P3H-ENFORCEMENT-GATE-001` | Systems | Live/Simulated | Precondition Gate | Enforcement Readiness Harness | `results/phase3/EXP-P3H-ENFORCEMENT-GATE-001/` | `DONE` | 5/5 precondition gates strictly validated |
+| `EXP-P3I-ISOLATED-LAB-001` | Systems | Netns Lab | Controlled Loop | Netns Isolation Loop Runner | `results/phase3/EXP-P3I-ISOLATED-LAB-001/` | `DONE` | Zero host network mutation observed |
+| `EXP-P3J-CONCURRENCY-001` | Systems | Netns Lab | Transaction Queue | Concurrent Isolated Transactions | `results/phase3/EXP-P3J-CONCURRENCY-001/` | `DONE` | Deadlock-free under concurrent traffic load |
+| `EXP-P3K-SECURITY-STRESS-001` | Systems | Netns Lab | Stress Matrix | Pre-Production Security Stress Audit | `results/phase3/EXP-P3K-SECURITY-STRESS-001/` | `DONE` | All safety invariants preserved under stress |
 
-3 datasets × 3 feature sets × 3 model types.
+---
 
-| | R10 | R15 | R20 |
-| --- | --- | --- | --- |
-| **CICIDS2017** | RF / LSTM / Fusion | RF / LSTM / Fusion | RF / LSTM / Fusion |
-| **CSE-CIC-IDS2018** | RF / LSTM / Fusion | RF / LSTM / Fusion | RF / LSTM / Fusion |
-| **UNSW-NB15** | RF / LSTM / Fusion | RF / LSTM / Fusion | RF / LSTM / Fusion |
+## Summary of Research Questions Addressed
 
-Status: **BLOCKED** on D-002 (feature rung definition) and D-004 (dataset acquisition).
-
-### Cross-dataset matrix — 6 directions (§37)
-
-CIC→CSE, CIC→UNSW, CSE→CIC, CSE→UNSW, UNSW→CIC, UNSW→CSE.
-Each direction requires a "why did performance drop?" analysis (§38).
-Status: **BLOCKED** on D-005.
-
-### Additional experiments
-
-| Experiment family | Purpose | Status |
-| --- | --- | --- |
-| Threshold sweep + trade-off curves | §31, §32 | BLOCKED on D-003 |
-| Calibration (reliability, Brier, ECE) | §40 | BLOCKED on D-003 |
-| OOD / unseen attack family | §39 | BLOCKED on D-004 |
-| SHAP + stability | §41 | BLOCKED on D-002 |
-| DQN reward sensitivity (A/B/C) | §51 | Phase 2 |
-| DQN baseline comparison | §52 | Phase 2 |
-| Live feature parity | §61 | Phase 3 |
-| Traffic-burst experiment ("1000 packets") | §66, §90 | Phase 3 |
-| Failure injection | §72 | Phase 3 |
-| Performance / latency profiling | §73 | Phase 3 |
+1. **RQ1: Detection Efficacy & Baseline Ordering**
+   - Verified on 3 benchmarks. The empirical ladder holds monotonically:
+     $$\text{Majority (F1: 0.00)} < \text{Logistic Reg (F1: 0.76-0.89)} < \text{Decision Tree (F1: 0.85-0.93)} < \text{Random Forest (F1: 0.85-0.95)} < \text{LSTM (F1: 0.86-0.96)}$$
+2. **RQ2: Score-Level Ensemble Fusion**
+   - Fusion achieves peak F1 of **0.9745** (CICIDS2017) and **0.8970** (UNSW-NB15) with Platt probability calibration.
+3. **RQ3: Cross-Dataset Domain Shift Collapse**
+   - Detectors trained in one environment experience severe performance degradation when evaluated out-of-domain without re-training (F1 dropping by up to 0.95). Covariate shift and feature definition disparities between capture toolchains are the primary drivers.
+4. **RQ4: Reinforcement Learning Autonomous Response**
+   - Deep Q-Networks dynamically balance containment costs against operational availability, achieving lower cumulative penalty than static threshold baselines under asymmetric attack regimes.
+5. **RQ5: Dual-Layer Explainability & Auditability**
+   - TreeSHAP feature attributions combined with discrete action rationales provide transparent, inspectable justification for autonomous network actions.
