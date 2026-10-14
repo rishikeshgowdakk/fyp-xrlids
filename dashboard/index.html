@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XRL-IDARS Dashboard</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #ffffff;
+      color: #000000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      line-height: 1.5;
+      padding: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 2px solid #000000;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    p.subtitle {
+      font-size: 14px;
+      color: #333333;
+    }
+    button {
+      background-color: #ffffff;
+      color: #000000;
+      border: 2px solid #000000;
+      padding: 8px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 0;
+      font-family: inherit;
+    }
+    button:hover {
+      background-color: #000000;
+      color: #ffffff;
+    }
+    button:disabled {
+      background-color: #e0e0e0;
+      color: #666666;
+      border-color: #999999;
+      cursor: not-allowed;
+    }
+    section {
+      margin-bottom: 32px;
+    }
+    h2 {
+      font-size: 18px;
+      font-weight: 700;
+      border-bottom: 1px solid #000000;
+      padding-bottom: 6px;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .metric-card {
+      border: 1px solid #000000;
+      padding: 12px;
+    }
+    .metric-card .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .metric-card .value {
+      font-size: 24px;
+      font-weight: 700;
+      margin-top: 4px;
+      font-family: monospace;
+    }
+    .metric-card .sub {
+      font-size: 11px;
+      color: #333333;
+      margin-top: 2px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+    th, td {
+      border: 1px solid #000000;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #ffffff;
+      font-weight: 700;
+    }
+    td.mono {
+      font-family: monospace;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border: 1px solid #000000;
+      font-weight: 700;
+      font-size: 11px;
+    }
+    .badge-invert {
+      background-color: #000000;
+      color: #ffffff;
+    }
+    select {
+      background-color: #ffffff;
+      color: #000000;
+      border: 1px solid #000000;
+      padding: 6px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      margin-bottom: 14px;
+      max-width: 100%;
+    }
+    .figure-container {
+      border: 1px solid #000000;
+      padding: 12px;
+      text-align: center;
+    }
+    .figure-container img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #000000;
+    }
+    #status-text {
+      font-size: 12px;
+      font-family: monospace;
+      margin-top: 6px;
+    }
+    footer {
+      border-top: 1px solid #000000;
+      padding-top: 12px;
+      font-size: 12px;
+      color: #444444;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>XRL-IDARS</h1>
+      <p class="subtitle">Explainable Reinforcement Learning Intrusion Detection & Response Dashboard</p>
+    </div>
+    <div>
+      <button id="run-btn" onclick="runAnalysis()">Run Replay Analysis</button>
+      <div id="status-text">Ready</div>
+    </div>
+  </header>
+
+  <!-- Summary Metrics -->
+  <section>
+    <h2>Summary Metrics</h2>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="label">Total Packets</div>
+        <div class="value" id="val-packets">-</div>
+        <div class="sub" id="val-pcap-source">PCAP Replay</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Completed Flows</div>
+        <div class="value" id="val-flows">-</div>
+        <div class="sub">Bidirectional (D-006)</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Research Accuracy</div>
+        <div class="value" id="val-res-acc">-</div>
+        <div class="sub" id="val-res-f1">F1: - (tau = 0.50)</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Operational Accuracy</div>
+        <div class="value" id="val-ops-acc">-</div>
+        <div class="sub" id="val-ops-f1">F1: - (tau = 0.40)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Flow Classification & Response Table -->
+  <section>
+    <h2>Network Flows & Response Actions</h2>
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Proto</th>
+            <th>Source Endpoint</th>
+            <th>Destination Endpoint</th>
+            <th>Pkts</th>
+            <th>Dur (ms)</th>
+            <th>Threat Score</th>
+            <th>Truth</th>
+            <th>Detection</th>
+            <th>Response Action</th>
+          </tr>
+        </thead>
+        <tbody id="flows-table-body">
+          <tr>
+            <td colspan="10" style="text-align: center;">Loading flows...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Explainable AI (SHAP) -->
+  <section>
+    <h2>Explainable AI & Feature Importance (TreeSHAP)</h2>
+    <p style="font-size: 13px; margin-bottom: 10px;">
+      Top flow statistical features that most strongly drive threat detection scores (CIC-IDS2017 Random Forest baseline):
+    </p>
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 60px;">Rank</th>
+            <th>Feature Name</th>
+            <th style="width: 140px;">Mean |SHAP|</th>
+            <th>Description & Significance</th>
+          </tr>
+        </thead>
+        <tbody id="shap-table-body">
+          <tr>
+            <td colspan="4" style="text-align: center;">Loading SHAP features...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Research Figures Gallery -->
+  <section>
+    <h2>Research Figures Gallery</h2>
+    <label for="figure-select" style="font-size: 13px; font-weight: 600;">Select Figure to View:</label><br>
+    <select id="figure-select" onchange="changeFigure()">
+      <option value="">Loading figures...</option>
+    </select>
+    <div class="figure-container">
+      <img id="figure-display" src="" alt="Selected Research Figure" style="display: none;">
+      <p id="figure-caption" style="margin-top: 8px; font-size: 13px;"></p>
+    </div>
+  </section>
+
+  <footer>
+    <span>XRL-IDARS v1.0.0 · Final Year Project</span>
+    <span>Host Integrity: 0 Mutations Verified (10.200.1.0/24 netns)</span>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>

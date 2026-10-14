@@ -7,13 +7,19 @@ model_id_prefix: "<DATASET>-<RUNG>-DQN"
 type: DQN
 status: historical_starter
 
+# NOTE (Phase 2 Evolution):
+# This file records the historical starter scaffold. The canonical implemented policy
+# (SPEC-P2-AUTONOMOUS-RESPONSE-001, configs/experiments/p2b_cicids2017_dqn.yaml) utilizes a
+# 6-dimensional causal state vector in R^6: s_t = [S_t, ΔS_t, N_alert, a_(t-1), c_t, v_t]
+# derived strictly from RF detector output, flow rate, and historical decision buffers.
+
 state:
   components:
     - rf_probability
     - lstm_score
     - fusion_score
-  normalization: null       # TODO (§50): how state is normalized
-  extra_features: []        # deliberately minimal; adding state requires justification
+  normalization: null       # historical starter scaffold; see xrlids.response.state for 6D causal state
+  extra_features: []
 
 actions:
   - id: 0

@@ -87,6 +87,17 @@ Execute the packet-to-prediction PCAP replay demo:
 python scripts/demo/run_replay_demo.py
 ```
 
+### 4. Run Monitoring Dashboard
+
+Launch the zero-dependency web dashboard to visualize replay statistics and TreeSHAP attributions:
+
+```bash
+python dashboard/server.py
+# Or: python scripts/demo/run_dashboard.py
+```
+
+Open `http://localhost:8000` in your web browser.
+
 > **Note:** The replay demonstration runs immediately out of the box in user space using `data/demo/sample_traffic.pcap` and the trained model artifact in `results/experiments/EXP-P1-CIC2017-R10-001/random_forest.joblib`. Retraining on full raw benchmark datasets (~8.7 GB across 20 CSV files) requires downloading raw data into `data/raw/` as detailed in [`docs/DATASETS.md`](docs/DATASETS.md). Live namespace enforcement requires an isolated Linux testbed with root privileges.
 
 ---
@@ -101,7 +112,7 @@ python scripts/demo/run_replay_demo.py
 | DQN response | Complete |
 | Safety/Rollback | Complete |
 | Live/lab pipeline | Complete within lab scope |
-| Web dashboard | Not currently included |
+| Web dashboard | Complete (minimalist zero-dependency server) |
 | Production deployment | Not validated |
 
 ---

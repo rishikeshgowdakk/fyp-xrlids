@@ -1,0 +1,181 @@
+// XRL-IDARS Minimalist Vanilla JavaScript Dashboard
+
+const FEATURE_DESCRIPTIONS = {
+  "packet_length_std": "Standard deviation of packet lengths in the flow (high variance indicates data transfers vs scans)",
+  "packet_length_mean": "Mean packet length in bytes across forward and backward packets",
+  "flow_packets_per_s": "Rate of packets transferred per second (floods and DoS exhibit extreme spikes)",
+  "flow_bytes_per_s": "Throughput in bytes per second across the flow lifetime",
+  "flow_duration_ms": "Total active duration of the bidirectional flow in milliseconds",
+  "ack_count": "Total count of TCP ACK flags observed in both directions",
+  "fin_count": "Total count of TCP FIN flags observed indicating graceful connection closure",
+  "syn_count": "Total count of TCP SYN flags observed (high count without ACK indicates SYN flood)",
+  "syn_ack_ratio": "Ratio of SYN flags to ACK flags in the flow handshake",
+  "rst_count": "Total count of TCP RST flags observed indicating aborted connections"
+};
+
+function determineResponseAction(score) {
+  // Matches Dueling DQN response policy mapping:
+  // Low threat (< 0.20): ALLOW
+  // Mild threat (0.20 - 0.40): MONITOR
+  // Suspicious (0.40 - 0.50): THROTTLE
+  // Confirmed attack (>= 0.50): BLOCK
+  if (score >= 0.50) {
+    return { action: "BLOCK", badgeClass: "badge-invert" };
+  } else if (score >= 0.40) {
+    return { action: "THROTTLE", badgeClass: "badge" };
+  } else if (score >= 0.20) {
+    return { action: "MONITOR", badgeClass: "badge" };
+  } else {
+    return { action: "ALLOW", badgeClass: "badge" };
+  }
+}
+
+async function loadDashboard() {
+  const statusEl = document.getElementById("status-text");
+  try {
+    statusEl.textContent = "Loading data...";
+    const res = await fetch("/api/data");
+    if (!res.ok) throw new Error("Failed to load data");
+    const data = await res.json();
+    renderDashboard(data);
+    statusEl.textContent = "Updated " + new Date().toLocaleTimeString();
+  } catch (err) {
+    statusEl.textContent = "Error: " + err.message;
+  }
+}
+
+function renderDashboard(data) {
+  const replay = data.replay;
+  if (replay) {
+    // Summary Cards
+    document.getElementById("val-packets").textContent = replay.total_packets || 0;
+    document.getElementById("val-flows").textContent = replay.total_flows || 0;
+    
+    if (replay.metrics_research) {
+      document.getElementById("val-res-acc").textContent = (replay.metrics_research.accuracy * 100).toFixed(1) + "%";
+      document.getElementById("val-res-f1").textContent = "F1: " + replay.metrics_research.f1.toFixed(4) + " (tau = 0.50)";
+    }
+    
+    if (replay.metrics_operational) {
+      document.getElementById("val-ops-acc").textContent = (replay.metrics_operational.accuracy * 100).toFixed(1) + "%";
+      document.getElementById("val-ops-f1").textContent = "F1: " + replay.metrics_operational.f1.toFixed(4) + " (tau = 0.40)";
+    }
+
+    // Flows Table
+    const tbody = document.getElementById("flows-table-body");
+    tbody.innerHTML = "";
+
+    const flows = replay.flow_events || [];
+    if (flows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">No flows available</td></tr>';
+    } else {
+      flows.forEach(flow => {
+        const tr = document.createElement("tr");
+        const actionInfo = determineResponseAction(flow.attack_score);
+        const isAttackTruth = flow.ground_truth_label === "ATTACK";
+
+        tr.innerHTML = `
+          <td class="mono">${flow.flow_id}</td>
+          <td><strong>${flow.protocol_name}</strong></td>
+          <td class="mono">${flow.src_endpoint}</td>
+          <td class="mono">${flow.dst_endpoint}</td>
+          <td class="mono">${flow.packet_count}</td>
+          <td class="mono">${flow.duration_ms.toFixed(1)}</td>
+          <td class="mono"><strong>${flow.attack_score.toFixed(4)}</strong></td>
+          <td><span class="badge ${isAttackTruth ? 'badge-invert' : ''}">${flow.ground_truth_label}</span></td>
+          <td>${flow.prediction_label} (${flow.verdict})</td>
+          <td><span class="badge ${actionInfo.badgeClass}">${actionInfo.action}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+  }
+
+  // SHAP Table
+  const shap = data.shap;
+  if (shap && shap.global_importance) {
+    const shapTbody = document.getElementById("shap-table-body");
+    shapTbody.innerHTML = "";
+    shap.global_importance.forEach(item => {
+      const tr = document.createElement("tr");
+      const desc = FEATURE_DESCRIPTIONS[item.feature] || "Flow statistical metric";
+      tr.innerHTML = `
+        <td class="mono"><strong>#${item.rank}</strong></td>
+        <td class="mono"><strong>${item.feature}</strong></td>
+        <td class="mono">${item.mean_abs_shap.toFixed(4)}</td>
+        <td>${desc}</td>
+      `;
+      shapTbody.appendChild(tr);
+    });
+  }
+
+  // Figures Select
+  const select = document.getElementById("figure-select");
+  const currentVal = select.value;
+  select.innerHTML = "";
+  if (data.figures && data.figures.length > 0) {
+    data.figures.forEach(fig => {
+      const opt = document.createElement("option");
+      opt.value = fig;
+      opt.textContent = formatFigureName(fig);
+      select.appendChild(opt);
+    });
+    if (currentVal && data.figures.includes(currentVal)) {
+      select.value = currentVal;
+    } else {
+      select.value = data.figures[0];
+    }
+    changeFigure();
+  } else {
+    select.innerHTML = '<option value="">No figures found</option>';
+  }
+}
+
+function formatFigureName(filename) {
+  return filename
+    .replace(".png", "")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, l => l.toUpperCase());
+}
+
+function changeFigure() {
+  const select = document.getElementById("figure-select");
+  const display = document.getElementById("figure-display");
+  const caption = document.getElementById("figure-caption");
+  const val = select.value;
+
+  if (val) {
+    display.src = "/figures/" + val;
+    display.style.display = "inline-block";
+    caption.textContent = "Viewing: " + select.options[select.selectedIndex].text + " (reports/figures/" + val + ")";
+  } else {
+    display.style.display = "none";
+    caption.textContent = "";
+  }
+}
+
+async function runAnalysis() {
+  const btn = document.getElementById("run-btn");
+  const statusEl = document.getElementById("status-text");
+
+  btn.disabled = true;
+  btn.textContent = "Running Analysis...";
+  statusEl.textContent = "Executing packet-to-prediction replay pipeline...";
+
+  try {
+    const res = await fetch("/api/run-replay", { method: "POST" });
+    if (!res.ok) throw new Error("Server returned " + res.status);
+    const data = await res.json();
+    renderDashboard(data);
+    statusEl.textContent = "Replay complete! Updated " + new Date().toLocaleTimeString();
+  } catch (err) {
+    statusEl.textContent = "Execution failed: " + err.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Run Replay Analysis";
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadDashboard();
+});

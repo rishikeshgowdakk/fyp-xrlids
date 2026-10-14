@@ -93,6 +93,6 @@ artifacts:
 - model_id: fusion_weights.json
   model_type: fusion
   canonical_path: models/fusion/fusion_weights.json
-  sha256: 746fe3b7b2d5673616d413f29ac6141aa43b956c8d0a2d19f43ea404197a0cd6
-  size_bytes: 522
+  sha256: bf8212b38303a13fa7bd5fed5c4c34526b299652345dd54913cf8e6fa6aef4e2
+  size_bytes: 1004
   status: REGISTERED

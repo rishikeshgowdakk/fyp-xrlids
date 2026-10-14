@@ -31,30 +31,42 @@ All models were trained deterministically under seed `42` with strict train-vali
 
 ## Loading Models in Code
 
-### Random Forest
+### Random Forest (Tabular Flow Classifier)
 ```python
 import joblib
+import pandas as pd
+from xrlids.models.random_forest import RandomForestDetector
 
-rf = joblib.load("models/rf/random_forest_cicids2017.joblib")
-probabilities = rf.predict_proba(X_test)[:, 1]
+# Load the registered detector object
+detector = joblib.load("models/rf/random_forest_cicids2017.joblib")
+
+# predict_proba takes a pandas DataFrame with canonical R10 features
+# and returns 1D P(attack) scores directly (np.ndarray):
+probabilities = detector.predict_proba(X_test_df)
+predictions = detector.predict(X_test_df, threshold=0.50)
 ```
 
-### Supervised LSTM
+### Supervised LSTM (Temporal Sequence Classifier)
 ```python
-import torch
-from xrlids.models.lstm import SupervisedLSTM
+from xrlids.models.lstm import LSTMDetector
 
-model = SupervisedLSTM(input_dim=10, hidden_dim=32, num_layers=2, dropout=0.2)
-model.load_state_dict(torch.load("models/lstm/lstm_cicids2017.pt"))
-model.eval()
+# Load checkpoint (includes model state_dict, sequence length, and hyperparameters)
+detector = LSTMDetector.load("models/lstm/lstm_cicids2017.pt")
+
+# The internal PyTorch sequence network is automatically set to eval mode:
+# detector.model.eval()
 ```
 
-### Autonomous Response DQN
+### Autonomous Response DQN (Dueling Deep Q-Network)
 ```python
 import torch
-from xrlids.response.environment import DuelingQNetwork
+from xrlids.response.dqn.network import DuelingQNetwork
 
-q_net = DuelingQNetwork(state_dim=10, action_dim=4)
-q_net.load_state_dict(torch.load("models/dqn/dqn_4action_best.pt"))
+# Checkpoint contains online network weights, step count, and validation metrics
+checkpoint = torch.load("models/dqn/dqn_4action_best.pt", map_location="cpu")
+
+# 6-dimensional causal state vector: s_t = [S_t, ΔS_t, N_alert, a_(t-1), c_t, v_t]
+q_net = DuelingQNetwork(input_dim=6, action_dim=4)
+q_net.load_state_dict(checkpoint["online_net_state_dict"])
 q_net.eval()
 ```
