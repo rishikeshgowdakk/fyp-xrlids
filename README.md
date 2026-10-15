@@ -51,11 +51,11 @@ Controlled Response / Rollback
 
 ## Research Results
 
-Canonical in-domain test Fusion F1 scores across multi-file benchmark datasets:
+Authoritative in-domain test evaluation metrics across multi-file benchmark datasets:
 
-- **CIC-IDS2017:** F1 = **0.9745** ($\alpha = 0.50$)
-- **CSE-CIC-IDS2018:** F1 = **0.9603** ($\alpha = 0.00$)
-- **UNSW-NB15:** F1 = **0.8970** ($\alpha = 0.60$, R4 contract)
+- **CIC-IDS2017:** Accuracy = **0.9906 (99.06%)**, F1 = **0.9745**, ROC-AUC = **0.9989** (Fusion $\alpha = 0.50$, $N = 355,833$)
+- **CSE-CIC-IDS2018:** Accuracy = **0.9912 (99.12%)**, F1 = **0.9603**, ROC-AUC = **0.9966** (LSTM / Fusion $\alpha = 0.00$, $N = 1,662,419$)
+- **UNSW-NB15:** Accuracy = **0.8996 (89.96%)**, F1 = **0.8970**, ROC-AUC = **0.9674** (Fusion $\alpha = 0.60$, R4 contract, $N = 24,496$)
 
 Cross-dataset experiments show significant domain-shift limitations, which are documented in the research report.
 
@@ -73,10 +73,10 @@ pip install -r requirements.txt
 
 ### 2. Run Test Suite
 
-Execute the full 386-test verification suite:
+Execute the full 388-test verification suite:
 
 ```bash
-pytest -q
+.venv/bin/pytest -q
 ```
 
 ### 3. Run Replay Demonstration

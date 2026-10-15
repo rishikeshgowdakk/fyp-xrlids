@@ -29,7 +29,7 @@ artifacts:
   source_path: results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/random_forest.joblib
   canonical_path: models/rf/random_forest_unswnb15.joblib
   dataset: unsw_nb15
-  feature_contract: R10
+  feature_contract: R4
   sha256: c432eb067507ad5b29a542b372ac6d35e609e783a9e6094c9764d0cfe654ec7c
   size_bytes: 22639151
   test_f1: 0.8546
@@ -62,7 +62,7 @@ artifacts:
   source_path: results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/lstm.pt
   canonical_path: models/lstm/lstm_unswnb15.pt
   dataset: unsw_nb15
-  feature_contract: R10
+  feature_contract: R4
   sha256: 4d9386ff44c99eed822f8ace5c64429fab571b4f8aad847d6cc78bae5f308fbd
   size_bytes: 57813
   test_f1: 0.8637
