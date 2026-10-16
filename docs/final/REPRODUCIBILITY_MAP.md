@@ -69,10 +69,12 @@ To execute the complete 393-test verification suite:
 | Experiment ID | Description | Config Path | Reproduction Command | Primary Artifact Location |
 |:---|:---|:---|:---|:---|
 | `AUDIT-001` | Multi-file streaming dataset audit | `data/manifests/dataset_registry.yaml` | `.venv/bin/python scripts/phase1/03_run_audit.py` | `results/audits/` |
-| `EXP-P1-CIC2017-R10-001` | CIC-IDS2017 RF, LSTM, Fusion | `configs/experiments/p1_cicids2017_r10.yaml` | `.venv/bin/python scripts/phase1/run_experiment.py --config configs/experiments/p1_cicids2017_r10.yaml` | `results/experiments/EXP-P1-CIC2017-R10-001/` |
-| `EXP-P1-CSE2018-R10-MULTI-001` | CSE-CIC-IDS2018 RF, LSTM, Fusion | `configs/experiments/p1_cse_cic_ids2018_r10_multifile.yaml` | `.venv/bin/python scripts/phase1/run_experiment.py --config configs/experiments/p1_cse_cic_ids2018_r10_multifile.yaml` | `results/experiments/EXP-P1-CSE2018-R10-MULTI-001/` |
-| `EXP-P1-UNSWNB15-R10-MULTI-001` | UNSW-NB15 R4 Baselines | `configs/experiments/p1_unsw_nb15_r10_multifile.yaml` | `.venv/bin/python scripts/phase1/run_experiment.py --config configs/experiments/p1_unsw_nb15_r10_multifile.yaml` | `results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/` |
+| `EXP-P1-CIC2017-R10-001` | CIC-IDS2017 RF, LSTM, Fusion | `configs/experiments/p1_cicids2017_r10.yaml` | `.venv/bin/python scripts/phase1/run_experiment.py --config configs/experiments/p1_cicids2017_r10.yaml --seeds 42` | `results/experiments/EXP-P1-CIC2017-R10-001/` |
+| `EXP-P1-CSE2018-R10-MULTI-001` | CSE-CIC-IDS2018 RF, LSTM, Fusion | `configs/experiments/p1_cse_cic_ids2018_r10_multifile.yaml` | `.venv/bin/python scripts/phase1/run_experiment.py --config configs/experiments/p1_cse_cic_ids2018_r10_multifile.yaml --seeds 42` | `results/experiments/EXP-P1-CSE2018-R10-MULTI-001/` |
+| `EXP-P1-UNSWNB15-R10-MULTI-001` | UNSW-NB15 R4 Baselines | `configs/experiments/p1_unsw_nb15_r10_multifile.yaml` | `.venv/bin/python scripts/phase1/run_experiment.py --config configs/experiments/p1_unsw_nb15_r10_multifile.yaml --seeds 42` | `results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/` |
 | `EXP-P1-TRANSFER-*` | 6-Direction Cross-Dataset Transfer | `configs/experiments/p1_transfer_*.yaml` | `.venv/bin/python scripts/phase1/run_transfer.py` | `results/cross_dataset/` |
+
+*Note: `--seeds 42` reproduces the frozen single-seed Phase 1 artifacts. Without it, the runner uses each config's `seeds` list and writes multi-seed output to `seed_<n>/` subdirectories.*
 
 ---
 
