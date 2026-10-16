@@ -54,12 +54,29 @@ def test_registries_report_identical_metadata(manifest, registry):
     by_id = {a["model_id"]: a for a in registry["artifacts"]}
     for artifact in manifest["artifacts"]:
         peer = by_id[artifact["model_id"]]
-        for field in ("canonical_path", "sha256", "size_bytes", "model_type"):
-            assert artifact[field] == peer[field], (
-                f"{artifact['model_id']}: {field} differs between manifest and registry"
-            )
-        if "test_f1" in artifact:
-            assert artifact["test_f1"] == peer.get("test_f1")
+        assert artifact == peer, (
+            f"{artifact['model_id']}: manifest and registry metadata differ"
+        )
+
+
+def test_dqn_entries_document_policy_metrics(manifest):
+    """DQN agents are reinforcement-learning policies, not classifiers.
+
+    test_f1/test_accuracy are intentionally null, and the held-out test-stage
+    policy metrics must be recorded instead of leaving the entry undocumented.
+    """
+    dqn = [a for a in manifest["artifacts"] if a["model_type"] == "dqn"]
+    assert dqn, "expected DQN policy artifacts in the registry"
+    for artifact in dqn:
+        assert artifact["test_f1"] is None, f"{artifact['model_id']}: test_f1 must stay null"
+        assert artifact["test_accuracy"] is None, (
+            f"{artifact['model_id']}: test_accuracy must stay null"
+        )
+        assert "not applicable" in artifact["metrics_note"]
+        assert artifact["selection_metric"] == "mean_cost_per_flow"
+        assert artifact["selected_step"] > 0
+        assert artifact["test_mean_cost_per_flow"] > 0
+        assert artifact["test_metrics_source"].endswith("final_test_metrics.json")
 
 
 def test_declared_checksums_are_well_formed(manifest):

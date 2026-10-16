@@ -77,7 +77,7 @@ pip install -r requirements.txt
 
 ### 2. Run Test Suite
 
-Execute the full 393-test verification suite:
+Execute the full 394-test verification suite:
 
 ```bash
 .venv/bin/pytest -q

@@ -48,6 +48,18 @@ models/
 | **UNSW-NB15** | R4 (4 feat) | Supervised LSTM | 0.8683 | 0.8637 | 0.9334 | 0.8903 | 24,496 |
 | **UNSW-NB15** | R4 (4 feat) | **RF + LSTM Fusion ($\alpha=0.60$)** | **0.8996 (89.96%)** | **0.8970** | **0.9674** | **0.9538** | 24,496 |
 
+### DQN Response Policy (Held-Out `D_pol_test`, 355,865 Flows, `standard_enterprise` Regime)
+
+DQN agents are reinforcement-learning policies, not classifiers — F1/accuracy do not apply. Checkpoints were selected by the pre-registered rule `pre_registered_minimum_validation_cost` on `mean_cost_per_flow`:
+
+| Model | Selected Step | Validation Cost/Flow | Test Cost/Flow | Test FQR | Test BAS | Test ACI |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| `dqn_3action_best.pt` | 10,000 | 2.0437 | 1.4208 | 0.00% | 96.51% | 0.0019 |
+| `dqn_4action_best.pt` | 45,000 | 2.2416 | 5.3256 | 0.20% | 96.52% | 0.0214 |
+
+FQR = False Quarantine Rate · BAS = Business Availability Score · ACI = Action Chattering Index.
+Source: `results/phase2/EXP-P2-FINAL-TEST-001/final_test_metrics.json` (full metric block in [`registry/model_manifest.json`](registry/model_manifest.json)).
+
 ## Model Verification & Integrity
 
 Every artifact is cryptographically checksummed using SHA-256 in [`registry/model_manifest.json`](registry/model_manifest.json).

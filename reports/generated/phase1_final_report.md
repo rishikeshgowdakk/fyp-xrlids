@@ -2,9 +2,9 @@
 
 - **Platform**: XRL-IDARS (Intrusion Detection and Autonomous Response System)
 - **Phase**: 1 (Empirical Research Platform & Explainability)
-- **Git Commit**: `5f6a3afa818cd76378d825ee5502c4da51ba50d8`
+- **Git Commit**: `8937dc0692ca5c46a4f02d45eb85036cddbad04b (dirty)`
 - **Environment**: Python 3.14.4 · PyTorch 2.14.0+cpu · Scikit-Learn 1.9.1 · SHAP 0.52.0
-- **Verified Test Suite**: 393 passing tests (0 failures)
+- **Verified Test Suite**: 394 passing tests (0 failures)
 
 ---
 ## 1. Research Status Taxonomy
@@ -22,7 +22,7 @@ All claims and findings adhere strictly to four evidentiary tiers: `VERIFIED`, `
 | Baseline Ladder Architecture | `VERIFIED` | Majority Class, Logistic Regression, Decision Tree, Random Forest implemented and unit-tested |
 | CIC-IDS2017 Multi-File Baseline Ladder | `EMPIRICALLY OBSERVED` | Executed across all 8 files (`EXP-P1-CIC2017-R10-001`, RF acc 0.9815, F1 0.9512, ROC-AUC 0.9968) |
 | CSE-CIC-IDS2018 Multi-File Baseline Ladder | `EMPIRICALLY OBSERVED` | Executed across all 10 files (`EXP-P1-CSE2018-R10-MULTI-001`, RF acc 0.9723, F1 0.8861, ROC-AUC 0.9902) |
-| UNSW-NB15 Multi-File Baseline Ladder | `EMPIRICALLY OBSERVED` | Executed across both files (`EXP-P1-UNSWNB15-R10-MULTI-001`, native 4-feature RF acc 0.8588, F1 0.8546) |
+| UNSW-NB15 Multi-File Baseline Ladder | `EMPIRICALLY OBSERVED` | Executed across both files (`EXP-P1-UNSWNB15-R10-MULTI-001`, RF acc 0.8590, F1 0.8548, ROC-AUC 0.9487) |
 | Per-Attack-Family Failure Analysis | `EMPIRICALLY OBSERVED` | Low-footprint failures exposed: Infiltration (10.70% recall on CSE-2018, 0% on CIC), Web Brute Force (15.89%), XSS (2.78%) |
 | TreeSHAP Explainability | `EMPIRICALLY OBSERVED` | Evaluated on multi-file RF; top drivers `flow_duration_ms` / `packet_length_std` (CSE), `packet_length_std` (CIC) |
 | Platt Probability Calibration | `EMPIRICALLY OBSERVED` | Evaluated on multi-file validation sets; Brier score reduced across all benchmark models |
