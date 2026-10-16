@@ -172,15 +172,15 @@ Phase 1 established the empirical, statistical, and data-integrity foundation fo
 ### 3.4 Multi-Model In-Domain Evaluation
 | Dataset | Model Type | Accuracy | F1 Score | Recall | Precision | ROC-AUC |
 |:---|:---|:---:|:---:|:---:|:---:|:---:|
-| **CIC-IDS2017** | Random Forest | 0.9815 | 0.9512 | 0.9901 | 0.9152 | 0.9968 |
-| | Supervised LSTM | 0.9859 | 0.9633 | 0.9892 | 0.9387 | 0.9975 |
-| | **Tuned Score Fusion ($\alpha=0.50$)** | **0.9903** | **0.9745** | **0.9942** | **0.9556** | **0.9989** |
+| **CIC-IDS2017** | Random Forest | 0.9815 | 0.9512 | 0.9901 | 0.9151 | 0.9968 |
+| | Supervised LSTM | 0.9867 | 0.9633 | 0.9576 | 0.9691 | 0.9974 |
+| | **Tuned Score Fusion ($\alpha=0.50$)** | **0.9906** | **0.9745** | **0.9823** | **0.9669** | **0.9989** |
 | **CSE-CIC-IDS2018**| Random Forest | 0.9723 | 0.8861 | 0.9580 | 0.8242 | 0.9902 |
-| | **Supervised LSTM** | **0.9894** | **0.9603** | **0.9811** | **0.9404** | **0.9961** |
-| | Score Fusion ($\alpha=0.00$) | 0.9894 | 0.9603 | 0.9811 | 0.9404 | 0.9961 |
+| | **Supervised LSTM** | **0.9912** | **0.9603** | **0.9424** | **0.9790** | **0.9966** |
+| | Score Fusion ($\alpha=0.00$) | 0.9912 | 0.9603 | 0.9424 | 0.9790 | 0.9966 |
 | **UNSW-NB15** | Random Forest | 0.8590 | 0.8548 | 0.9223 | 0.7966 | 0.9487 |
-| | Supervised LSTM | 0.8671 | 0.8637 | 0.9251 | 0.8101 | 0.9520 |
-| | **Tuned Score Fusion ($\alpha=0.60$)** | **0.8996** | **0.8970** | **0.9412** | **0.8568** | **0.9674** |
+| | Supervised LSTM | 0.8683 | 0.8637 | 0.9269 | 0.8086 | 0.9334 |
+| | **Tuned Score Fusion ($\alpha=0.60$)** | **0.8996** | **0.8970** | **0.9711** | **0.8334** | **0.9674** |
 
 ### 3.5 Negative Finding: Attack-Family Blind Spots & Threshold Governance (Decision D-003)
 - Detailed per-class auditing revealed that despite >0.98 aggregate accuracy, models fail catastrophically on stealthy attack classes at the standard $\tau = 0.50$ cutoff (Infiltration recall = 10.70%, Web attacks recall = 2.78%).

@@ -42,7 +42,7 @@ All raw datasets are registered with authoritative SHA-256 cryptographic digests
 
 To verify physical file integrity:
 ```bash
-.venv/bin/python scripts/phase1/01_verify_checksums.py
+.venv/bin/python scripts/phase1/prepare_dataset.py verify
 ```
 
 ### Dataset Inventory:
@@ -54,11 +54,11 @@ To verify physical file integrity:
 
 ## 3. Test Suite Verification
 
-To execute the complete 386-test verification suite:
+To execute the complete 393-test verification suite:
 ```bash
 .venv/bin/pytest -q
 ```
-*Expected Result:* `386 passed in ~41s` (0 failures, 100% pass rate).
+*Expected Result:* `393 passed` (0 failures, 100% pass rate).
 
 ---
 
@@ -68,11 +68,11 @@ To execute the complete 386-test verification suite:
 
 | Experiment ID | Description | Config Path | Reproduction Command | Primary Artifact Location |
 |:---|:---|:---|:---|:---|
-| `AUDIT-001` | Multi-file streaming dataset audit | `configs/datasets/` | `.venv/bin/python scripts/phase1/03_run_audit.py` | `results/audits/` |
-| `EXP-P1-CIC2017-R10-001` | CIC-IDS2017 RF, LSTM, Fusion | `configs/experiments/cic_ids2017_r10.yaml` | `.venv/bin/python scripts/phase1/run_experiment.py --config configs/experiments/cic_ids2017_r10.yaml` | `results/experiments/EXP-P1-CIC2017-R10-001/` |
-| `EXP-P1-CSE2018-R10-MULTI-001` | CSE-CIC-IDS2018 RF, LSTM, Fusion | `configs/experiments/cse_cic_ids2018_r10_multi.yaml` | `.venv/bin/python scripts/phase1/run_experiment.py --config configs/experiments/cse_cic_ids2018_r10_multi.yaml` | `results/experiments/EXP-P1-CSE2018-R10-MULTI-001/` |
-| `EXP-P1-UNSWNB15-R10-MULTI-001` | UNSW-NB15 R4 Baselines | `configs/experiments/unsw_nb15_r10_multi.yaml` | `.venv/bin/python scripts/phase1/run_experiment.py --config configs/experiments/unsw_nb15_r10_multi.yaml` | `results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/` |
-| `EXP-P1-TRANSFER-*` | 6-Direction Cross-Dataset Transfer | `configs/experiments/transfer_*.yaml` | `.venv/bin/python scripts/phase1/run_transfer.py` | `results/cross_dataset/` |
+| `AUDIT-001` | Multi-file streaming dataset audit | `data/manifests/dataset_registry.yaml` | `.venv/bin/python scripts/phase1/03_run_audit.py` | `results/audits/` |
+| `EXP-P1-CIC2017-R10-001` | CIC-IDS2017 RF, LSTM, Fusion | `configs/experiments/p1_cicids2017_r10.yaml` | `.venv/bin/python scripts/phase1/run_experiment.py --config configs/experiments/p1_cicids2017_r10.yaml` | `results/experiments/EXP-P1-CIC2017-R10-001/` |
+| `EXP-P1-CSE2018-R10-MULTI-001` | CSE-CIC-IDS2018 RF, LSTM, Fusion | `configs/experiments/p1_cse_cic_ids2018_r10_multifile.yaml` | `.venv/bin/python scripts/phase1/run_experiment.py --config configs/experiments/p1_cse_cic_ids2018_r10_multifile.yaml` | `results/experiments/EXP-P1-CSE2018-R10-MULTI-001/` |
+| `EXP-P1-UNSWNB15-R10-MULTI-001` | UNSW-NB15 R4 Baselines | `configs/experiments/p1_unsw_nb15_r10_multifile.yaml` | `.venv/bin/python scripts/phase1/run_experiment.py --config configs/experiments/p1_unsw_nb15_r10_multifile.yaml` | `results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/` |
+| `EXP-P1-TRANSFER-*` | 6-Direction Cross-Dataset Transfer | `configs/experiments/p1_transfer_*.yaml` | `.venv/bin/python scripts/phase1/run_transfer.py` | `results/cross_dataset/` |
 
 ---
 
@@ -87,7 +87,7 @@ To execute the complete 386-test verification suite:
 | `EXP-P2C-SENSITIVITY-001` | 6D State Sensitivity & Ablation | `.venv/bin/python scripts/phase2/run_phase2c_sensitivity.py` | `results/phase2/EXP-P2C-SENSITIVITY-001/` |
 | `EXP-P2D-ROBUSTNESS-001` | Jitter & Out-of-Domain Stress | `.venv/bin/python scripts/phase2/run_phase2d_robustness.py` | `results/phase2/EXP-P2D-ROBUSTNESS-001/` |
 | `EXP-P2E-EXPLAINABILITY-001` | Dual-Layer Audit Cards (28,167 cards) | `.venv/bin/python scripts/phase2/run_phase2e_explainability.py` | `results/phase2/EXP-P2E-EXPLAINABILITY-001/` |
-| `EXP-P2-FINAL-TEST-001` | Authoritative Test on 355,865 Flows | `.venv/bin/python scripts/phase2/run_phase2_final_test.py` | `results/phase2/EXP-P2-FINAL-TEST-001/` |
+| `EXP-P2-FINAL-TEST-001` | Authoritative Test on 355,865 Flows | `.venv/bin/python scripts/phase2/run_final_test_evaluation.py` | `results/phase2/EXP-P2-FINAL-TEST-001/` |
 
 ---
 

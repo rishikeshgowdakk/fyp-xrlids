@@ -24,7 +24,7 @@ EXP-<PHASE>-<DATASET/DOMAIN>-<FEATURESET/SCOPE>-<NNN>
 | :--- | :---: | :--- | :---: | :--- | :--- | :---: | :--- |
 | `EXP-P1-CIC2017-R10-001` | RQ1, RQ2 | CIC-IDS2017 | `R10` | Baseline Ladder (RF, LSTM, Fusion) | `results/experiments/EXP-P1-CIC2017-R10-001/` | `DONE` | **RF F1: 0.9512**, **LSTM F1: 0.9633**, **Fusion F1: 0.9745** |
 | `EXP-P1-CSE2018-R10-MULTI-001` | RQ1, RQ2 | CSE-CIC-IDS2018 | `R10` | Baseline Ladder (RF, LSTM, Fusion) | `results/experiments/EXP-P1-CSE2018-R10-MULTI-001/` | `DONE` | **RF F1: 0.8861**, **LSTM F1: 0.9603**, **Fusion F1: 0.9603** |
-| `EXP-P1-UNSWNB15-R10-MULTI-001` | RQ1, RQ2 | UNSW-NB15 | `R10` | Baseline Ladder (RF, LSTM, Fusion) | `results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/` | `DONE` | **RF F1: 0.8546**, **LSTM F1: 0.8637**, **Fusion F1: 0.8970** |
+| `EXP-P1-UNSWNB15-R10-MULTI-001` | RQ1, RQ2 | UNSW-NB15 | `R4` | Baseline Ladder (RF, LSTM, Fusion) | `results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/` | `DONE` | **RF F1: 0.8548**, **LSTM F1: 0.8637**, **Fusion F1: 0.8970** |
 | `EXP-P1-TRANSFER-CIC-TO-CSE-R10-001` | RQ3 | CIC-17 → CSE-18 | `R10` (10 feat) | RF, LSTM, Fusion Transfer | `results/experiments/EXP-P1-TRANSFER-CIC-TO-CSE-R10-001/` | `DONE` | Target RF F1: **0.3286** (Δ -0.6225) |
 | `EXP-P1-TRANSFER-CSE-TO-CIC-R10-001` | RQ3 | CSE-18 → CIC-17 | `R10` (10 feat) | RF, LSTM, Fusion Transfer | `results/experiments/EXP-P1-TRANSFER-CSE-TO-CIC-R10-001/` | `DONE` | Target LSTM F1: **0.2601** (Δ -0.7003) |
 | `EXP-P1-TRANSFER-UNSW-TO-CIC-R4-001` | RQ3 | UNSW → CIC-17 | `transfer_common_4` | RF, LSTM, Fusion Transfer | `results/experiments/EXP-P1-TRANSFER-UNSW-TO-CIC-R4-001/` | `DONE` | Target Fusion F1: **0.3664** (Δ -0.5306) |

@@ -32,8 +32,8 @@ artifacts:
   feature_contract: R4
   sha256: c432eb067507ad5b29a542b372ac6d35e609e783a9e6094c9764d0cfe654ec7c
   size_bytes: 22639151
-  test_f1: 0.8546
-  test_accuracy: 0.8588
+  test_f1: 0.8548
+  test_accuracy: 0.8590
   status: REGISTERED
 - model_id: lstm_cicids2017.pt
   model_type: lstm
@@ -93,6 +93,6 @@ artifacts:
 - model_id: fusion_weights.json
   model_type: fusion
   canonical_path: models/fusion/fusion_weights.json
-  sha256: bf8212b38303a13fa7bd5fed5c4c34526b299652345dd54913cf8e6fa6aef4e2
-  size_bytes: 1004
+  sha256: fd50a413119d3ec3b0c7515125cf6e0f4a605aa52ca2739b9fcd951f8e081c72
+  size_bytes: 1005
   status: REGISTERED

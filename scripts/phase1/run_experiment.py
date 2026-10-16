@@ -86,6 +86,7 @@ from xrlids.preprocessing.cleaning import clean_dataset_frame  # noqa: E402
 from xrlids.preprocessing.pipeline import Preprocessor  # noqa: E402
 from xrlids.splitting.splitter import SplitConfig, build_splits  # noqa: E402
 from xrlids.utils.env import environment_fingerprint, git_commit  # noqa: E402
+from xrlids.utils.hashing import feature_schema_hash  # noqa: E402
 from xrlids.utils.logging_utils import get_logger  # noqa: E402
 from xrlids.utils.profiler import ResourceProfiler  # noqa: E402
 from xrlids.utils.seeding import set_global_seeds  # noqa: E402
@@ -183,6 +184,17 @@ def run_experiment_pipeline(
         registry=registry,
     )
     feature_names = list(population.features.columns)
+    # Record the contract that was actually realized. Datasets that cannot supply
+    # every feature of the requested rung fall back to the verified subset they
+    # natively support (e.g. UNSW-NB15 lacks TCP flags/IAT fields, so the
+    # requested R10 degrades to the 4-feature "R4" auxiliary contract). The
+    # effective contract and schema hash must describe the trained feature set,
+    # not the requested rung, or artifacts contradict their fitted preprocessor.
+    requested_features = registry.rung_features(rung)
+    effective_contract = rung if set(feature_names) == set(requested_features) else f"R{len(feature_names)}"
+    print(
+        f"       Effective feature contract: {effective_contract} ({len(feature_names)} features)"
+    )
     print(
         f"       Population loaded: {population.accounting.aggregate['raw_rows']:,} raw rows "
         f"-> {len(population.features):,} final modeling rows across {len(population.files)} files."
@@ -625,9 +637,9 @@ def run_experiment_pipeline(
         rows_train=len(train_df),
         rows_validation=len(val_df),
         rows_test=len(test_df),
-        feature_contract=rung,
+        feature_contract=effective_contract,
         feature_list=feature_names,
-        feature_schema_hash=registry.schema_hash(rung),
+        feature_schema_hash=feature_schema_hash(feature_names),
         preprocessing=preprocessor.metadata(),
         split_id=split_result.manifest.get("split_config_hash"),
         model=composite_model_config,

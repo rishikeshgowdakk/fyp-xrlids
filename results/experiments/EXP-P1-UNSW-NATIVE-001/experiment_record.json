@@ -3,7 +3,7 @@
     "experiment_id": "EXP-P1-UNSW-NATIVE-001",
     "git_commit": "49fe3b9d325b663d3004d91fa7b08d5ac23c49f6",
     "dataset_sha256": "734fe6642edf758f7c94d7d9149426b49d202fe8e7bf0bef47392489c3c0a559",
-    "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+    "feature_schema_hash": "7b2e3edf447d34b7d00c8f2a877c51599af42fd42e5ff63e6811c6b22eda12a4",
     "seed": 42,
     "created_at": "2026-10-01T22:00:31.798937+00:00",
     "software_environment": {
@@ -44,14 +44,14 @@
   "rows_train": 73512,
   "rows_validation": 24504,
   "rows_test": 24504,
-  "feature_contract": "R10",
+  "feature_contract": "R4",
   "feature_list": [
     "flow_duration_ms",
     "flow_packets_per_s",
     "flow_bytes_per_s",
     "packet_length_mean"
   ],
-  "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+  "feature_schema_hash": "7b2e3edf447d34b7d00c8f2a877c51599af42fd42e5ff63e6811c6b22eda12a4",
   "preprocessing": {
     "preprocessor_version": "1.0.0",
     "dataset": "unsw_nb15",

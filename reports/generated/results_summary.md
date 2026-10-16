@@ -17,7 +17,7 @@ All models were evaluated using the standardized **R10 feature rung** (10 canoni
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | **CIC-IDS2017** (`EXP-P1-CIC2017-R10-001`) | 355,833 | 0.9512 | 0.9633 | **0.9745** | **99.06%** | **0.9989** |
 | **CSE-CIC-IDS2018** (`EXP-P1-CSE2018-R10-MULTI-001`) | 1,662,419 | 0.8861 | 0.9603 | **0.9603** | **99.12%** | **0.9966** |
-| **UNSW-NB15** (`EXP-P1-UNSWNB15-R10-MULTI-001`) | 24,496 | 0.8546 | 0.8637 | **0.8970** | **90.34%** | **0.9582** |
+| **UNSW-NB15** (`EXP-P1-UNSWNB15-R10-MULTI-001`) | 24,496 | 0.8548 | 0.8637 | **0.8970** | **89.96%** | **0.9674** |
 
 ### Complete Baseline Ladder (CIC-IDS2017 Test Population = 355,833)
 
@@ -26,9 +26,9 @@ All models were evaluated using the standardized **R10 feature rung** (10 canoni
 | Prior Baseline | **Majority Class** | 0.8178 | 0.0000 | 0.0000 | 0.0000 | 1.0000 | 0.0000 | 0.5000 | 0.1822 |
 | Linear Baseline | **Logistic Regression** | 0.8918 | 0.6403 | 0.9264 | 0.7572 | 0.8841 | 0.1159 | 0.9292 | 0.8238 |
 | Tree Baseline | **Decision Tree** | 0.9744 | 0.8870 | 0.9851 | 0.9335 | 0.9720 | 0.0280 | 0.9945 | 0.9674 |
-| Ensemble | **Random Forest (200 trees)** | 0.9815 | 0.9151 | 0.9901 | 0.9512 | 0.9796 | 0.0204 | 0.9968 | 0.9824 |
+| Ensemble | **Random Forest (100 trees)** | 0.9815 | 0.9151 | 0.9901 | 0.9512 | 0.9796 | 0.0204 | 0.9968 | 0.9824 |
 | Recurrent | **Supervised LSTM (2-layer)** | 0.9867 | 0.9691 | 0.9576 | 0.9633 | 0.9932 | 0.0068 | 0.9974 | 0.9904 |
-| Hybrid Ensemble | **Score Fusion (α=0.40, Platt Calibrated)** | **0.9906** | **0.9669** | **0.9823** | **0.9745** | **0.9925** | **0.0075** | **0.9989** | **0.9947** |
+| Hybrid Ensemble | **Score Fusion (α=0.50, Platt Calibrated)** | **0.9906** | **0.9669** | **0.9823** | **0.9745** | **0.9925** | **0.0075** | **0.9989** | **0.9947** |
 
 ![Baseline Ladder Comparison](../figures/baseline_ladder_comparison.png)
 
