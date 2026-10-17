@@ -1,0 +1,1327 @@
+{
+  "rf": {
+    "threshold": 0.5,
+    "total_evaluated": 24504,
+    "confusion": {
+      "tn": 11170,
+      "fp": 2306,
+      "fn": 934,
+      "tp": 10094
+    },
+    "rates": {
+      "accuracy": 0.8677766895200784,
+      "precision": 0.8140322580645162,
+      "recall": 0.9153064925643816,
+      "f1": 0.8617039439986341,
+      "fpr": 0.1711190264173345,
+      "fnr": 0.08469350743561843,
+      "balanced_accuracy": 0.8720937330735234
+    },
+    "confidence_distributions": {
+      "true_positives": {
+        "count": 10094,
+        "mean": 0.8509821725686669,
+        "std": 0.1363900586054236,
+        "median": 0.8891633601660154,
+        "min": 0.5001058003466151,
+        "max": 1.0,
+        "p25": 0.7772056190910948,
+        "p75": 0.9639553000476169
+      },
+      "true_negatives": {
+        "count": 11170,
+        "mean": 0.07481778930803262,
+        "std": 0.15184670984630103,
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.4999936645166422,
+        "p25": 0.0,
+        "p75": 0.025639168659467283
+      },
+      "false_positives": {
+        "count": 2306,
+        "mean": 0.6741539260269451,
+        "std": 0.13148320955323062,
+        "median": 0.6512063571587396,
+        "min": 0.5001933815209408,
+        "max": 1.0,
+        "p25": 0.5538306704749116,
+        "p75": 0.7818499796431692
+      },
+      "false_negatives": {
+        "count": 934,
+        "mean": 0.4002573495344898,
+        "std": 0.1065988828063165,
+        "median": 0.45172209856589673,
+        "min": 0.06919959880307741,
+        "max": 0.4999828522933744,
+        "p25": 0.34865871726916925,
+        "p75": 0.4772112728100782
+      }
+    },
+    "difficult_samples": {
+      "worst_false_negatives": [
+        {
+          "index": 537,
+          "true_label": 1,
+          "predicted_score": 0.06919959880307741,
+          "predicted_label": 0,
+          "features": {
+            "flow_duration_ms": 619.8930053710938,
+            "flow_packets_per_s": 29.037269592285156,
+            "flow_bytes_per_s": 1432.5052490234375,
+            "packet_length_mean": 49.33333206176758
+          },
+          "provenance": {
+            "source_file": "UNSW_NB15_testing-set.csv",
+            "source_row_index": 6561,
+            "label_family": "Fuzzers",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 20537,
+          "true_label": 1,
+          "predicted_score": 0.06919959880307741,
+          "predicted_label": 0,
+          "features": {
+            "flow_duration_ms": 620.0980224609375,
+            "flow_packets_per_s": 29.02766990661621,
+            "flow_bytes_per_s": 1432.03173828125,
+            "packet_length_mean": 49.33333206176758
+          },
+          "provenance": {
+            "source_file": "UNSW_NB15_training-set.csv",
+            "source_row_index": 97029,
+            "label_family": "Fuzzers",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 15926,
+          "true_label": 1,
+          "predicted_score": 0.07392391561709101,
+          "predicted_label": 0,
+          "features": {
+            "flow_duration_ms": 2938.81396484375,
+            "flow_packets_per_s": 6.124919891357422,
+            "flow_bytes_per_s": 302.1627197265625,
+            "packet_length_mean": 49.33333206176758
+          },
+          "provenance": {
+            "source_file": "UNSW_NB15_training-set.csv",
+            "source_row_index": 50629,
+            "label_family": "Fuzzers",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 15677,
+          "true_label": 1,
+          "predicted_score": 0.08214353610593092,
+          "predicted_label": 0,
+          "features": {
+            "flow_duration_ms": 645.4879760742188,
+            "flow_packets_per_s": 27.885879516601562,
+            "flow_bytes_per_s": 1375.703369140625,
+            "packet_length_mean": 49.33333206176758
+          },
+          "provenance": {
+            "source_file": "UNSW_NB15_training-set.csv",
+            "source_row_index": 48589,
+            "label_family": "Fuzzers",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 6196,
+          "true_label": 1,
+          "predicted_score": 0.08257342456354834,
+          "predicted_label": 0,
+          "features": {
+            "flow_duration_ms": 0.010999999940395355,
+            "flow_packets_per_s": 181818.1875,
+            "flow_bytes_per_s": 146727280.0,
+            "packet_length_mean": 807.0
+          },
+          "provenance": {
+            "source_file": "UNSW_NB15_testing-set.csv",
+            "source_row_index": 65804,
+            "label_family": "Fuzzers",
+            "canonical_label": "ATTACK"
+          }
+        }
+      ],
+      "worst_false_positives": [
+        {
+          "index": 14700,
+          "true_label": 0,
+          "predicted_score": 1.0,
+          "predicted_label": 1,
+          "features": {
+            "flow_duration_ms": 0.012000000104308128,
+            "flow_packets_per_s": 166666.671875,
+            "flow_bytes_per_s": 74333336.0,
+            "packet_length_mean": 446.0
+          },
+          "provenance": {
+            "source_file": "UNSW_NB15_training-set.csv",
+            "source_row_index": 41408,
+            "label_family": "Normal",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 6682,
+          "true_label": 0,
+          "predicted_score": 1.0,
+          "predicted_label": 1,
+          "features": {
+            "flow_duration_ms": 0.012000000104308128,
+            "flow_packets_per_s": 166666.671875,
+            "flow_bytes_per_s": 18166666.0,
+            "packet_length_mean": 109.0
+          },
+          "provenance": {
+            "source_file": "UNSW_NB15_testing-set.csv",
+            "source_row_index": 69676,
+            "label_family": "Normal",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 7003,
+          "true_label": 0,
+          "predicted_score": 1.0,
+          "predicted_label": 1,
+          "features": {
+            "flow_duration_ms": 0.004999999888241291,
+            "flow_packets_per_s": 400000.0,
+            "flow_bytes_per_s": 593600000.0,
+            "packet_length_mean": 1484.0
+          },
+          "provenance": {
+            "source_file": "UNSW_NB15_testing-set.csv",
+            "source_row_index": 71339,
+            "label_family": "Normal",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 15562,
+          "true_label": 0,
+          "predicted_score": 1.0,
+          "predicted_label": 1,
+          "features": {
+            "flow_duration_ms": 0.010999999940395355,
+            "flow_packets_per_s": 181818.1875,
+            "flow_bytes_per_s": 267454544.0,
+            "packet_length_mean": 1471.0
+          },
+          "provenance": {
+            "source_file": "UNSW_NB15_training-set.csv",
+            "source_row_index": 47578,
+            "label_family": "Normal",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 21800,
+          "true_label": 0,
+          "predicted_score": 1.0,
+          "predicted_label": 1,
+          "features": {
+            "flow_duration_ms": 868.9660034179688,
+            "flow_packets_per_s": 202.53956604003906,
+            "flow_bytes_per_s": 215964.71875,
+            "packet_length_mean": 1066.2840576171875
+          },
+          "provenance": {
+            "source_file": "UNSW_NB15_training-set.csv",
+            "source_row_index": 107338,
+            "label_family": "Normal",
+            "canonical_label": "BENIGN"
+          }
+        }
+      ]
+    },
+    "duplicate_subset_analysis": null
+  },
+  "per_family": {
+    "threshold": 0.5,
+    "total_evaluated_rows": 24504,
+    "total_attack_families": 9,
+    "summary_table": [
+      {
+        "family": "Normal",
+        "is_attack": false,
+        "support": 13476,
+        "correct": 11170,
+        "false_positives": 2306,
+        "false_negatives": 0,
+        "detection_rate": 0.828881,
+        "error_rate": 0.171119
+      },
+      {
+        "family": "Exploits",
+        "is_attack": true,
+        "support": 5142,
+        "correct": 4995,
+        "false_positives": 0,
+        "false_negatives": 147,
+        "detection_rate": 0.971412,
+        "error_rate": 0.028588
+      },
+      {
+        "family": "Fuzzers",
+        "is_attack": true,
+        "support": 3098,
+        "correct": 2447,
+        "false_positives": 0,
+        "false_negatives": 651,
+        "detection_rate": 0.789864,
+        "error_rate": 0.210136
+      },
+      {
+        "family": "Reconnaissance",
+        "is_attack": true,
+        "support": 1435,
+        "correct": 1432,
+        "false_positives": 0,
+        "false_negatives": 3,
+        "detection_rate": 0.997909,
+        "error_rate": 0.002091
+      },
+      {
+        "family": "DoS",
+        "is_attack": true,
+        "support": 726,
+        "correct": 679,
+        "false_positives": 0,
+        "false_negatives": 47,
+        "detection_rate": 0.935262,
+        "error_rate": 0.064738
+      },
+      {
+        "family": "Generic",
+        "is_attack": true,
+        "support": 234,
+        "correct": 220,
+        "false_positives": 0,
+        "false_negatives": 14,
+        "detection_rate": 0.940171,
+        "error_rate": 0.059829
+      },
+      {
+        "family": "Shellcode",
+        "is_attack": true,
+        "support": 221,
+        "correct": 194,
+        "false_positives": 0,
+        "false_negatives": 27,
+        "detection_rate": 0.877828,
+        "error_rate": 0.122172
+      },
+      {
+        "family": "Analysis",
+        "is_attack": true,
+        "support": 83,
+        "correct": 45,
+        "false_positives": 0,
+        "false_negatives": 38,
+        "detection_rate": 0.542169,
+        "error_rate": 0.457831
+      },
+      {
+        "family": "Backdoor",
+        "is_attack": true,
+        "support": 66,
+        "correct": 59,
+        "false_positives": 0,
+        "false_negatives": 7,
+        "detection_rate": 0.893939,
+        "error_rate": 0.106061
+      },
+      {
+        "family": "Worms",
+        "is_attack": true,
+        "support": 23,
+        "correct": 23,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "detection_rate": 1.0,
+        "error_rate": 0.0
+      }
+    ],
+    "family_breakdown": {
+      "Analysis": {
+        "family": "Analysis",
+        "is_attack": true,
+        "support": 83,
+        "correct": 45,
+        "false_positives": 0,
+        "false_negatives": 38,
+        "detection_rate": 0.542169,
+        "error_rate": 0.457831
+      },
+      "Backdoor": {
+        "family": "Backdoor",
+        "is_attack": true,
+        "support": 66,
+        "correct": 59,
+        "false_positives": 0,
+        "false_negatives": 7,
+        "detection_rate": 0.893939,
+        "error_rate": 0.106061
+      },
+      "DoS": {
+        "family": "DoS",
+        "is_attack": true,
+        "support": 726,
+        "correct": 679,
+        "false_positives": 0,
+        "false_negatives": 47,
+        "detection_rate": 0.935262,
+        "error_rate": 0.064738
+      },
+      "Exploits": {
+        "family": "Exploits",
+        "is_attack": true,
+        "support": 5142,
+        "correct": 4995,
+        "false_positives": 0,
+        "false_negatives": 147,
+        "detection_rate": 0.971412,
+        "error_rate": 0.028588
+      },
+      "Fuzzers": {
+        "family": "Fuzzers",
+        "is_attack": true,
+        "support": 3098,
+        "correct": 2447,
+        "false_positives": 0,
+        "false_negatives": 651,
+        "detection_rate": 0.789864,
+        "error_rate": 0.210136
+      },
+      "Generic": {
+        "family": "Generic",
+        "is_attack": true,
+        "support": 234,
+        "correct": 220,
+        "false_positives": 0,
+        "false_negatives": 14,
+        "detection_rate": 0.940171,
+        "error_rate": 0.059829
+      },
+      "Normal": {
+        "family": "Normal",
+        "is_attack": false,
+        "support": 13476,
+        "correct": 11170,
+        "false_positives": 2306,
+        "false_negatives": 0,
+        "detection_rate": 0.828881,
+        "error_rate": 0.171119
+      },
+      "Reconnaissance": {
+        "family": "Reconnaissance",
+        "is_attack": true,
+        "support": 1435,
+        "correct": 1432,
+        "false_positives": 0,
+        "false_negatives": 3,
+        "detection_rate": 0.997909,
+        "error_rate": 0.002091
+      },
+      "Shellcode": {
+        "family": "Shellcode",
+        "is_attack": true,
+        "support": 221,
+        "correct": 194,
+        "false_positives": 0,
+        "false_negatives": 27,
+        "detection_rate": 0.877828,
+        "error_rate": 0.122172
+      },
+      "Worms": {
+        "family": "Worms",
+        "is_attack": true,
+        "support": 23,
+        "correct": 23,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "detection_rate": 1.0,
+        "error_rate": 0.0
+      }
+    }
+  },
+  "lstm": {
+    "threshold": 0.5,
+    "total_evaluated": 24496,
+    "confusion": {
+      "tn": 11105,
+      "fp": 2363,
+      "fn": 868,
+      "tp": 10160
+    },
+    "rates": {
+      "accuracy": 0.8681009144350098,
+      "precision": 0.8113071947616386,
+      "recall": 0.921291258614436,
+      "f1": 0.8628083733174812,
+      "fpr": 0.17545292545292546,
+      "fnr": 0.07870874138556402,
+      "balanced_accuracy": 0.8729191665807552
+    },
+    "confidence_distributions": {
+      "true_positives": {
+        "count": 10160,
+        "mean": 0.844897321946039,
+        "std": 0.10703014446146474,
+        "median": 0.8743000328540802,
+        "min": 0.500713586807251,
+        "max": 0.9924781322479248,
+        "p25": 0.7950793653726578,
+        "p75": 0.9249507486820221
+      },
+      "true_negatives": {
+        "count": 11105,
+        "mean": 0.051673101656779886,
+        "std": 0.1073832050344013,
+        "median": 0.00030713106389157474,
+        "min": 9.086772479349747e-06,
+        "max": 0.49992847442626953,
+        "p25": 8.003990660654381e-05,
+        "p75": 0.03753560408949852
+      },
+      "false_positives": {
+        "count": 2363,
+        "mean": 0.7653799930518833,
+        "std": 0.1228919718549066,
+        "median": 0.784476101398468,
+        "min": 0.5000667572021484,
+        "max": 0.9836461544036865,
+        "p25": 0.6754431426525116,
+        "p75": 0.8662381172180176
+      },
+      "false_negatives": {
+        "count": 868,
+        "mean": 0.3199190958956962,
+        "std": 0.1337256353095694,
+        "median": 0.34356722235679626,
+        "min": 0.0018751240568235517,
+        "max": 0.4996439516544342,
+        "p25": 0.22406114637851715,
+        "p75": 0.4375235587358475
+      }
+    },
+    "difficult_samples": {
+      "worst_false_negatives": [
+        {
+          "index": 22384,
+          "true_label": 1,
+          "predicted_score": 0.0018751240568235517,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "UNSW_NB15_training-set.csv",
+            "source_row_index": 116363,
+            "label_family": "Exploits",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 17915,
+          "true_label": 1,
+          "predicted_score": 0.0060691749677062035,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "UNSW_NB15_training-set.csv",
+            "source_row_index": 70687,
+            "label_family": "Exploits",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 18155,
+          "true_label": 1,
+          "predicted_score": 0.007127800490707159,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "UNSW_NB15_training-set.csv",
+            "source_row_index": 73681,
+            "label_family": "Fuzzers",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 19213,
+          "true_label": 1,
+          "predicted_score": 0.008256751112639904,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "UNSW_NB15_training-set.csv",
+            "source_row_index": 83793,
+            "label_family": "Exploits",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 490,
+          "true_label": 1,
+          "predicted_score": 0.011426513083279133,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "UNSW_NB15_testing-set.csv",
+            "source_row_index": 6077,
+            "label_family": "Exploits",
+            "canonical_label": "ATTACK"
+          }
+        }
+      ],
+      "worst_false_positives": [
+        {
+          "index": 21498,
+          "true_label": 0,
+          "predicted_score": 0.9836461544036865,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "UNSW_NB15_training-set.csv",
+            "source_row_index": 104197,
+            "label_family": "Normal",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 8282,
+          "true_label": 0,
+          "predicted_score": 0.9815537929534912,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "UNSW_NB15_testing-set.csv",
+            "source_row_index": 81409,
+            "label_family": "Normal",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 7536,
+          "true_label": 0,
+          "predicted_score": 0.9814852476119995,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "UNSW_NB15_testing-set.csv",
+            "source_row_index": 75704,
+            "label_family": "Normal",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 1203,
+          "true_label": 0,
+          "predicted_score": 0.9782606959342957,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "UNSW_NB15_testing-set.csv",
+            "source_row_index": 23674,
+            "label_family": "Normal",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 4317,
+          "true_label": 0,
+          "predicted_score": 0.9776152968406677,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "UNSW_NB15_testing-set.csv",
+            "source_row_index": 43258,
+            "label_family": "Normal",
+            "canonical_label": "BENIGN"
+          }
+        }
+      ]
+    },
+    "duplicate_subset_analysis": null
+  },
+  "fusion": {
+    "threshold": 0.5,
+    "total_evaluated": 24496,
+    "confusion": {
+      "tn": 11316,
+      "fp": 2152,
+      "fn": 318,
+      "tp": 10710
+    },
+    "rates": {
+      "accuracy": 0.8991672109732202,
+      "precision": 0.8326854299486861,
+      "recall": 0.971164309031556,
+      "f1": 0.8966094600251151,
+      "fpr": 0.1597861597861598,
+      "fnr": 0.02883569096844396,
+      "balanced_accuracy": 0.9056890746226982
+    },
+    "confidence_distributions": {
+      "true_positives": {
+        "count": 10710,
+        "mean": 0.8204295335185033,
+        "std": 0.11570230541642637,
+        "median": 0.847362822556223,
+        "min": 0.5000667673521586,
+        "max": 0.995268353356725,
+        "p25": 0.7417540512106706,
+        "p75": 0.9159068710608208
+      },
+      "true_negatives": {
+        "count": 11316,
+        "mean": 0.0844557386179609,
+        "std": 0.14797811127179178,
+        "median": 0.00034493433777242903,
+        "min": 3.634708991739899e-06,
+        "max": 0.49986495873192166,
+        "p25": 3.73525450413581e-05,
+        "p75": 0.08625745798870052
+      },
+      "false_positives": {
+        "count": 2152,
+        "mean": 0.6639298719122335,
+        "std": 0.10848996387747842,
+        "median": 0.649236558640562,
+        "min": 0.500184139747438,
+        "max": 0.9837191104888916,
+        "p25": 0.5763576007861708,
+        "p75": 0.7444122630742146
+      },
+      "false_negatives": {
+        "count": 318,
+        "mean": 0.428084814856981,
+        "std": 0.06238034363211309,
+        "median": 0.44569286502033056,
+        "min": 0.1572515094833038,
+        "max": 0.4993734553274948,
+        "p25": 0.39829377056222354,
+        "p75": 0.47589525409746597
+      }
+    },
+    "difficult_samples": {
+      "worst_false_negatives": [
+        {
+          "index": 21341,
+          "true_label": 1,
+          "predicted_score": 0.1572515094833038,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "UNSW_NB15_training-set.csv",
+            "source_row_index": 102582,
+            "label_family": "Fuzzers",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 16730,
+          "true_label": 1,
+          "predicted_score": 0.15957266999152048,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "UNSW_NB15_training-set.csv",
+            "source_row_index": 60449,
+            "label_family": "Fuzzers",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 5289,
+          "true_label": 1,
+          "predicted_score": 0.21393390093390854,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "UNSW_NB15_testing-set.csv",
+            "source_row_index": 52093,
+            "label_family": "Fuzzers",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 4685,
+          "true_label": 1,
+          "predicted_score": 0.21992173643474983,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "UNSW_NB15_testing-set.csv",
+            "source_row_index": 45741,
+            "label_family": "Fuzzers",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 21939,
+          "true_label": 1,
+          "predicted_score": 0.2234550676327643,
+          "predicted_label": 0,
+          "provenance": {
+            "source_file": "UNSW_NB15_training-set.csv",
+            "source_row_index": 109958,
+            "label_family": "Fuzzers",
+            "canonical_label": "ATTACK"
+          }
+        }
+      ],
+      "worst_false_positives": [
+        {
+          "index": 15554,
+          "true_label": 0,
+          "predicted_score": 0.9837191104888916,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "UNSW_NB15_training-set.csv",
+            "source_row_index": 47578,
+            "label_family": "Normal",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 6712,
+          "true_label": 0,
+          "predicted_score": 0.9607432754092395,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "UNSW_NB15_testing-set.csv",
+            "source_row_index": 69865,
+            "label_family": "Normal",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 7086,
+          "true_label": 0,
+          "predicted_score": 0.953352583482098,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "UNSW_NB15_testing-set.csv",
+            "source_row_index": 72034,
+            "label_family": "Normal",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 21056,
+          "true_label": 0,
+          "predicted_score": 0.951011705809423,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "UNSW_NB15_training-set.csv",
+            "source_row_index": 100634,
+            "label_family": "Normal",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 21739,
+          "true_label": 0,
+          "predicted_score": 0.9461249473938413,
+          "predicted_label": 1,
+          "provenance": {
+            "source_file": "UNSW_NB15_training-set.csv",
+            "source_row_index": 106596,
+            "label_family": "Normal",
+            "canonical_label": "BENIGN"
+          }
+        }
+      ]
+    },
+    "duplicate_subset_analysis": null
+  },
+  "per_family_lstm": {
+    "threshold": 0.5,
+    "total_evaluated_rows": 24496,
+    "total_attack_families": 9,
+    "summary_table": [
+      {
+        "family": "Normal",
+        "is_attack": false,
+        "support": 13468,
+        "correct": 11105,
+        "false_positives": 2363,
+        "false_negatives": 0,
+        "detection_rate": 0.824547,
+        "error_rate": 0.175453
+      },
+      {
+        "family": "Exploits",
+        "is_attack": true,
+        "support": 5142,
+        "correct": 4784,
+        "false_positives": 0,
+        "false_negatives": 358,
+        "detection_rate": 0.930377,
+        "error_rate": 0.069623
+      },
+      {
+        "family": "Fuzzers",
+        "is_attack": true,
+        "support": 3098,
+        "correct": 2830,
+        "false_positives": 0,
+        "false_negatives": 268,
+        "detection_rate": 0.913493,
+        "error_rate": 0.086507
+      },
+      {
+        "family": "Reconnaissance",
+        "is_attack": true,
+        "support": 1435,
+        "correct": 1304,
+        "false_positives": 0,
+        "false_negatives": 131,
+        "detection_rate": 0.908711,
+        "error_rate": 0.091289
+      },
+      {
+        "family": "DoS",
+        "is_attack": true,
+        "support": 726,
+        "correct": 658,
+        "false_positives": 0,
+        "false_negatives": 68,
+        "detection_rate": 0.906336,
+        "error_rate": 0.093664
+      },
+      {
+        "family": "Generic",
+        "is_attack": true,
+        "support": 234,
+        "correct": 224,
+        "false_positives": 0,
+        "false_negatives": 10,
+        "detection_rate": 0.957265,
+        "error_rate": 0.042735
+      },
+      {
+        "family": "Shellcode",
+        "is_attack": true,
+        "support": 221,
+        "correct": 203,
+        "false_positives": 0,
+        "false_negatives": 18,
+        "detection_rate": 0.918552,
+        "error_rate": 0.081448
+      },
+      {
+        "family": "Analysis",
+        "is_attack": true,
+        "support": 83,
+        "correct": 77,
+        "false_positives": 0,
+        "false_negatives": 6,
+        "detection_rate": 0.927711,
+        "error_rate": 0.072289
+      },
+      {
+        "family": "Backdoor",
+        "is_attack": true,
+        "support": 66,
+        "correct": 60,
+        "false_positives": 0,
+        "false_negatives": 6,
+        "detection_rate": 0.909091,
+        "error_rate": 0.090909
+      },
+      {
+        "family": "Worms",
+        "is_attack": true,
+        "support": 23,
+        "correct": 20,
+        "false_positives": 0,
+        "false_negatives": 3,
+        "detection_rate": 0.869565,
+        "error_rate": 0.130435
+      }
+    ],
+    "family_breakdown": {
+      "Analysis": {
+        "family": "Analysis",
+        "is_attack": true,
+        "support": 83,
+        "correct": 77,
+        "false_positives": 0,
+        "false_negatives": 6,
+        "detection_rate": 0.927711,
+        "error_rate": 0.072289
+      },
+      "Backdoor": {
+        "family": "Backdoor",
+        "is_attack": true,
+        "support": 66,
+        "correct": 60,
+        "false_positives": 0,
+        "false_negatives": 6,
+        "detection_rate": 0.909091,
+        "error_rate": 0.090909
+      },
+      "DoS": {
+        "family": "DoS",
+        "is_attack": true,
+        "support": 726,
+        "correct": 658,
+        "false_positives": 0,
+        "false_negatives": 68,
+        "detection_rate": 0.906336,
+        "error_rate": 0.093664
+      },
+      "Exploits": {
+        "family": "Exploits",
+        "is_attack": true,
+        "support": 5142,
+        "correct": 4784,
+        "false_positives": 0,
+        "false_negatives": 358,
+        "detection_rate": 0.930377,
+        "error_rate": 0.069623
+      },
+      "Fuzzers": {
+        "family": "Fuzzers",
+        "is_attack": true,
+        "support": 3098,
+        "correct": 2830,
+        "false_positives": 0,
+        "false_negatives": 268,
+        "detection_rate": 0.913493,
+        "error_rate": 0.086507
+      },
+      "Generic": {
+        "family": "Generic",
+        "is_attack": true,
+        "support": 234,
+        "correct": 224,
+        "false_positives": 0,
+        "false_negatives": 10,
+        "detection_rate": 0.957265,
+        "error_rate": 0.042735
+      },
+      "Normal": {
+        "family": "Normal",
+        "is_attack": false,
+        "support": 13468,
+        "correct": 11105,
+        "false_positives": 2363,
+        "false_negatives": 0,
+        "detection_rate": 0.824547,
+        "error_rate": 0.175453
+      },
+      "Reconnaissance": {
+        "family": "Reconnaissance",
+        "is_attack": true,
+        "support": 1435,
+        "correct": 1304,
+        "false_positives": 0,
+        "false_negatives": 131,
+        "detection_rate": 0.908711,
+        "error_rate": 0.091289
+      },
+      "Shellcode": {
+        "family": "Shellcode",
+        "is_attack": true,
+        "support": 221,
+        "correct": 203,
+        "false_positives": 0,
+        "false_negatives": 18,
+        "detection_rate": 0.918552,
+        "error_rate": 0.081448
+      },
+      "Worms": {
+        "family": "Worms",
+        "is_attack": true,
+        "support": 23,
+        "correct": 20,
+        "false_positives": 0,
+        "false_negatives": 3,
+        "detection_rate": 0.869565,
+        "error_rate": 0.130435
+      }
+    }
+  },
+  "per_family_fusion": {
+    "threshold": 0.5,
+    "total_evaluated_rows": 24496,
+    "total_attack_families": 9,
+    "summary_table": [
+      {
+        "family": "Normal",
+        "is_attack": false,
+        "support": 13468,
+        "correct": 11316,
+        "false_positives": 2152,
+        "false_negatives": 0,
+        "detection_rate": 0.840214,
+        "error_rate": 0.159786
+      },
+      {
+        "family": "Exploits",
+        "is_attack": true,
+        "support": 5142,
+        "correct": 5109,
+        "false_positives": 0,
+        "false_negatives": 33,
+        "detection_rate": 0.993582,
+        "error_rate": 0.006418
+      },
+      {
+        "family": "Fuzzers",
+        "is_attack": true,
+        "support": 3098,
+        "correct": 2839,
+        "false_positives": 0,
+        "false_negatives": 259,
+        "detection_rate": 0.916398,
+        "error_rate": 0.083602
+      },
+      {
+        "family": "Reconnaissance",
+        "is_attack": true,
+        "support": 1435,
+        "correct": 1434,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "detection_rate": 0.999303,
+        "error_rate": 0.000697
+      },
+      {
+        "family": "DoS",
+        "is_attack": true,
+        "support": 726,
+        "correct": 714,
+        "false_positives": 0,
+        "false_negatives": 12,
+        "detection_rate": 0.983471,
+        "error_rate": 0.016529
+      },
+      {
+        "family": "Generic",
+        "is_attack": true,
+        "support": 234,
+        "correct": 233,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "detection_rate": 0.995726,
+        "error_rate": 0.004274
+      },
+      {
+        "family": "Shellcode",
+        "is_attack": true,
+        "support": 221,
+        "correct": 215,
+        "false_positives": 0,
+        "false_negatives": 6,
+        "detection_rate": 0.972851,
+        "error_rate": 0.027149
+      },
+      {
+        "family": "Analysis",
+        "is_attack": true,
+        "support": 83,
+        "correct": 80,
+        "false_positives": 0,
+        "false_negatives": 3,
+        "detection_rate": 0.963855,
+        "error_rate": 0.036145
+      },
+      {
+        "family": "Backdoor",
+        "is_attack": true,
+        "support": 66,
+        "correct": 64,
+        "false_positives": 0,
+        "false_negatives": 2,
+        "detection_rate": 0.969697,
+        "error_rate": 0.030303
+      },
+      {
+        "family": "Worms",
+        "is_attack": true,
+        "support": 23,
+        "correct": 22,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "detection_rate": 0.956522,
+        "error_rate": 0.043478
+      }
+    ],
+    "family_breakdown": {
+      "Analysis": {
+        "family": "Analysis",
+        "is_attack": true,
+        "support": 83,
+        "correct": 80,
+        "false_positives": 0,
+        "false_negatives": 3,
+        "detection_rate": 0.963855,
+        "error_rate": 0.036145
+      },
+      "Backdoor": {
+        "family": "Backdoor",
+        "is_attack": true,
+        "support": 66,
+        "correct": 64,
+        "false_positives": 0,
+        "false_negatives": 2,
+        "detection_rate": 0.969697,
+        "error_rate": 0.030303
+      },
+      "DoS": {
+        "family": "DoS",
+        "is_attack": true,
+        "support": 726,
+        "correct": 714,
+        "false_positives": 0,
+        "false_negatives": 12,
+        "detection_rate": 0.983471,
+        "error_rate": 0.016529
+      },
+      "Exploits": {
+        "family": "Exploits",
+        "is_attack": true,
+        "support": 5142,
+        "correct": 5109,
+        "false_positives": 0,
+        "false_negatives": 33,
+        "detection_rate": 0.993582,
+        "error_rate": 0.006418
+      },
+      "Fuzzers": {
+        "family": "Fuzzers",
+        "is_attack": true,
+        "support": 3098,
+        "correct": 2839,
+        "false_positives": 0,
+        "false_negatives": 259,
+        "detection_rate": 0.916398,
+        "error_rate": 0.083602
+      },
+      "Generic": {
+        "family": "Generic",
+        "is_attack": true,
+        "support": 234,
+        "correct": 233,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "detection_rate": 0.995726,
+        "error_rate": 0.004274
+      },
+      "Normal": {
+        "family": "Normal",
+        "is_attack": false,
+        "support": 13468,
+        "correct": 11316,
+        "false_positives": 2152,
+        "false_negatives": 0,
+        "detection_rate": 0.840214,
+        "error_rate": 0.159786
+      },
+      "Reconnaissance": {
+        "family": "Reconnaissance",
+        "is_attack": true,
+        "support": 1435,
+        "correct": 1434,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "detection_rate": 0.999303,
+        "error_rate": 0.000697
+      },
+      "Shellcode": {
+        "family": "Shellcode",
+        "is_attack": true,
+        "support": 221,
+        "correct": 215,
+        "false_positives": 0,
+        "false_negatives": 6,
+        "detection_rate": 0.972851,
+        "error_rate": 0.027149
+      },
+      "Worms": {
+        "family": "Worms",
+        "is_attack": true,
+        "support": 23,
+        "correct": 22,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "detection_rate": 0.956522,
+        "error_rate": 0.043478
+      }
+    }
+  },
+  "model_disagreements": {
+    "threshold": 0.5,
+    "aligned_population_size": 24496,
+    "disagreement_count": 3810,
+    "disagreement_fraction": 0.1555355976485957,
+    "rf_pos_lstm_neg": {
+      "count": 1841,
+      "true_attacks_rf_right": 787,
+      "true_benign_rf_false_alarm": 1054
+    },
+    "rf_neg_lstm_pos": {
+      "count": 1969,
+      "true_attacks_lstm_right": 853,
+      "true_benign_lstm_false_alarm": 1116
+    },
+    "fusion_analysis": {
+      "fusion_rescues_when_one_model_failed": 2668,
+      "fusion_rescues_when_both_models_failed": 0,
+      "fusion_degradations_when_both_were_right": 0,
+      "fusion_accuracy_on_disagreements": 0.700262467191601
+    },
+    "representative_disagreement_examples": [
+      {
+        "index": 0,
+        "true_label": 0,
+        "rf_score": 0.7733072369487453,
+        "rf_pred": 1,
+        "lstm_score": 0.17461076378822327,
+        "lstm_pred": 0,
+        "fusion_score": 0.5338286476845364,
+        "fusion_pred": 1
+      },
+      {
+        "index": 1,
+        "true_label": 0,
+        "rf_score": 0.6048158066052969,
+        "rf_pred": 1,
+        "lstm_score": 0.15502086281776428,
+        "lstm_pred": 0,
+        "fusion_score": 0.42489782909028384,
+        "fusion_pred": 0
+      },
+      {
+        "index": 2,
+        "true_label": 0,
+        "rf_score": 0.7902918393847906,
+        "rf_pred": 1,
+        "lstm_score": 0.19411329925060272,
+        "lstm_pred": 0,
+        "fusion_score": 0.5518204233311155,
+        "fusion_pred": 1
+      },
+      {
+        "index": 5,
+        "true_label": 0,
+        "rf_score": 0.4413671775869085,
+        "rf_pred": 0,
+        "lstm_score": 0.6543827652931213,
+        "lstm_pred": 1,
+        "fusion_score": 0.5265734126693937,
+        "fusion_pred": 1
+      },
+      {
+        "index": 6,
+        "true_label": 0,
+        "rf_score": 0.5289635722930293,
+        "rf_pred": 1,
+        "lstm_score": 0.49150556325912476,
+        "lstm_pred": 0,
+        "fusion_score": 0.5139803686794675,
+        "fusion_pred": 1
+      }
+    ]
+  }
+}

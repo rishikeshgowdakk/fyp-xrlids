@@ -1,0 +1,81 @@
+{
+  "metadata": {
+    "experiment_id": "unassigned",
+    "git_commit": null,
+    "dataset_sha256": null,
+    "feature_schema_hash": "7b2e3edf447d34b7d00c8f2a877c51599af42fd42e5ff63e6811c6b22eda12a4",
+    "seed": null,
+    "created_at": "2026-10-16T23:39:46.758016+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "4798758c58044eee89ff6b8f39851bbb7ec439e9",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {
+      "preprocessor_hash": "5a2bf4c4ff830ee42cb54fc6ac3da3168c208271cce8440dcfca8a0565c46774"
+    }
+  },
+  "preprocessor_version": "1.0.0",
+  "dataset": "unsw_nb15",
+  "feature_list": [
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean"
+  ],
+  "n_features": 4,
+  "feature_order": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "scaler_type": "StandardScaler",
+  "missing_policy": "median_train",
+  "n_train_rows": 73512,
+  "fitted_at": "2026-10-16T23:37:51.304498+00:00",
+  "git_commit": "4798758c58044eee89ff6b8f39851bbb7ec439e9",
+  "feature_schema_hash": "7b2e3edf447d34b7d00c8f2a877c51599af42fd42e5ff63e6811c6b22eda12a4",
+  "scaler_params": {
+    "mean": [
+      1405.9299251772684,
+      11578.987603603211,
+      5376326.000312877,
+      252.92010483133066
+    ],
+    "scale": [
+      4772.261102862087,
+      82712.16064919147,
+      41429650.08734629,
+      262.7431318404814
+    ],
+    "var": [
+      22774476.03389046,
+      6841301519.257657,
+      1716415906359953.0,
+      69033.9533293446
+    ]
+  },
+  "imputation_medians": {
+    "flow_duration_ms": 608.7705078125,
+    "flow_packets_per_s": 42.231863021850586,
+    "flow_bytes_per_s": 7901.37939453125,
+    "packet_length_mean": 120.60952377319336
+  },
+  "preprocessor_hash": "5a2bf4c4ff830ee42cb54fc6ac3da3168c208271cce8440dcfca8a0565c46774"
+}

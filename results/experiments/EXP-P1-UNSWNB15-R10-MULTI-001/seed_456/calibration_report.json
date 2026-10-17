@@ -1,0 +1,402 @@
+{
+  "validation_calibration": {
+    "rf": {
+      "brier_score": 0.08865803591278702,
+      "expected_calibration_error": 0.019744386005983754,
+      "n_bins": 10,
+      "population_size": 24504,
+      "reliability_curve": [
+        {
+          "bin": 0,
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 8960,
+          "mean_predicted": 0.004420142058361349,
+          "observed_frequency": 0.0015625,
+          "gap": 0.002857642058361349
+        },
+        {
+          "bin": 1,
+          "lower": 0.1,
+          "upper": 0.2,
+          "count": 426,
+          "mean_predicted": 0.15632487103896173,
+          "observed_frequency": 0.16901408450704225,
+          "gap": -0.012689213468080524
+        },
+        {
+          "bin": 2,
+          "lower": 0.2,
+          "upper": 0.30000000000000004,
+          "count": 526,
+          "mean_predicted": 0.24861593201541834,
+          "observed_frequency": 0.19011406844106463,
+          "gap": 0.05850186357435372
+        },
+        {
+          "bin": 3,
+          "lower": 0.30000000000000004,
+          "upper": 0.4,
+          "count": 546,
+          "mean_predicted": 0.3534750885897094,
+          "observed_frequency": 0.27289377289377287,
+          "gap": 0.08058131569593652
+        },
+        {
+          "bin": 4,
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 1710,
+          "mean_predicted": 0.46709420905156307,
+          "observed_frequency": 0.3736842105263158,
+          "gap": 0.09340999852524728
+        },
+        {
+          "bin": 5,
+          "lower": 0.5,
+          "upper": 0.6000000000000001,
+          "count": 1642,
+          "mean_predicted": 0.5436846946856605,
+          "observed_frequency": 0.4646772228989038,
+          "gap": 0.07900747178675671
+        },
+        {
+          "bin": 6,
+          "lower": 0.6000000000000001,
+          "upper": 0.7000000000000001,
+          "count": 1322,
+          "mean_predicted": 0.653598801945807,
+          "observed_frequency": 0.653555219364599,
+          "gap": 4.3582581207957105e-05
+        },
+        {
+          "bin": 7,
+          "lower": 0.7000000000000001,
+          "upper": 0.8,
+          "count": 1805,
+          "mean_predicted": 0.7578977520777683,
+          "observed_frequency": 0.7573407202216067,
+          "gap": 0.0005570318561616272
+        },
+        {
+          "bin": 8,
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 2732,
+          "mean_predicted": 0.8481804830507346,
+          "observed_frequency": 0.8587115666178624,
+          "gap": -0.010531083567127841
+        },
+        {
+          "bin": 9,
+          "lower": 0.9,
+          "upper": 1.0,
+          "count": 4835,
+          "mean_predicted": 0.962824894897608,
+          "observed_frequency": 0.9749741468459152,
+          "gap": -0.012149251948307183
+        }
+      ],
+      "interpretation": "score treated as probability: a well-calibrated model has ECE near 0. If ECE is large, do not call the raw score 'confidence'."
+    },
+    "lstm": {
+      "brier_score": 0.09307636866509482,
+      "expected_calibration_error": 0.009809237533575587,
+      "n_bins": 10,
+      "population_size": 24496,
+      "reliability_curve": [
+        {
+          "bin": 0,
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 9303,
+          "mean_predicted": 0.008135814230256036,
+          "observed_frequency": 0.008491884338385467,
+          "gap": -0.00035607010812943075
+        },
+        {
+          "bin": 1,
+          "lower": 0.1,
+          "upper": 0.2,
+          "count": 1034,
+          "mean_predicted": 0.1462181074764558,
+          "observed_frequency": 0.12379110251450677,
+          "gap": 0.022427004961949035
+        },
+        {
+          "bin": 2,
+          "lower": 0.2,
+          "upper": 0.30000000000000004,
+          "count": 624,
+          "mean_predicted": 0.24545012113566583,
+          "observed_frequency": 0.2692307692307692,
+          "gap": -0.023780648095103385
+        },
+        {
+          "bin": 3,
+          "lower": 0.30000000000000004,
+          "upper": 0.4,
+          "count": 594,
+          "mean_predicted": 0.34902034770158,
+          "observed_frequency": 0.38552188552188554,
+          "gap": -0.03650153782030552
+        },
+        {
+          "bin": 4,
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 633,
+          "mean_predicted": 0.45168897584904616,
+          "observed_frequency": 0.5007898894154819,
+          "gap": -0.0491009135664357
+        },
+        {
+          "bin": 5,
+          "lower": 0.5,
+          "upper": 0.6000000000000001,
+          "count": 761,
+          "mean_predicted": 0.5507702620677973,
+          "observed_frequency": 0.5873850197109067,
+          "gap": -0.0366147576431094
+        },
+        {
+          "bin": 6,
+          "lower": 0.6000000000000001,
+          "upper": 0.7000000000000001,
+          "count": 1144,
+          "mean_predicted": 0.6548319195846578,
+          "observed_frequency": 0.659965034965035,
+          "gap": -0.005133115380377196
+        },
+        {
+          "bin": 7,
+          "lower": 0.7000000000000001,
+          "upper": 0.8,
+          "count": 2046,
+          "mean_predicted": 0.7553665340238069,
+          "observed_frequency": 0.7424242424242424,
+          "gap": 0.012942291599564504
+        },
+        {
+          "bin": 8,
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 4397,
+          "mean_predicted": 0.8550009141598394,
+          "observed_frequency": 0.8408005458267,
+          "gap": 0.014200368333139313
+        },
+        {
+          "bin": 9,
+          "lower": 0.9,
+          "upper": 1.0,
+          "count": 3960,
+          "mean_predicted": 0.937507085953698,
+          "observed_frequency": 0.9315656565656566,
+          "gap": 0.00594142938804143
+        }
+      ],
+      "interpretation": "score treated as probability: a well-calibrated model has ECE near 0. If ECE is large, do not call the raw score 'confidence'."
+    },
+    "fusion": {
+      "brier_score": 0.0760498038292538,
+      "expected_calibration_error": 0.06674765614495805,
+      "n_bins": 10,
+      "population_size": 24496,
+      "reliability_curve": [
+        {
+          "bin": 0,
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 8587,
+          "mean_predicted": 0.0060958624797571425,
+          "observed_frequency": 0.0,
+          "gap": 0.0060958624797571425
+        },
+        {
+          "bin": 1,
+          "lower": 0.1,
+          "upper": 0.2,
+          "count": 481,
+          "mean_predicted": 0.14863267381139725,
+          "observed_frequency": 0.006237006237006237,
+          "gap": 0.142395667574391
+        },
+        {
+          "bin": 2,
+          "lower": 0.2,
+          "upper": 0.30000000000000004,
+          "count": 554,
+          "mean_predicted": 0.25342104992895453,
+          "observed_frequency": 0.03790613718411552,
+          "gap": 0.21551491274483903
+        },
+        {
+          "bin": 3,
+          "lower": 0.30000000000000004,
+          "upper": 0.4,
+          "count": 1118,
+          "mean_predicted": 0.3535113097517275,
+          "observed_frequency": 0.0626118067978533,
+          "gap": 0.29089950295387423
+        },
+        {
+          "bin": 4,
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 1002,
+          "mean_predicted": 0.45011344322031943,
+          "observed_frequency": 0.22355289421157684,
+          "gap": 0.2265605490087426
+        },
+        {
+          "bin": 5,
+          "lower": 0.5,
+          "upper": 0.6000000000000001,
+          "count": 1270,
+          "mean_predicted": 0.5544184448194666,
+          "observed_frequency": 0.46062992125984253,
+          "gap": 0.09378852355962403
+        },
+        {
+          "bin": 6,
+          "lower": 0.6000000000000001,
+          "upper": 0.7000000000000001,
+          "count": 2146,
+          "mean_predicted": 0.6505615861689186,
+          "observed_frequency": 0.6826654240447344,
+          "gap": -0.03210383787581583
+        },
+        {
+          "bin": 7,
+          "lower": 0.7000000000000001,
+          "upper": 0.8,
+          "count": 2386,
+          "mean_predicted": 0.7539513963901462,
+          "observed_frequency": 0.8252305113160101,
+          "gap": -0.07127911492586392
+        },
+        {
+          "bin": 8,
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 3685,
+          "mean_predicted": 0.8522416303881454,
+          "observed_frequency": 0.9381275440976934,
+          "gap": -0.08588591370954801
+        },
+        {
+          "bin": 9,
+          "lower": 0.9,
+          "upper": 1.0,
+          "count": 3267,
+          "mean_predicted": 0.9384723904483978,
+          "observed_frequency": 0.98989898989899,
+          "gap": -0.051426599450592136
+        }
+      ],
+      "interpretation": "score treated as probability: a well-calibrated model has ECE near 0. If ECE is large, do not call the raw score 'confidence'."
+    }
+  },
+  "test_calibration": {
+    "rf": {
+      "brier_score": 0.08835778452162564,
+      "expected_calibration_error": 0.019159733563828572,
+      "n_bins": 10,
+      "population_size": 24504,
+      "reliability_curve": [
+        {
+          "bin": 0,
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 9715,
+          "mean_predicted": 0.018657130734036204,
+          "observed_frequency": 0.015337107565620175,
+          "gap": 0.0033200231684160295
+        },
+        {
+          "bin": 1,
+          "lower": 0.1,
+          "upper": 0.2,
+          "count": 554,
+          "mean_predicted": 0.14773973353484832,
+          "observed_frequency": 0.2292418772563177,
+          "gap": -0.08150214372146938
+        },
+        {
+          "bin": 2,
+          "lower": 0.2,
+          "upper": 0.30000000000000004,
+          "count": 520,
+          "mean_predicted": 0.2542390529871299,
+          "observed_frequency": 0.3384615384615385,
+          "gap": -0.08422248547440858
+        },
+        {
+          "bin": 3,
+          "lower": 0.30000000000000004,
+          "upper": 0.4,
+          "count": 1484,
+          "mean_predicted": 0.3525510135754535,
+          "observed_frequency": 0.3692722371967655,
+          "gap": -0.01672122362131201
+        },
+        {
+          "bin": 4,
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 1009,
+          "mean_predicted": 0.4472305567972454,
+          "observed_frequency": 0.4717542120911794,
+          "gap": -0.02452365529393402
+        },
+        {
+          "bin": 5,
+          "lower": 0.5,
+          "upper": 0.6000000000000001,
+          "count": 688,
+          "mean_predicted": 0.5455142233770847,
+          "observed_frequency": 0.5072674418604651,
+          "gap": 0.03824678151661953
+        },
+        {
+          "bin": 6,
+          "lower": 0.6000000000000001,
+          "upper": 0.7000000000000001,
+          "count": 739,
+          "mean_predicted": 0.6508604344734439,
+          "observed_frequency": 0.6427604871447903,
+          "gap": 0.0080999473286536
+        },
+        {
+          "bin": 7,
+          "lower": 0.7000000000000001,
+          "upper": 0.8,
+          "count": 1075,
+          "mean_predicted": 0.7541589206282118,
+          "observed_frequency": 0.7172093023255814,
+          "gap": 0.03694961830263033
+        },
+        {
+          "bin": 8,
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 2658,
+          "mean_predicted": 0.8608113901813901,
+          "observed_frequency": 0.8066215199398044,
+          "gap": 0.054189870241585725
+        },
+        {
+          "bin": 9,
+          "lower": 0.9,
+          "upper": 1.0,
+          "count": 6062,
+          "mean_predicted": 0.9452866412873426,
+          "observed_frequency": 0.9589244473771033,
+          "gap": -0.013637806089760618
+        }
+      ],
+      "interpretation": "score treated as probability: a well-calibrated model has ECE near 0. If ECE is large, do not call the raw score 'confidence'."
+    }
+  }
+}

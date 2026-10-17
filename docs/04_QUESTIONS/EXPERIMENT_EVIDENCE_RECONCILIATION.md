@@ -107,6 +107,9 @@ The results confirm that **`data/manifests/dataset_registry.yaml` is the canonic
 > [!CAUTION]
 > The repository **must not** claim that empirical results have been averaged across three random seeds. All committed multi-file performance figures reflect **single-seed (seed=42)** execution.
 
+> [!NOTE]
+> **Update (2026-10-17).** A 3-seed robustness sweep (seeds 42/123/456) has since been executed for all three benchmarks, with per-seed artifacts under `results/experiments/<EXP>/seed_<n>/` and mean ± std in `reports/generated/multi_seed_report.md`. The canonical headline figures remain **single-seed (seed=42)**; seed 42 exactly reproduces the frozen artifacts, so the two are consistent rather than competing claims.
+
 ---
 
 ## 6. Model Evidence Matrix

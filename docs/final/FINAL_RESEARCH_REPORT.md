@@ -182,6 +182,18 @@ Phase 1 established the empirical, statistical, and data-integrity foundation fo
 | | Supervised LSTM | 0.8683 | 0.8637 | 0.9269 | 0.8086 | 0.9334 |
 | | **Tuned Score Fusion ($\alpha=0.60$)** | **0.8996** | **0.8970** | **0.9711** | **0.8334** | **0.9674** |
 
+### 3.4.1 Multi-Seed Robustness (Seeds 42 / 123 / 456)
+
+All three benchmarks were re-run end-to-end with seeds 42, 123 and 456 (population std; per-seed records under `results/experiments/<EXP>/seed_<n>/`). Seed 42 reproduces the frozen single-seed artifacts **exactly**, and the fused detector is highly seed-stable:
+
+| Dataset | Fusion Accuracy | Fusion F1 | Fusion ROC-AUC |
+|:---|:---:|:---:|:---:|
+| CIC-IDS2017 | 0.9903 ± 0.0005 | 0.9735 ± 0.0016 | 0.9986 ± 0.0002 |
+| CSE-CIC-IDS2018 | 0.9912 ± 0.0001 | 0.9602 ± 0.0004 | 0.9965 ± 0.0000 |
+| UNSW-NB15 | 0.8988 ± 0.0008 | 0.8963 ± 0.0006 | 0.9674 ± 0.0004 |
+
+Full RF / LSTM / Fusion table: `reports/generated/multi_seed_report.md`.
+
 ### 3.5 Negative Finding: Attack-Family Blind Spots & Threshold Governance (Decision D-003)
 - Detailed per-class auditing revealed that despite >0.98 aggregate accuracy, models fail catastrophically on stealthy attack classes at the standard $\tau = 0.50$ cutoff (Infiltration recall = 10.70%, Web attacks recall = 2.78%).
 - Established Decision D-003: Academic reporting baseline ($\tau = 0.50$) remains frozen for comparability; operational threshold selection remains open, with continuous risk scores $S \in [0, 1]$ passed to downstream RL agents rather than uncalibrated binary decisions.
@@ -367,6 +379,7 @@ In accordance with scientific integrity standards, all limitations and negative 
 6. **Single-Node Concurrency Architecture:** The current implementation uses single-node multi-threading with target-scoped locks; it lacks distributed consensus (e.g., Raft) for multi-node enterprise deployments.
 7. **No Production Hardware / Kernel-Bypass Actuation:** Actuation is implemented via Linux network namespaces and virtual interfaces; production deployment requires kernel-bypass mechanisms (e.g., eBPF / XDP).
 8. **No Live Accuracy Claims Without Ground Truth (§64):** Real-time predictions on unmanaged traffic are reported strictly as flow counts and latency metrics, never as accuracy metrics, due to the absence of independent packet-level ground truth.
+9. **Row-Level Split Optimism:** Splits are row-level — exact feature-duplicate vectors are removed across splits, but host- or time-disjoint grouping is not applied. Near-duplicate flows from the same traffic burst can appear in both train and test, so in-domain metrics should be read as optimistic upper bounds. A temporal split is feasible for CSE-CIC-IDS2018 (`Timestamp` column present) and is the recommended next validation step.
 
 ---
 

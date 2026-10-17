@@ -48,6 +48,18 @@ models/
 | **UNSW-NB15** | R4 (4 feat) | Supervised LSTM | 0.8683 | 0.8637 | 0.9334 | 0.8903 | 24,496 |
 | **UNSW-NB15** | R4 (4 feat) | **RF + LSTM Fusion ($\alpha=0.60$)** | **0.8996 (89.96%)** | **0.8970** | **0.9674** | **0.9538** | 24,496 |
 
+### Multi-Seed Robustness (Seeds 42 / 123 / 456)
+
+All benchmarks re-run end-to-end with three seeds (population std); seed 42 reproduces the frozen artifacts exactly. Fusion detector, mean ± std:
+
+| Dataset | Accuracy | F1 | ROC-AUC |
+|:---|:---:|:---:|:---:|
+| CIC-IDS2017 | 0.9903 ± 0.0005 | 0.9735 ± 0.0016 | 0.9986 ± 0.0002 |
+| CSE-CIC-IDS2018 | 0.9912 ± 0.0001 | 0.9602 ± 0.0004 | 0.9965 ± 0.0000 |
+| UNSW-NB15 | 0.8988 ± 0.0008 | 0.8963 ± 0.0006 | 0.9674 ± 0.0004 |
+
+Full RF / LSTM / Fusion table: [`../reports/generated/multi_seed_report.md`](../reports/generated/multi_seed_report.md).
+
 ### DQN Response Policy (Held-Out `D_pol_test`, 355,865 Flows, `standard_enterprise` Regime)
 
 DQN agents are reinforcement-learning policies, not classifiers — F1/accuracy do not apply. Checkpoints were selected by the pre-registered rule `pre_registered_minimum_validation_cost` on `mean_cost_per_flow`:

@@ -2,7 +2,7 @@
 
 - **Platform**: XRL-IDARS (Intrusion Detection and Autonomous Response System)
 - **Phase**: 1 (Empirical Research Platform & Explainability)
-- **Git Commit**: `6e7eafd1ae77dbca0c5948073343bc57195d4b51`
+- **Git Commit**: `4798758c58044eee89ff6b8f39851bbb7ec439e9 (dirty)`
 - **Environment**: Python 3.14.4 · PyTorch 2.14.0+cpu · Scikit-Learn 1.9.1 · SHAP 0.52.0
 - **Verified Test Suite**: 394 passing tests (0 failures)
 
@@ -31,7 +31,7 @@ All claims and findings adhere strictly to four evidentiary tiers: `VERIFIED`, `
 | RF + LSTM Score Fusion (All 3 Domains) | `EMPIRICALLY OBSERVED` | Validated across all benchmarks: CIC-IDS2017 (alpha=0.50, F1 0.9745), CSE-CIC-IDS2018 (alpha=0.00, F1 0.9603), and UNSW-NB15 (alpha=0.60, acc 0.8996, F1 0.8970, p=0.0000) |
 | Multi-File UNSW-NB15 Benchmark | `EMPIRICALLY OBSERVED` | Full 2-file benchmark under 4-feature contract fallback (`EXP-P1-UNSWNB15-R10-MULTI-001`, Fusion acc 0.8996, F1 0.8970, ROC-AUC 0.9674) |
 | Historical Single-Day CSE-CIC-IDS2018 Baselines | `HISTORICAL EVIDENCE (SINGLE-DAY RUNS ONLY)` | Evaluated on single day Thursday-01-03-2018 (`EXP-P1-CSE2018-R10-001`); superseded by full 10-file multi-day run |
-| Multi-Seed Robustness Evaluation | `PARTIAL` | Runner supports multi-seed loop; full-dataset runs executed with seed 42 only |
+| Multi-Seed Robustness Evaluation | `EMPIRICALLY OBSERVED` | 3-seed sweep (42/123/456) executed across all three benchmarks; seed 42 reproduces frozen artifacts exactly; mean ± std in `reports/generated/multi_seed_report.md` |
 | Cross-Dataset Transfer Evaluation | `EMPIRICALLY OBSERVED` | Evaluated across 6 transfer directions: Primary R10 (`CIC ↔ CSE`), Auxiliary R4 (`UNSW ↔ CIC`, `UNSW ↔ CSE`); severe domain collapse observed |
 | Decision Gate D-002 (Feature Contract) | `FROZEN` | R10 frozen for CIC-IDS2017/CSE-CIC-IDS2018; 4-feature contract for cross-dataset transfer |
 | Decision Gate D-003 (Threshold Objective) | `FRAMEWORK RESOLVED` | Governance framework resolved; operational threshold selection remains open. Research baseline tau=0.50 frozen; tau_ops=0.40 proposed candidate only |

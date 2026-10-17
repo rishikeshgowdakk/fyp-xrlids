@@ -130,8 +130,11 @@ python -m pytest -q
 # run a detection experiment
 python scripts/phase1/run_experiment.py --config configs/experiments/p1_cicids2017_r10.yaml
 
-# multi-seed (for mean ± std)
+# multi-seed (for mean ± std) — writes seed_<n>/ subdirs
 python scripts/phase1/run_experiment.py --config configs/experiments/p1_cicids2017_r10.yaml --seeds 42 123 456
+
+# aggregate a completed sweep (mean ± std across RF / LSTM / Fusion)
+python scripts/phase1/summarize_multi_seed.py --experiments results/experiments/EXP-P1-CIC2017-R10-001
 
 # replay demonstration (uses committed models + demo PCAP)
 python scripts/demo/run_replay_demo.py

@@ -1,0 +1,299 @@
+{
+  "dataset": "unsw_nb15",
+  "feature_contract": {
+    "feature_count": 10,
+    "features": [
+      "flow_duration_ms",
+      "flow_packets_per_s",
+      "flow_bytes_per_s",
+      "packet_length_mean",
+      "packet_length_std",
+      "syn_count",
+      "ack_count",
+      "rst_count",
+      "fin_count",
+      "syn_ack_ratio"
+    ]
+  },
+  "population_config": {
+    "dataset": "unsw_nb15",
+    "files": "all_verified",
+    "exclude_files": [],
+    "file_order": "manifest",
+    "require_verified_checksums": true,
+    "require_schema_validated": true,
+    "duplicate_policy": "deduplicate_features",
+    "duplicate_conflict_policy": "reject_conflicts",
+    "sample_limit": null,
+    "sample_strategy": "stratified",
+    "seed": 42
+  },
+  "files": [
+    {
+      "filename": "UNSW_NB15_testing-set.csv",
+      "relative_path": "data/raw/unsw_nb15/UNSW_NB15_testing-set.csv",
+      "sha256": "734fe6642edf758f7c94d7d9149426b49d202fe8e7bf0bef47392489c3c0a559",
+      "size_bytes": 15380800,
+      "raw_rows": 82332,
+      "provenance_class": "recognized_mirror",
+      "status": "verified",
+      "accounting": {
+        "raw_rows": 82332,
+        "removed_unknown_label": 0,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 0,
+        "removed_non_finite": 950,
+        "final_modeling_rows": 81382
+      }
+    },
+    {
+      "filename": "UNSW_NB15_training-set.csv",
+      "relative_path": "data/raw/unsw_nb15/UNSW_NB15_training-set.csv",
+      "sha256": "bec7dd5ec88dc2a0ccc7a07879d338395ed7421750f675fd0339e07dfe0648fa",
+      "size_bytes": 32293018,
+      "raw_rows": 175341,
+      "provenance_class": "recognized_mirror",
+      "status": "verified",
+      "accounting": {
+        "raw_rows": 175341,
+        "removed_unknown_label": 0,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 0,
+        "removed_non_finite": 2657,
+        "final_modeling_rows": 172684
+      }
+    }
+  ],
+  "accounting": {
+    "per_file": {
+      "UNSW_NB15_testing-set.csv": {
+        "raw_rows": 82332,
+        "removed_unknown_label": 0,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 0,
+        "removed_non_finite": 950,
+        "final_modeling_rows": 81382
+      },
+      "UNSW_NB15_training-set.csv": {
+        "raw_rows": 175341,
+        "removed_unknown_label": 0,
+        "removed_invalid": 0,
+        "removed_exact_duplicates": 0,
+        "removed_non_finite": 2657,
+        "final_modeling_rows": 172684
+      }
+    },
+    "aggregate": {
+      "raw_rows": 257673,
+      "removed_unknown_label": 0,
+      "removed_invalid": 0,
+      "removed_exact_duplicates": 0,
+      "removed_non_finite": 3607,
+      "removed_feature_duplicates": 102136,
+      "removed_label_conflicts": 29410,
+      "final_modeling_rows": 122520
+    },
+    "reconciled": true,
+    "formula": "raw_rows - (removed_unknown_label + removed_invalid + removed_exact_duplicates + removed_non_finite + removed_feature_duplicates + removed_label_conflicts) == final_modeling_rows"
+  },
+  "duplicate_conflict_analysis": {
+    "total_unique_vectors_with_duplicates": 10625,
+    "total_conflicting_vectors": 558,
+    "total_conflicting_rows": 29410,
+    "benign_attack_conflicts": 10,
+    "family_conflicts": 10,
+    "policy_applied": "reject_conflicts",
+    "rows_dropped": 29410,
+    "conflict_examples": [
+      {
+        "hash": 5279238718747293,
+        "row_count": 3,
+        "binary_labels": [
+          0,
+          1
+        ],
+        "label_families": [
+          "Normal",
+          "Fuzzers"
+        ],
+        "sample_indices": [
+          42633,
+          42748,
+          165860
+        ]
+      },
+      {
+        "hash": 17906798240320983,
+        "row_count": 4,
+        "binary_labels": [
+          0,
+          1
+        ],
+        "label_families": [
+          "Normal",
+          "Fuzzers"
+        ],
+        "sample_indices": [
+          70819,
+          149895,
+          178996
+        ]
+      },
+      {
+        "hash": 57811416292526581,
+        "row_count": 4,
+        "binary_labels": [
+          0,
+          1
+        ],
+        "label_families": [
+          "Normal",
+          "Fuzzers"
+        ],
+        "sample_indices": [
+          42764,
+          42765,
+          117644
+        ]
+      },
+      {
+        "hash": 83183213896542665,
+        "row_count": 2,
+        "binary_labels": [
+          0,
+          1
+        ],
+        "label_families": [
+          "Normal",
+          "Fuzzers"
+        ],
+        "sample_indices": [
+          125851,
+          200360
+        ]
+      },
+      {
+        "hash": 226671739487354103,
+        "row_count": 3,
+        "binary_labels": [
+          0,
+          1
+        ],
+        "label_families": [
+          "Normal",
+          "Fuzzers"
+        ],
+        "sample_indices": [
+          73457,
+          148261,
+          196909
+        ]
+      },
+      {
+        "hash": 268673797346448018,
+        "row_count": 6,
+        "binary_labels": [
+          1,
+          0
+        ],
+        "label_families": [
+          "Shellcode",
+          "Normal",
+          "Fuzzers"
+        ],
+        "sample_indices": [
+          1098,
+          74932,
+          129814
+        ]
+      },
+      {
+        "hash": 277198952392769693,
+        "row_count": 2,
+        "binary_labels": [
+          0,
+          1
+        ],
+        "label_families": [
+          "Normal",
+          "Fuzzers"
+        ],
+        "sample_indices": [
+          122263,
+          195394
+        ]
+      },
+      {
+        "hash": 287016968739500730,
+        "row_count": 2,
+        "binary_labels": [
+          0,
+          1
+        ],
+        "label_families": [
+          "Normal",
+          "Shellcode"
+        ],
+        "sample_indices": [
+          41882,
+          164628
+        ]
+      },
+      {
+        "hash": 323121181769295902,
+        "row_count": 2,
+        "binary_labels": [
+          1,
+          0
+        ],
+        "label_families": [
+          "Shellcode",
+          "Normal"
+        ],
+        "sample_indices": [
+          44593,
+          70836
+        ]
+      },
+      {
+        "hash": 351427759047169254,
+        "row_count": 4,
+        "binary_labels": [
+          0,
+          1
+        ],
+        "label_families": [
+          "Normal",
+          "Fuzzers"
+        ],
+        "sample_indices": [
+          40406,
+          63510,
+          78934
+        ]
+      }
+    ]
+  },
+  "population_summary": {
+    "total_modeling_rows": 122520,
+    "benign_count": 67379,
+    "attack_count": 55141,
+    "attack_fraction": 0.4500571335292197,
+    "attack_families": {
+      "Normal": 67379,
+      "Exploits": 25374,
+      "Fuzzers": 15880,
+      "Reconnaissance": 6951,
+      "DoS": 3661,
+      "Generic": 1206,
+      "Shellcode": 1093,
+      "Analysis": 455,
+      "Backdoor": 369,
+      "Worms": 152
+    },
+    "rows_per_file": {
+      "UNSW_NB15_training-set.csv": 79692,
+      "UNSW_NB15_testing-set.csv": 42828
+    }
+  }
+}

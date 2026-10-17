@@ -1,0 +1,117 @@
+{
+  "metadata": {
+    "experiment_id": "unassigned",
+    "git_commit": null,
+    "dataset_sha256": null,
+    "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+    "seed": null,
+    "created_at": "2026-10-17T12:54:12.386955+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "4798758c58044eee89ff6b8f39851bbb7ec439e9",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {
+      "preprocessor_hash": "3a11e07baab59fef56792661d59a37988749d677ef9ab9989588c2a2f7143e06"
+    }
+  },
+  "preprocessor_version": "1.0.0",
+  "dataset": "cse_cic_ids2018",
+  "feature_list": [
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean",
+    "packet_length_std",
+    "syn_count",
+    "ack_count",
+    "rst_count",
+    "fin_count",
+    "syn_ack_ratio"
+  ],
+  "n_features": 10,
+  "feature_order": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "scaler_type": "StandardScaler",
+  "missing_policy": "median_train",
+  "n_train_rows": 4987377,
+  "fitted_at": "2026-10-17T11:06:40.343334+00:00",
+  "git_commit": "4798758c58044eee89ff6b8f39851bbb7ec439e9",
+  "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+  "scaler_params": {
+    "mean": [
+      20348.296079110358,
+      320.77420045196897,
+      32498.687615312127,
+      119.00329897997126,
+      199.79408042379188,
+      0.02229909629851523,
+      0.18971635791719776,
+      0.287748650242402,
+      0.001269404739204596,
+      0.02229909629851523
+    ],
+    "scale": [
+      37530.86113281666,
+      11997.237342303597,
+      2216753.1049222173,
+      123.44889869537602,
+      179.46707728006658,
+      0.1476544838560102,
+      0.3920766015153563,
+      0.4527133359269172,
+      0.03560608586762495,
+      0.1476544838560102
+    ],
+    "var": [
+      1408565537.370768,
+      143933703.84756386,
+      4913994328182.291,
+      15239.630589101209,
+      32208.431827449393,
+      0.02180184660278478,
+      0.15372406145583148,
+      0.20494936452607776,
+      0.0012677933508126811,
+      0.02180184660278478
+    ]
+  },
+  "imputation_medians": {
+    "flow_duration_ms": 2172.31201171875,
+    "flow_packets_per_s": 6.33842658996582,
+    "flow_bytes_per_s": 783.9678955078125,
+    "packet_length_mean": 103.13333129882812,
+    "packet_length_std": 189.31358337402344,
+    "syn_count": 0.0,
+    "ack_count": 0.0,
+    "rst_count": 0.0,
+    "fin_count": 0.0,
+    "syn_ack_ratio": 0.0
+  },
+  "preprocessor_hash": "3a11e07baab59fef56792661d59a37988749d677ef9ab9989588c2a2f7143e06"
+}

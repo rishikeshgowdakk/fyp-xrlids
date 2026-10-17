@@ -1,0 +1,86 @@
+{
+  "preprocessor_version": "1.0.0",
+  "dataset": "cse_cic_ids2018",
+  "feature_list": [
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean",
+    "packet_length_std",
+    "syn_count",
+    "ack_count",
+    "rst_count",
+    "fin_count",
+    "syn_ack_ratio"
+  ],
+  "n_features": 10,
+  "feature_order": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "scaler_type": "StandardScaler",
+  "missing_policy": "median_train",
+  "n_train_rows": 4987377,
+  "fitted_at": "2026-10-17T13:02:34.059542+00:00",
+  "git_commit": "4798758c58044eee89ff6b8f39851bbb7ec439e9",
+  "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+  "scaler_params": {
+    "mean": [
+      20341.228166294914,
+      321.68834171242116,
+      32634.173433441254,
+      119.0290089343786,
+      199.8123610530914,
+      0.022335788932739593,
+      0.18970232248334146,
+      0.2876018797055045,
+      0.0012619860098805444,
+      0.022335788932739593
+    ],
+    "scale": [
+      37527.10118321667,
+      12133.886961173646,
+      2263600.4207096784,
+      123.49972607728593,
+      179.405315125578,
+      0.14777314189490492,
+      0.39206549367136073,
+      0.4526444946040602,
+      0.0355020196776382,
+      0.14777314189490492
+    ],
+    "var": [
+      1408283323.2153819,
+      147231212.78653982,
+      5123886864637.032,
+      15252.182341164658,
+      32186.267095307947,
+      0.021836901465491703,
+      0.1537153513277678,
+      0.20488703849536508,
+      0.00126039340119141,
+      0.021836901465491703
+    ]
+  },
+  "imputation_medians": {
+    "flow_duration_ms": 2173.989990234375,
+    "flow_packets_per_s": 6.337497234344482,
+    "flow_bytes_per_s": 784.1136474609375,
+    "packet_length_mean": 103.13333129882812,
+    "packet_length_std": 189.31358337402344,
+    "syn_count": 0.0,
+    "ack_count": 0.0,
+    "rst_count": 0.0,
+    "fin_count": 0.0,
+    "syn_ack_ratio": 0.0
+  },
+  "preprocessor_hash": "fab078332caabf11f210b12f99cc19ee05ec67f8e67acf56006c6fa77b4bb7aa"
+}

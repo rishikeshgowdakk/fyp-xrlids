@@ -11,7 +11,7 @@
 > **Resolution status (2026-10-17).** Retained as the historical review that triggered a repo-wide correction pass. Current state of the tracked defects:
 > - **A1 (empty `hyperparameters.rf`)** — resolved: `hyperparameters.rf`, `model.primary_baseline.params`, and `model.models_evaluated.random_forest.params` all carry the full RF config in the canonical records.
 > - **A2 (UNSW labelled `R10` but trained on R4)** — resolved: registry, experiment records, and the runner now record the effective `R4` contract and its schema hash.
-> - **A3 (single-seed artifacts vs `seeds: [42,123,456]`)** — open by design: frozen artifacts are single-seed; reproduction commands now state `--seeds 42` explicitly (`docs/final/REPRODUCIBILITY_MAP.md`). Running the multi-seed sweep remains future work.
+> - **A3 (single-seed artifacts vs `seeds: [42,123,456]`)** — resolved (2026-10-17): the full 3-seed sweep was executed across all three benchmarks (`seed_42/123/456/`); seed 42 reproduces the frozen artifacts exactly and the headline metrics are seed-stable (mean ± std in `reports/generated/multi_seed_report.md`). Frozen headline artifacts remain single-seed by design; reproduction commands state `--seeds 42`.
 > - **A4 (test-count drift)** — resolved: every document reports the verified 394-test suite.
 > - **A5 (artifacts pinned to their run commit)** — accepted: the recorded `git_commit` is the run-time fact; generated reports now reference the commit they were generated at.
 > - **A6 (native vs aligned UNSW values)** — resolved: all UNSW tables use the aligned values (RF 0.8590 / 0.8548, ROC-AUC 0.9487), matching the registry.

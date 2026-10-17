@@ -92,7 +92,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | UNSW-NB15 Multi-File Baselines | ✅ EMPIRICALLY OBSERVED | Executed across both files (257,673 raw rows -> 122,520 modeling rows); full baseline ladder, Supervised LSTM, and RF+LSTM Fusion evaluated under native 4-feature contract (`EXP-P1-UNSWNB15-R10-MULTI-001`, Fusion test acc=0.8996, F1=0.8970, ROC-AUC=0.9674) |
 | Supervised LSTM (Multi-file) | ✅ EMPIRICALLY OBSERVED (ALL 3 DOMAINS) | Full multi-file training executed on CIC-IDS2017 (F1=0.9633), CSE-CIC-IDS2018 (F1=0.9603), and UNSW-NB15 (F1=0.8637, outperforming RF with $\text{LSTM} - \text{RF} = +0.0089$, $p=0.0000$) |
 | Score Fusion (Multi-file) | ✅ EMPIRICALLY OBSERVED (ALL 3 DOMAINS) | Tuned fusion evaluated on CIC-IDS2017 ($\alpha=0.50$, F1=0.9745), CSE-CIC-IDS2018 ($\alpha=0.00$, F1=0.9603), and UNSW-NB15 ($\alpha=0.60$, F1=0.8970; $\Delta \text{F1}=+0.0421$ over RF, $\Delta \text{F1}=+0.0332$ over LSTM, $p=0.0000$) |
-| Multi-seed evaluation | 🟡 PARTIAL | Runner supports multi-seed loop and aggregate metrics; full multi-file runs executed with seed 42 only |
+| Multi-seed evaluation | ✅ COMPLETED | 3-seed sweep (42/123/456) executed across all three benchmarks (2026-10-17); seed 42 reproduces frozen artifacts exactly; mean ± std in `reports/generated/multi_seed_report.md` |
 | Cross-dataset transfer | ✅ EMPIRICALLY OBSERVED | Executed across all 6 directions: Primary R10 (CIC ↔ CSE) and Auxiliary R4 (UNSW ↔ CIC, UNSW ↔ CSE); severe domain degradation demonstrated (ΔF1 -0.52 to -0.95), answering RQ5 |
 | SHAP (real data) | ✅ EMPIRICALLY OBSERVED | TreeSHAP evaluated on CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15 Random Forest models |
 | Calibration (real data) | ✅ EMPIRICALLY OBSERVED | Platt scaling evaluated on CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15 models |
@@ -126,7 +126,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 - No claims that intrusion detectors generalize out-of-domain without target adaptation; empirical evaluation across all 6 cross-dataset pairs demonstrates 52% to 95% F1 degradation under unadapted transfer (answering RQ5).
 - In auxiliary transfers involving UNSW-NB15, source models were trained under the common 4-feature (R4) contract; original 10-feature models were not directly evaluated on UNSW due to missing features.
 - No claims that sequence models capture true physical packet arrival timelines; sequence ordering represents capture flow arrival order within sample partitions.
-- No claims of three-seed empirical averaging; full multi-file experiments reflect single-seed (seed=42) execution.
+- No claims that the frozen headline artifacts are three-seed averages; headline figures reflect single-seed (seed=42) execution. The separate 3-seed robustness sweep (seeds 42/123/456, `reports/generated/multi_seed_report.md`) is reported as stability evidence only.
 - Live lab monitor and Phase 3 dry-run pipelines are strictly observational / non-disruptive; ZERO system firewall, socket, routing, or interface mutations are performed.
 - Auxiliary event list `UNSW-NB15_LIST_EVENTS.csv` is absent (`DATA_NOT_AVAILABLE`); modeling relies solely on the two verified train/test partitions.
 - Phase 2 offline response research and held-out evaluation is scientifically frozen (`11f32f658cde525300f8bc46088a0143e8329c21`); all cost models and state transitions were evaluated offline under pre-registered audit criteria.

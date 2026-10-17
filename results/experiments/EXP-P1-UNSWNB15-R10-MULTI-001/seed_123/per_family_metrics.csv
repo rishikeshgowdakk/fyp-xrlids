@@ -1,0 +1,11 @@
+family,is_attack,support,correct,false_positives,false_negatives,detection_rate,error_rate
+Normal,False,13476,11165,2311,0,0.82851,0.17149
+Exploits,True,5070,4921,0,149,0.970611,0.029389
+Fuzzers,True,3226,2495,0,731,0.773404,0.226596
+Reconnaissance,True,1332,1327,0,5,0.996246,0.003754
+DoS,True,740,689,0,51,0.931081,0.068919
+Generic,True,234,228,0,6,0.974359,0.025641
+Shellcode,True,218,179,0,39,0.821101,0.178899
+Analysis,True,96,63,0,33,0.65625,0.34375
+Backdoor,True,72,62,0,10,0.861111,0.138889
+Worms,True,40,40,0,0,1.0,0.0
