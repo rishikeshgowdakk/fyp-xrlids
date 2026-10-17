@@ -388,6 +388,7 @@ In accordance with scientific integrity standards, all limitations and negative 
 - **Phase 1 (Intrusion Detection):** `SCIENTIFICALLY FROZEN` at commit `11f32f6`
 - **Phase 2 (Autonomous Response):** `SCIENTIFICALLY FROZEN` at commit `11f32f6`
 - **Phase 3 (Laboratory Validation):** `LABORATORY VALIDATION COMPLETE` at commit `f600bfb`
+- **Post-freeze robustness validation (2026-10-17):** 3-seed sweep completed across all three benchmarks (§3.4.1) — seed 42 reproduces the frozen artifacts exactly; `reports/generated/multi_seed_report.md`.
 - **Production Deployment:** `NOT VALIDATED / OUT OF SCOPE`
 
 **Final Sign-Off:**  

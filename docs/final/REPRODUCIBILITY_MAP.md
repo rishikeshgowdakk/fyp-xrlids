@@ -74,7 +74,7 @@ To execute the complete 394-test verification suite:
 | `EXP-P1-UNSWNB15-R10-MULTI-001` | UNSW-NB15 R4 Baselines | `configs/experiments/p1_unsw_nb15_r10_multifile.yaml` | `.venv/bin/python scripts/phase1/run_experiment.py --config configs/experiments/p1_unsw_nb15_r10_multifile.yaml --seeds 42` | `results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/` |
 | `EXP-P1-TRANSFER-*` | 6-Direction Cross-Dataset Transfer | `configs/experiments/p1_transfer_*.yaml` | `.venv/bin/python scripts/phase1/run_transfer.py` | `results/cross_dataset/` |
 
-*Note: `--seeds 42` reproduces the frozen single-seed Phase 1 artifacts. Without it, the runner uses each config's `seeds` list (`[42, 123, 456]`) and writes multi-seed output to `seed_<n>/` subdirectories. The 3-seed robustness sweep has been executed for all three benchmarks; aggregate a sweep with `python scripts/phase1/summarize_multi_seed.py --experiments <experiment dirs>` — results in `reports/generated/multi_seed_report.md`.*
+*Note: `--seeds 42` reproduces the frozen single-seed Phase 1 artifacts. Without it, the runner uses each config's `seeds` list (`[42, 123, 456]`) and writes multi-seed output to `seed_<n>/` subdirectories. The 3-seed robustness sweep has been executed for all three benchmarks; aggregate a sweep with `python scripts/phase1/summarize_multi_seed.py --experiments <experiment dirs>` — results in `reports/generated/multi_seed_report.md`. Equivalent resumable per-seed invocation: `--seeds <n> --out-dir <EXP>/seed_<n>` produces the same layout and allows skipping already-completed seeds when scripted.*
 
 ---
 

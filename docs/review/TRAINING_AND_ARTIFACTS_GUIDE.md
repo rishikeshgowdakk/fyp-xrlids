@@ -136,6 +136,9 @@ python scripts/phase1/run_experiment.py --config configs/experiments/p1_cicids20
 # aggregate a completed sweep (mean ± std across RF / LSTM / Fusion)
 python scripts/phase1/summarize_multi_seed.py --experiments results/experiments/EXP-P1-CIC2017-R10-001
 
+# equivalent resumable per-seed invocation (skip already-complete seeds when scripted):
+python scripts/phase1/run_experiment.py --config configs/experiments/p1_cicids2017_r10.yaml --seeds 123 --out-dir results/experiments/EXP-P1-CIC2017-R10-001/seed_123
+
 # replay demonstration (uses committed models + demo PCAP)
 python scripts/demo/run_replay_demo.py
 ```
