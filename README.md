@@ -89,7 +89,7 @@ pip install -r requirements.txt
 
 ### 2. Run Test Suite
 
-Execute the full 399-test verification suite:
+Execute the full 408-test verification suite:
 
 ```bash
 .venv/bin/pytest -q
@@ -105,7 +105,7 @@ python scripts/demo/run_replay_demo.py
 
 ### 4. Run Monitoring Dashboard (Live Monitor + Replay & Evidence)
 
-Launch the zero-dependency web dashboard. It has two tabs: a **Live Monitor** (observational packet capture → flows → frozen detector, with IP endpoints and threat scores) and a **Replay & Evidence** tab (replay verification statistics, TreeSHAP attributions, research figures):
+Launch the zero-dependency web dashboard. It has two tabs: a **Live Monitor** (observational packet capture → flows → frozen detector, with IP endpoints, threat scores, and a calibrated **Attack Simulator** panel) and a **Replay & Evidence** tab (replay verification statistics, TreeSHAP attributions, research figures):
 
 ```bash
 python dashboard/server.py
@@ -121,6 +121,7 @@ Open `http://localhost:8000` in your web browser.
   ```
 - **No root available?** Use the *Sample stream* mode in the UI: it replays `data/demo/sample_traffic.pcap` in real time through the exact same live pipeline (clearly labeled as sample traffic).
 - Live monitoring is **strictly observational** (zero firewall/routing mutations) and shows **no accuracy numbers** (live traffic has no ground truth) — only flows, alerts, and model scores.
+- **Attack Simulator (simulation only):** the Live Monitor includes a calibrated attack-scenario injector — packets are synthesised **in memory** and pushed through the exact monitoring pipeline (nothing is transmitted). Scenario scores are pre-verified against the frozen detector by `scripts/demo/verify_attack_scenarios.py`; "evasion demo" scenarios are documented non-detections, shown deliberately. See [`dashboard/README.md`](dashboard/README.md#attack-simulator-simulation-only).
 
 > **Note:** The replay demonstration runs immediately out of the box in user space using `data/demo/sample_traffic.pcap` and the trained model artifact in `results/experiments/EXP-P1-CIC2017-R10-001/random_forest.joblib`. Retraining on full raw benchmark datasets (~8.7 GB across 20 CSV files) requires downloading raw data into `data/raw/` as detailed in [`docs/DATASETS.md`](docs/DATASETS.md). Live namespace enforcement requires an isolated Linux testbed with root privileges.
 

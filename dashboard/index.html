@@ -257,6 +257,26 @@
     </section>
 
     <section>
+      <h2>Attack Simulator (simulation only)</h2>
+      <div class="control-row">
+        <select id="scenario-select" title="Calibrated attack scenarios" onchange="renderScenarioInfo()">
+          <option value="">Loading scenarios…</option>
+        </select>
+        <button id="inject-btn" onclick="injectAttack()" disabled>Inject Attack</button>
+        <span id="scenario-expectation" class="badge">—</span>
+      </div>
+      <div id="scenario-desc" style="font-size: 12px; margin-bottom: 6px;"></div>
+      <div id="inject-status" class="lv-status">idle (start the monitor to inject)</div>
+      <div class="notice" style="margin-top: 8px;">
+        Simulation only: the selected scenario synthesises TCP packets <strong>in memory</strong> and pushes them through
+        the exact monitoring pipeline (FlowBuilder &rarr; frozen R10 features &rarr; frozen CIC-IDS2017 Random Forest).
+        Nothing is transmitted on the network; no firewall or routing state is touched. Injection pacing is 1&times;
+        because the calibrated scores depend on each flow's time shape. "Detected" scenarios are calibrated
+        low-and-slow signatures; "evasion demo" entries are deliberate known non-detections (see dashboard README).
+      </div>
+    </section>
+
+    <section>
       <h2>Live Counters</h2>
       <div class="metrics-grid">
         <div class="metric-card">

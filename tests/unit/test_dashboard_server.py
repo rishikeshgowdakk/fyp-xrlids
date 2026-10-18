@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import threading
 import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 import sys
@@ -120,6 +121,75 @@ def test_live_session_rejects_unknown_mode():
     assert result.get("error")
 
 
+def test_live_session_attack_injection(tmp_path: Path):
+    """Injected scenario packets flow through the same pipeline, complete, and alert."""
+    pcap = tmp_path / "inject_session.pcap"
+    _write_attack_pcap(pcap)
+
+    engine = ReplayEngine(model=_AlwaysAttackModel(), threshold=0.50)
+    session = LiveSession(engine=engine)
+    result = session.start(mode="sample", pcap=str(pcap), pace_speed=50.0, loop=True)
+    assert not result.get("error")
+
+    try:
+        # speed=50 compresses the 3.27 s scenario pacing to ~65 ms (test aid only).
+        started = session.inject_scenario("slow_http_dos_lite", speed=50.0)
+        assert not started.get("error")
+        assert started["status"] == "injecting"
+        assert started["injection"]["packets_total"] == 2
+
+        deadline = time.time() + 10.0
+        status = session.snapshot()["injection"]
+        while status["active"] and time.time() < deadline:
+            time.sleep(0.05)
+            status = session.snapshot()["injection"]
+        assert status["active"] is False
+        assert status["packets_sent"] == 2
+        assert status["finished_at"]
+
+        snapshot = session.snapshot()
+        injected_flows = [f for f in snapshot["recent_flows"] if "203.0.113.67" in f["src_endpoint"]]
+        assert injected_flows, "the injected scenario flow must appear in the live flow table"
+        # The mock model scores every flow 0.9 -> the injected flow produced a HIGH alert.
+        assert any(
+            "203.0.113.67" in a["src_endpoint"] and a["alert_level"] == "HIGH"
+            for a in snapshot["recent_alerts"]
+        )
+    finally:
+        session.stop()
+
+
+def test_live_session_injection_guards(tmp_path: Path):
+    """Injection is refused without a running session, for unknown ids, and while one is active."""
+    pcap = tmp_path / "inject_guard.pcap"
+    _write_attack_pcap(pcap)
+
+    engine = ReplayEngine(model=_AlwaysAttackModel(), threshold=0.50)
+    session = LiveSession(engine=engine)
+    assert session.inject_scenario("slow_http_dos").get("error"), (
+        "must refuse injection without a running session"
+    )
+
+    result = session.start(mode="sample", pcap=str(pcap), pace_speed=50.0, loop=True)
+    assert not result.get("error")
+    try:
+        unknown = session.inject_scenario("does_not_exist")
+        assert unknown.get("error")
+        assert "Unknown scenario" in unknown["error"]
+
+        started = session.inject_scenario("slow_http_dos", speed=1.0)  # ~3.25 s of real pacing
+        assert not started.get("error")
+        concurrent = session.inject_scenario("slow_http_dos_lite", speed=1.0)
+        assert concurrent.get("error"), "a second injection must be rejected while one is active"
+
+        time.sleep(0.1)
+        status = session.snapshot()["injection"]
+        assert status["active"] is True
+        assert status["packets_sent"] == 1  # first packet emitted immediately; next is ~3.25 s away
+    finally:
+        session.stop()
+
+
 def test_dashboard_http_live_endpoints():
     """Smoke-test the HTTP surface for the live monitor endpoints."""
     server = create_server(port=0)
@@ -139,6 +209,26 @@ def test_dashboard_http_live_endpoints():
             info = json.loads(resp.read().decode("utf-8"))
         assert isinstance(info["interfaces"], list)
         assert "raw_socket" in info["permissions"]
+
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/live/scenarios", timeout=5) as resp:
+            assert resp.status == 200
+            scenario_data = json.loads(resp.read().decode("utf-8"))
+        assert len(scenario_data["scenarios"]) >= 1
+        assert all("expected_band" in spec for spec in scenario_data["scenarios"])
+
+        # Injection without a running session is rejected with a clear error.
+        inject_req = urllib.request.Request(
+            f"http://127.0.0.1:{port}/api/live/inject-attack",
+            data=json.dumps({"scenario": "slow_http_dos"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            urllib.request.urlopen(inject_req, timeout=5)
+            raised = False
+        except urllib.error.HTTPError as exc:
+            raised = exc.code == 400
+        assert raised, "inject-attack must return HTTP 400 when no session is running"
 
         with urllib.request.urlopen(f"http://127.0.0.1:{port}/", timeout=5) as resp:
             assert resp.status == 200

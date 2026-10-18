@@ -24,6 +24,7 @@ let seenFlowIds = new Set();
 let seenAlertKeys = new Set();
 let renderedFlowCount = 0;
 let renderedAlertCount = 0;
+let scenariosCache = [];
 
 // ---------------------------------------------------------------- tabs
 function showTab(name) {
@@ -72,6 +73,78 @@ async function loadLiveInterfaces() {
   }
 }
 
+// ---------------------------------------------------------------- attack simulator
+async function loadScenarios() {
+  try {
+    const res = await fetch("/api/live/scenarios");
+    if (!res.ok) return;
+    const data = await res.json();
+    scenariosCache = data.scenarios || [];
+    const select = document.getElementById("scenario-select");
+    select.innerHTML = "";
+    scenariosCache.forEach(spec => {
+      const opt = document.createElement("option");
+      opt.value = spec.id;
+      opt.textContent = spec.name;
+      select.appendChild(opt);
+    });
+    renderScenarioInfo();
+  } catch (err) {
+    /* transient; keep the page usable */
+  }
+}
+
+function scenarioExpectationText(spec) {
+  if (!spec) return "—";
+  if (spec.expected_band === "NONE") {
+    return "calibrated: NOT DETECTED (evasion demo)";
+  }
+  return "calibrated: " + spec.expected_band + " · score ≈ " + Number(spec.expected_score).toFixed(3);
+}
+
+function renderScenarioInfo() {
+  const select = document.getElementById("scenario-select");
+  const spec = scenariosCache.find(s => s.id === select.value);
+  const badge = document.getElementById("scenario-expectation");
+  const desc = document.getElementById("scenario-desc");
+  if (!spec) {
+    badge.textContent = "—";
+    badge.className = "badge";
+    desc.textContent = "";
+    return;
+  }
+  badge.textContent = scenarioExpectationText(spec);
+  badge.className = "badge" + (spec.expected_band === "NONE" ? "" : " badge-invert");
+  desc.textContent = spec.description + " — " + spec.packet_count + " packets, " +
+    spec.expected_flows + " flow(s), " + Number(spec.duration_s).toFixed(2) + " s " +
+    "(attacker " + spec.attacker_ip + " → " + spec.victim_ip + ")";
+}
+
+async function injectAttack() {
+  const select = document.getElementById("scenario-select");
+  const statusEl = document.getElementById("inject-status");
+  const btn = document.getElementById("inject-btn");
+  if (!select.value) return;
+  btn.disabled = true;
+  try {
+    const res = await fetch("/api/live/inject-attack", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ scenario: select.value })
+    });
+    const data = await res.json();
+    if (data.error) {
+      statusEl.textContent = "error: " + data.error;
+    } else {
+      statusEl.textContent = "injecting " + select.value + " …";
+    }
+  } catch (err) {
+    statusEl.textContent = "error: " + err.message;
+  } finally {
+    pollLive();
+  }
+}
+
 async function pollLive() {
   try {
     const res = await fetch("/api/live");
@@ -107,6 +180,8 @@ function renderLive(snap) {
     ? "started " + new Date(snap.started_at).toLocaleTimeString()
     : "not started";
 
+  renderInjectionStatus(snap, running);
+
   const notice = document.getElementById("live-notice");
   if (snap.error) {
     notice.className = "notice error";
@@ -136,6 +211,30 @@ function renderLive(snap) {
   appendLiveAlerts(snap.recent_alerts || []);
 }
 
+function renderInjectionStatus(snap, running) {
+  const statusEl = document.getElementById("inject-status");
+  const btn = document.getElementById("inject-btn");
+  const inj = snap.injection;
+  if (!running) {
+    statusEl.textContent = "idle (start the monitor to inject)";
+    btn.disabled = true;
+  } else if (inj && inj.active) {
+    statusEl.textContent = "injecting " + inj.scenario + " · " + inj.packets_sent + "/" + inj.packets_total +
+      " packets · expected " + (inj.expected_band === "NONE" ? "not detected" : inj.expected_band + " ≈ " +
+      Number(inj.expected_score).toFixed(3));
+    btn.disabled = true;
+  } else if (inj) {
+    const when = inj.finished_at ? new Date(inj.finished_at).toLocaleTimeString() : "";
+    statusEl.textContent = "last injection: " + inj.scenario + " finished " + when +
+      " · expected " + (inj.expected_band === "NONE" ? "not detected" : inj.expected_band + " ≈ " +
+      Number(inj.expected_score).toFixed(3));
+    btn.disabled = false;
+  } else {
+    statusEl.textContent = "idle";
+    btn.disabled = false;
+  }
+}
+
 function appendLiveFlows(flows) {
   const fresh = flows.filter(f => !seenFlowIds.has(f.flow_id));
   if (fresh.length === 0) return;
@@ -148,14 +247,17 @@ function appendLiveFlows(flows) {
     renderedFlowCount++;
     const actionInfo = determineResponseAction(flow.attack_score);
     const isAttack = flow.prediction_class === 1;
+    const srcText = String(flow.src_endpoint);
+    const dstText = String(flow.dst_endpoint);
+    const isSim = srcText.startsWith("203.0.113.") || dstText.startsWith("203.0.113.");
     const tr = document.createElement("tr");
     const time = flow.timestamp ? new Date(flow.timestamp).toLocaleTimeString() : "-";
     tr.innerHTML = `
       <td class="mono">${flow.flow_id}</td>
       <td class="mono">${time}</td>
       <td><strong>${flow.protocol}</strong></td>
-      <td class="mono">${flow.src_endpoint}</td>
-      <td class="mono">${flow.dst_endpoint}</td>
+      <td class="mono">${srcText}${isSim ? ' <span class="badge" title="Attack simulator packet (synthetic, in-memory injection)">SIM</span>' : ""}</td>
+      <td class="mono">${dstText}</td>
       <td class="mono">${flow.packet_count}</td>
       <td class="mono">${Number(flow.duration_ms).toFixed(1)}</td>
       <td class="mono"><strong>${Number(flow.attack_score).toFixed(4)}</strong></td>
@@ -403,6 +505,7 @@ async function runAnalysis() {
 document.addEventListener("DOMContentLoaded", () => {
   loadDashboard();
   loadLiveInterfaces();
+  loadScenarios();
   pollLive();
   setInterval(pollLive, LIVE_POLL_MS);
 });

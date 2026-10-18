@@ -5,7 +5,9 @@ Two views, zero external dependencies (Python standard library only):
 
 1. Live Monitor — streams packets through the observational Phase 3 pipeline
    (PacketCaptureService -> FlowBuilder (D-006) -> frozen R10 detector) and
-   serves rolling per-flow observations and alerts to the browser.
+   serves rolling per-flow observations and alerts to the browser. Includes an
+   attack simulator that injects calibrated synthetic packet scripts into the
+   same pipeline (in memory only; nothing is ever transmitted).
 2. Replay & Evidence — replay statistics, TreeSHAP attributions, and figures.
 
 Safety invariants:
@@ -22,6 +24,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import queue
 import socket
 import subprocess
 import sys
@@ -40,6 +43,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
+from xrlids.demo.attack_sim import build_scenario_packets, get_scenario, list_scenarios  # noqa: E402
 from xrlids.demo.live_lab import AlertEvent, FlowObservation, LiveLabMonitor  # noqa: E402
 from xrlids.demo.pcap import PacketInfo, PcapReader  # noqa: E402
 from xrlids.demo.replay import ReplayEngine  # noqa: E402
@@ -53,6 +57,9 @@ SAMPLE_PCAP = REPO_ROOT / "data" / "demo" / "sample_traffic.pcap"
 DEFAULT_MODEL_DIR = REPO_ROOT / "results" / "experiments" / "EXP-P1-CIC2017-R10-001"
 RESEARCH_THRESHOLD = 0.50
 OPERATIONAL_CANDIDATE_THRESHOLD = 0.40
+
+# Sentinel pushed by the capture producer when the capture source is exhausted.
+_CAPTURE_DONE = object()
 
 
 def get_dashboard_data() -> dict:
@@ -132,6 +139,8 @@ class LiveSession:
         self._stop_event = threading.Event()
         self._thread: threading.Thread | None = None
         self._capture: PacketCaptureService | None = None
+        self._packet_queue: "queue.Queue[Any] | None" = None
+        self._injection_thread: threading.Thread | None = None
 
         self.status = "stopped"  # stopped | running | error
         self.mode: str | None = None
@@ -151,6 +160,7 @@ class LiveSession:
 
         self.flows: deque[dict[str, Any]] = deque(maxlen=1000)
         self.alerts: deque[dict[str, Any]] = deque(maxlen=200)
+        self.injection: dict[str, Any] | None = None
 
     # ------------------------------------------------------------- engine
     def _get_engine(self) -> ReplayEngine:
@@ -207,9 +217,12 @@ class LiveSession:
             self._t0 = time.time()
             self._stop_event.clear()
 
+            # The merge queue exists for the whole session so injections can start immediately.
+            packet_queue: "queue.Queue[Any]" = queue.Queue()
+            self._packet_queue = packet_queue
             self._thread = threading.Thread(
                 target=self._run,
-                args=(mode, interface, bpf_filter, pcap, pace_speed, loop, max_packets),
+                args=(mode, interface, bpf_filter, pcap, pace_speed, loop, max_packets, packet_queue),
                 name="xrlids-live-session",
                 daemon=True,
             )
@@ -227,6 +240,53 @@ class LiveSession:
         if thread is not None and thread.is_alive():
             thread.join(timeout=5.0)
         return self.snapshot()
+
+    # ------------------------------------------------------ attack simulator
+    def inject_scenario(self, scenario_id: str, speed: float = 1.0) -> dict[str, Any]:
+        """Inject a calibrated attack-simulation scenario into the live pipeline.
+
+        Simulation only: packets are synthesised in memory by
+        :mod:`xrlids.demo.attack_sim` and pushed through the same observational
+        pipeline as captured traffic. Nothing is transmitted on the network.
+
+        ``speed`` is a test aid (compresses inter-packet pacing); production
+        injections run at 1x because the calibrated scores are time-shape dependent.
+        """
+        with self._lock:
+            if self.status != "running" or self._packet_queue is None:
+                return {"error": "No running session — start the monitor before injecting an attack scenario."}
+            if self.injection is not None and self.injection.get("active"):
+                active = self.injection.get("scenario")
+                return {"error": f"Injection {active!r} is still running; wait for it to finish."}
+            spec = get_scenario(scenario_id)
+            if spec is None:
+                return {"error": f"Unknown scenario {scenario_id!r}. See GET /api/live/scenarios."}
+
+            packets = build_scenario_packets(spec)
+            self.injection = {
+                "active": True,
+                "scenario": spec.id,
+                "name": spec.name,
+                "category": spec.category,
+                "packets_total": len(packets),
+                "packets_sent": 0,
+                "duration_s": round(spec.duration_s, 3),
+                "expected_score": spec.expected_score,
+                "expected_band": spec.expected_band,
+                "expected_flows": spec.expected_flows,
+                "speed": speed,
+                "started_at": datetime.now(timezone.utc).isoformat(),
+                "finished_at": None,
+            }
+            thread = threading.Thread(
+                target=self._injection_worker,
+                args=(packets, max(speed, 1e-9), self._packet_queue),
+                name="xrlids-attack-injection",
+                daemon=True,
+            )
+            self._injection_thread = thread
+            thread.start()
+            return {"status": "injecting", "injection": dict(self.injection)}
 
     def snapshot(self) -> dict[str, Any]:
         """Return a consistent view of the session for the API/UI."""
@@ -260,6 +320,7 @@ class LiveSession:
                 },
                 "recent_flows": list(self.flows)[-500:],
                 "recent_alerts": list(self.alerts)[-100:],
+                "injection": dict(self.injection) if self.injection else None,
             }
 
     # ------------------------------------------------------------- internals
@@ -273,6 +334,7 @@ class LiveSession:
         self._t_end = None
         self.flows.clear()
         self.alerts.clear()
+        self.injection = None
 
     def _run(
         self,
@@ -283,6 +345,7 @@ class LiveSession:
         pace_speed: float,
         loop: bool,
         max_packets: int | None,
+        packet_queue: "queue.Queue[Any]",
     ) -> None:
         try:
             engine = self._get_engine()
@@ -304,7 +367,30 @@ class LiveSession:
                 )
             with self._lock:
                 self._capture = capture
-            monitor.process_packet_stream(self._count_packets(capture.stream_packets()))
+
+            def _produce() -> None:
+                """Feed captured packets into the merge queue (single consumer: the monitor)."""
+                try:
+                    for pkt in capture.stream_packets():
+                        if self._stop_event.is_set():
+                            return
+                        packet_queue.put(pkt)
+                except (OSError, ValueError):
+                    # Raw-socket teardown on stop() may raise from a closed descriptor; treat as a clean stop.
+                    if not self._stop_event.is_set():
+                        with self._lock:
+                            self.error = "Capture stream failed (see server log)."
+                        self._stop_event.set()
+                except Exception as exc:  # pragma: no cover - defensive
+                    with self._lock:
+                        self.error = str(exc)
+                    self._stop_event.set()
+                finally:
+                    packet_queue.put(_CAPTURE_DONE)
+
+            producer = threading.Thread(target=_produce, name="xrlids-capture-producer", daemon=True)
+            producer.start()
+            monitor.process_packet_stream(self._count_packets(self._merge_packets(packet_queue)))
         except Exception as exc:
             with self._lock:
                 if not self._stop_event.is_set():
@@ -313,8 +399,32 @@ class LiveSession:
         finally:
             with self._lock:
                 self._t_end = time.time()
+                self._packet_queue = None
                 if self.status == "running":
-                    self.status = "stopped"
+                    self.status = "error" if self.error else "stopped"
+
+    def _merge_packets(self, packet_queue: "queue.Queue[Any]") -> Generator[PacketInfo, None, None]:
+        """Merge captured and injected packets into one ordered stream for the monitor.
+
+        Both sources enqueue into ``packet_queue``; this single consumer guarantees
+        the FlowBuilder state is only ever touched from the monitor thread.
+        """
+        while not self._stop_event.is_set():
+            try:
+                item = packet_queue.get(timeout=0.1)
+            except queue.Empty:
+                continue
+            if item is _CAPTURE_DONE:
+                # Capture source exhausted (single-pass sample stream): flush queued packets, then stop.
+                while not self._stop_event.is_set():
+                    try:
+                        pending = packet_queue.get_nowait()
+                    except queue.Empty:
+                        break
+                    if pending is not _CAPTURE_DONE:
+                        yield pending
+                return
+            yield item
 
     def _count_packets(self, packet_iter: Generator[PacketInfo, None, None]) -> Generator[PacketInfo, None, None]:
         try:
@@ -364,6 +474,37 @@ class LiveSession:
             if not loop:
                 return
 
+    def _injection_worker(
+        self, packets: list[PacketInfo], speed: float, packet_queue: "queue.Queue[Any] | None"
+    ) -> None:
+        """Pace scenario packets into the merge queue, restamped to wall-clock time.
+
+        Restamping preserves inter-packet deltas, so the resulting flow features
+        (and therefore the frozen model's scores) match the calibrated values.
+        """
+        prev_ts: float | None = None
+        sent = 0
+        try:
+            for pkt in packets:
+                if self._stop_event.is_set() or packet_queue is None:
+                    break
+                if prev_ts is not None:
+                    delay = (pkt.timestamp - prev_ts) / speed
+                    if delay > 0 and self._stop_event.wait(delay):
+                        break
+                prev_ts = pkt.timestamp
+                packet_queue.put(replace(pkt, timestamp=time.time()))
+                sent += 1
+                with self._lock:
+                    if self.injection is not None:
+                        self.injection["packets_sent"] = sent
+        finally:
+            with self._lock:
+                if self.injection is not None:
+                    self.injection["active"] = False
+                    self.injection["packets_sent"] = sent
+                    self.injection["finished_at"] = datetime.now(timezone.utc).isoformat()
+
     def _on_flow(self, observation: FlowObservation) -> None:
         with self._lock:
             self.flow_count += 1
@@ -400,6 +541,21 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     "permissions": {"raw_socket": PacketCaptureService.check_permissions()},
                 }
             )
+        elif path == "/api/live/scenarios":
+            self.send_json(
+                {
+                    "scenarios": list_scenarios(),
+                    "thresholds": {
+                        "research": RESEARCH_THRESHOLD,
+                        "operational_candidate": OPERATIONAL_CANDIDATE_THRESHOLD,
+                    },
+                    "notice": (
+                        "Simulation only: scenarios synthesise TCP packets in memory and push them through the "
+                        "observational pipeline; nothing is transmitted and no firewall/routing state is touched. "
+                        "Scores are the frozen CIC-IDS2017 R10 Random Forest's real outputs."
+                    ),
+                }
+            )
         elif path.startswith("/figures/"):
             filename = os.path.basename(path)
             fig_path = FIGURES_DIR / filename
@@ -428,6 +584,14 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self.send_json(result, status=HTTPStatus.BAD_REQUEST if result.get("error") else HTTPStatus.OK)
         elif parsed.path == "/api/live/stop":
             self.send_json(LIVE_SESSION.stop())
+        elif parsed.path == "/api/live/inject-attack":
+            body = self.read_json_body()
+            scenario_id = str(body.get("scenario", "")).strip()
+            if not scenario_id:
+                self.send_json({"error": "Missing 'scenario' in request body."}, status=HTTPStatus.BAD_REQUEST)
+                return
+            result = LIVE_SESSION.inject_scenario(scenario_id)
+            self.send_json(result, status=HTTPStatus.BAD_REQUEST if result.get("error") else HTTPStatus.OK)
         else:
             self.send_error(HTTPStatus.NOT_FOUND, "Not found")
 
