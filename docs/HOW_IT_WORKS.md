@@ -1,0 +1,360 @@
+# How the XRL-IDARS System Works — End to End
+
+*Written 2026-10-19. Audience: Part 1 is for anyone; Part 2 is the detailed engineering view.
+Every claim below can be re-checked with the commands in Part 2.9.*
+
+---
+
+## 0. The one thing to know first: what is real and what is synthetic
+
+The dashboard has **three different kinds of traffic**, and only one of them is real:
+
+| Mode / feature | What it actually is | Does it touch the network? | IP addresses you see |
+|---|---|---|---|
+| **Sample stream** (default demo, `--sample`) | Replay of a bundled **synthetic** file: `data/demo/sample_traffic.pcap`, 42 packets, generated in code by `scripts/demo/run_replay_demo.py` | **No.** Nothing is sent or received; the file is read and restamped to "now" | Fictional demo LAN `192.168.1.50` / `192.168.1.10`, fake attacker `10.0.0.99`, and cosmetic public IPs `8.8.8.8`, `142.250.190.46`, `104.16.132.229` |
+| **Attack Simulator** (button in the Live Monitor tab) | In-memory packet scripts from `src/xrlids/demo/attack_sim.py`, pushed straight into the detection pipeline | **No.** Packets are never transmitted — they are injected *inside* the program | RFC 5737 documentation range `203.0.113.x` on purpose, so they can never collide with real hosts |
+| **Live capture** (opt-in: `sudo … --live --iface <name>`) | **REAL packets** from this machine's NIC via an AF_PACKET raw socket | **Read-only.** Captures real traffic; never sends, drops, or modifies anything | Your real network — on this laptop: WiFi `wlo1 = 192.168.0.109/24`, gateway `192.168.0.1` |
+
+Two independent proofs that the sample stream is synthetic, not captured:
+
+1. It contains a **5,880-byte packet**. The largest possible Ethernet/WiFi frame is 1,514 bytes,
+   so no real capture can contain it. (The file's packet lengths: `40, 66, 94, 96, 104, 170, 340,
+   490, 840, 1240, 1500, 5880`.)
+2. The addresses (`192.168.1.x`, `10.0.0.99`) belong to no real network here — this laptop's WiFi
+   is `192.168.0.0/24`.
+
+**So: if you saw IPs like `192.168.1.10` or `203.0.113.66` in the dashboard, those were demo/replay
+addresses by design — none of them came from your WiFi. Real WiFi traffic appears only after you
+start live capture yourself with `sudo` (Part 2.8).**
+
+```bash
+# Real WiFi capture (you run this — it needs root):
+sudo .venv/bin/python dashboard/server.py --live --iface wlo1
+```
+
+---
+
+## Part 1 — The simple version (60-second read)
+
+The system watches network traffic and answers one question per conversation:
+**"does this conversation look like an attack?"**
+
+```
+Real WiFi packets            (live mode, sudo)
+      or                     ─────────────────►  ┌──────────────┐
+42-packet synthetic replay   (sample mode)        │ 1. Capture   │  packets
+      or                                          └──────┬───────┘
+in-memory simulator packets  (simulator)                │
+                                                        ▼
+                                               ┌──────────────────┐
+                                               │ 2. Flow assembly │  group packets into
+                                               │    ("D-006")     │  bidirectional conversations
+                                               └──────┬───────────┘
+                                                      │ one row per finished conversation
+                                                      ▼
+                                               ┌──────────────────┐
+                                               │ 3. Features      │  summarize each flow
+                                               │    ("R10")       │  with 10 numbers
+                                               └──────┬───────────┘
+                                                      ▼
+                                               ┌──────────────────┐
+                                               │ 4. Frozen model  │  trained Random Forest
+                                               │    (CIC-IDS2017) │  says: attack probability 0…1
+                                               └──────┬───────────┘
+                                                      ▼
+                                               ┌──────────────────┐
+                                               │ 5. Dashboard     │  flows, scores, alerts,
+                                               │    (browser)     │  suggested action (display only)
+                                               └──────────────────┘
+```
+
+1. **Capture** — packets arrive either from your real WiFi/Ethernet card (live mode), from the
+   bundled demo file (sample mode), or from the attack simulator (button).
+2. **Flow assembly** — packets are grouped into *flows*: one bidirectional "conversation" between
+   two endpoints (e.g. your laptop ↔ a web server). A flow **finishes** when a TCP connection
+   closes (FIN/RST packet) or when 120 seconds pass with no more packets.
+3. **Features** — every finished flow is summarized by exactly **10 numbers** (duration, packets
+   per second, bytes per second, mean/std packet size, and the counts of SYN/ACK/RST/FIN flags).
+   These are the same 10 numbers ("R10") the models were trained on.
+4. **Model** — a **frozen, already-trained** Random Forest (trained offline on CIC-IDS2017) reads
+   the 10 numbers and outputs a probability between 0 and 1 that the flow is an attack. Nothing is
+   re-trained while monitoring.
+5. **Dashboard** — every finished flow appears in the "Live Flows" table with its score
+   (e.g. `0.991 → ATTACK`). Flows scoring ≥ 0.50 additionally appear in "Alerts" with a level:
+   **HIGH** (≥ 0.85), **MEDIUM** (≥ 0.65), **LOW** (≥ 0.50). The "Suggested Action" column is a
+   *label for what a future response stage could do* — the dashboard itself never blocks anything.
+6. **Speed** — scoring a flow takes milliseconds; the visible delay is only how long the
+   conversation itself takes to finish (a slow attack that lasts 3 seconds appears after 3 seconds).
+
+What the system **never** does: send packets, block traffic, change firewall/routing, or claim
+accuracy on live traffic (live traffic has no ground-truth labels).
+
+What "attack simulator injection" means: the simulator creates packet descriptions *inside memory*
+and inserts them into step 2 of the pipeline as if they had been captured. The model then scores
+them for real. The packets never exist on any wire — that is why they can use documentation IPs
+(`203.0.113.x`) safely.
+
+---
+
+## Part 2 — The detailed version
+
+### 2.1 Two pipelines: offline training vs. online monitoring
+
+**Offline (done once, results frozen):** raw datasets → cleaning/audits → modeling populations →
+model training → frozen artifacts. The dashboard consumes one frozen artifact set:
+
+| Item | Value |
+|---|---|
+| Datasets (raw) | CIC-IDS2017: 2,830,743 rows / 8 files · CSE-CIC-IDS2018: 16,233,002 / 10 · UNSW-NB15: 257,673 / 2 |
+| Final modeling populations | 1,779,322 (CIC) + 8,312,295 (CSE) + 122,520 (UNSW) = 10,214,137 rows |
+| Model used live | Frozen CIC-IDS2017 Random Forest, `results/experiments/EXP-P1-CIC2017-R10-001/random_forest.joblib` |
+| Preprocessing used live | Frozen preprocessor, `…/preprocessor.joblib` (same transform as at training time) |
+| Feature contract | "R10" — the 10 flow features listed in 2.4 |
+
+**Online (every monitoring session):**
+
+```
+src/xrlids/live/capture.py        PacketCaptureService
+        │   live: AF_PACKET raw socket on <iface>       (needs root/CAP_NET_RAW)
+        │   sample: paced replay of a .pcap file        (no privileges)
+        ▼
+dashboard/server.py               LiveSession merge queue
+        │   capture-producer thread ──┐
+        │   attack-injection thread ──┤─► queue ─► single consumer
+        ▼                             (FlowBuilder is only ever touched by one thread)
+src/xrlids/demo/flow.py           FlowBuilder (D-006 completion policy)
+        ▼   completed flow (one per finished conversation)
+src/xrlids/demo/live_lab.py       LiveLabMonitor._evaluate_and_alert()
+        │   ReplayEngine._predict_flow(flow)
+        ▼   preprocessor.transform → model.predict_proba → score ∈ [0,1]
+dashboard/server.py               FlowObservation / AlertEvent → HTTP JSON API
+        ▼
+dashboard/app.js + index.html     browser UI, polls GET /api/live every 1 s
+```
+
+### 2.2 Capture layer (`src/xrlids/live/capture.py`)
+
+- **Live mode** opens a Linux `AF_PACKET` raw socket (`ETH_P_ALL`, 0x0003), optionally bound to one
+  interface (e.g. `wlo1`), polls with `select()` (never blocks the process), parses each frame with
+  `parse_packet_bytes()`, and yields `PacketInfo` objects.
+  Requires root / `CAP_NET_RAW`; `PacketCaptureService.check_permissions()` probes this and the UI
+  shows *"raw sockets denied (sudo needed…)"* when unavailable.
+- **Filter** (`--bpf`, UI text box) is a *simplified* matcher, not full BPF: it understands tokens
+  `tcp`, `udp`, and `port <N>` — e.g. `"tcp port 443"`. Anything else is ignored.
+- **Sample mode** (no privileges): reads the demo PCAP and paces it in real time. At each yield the
+  packet's original timestamp is replaced by the current wall-clock time, and the inter-packet gaps
+  are divided by the pace factor (default **2×**; `loop=True` restarts the file when it ends).
+  A special case: the demo file's timestamps start at `1700000000.0` (Nov 2023) — restamping is why
+  the dashboard shows today's times for a 2023 file.
+
+### 2.3 Flow assembly — the D-006 completion policy (`src/xrlids/demo/flow.py`)
+
+- **Grouping key:** canonical bidirectional 5-tuple — the two endpoints `(ip, port)` are sorted,
+  plus the protocol. So both directions of a conversation land in one flow regardless of which side
+  sent the first packet. The flow remembers which endpoint sent packet #1
+  (`source_first_ip/port`) for display.
+- **Accumulation:** packet lengths, total bytes, start/last timestamps, and TCP flag counts
+  (SYN, ACK, RST, FIN).
+- **Completion (D-006):** a TCP flow is *closed* the moment a packet carries **RST or FIN** (either
+  direction). Independently, any flow that has been **idle for 120 s** is flushed as completed when
+  the next packet of any flow is processed (and everything pending is flushed when the session
+  stops). Consequence: **UDP conversations (like the demo DNS query) never complete on their own** —
+  they appear only after the 120 s idle timeout or when you press Stop. This is expected, not a bug.
+- Each completed flow is passed to `LiveLabMonitor._evaluate_and_alert()` which produces one
+  `FlowObservation` (for the flows table) and, if the decision crosses the threshold, one
+  `AlertEvent` (for the alerts table).
+
+### 2.4 The R10 feature contract (exact formulas)
+
+Computed from the flow's packet list (`n` = packet count, `L_i` = packet lengths in bytes,
+`dur_s = max(0, last_ts − first_ts)`):
+
+| # | Feature | Formula |
+|---|---|---|
+| 1 | `flow_duration_ms` | `dur_s × 1000` |
+| 2 | `flow_packets_per_s` | `n / max(dur_s, 1e-6)` |
+| 3 | `flow_bytes_per_s` | `sum(L_i) / max(dur_s, 1e-6)` |
+| 4 | `packet_length_mean` | `mean(L_i)` (0 if no packets) |
+| 5 | `packet_length_std` | population std of `L_i` (0 if fewer than 2 packets) |
+| 6 | `syn_count` | number of packets with the TCP SYN flag |
+| 7 | `ack_count` | number of packets with the TCP ACK flag |
+| 8 | `rst_count` | number of packets with the TCP RST flag |
+| 9 | `fin_count` | number of packets with the TCP FIN flag |
+| 10 | `syn_ack_ratio` | `syn_count / max(ack_count, 1)` |
+
+Note the guaranteed fallbacks: `dur_s` is floored at 1 µs (so instant flows don't divide by zero)
+and `ack_count` is floored at 1 (so the ratio never divides by zero). This exact contract was
+parity-verified against the training-time extraction.
+
+### 2.5 Inference, thresholds, and alert levels (`live_lab.py`, `replay.py`)
+
+- `ReplayEngine._predict_flow(flow)`: `preprocessor.transform([10 features])` → frozen RF
+  `predict_proba` → attack probability.
+- **Research threshold τ = 0.50** decides `ATTACK` vs `BENIGN` (shown as the Detection badge).
+- **Operational candidate τ = 0.40** exists in the engine (decision D-003 candidates) and is shown
+  in the "Suggested Action" mapping; it is *not* used to declare attacks.
+- **Alert levels** (only when `pred == ATTACK`): **HIGH ≥ 0.85**, **MEDIUM ≥ 0.65**, **LOW ≥ 0.50**.
+- **Suggested Action** column (display-only mapping in `app.js`): `≥0.50 BLOCK`, `≥0.40 THROTTLE`,
+  `≥0.20 MONITOR`, else `ALLOW`. The comment in the code says it plainly:
+  *"observational display only; the dashboard never actuates."*
+- **No accuracy claims on live traffic** — there are no ground-truth labels for your network, so
+  the UI deliberately shows scores and alerts, never accuracy numbers.
+
+### 2.6 Dashboard server (`dashboard/server.py`)
+
+Zero-dependency Python standard library HTTP server, bound to `127.0.0.1` only.
+
+Threading model (important for correctness): the capture source and the attack simulator **never
+touch the flow builder**. A capture-producer thread feeds a `queue.Queue`; injection threads feed
+the same queue; one consumer (the monitor thread) drains it and is the only place `FlowBuilder`,
+the model, and the counters are used. That removes any thread-safety question from the pipeline.
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/` | The dashboard page (Live Monitor + Replay & Evidence tabs) |
+| GET | `/app.js` | Front-end logic |
+| GET | `/api/data` | Replay & Evidence data (replay summary, SHAP, figures list) |
+| GET | `/api/live` | Live session snapshot (status, counters, flows, alerts, injection state) |
+| POST | `/api/live/start` | Start a session: `{"mode": "sample"}` or `{"mode": "live", "interface": "wlo1", "bpf_filter": "tcp port 443"}` |
+| POST | `/api/live/stop` | Stop the session (flushes pending flows) |
+| GET | `/api/live/interfaces` | Interface names + raw-socket permission status |
+| GET | `/api/live/scenarios` | Attack-simulator catalogue with calibrated expectations |
+| POST | `/api/live/inject-attack` | Inject a scenario: `{"scenario": "slow_http_dos"}` (requires a running session) |
+| POST | `/api/run-replay` | Re-run the offline replay demo (evidence tab) |
+| GET | `/figures/<name>.png` | Research figures |
+
+The browser polls `/api/live` once per second (`LIVE_POLL_MS = 1000`) and appends new flows/alerts
+to the tables (newest first). CLI autostart: `--sample` (paced demo stream, no root) or
+`--live --iface <name>` (real capture, root required).
+
+### 2.7 The Attack Simulator and its calibration (`src/xrlids/demo/attack_sim.py`)
+
+Every scenario is a deterministic TCP packet script. Injection restamps each packet to wall-clock
+time **at 1× speed** (the calibrated scores depend on the flow's time shape; injections are never
+speed-scaled in the UI) and pushes it into the same queue as captured packets. At most one
+injection runs at a time.
+
+| Scenario | Packets | Duration | Flow(s) | Frozen-model score | Band |
+|---|---|---|---|---|---|
+| `slow_http_dos` (slowhttptest-style) | 2 | 3.25 s | 1 | **0.9910** | HIGH |
+| `slow_http_dos_lite` (minimal headers) | 2 | 3.27 s | 1 | **0.9163** | HIGH |
+| `slowloris_session` | 3 | 5.00 s | 1 | **0.7667** | MEDIUM |
+| `low_rate_drip` | 3 | 8.00 s | 1 | **0.5476** | LOW |
+| `syn_flood` *(evasion demo)* | 201 | 1.00 s | 1 | 0.0002 | not detected |
+| `http_flood` *(evasion demo)* | 301 | 1.50 s | 1 | 0.0290 | not detected |
+| `port_sweep` *(evasion demo)* | 80 | 1.96 s | 40 | 0.0169 | not detected |
+
+**How the scores were obtained (and can be re-obtained):** the parameter space of physically
+buildable scripts was probed (2–400 packets, 54–1500-byte lengths, 0.1 ms–8 s durations, flag
+mixes), each candidate was pushed through the *real* pipeline (`FlowBuilder → frozen R10 → frozen
+RF`), and only surviving scripts were kept. `scripts/demo/verify_attack_scenarios.py` re-runs every
+scenario end-to-end and checks the recorded score (±0.05), the flow count, the packet count, and
+band consistency. Run it with:
+
+```bash
+.venv/bin/python scripts/demo/verify_attack_scenarios.py
+```
+
+**Why three scenarios are "evasion demos" (deliberate non-detections):** the probing showed that
+this frozen model's high-confidence region for *clean synthetic* traffic is the low-and-slow family
+(2–4 packets, 3–8 s, small equal-size payloads). Classic fast floods and scans score near zero
+because the model's learned flood/scan signatures lean on CIC FlowMeter artefacts — e.g.
+`packet_length_std` values above the physical 1500-byte limit, or flows with thousands of packets —
+that a clean capture cannot reproduce. Those scenarios ship labelled as non-detections so the
+console shows the model's real behaviour instead of a staged detection.
+
+### 2.8 Showing REAL traffic from this laptop's WiFi
+
+On this machine the WiFi interface is `wlo1` (`192.168.0.109/24`, gateway `192.168.0.1`).
+
+```bash
+# 1. Stop any running dashboard first, then (NEEDS root — run it yourself):
+sudo .venv/bin/python dashboard/server.py --live --iface wlo1
+#    …or start it without root and use the UI: mode "Live capture", interface wlo1
+#    (the UI shows "raw sockets denied" unless the server itself runs with sudo)
+
+# Optional capture filter (simple matcher): tcp / udp / "tcp port 443"
+sudo .venv/bin/python dashboard/server.py --live --iface wlo1 --bpf "tcp port 443"
+```
+
+What you will see: flows whose addresses are *yours* — `192.168.0.109` talking to DNS servers,
+browsers talking to websites, ARP/DHCP/mDNS broadcasts, etc. They will look completely different
+from the demo data, and that is the point: it is your real network.
+
+Honest limits of WiFi capture in normal (managed) mode: the card only delivers frames addressed to
+this laptop plus broadcast/multicast. You will **not** see other devices' unicast traffic on the
+same WiFi (that would require monitor mode, which this project deliberately does not use). Nothing
+is ever transmitted, dropped, or modified — the socket is read-only.
+
+Terminology note: "live" in the dashboard means *the Python process receives packets as they
+arrive* — the capture is real, but it is passive observation, not interception.
+
+### 2.9 Verification quick-reference
+
+```bash
+# Is the dashboard running, and in which mode?
+pgrep -af "dashboard/server.py"
+
+# What does the API say right now? (status, mode, counters, flows, alerts, injection)
+curl -s http://127.0.0.1:8000/api/live | .venv/bin/python -m json.tool | head -40
+
+# Attack-simulator catalogue + calibrated expectations
+curl -s http://127.0.0.1:8000/api/live/scenarios | .venv/bin/python -m json.tool | head -40
+
+# Re-verify every simulator scenario against the frozen model
+.venv/bin/python scripts/demo/verify_attack_scenarios.py
+
+# Full test suite (408 tests)
+.venv/bin/pytest -q
+
+# This laptop's real addresses (compare against dashboard IPs)
+ip -brief addr
+```
+
+### 2.10 Map: which file does what
+
+| File | Responsibility |
+|---|---|
+| `src/xrlids/live/capture.py` | Packet sources: AF_PACKET live socket, PCAP reader, synthetic stream; permission checks |
+| `src/xrlids/demo/pcap.py` | Packet representation (`PacketInfo`) and PCAP parsing; frame builder for tests/demos |
+| `src/xrlids/demo/flow.py` | D-006 bidirectional flow assembly + R10 feature computation |
+| `src/xrlids/demo/live_lab.py` | Per-flow observations, alert creation/bands, alert callbacks (observational only) |
+| `src/xrlids/demo/replay.py` | `ReplayEngine`: loads the frozen model/preprocessor, scores flows, thresholds |
+| `src/xrlids/demo/attack_sim.py` | Calibrated attack-scenario packet scripts (simulation only) |
+| `dashboard/server.py` | HTTP API, `LiveSession` (merge queue, injection worker, counters, snapshots) |
+| `dashboard/app.js` / `index.html` | UI: Live Monitor tab (+ Attack Simulator panel), Replay & Evidence tab |
+| `scripts/demo/verify_attack_scenarios.py` | End-to-end re-verification of all calibrated scenario scores |
+| `results/experiments/EXP-P1-CIC2017-R10-001/` | The frozen model + preprocessor the live pipeline loads |
+
+---
+
+## Part 3 — Quick answers (FAQ)
+
+**Q: Are the packets in the dashboard real WiFi packets?**
+A: Only in **live mode** (`sudo … --live --iface wlo1`). In sample mode you see a synthetic 42-packet
+demo file; simulator rows (`203.0.113.x`) are in-memory by design. Neither ever touches your network.
+
+**Q: Why do the IP addresses differ so much from my network?**
+A: The demo LAN is fictional (`192.168.1.x`), the fake attacker is `10.0.0.99`, and the simulator
+uses the RFC 5737 documentation range (`203.0.113.x`). Your real WiFi is `192.168.0.x` — that
+difference is exactly what distinguishes demo data from live data.
+
+**Q: Why did the dashboard show a packet of impossible size (e.g. 5,880 bytes)?**
+A: Because it is a simulated demo capture, generated in code; it was never on a physical wire.
+Real frames cap at 1,514 bytes. Live capture can never show such packets.
+
+**Q: Can the system block or stop attacks?**
+A: No. It is strictly observational: it never sends, drops, or reroutes. The "Suggested Action"
+column is a display-only mapping of what a separate, future response stage could decide.
+
+**Q: Why do some flows (like the demo's DNS query) never appear as completed?**
+A: D-006 completes TCP flows on FIN/RST or 120 s of silence. The demo DNS flow is UDP with no
+closing packet, so it completes only at the idle timeout or when you press Stop.
+
+**Q: Is the model re-trained or "learning" while monitoring?**
+A: No. The live pipeline uses the frozen artifact from `EXP-P1-CIC2017-R10-001` exactly as trained.
+
+**Q: Why do classic SYN floods/port scans show "not detected" in the simulator?**
+A: That is a documented property/limitation of this frozen model on clean synthetic traffic (see
+2.7). The evasion demos exist so the console shows the model's real behaviour rather than a staged
+detection — an honesty feature, not a bug.

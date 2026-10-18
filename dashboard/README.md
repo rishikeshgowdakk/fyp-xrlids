@@ -5,6 +5,10 @@ A zero-dependency, lightweight web console with two views:
 1. **Live Monitor** — observational live capture: packets → bidirectional flows (D-006) → frozen R10 features → frozen CIC-IDS2017 Random Forest detector. Streams per-flow records (endpoints, protocol, packet counts, threat scores, alerts).
 2. **Replay & Evidence** — reproducible PCAP replay verification statistics, TreeSHAP feature attributions, and the generated research figures gallery.
 
+> **What is real vs. simulated?** See [`docs/HOW_IT_WORKS.md`](../docs/HOW_IT_WORKS.md) for the full
+> end-to-end explanation: which modes use real traffic (live capture only), why the demo/simulator IPs
+> differ from your network, and how every component works in detail.
+
 ---
 
 ## Quick Start (no root required)
