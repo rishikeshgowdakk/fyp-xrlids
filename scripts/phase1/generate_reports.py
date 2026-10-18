@@ -823,7 +823,7 @@ def generate_phase1_final_report() -> str:
         f"- **Phase**: 1 (Empirical Research Platform & Explainability)",
         f"- **Git Commit**: `{commit_str}`",
         f"- **Environment**: Python {env['python_version']} · PyTorch {env['packages'].get('torch', 'N/A')} · Scikit-Learn {env['packages'].get('scikit-learn', 'N/A')} · SHAP {env['packages'].get('shap', 'N/A')}",
-        f"- **Verified Test Suite**: 394 passing tests (0 failures)",
+        f"- **Verified Test Suite**: 399 passing tests (0 failures)",
         "",
         "---",
         "## 1. Research Status Taxonomy",

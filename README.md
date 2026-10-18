@@ -89,7 +89,7 @@ pip install -r requirements.txt
 
 ### 2. Run Test Suite
 
-Execute the full 394-test verification suite:
+Execute the full 399-test verification suite:
 
 ```bash
 .venv/bin/pytest -q
@@ -103,9 +103,9 @@ Execute the packet-to-prediction PCAP replay demo:
 python scripts/demo/run_replay_demo.py
 ```
 
-### 4. Run Monitoring Dashboard
+### 4. Run Monitoring Dashboard (Live Monitor + Replay & Evidence)
 
-Launch the zero-dependency web dashboard to visualize replay statistics and TreeSHAP attributions:
+Launch the zero-dependency web dashboard. It has two tabs: a **Live Monitor** (observational packet capture → flows → frozen detector, with IP endpoints and threat scores) and a **Replay & Evidence** tab (replay verification statistics, TreeSHAP attributions, research figures):
 
 ```bash
 python dashboard/server.py
@@ -113,6 +113,14 @@ python dashboard/server.py
 ```
 
 Open `http://localhost:8000` in your web browser.
+
+- **Live interface capture** (real packets from your network) requires root / `CAP_NET_RAW`:
+  ```bash
+  sudo .venv/bin/python dashboard/server.py --live --iface <interface>
+  # or start it from the UI after launching the server with sudo
+  ```
+- **No root available?** Use the *Sample stream* mode in the UI: it replays `data/demo/sample_traffic.pcap` in real time through the exact same live pipeline (clearly labeled as sample traffic).
+- Live monitoring is **strictly observational** (zero firewall/routing mutations) and shows **no accuracy numbers** (live traffic has no ground truth) — only flows, alerts, and model scores.
 
 > **Note:** The replay demonstration runs immediately out of the box in user space using `data/demo/sample_traffic.pcap` and the trained model artifact in `results/experiments/EXP-P1-CIC2017-R10-001/random_forest.joblib`. Retraining on full raw benchmark datasets (~8.7 GB across 20 CSV files) requires downloading raw data into `data/raw/` as detailed in [`docs/DATASETS.md`](docs/DATASETS.md). Live namespace enforcement requires an isolated Linux testbed with root privileges.
 
@@ -128,7 +136,7 @@ Open `http://localhost:8000` in your web browser.
 | DQN response | Complete |
 | Safety/Rollback | Complete |
 | Live/lab pipeline | Complete within lab scope |
-| Web dashboard | Complete (minimalist zero-dependency server) |
+| Web dashboard | Complete (live monitor + replay evidence; zero-dependency) |
 | Production deployment | Not validated |
 
 ---

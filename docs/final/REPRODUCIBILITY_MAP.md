@@ -54,11 +54,11 @@ To verify physical file integrity:
 
 ## 3. Test Suite Verification
 
-To execute the complete 394-test verification suite:
+To execute the complete 399-test verification suite:
 ```bash
 .venv/bin/pytest -q
 ```
-*Expected Result:* `394 passed` (0 failures, 100% pass rate).
+*Expected Result:* `399 passed` (0 failures, 100% pass rate).
 
 ---
 
@@ -98,6 +98,7 @@ To execute the complete 394-test verification suite:
 | Experiment ID | Description | Primary Reproduction Command | Artifact Location |
 |:---|:---|:---|:---|
 | `DEMO-REPLAY-001` | Deterministic PCAP Replay Demo | `.venv/bin/python scripts/demo/run_replay_demo.py` | `results/demo/` |
+| `DEMO-DASHBOARD-001` | Live Monitor + Replay Evidence console (sample stream: no root; live capture: `sudo` + interface) | `.venv/bin/python dashboard/server.py --sample` (live: `sudo .venv/bin/python dashboard/server.py --live --iface <iface>`) | `dashboard/` (in-memory live session) |
 | `EXP-P3-BURST-1000-001` | 1,000-Packet Traffic Burst (DRY_RUN) | `.venv/bin/python scripts/phase3/run_burst_experiment.py` | `results/phase3/EXP-P3-BURST-1000-001/` |
 | `EXP-P3F-OBSERVABILITY-001` | Observability & Backpressure Test | `.venv/bin/python scripts/phase3/run_observability_experiment.py` | `results/phase3/EXP-P3F-OBSERVABILITY-001/` |
 | `EXP-P3G-ROLLBACK-001` | Atomic Rollback & Transaction Harness | `.venv/bin/python scripts/phase3/run_rollback_experiment.py` | `results/phase3/EXP-P3G-ROLLBACK-001/` |

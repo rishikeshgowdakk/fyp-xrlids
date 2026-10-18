@@ -140,3 +140,45 @@ def test_live_lab_monitor_observational_alerting(tmp_path: Path):
     # Check raw socket capability check executes cleanly
     cap = LiveLabMonitor.check_raw_socket_capability()
     assert isinstance(cap, bool)
+
+
+def test_live_lab_monitor_emits_flow_observations(tmp_path: Path):
+    """Verify every completed flow is observed via on_flow_callback; alerts remain the attack subset."""
+    pcap_file = tmp_path / "observation_test.pcap"
+
+    packets = []
+    t = 300.0
+    # Benign flow: 5 packets over 1.0 s (5 pkt/s, 1000 ms), closed with FIN
+    for _ in range(5):
+        packets.append((t, build_raw_packet("192.168.1.1", "10.0.0.1", 1001, 80, 6, payload_len=100)))
+        t += 0.2
+    packets.append((t + 0.1, build_raw_packet("10.0.0.1", "192.168.1.1", 80, 1001, 6, {"fin": True, "ack": True})))
+    # Attack flow: 10 packets over 0.05 s (200 pkt/s), closed with RST
+    t += 10.0
+    for _ in range(10):
+        packets.append((t, build_raw_packet("10.0.0.99", "192.168.1.1", 6000, 80, 6, payload_len=50)))
+        t += 0.005
+    packets.append((t + 0.1, build_raw_packet("192.168.1.1", "10.0.0.99", 80, 6000, 6, {"rst": True})))
+    write_pcap(pcap_file, packets)
+
+    from xrlids.demo.pcap import PcapReader
+
+    engine = ReplayEngine(model=DummyMockModel(), threshold=0.50)
+    observations = []
+    alerts = []
+    monitor = LiveLabMonitor(
+        engine=engine,
+        alert_threshold=0.50,
+        on_alert_callback=lambda a: alerts.append(a),
+        on_flow_callback=lambda o: observations.append(o),
+    )
+    monitor.process_packet_stream(PcapReader(pcap_file).read_packets())
+
+    assert len(observations) == 2
+    labels_by_src = {o.src_endpoint: o.prediction_label for o in observations}
+    assert labels_by_src["10.0.0.99:6000"] == "ATTACK"
+    assert labels_by_src["192.168.1.1:1001"] == "BENIGN"
+    assert observations[0].is_alert is False
+    assert observations[1].is_alert is True
+    assert len(alerts) == 1
+    assert len(monitor.observations) == 2

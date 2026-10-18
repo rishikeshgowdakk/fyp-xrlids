@@ -1,7 +1,8 @@
 """Observational-only live lab monitor for real-time intrusion alerting.
 
 Strictly observational: monitors network interfaces or packet streams,
-accumulates flows, runs model inference, and emits alerts.
+accumulates flows, runs model inference, records per-flow observations,
+and emits alerts on attack detections.
 NEVER mutates system firewall rules, routing tables, or iptables.
 """
 
@@ -9,6 +10,7 @@ from __future__ import annotations
 
 import logging
 import socket
+from collections import deque
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Callable, Generator
@@ -36,6 +38,23 @@ class AlertEvent:
     details: dict[str, float]
 
 
+@dataclass
+class FlowObservation:
+    """Per-flow observation record for every completed flow (benign or attack)."""
+
+    timestamp: str
+    flow_id: int
+    src_endpoint: str
+    dst_endpoint: str
+    protocol: str
+    packet_count: int
+    duration_ms: float
+    attack_score: float
+    prediction_class: int
+    prediction_label: str  # "BENIGN" or "ATTACK" at the research threshold
+    is_alert: bool
+
+
 class LiveLabMonitor:
     """Safe observational-only network monitor."""
 
@@ -44,11 +63,15 @@ class LiveLabMonitor:
         engine: ReplayEngine,
         alert_threshold: float = 0.50,
         on_alert_callback: Callable[[AlertEvent], None] | None = None,
+        on_flow_callback: Callable[[FlowObservation], None] | None = None,
+        max_observations: int = 10000,
     ) -> None:
         self.engine = engine
         self.alert_threshold = alert_threshold
         self.on_alert_callback = on_alert_callback
+        self.on_flow_callback = on_flow_callback
         self.alerts: list[AlertEvent] = []
+        self.observations: deque[FlowObservation] = deque(maxlen=max_observations)
         self._running = False
 
     def process_packet_stream(
@@ -56,7 +79,12 @@ class LiveLabMonitor:
         packet_generator: Generator[PacketInfo, None, None],
         ground_truth_resolver: Callable[[Flow], int | None] | None = None,
     ) -> list[AlertEvent]:
-        """Ingest streaming packets in userland/test mode, evaluate flows, and emit alerts."""
+        """Ingest streaming packets in userland/test mode, evaluate flows, and emit alerts.
+
+        Every completed flow produces a FlowObservation (streamed to
+        ``on_flow_callback``); attack detections additionally produce an
+        AlertEvent (streamed to ``on_alert_callback``).
+        """
         builder = FlowBuilder(idle_timeout_s=self.engine.idle_timeout_s)
         self.alerts.clear()
         flow_idx = 0
@@ -74,18 +102,37 @@ class LiveLabMonitor:
         return list(self.alerts)
 
     def _evaluate_and_alert(self, flow: Flow, flow_idx: int) -> None:
-        """Run model inference and generate alert if probability exceeds threshold."""
+        """Run model inference, record the observation, and emit an alert when threshold is crossed."""
         pred, conf = self.engine._predict_flow(flow)
-        if pred == 1 and conf >= self.alert_threshold:
-            proto = "TCP" if flow.key.protocol == 6 else ("UDP" if flow.key.protocol == 17 else f"PROTO_{flow.key.protocol}")
+        proto = "TCP" if flow.key.protocol == 6 else ("UDP" if flow.key.protocol == 17 else f"PROTO_{flow.key.protocol}")
+        is_alert = pred == 1 and conf >= self.alert_threshold
+
+        observation = FlowObservation(
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            flow_id=flow_idx,
+            src_endpoint=f"{flow.source_first_ip}:{flow.source_first_port}",
+            dst_endpoint=f"{flow.dest_first_ip}:{flow.dest_first_port}",
+            protocol=proto,
+            packet_count=flow.packet_count,
+            duration_ms=round(flow.duration_ms, 2),
+            attack_score=round(conf, 4),
+            prediction_class=pred,
+            prediction_label="ATTACK" if pred == 1 else "BENIGN",
+            is_alert=is_alert,
+        )
+        self.observations.append(observation)
+        if self.on_flow_callback is not None:
+            self.on_flow_callback(observation)
+
+        if is_alert:
             level = "HIGH" if conf >= 0.85 else ("MEDIUM" if conf >= 0.65 else "LOW")
             alert = AlertEvent(
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=observation.timestamp,
                 flow_id=flow_idx,
                 alert_level=level,
                 confidence=round(conf, 4),
-                src_endpoint=f"{flow.source_first_ip}:{flow.source_first_port}",
-                dst_endpoint=f"{flow.dest_first_ip}:{flow.dest_first_port}",
+                src_endpoint=observation.src_endpoint,
+                dst_endpoint=observation.dst_endpoint,
                 protocol=proto,
                 packet_count=flow.packet_count,
                 duration_ms=round(flow.duration_ms, 2),

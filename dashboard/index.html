@@ -38,6 +38,24 @@
       font-size: 14px;
       color: #333333;
     }
+    .tabbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .tab {
+      background-color: #ffffff;
+      color: #000000;
+      border: 2px solid #000000;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .tab.active {
+      background-color: #000000;
+      color: #ffffff;
+    }
     button {
       background-color: #ffffff;
       color: #000000;
@@ -49,7 +67,7 @@
       border-radius: 0;
       font-family: inherit;
     }
-    button:hover {
+    button:hover:not(:disabled) {
       background-color: #000000;
       color: #ffffff;
     }
@@ -126,15 +144,52 @@
       background-color: #000000;
       color: #ffffff;
     }
-    select {
+    select, input[type="text"] {
       background-color: #ffffff;
       color: #000000;
       border: 1px solid #000000;
       padding: 6px 12px;
       font-size: 14px;
       font-family: inherit;
-      margin-bottom: 14px;
       max-width: 100%;
+    }
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .control-row .lv-status {
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .notice {
+      border: 1px solid #000000;
+      border-left-width: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+    .notice.error {
+      border-left-color: #b00020;
+      color: #b00020;
+    }
+    .dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1px solid #000000;
+      vertical-align: middle;
+    }
+    .dot.live {
+      background-color: #000000;
+      animation: pulse 1s infinite alternate;
+    }
+    @keyframes pulse {
+      from { opacity: 1; }
+      to { opacity: 0.2; }
     }
     .figure-container {
       border: 1px solid #000000;
@@ -158,6 +213,8 @@
       color: #444444;
       display: flex;
       justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
     }
   </style>
 </head>
@@ -166,110 +223,225 @@
   <header>
     <div>
       <h1>XRL-IDARS</h1>
-      <p class="subtitle">Explainable Reinforcement Learning Intrusion Detection & Response Dashboard</p>
+      <p class="subtitle">Explainable Reinforcement Learning Intrusion Detection &amp; Response Console</p>
     </div>
-    <div>
-      <button id="run-btn" onclick="runAnalysis()">Run Replay Analysis</button>
-      <div id="status-text">Ready</div>
+    <div class="tabbar">
+      <button class="tab active" data-tab="live" onclick="showTab('live')">Live Monitor</button>
+      <button class="tab" data-tab="evidence" onclick="showTab('evidence')">Replay &amp; Evidence</button>
     </div>
   </header>
 
-  <!-- Summary Metrics -->
-  <section>
-    <h2>Summary Metrics</h2>
-    <div class="metrics-grid">
-      <div class="metric-card">
-        <div class="label">Total Packets</div>
-        <div class="value" id="val-packets">-</div>
-        <div class="sub" id="val-pcap-source">PCAP Replay</div>
-      </div>
-      <div class="metric-card">
-        <div class="label">Completed Flows</div>
-        <div class="value" id="val-flows">-</div>
-        <div class="sub">Bidirectional (D-006)</div>
-      </div>
-      <div class="metric-card">
-        <div class="label">Research Accuracy</div>
-        <div class="value" id="val-res-acc">-</div>
-        <div class="sub" id="val-res-f1">F1: - (tau = 0.50)</div>
-      </div>
-      <div class="metric-card">
-        <div class="label">Operational Accuracy</div>
-        <div class="value" id="val-ops-acc">-</div>
-        <div class="sub" id="val-ops-f1">F1: - (tau = 0.40)</div>
-      </div>
-    </div>
-  </section>
+  <!-- ==================== LIVE MONITOR TAB ==================== -->
+  <main id="tab-live">
 
-  <!-- Flow Classification & Response Table -->
-  <section>
-    <h2>Network Flows & Response Actions</h2>
-    <div style="overflow-x: auto;">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Proto</th>
-            <th>Source Endpoint</th>
-            <th>Destination Endpoint</th>
-            <th>Pkts</th>
-            <th>Dur (ms)</th>
-            <th>Threat Score</th>
-            <th>Truth</th>
-            <th>Detection</th>
-            <th>Response Action</th>
-          </tr>
-        </thead>
-        <tbody id="flows-table-body">
-          <tr>
-            <td colspan="10" style="text-align: center;">Loading flows...</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+    <section>
+      <h2>Live Capture Control</h2>
+      <div class="control-row">
+        <select id="live-mode" title="Capture source">
+          <option value="sample">Sample stream (no root)</option>
+          <option value="live">Live interface (requires root)</option>
+        </select>
+        <input type="text" id="live-iface" list="iface-list" placeholder="interface e.g. wlo1" size="18" title="Interface for live capture">
+        <datalist id="iface-list"></datalist>
+        <input type="text" id="live-bpf" placeholder="filter e.g. tcp port 443 (optional)" size="26" title="Optional capture filter">
+        <button id="live-start-btn" onclick="startLive()">Start Capture</button>
+        <button id="live-stop-btn" onclick="stopLive()" disabled>Stop</button>
+        <span id="live-status" class="lv-status">stopped</span>
+        <span id="live-dot" class="dot" title="Session running indicator"></span>
+      </div>
+      <div id="live-notice" class="notice">
+        Observational only — this console never modifies firewall, routing, or traffic. Live traffic has no ground
+        truth, so accuracy is not claimed here; the score is the frozen CIC-IDS2017 Random Forest output
+        (research &tau; = 0.50). Flow completion follows the D-006 policy (TCP FIN/RST or 120 s idle timeout).
+      </div>
+    </section>
 
-  <!-- Explainable AI (SHAP) -->
-  <section>
-    <h2>Explainable AI & Feature Importance (TreeSHAP)</h2>
-    <p style="font-size: 13px; margin-bottom: 10px;">
-      Top flow statistical features that most strongly drive threat detection scores (CIC-IDS2017 Random Forest baseline):
-    </p>
-    <div style="overflow-x: auto;">
-      <table>
-        <thead>
-          <tr>
-            <th style="width: 60px;">Rank</th>
-            <th>Feature Name</th>
-            <th style="width: 140px;">Mean |SHAP|</th>
-            <th>Description & Significance</th>
-          </tr>
-        </thead>
-        <tbody id="shap-table-body">
-          <tr>
-            <td colspan="4" style="text-align: center;">Loading SHAP features...</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+    <section>
+      <h2>Live Counters</h2>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="label">Packets Captured</div>
+          <div class="value" id="lv-packets">0</div>
+          <div class="sub" id="lv-rate">0.0 pkt/s</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Completed Flows</div>
+          <div class="value" id="lv-flows">0</div>
+          <div class="sub">Bidirectional (D-006)</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Alerts (&tau; &ge; 0.50)</div>
+          <div class="value" id="lv-alerts">0</div>
+          <div class="sub">ATTACK predictions</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Session</div>
+          <div class="value" id="lv-elapsed">0s</div>
+          <div class="sub" id="lv-mode-label">not started</div>
+        </div>
+      </div>
+    </section>
 
-  <!-- Research Figures Gallery -->
-  <section>
-    <h2>Research Figures Gallery</h2>
-    <label for="figure-select" style="font-size: 13px; font-weight: 600;">Select Figure to View:</label><br>
-    <select id="figure-select" onchange="changeFigure()">
-      <option value="">Loading figures...</option>
-    </select>
-    <div class="figure-container">
-      <img id="figure-display" src="" alt="Selected Research Figure" style="display: none;">
-      <p id="figure-caption" style="margin-top: 8px; font-size: 13px;"></p>
-    </div>
-  </section>
+    <section>
+      <h2>Live Flows (newest first)</h2>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Time</th>
+              <th>Proto</th>
+              <th>Source Endpoint</th>
+              <th>Destination Endpoint</th>
+              <th>Pkts</th>
+              <th>Dur (ms)</th>
+              <th>Threat Score</th>
+              <th>Detection (&tau;=0.50)</th>
+              <th>Suggested Action (observational)</th>
+            </tr>
+          </thead>
+          <tbody id="live-flows-body">
+            <tr><td colspan="10" style="text-align: center;">No live session yet — press "Start Capture".</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Alerts</h2>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Level</th>
+              <th>Score</th>
+              <th>Source Endpoint</th>
+              <th>Destination Endpoint</th>
+              <th>Proto</th>
+              <th>Pkts</th>
+            </tr>
+          </thead>
+          <tbody id="live-alerts-body">
+            <tr><td colspan="7" style="text-align: center;">No alerts.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== REPLAY & EVIDENCE TAB ==================== -->
+  <main id="tab-evidence" style="display: none;">
+
+    <section>
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
+        <p style="font-size: 13px;">
+          Static evidence view: reproducible PCAP replay verification, TreeSHAP attributions, and generated research figures.
+        </p>
+        <div>
+          <button id="run-btn" onclick="runAnalysis()">Run Replay Analysis</button>
+          <div id="status-text">Ready</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Summary Metrics -->
+    <section>
+      <h2>Summary Metrics (Replay Verification)</h2>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="label">Total Packets</div>
+          <div class="value" id="val-packets">-</div>
+          <div class="sub" id="val-pcap-source">PCAP Replay</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Completed Flows</div>
+          <div class="value" id="val-flows">-</div>
+          <div class="sub">Bidirectional (D-006)</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Research Accuracy</div>
+          <div class="value" id="val-res-acc">-</div>
+          <div class="sub" id="val-res-f1">F1: - (tau = 0.50)</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Operational Accuracy</div>
+          <div class="value" id="val-ops-acc">-</div>
+          <div class="sub" id="val-ops-f1">F1: - (tau = 0.40)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Flow Classification & Response Table -->
+    <section>
+      <h2>Network Flows &amp; Response Actions</h2>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Proto</th>
+              <th>Source Endpoint</th>
+              <th>Destination Endpoint</th>
+              <th>Pkts</th>
+              <th>Dur (ms)</th>
+              <th>Threat Score</th>
+              <th>Truth</th>
+              <th>Detection</th>
+              <th>Response Action</th>
+            </tr>
+          </thead>
+          <tbody id="flows-table-body">
+            <tr>
+              <td colspan="10" style="text-align: center;">Loading flows...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Explainable AI (SHAP) -->
+    <section>
+      <h2>Explainable AI &amp; Feature Importance (TreeSHAP)</h2>
+      <p style="font-size: 13px; margin-bottom: 10px;">
+        Top flow statistical features that most strongly drive threat detection scores (CIC-IDS2017 Random Forest baseline):
+      </p>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 60px;">Rank</th>
+              <th>Feature Name</th>
+              <th style="width: 140px;">Mean |SHAP|</th>
+              <th>Description &amp; Significance</th>
+            </tr>
+          </thead>
+          <tbody id="shap-table-body">
+            <tr>
+              <td colspan="4" style="text-align: center;">Loading SHAP features...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Research Figures Gallery -->
+    <section>
+      <h2>Research Figures Gallery</h2>
+      <label for="figure-select" style="font-size: 13px; font-weight: 600;">Select Figure to View:</label><br>
+      <select id="figure-select" onchange="changeFigure()">
+        <option value="">Loading figures...</option>
+      </select>
+      <div class="figure-container">
+        <img id="figure-display" src="" alt="Selected Research Figure" style="display: none;">
+        <p id="figure-caption" style="margin-top: 8px; font-size: 13px;"></p>
+      </div>
+    </section>
+  </main>
 
   <footer>
     <span>XRL-IDARS v1.0.0 · Final Year Project</span>
-    <span>Host Integrity: 0 Mutations Verified (10.200.1.0/24 netns)</span>
+    <span>Observational only · Host Integrity: 0 Mutations Verified (10.200.1.0/24 netns)</span>
   </footer>
 
   <script src="/app.js"></script>
