@@ -1,0 +1,344 @@
+# Demo Runbook, Viva Script & Video Recording Guide
+
+*Created 2026-10-20. Companion to [`FINAL_VIVA_GUIDE.md`](FINAL_VIVA_GUIDE.md) (research Q&A) and
+[`../HOW_IT_WORKS.md`](../HOW_IT_WORKS.md) (system explanation). This file is the **practical**
+script: what to run, what to click, what to say, and what to do when something breaks.*
+
+---
+
+## 1. Readiness verdict (verified 2026-10-20)
+
+### 1.1 Demo readiness — ✅ READY
+
+| Check | Result |
+|---|---|
+| Frontend starts (no build step — static HTML/JS served by Python) | ✅ `dashboard/server.py 8000 --sample` → running |
+| Live Monitor tab renders + polls (`/api/live`) | ✅ counters, flows, alerts updating every 1 s |
+| Attack Simulator end-to-end (HTTP + UI) | ✅ `slow_http_dos` → 2-packet flow, 3250.6 ms, score **0.9910**, **HIGH** alert |
+| Scenario catalogue (`/api/live/scenarios`) | ✅ 7 scenarios with calibrated expectations |
+| Replay & Evidence tab (`/api/data`) | ✅ 42 packets / 6 flows; 7 figures; TreeSHAP table |
+| Deterministic replay metrics | ✅ research τ=0.50 → 83.3% (F1 0.8000); operational τ=0.40 → 100% (F1 1.0000) |
+| Frozen model artifacts | ✅ `EXP-P1-CIC2017-R10-001/*.joblib` present (RF 26 MB + preprocessor) |
+| Simulator calibration re-verification | ✅ 7/7 scenarios OK (`scripts/demo/verify_attack_scenarios.py`) |
+| Full test suite | ✅ **408 passed, 0 failed** (`pytest -q`, exit 0) |
+| Phase 2/3 artifacts (RL, response, burst, gate) | ✅ result directories present |
+| Root required? | ❌ No for sample mode; ✅ only for optional live WiFi capture |
+
+### 1.2 Production readiness — ⚠️ RESEARCH PROTOTYPE, not production-exposed
+
+Honest gaps (know these before a viva question):
+
+| Area | Current state | Production requirement |
+|---|---|---|
+| Network exposure | Binds `127.0.0.1` only | Reverse proxy + TLS + authentication/RBAC |
+| HTTP server | Python stdlib `ThreadingHTTPServer`, single process | ASGI/WSGI server, worker pool, health checks |
+| State | In-memory deques (flows/alerts), no history DB | Durable storage (e.g. Postgres/OpenSearch) + retention policy |
+| Model shipping | `.joblib` artifacts are **gitignored** (`*.joblib`) | Versioned model registry / release artifact; integrity hash |
+| Missing-model behaviour | Falls back to a heuristic detector with `engine_warning` | Fail closed / refuse to start, or serve last-known-good model |
+| Capture privileges | Live capture needs root / `CAP_NET_RAW` | systemd unit with `AmbientCapabilities=CAP_NET_RAW` + hardening |
+| Throughput | RF ~sub-ms/flow; full fusion (LSTM) heavier; single node | eBPF/XDP + hardware acceleration; horizontal scaling |
+| Response | Observational only (dashboard never actuates) | Enforcement stays inside the audited transaction/safety-gate path |
+| CI/CD | None (no `.github/workflows`, no Dockerfile) | CI pipeline, container image, deployment manifests |
+| Multi-node | Single-node locks | Distributed coordination (Raft/queue), shared model server |
+
+**Safe demo claim:** "The detection + monitoring prototype is demo-ready end-to-end; production
+deployment would require the hardening items above." Never claim it is production-deployed.
+
+---
+
+## 2. Pre-demo checklist (T-10 minutes)
+
+```bash
+cd ~/Desktop/fyp-xrlids
+
+# 1) Start the dashboard (sample mode — no root needed)
+.venv/bin/python dashboard/server.py 8000 --sample
+# leave this terminal running
+
+# 2) Open the UI
+#    http://127.0.0.1:8000   (Live Monitor is the default tab)
+```
+
+Sanity checks before the examiner walks in:
+
+1. Header status line reads **"running · sample stream (bundled demo capture)"**.
+2. **Packets Captured** counter is increasing (refresh after a few seconds).
+3. Scenario dropdown lists 7 entries; the expectation badge shows
+   **"calibrated: HIGH · score ≈ 0.991"** for the default scenario.
+4. Nothing else is running on port 8000.
+
+Optional (only if you will show *real* WiFi traffic — needs your sudo password):
+
+```bash
+# stop the sample-mode server first (Ctrl+C in its terminal), then:
+sudo .venv/bin/python dashboard/server.py --live --iface wlo1
+# check your interface name with: ip -brief addr
+```
+
+> If the examiner asks for real traffic and you cannot sudo: stay in sample mode and say so
+> explicitly. Never present sample data as live.
+
+Backup plan (recommended): record the video demo **before** the viva and keep the file handy. If the
+live demo fails, play the recording and narrate over it.
+
+---
+
+## 3. The demo scripts
+
+### 3.1 Three-minute demo (core story)
+
+| Step | Action | Say |
+|---|---|---|
+| 1 | Point at the header + status line | "This is an observational intrusion-detection console. It never blocks or modifies traffic — it watches, scores, and alerts." |
+| 2 | Point at **Live Counters** | "Packets are grouped into bidirectional flows under decision D-006: a TCP flow closes on FIN/RST, otherwise 120 s idle. Each completed flow is scored once." |
+| 3 | Attack Simulator → keep default **Slow HTTP DoS (slowhttptest-style)** | "This scenario is calibrated against the frozen model. The badge shows the score it will produce: 0.991, HIGH." |
+| 4 | Click **Inject Attack**, then point at the status line | "The packets are synthesised in memory and pushed through the same pipeline as captured traffic. Nothing is sent on the network." |
+| 5 | Wait ~3.5 s (narrate while waiting: "the flow must finish before it is scored — that's the 3.25 s gap") | "There it is: 2 packets, 3250 ms, score 0.991, ATTACK, HIGH alert." |
+| 6 | (Optional, 20 s) Inject **Port sweep scan (evasion demo)** | "40 flows, zero alerts — a documented limitation of this model on clean synthetic scans. We ship it deliberately instead of staging a fake detection." |
+
+### 3.2 Seven-minute demo (recommended)
+
+1. **Problem + architecture (60 s)** — signature IDS vs flow ML; walk the diagram from
+   `../HOW_IT_WORKS.md` Part 1: capture → flows → 10 features → frozen RF → dashboard.
+2. **Live Monitor tour (60 s)** — counters, flows table, alerts table; explain SIM badge,
+   τ=0.50 research threshold, alert bands (HIGH ≥ 0.85 / MEDIUM ≥ 0.65 / LOW ≥ 0.50).
+3. **Simulator: detected scenario (60 s)** — `slow_http_dos` → 0.991 HIGH. Mention calibration +
+   verifier script.
+4. **Simulator: evasion demo (45 s)** — `syn_flood` or `port_sweep` → near-zero scores; explain
+   the FlowMeter-artifact limitation honestly (this is a strength in a viva, not a weakness).
+5. **Replay & Evidence tab (90 s)** — 42-packet deterministic replay; 6 flows with ground truth;
+   research τ=0.50 → 83.3% (one borderline miss at 0.4692 shown explicitly), operational τ=0.40 →
+   100%. TreeSHAP feature importance below.
+6. **Datasets + model evidence (60 s)** — 19,321,418 raw rows → 10,214,137 modeling rows after
+   dedup/conflict rejection; 3-seed fusion metrics (CIC 0.9903 ± 0.0005 accuracy, AUC 0.9986).
+7. **Limitations + production path (45 s)** — live traffic has no ground truth (never claim
+   accuracy); production gaps: auth/TLS, persistence, model registry, eBPF/XDP, CI.
+
+### 3.3 Twelve-minute full demo
+
+Run 3.2, then add:
+
+- **Live capture explanation (90 s)**: what live mode is (`AF_PACKET`, root), what it can see in
+  managed WiFi mode (this laptop's traffic + broadcast/multicast, not other clients' unicast),
+  and why live flows look nothing like the demo IPs.
+- **RL/response recap (90 s)**: 6-D state, Dueling DQN, safety gate, transactional rollback;
+  H0 rejected (p<0.001) but the 15% practical criterion was **not** met (11.29%/14.10% cost
+  reduction) — report it as pre-registered and honest.
+- **Any viva question** from §4.
+
+---
+
+## 4. Viva Q&A — dashboard/demo-specific supplement
+
+> The full research Q&A (datasets, RF/LSTM/fusion, RL, SHAP, rollback) is in
+> [`FINAL_VIVA_GUIDE.md`](FINAL_VIVA_GUIDE.md). These are the questions examiners ask **while the
+> dashboard is on screen.**
+
+**Q1. Are these real packets from my WiFi?**
+No — in the default sample mode this is a bundled synthetic 42-packet capture, and simulator rows
+are in-memory. Real traffic appears only after live capture is started with `sudo ... --live
+--iface <name>`. The UI labels the mode and the SIM badge marks injected flows.
+
+**Q2. Why do the IP addresses differ from my network?**
+The demo LAN is fictional (`192.168.1.x`), the fake attacker host is `10.0.0.99`, and the simulator
+uses the RFC 5737 documentation range (`203.0.113.x`) so it can never collide with real hosts. Your
+WiFi is whatever `ip -brief addr` shows (e.g. `192.168.0.x`). This difference is the fastest way to
+prove to an examiner which mode is running.
+
+**Q3. Why does the demo capture contain a 5,880-byte packet?**
+Because it is generated in code, not captured. Real Ethernet/WiFi frames cap at 1,514 bytes. This is
+a feature of a reproducible demo file, and impossible in live capture.
+
+**Q4. Why does the live monitor use only the Random Forest and not the fusion model?**
+The monitor loads the frozen RF artifact for deterministic latency and exact feature parity with the
+R10 contract. Fusion (RF+LSTM) improvements are established offline in the Phase 1 experiments; a
+production monitor would serve the fusion model behind a model server. The dashboard's job is
+observability, not benchmark reporting.
+
+**Q5. One replay attack shows "BENIGN (INCORRECT)" — is that a bug?**
+No — it is the threshold decision being shown honestly. The flow scores 0.4692, below the research
+τ=0.50, so it is classified benign; at the operational candidate τ=0.40 the same replay is 100%
+correct. D-003 (operational threshold) remains an open decision; we display both thresholds.
+
+**Q6. Why do your SYN flood / port scan demos get "not detected"?**
+A calibrated property of this frozen model on clean synthetic traffic: its learned flood/scan
+regions rely on CIC FlowMeter artefacts (e.g. packet-length std above the physical 1500-byte limit,
+thousands-packet flows) that clean captures cannot reproduce. We ship those scenarios as labelled
+evasion demos so the model's real behaviour is visible. This is exactly the kind of finding a viva
+should reward — no staged detections.
+
+**Q7. How do we know the simulator isn't faking detections?**
+Scenario parameters were searched over the physically realisable script space and every surviving
+script was verified end-to-end through `FlowBuilder → frozen R10 → frozen RF`. The recorded scores
+are re-checked by `scripts/demo/verify_attack_scenarios.py`; the live UI shows the model's own
+output, and the code never writes scores. Injection only supplies packets.
+
+**Q8. Is the injection dangerous? Can it attack a real host?**
+No. Packets are objects in memory pushed into the pipeline queue; the program never opens a sending
+socket for them, and the attacker addresses are documentation-range IPs. The monitoring service
+itself only reads (live capture) — it never sends, drops, or reroutes.
+
+**Q9. How do you know live features match the training features?**
+Parity tests verify computed features against the offline definitions to `atol ≤ 1e-4`; the R10
+contract is frozen and shared by training, replay, and live paths. The test suite (408 tests)
+includes the parity and pipeline tests.
+
+**Q10. What happens if the model files are missing on the demo machine?**
+The server falls back to a heuristic detector and exposes an `engine_warning` in the API/UI. For a
+viva, check the warning field is empty before you start; if it is set, the demo is running without
+the frozen model — say so or fix the artifacts first.
+
+**Q11. Why does the DNS flow never appear as completed?**
+D-006 completes TCP flows on FIN/RST; UDP has no close semantics, so it completes only at the 120 s
+idle timeout or when the session stops. This is documented and expected.
+
+**Q12. What would it take to productionise this?**
+Auth/TLS/reverse proxy, durable storage, model registry with integrity hashes, capability-scoped
+capture, eBPF/XDP for line rate, CI/CD + containers, and distributed coordination. The detection and
+observability logic is complete; the operational envelope is not.
+
+**Q13. What is the "Suggested Action" column?**
+A display-only mapping of the DQN response-policy bands (BLOCK ≥ 0.50, THROTTLE ≥ 0.40, MONITOR
+≥ 0.20, ALLOW otherwise). The dashboard never actuates; enforcement lives in the audited
+transaction/safety-gate path, tested only inside isolated network namespaces.
+
+**Q14. Why 408 tests? What do they cover?**
+Phase 1 data/model contracts, leakage/dedup guarantees, parity, replay, Phase 2 RL, Phase 3
+observability/rollback/gate, dashboard server + simulator + HTTP endpoints. `pytest -q` is the
+single gate; expected result: 408 passed.
+
+---
+
+## 5. Video demo — recording script
+
+### 5.1 Setup
+
+- **Recorder:** OBS Studio (1920×1080, 30 fps) or ffmpeg:
+  ```bash
+  ffmpeg -f x11grab -video_size 1920x1080 -framerate 30 -i "$DISPLAY" \
+         -f pulse -i default -c:v libx264 -preset veryfast -crf 20 -c:a aac demo.mp4
+  ```
+- **Browser:** one tab, `http://127.0.0.1:8000`, zoom 110–125% (`Ctrl` `+`), bookmarks bar hidden.
+- **Terminal:** font ≥ 16 pt; only the dashboard terminal visible.
+- **Timing:** record at 1× pacing (do not speed up injections — the wait is part of the proof).
+- **Length target:** 6–8 minutes. One continuous take is fine; segment-record if you need retakes.
+
+### 5.2 Shot list + narration
+
+**Shot 1 — Title (0:00–0:20, static or webcam)**
+> "XRL-IDARS: an explainable intrusion-detection and response prototype. This video shows the live
+> detection console, the calibrated attack simulator, and the evidence behind the models."
+
+**Shot 2 — Architecture (0:20–1:10, show `docs/HOW_IT_WORKS.md` Part 1 diagram)**
+> "Traffic is captured or replayed, grouped into bidirectional flows under D-006, summarised by ten
+> frozen features, and scored by a frozen Random Forest trained on CIC-IDS2017. Results stream to a
+> zero-dependency web console. The monitor is observational: it never blocks or modifies traffic."
+
+**Shot 3 — Live Monitor tour (1:10–2:10)**
+> "This is the Live Monitor. The sample stream is a bundled synthetic capture — no root needed. The
+> counters show packets, completed flows, and alerts. The flows table lists every completed flow
+> with endpoints, packet count, duration, and the model's attack probability. Alerts fire at the
+> research threshold of 0.50, with severity bands: HIGH above 0.85, MEDIUM above 0.65."
+
+**Shot 4 — Attack Simulator, detected scenario (2:10–3:20)**
+> "The Attack Simulator injects calibrated scenarios in memory. This slow-HTTP-DoS scenario is
+> expected to score 0.991 — HIGH. I press Inject Attack… [wait] … the first packet is sent into the
+> pipeline; the flow completes after 3.25 seconds; and here is the result: two packets, 3250
+> milliseconds, score 0.991, ATTACK, HIGH alert. The score is the frozen model's real output."
+
+**Shot 5 — Evasion demo (3:20–4:00)**
+> "Now a classic SYN flood. It produces two hundred packets over one second… and scores near zero.
+> This is a documented limitation: the model's learned flood signature depends on CIC FlowMeter
+> artefacts that clean captures cannot reproduce. We expose this honestly instead of tuning a fake
+> detection."
+
+**Shot 6 — Replay & Evidence (4:00–5:10)**
+> "The Replay & Evidence tab is deterministic. Forty-two packets, six flows, with ground truth.
+> At the research threshold, accuracy is 83.3 percent — and you can see the single borderline miss
+> at 0.4692. At the operational candidate threshold of 0.40, the same replay is 100 percent. Below,
+> TreeSHAP ranks the features driving the detector."
+
+**Shot 7 — Data and model evidence (5:10–6:00, terminal or slides)**
+> "The models were trained on 19.3 million raw rows across CIC-IDS2017, CSE-CIC-IDS2018 and
+> UNSW-NB15, reduced to 10.2 million modeling rows after duplicate and label-conflict rejection.
+> Three-seed fusion results: CIC accuracy 0.9903 with AUC 0.9986; CSE 0.9912; UNSW 0.8988."
+
+**Shot 8 — Closing + limitations (6:00–6:45)**
+> "The detector and console are complete and covered by 408 passing tests. Live traffic has no
+> ground truth, so we never report accuracy on it. Production deployment would require
+> authentication, TLS, durable storage, a model registry, and kernel-bypass capture. The research
+> contribution — leakage-safe training, calibrated simulation, and an honest evaluation — is
+> reproducible from the repository."
+
+### 5.3 Recording tips
+
+- Do a silent dry run first; note the exact timings of the injection waits.
+- Narrate during waits (do not leave dead air): explain D-006 or the score bands.
+- Keep the mouse still while speaking; move it only to the next control.
+- Record the terminal command once (server start) so the setup is verifiable.
+- If you must shorten the 8 s drip scenario in the edit, label the cut; keep at least one real-time
+  injection uncut.
+- Save as `demo_xrlids_<date>.mp4`; keep a copy offline for viva day.
+
+---
+
+## 6. Recovery playbook (if something breaks)
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `Address already in use` | Old server still running | `pkill -f "[d]ashboard/server.py"`, then restart |
+| Page shows no data | Server crashed / wrong port | Check terminal; open `http://127.0.0.1:8000`; restart |
+| UI stale after code change | Browser cache | `Ctrl+Shift+R` |
+| "raw sockets denied" | No root | Stay in sample mode (say so) or restart with `sudo` |
+| Live mode shows no flows | Wrong interface / no traffic / filter too narrow | `ip -brief addr`; clear the filter; generate traffic (open a website) |
+| UDP-only flows missing | D-006 waits 120 s idle | Expected; point at a TCP flow or press Stop |
+| Injection error "No running session" | Monitor not started | Click **Start Capture** (or restart with `--sample`) |
+| Injection error "still running" | One injection at a time | Wait for completion (3–8 s) |
+| `engine_warning` in the API | Model artifacts missing/unloadable | Restore `results/experiments/EXP-P1-CIC2017-R10-001/*.joblib`; heuristics are not the frozen model |
+| Examiner asks for real traffic, no sudo | Privilege restriction | Show the recorded video + explain the managed-mode limits |
+
+---
+
+## 7. One-page cheat sheet (numbers to memorize)
+
+| Fact | Value |
+|---|---|
+| Raw datasets | 19,321,418 rows / 20 files (CIC 2,830,743 · CSE 16,233,002 · UNSW 257,673) |
+| Modeling populations | 10,214,137 rows (1,779,322 + 8,312,295 + 122,520) |
+| CIC rows removed in cleaning | 1,051,421 (dupes, invalid, non-finite, conflicts) |
+| Feature contract | R10 (10 flow features); UNSW auxiliary R4 (D-002) |
+| Live thresholds | research τ = 0.50; operational candidate τ = 0.40 (D-003 open) |
+| Alert bands | HIGH ≥ 0.85 · MEDIUM ≥ 0.65 · LOW ≥ 0.50 |
+| Multi-seed fusion (acc / F1 / AUC) | CIC 0.9903/0.9735/0.9986 · CSE 0.9912/0.9602/0.9965 · UNSW 0.8988/0.8963/0.9674 |
+| Replay demo | 42 packets · 6 flows · 83.3% @0.50 · 100% @0.40 |
+| Simulator (detected) | 0.9910 · 0.9163 · 0.7667 · 0.5476 |
+| Simulator (evasion demos) | 0.0002 · 0.0290 · 0.0169 |
+| Tests | 408 passed, 0 failed |
+| RL hypothesis | H0 rejected (p < 0.001); cost −11.29% / −14.10%; 15% practical criterion NOT met |
+| D-006 | TCP closes on FIN/RST; otherwise 120 s idle |
+| Live capture | AF_PACKET raw socket; root/CAP_NET_RAW; read-only |
+
+---
+
+## 8. Exact command reference
+
+```bash
+# Dashboard (sample mode — no root)
+.venv/bin/python dashboard/server.py 8000 --sample
+
+# Dashboard (real WiFi — run yourself, needs sudo; interface from `ip -brief addr`)
+sudo .venv/bin/python dashboard/server.py --live --iface wlo1
+
+# Optional simple capture filter
+sudo .venv/bin/python dashboard/server.py --live --iface wlo1 --bpf "tcp port 443"
+
+# Scenario calibration re-verification
+.venv/bin/python scripts/demo/verify_attack_scenarios.py
+
+# Full test suite
+.venv/bin/pytest -q
+
+# API spot checks
+curl -s http://127.0.0.1:8000/api/live | python3 -m json.tool | head -40
+curl -s http://127.0.0.1:8000/api/live/scenarios | python3 -m json.tool | head -40
+```

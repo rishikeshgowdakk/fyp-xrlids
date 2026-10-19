@@ -34,3 +34,11 @@ Each question gets: **short answer · technical answer · evidence · relevant e
   established" — not a plausible-sounding claim.
 - Attribution ≠ causality: SHAP answers are framed as attribution.
 - Live results are framed as "predictions generated", never "accuracy", absent ground truth.
+
+## Practical demo material
+
+| Document | Purpose |
+| --- | --- |
+| [`FINAL_VIVA_GUIDE.md`](FINAL_VIVA_GUIDE.md) | Full research/defense Q&A (datasets, models, RL, SHAP, rollback) |
+| [`DEMO_AND_VIDEO_SCRIPT.md`](DEMO_AND_VIDEO_SCRIPT.md) | Readiness verdict, click-by-click demo runbook (3/7/12 min), viva supplement, video shot list + narration, recovery playbook, cheat sheet |
+| [`../HOW_IT_WORKS.md`](../HOW_IT_WORKS.md) | End-to-end system explanation (simple + detailed) |
