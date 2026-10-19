@@ -2,8 +2,8 @@
 
 A zero-dependency, lightweight web console with two views:
 
-1. **Live Monitor** — observational live capture: packets → bidirectional flows (D-006) → frozen R10 features → frozen CIC-IDS2017 Random Forest detector. Streams per-flow records (endpoints, protocol, packet counts, threat scores, alerts).
-2. **Replay & Evidence** — reproducible PCAP replay verification statistics, TreeSHAP feature attributions, and the generated research figures gallery.
+1. **Live Monitor** — observational live capture: packets → bidirectional flows (D-006) → frozen R10 features → frozen CIC-IDS2017 Random Forest detector. Streams per-flow records (endpoints, protocol, packet counts, threat scores, alerts), with an alert banner, a **Detected Attack Sources** summary (source IPs, targets, counts, max score), and a per-alert **features** dialog showing the exact 10 model inputs and output.
+2. **Replay & Evidence** — reproducible PCAP replay verification statistics, an offline model comparison (3-seed RF / LSTM / RF+LSTM fusion), TreeSHAP feature attributions, and the generated research figures gallery.
 
 > **What is real vs. simulated?** See [`docs/HOW_IT_WORKS.md`](../docs/HOW_IT_WORKS.md) for the full
 > end-to-end explanation: which modes use real traffic (live capture only), why the demo/simulator IPs
@@ -23,7 +23,14 @@ Open `http://127.0.0.1:8000/` in your browser.
 
 - **Live Monitor tab** → *Sample stream (no root)* → **Start Capture**: replays `data/demo/sample_traffic.pcap` at its original pacing (2× speed by default) through the exact live pipeline. This is sample traffic, clearly labeled as such — not your live network.
 - **Attack Simulator panel** (inside the Live Monitor tab): injects calibrated synthetic attack scenarios on demand — see below.
+- **Detected Attack Sources**: aggregates alerts by source IP. Nothing is blocked; the policy suggestion is display-only.
+- **Alerts → features**: opens the exact R10 feature vector and the frozen model's output for that flow.
 - **Replay & Evidence tab**: static replay verification, TreeSHAP table, and research figures (including a *Run Replay Analysis* button that re-runs `scripts/demo/run_replay_demo.py`).
+
+> **Live detector vs. deep model:** the Live Monitor serves the frozen per-flow **Random Forest**.
+> The LSTM (5-flow sequences) and RF+LSTM fusion are trained/evaluated offline; their 3-seed metrics
+> are in `results/experiments/EXP-P1-CIC2017-R10-001/multi_seed_metrics.json` and summarized in
+> [`docs/HOW_IT_WORKS.md`](../docs/HOW_IT_WORKS.md) §2.7.1. The live score is not an LSTM output.
 
 ## Attack Simulator (simulation only)
 
@@ -71,6 +78,17 @@ Re-runs every scenario through `FlowBuilder → frozen R10 → frozen RF
 (EXP-P1-CIC2017-R10-001)` and checks completed-flow counts, packet counts, recorded scores (±0.05),
 and band consistency (`HIGH ≥ 0.85`, `ALERT ≥ 0.50`, `NONE < 0.50`).
 
+### Proving the score is real (not a stored constant)
+
+```bash
+.venv/bin/python scripts/demo/explain_score.py
+```
+
+It prints the model path/SHA-256, a benign control score, the scenario's exact R10 features, the
+frozen `predict_proba` output, and a timing sweep where only the inter-packet gap changes. The UI's
+**features** dialog shows the same values for every alert. If someone claims the demo is staged,
+this is the shortest reproducible counter-example.
+
 ### Pacing
 
 Injections run at **1× speed**: the calibrated scores depend on each flow's time shape
@@ -93,7 +111,7 @@ Or launch the server with `sudo` (no `--live`) and press **Start Capture** in th
 
 - **Strictly observational:** never injects, modifies, drops, or reroutes traffic; no firewall/iptables/routing mutations, ever.
 - **No accuracy claims on live traffic:** real networks have no ground truth; the Live Monitor shows flows, alerts, and model scores only.
-- **Scores use the frozen research threshold** $\tau = 0.50$ (D-003). The "Suggested Action" column is the DQN response-policy mapping for display only — the console never actuates.
+- **Scores use the frozen research threshold** $\tau = 0.50$ (D-003). The "Policy Suggestion (NOT enforced)" column is the DQN response-policy mapping for display only — the console never actuates, and the UI labels each suggestion `(suggested)`.
 - **Flow completion** follows the canonical D-006 policy: TCP FIN/RST or 120 s idle timeout (pending flows are flushed when the session stops).
 - **Local only:** the server binds to `127.0.0.1`.
 

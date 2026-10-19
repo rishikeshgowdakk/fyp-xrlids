@@ -15,9 +15,10 @@ const FEATURE_DESCRIPTIONS = {
 
 const LIVE_POLL_MS = 1000;
 const MAX_LIVE_ROWS = 500;
-const LIVE_NOTICE_TEXT = "Observational only — this console never modifies firewall, routing, or traffic. " +
+const LIVE_NOTICE_TEXT = "Observational only — this console never blocks, drops, or modifies firewall, routing, or traffic. " +
   "Live traffic has no ground truth, so accuracy is not claimed here; the score is the frozen CIC-IDS2017 " +
-  "Random Forest output (research \u03C4 = 0.50). Flow completion follows the D-006 policy (TCP FIN/RST or 120 s idle timeout).";
+  "Random Forest output (research \u03C4 = 0.50). The LSTM/fusion model is a sequence model evaluated offline. " +
+  "Flow completion follows the D-006 policy (TCP FIN/RST or 120 s idle timeout).";
 
 let liveSessionKey = null;
 let seenFlowIds = new Set();
@@ -25,6 +26,9 @@ let seenAlertKeys = new Set();
 let renderedFlowCount = 0;
 let renderedAlertCount = 0;
 let scenariosCache = [];
+let alertDetailsCache = new Map();
+let bannerScore = 0;
+let bannerHoldUntil = 0;
 
 // ---------------------------------------------------------------- tabs
 function showTab(name) {
@@ -36,9 +40,9 @@ function showTab(name) {
 }
 
 // ---------------------------------------------------------------- live monitor
-function determineResponseAction(score) {
-  // Matches Dueling DQN response policy mapping (observational display only;
-  // the dashboard never actuates — no firewall or routing mutations).
+function determinePolicySuggestion(score) {
+  // Matches the Dueling DQN response-policy mapping. DISPLAY ONLY: the dashboard
+  // never actuates this — no firewall, routing, or traffic mutations.
   if (score >= 0.50) {
     return { action: "BLOCK", badgeClass: "badge-invert" };
   } else if (score >= 0.40) {
@@ -194,21 +198,30 @@ function renderLive(snap) {
     notice.textContent = LIVE_NOTICE_TEXT;
   }
 
-  if (snap.started_at !== liveSessionKey) {
+  const isNewSession = snap.started_at !== liveSessionKey;
+  if (isNewSession) {
     // New session (or cleared): reset rendered rows.
     liveSessionKey = snap.started_at;
     seenFlowIds = new Set();
     seenAlertKeys = new Set();
     renderedFlowCount = 0;
     renderedAlertCount = 0;
+    alertDetailsCache = new Map();
+    dismissAlertBanner();
     document.getElementById("live-flows-body").innerHTML =
       '<tr><td colspan="10" style="text-align: center;">Waiting for the first completed flow…</td></tr>';
     document.getElementById("live-alerts-body").innerHTML =
-      '<tr><td colspan="7" style="text-align: center;">No alerts.</td></tr>';
+      '<tr><td colspan="8" style="text-align: center;">No alerts.</td></tr>';
+    const sourcesBody = document.getElementById("attack-sources-body");
+    if (sourcesBody) {
+      sourcesBody.innerHTML =
+        '<tr><td colspan="6" style="text-align: center;">No detected attack sources yet.</td></tr>';
+    }
   }
 
   appendLiveFlows(snap.recent_flows || []);
-  appendLiveAlerts(snap.recent_alerts || []);
+  appendLiveAlerts(snap.recent_alerts || [], { suppressBanner: isNewSession });
+  renderAttackSources(snap.recent_alerts || []);
 }
 
 function renderInjectionStatus(snap, running) {
@@ -245,7 +258,7 @@ function appendLiveFlows(flows) {
   fresh.forEach(flow => {
     seenFlowIds.add(flow.flow_id);
     renderedFlowCount++;
-    const actionInfo = determineResponseAction(flow.attack_score);
+    const actionInfo = determinePolicySuggestion(flow.attack_score);
     const isAttack = flow.prediction_class === 1;
     const srcText = String(flow.src_endpoint);
     const dstText = String(flow.dst_endpoint);
@@ -262,7 +275,7 @@ function appendLiveFlows(flows) {
       <td class="mono">${Number(flow.duration_ms).toFixed(1)}</td>
       <td class="mono"><strong>${Number(flow.attack_score).toFixed(4)}</strong></td>
       <td><span class="badge ${isAttack ? "badge-invert" : ""}">${flow.prediction_label}</span></td>
-      <td><span class="badge ${actionInfo.badgeClass}">${actionInfo.action}</span></td>
+      <td><span class="badge ${actionInfo.badgeClass}" title="Display-only policy recommendation; no traffic is blocked.">${actionInfo.action} (suggested)</span></td>
     `;
     tbody.prepend(tr);
   });
@@ -271,7 +284,7 @@ function appendLiveFlows(flows) {
   }
 }
 
-function appendLiveAlerts(alerts) {
+function appendLiveAlerts(alerts, options = {}) {
   const fresh = alerts.filter(a => !seenAlertKeys.has(a.timestamp + "|" + a.flow_id));
   if (fresh.length === 0) return;
   const tbody = document.getElementById("live-alerts-body");
@@ -279,7 +292,9 @@ function appendLiveAlerts(alerts) {
     tbody.innerHTML = "";
   }
   fresh.forEach(alert => {
-    seenAlertKeys.add(alert.timestamp + "|" + alert.flow_id);
+    const key = alert.flow_id + "|" + alert.timestamp;
+    seenAlertKeys.add(key);
+    alertDetailsCache.set(key, alert);
     renderedAlertCount++;
     const tr = document.createElement("tr");
     const time = alert.timestamp ? new Date(alert.timestamp).toLocaleTimeString() : "-";
@@ -291,12 +306,149 @@ function appendLiveAlerts(alerts) {
       <td class="mono">${alert.dst_endpoint}</td>
       <td><strong>${alert.protocol}</strong></td>
       <td class="mono">${alert.packet_count}</td>
+      <td><button type="button" class="link-btn" data-alert-key="${key}"
+        title="Show the exact R10 features and model output for this flow">features</button></td>
     `;
+    const detailsBtn = tr.querySelector("button[data-alert-key]");
+    if (detailsBtn) {
+      detailsBtn.addEventListener("click", () => showAlertDetails(detailsBtn.dataset.alertKey));
+    }
     tbody.prepend(tr);
   });
   while (tbody.children.length > MAX_LIVE_ROWS) {
     tbody.removeChild(tbody.lastChild);
   }
+  if (!options.suppressBanner) {
+    showAlertBanner(fresh[fresh.length - 1]);
+  }
+}
+
+// ---------------------------------------------------------------- alerts & provenance
+function showAlertBanner(alert) {
+  const banner = document.getElementById("alert-banner");
+  if (!banner) return;
+  const score = Number(alert.confidence) || 0;
+  const now = Date.now();
+  // Keep a higher-severity alert visible for a short hold window so a stream of
+  // low-score sample alerts cannot immediately hide an injected HIGH detection.
+  if (score < bannerScore && now < bannerHoldUntil) return;
+  const level = alert.alert_level || "ALERT";
+  banner.className = "alert-banner" + (level === "HIGH" ? "" : " " + level.toLowerCase());
+  document.getElementById("alert-banner-title").textContent = level + " ALERT";
+  document.getElementById("alert-banner-text").textContent =
+    "score " + score.toFixed(4) + " · " + alert.src_endpoint + " → " +
+    alert.dst_endpoint + " · " + alert.protocol + " · flow " + alert.flow_id;
+  banner.style.display = "flex";
+  bannerScore = score;
+  bannerHoldUntil = now + (score >= 0.65 ? 15000 : 5000);
+}
+
+function dismissAlertBanner() {
+  const banner = document.getElementById("alert-banner");
+  if (banner) banner.style.display = "none";
+  bannerScore = 0;
+  bannerHoldUntil = 0;
+}
+
+function showAlertDetails(key) {
+  const alert = alertDetailsCache.get(key);
+  if (!alert) return;
+  const details = alert.details || {};
+  const detailEntries = Object.entries(details);
+  const rows = detailEntries.length
+    ? detailEntries.map(([name, value]) =>
+        `<tr><td class="mono">${name}</td><td class="mono">${Number(value).toFixed(4)}</td></tr>`
+      ).join("")
+    : '<tr><td colspan="2">No feature payload was recorded for this alert.</td></tr>';
+  const score = Number(alert.confidence);
+  const isSim = String(alert.src_endpoint).startsWith("203.0.113.") ||
+    String(alert.dst_endpoint).startsWith("203.0.113.");
+  const label = score >= 0.50 ? "ATTACK" : "BENIGN";
+  document.getElementById("score-dialog-title").textContent = "Score provenance — flow " + alert.flow_id;
+  document.getElementById("score-dialog-body").innerHTML = `
+    <p><strong>${alert.src_endpoint} → ${alert.dst_endpoint}</strong> · ${alert.protocol} ·
+      ${alert.packet_count} packets · ${Number(alert.duration_ms).toFixed(1)} ms
+      ${isSim ? '<span class="badge">SIM</span>' : ""}</p>
+    <p>These are the R10 feature values the detector received (rounded to 4 decimals in this payload):</p>
+    <table>
+      <thead><tr><th>R10 feature</th><th>Value</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p>Score computed by the frozen model:</p>
+    <pre>score = random_forest.predict_proba(preprocessor.transform(R10_features))[0]
+      = ${score.toFixed(6)}
+label = ${label} (research τ = 0.50)
+alert = ${alert.alert_level} (HIGH ≥ 0.85, MEDIUM ≥ 0.65, LOW ≥ 0.50)</pre>
+    <p>${isSim
+      ? "This flow came from the attack simulator. The packets were synthesised in memory; the score above is the frozen model's real output."
+      : "This flow came from the capture stream."}</p>
+    <p><strong>Nothing is blocked.</strong> The policy suggestion is display-only; enforcement is disabled in this console.</p>
+  `;
+  const dialog = document.getElementById("score-dialog");
+  if (typeof dialog.showModal === "function") {
+    dialog.showModal();
+  } else {
+    dialog.setAttribute("open", "");
+  }
+}
+
+function closeScoreDialog() {
+  const dialog = document.getElementById("score-dialog");
+  if (!dialog) return;
+  if (typeof dialog.close === "function") {
+    dialog.close();
+  } else {
+    dialog.removeAttribute("open");
+  }
+}
+
+function renderAttackSources(alerts) {
+  const tbody = document.getElementById("attack-sources-body");
+  if (!tbody) return;
+  const byIp = new Map();
+  (alerts || []).forEach(alert => {
+    const src = String(alert.src_endpoint || "?");
+    const ip = src.includes(":") ? src.slice(0, src.lastIndexOf(":")) : src;
+    const entry = byIp.get(ip) || {
+      ip: ip,
+      alerts: 0,
+      maxScore: 0,
+      latest: "",
+      targets: new Set(),
+      levels: new Set()
+    };
+    entry.alerts += 1;
+    entry.maxScore = Math.max(entry.maxScore, Number(alert.confidence) || 0);
+    if (!entry.latest || String(alert.timestamp) > entry.latest) entry.latest = alert.timestamp;
+    entry.targets.add(String(alert.dst_endpoint || "?"));
+    entry.levels.add(alert.alert_level);
+    byIp.set(ip, entry);
+  });
+  const rows = Array.from(byIp.values()).sort((a, b) =>
+    b.alerts - a.alerts || b.maxScore - a.maxScore
+  );
+  if (rows.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="6" style="text-align: center;">No detected attack sources yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = "";
+  rows.forEach(entry => {
+    const suggestion = determinePolicySuggestion(entry.maxScore);
+    const isSim = entry.ip.startsWith("203.0.113.");
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="mono"><strong>${entry.ip}</strong>${isSim
+        ? ' <span class="badge" title="Attack simulator host (RFC 5737 documentation range)">SIM</span>' : ""}</td>
+      <td class="mono">${Array.from(entry.targets).join("<br>")}</td>
+      <td class="mono">${entry.alerts}</td>
+      <td class="mono"><strong>${entry.maxScore.toFixed(4)}</strong></td>
+      <td class="mono">${entry.latest ? new Date(entry.latest).toLocaleTimeString() : "-"}</td>
+      <td><span class="badge ${suggestion.badgeClass}"
+        title="Display-only policy recommendation; no traffic is blocked.">${suggestion.action} (suggested)</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
 
 async function startLive() {
@@ -397,7 +549,7 @@ function renderDashboard(data) {
     } else {
       flows.forEach(flow => {
         const tr = document.createElement("tr");
-        const actionInfo = determineResponseAction(flow.attack_score);
+        const actionInfo = determinePolicySuggestion(flow.attack_score);
         const isAttackTruth = flow.ground_truth_label === "ATTACK";
 
         tr.innerHTML = `
@@ -410,12 +562,14 @@ function renderDashboard(data) {
           <td class="mono"><strong>${flow.attack_score.toFixed(4)}</strong></td>
           <td><span class="badge ${isAttackTruth ? 'badge-invert' : ''}">${flow.ground_truth_label}</span></td>
           <td>${flow.prediction_label} (${flow.verdict})</td>
-          <td><span class="badge ${actionInfo.badgeClass}">${actionInfo.action}</span></td>
+          <td><span class="badge ${actionInfo.badgeClass}" title="Display-only policy recommendation; no traffic is blocked.">${actionInfo.action} (suggested)</span></td>
         `;
         tbody.appendChild(tr);
       });
     }
   }
+
+  renderModelComparison(data.model_comparison);
 
   // SHAP Table
   const shap = data.shap;
@@ -455,6 +609,42 @@ function renderDashboard(data) {
   } else {
     select.innerHTML = '<option value="">No figures found</option>';
   }
+}
+
+function renderModelComparison(comparison) {
+  const tbody = document.getElementById("model-comparison-body");
+  if (!tbody) return;
+  if (!comparison || !comparison.models || Object.keys(comparison.models).length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No model comparison artifact found.</td></tr>';
+    return;
+  }
+  const labels = {
+    random_forest: "Random Forest",
+    lstm: "LSTM (5-flow sequence)",
+    fusion: "RF + LSTM fusion"
+  };
+  const roles = {
+    random_forest: "Live Monitor (per-flow)",
+    lstm: "Offline sequence model",
+    fusion: "Offline ensemble"
+  };
+  const fmt = entry => entry
+    ? Number(entry.mean).toFixed(4) + " ± " + Number(entry.std).toFixed(4)
+    : "—";
+  tbody.innerHTML = "";
+  ["random_forest", "lstm", "fusion"].forEach(name => {
+    const model = comparison.models[name];
+    if (!model) return;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><strong>${labels[name] || name}</strong></td>
+      <td class="mono">${fmt(model.accuracy)}</td>
+      <td class="mono">${fmt(model.f1)}</td>
+      <td class="mono">${fmt(model.roc_auc)}</td>
+      <td>${roles[name] || ""}</td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
 
 function formatFigureName(filename) {

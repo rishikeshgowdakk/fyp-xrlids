@@ -216,6 +216,114 @@
       flex-wrap: wrap;
       gap: 8px;
     }
+    .muted {
+      color: #555555;
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .alert-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 2px solid #b00020;
+      border-left-width: 10px;
+      background-color: #fff5f5;
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+    .alert-banner .banner-title {
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #b00020;
+    }
+    .alert-banner.medium {
+      border-color: #8a5a00;
+      background-color: #fffaf0;
+    }
+    .alert-banner.medium .banner-title {
+      color: #8a5a00;
+    }
+    .alert-banner.low {
+      border-color: #555555;
+      background-color: #f7f7f7;
+    }
+    .alert-banner.low .banner-title {
+      color: #333333;
+    }
+    .alert-banner button {
+      padding: 4px 10px;
+      font-size: 12px;
+      flex: 0 0 auto;
+    }
+    .link-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      font: inherit;
+      font-weight: 600;
+      text-decoration: underline;
+      cursor: pointer;
+      color: #000000;
+    }
+    .link-btn:hover:not(:disabled) {
+      background: none;
+      color: #b00020;
+    }
+    details.score-explainer {
+      border: 1px solid #000000;
+      padding: 10px 12px;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+    details.score-explainer summary {
+      cursor: pointer;
+      font-weight: 700;
+    }
+    details.score-explainer pre {
+      background-color: #f4f4f4;
+      border: 1px solid #000000;
+      padding: 10px;
+      overflow-x: auto;
+      margin: 8px 0;
+      font-size: 12px;
+    }
+    dialog {
+      border: 2px solid #000000;
+      padding: 0;
+      max-width: 760px;
+      width: calc(100% - 32px);
+    }
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.35);
+    }
+    .dialog-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 2px solid #000000;
+      padding: 12px 16px;
+    }
+    .dialog-head h3 {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .dialog-body {
+      padding: 16px;
+      font-size: 13px;
+    }
+    .dialog-body pre {
+      background-color: #f4f4f4;
+      border: 1px solid #000000;
+      padding: 10px;
+      overflow-x: auto;
+      font-size: 12px;
+      margin: 8px 0;
+    }
   </style>
 </head>
 <body>
@@ -250,9 +358,17 @@
         <span id="live-dot" class="dot" title="Session running indicator"></span>
       </div>
       <div id="live-notice" class="notice">
-        Observational only — this console never modifies firewall, routing, or traffic. Live traffic has no ground
-        truth, so accuracy is not claimed here; the score is the frozen CIC-IDS2017 Random Forest output
-        (research &tau; = 0.50). Flow completion follows the D-006 policy (TCP FIN/RST or 120 s idle timeout).
+        Observational only — this console never blocks, drops, or modifies firewall, routing, or traffic. Live traffic
+        has no ground truth, so accuracy is not claimed here; the score is the frozen CIC-IDS2017 Random Forest output
+        (research &tau; = 0.50). The LSTM/fusion model is a sequence model evaluated offline (see Replay &amp; Evidence).
+        Flow completion follows the D-006 policy (TCP FIN/RST or 120 s idle timeout).
+      </div>
+      <div id="alert-banner" class="alert-banner" style="display: none;" role="alert" aria-live="assertive">
+        <div>
+          <span class="banner-title" id="alert-banner-title">ATTACK DETECTED</span>
+          <span id="alert-banner-text"></span>
+        </div>
+        <button type="button" onclick="dismissAlertBanner()">Dismiss</button>
       </div>
     </section>
 
@@ -303,6 +419,31 @@
     </section>
 
     <section>
+      <h2>Detected Attack Sources <span class="muted">(observational — nothing is blocked)</span></h2>
+      <div class="notice" style="margin-top: 0; margin-bottom: 8px;">
+        Aggregated from the Alerts table below. <strong>No traffic is blocked, dropped, or modified.</strong>
+        The policy suggestion is a display-only recommendation; enforcement is disabled in this console.
+      </div>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Source IP</th>
+              <th>Target(s)</th>
+              <th>Alerts</th>
+              <th>Max score</th>
+              <th>Latest</th>
+              <th>Policy suggestion (NOT enforced)</th>
+            </tr>
+          </thead>
+          <tbody id="attack-sources-body">
+            <tr><td colspan="6" style="text-align: center;">No detected attack sources yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
       <h2>Live Flows (newest first)</h2>
       <div style="overflow-x: auto;">
         <table>
@@ -317,13 +458,17 @@
               <th>Dur (ms)</th>
               <th>Threat Score</th>
               <th>Detection (&tau;=0.50)</th>
-              <th>Suggested Action (observational)</th>
+              <th>Policy Suggestion (NOT enforced)</th>
             </tr>
           </thead>
           <tbody id="live-flows-body">
             <tr><td colspan="10" style="text-align: center;">No live session yet — press "Start Capture".</td></tr>
           </tbody>
         </table>
+      </div>
+      <div class="notice" style="margin-top: -4px;">
+        <strong>No traffic is blocked.</strong> "BLOCK" is the response policy's recommendation for this score;
+        this observational console does not actuate it.
       </div>
     </section>
 
@@ -340,13 +485,31 @@
               <th>Destination Endpoint</th>
               <th>Proto</th>
               <th>Pkts</th>
+              <th>Features</th>
             </tr>
           </thead>
           <tbody id="live-alerts-body">
-            <tr><td colspan="7" style="text-align: center;">No alerts.</td></tr>
+            <tr><td colspan="8" style="text-align: center;">No alerts.</td></tr>
           </tbody>
         </table>
       </div>
+      <details class="score-explainer">
+        <summary>How is the threat score calculated? (click to verify)</summary>
+        <p style="margin-top: 8px;">
+          Each completed flow is reduced to the frozen <strong>R10</strong> feature vector, preprocessed, and scored by
+          the frozen CIC-IDS2017 Random Forest. The score is <code>P(attack)</code>; the alert threshold is 0.50.
+        </p>
+        <pre>raw = [flow_duration_ms, flow_packets_per_s, flow_bytes_per_s,
+       packet_length_mean, packet_length_std, syn_count,
+       ack_count, rst_count, fin_count, syn_ack_ratio]
+score = random_forest.predict_proba(preprocessor.transform(raw))[0]
+label = "ATTACK" if score &gt;= 0.50 else "BENIGN"
+alert = HIGH if score &gt;= 0.85 else MEDIUM if score &gt;= 0.65 else LOW</pre>
+        <p>
+          Click <strong>features</strong> on any alert row to see the exact 10 values the model received for that flow.
+          The simulator only supplies packets — it never writes a score; the value comes from the frozen model.
+        </p>
+      </details>
     </section>
   </main>
 
@@ -392,9 +555,35 @@
       </div>
     </section>
 
+    <!-- Offline Model Comparison -->
+    <section>
+      <h2>Offline Model Comparison <span class="muted">(3 seeds, test set)</span></h2>
+      <p style="font-size: 13px; margin-bottom: 10px;">
+        The Live Monitor serves the per-flow Random Forest. The LSTM (5-flow sequences) and RF+LSTM fusion
+        are evaluated offline; these are their frozen test metrics from
+        <code>multi_seed_metrics.json</code>.
+      </p>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Accuracy (mean ± std)</th>
+              <th>F1</th>
+              <th>ROC-AUC</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+          <tbody id="model-comparison-body">
+            <tr><td colspan="5" style="text-align: center;">Loading model comparison...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
     <!-- Flow Classification & Response Table -->
     <section>
-      <h2>Network Flows &amp; Response Actions</h2>
+      <h2>Network Flows &amp; Policy Suggestions <span class="muted">(observational)</span></h2>
       <div style="overflow-x: auto;">
         <table>
           <thead>
@@ -408,7 +597,7 @@
               <th>Threat Score</th>
               <th>Truth</th>
               <th>Detection</th>
-              <th>Response Action</th>
+              <th>Policy Suggestion (NOT enforced)</th>
             </tr>
           </thead>
           <tbody id="flows-table-body">
@@ -417,6 +606,10 @@
             </tr>
           </tbody>
         </table>
+      </div>
+      <div class="notice" style="margin-top: -4px;">
+        <strong>No traffic is blocked.</strong> These are display-only policy recommendations from the response
+        mapping; the replay console does not actuate enforcement.
       </div>
     </section>
 
@@ -458,6 +651,14 @@
       </div>
     </section>
   </main>
+
+  <dialog id="score-dialog">
+    <div class="dialog-head">
+      <h3 id="score-dialog-title">Score provenance</h3>
+      <button type="button" onclick="closeScoreDialog()">Close</button>
+    </div>
+    <div class="dialog-body" id="score-dialog-body"></div>
+  </dialog>
 
   <footer>
     <span>XRL-IDARS v1.0.0 · Final Year Project</span>

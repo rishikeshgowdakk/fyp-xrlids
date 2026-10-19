@@ -63,6 +63,17 @@ def test_get_dashboard_data_structure():
     assert "shap" in data
     assert "figures" in data
     assert isinstance(data["figures"], list)
+    # Offline model comparison is part of the evidence view (3-seed RF/LSTM/fusion).
+    assert "model_comparison" in data
+    comparison = data["model_comparison"]
+    assert comparison is not None
+    assert comparison["seeds"] == [42, 123, 456]
+    for model_name in ("random_forest", "lstm", "fusion"):
+        assert model_name in comparison["models"]
+        for metric in ("accuracy", "f1", "roc_auc"):
+            entry = comparison["models"][model_name][metric]
+            assert "mean" in entry
+            assert "std" in entry
 
 
 def test_live_session_sample_stream_lifecycle(tmp_path: Path):

@@ -81,8 +81,11 @@ in-memory simulator packets  (simulator)                │
    re-trained while monitoring.
 5. **Dashboard** — every finished flow appears in the "Live Flows" table with its score
    (e.g. `0.991 → ATTACK`). Flows scoring ≥ 0.50 additionally appear in "Alerts" with a level:
-   **HIGH** (≥ 0.85), **MEDIUM** (≥ 0.65), **LOW** (≥ 0.50). The "Suggested Action" column is a
-   *label for what a future response stage could do* — the dashboard itself never blocks anything.
+   **HIGH** (≥ 0.85), **MEDIUM** (≥ 0.65), **LOW** (≥ 0.50). A banner shows new alerts, the
+   **Detected Attack Sources** panel aggregates alerting IPs, and the **features** button on each
+   alert shows the exact 10 numbers the model received plus its output. The "Policy Suggestion
+   (NOT enforced)" column is a *label for what a future response stage could do* — the dashboard
+   itself never blocks anything.
 6. **Speed** — scoring a flow takes milliseconds; the visible delay is only how long the
    conversation itself takes to finish (a slow attack that lasts 3 seconds appears after 3 seconds).
 
@@ -188,15 +191,45 @@ parity-verified against the training-time extraction.
 
 ### 2.5 Inference, thresholds, and alert levels (`live_lab.py`, `replay.py`)
 
-- `ReplayEngine._predict_flow(flow)`: `preprocessor.transform([10 features])` → frozen RF
-  `predict_proba` → attack probability.
-- **Research threshold τ = 0.50** decides `ATTACK` vs `BENIGN` (shown as the Detection badge).
-- **Operational candidate τ = 0.40** exists in the engine (decision D-003 candidates) and is shown
-  in the "Suggested Action" mapping; it is *not* used to declare attacks.
-- **Alert levels** (only when `pred == ATTACK`): **HIGH ≥ 0.85**, **MEDIUM ≥ 0.65**, **LOW ≥ 0.50**.
-- **Suggested Action** column (display-only mapping in `app.js`): `≥0.50 BLOCK`, `≥0.40 THROTTLE`,
-  `≥0.20 MONITOR`, else `ALLOW`. The comment in the code says it plainly:
-  *"observational display only; the dashboard never actuates."*
+For every completed flow, the score is computed in exactly four steps:
+
+1. `Flow.to_features()` returns the 10 R10 values (section 2.4).
+2. The frozen preprocessor standardises them: `x = preprocessor.transform([10 features])`.
+3. The frozen Random Forest returns the positive-class probability:
+   `score = random_forest.predict_proba(x)[0]` (the project's `RandomForestDetector` returns a 1-D
+   array containing `P(attack)`).
+4. `prediction = ATTACK if score >= 0.50 else BENIGN` (research τ = 0.50). If it is an attack, the
+   alert band is **HIGH ≥ 0.85**, **MEDIUM ≥ 0.65**, **LOW ≥ 0.50**.
+
+Concrete example — the `slow_http_dos` simulator flow:
+
+```
+flow_duration_ms   = 3250.000000
+flow_packets_per_s =    0.615385
+flow_bytes_per_s   =  219.076923
+packet_length_mean =  356.000000
+packet_length_std  =    0.000000
+syn_count          =    1.000000
+ack_count          =    1.000000
+rst_count          =    1.000000
+fin_count          =    0.000000
+syn_ack_ratio      =    1.000000
+
+score = random_forest.predict_proba(preprocessor.transform(R10))[0] = 0.991025
+label = ATTACK   alert = HIGH
+```
+
+That exact feature vector and output are visible in the UI: click **features** on any alert row.
+
+- **Operational candidate τ = 0.40** exists in the engine (decision D-003 candidates) and is used
+  only in the policy-suggestion mapping; it is *not* used to declare attacks.
+- **Policy Suggestion (NOT enforced)** column (display-only mapping in `app.js`): `≥0.50 BLOCK`,
+  `≥0.40 THROTTLE`, `≥0.20 MONITOR`, else `ALLOW`. The dashboard labels these `(suggested)` and
+  states **"No traffic is blocked."** It never actuates a firewall, routing, or traffic change.
+- **Alert delivery in the frontend:** a banner shows new alerts (HIGH/MEDIUM hold for 15 s so a
+  stream of low-score sample alerts cannot hide an injected detection); the **Alerts** table keeps
+  the history; the **Detected Attack Sources** panel aggregates by source IP; the **features**
+  dialog shows the exact 10 values and the model output.
 - **No accuracy claims on live traffic** — there are no ground-truth labels for your network, so
   the UI deliberately shows scores and alerts, never accuracy numbers.
 
@@ -263,6 +296,64 @@ because the model's learned flood/scan signatures lean on CIC FlowMeter artefact
 that a clean capture cannot reproduce. Those scenarios ship labelled as non-detections so the
 console shows the model's real behaviour instead of a staged detection.
 
+### 2.7.1 Where is the deep-learning model? (LSTM / fusion)
+
+The Live Monitor's score is the **Random Forest**, not the LSTM. This is deliberate:
+
+- The **LSTM** is a supervised sequence classifier over **5 consecutive flows** (`seq_len = 5`),
+  using the same R10 features. It is trained and frozen in
+  `results/experiments/EXP-P1-CIC2017-R10-001/`: `lstm.pt` (top-level) and per-seed
+  `seed_42/lstm.pt`, `seed_123/lstm.pt`, `seed_456/lstm.pt`. The 3-seed test metrics are
+  **accuracy 0.9858 ± 0.0007, F1 0.9610 ± 0.0019, ROC-AUC 0.9973 ± 0.0002**
+  (`multi_seed_metrics.json`).
+- **Fusion** is the score-level weighted mean `0.5 × RF + 0.5 × LSTM` on the same aligned population.
+  Its 3-seed metrics are **accuracy 0.9903 ± 0.0005, F1 0.9735 ± 0.0016, ROC-AUC 0.9986 ± 0.0002**.
+  For reference, the 3-seed RF metrics are **0.9816 / 0.9515 / 0.9968**.
+- **Why the live monitor uses RF only:** the LSTM needs a buffer of 5 consecutive flows and a
+  sequence-boundary decision; the live console scores each completed flow independently. Fusion
+  also requires aligning two score streams. The RF is used live for deterministic per-flow latency
+  and exact parity with the frozen R10 contract. This is a deployment choice, not a claim that the
+  LSTM does not work — the offline results above show it does.
+- **Where to see the DL results:** Replay & Evidence tab → **Offline Model Comparison** table
+  (3-seed RF / LSTM / fusion accuracy, F1, ROC-AUC) and the generated figures; raw artifacts are
+  `experiment_record.json`, `multi_seed_metrics.json`, `model_comparisons.json`. The live notice
+  states that LSTM/fusion are evaluated offline.
+
+### 2.7.2 Prove the simulator isn't bluffing (run this)
+
+The simulator only creates packets. It never writes a score. Run:
+
+```bash
+.venv/bin/python scripts/demo/explain_score.py
+```
+
+It loads the frozen artifact, builds the scenario packets, runs them through the same `FlowBuilder`,
+prints the 10 features, and calls the same `predict_proba` used by the dashboard. Example output
+(abridged):
+
+```
+model sha256: 7c6ad493b773b687da24a2a12dcb21bd03bd56b76809462b983454aeacf2b774
+benign control: score = 0.020312 -> BENIGN
+slow_http_dos:  score = 0.991025 -> ATTACK (HIGH)
+same two packets, only the gap changes:
+  gap=0.05s -> 0.103262
+  gap=0.50s -> 0.343725
+  gap=1.00s -> 0.527782
+  gap=2.00s -> 0.265950
+  gap=3.25s -> 0.991025
+```
+
+The score changes when only the packet timing changes, and a normal TCP request scores 0.02 in the
+same code path. In the UI, the **features** dialog shows the same 10 values for every alert. The
+scenario verifier checks all seven scenarios end-to-end:
+
+```bash
+.venv/bin/python scripts/demo/verify_attack_scenarios.py
+```
+
+If someone claims the demo is staged, point them at `scripts/demo/explain_score.py`, the feature
+dialog, and the `predict_proba` call in `src/xrlids/demo/replay.py::_predict_flow`.
+
 ### 2.8 Showing REAL traffic from this laptop's WiFi
 
 On this machine the WiFi interface is `wlo1` (`192.168.0.109/24`, gateway `192.168.0.1`).
@@ -304,6 +395,11 @@ curl -s http://127.0.0.1:8000/api/live/scenarios | .venv/bin/python -m json.tool
 # Re-verify every simulator scenario against the frozen model
 .venv/bin/python scripts/demo/verify_attack_scenarios.py
 
+# Prove a scenario's score: print the R10 features and the model's predict_proba output
+.venv/bin/python scripts/demo/explain_score.py
+
+# In the UI, click "features" on any alert to see the same values and output
+
 # Full test suite (408 tests)
 .venv/bin/pytest -q
 
@@ -322,8 +418,9 @@ ip -brief addr
 | `src/xrlids/demo/replay.py` | `ReplayEngine`: loads the frozen model/preprocessor, scores flows, thresholds |
 | `src/xrlids/demo/attack_sim.py` | Calibrated attack-scenario packet scripts (simulation only) |
 | `dashboard/server.py` | HTTP API, `LiveSession` (merge queue, injection worker, counters, snapshots) |
-| `dashboard/app.js` / `index.html` | UI: Live Monitor tab (+ Attack Simulator panel), Replay & Evidence tab |
+| `dashboard/app.js` / `index.html` | UI: Live Monitor tab (+ Attack Simulator, alert banner, attack-source summary, per-alert feature dialog), Replay & Evidence tab |
 | `scripts/demo/verify_attack_scenarios.py` | End-to-end re-verification of all calibrated scenario scores |
+| `scripts/demo/explain_score.py` | Prints the R10 features and frozen-model `predict_proba` for a scenario (anti-bluffing proof) |
 | `results/experiments/EXP-P1-CIC2017-R10-001/` | The frozen model + preprocessor the live pipeline loads |
 
 ---
@@ -344,8 +441,41 @@ A: Because it is a simulated demo capture, generated in code; it was never on a 
 Real frames cap at 1,514 bytes. Live capture can never show such packets.
 
 **Q: Can the system block or stop attacks?**
-A: No. It is strictly observational: it never sends, drops, or reroutes. The "Suggested Action"
-column is a display-only mapping of what a separate, future response stage could decide.
+A: No. It is strictly observational: it never sends, drops, or reroutes. The "Policy Suggestion
+(NOT enforced)" column is a display-only mapping of what a separate, future response stage could
+decide; the UI labels it "(suggested)" and states that nothing is blocked.
+
+**Q: How exactly is the score calculated?**
+A: `score = random_forest.predict_proba(preprocessor.transform(R10_features))[0]` — the frozen
+Random Forest's positive-class probability. The 10 R10 values are shown in the **features** dialog
+on every alert; the score is not a lookup or a hardcoded value. See 2.5 for the worked example.
+
+**Q: Where is the deep-learning model?**
+A: The LSTM is trained and frozen (5-flow sequences, 3 seeds) and the fusion model is evaluated
+offline; their 3-seed metrics are in 2.7.1. The Live Monitor deliberately uses the per-flow Random
+Forest, because a live per-flow score has no 5-flow sequence context. The Replay & Evidence tab
+shows the offline evidence; the live score is not an LSTM output.
+
+**Q: How do I see which IP is attacking?**
+A: The **Detected Attack Sources** panel aggregates alerts by source IP (with targets, alert count,
+max score, and latest time). The **Live Flows** and **Alerts** tables show the full source and
+destination endpoints; simulator sources are marked `SIM` and use `203.0.113.x`.
+
+**Q: Which traffic is blocked?**
+A: **None.** The console is observational. `BLOCK` / `THROTTLE` / `MONITOR` / `ALLOW` are
+display-only policy suggestions, labeled `(suggested)` and `(NOT enforced)`. No firewall, routing,
+or packet-drop state is touched.
+
+**Q: Where does the frontend alert me?**
+A: A red/amber banner appears on new alerts; the **Alerts** table keeps history; the **Detected
+Attack Sources** panel summarizes attackers; and each alert has a **features** button showing the
+exact model input/output. There is no email/SMS/pager integration.
+
+**Q: Is the attack simulator just bluffing?**
+A: No. It only creates packets; the score comes from the frozen model. Run
+`scripts/demo/explain_score.py` to see a benign control (≈0.02), the calibrated scenario (≈0.99), and
+the same two packets scoring differently as the gap changes. The UI's feature dialog shows the same
+values, and `verify_attack_scenarios.py` re-verifies all seven scenarios. See 2.7.2.
 
 **Q: Why do some flows (like the demo's DNS query) never appear as completed?**
 A: D-006 completes TCP flows on FIN/RST or 120 s of silence. The demo DNS flow is UDP with no

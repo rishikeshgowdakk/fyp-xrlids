@@ -53,6 +53,9 @@ DASHBOARD_DIR = REPO_ROOT / "dashboard"
 FIGURES_DIR = REPO_ROOT / "reports" / "figures"
 REPLAY_SUMMARY = REPO_ROOT / "results" / "demo" / "replay_summary.json"
 SHAP_SUMMARY = REPO_ROOT / "results" / "experiments" / "EXP-P1-CIC2017-R10-001" / "shap_summary.json"
+MULTI_SEED_METRICS = (
+    REPO_ROOT / "results" / "experiments" / "EXP-P1-CIC2017-R10-001" / "multi_seed_metrics.json"
+)
 SAMPLE_PCAP = REPO_ROOT / "data" / "demo" / "sample_traffic.pcap"
 DEFAULT_MODEL_DIR = REPO_ROOT / "results" / "experiments" / "EXP-P1-CIC2017-R10-001"
 RESEARCH_THRESHOLD = 0.50
@@ -68,6 +71,7 @@ def get_dashboard_data() -> dict:
         "status": "ready",
         "replay": None,
         "shap": None,
+        "model_comparison": None,
         "figures": [],
     }
 
@@ -88,6 +92,31 @@ def get_dashboard_data() -> dict:
                 }
         except Exception as e:
             data["shap_error"] = str(e)
+
+    if MULTI_SEED_METRICS.exists():
+        try:
+            with open(MULTI_SEED_METRICS, "r", encoding="utf-8") as f:
+                raw = json.load(f)
+            summary = raw.get("summary", {})
+            models: dict = {}
+            for name in ("random_forest", "lstm", "fusion"):
+                if name not in summary:
+                    continue
+                models[name] = {}
+                for metric in ("accuracy", "f1", "roc_auc"):
+                    entry = summary[name].get(metric)
+                    if isinstance(entry, dict) and "mean" in entry:
+                        models[name][metric] = {
+                            "mean": entry["mean"],
+                            "std": entry.get("std", 0.0),
+                        }
+            data["model_comparison"] = {
+                "seeds": raw.get("seeds", []),
+                "models": models,
+                "source": str(MULTI_SEED_METRICS.relative_to(REPO_ROOT)),
+            }
+        except Exception as e:
+            data["model_comparison_error"] = str(e)
 
     if FIGURES_DIR.exists():
         data["figures"] = sorted([p.name for p in FIGURES_DIR.glob("*.png")])

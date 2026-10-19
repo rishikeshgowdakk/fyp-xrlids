@@ -94,16 +94,18 @@ live demo fails, play the recording and narrate over it.
 | 3 | Attack Simulator → keep default **Slow HTTP DoS (slowhttptest-style)** | "This scenario is calibrated against the frozen model. The badge shows the score it will produce: 0.991, HIGH." |
 | 4 | Click **Inject Attack**, then point at the status line | "The packets are synthesised in memory and pushed through the same pipeline as captured traffic. Nothing is sent on the network." |
 | 5 | Wait ~3.5 s (narrate while waiting: "the flow must finish before it is scored — that's the 3.25 s gap") | "There it is: 2 packets, 3250 ms, score 0.991, ATTACK, HIGH alert." |
-| 6 | (Optional, 20 s) Inject **Port sweep scan (evasion demo)** | "40 flows, zero alerts — a documented limitation of this model on clean synthetic scans. We ship it deliberately instead of staging a fake detection." |
+| 6 | Point at **Detected Attack Sources**; click **features** on the injected alert | "Every alerting source IP is summarized here. 'BLOCK (suggested)' is not a block — nothing is enforced. The features dialog shows the exact 10 values the model received and its output." |
+| 7 | (Optional, 20 s) Inject **Port sweep scan (evasion demo)** | "40 flows, zero alerts — a documented limitation of this model on clean synthetic scans. We ship it deliberately instead of staging a fake detection." |
 
 ### 3.2 Seven-minute demo (recommended)
 
 1. **Problem + architecture (60 s)** — signature IDS vs flow ML; walk the diagram from
    `../HOW_IT_WORKS.md` Part 1: capture → flows → 10 features → frozen RF → dashboard.
-2. **Live Monitor tour (60 s)** — counters, flows table, alerts table; explain SIM badge,
-   τ=0.50 research threshold, alert bands (HIGH ≥ 0.85 / MEDIUM ≥ 0.65 / LOW ≥ 0.50).
-3. **Simulator: detected scenario (60 s)** — `slow_http_dos` → 0.991 HIGH. Mention calibration +
-   verifier script.
+2. **Live Monitor tour (60 s)** — counters, flows table, alerts table, alert banner, Detected Attack
+   Sources panel; explain SIM badge, τ=0.50 research threshold, alert bands (HIGH ≥ 0.85 /
+   MEDIUM ≥ 0.65 / LOW ≥ 0.50), and that "BLOCK (suggested)" never blocks anything.
+3. **Simulator: detected scenario (60 s)** — `slow_http_dos` → 0.991 HIGH; click **features** on the
+   alert to show the exact R10 input and model output. Mention calibration + verifier script.
 4. **Simulator: evasion demo (45 s)** — `syn_flood` or `port_sweep` → near-zero scores; explain
    the FlowMeter-artifact limitation honestly (this is a strength in a viva, not a weakness).
 5. **Replay & Evidence tab (90 s)** — 42-packet deterministic replay; 6 flows with ground truth;
@@ -149,11 +151,13 @@ prove to an examiner which mode is running.
 Because it is generated in code, not captured. Real Ethernet/WiFi frames cap at 1,514 bytes. This is
 a feature of a reproducible demo file, and impossible in live capture.
 
-**Q4. Why does the live monitor use only the Random Forest and not the fusion model?**
-The monitor loads the frozen RF artifact for deterministic latency and exact feature parity with the
-R10 contract. Fusion (RF+LSTM) improvements are established offline in the Phase 1 experiments; a
-production monitor would serve the fusion model behind a model server. The dashboard's job is
-observability, not benchmark reporting.
+**Q4. Where is the deep-learning model? Why does the live monitor use only the Random Forest?**
+The LSTM is trained and frozen (5-flow sequences, R10 input): 3-seed accuracy 0.9858, F1 0.9610,
+AUC 0.9973; RF+LSTM fusion is 0.9903 / 0.9735 / 0.9986. The live monitor loads the frozen RF because
+a live per-flow score has no 5-flow sequence context, and fusion needs aligned RF/LSTM score streams.
+RF is the deployed per-flow detector for deterministic latency and exact R10 parity; the DL results
+are in Replay & Evidence → **Offline Model Comparison** (3-seed RF / LSTM / fusion) and the
+experiment artifacts. **The live score is not an LSTM output** — state that plainly if asked.
 
 **Q5. One replay attack shows "BENIGN (INCORRECT)" — is that a bug?**
 No — it is the threshold decision being shown honestly. The flow scores 0.4692, below the research
@@ -171,7 +175,11 @@ should reward — no staged detections.
 Scenario parameters were searched over the physically realisable script space and every surviving
 script was verified end-to-end through `FlowBuilder → frozen R10 → frozen RF`. The recorded scores
 are re-checked by `scripts/demo/verify_attack_scenarios.py`; the live UI shows the model's own
-output, and the code never writes scores. Injection only supplies packets.
+output, and the code never writes scores. Injection only supplies packets. The strongest live proof
+is `scripts/demo/explain_score.py`: a normal TCP request scores **0.0203**, `slow_http_dos` scores
+**0.9910**, and the same two packets score **0.103 / 0.344 / 0.528 / 0.266 / 0.991** as only the
+inter-packet gap changes. In the UI, click **features** on any alert to see the exact 10 values and
+the model output for that flow.
 
 **Q8. Is the injection dangerous? Can it attack a real host?**
 No. Packets are objects in memory pushed into the pipeline queue; the program never opens a sending
@@ -197,15 +205,33 @@ Auth/TLS/reverse proxy, durable storage, model registry with integrity hashes, c
 capture, eBPF/XDP for line rate, CI/CD + containers, and distributed coordination. The detection and
 observability logic is complete; the operational envelope is not.
 
-**Q13. What is the "Suggested Action" column?**
+**Q13. What is the "Policy Suggestion (NOT enforced)" column?**
 A display-only mapping of the DQN response-policy bands (BLOCK ≥ 0.50, THROTTLE ≥ 0.40, MONITOR
-≥ 0.20, ALLOW otherwise). The dashboard never actuates; enforcement lives in the audited
-transaction/safety-gate path, tested only inside isolated network namespaces.
+≥ 0.20, ALLOW otherwise), labeled `(suggested)`. The dashboard never actuates and states "No traffic
+is blocked"; enforcement lives in the audited transaction/safety-gate path, tested only inside
+isolated network namespaces.
 
 **Q14. Why 408 tests? What do they cover?**
 Phase 1 data/model contracts, leakage/dedup guarantees, parity, replay, Phase 2 RL, Phase 3
 observability/rollback/gate, dashboard server + simulator + HTTP endpoints. `pytest -q` is the
 single gate; expected result: 408 passed.
+
+**Q15. How exactly is the score calculated?**
+`score = random_forest.predict_proba(preprocessor.transform(R10_features))[0]` — the frozen RF's
+positive-class probability. `ATTACK if score ≥ 0.50`; alert bands HIGH ≥ 0.85, MEDIUM ≥ 0.65,
+LOW ≥ 0.50. The **features** dialog shows the exact 10 values; the worked example is in
+`docs/HOW_IT_WORKS.md` §2.5.
+
+**Q16. Which IP is attacking, and which traffic is blocked?**
+The **Detected Attack Sources** panel aggregates alerts by source IP (targets, alert count, max
+score, latest time). Live Flows/Alerts show full `src → dst` endpoints; simulator addresses are
+marked `SIM` (`203.0.113.x`). **Nothing is blocked** — BLOCK/THROTTLE are `(suggested)` labels only;
+no firewall, routing, or packet-drop state is touched.
+
+**Q17. Where does the frontend alert me?**
+A banner appears on new alerts (HIGH/MEDIUM hold for 15 s so sample noise cannot hide an injected
+detection), the **Alerts** table keeps history, the **Detected Attack Sources** panel summarizes
+attackers, and each alert has a **features** button. There is no email/SMS/pager integration.
 
 ---
 
@@ -246,24 +272,31 @@ single gate; expected result: 408 passed.
 > pipeline; the flow completes after 3.25 seconds; and here is the result: two packets, 3250
 > milliseconds, score 0.991, ATTACK, HIGH alert. The score is the frozen model's real output."
 
-**Shot 5 — Evasion demo (3:20–4:00)**
+**Shot 4b — Attack sources + score provenance (3:20–3:50, optional but recommended)**
+> "The Detected Attack Sources panel aggregates every alerting IP. Clicking features on the alert
+> shows the exact ten R10 values the model received and the output it produced. And note the label:
+> 'BLOCK (suggested)' — this console never blocks anything."
+
+**Shot 5 — Evasion demo (3:50–4:30)**
 > "Now a classic SYN flood. It produces two hundred packets over one second… and scores near zero.
 > This is a documented limitation: the model's learned flood signature depends on CIC FlowMeter
 > artefacts that clean captures cannot reproduce. We expose this honestly instead of tuning a fake
 > detection."
 
-**Shot 6 — Replay & Evidence (4:00–5:10)**
+**Shot 6 — Replay & Evidence (4:30–5:40)**
 > "The Replay & Evidence tab is deterministic. Forty-two packets, six flows, with ground truth.
 > At the research threshold, accuracy is 83.3 percent — and you can see the single borderline miss
 > at 0.4692. At the operational candidate threshold of 0.40, the same replay is 100 percent. Below,
 > TreeSHAP ranks the features driving the detector."
 
-**Shot 7 — Data and model evidence (5:10–6:00, terminal or slides)**
+**Shot 7 — Data and model evidence (5:40–6:30, terminal or slides)**
 > "The models were trained on 19.3 million raw rows across CIC-IDS2017, CSE-CIC-IDS2018 and
 > UNSW-NB15, reduced to 10.2 million modeling rows after duplicate and label-conflict rejection.
-> Three-seed fusion results: CIC accuracy 0.9903 with AUC 0.9986; CSE 0.9912; UNSW 0.8988."
+> Three-seed fusion results: CIC accuracy 0.9903 with AUC 0.9986; CSE 0.9912; UNSW 0.8988. The
+> live console intentionally serves the per-flow Random Forest; the LSTM and fusion results are the
+> offline evidence."
 
-**Shot 8 — Closing + limitations (6:00–6:45)**
+**Shot 8 — Closing + limitations (6:30–7:15)**
 > "The detector and console are complete and covered by 408 passing tests. Live traffic has no
 > ground truth, so we never report accuracy on it. Production deployment would require
 > authentication, TLS, durable storage, a model registry, and kernel-bypass capture. The research
@@ -310,9 +343,14 @@ single gate; expected result: 408 passed.
 | Live thresholds | research τ = 0.50; operational candidate τ = 0.40 (D-003 open) |
 | Alert bands | HIGH ≥ 0.85 · MEDIUM ≥ 0.65 · LOW ≥ 0.50 |
 | Multi-seed fusion (acc / F1 / AUC) | CIC 0.9903/0.9735/0.9986 · CSE 0.9912/0.9602/0.9965 · UNSW 0.8988/0.8963/0.9674 |
+| Deep models (3-seed acc / F1 / AUC) | RF 0.9816/0.9515/0.9968 · LSTM 0.9858/0.9610/0.9973 · Fusion 0.9903/0.9735/0.9986 |
+| Live detector | Frozen per-flow Random Forest (not the LSTM; DL/fusion are offline evidence) |
+| Score formula | `random_forest.predict_proba(preprocessor.transform(R10))[0]`; ATTACK if ≥ 0.50 |
 | Replay demo | 42 packets · 6 flows · 83.3% @0.50 · 100% @0.40 |
 | Simulator (detected) | 0.9910 · 0.9163 · 0.7667 · 0.5476 |
 | Simulator (evasion demos) | 0.0002 · 0.0290 · 0.0169 |
+| Proof script | benign 0.0203 · attack 0.9910 · gap sweep 0.103/0.344/0.528/0.266/0.991 |
+| Blocked traffic | 0 — policy suggestions only (`BLOCK (suggested)`, NOT enforced) |
 | Tests | 408 passed, 0 failed |
 | RL hypothesis | H0 rejected (p < 0.001); cost −11.29% / −14.10%; 15% practical criterion NOT met |
 | D-006 | TCP closes on FIN/RST; otherwise 120 s idle |
@@ -334,6 +372,9 @@ sudo .venv/bin/python dashboard/server.py --live --iface wlo1 --bpf "tcp port 44
 
 # Scenario calibration re-verification
 .venv/bin/python scripts/demo/verify_attack_scenarios.py
+
+# Prove a scenario's score (prints R10 features + frozen-model predict_proba)
+.venv/bin/python scripts/demo/explain_score.py
 
 # Full test suite
 .venv/bin/pytest -q
