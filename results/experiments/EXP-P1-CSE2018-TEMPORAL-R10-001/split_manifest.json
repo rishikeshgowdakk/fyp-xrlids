@@ -1,0 +1,93 @@
+{
+  "dataset": "cse_cic_ids2018",
+  "methodology": "temporal",
+  "rationale": "Multi-file split with duplicate_policy=deduplicate_features",
+  "duplicate_policy": "deduplicate_features",
+  "duplicate_accounting": {
+    "policy": "deduplicate_features",
+    "input_rows": 8312295,
+    "duplicate_rows_dropped": 0,
+    "unique_rows_retained": 8312295,
+    "duplicate_fraction": 0.0
+  },
+  "ordering_basis": "timestamp_sorted",
+  "checks_performed": [
+    "feature_deduplication_audit",
+    "train_val_test_disjointness",
+    "class_distribution_audit",
+    "exact_duplicate_leakage_audit",
+    "temporal_ordering_audit",
+    "temporal_disjointness"
+  ],
+  "checks_not_performed": [
+    "group_overlap (no group column supplied)"
+  ],
+  "ratios": {
+    "train": 0.6,
+    "validation": 0.2,
+    "test": 0.2
+  },
+  "observed_ratios": {
+    "train": 0.6079008264263961,
+    "validation": 0.19580801691951502,
+    "test": 0.19629115665408892
+  },
+  "seed": 42,
+  "stratified": false,
+  "group_column": null,
+  "time_column": "timestamp",
+  "temporal": {
+    "strategy": "nearest_hour_boundary",
+    "target_cuts": {
+      "train_end": 4987377,
+      "validation_end": 6649836
+    },
+    "actual_cuts": {
+      "train_end": 5053051,
+      "validation_end": 6680665
+    },
+    "ranges": {
+      "train": {
+        "min": "2018-02-14 01:00:00",
+        "max": "2018-02-20 10:59:59",
+        "rows": 5053051
+      },
+      "validation": {
+        "min": "2018-02-20 11:00:00",
+        "max": "2018-02-22 10:59:59",
+        "rows": 1627614
+      },
+      "test": {
+        "min": "2018-02-22 11:00:00",
+        "max": "2018-03-02 12:59:59",
+        "rows": 1631630
+      }
+    },
+    "hour_aligned": true,
+    "fallback_count": 0,
+    "fallback_group_column": "source_file"
+  },
+  "counts": {
+    "train": 5053051,
+    "validation": 1627614,
+    "test": 1631630
+  },
+  "class_distribution": {
+    "train": {
+      "benign": 4414850,
+      "attack": 638201,
+      "attack_fraction": 0.12630013035688736
+    },
+    "validation": {
+      "benign": 1380316,
+      "attack": 247298,
+      "attack_fraction": 0.15193897324549924
+    },
+    "test": {
+      "benign": 1581324,
+      "attack": 50306,
+      "attack_fraction": 0.03083174494217439
+    }
+  },
+  "split_config_hash": "d9888112a9167092634c2e06334b26412d2c971046ef93c4be6ba7c6d33aa383"
+}

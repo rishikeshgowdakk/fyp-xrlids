@@ -1,0 +1,215 @@
+{
+  "random_experiment": "results/experiments/EXP-P1-CSE2018-R10-MULTI-001",
+  "temporal_experiment": "results/experiments/EXP-P1-CSE2018-TEMPORAL-R10-001",
+  "metric_model": "random_forest",
+  "threshold": 0.5,
+  "random_split": {
+    "methodology": "stratified_random",
+    "counts": {
+      "train": 4987377,
+      "validation": 1662459,
+      "test": 1662459
+    },
+    "observed_ratios": {},
+    "class_distribution": {
+      "train": {
+        "benign": 4425894,
+        "attack": 561483,
+        "attack_fraction": 0.1125808215420651
+      },
+      "validation": {
+        "benign": 1475298,
+        "attack": 187161,
+        "attack_fraction": 0.1125808215420651
+      },
+      "test": {
+        "benign": 1475298,
+        "attack": 187161,
+        "attack_fraction": 0.1125808215420651
+      }
+    },
+    "temporal": null,
+    "rows_total": 8312295,
+    "rows_train": 4987377,
+    "rows_validation": 1662459,
+    "rows_test": 1662459
+  },
+  "temporal_split": {
+    "methodology": "temporal",
+    "counts": {
+      "train": 5053051,
+      "validation": 1627614,
+      "test": 1631630
+    },
+    "observed_ratios": {
+      "train": 0.6079008264263961,
+      "validation": 0.19580801691951502,
+      "test": 0.19629115665408892
+    },
+    "class_distribution": {
+      "train": {
+        "benign": 4414850,
+        "attack": 638201,
+        "attack_fraction": 0.12630013035688736
+      },
+      "validation": {
+        "benign": 1380316,
+        "attack": 247298,
+        "attack_fraction": 0.15193897324549924
+      },
+      "test": {
+        "benign": 1581324,
+        "attack": 50306,
+        "attack_fraction": 0.03083174494217439
+      }
+    },
+    "temporal": {
+      "strategy": "nearest_hour_boundary",
+      "target_cuts": {
+        "train_end": 4987377,
+        "validation_end": 6649836
+      },
+      "actual_cuts": {
+        "train_end": 5053051,
+        "validation_end": 6680665
+      },
+      "ranges": {
+        "train": {
+          "min": "2018-02-14 01:00:00",
+          "max": "2018-02-20 10:59:59",
+          "rows": 5053051
+        },
+        "validation": {
+          "min": "2018-02-20 11:00:00",
+          "max": "2018-02-22 10:59:59",
+          "rows": 1627614
+        },
+        "test": {
+          "min": "2018-02-22 11:00:00",
+          "max": "2018-03-02 12:59:59",
+          "rows": 1631630
+        }
+      },
+      "hour_aligned": true,
+      "fallback_count": 0,
+      "fallback_group_column": "source_file"
+    },
+    "rows_total": 8312295,
+    "rows_train": 5053051,
+    "rows_validation": 1627614,
+    "rows_test": 1631630
+  },
+  "random_metrics": {
+    "accuracy": 0.972268122537098,
+    "precision": 0.8242213896614338,
+    "recall": 0.9579826993871586,
+    "f1": 0.8860823927095894,
+    "roc_auc": 0.9901786773627602
+  },
+  "temporal_metrics": {
+    "accuracy": 0.9632821166563498,
+    "precision": 0.03315185689286409,
+    "recall": 0.00677851548523039,
+    "f1": 0.011255611301822023,
+    "roc_auc": 0.3904581997652676
+  },
+  "delta": {
+    "accuracy": -0.008986005880748271,
+    "precision": -0.7910695327685697,
+    "recall": -0.9512041839019283,
+    "f1": -0.8748267814077674,
+    "roc_auc": -0.5997204775974927
+  },
+  "per_family": {
+    "random": {
+      "DDOS ATTACKS-LOIC-HTTP": {
+        "support": 106973,
+        "detection_rate": 0.991456,
+        "error_rate": 0.008544
+      },
+      "DDOS ATTACK-HOIC": {
+        "support": 22483,
+        "detection_rate": 0.990749,
+        "error_rate": 0.009251
+      },
+      "DOS ATTACKS-HULK": {
+        "support": 19374,
+        "detection_rate": 0.983741,
+        "error_rate": 0.016259
+      },
+      "SSH-BRUTEFORCE": {
+        "support": 18043,
+        "detection_rate": 1.0,
+        "error_rate": 0.0
+      },
+      "DOS ATTACKS-GOLDENEYE": {
+        "support": 8109,
+        "detection_rate": 0.987545,
+        "error_rate": 0.012455
+      },
+      "INFILTERATION": {
+        "support": 7027,
+        "detection_rate": 0.107016,
+        "error_rate": 0.892984
+      },
+      "BOT": {
+        "support": 2999,
+        "detection_rate": 0.991664,
+        "error_rate": 0.008336
+      },
+      "DOS ATTACKS-SLOWLORIS": {
+        "support": 1709,
+        "detection_rate": 0.990053,
+        "error_rate": 0.009947
+      },
+      "DDOS ATTACK-LOIC-UDP": {
+        "support": 358,
+        "detection_rate": 1.0,
+        "error_rate": 0.0
+      },
+      "BRUTE FORCE -WEB": {
+        "support": 49,
+        "detection_rate": 0.918367,
+        "error_rate": 0.081633
+      },
+      "BRUTE FORCE -XSS": {
+        "support": 22,
+        "detection_rate": 0.954545,
+        "error_rate": 0.045455
+      },
+      "SQL INJECTION": {
+        "support": 15,
+        "detection_rate": 0.733333,
+        "error_rate": 0.266667
+      }
+    },
+    "temporal": {
+      "INFILTERATION": {
+        "support": 34807,
+        "detection_rate": 0.009423,
+        "error_rate": 0.990577
+      },
+      "BOT": {
+        "support": 15214,
+        "detection_rate": 0.000854,
+        "error_rate": 0.999146
+      },
+      "BRUTE FORCE -WEB": {
+        "support": 179,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      },
+      "BRUTE FORCE -XSS": {
+        "support": 75,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      },
+      "SQL INJECTION": {
+        "support": 31,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      }
+    }
+  },
+  "unseen_in_temporal": []
+}

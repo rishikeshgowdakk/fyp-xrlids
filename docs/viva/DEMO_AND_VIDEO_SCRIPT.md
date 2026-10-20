@@ -233,6 +233,23 @@ A banner appears on new alerts (HIGH/MEDIUM hold for 15 s so sample noise cannot
 detection), the **Alerts** table keeps history, the **Detected Attack Sources** panel summarizes
 attackers, and each alert has a **features** button. There is no email/SMS/pager integration.
 
+**Q18. How uncertain are the detector metrics?**
+Per-seed 95% bootstrap intervals were computed from the frozen held-out predictions (B=1000; no
+retraining or test-set selection). Examples: CSE seed-42 RF F1 = 0.8861 [0.8851, 0.8872]; CIC
+fusion F1 = 0.9745 [0.9737, 0.9754]; UNSW fusion F1 = 0.8970 [0.8930, 0.9009]. These intervals
+quantify **test-set sampling uncertainty**, not training-seed variance; the 3-seed mean ± std is
+reported separately. Full table: `reports/generated/bootstrap_ci_report.md`.
+
+**Q19. Did you test on future traffic? What did it show?**
+Yes. `EXP-P1-CSE2018-TEMPORAL-R10-001` is a strict future-day holdout: train 14–20 Feb
+2018, validation 20–22 Feb, test 22 Feb–2 Mar, sorted by the real CSE `Timestamp` and cut at
+hour boundaries. L-01/L-02/L-05 pass. The frozen RF scores F1 **0.0113** (recall 0.0068,
+ROC-AUC 0.3905) versus 0.8861 on the random split. Bot recall falls from 99.17% to 0.09%;
+infiltration from 10.70% to 0.94%; web/XSS/SQL to 0%. The test is 3.08% attacks after Policy A
+dedup (50,306 unique future attacks), so this is a hard, conflict-free future set. This is a
+negative result, and we report it: the 99% headline is an in-domain upper bound, not a
+future-day readiness claim. Full comparison: `reports/generated/temporal_split_report.md`.
+
 ---
 
 ## 5. Video demo — recording script

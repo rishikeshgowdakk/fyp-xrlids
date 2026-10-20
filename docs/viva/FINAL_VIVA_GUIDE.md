@@ -47,7 +47,16 @@
 ## 4. Experimental Rigor & Leakage Prevention
 
 ### Q: How did you prevent data leakage in your evaluation?
-**A:** We discovered that up to 34.5% of raw flows in IDS datasets share identical feature vectors. Standard random train/test splitting leaks identical vectors across splits (`L-01` leakage). We enforced **Policy A Feature Deduplication with Conflict Rejection**: all duplicate vectors and label-conflicting rows were removed prior to splitting, guaranteeing zero shared vectors between train, validation, and test sets.
+**A:** We discovered that up to 34.5% of raw flows in IDS datasets share identical feature vectors. Standard random train/test splitting leaks identical vectors across splits (`L-01` leakage). We enforced **Policy A Feature Deduplication with Conflict Rejection**: all duplicate vectors and label-conflicting rows were removed prior to splitting, guaranteeing zero shared vectors between train, validation, and test sets. For the CSE-CIC-IDS2018 benchmark we additionally executed a strict future-period temporal holdout (`EXP-P1-CSE2018-TEMPORAL-R10-001`), so the headline random-split numbers are not the only evidence.
+
+### Q: How uncertain are the reported detector metrics?
+**A:** We report two separate sources of uncertainty. First, a 3-seed sweep (42/123/456) gives training-seed mean ± std (`reports/generated/multi_seed_report.md`). Second, per-seed 95% bootstrap intervals are computed from the saved held-out predictions (B=1000; threshold metrics on the full test set, ROC-AUC on a fixed 100k stratified sample) in `reports/generated/bootstrap_ci_report.md`. For example, CSE seed-42 RF F1 is 0.8861 [0.8851, 0.8872], and CIC fusion F1 is 0.9745 [0.9737, 0.9754]. The bootstrap intervals quantify test-set sampling uncertainty, not seed variance; neither replaces the temporal holdout.
+
+### Q: What did the future-day temporal holdout show?
+**A:** It shows a severe generalization failure. `EXP-P1-CSE2018-TEMPORAL-R10-001` trains on 14–20 Feb 2018, validates on 20–22 Feb, and tests on 22 Feb–2 Mar, using the real CSE `Timestamp`; L-01/L-02/L-05 pass. The frozen RF gets F1 **0.0113** (recall 0.0068, ROC-AUC 0.3905) on the future test, versus 0.8861 on the random split. Bot recall falls from 99.17% to 0.09%, infiltration from 10.70% to 0.94%, and web/XSS/SQL to 0%. The temporal test contains 50,306 attacks (3.08%) after Policy A dedup; these are the unique, conflict-free future flows, not the raw prevalence.
+
+### Q: Does that invalidate your 99% accuracy claim?
+**A:** It invalidates using 99% as a future-day performance claim. The 99% figures are **in-domain random-split upper bounds**: the test rows come from the same capture days as training, and near-duplicate structure inflates them. The defensible claim is: the detector separates deduplicated same-day flows well, but it does not generalize to later unseen attack families. We report both results, and the dashboard displays a temporal-holdout caveat next to the model-comparison table. We do **not** claim production or future-day readiness.
 
 ### Q: Why did cross-dataset transfer fail so severely (52% to 95% F1 drop)?
 **A:** Unadapted transfer exposes severe covariate shift and concept drift. Different networks have different background traffic distributions, bandwidths, MTU sizes, and flow timeout configurations. Supervised models learn sharp decision boundaries tailored to the training network; without target domain adaptation, their probabilistic calibration collapses.

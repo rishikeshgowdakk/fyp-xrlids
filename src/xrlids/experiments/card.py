@@ -49,6 +49,7 @@ def generate_experiment_card(
     shap_data: dict[str, Any] | None,
     transfer_data: dict[str, Any] | None = None,
     multi_seed_metrics: dict[str, Any] | None = None,
+    split_manifest: dict[str, Any] | None = None,
 ) -> str:
     """Generate self-contained, scientifically rigorous experiment card."""
     acct = population.accounting.aggregate
@@ -115,13 +116,43 @@ def generate_experiment_card(
         "---",
         "## 4. Split Methodology and Ordering Justification",
         "",
-        f"- **Methodology**: `{population.config.duplicate_policy}` with stratified partition",
-        f"- **Duplicate Policy**: `{population.config.duplicate_policy}`",
-        f"- **Ordering Basis**: Capture/arrival order from source collection. Microsecond timestamps are absent (CIC-IDS2017/UNSW-NB15) or non-monotonic with second-level ties (CSE-CIC-IDS2018).",
+    ]
+
+    split = split_manifest or {}
+    methodology = split.get("methodology", "unknown")
+    duplicate_policy = split.get("duplicate_policy", population.config.duplicate_policy)
+    ordering_basis = split.get("ordering_basis")
+    if ordering_basis == "timestamp_sorted":
+        ordering_text = (
+            "Real capture `Timestamp`, sorted ascending. The temporal holdout is cut at hour "
+            "boundaries; test rows are strictly later than validation rows, and validation rows "
+            "are strictly later than training rows."
+        )
+    elif ordering_basis == "arrival_order":
+        ordering_text = "Capture/arrival order from source collection (no temporal holdout)."
+    else:
+        ordering_text = "See `split_manifest.json` for the recorded ordering basis."
+
+    lines.extend([
+        f"- **Methodology**: `{methodology}`",
+        f"- **Duplicate Policy**: `{duplicate_policy}`",
+        f"- **Ordering Basis**: {ordering_text}",
         "- **Sequence Safety**: LSTM sequences are strictly bounded within individual source files; no cross-file sequence generation.",
         f"- **Split Counts**: Train={record.rows_train:,}, Val={record.rows_validation:,}, Test={record.rows_test:,}",
-        "",
-    ]
+    ])
+    temporal = split.get("temporal") or {}
+    if temporal.get("ranges"):
+        ranges = temporal["ranges"]
+        lines.extend([
+            f"- **Temporal Cut Strategy**: `{temporal.get('strategy', 'unknown')}` "
+            f"(hour-aligned: `{temporal.get('hour_aligned')}`; repaired timestamps: `{temporal.get('fallback_count', 0)}`)",
+            "- **Temporal Ranges**: "
+            + "; ".join(
+                f"{name} {ranges.get(name, {}).get('min', '—')} → {ranges.get(name, {}).get('max', '—')}"
+                for name in ("train", "validation", "test")
+            ),
+        ])
+    lines.append("")
 
     diff_rows = (record.rows_test or 0) - aligned_metrics.get("population_size", 0)
     boundary_expl = ""

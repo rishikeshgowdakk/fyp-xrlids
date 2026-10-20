@@ -143,6 +143,10 @@ def main() -> int:
         "`multi_seed_summary.json`) via `scripts/phase1/summarize_multi_seed.py`.",
         "Per-seed records: `seed_*/experiment_record.json`.",
         "",
+        "Bootstrap 95% confidence intervals are generated separately by",
+        "`scripts/phase1/bootstrap_confidence_intervals.py` and published in",
+        "`reports/generated/bootstrap_ci_report.md`.",
+        "",
         "| Dataset | Model | Accuracy (mean ± std) | F1 (mean ± std) | ROC-AUC (mean ± std) | Seeds |",
         "|:---|:---|:---:|:---:|:---:|:---:|",
     ]

@@ -59,6 +59,11 @@ The flagship models (Random Forest + LSTM Score Fusion under the canonical 10-fe
 - **CSE-CIC-IDS2018:** Accuracy = **99.12% (0.9912)**, F1 = **0.9603**, ROC-AUC = **0.9966** (LSTM / Fusion $\alpha = 0.00$, $N = 1,662,419$)
 - **Combined Primary Fleet Accuracy:** **99.11%** across 2,018,252 held-out test flows.
 
+> **Scope note (important):** these are **in-domain random-split** metrics. A strict future-day
+> holdout on CSE-CIC-IDS2018 produced RF **F1 0.0113** (recall 0.0068, ROC-AUC 0.3905) versus
+> 0.8861 on the random split. The 99% figures are upper bounds, not future-day or production
+> performance claims. See [Temporal Holdout](#temporal-holdout-cse-cic-ids2018-gap-p06) below.
+
 ### Auxiliary Benchmark (Degraded Sensor Schema)
 
 - **UNSW-NB15 (Auxiliary R4 Fallback):** Accuracy = **89.96% (0.8996)**, F1 = **0.8970**, ROC-AUC = **0.9674** (Fusion $\alpha = 0.60$, $N = 24,496$). Evaluated under a 4-feature contract due to missing transport flags in Argus exporter. Cross-dataset experiments show significant domain-shift limitations documented in the research report.
@@ -74,6 +79,35 @@ Each benchmark was re-run end-to-end with three seeds (population std); seed 42 
 | UNSW-NB15 | 0.8988 ± 0.0008 | 0.8963 ± 0.0006 | 0.9674 ± 0.0004 |
 
 Full RF / LSTM / Fusion table: [`reports/generated/multi_seed_report.md`](reports/generated/multi_seed_report.md). Per-seed records: `results/experiments/<EXP>/seed_<n>/`.
+
+### Bootstrap Uncertainty (Seed 42)
+
+Per-seed 95% bootstrap intervals from the frozen held-out predictions (B=1000; threshold metrics on the full test population, ROC-AUC on a fixed 100k stratified sample). These quantify **test-set sampling uncertainty**, not training-seed variance:
+
+| Dataset | Model | F1 [95% CI] | ROC-AUC [95% CI] |
+|:---|:---|:---:|:---:|
+| CIC-IDS2017 | Random Forest | 0.9512 [0.9500, 0.9524] | 0.9968 [0.9965, 0.9971] |
+| CIC-IDS2017 | Fusion ($\alpha=0.50$) | 0.9745 [0.9737, 0.9754] | 0.9989 [0.9987, 0.9991] |
+| CSE-CIC-IDS2018 | Random Forest | 0.8861 [0.8851, 0.8872] | 0.9902 [0.9893, 0.9914] |
+| CSE-CIC-IDS2018 | Fusion ($\alpha=0.00$) | 0.9603 [0.9597, 0.9610] | 0.9966 [0.9962, 0.9972] |
+| UNSW-NB15 | Random Forest | 0.8548 [0.8502, 0.8599] | 0.9487 [0.9462, 0.9511] |
+| UNSW-NB15 | Fusion ($\alpha=0.60$) | 0.8970 [0.8930, 0.9009] | 0.9674 [0.9654, 0.9693] |
+
+Full table: [`reports/generated/bootstrap_ci_report.md`](reports/generated/bootstrap_ci_report.md).
+
+### Temporal Holdout (CSE-CIC-IDS2018, GAP-P06)
+
+`EXP-P1-CSE2018-TEMPORAL-R10-001` sorts the 8,312,295 modelling rows by the real CSE `Timestamp`, trains on 14–20 Feb 2018, validates on 20–22 Feb, and tests on 22 Feb–2 Mar. L-01/L-02/L-05 pass. The frozen RF result is a **negative generalization finding**:
+
+| Metric | Random split | Temporal holdout |
+|:---|:---:|:---:|
+| Accuracy | 0.9723 | 0.9633 |
+| Precision | 0.8242 | 0.0332 |
+| Recall | 0.9580 | 0.0068 |
+| F1 | 0.8861 | **0.0113** [0.0101, 0.0124] |
+| ROC-AUC | 0.9902 | 0.3905 |
+
+The future test contains 50,306 attacks (3.08%) after Policy A removed conflicting/duplicate rows; these are the surviving unique future flows. Bot recall falls from 99.17% to 0.09%, infiltration from 10.70% to 0.94%, and web/XSS/SQL to 0%. The random-split 99% numbers are in-domain upper bounds, not future-day readiness claims. Full comparison: [`reports/generated/temporal_split_report.md`](reports/generated/temporal_split_report.md).
 
 ---
 

@@ -1,0 +1,7 @@
+family,is_attack,support,correct,false_positives,false_negatives,detection_rate,error_rate
+BENIGN,False,1581324,1571379,9945,0,0.993711,0.006289
+INFILTERATION,True,34807,328,0,34479,0.009423,0.990577
+BOT,True,15214,13,0,15201,0.000854,0.999146
+BRUTE FORCE -WEB,True,179,0,0,179,0.0,1.0
+BRUTE FORCE -XSS,True,75,0,0,75,0.0,1.0
+SQL INJECTION,True,31,0,0,31,0.0,1.0

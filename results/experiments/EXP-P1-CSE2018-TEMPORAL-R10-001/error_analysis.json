@@ -1,0 +1,439 @@
+{
+  "rf": {
+    "threshold": 0.5,
+    "total_evaluated": 1631630,
+    "confusion": {
+      "tn": 1571379,
+      "fp": 9945,
+      "fn": 49965,
+      "tp": 341
+    },
+    "rates": {
+      "accuracy": 0.9632821166563498,
+      "precision": 0.03315185689286409,
+      "recall": 0.00677851548523039,
+      "f1": 0.011255611301822023,
+      "fpr": 0.006289033746404911,
+      "fnr": 0.9932214845147697,
+      "balanced_accuracy": 0.5002447408694127
+    },
+    "confidence_distributions": {
+      "true_positives": {
+        "count": 341,
+        "mean": 0.8340413058774497,
+        "std": 0.15531619643538203,
+        "median": 0.8650163951972724,
+        "min": 0.5000645842258786,
+        "max": 0.9902399698827512,
+        "p25": 0.6919083660275287,
+        "p75": 0.9815247162464253
+      },
+      "true_negatives": {
+        "count": 1571379,
+        "mean": 0.028231353590163873,
+        "std": 0.08413054503688627,
+        "median": 1.986666078093773e-05,
+        "min": 0.0,
+        "max": 0.4999704123381756,
+        "p25": 2.748217595453049e-06,
+        "p75": 0.009232816024759576
+      },
+      "false_positives": {
+        "count": 9945,
+        "mean": 0.7891784577558952,
+        "std": 0.16879778884556135,
+        "median": 0.7984065020020408,
+        "min": 0.5000259932777176,
+        "max": 0.9902413927362183,
+        "p25": 0.6496401965675161,
+        "p75": 0.9690039194900586
+      },
+      "false_negatives": {
+        "count": 49965,
+        "mean": 0.007107826146145847,
+        "std": 0.035055914030787144,
+        "median": 2.748217595453049e-06,
+        "min": 0.0,
+        "max": 0.49982201694086426,
+        "p25": 2.748217595453049e-06,
+        "p75": 0.00048075734406807737
+      }
+    },
+    "difficult_samples": {
+      "worst_false_negatives": [
+        {
+          "index": 1260868,
+          "true_label": 1,
+          "predicted_score": 0.0,
+          "predicted_label": 0,
+          "features": {
+            "flow_duration_ms": 11027.283203125,
+            "flow_packets_per_s": 0.7254733443260193,
+            "flow_bytes_per_s": 350.9477233886719,
+            "packet_length_mean": 430.0,
+            "packet_length_std": 822.86083984375,
+            "syn_count": 0.0,
+            "ack_count": 0.0,
+            "rst_count": 1.0,
+            "fin_count": 0.0,
+            "syn_ack_ratio": 0.0
+          },
+          "provenance": {
+            "source_file": "Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv",
+            "source_row_index": 134983,
+            "label_family": "INFILTERATION",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 1260831,
+          "true_label": 1,
+          "predicted_score": 0.0,
+          "predicted_label": 0,
+          "features": {
+            "flow_duration_ms": 116270.2578125,
+            "flow_packets_per_s": 0.3784286677837372,
+            "flow_bytes_per_s": 52.30056381225586,
+            "packet_length_mean": 135.13333129882812,
+            "packet_length_std": 334.9356384277344,
+            "syn_count": 0.0,
+            "ack_count": 0.0,
+            "rst_count": 1.0,
+            "fin_count": 0.0,
+            "syn_ack_ratio": 0.0
+          },
+          "provenance": {
+            "source_file": "Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv",
+            "source_row_index": 134928,
+            "label_family": "INFILTERATION",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 12960,
+          "true_label": 1,
+          "predicted_score": 0.0,
+          "predicted_label": 0,
+          "features": {
+            "flow_duration_ms": 18.538999557495117,
+            "flow_packets_per_s": 970.9261474609375,
+            "flow_bytes_per_s": 6958.30419921875,
+            "packet_length_mean": 6.789473533630371,
+            "packet_length_std": 25.773757934570312,
+            "syn_count": 0.0,
+            "ack_count": 0.0,
+            "rst_count": 1.0,
+            "fin_count": 0.0,
+            "syn_ack_ratio": 0.0
+          },
+          "provenance": {
+            "source_file": "Friday-02-03-2018_TrafficForML_CICFlowMeter.csv",
+            "source_row_index": 42865,
+            "label_family": "BOT",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 1260798,
+          "true_label": 1,
+          "predicted_score": 0.0,
+          "predicted_label": 0,
+          "features": {
+            "flow_duration_ms": 32.125,
+            "flow_packets_per_s": 62.25680923461914,
+            "flow_bytes_per_s": 6941.63427734375,
+            "packet_length_mean": 102.0,
+            "packet_length_std": 32.908966064453125,
+            "syn_count": 0.0,
+            "ack_count": 0.0,
+            "rst_count": 0.0,
+            "fin_count": 0.0,
+            "syn_ack_ratio": 0.0
+          },
+          "provenance": {
+            "source_file": "Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv",
+            "source_row_index": 134877,
+            "label_family": "INFILTERATION",
+            "canonical_label": "ATTACK"
+          }
+        },
+        {
+          "index": 1260801,
+          "true_label": 1,
+          "predicted_score": 0.0,
+          "predicted_label": 0,
+          "features": {
+            "flow_duration_ms": 17.104999542236328,
+            "flow_packets_per_s": 116.92487335205078,
+            "flow_bytes_per_s": 14498.6845703125,
+            "packet_length_mean": 110.33333587646484,
+            "packet_length_std": 47.34272384643555,
+            "syn_count": 0.0,
+            "ack_count": 0.0,
+            "rst_count": 0.0,
+            "fin_count": 0.0,
+            "syn_ack_ratio": 0.0
+          },
+          "provenance": {
+            "source_file": "Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv",
+            "source_row_index": 134882,
+            "label_family": "INFILTERATION",
+            "canonical_label": "ATTACK"
+          }
+        }
+      ],
+      "worst_false_positives": [
+        {
+          "index": 1305441,
+          "true_label": 0,
+          "predicted_score": 0.9902413927362183,
+          "predicted_label": 1,
+          "features": {
+            "flow_duration_ms": 34341.4453125,
+            "flow_packets_per_s": 0.058238670229911804,
+            "flow_bytes_per_s": 0.0,
+            "packet_length_mean": 0.0,
+            "packet_length_std": 0.0,
+            "syn_count": 0.0,
+            "ack_count": 1.0,
+            "rst_count": 0.0,
+            "fin_count": 0.0,
+            "syn_ack_ratio": 0.0
+          },
+          "provenance": {
+            "source_file": "Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv",
+            "source_row_index": 232634,
+            "label_family": "BENIGN",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 260953,
+          "true_label": 0,
+          "predicted_score": 0.9902413927362183,
+          "predicted_label": 1,
+          "features": {
+            "flow_duration_ms": 33791.69921875,
+            "flow_packets_per_s": 0.05918613448739052,
+            "flow_bytes_per_s": 0.0,
+            "packet_length_mean": 0.0,
+            "packet_length_std": 0.0,
+            "syn_count": 0.0,
+            "ack_count": 1.0,
+            "rst_count": 0.0,
+            "fin_count": 0.0,
+            "syn_ack_ratio": 0.0
+          },
+          "provenance": {
+            "source_file": "Friday-02-03-2018_TrafficForML_CICFlowMeter.csv",
+            "source_row_index": 620053,
+            "label_family": "BENIGN",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 1574656,
+          "true_label": 0,
+          "predicted_score": 0.9902413927362183,
+          "predicted_label": 1,
+          "features": {
+            "flow_duration_ms": 32897.05078125,
+            "flow_packets_per_s": 0.06079572066664696,
+            "flow_bytes_per_s": 0.0,
+            "packet_length_mean": 0.0,
+            "packet_length_std": 0.0,
+            "syn_count": 0.0,
+            "ack_count": 1.0,
+            "rst_count": 0.0,
+            "fin_count": 0.0,
+            "syn_ack_ratio": 0.0
+          },
+          "provenance": {
+            "source_file": "Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv",
+            "source_row_index": 211337,
+            "label_family": "BENIGN",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 1529225,
+          "true_label": 0,
+          "predicted_score": 0.9902399698827512,
+          "predicted_label": 1,
+          "features": {
+            "flow_duration_ms": 38842.25390625,
+            "flow_packets_per_s": 0.05149032175540924,
+            "flow_bytes_per_s": 0.0,
+            "packet_length_mean": 0.0,
+            "packet_length_std": 0.0,
+            "syn_count": 0.0,
+            "ack_count": 1.0,
+            "rst_count": 0.0,
+            "fin_count": 0.0,
+            "syn_ack_ratio": 0.0
+          },
+          "provenance": {
+            "source_file": "Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv",
+            "source_row_index": 86043,
+            "label_family": "BENIGN",
+            "canonical_label": "BENIGN"
+          }
+        },
+        {
+          "index": 607520,
+          "true_label": 0,
+          "predicted_score": 0.9902399698827512,
+          "predicted_label": 1,
+          "features": {
+            "flow_duration_ms": 39440.0390625,
+            "flow_packets_per_s": 0.050709884613752365,
+            "flow_bytes_per_s": 0.0,
+            "packet_length_mean": 0.0,
+            "packet_length_std": 0.0,
+            "syn_count": 0.0,
+            "ack_count": 1.0,
+            "rst_count": 0.0,
+            "fin_count": 0.0,
+            "syn_ack_ratio": 0.0
+          },
+          "provenance": {
+            "source_file": "Friday-23-02-2018_TrafficForML_CICFlowMeter.csv",
+            "source_row_index": 83428,
+            "label_family": "BENIGN",
+            "canonical_label": "BENIGN"
+          }
+        }
+      ]
+    },
+    "duplicate_subset_analysis": null
+  },
+  "per_family": {
+    "threshold": 0.5,
+    "total_evaluated_rows": 1631630,
+    "total_attack_families": 5,
+    "summary_table": [
+      {
+        "family": "BENIGN",
+        "is_attack": false,
+        "support": 1581324,
+        "correct": 1571379,
+        "false_positives": 9945,
+        "false_negatives": 0,
+        "detection_rate": 0.993711,
+        "error_rate": 0.006289
+      },
+      {
+        "family": "INFILTERATION",
+        "is_attack": true,
+        "support": 34807,
+        "correct": 328,
+        "false_positives": 0,
+        "false_negatives": 34479,
+        "detection_rate": 0.009423,
+        "error_rate": 0.990577
+      },
+      {
+        "family": "BOT",
+        "is_attack": true,
+        "support": 15214,
+        "correct": 13,
+        "false_positives": 0,
+        "false_negatives": 15201,
+        "detection_rate": 0.000854,
+        "error_rate": 0.999146
+      },
+      {
+        "family": "BRUTE FORCE -WEB",
+        "is_attack": true,
+        "support": 179,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 179,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      },
+      {
+        "family": "BRUTE FORCE -XSS",
+        "is_attack": true,
+        "support": 75,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 75,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      },
+      {
+        "family": "SQL INJECTION",
+        "is_attack": true,
+        "support": 31,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 31,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      }
+    ],
+    "family_breakdown": {
+      "BENIGN": {
+        "family": "BENIGN",
+        "is_attack": false,
+        "support": 1581324,
+        "correct": 1571379,
+        "false_positives": 9945,
+        "false_negatives": 0,
+        "detection_rate": 0.993711,
+        "error_rate": 0.006289
+      },
+      "BOT": {
+        "family": "BOT",
+        "is_attack": true,
+        "support": 15214,
+        "correct": 13,
+        "false_positives": 0,
+        "false_negatives": 15201,
+        "detection_rate": 0.000854,
+        "error_rate": 0.999146
+      },
+      "BRUTE FORCE -WEB": {
+        "family": "BRUTE FORCE -WEB",
+        "is_attack": true,
+        "support": 179,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 179,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      },
+      "BRUTE FORCE -XSS": {
+        "family": "BRUTE FORCE -XSS",
+        "is_attack": true,
+        "support": 75,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 75,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      },
+      "INFILTERATION": {
+        "family": "INFILTERATION",
+        "is_attack": true,
+        "support": 34807,
+        "correct": 328,
+        "false_positives": 0,
+        "false_negatives": 34479,
+        "detection_rate": 0.009423,
+        "error_rate": 0.990577
+      },
+      "SQL INJECTION": {
+        "family": "SQL INJECTION",
+        "is_attack": true,
+        "support": 31,
+        "correct": 0,
+        "false_positives": 0,
+        "false_negatives": 31,
+        "detection_rate": 0.0,
+        "error_rate": 1.0
+      }
+    }
+  }
+}

@@ -1,0 +1,493 @@
+{
+  "experiment_id": "EXP-P1-CSE2018-R10-MULTI-001",
+  "dataset_label": "CSE-CIC-IDS2018",
+  "threshold": 0.5,
+  "ci_level": 0.95,
+  "n_bootstraps_threshold": 1000,
+  "n_bootstraps_auc": 1000,
+  "auc_sample_size": 100000,
+  "seed": 42,
+  "method": {
+    "threshold_metrics": "exact row-bootstrap of the held-out confusion matrix (multinomial cell resampling, full test population)",
+    "roc_auc": "stratified bootstrap of a fixed test sample; point estimate on full test set"
+  },
+  "seeds": {
+    "42": {
+      "path": "/home/rishikesh/Desktop/fyp-xrlids/results/experiments/EXP-P1-CSE2018-R10-MULTI-001/seed_42/predictions_test.csv",
+      "n_rows": 1662419,
+      "models": {
+        "random_forest": {
+          "n": 1662419,
+          "threshold": 0.5,
+          "confusion": {
+            "tn": 1437020,
+            "fp": 38238,
+            "fn": 7864,
+            "tp": 179297
+          },
+          "threshold_metrics": {
+            "accuracy": {
+              "point_estimate": 0.972268,
+              "ci_lower": 0.972015,
+              "ci_upper": 0.972523,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "precision": {
+              "point_estimate": 0.824221,
+              "ci_lower": 0.822589,
+              "ci_upper": 0.825817,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "recall": {
+              "point_estimate": 0.957983,
+              "ci_lower": 0.957085,
+              "ci_upper": 0.958892,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "f1": {
+              "point_estimate": 0.886082,
+              "ci_lower": 0.885053,
+              "ci_upper": 0.887164,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            }
+          },
+          "roc_auc": {
+            "point_estimate": 0.990179,
+            "ci_lower": 0.989345,
+            "ci_upper": 0.991417,
+            "n_bootstraps": 1000,
+            "ci_level": 0.95,
+            "sample_size": 100000,
+            "sample_positives": 11258,
+            "sample_negatives": 88742,
+            "method": "stratified_bootstrap_sample"
+          }
+        },
+        "lstm": {
+          "n": 1662419,
+          "threshold": 0.5,
+          "confusion": {
+            "tn": 1471466,
+            "fp": 3792,
+            "fn": 10777,
+            "tp": 176384
+          },
+          "threshold_metrics": {
+            "accuracy": {
+              "point_estimate": 0.991236,
+              "ci_lower": 0.991094,
+              "ci_upper": 0.99137,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "precision": {
+              "point_estimate": 0.978954,
+              "ci_lower": 0.978294,
+              "ci_upper": 0.979604,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "recall": {
+              "point_estimate": 0.942419,
+              "ci_lower": 0.941396,
+              "ci_upper": 0.94345,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "f1": {
+              "point_estimate": 0.960339,
+              "ci_lower": 0.959702,
+              "ci_upper": 0.960959,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            }
+          },
+          "roc_auc": {
+            "point_estimate": 0.996552,
+            "ci_lower": 0.996188,
+            "ci_upper": 0.997204,
+            "n_bootstraps": 1000,
+            "ci_level": 0.95,
+            "sample_size": 100000,
+            "sample_positives": 11258,
+            "sample_negatives": 88742,
+            "method": "stratified_bootstrap_sample"
+          }
+        },
+        "fusion": {
+          "n": 1662419,
+          "threshold": 0.5,
+          "confusion": {
+            "tn": 1471466,
+            "fp": 3792,
+            "fn": 10777,
+            "tp": 176384
+          },
+          "threshold_metrics": {
+            "accuracy": {
+              "point_estimate": 0.991236,
+              "ci_lower": 0.991094,
+              "ci_upper": 0.99137,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "precision": {
+              "point_estimate": 0.978954,
+              "ci_lower": 0.978294,
+              "ci_upper": 0.979604,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "recall": {
+              "point_estimate": 0.942419,
+              "ci_lower": 0.941396,
+              "ci_upper": 0.94345,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "f1": {
+              "point_estimate": 0.960339,
+              "ci_lower": 0.959702,
+              "ci_upper": 0.960959,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            }
+          },
+          "roc_auc": {
+            "point_estimate": 0.996552,
+            "ci_lower": 0.996188,
+            "ci_upper": 0.997204,
+            "n_bootstraps": 1000,
+            "ci_level": 0.95,
+            "sample_size": 100000,
+            "sample_positives": 11258,
+            "sample_negatives": 88742,
+            "method": "stratified_bootstrap_sample"
+          }
+        }
+      }
+    },
+    "123": {
+      "path": "/home/rishikesh/Desktop/fyp-xrlids/results/experiments/EXP-P1-CSE2018-R10-MULTI-001/seed_123/predictions_test.csv",
+      "n_rows": 1662419,
+      "models": {
+        "random_forest": {
+          "n": 1662419,
+          "threshold": 0.5,
+          "confusion": {
+            "tn": 1436881,
+            "fp": 38378,
+            "fn": 7843,
+            "tp": 179317
+          },
+          "threshold_metrics": {
+            "accuracy": {
+              "point_estimate": 0.972197,
+              "ci_lower": 0.971954,
+              "ci_upper": 0.972447,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "precision": {
+              "point_estimate": 0.823707,
+              "ci_lower": 0.822148,
+              "ci_upper": 0.825308,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "recall": {
+              "point_estimate": 0.958095,
+              "ci_lower": 0.95719,
+              "ci_upper": 0.958983,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "f1": {
+              "point_estimate": 0.885833,
+              "ci_lower": 0.88483,
+              "ci_upper": 0.886861,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            }
+          },
+          "roc_auc": {
+            "point_estimate": 0.989915,
+            "ci_lower": 0.98853,
+            "ci_upper": 0.990865,
+            "n_bootstraps": 1000,
+            "ci_level": 0.95,
+            "sample_size": 100000,
+            "sample_positives": 11258,
+            "sample_negatives": 88742,
+            "method": "stratified_bootstrap_sample"
+          }
+        },
+        "lstm": {
+          "n": 1662419,
+          "threshold": 0.5,
+          "confusion": {
+            "tn": 1472168,
+            "fp": 3091,
+            "fn": 11878,
+            "tp": 175282
+          },
+          "threshold_metrics": {
+            "accuracy": {
+              "point_estimate": 0.990996,
+              "ci_lower": 0.990849,
+              "ci_upper": 0.99113,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "precision": {
+              "point_estimate": 0.982671,
+              "ci_lower": 0.982029,
+              "ci_upper": 0.983237,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "recall": {
+              "point_estimate": 0.936536,
+              "ci_lower": 0.935413,
+              "ci_upper": 0.937534,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "f1": {
+              "point_estimate": 0.959049,
+              "ci_lower": 0.958381,
+              "ci_upper": 0.959662,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            }
+          },
+          "roc_auc": {
+            "point_estimate": 0.996476,
+            "ci_lower": 0.995627,
+            "ci_upper": 0.996775,
+            "n_bootstraps": 1000,
+            "ci_level": 0.95,
+            "sample_size": 100000,
+            "sample_positives": 11258,
+            "sample_negatives": 88742,
+            "method": "stratified_bootstrap_sample"
+          }
+        },
+        "fusion": {
+          "n": 1662419,
+          "threshold": 0.5,
+          "confusion": {
+            "tn": 1471986,
+            "fp": 3273,
+            "fn": 11472,
+            "tp": 175688
+          },
+          "threshold_metrics": {
+            "accuracy": {
+              "point_estimate": 0.99113,
+              "ci_lower": 0.990982,
+              "ci_upper": 0.991263,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "precision": {
+              "point_estimate": 0.981711,
+              "ci_lower": 0.981089,
+              "ci_upper": 0.982306,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "recall": {
+              "point_estimate": 0.938705,
+              "ci_lower": 0.937611,
+              "ci_upper": 0.939651,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "f1": {
+              "point_estimate": 0.959726,
+              "ci_lower": 0.959065,
+              "ci_upper": 0.960328,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            }
+          },
+          "roc_auc": {
+            "point_estimate": 0.996494,
+            "ci_lower": 0.995692,
+            "ci_upper": 0.9968,
+            "n_bootstraps": 1000,
+            "ci_level": 0.95,
+            "sample_size": 100000,
+            "sample_positives": 11258,
+            "sample_negatives": 88742,
+            "method": "stratified_bootstrap_sample"
+          }
+        }
+      }
+    },
+    "456": {
+      "path": "/home/rishikesh/Desktop/fyp-xrlids/results/experiments/EXP-P1-CSE2018-R10-MULTI-001/seed_456/predictions_test.csv",
+      "n_rows": 1662419,
+      "models": {
+        "random_forest": {
+          "n": 1662419,
+          "threshold": 0.5,
+          "confusion": {
+            "tn": 1436030,
+            "fp": 39228,
+            "fn": 7685,
+            "tp": 179476
+          },
+          "threshold_metrics": {
+            "accuracy": {
+              "point_estimate": 0.97178,
+              "ci_lower": 0.97152,
+              "ci_upper": 0.972046,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "precision": {
+              "point_estimate": 0.820634,
+              "ci_lower": 0.819002,
+              "ci_upper": 0.822253,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "recall": {
+              "point_estimate": 0.958939,
+              "ci_lower": 0.958071,
+              "ci_upper": 0.959818,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "f1": {
+              "point_estimate": 0.884412,
+              "ci_lower": 0.883334,
+              "ci_upper": 0.885504,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            }
+          },
+          "roc_auc": {
+            "point_estimate": 0.989942,
+            "ci_lower": 0.988657,
+            "ci_upper": 0.990805,
+            "n_bootstraps": 1000,
+            "ci_level": 0.95,
+            "sample_size": 100000,
+            "sample_positives": 11258,
+            "sample_negatives": 88742,
+            "method": "stratified_bootstrap_sample"
+          }
+        },
+        "lstm": {
+          "n": 1662419,
+          "threshold": 0.5,
+          "confusion": {
+            "tn": 1471280,
+            "fp": 3978,
+            "fn": 10525,
+            "tp": 176636
+          },
+          "threshold_metrics": {
+            "accuracy": {
+              "point_estimate": 0.991276,
+              "ci_lower": 0.991133,
+              "ci_upper": 0.991411,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "precision": {
+              "point_estimate": 0.977975,
+              "ci_lower": 0.97732,
+              "ci_upper": 0.978645,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "recall": {
+              "point_estimate": 0.943765,
+              "ci_lower": 0.942738,
+              "ci_upper": 0.944725,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "f1": {
+              "point_estimate": 0.960566,
+              "ci_lower": 0.959926,
+              "ci_upper": 0.961171,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            }
+          },
+          "roc_auc": {
+            "point_estimate": 0.996523,
+            "ci_lower": 0.996201,
+            "ci_upper": 0.997201,
+            "n_bootstraps": 1000,
+            "ci_level": 0.95,
+            "sample_size": 100000,
+            "sample_positives": 11258,
+            "sample_negatives": 88742,
+            "method": "stratified_bootstrap_sample"
+          }
+        },
+        "fusion": {
+          "n": 1662419,
+          "threshold": 0.5,
+          "confusion": {
+            "tn": 1471280,
+            "fp": 3978,
+            "fn": 10525,
+            "tp": 176636
+          },
+          "threshold_metrics": {
+            "accuracy": {
+              "point_estimate": 0.991276,
+              "ci_lower": 0.991133,
+              "ci_upper": 0.991411,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "precision": {
+              "point_estimate": 0.977975,
+              "ci_lower": 0.97732,
+              "ci_upper": 0.978645,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "recall": {
+              "point_estimate": 0.943765,
+              "ci_lower": 0.942738,
+              "ci_upper": 0.944725,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "f1": {
+              "point_estimate": 0.960566,
+              "ci_lower": 0.959926,
+              "ci_upper": 0.961171,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            }
+          },
+          "roc_auc": {
+            "point_estimate": 0.996523,
+            "ci_lower": 0.996201,
+            "ci_upper": 0.997201,
+            "n_bootstraps": 1000,
+            "ci_level": 0.95,
+            "sample_size": 100000,
+            "sample_positives": 11258,
+            "sample_negatives": 88742,
+            "method": "stratified_bootstrap_sample"
+          }
+        }
+      }
+    }
+  }
+}

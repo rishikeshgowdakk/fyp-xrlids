@@ -194,9 +194,61 @@ All three benchmarks were re-run end-to-end with seeds 42, 123 and 456 (populati
 
 Full RF / LSTM / Fusion table: `reports/generated/multi_seed_report.md`.
 
+### 3.4.2 Bootstrap Confidence Intervals (Seed 42)
+
+Per-seed 95% non-parametric bootstrap intervals were computed directly from the saved held-out `predictions_test.csv` files; no model was retrained and no test row influenced model selection. Accuracy / precision / recall / F1 use an exact row-bootstrap of the full test confusion matrix ($B=1000$). ROC-AUC uses $B=1000$ stratified resamples of a fixed 100,000-flow sample, with the point estimate computed on the full test set. The intervals quantify **test-set sampling uncertainty**, not training-seed variance (which is reported separately in §3.4.1).
+
+| Dataset | Model | Accuracy [95% CI] | F1 [95% CI] | ROC-AUC [95% CI] |
+|:---|:---|:---:|:---:|:---:|
+| CIC-IDS2017 | Random Forest | 0.9815 [0.9811, 0.9819] | 0.9512 [0.9500, 0.9524] | 0.9968 [0.9965, 0.9971] |
+| CIC-IDS2017 | Supervised LSTM | 0.9867 [0.9863, 0.9871] | 0.9633 [0.9622, 0.9643] | 0.9974 [0.9971, 0.9977] |
+| CIC-IDS2017 | Tuned Fusion ($\alpha=0.50$) | 0.9906 [0.9903, 0.9910] | 0.9745 [0.9737, 0.9754] | 0.9989 [0.9987, 0.9991] |
+| CSE-CIC-IDS2018 | Random Forest | 0.9723 [0.9720, 0.9725] | 0.8861 [0.8851, 0.8872] | 0.9902 [0.9893, 0.9914] |
+| CSE-CIC-IDS2018 | Supervised LSTM | 0.9912 [0.9911, 0.9914] | 0.9603 [0.9597, 0.9610] | 0.9966 [0.9962, 0.9972] |
+| CSE-CIC-IDS2018 | Fusion ($\alpha=0.00$) | 0.9912 [0.9911, 0.9914] | 0.9603 [0.9597, 0.9610] | 0.9966 [0.9962, 0.9972] |
+| UNSW-NB15 | Random Forest | 0.8590 [0.8545, 0.8634] | 0.8548 [0.8502, 0.8599] | 0.9487 [0.9462, 0.9511] |
+| UNSW-NB15 | Supervised LSTM | 0.8683 [0.8639, 0.8728] | 0.8637 [0.8591, 0.8687] | 0.9334 [0.9305, 0.9365] |
+| UNSW-NB15 | Tuned Fusion ($\alpha=0.60$) | 0.8996 [0.8959, 0.9033] | 0.8970 [0.8930, 0.9009] | 0.9674 [0.9654, 0.9693] |
+
+The CSE fusion row equals the LSTM row by construction: validation selected $\alpha=0.00$, so the fused score is the LSTM score. Full per-seed intervals for all three seeds and all models are in `reports/generated/bootstrap_ci_report.md`; machine-readable intervals and confusion counts are in each experiment's `bootstrap_cis.json`.
+
 ### 3.5 Negative Finding: Attack-Family Blind Spots & Threshold Governance (Decision D-003)
 - Detailed per-class auditing revealed that despite >0.98 aggregate accuracy, models fail catastrophically on stealthy attack classes at the standard $\tau = 0.50$ cutoff (Infiltration recall = 10.70%, Web attacks recall = 2.78%).
 - Established Decision D-003: Academic reporting baseline ($\tau = 0.50$) remains frozen for comparability; operational threshold selection remains open, with continuous risk scores $S \in [0, 1]$ passed to downstream RL agents rather than uncalibrated binary decisions.
+
+### 3.6 Temporal Holdout: Future-Day Generalization (GAP-P06)
+
+The random-split benchmarks above are in-domain: test rows are drawn from the same capture days as training. To test whether the detector transfers to later traffic, `EXP-P1-CSE2018-TEMPORAL-R10-001` sorts all 8,312,295 modelling rows by the real CSE `Timestamp` and cuts at hour boundaries. No class stratification is applied. The split passes L-01 (exact duplicate overlap), L-02 (rounded near-duplicate overlap), and L-05 (temporal ordering); `leakage_report.json` status is `pass`.
+
+| Split | Rows | Window | Attack fraction |
+|:---|:---:|:---|:---:|
+| TRAIN | 5,053,051 | 2018-02-14 01:00 → 2018-02-20 10:59 | 12.63% |
+| VALIDATION | 1,627,614 | 2018-02-20 11:00 → 2018-02-22 10:59 | 15.19% |
+| TEST | 1,631,630 | 2018-02-22 11:00 → 2018-03-02 12:59 | 3.08% |
+
+The low test attack fraction is a Policy A effect, not the raw future prevalence: conflict rejection removed 4,496,789 rows and feature deduplication removed 2,944,601 duplicate vectors before splitting. Many later bot/infiltration flows were exact duplicates of earlier rows or conflicted with benign labels. The surviving 50,306 future attacks are the unique, conflict-free cases; they are a deliberately hard test.
+
+| Metric | Random split (same-day) | Temporal holdout (future-day) | Δ |
+|:---|:---:|:---:|:---:|
+| Accuracy | 0.9723 | 0.9633 | -0.0090 |
+| Precision | 0.8242 | 0.0332 | -0.7911 |
+| Recall | 0.9580 | 0.0068 | -0.9512 |
+| F1 | 0.8861 | 0.0113 | -0.8748 |
+| ROC-AUC | 0.9902 | 0.3905 | -0.5997 |
+
+The temporal F1 95% bootstrap CI is [0.0101, 0.0124] (B=1000); the failure is systematic, not sampling noise. The detector is worse than the majority baseline on future data (majority accuracy 0.9692, F1 0). The per-family collapse is the clearest evidence that the random-split bot score was memorization, not generalization:
+
+| Family | Random support / detection | Temporal support / detection |
+|:---|:---:|:---:|
+| BOT | 2,999 / 99.17% | 15,214 / 0.09% |
+| INFILTERATION | 7,027 / 10.70% | 34,807 / 0.94% |
+| BRUTE FORCE -WEB | 49 / 91.84% | 179 / 0.00% |
+| BRUTE FORCE -XSS | 22 / 95.45% | 75 / 0.00% |
+| SQL INJECTION | 15 / 73.33% | 31 / 0.00% |
+
+**Interpretation.** The random-split CSE F1 0.8861 is an in-domain upper bound, not a future-day estimate. The temporal holdout contains only unseen attack families (bot, infiltration, web) and the surviving unique flows; the model fails them almost completely. This is a negative result, but a scientifically useful one: it quantifies the optimism and shows that aggregate accuracy is dominated by benign prevalence. The 99% headline must not be presented as evidence of future-day detection readiness.
+
+**Scope.** Single seed (42); LSTM/fusion were not trained in the temporal run; grouped-by-host validation was not executed because CSE provenance has no stable host key (source IP is not reliable across NAT/replay). Full artifacts: `results/experiments/EXP-P1-CSE2018-TEMPORAL-R10-001/`, report: `reports/generated/temporal_split_report.md`.
 
 ---
 
@@ -379,7 +431,7 @@ In accordance with scientific integrity standards, all limitations and negative 
 6. **Single-Node Concurrency Architecture:** The current implementation uses single-node multi-threading with target-scoped locks; it lacks distributed consensus (e.g., Raft) for multi-node enterprise deployments.
 7. **No Production Hardware / Kernel-Bypass Actuation:** Actuation is implemented via Linux network namespaces and virtual interfaces; production deployment requires kernel-bypass mechanisms (e.g., eBPF / XDP).
 8. **No Live Accuracy Claims Without Ground Truth (§64):** Real-time predictions on unmanaged traffic are reported strictly as flow counts and latency metrics, never as accuracy metrics, due to the absence of independent packet-level ground truth.
-9. **Row-Level Split Optimism:** Splits are row-level — exact feature-duplicate vectors are removed across splits, but host- or time-disjoint grouping is not applied. Near-duplicate flows from the same traffic burst can appear in both train and test, so in-domain metrics should be read as optimistic upper bounds. A temporal split is feasible for CSE-CIC-IDS2018 (`Timestamp` column present) and is the recommended next validation step.
+9. **Row-Level Split Optimism (Quantified):** The primary splits are row-level. Exact feature-duplicate vectors are removed across splits, but host-disjoint grouping is not applied; near-duplicate flows from the same traffic burst can still share a split. The strict CSE temporal holdout (§3.6) removes same-day overlap and shows the optimism is severe: RF F1 falls from 0.8861 to 0.0113, bot recall from 99.17% to 0.09%, and infiltration recall from 10.70% to 0.94% on the surviving unique future attacks. In-domain metrics must therefore be read as upper bounds, not future-day performance. Grouped-by-host validation was not executed because no stable host key is available.
 
 ---
 
@@ -389,6 +441,8 @@ In accordance with scientific integrity standards, all limitations and negative 
 - **Phase 2 (Autonomous Response):** `SCIENTIFICALLY FROZEN` at commit `11f32f6`
 - **Phase 3 (Laboratory Validation):** `LABORATORY VALIDATION COMPLETE` at commit `f600bfb`
 - **Post-freeze robustness validation (2026-10-17):** 3-seed sweep completed across all three benchmarks (§3.4.1) — seed 42 reproduces the frozen artifacts exactly; `reports/generated/multi_seed_report.md`.
+- **Post-freeze uncertainty validation (2026-10-20):** Per-seed 95% bootstrap confidence intervals computed from the saved held-out predictions for all three benchmarks (B=1000; threshold metrics on the full test population, ROC-AUC on a fixed 100k stratified sample); `reports/generated/bootstrap_ci_report.md`, per-experiment `bootstrap_cis.json`.
+- **Post-freeze temporal validation (2026-10-20):** Strict future-day holdout executed on CSE-CIC-IDS2018 (`EXP-P1-CSE2018-TEMPORAL-R10-001`); L-01/L-02/L-05 pass. RF F1 0.0113 on 50,306 surviving future attacks vs 0.8861 on the random split; bot recall 99.17% → 0.09%. This is a negative generalization result and confirms that the in-domain metrics are upper bounds; `reports/generated/temporal_split_report.md`.
 - **Production Deployment:** `NOT VALIDATED / OUT OF SCOPE`
 
 **Final Sign-Off:**  

@@ -15,6 +15,8 @@
 > - **A4 (test-count drift)** — resolved: every document reports the verified 408-test suite.
 > - **A5 (artifacts pinned to their run commit)** — accepted: the recorded `git_commit` is the run-time fact; generated reports now reference the commit they were generated at.
 > - **A6 (native vs aligned UNSW values)** — resolved: all UNSW tables use the aligned values (RF 0.8590 / 0.8548, ROC-AUC 0.9487), matching the registry.
+> - **A7 (row-level split optimism / no temporal validation)** — addressed (2026-10-20): `EXP-P1-CSE2018-TEMPORAL-R10-001` trains on 14–20 Feb and evaluates once on 22 Feb–2 Mar using the real CSE `Timestamp`; L-01/L-02/L-05 pass. RF F1 falls from 0.8861 (random) to **0.0113** (temporal), bot recall from 99.17% to 0.09%, and infiltration from 10.70% to 0.94%; the random-split result is an in-domain upper bound. Comparison: `reports/generated/temporal_split_report.md`.
+> - **A8 (no uncertainty intervals on detector metrics)** — addressed (2026-10-20): per-seed 95% bootstrap CIs are published in `reports/generated/bootstrap_ci_report.md` with machine-readable `bootstrap_cis.json` per experiment.
 
 ---
 

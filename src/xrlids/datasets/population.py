@@ -13,6 +13,7 @@ Provides rigorous, memory-safe loading of multi-file dataset populations:
 
 from __future__ import annotations
 
+import gc
 import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -180,8 +181,17 @@ def analyze_duplicate_label_conflicts(
     *,
     policy: str = "reject_conflicts",
     max_examples: int = 10,
+    precomputed_hash: pd.Series | None = None,
 ) -> tuple[pd.Index, DuplicateConflictReport]:
     """Analyze identical feature vectors having conflicting ground truth labels.
+
+    Parameters
+    ----------
+    precomputed_hash:
+        Optional row fingerprint from ``pd.util.hash_pandas_object(feature_df,
+        index=False)``. The caller can compute it once and reuse it for the
+        subsequent feature deduplication, avoiding a second multi-GB hash pass
+        on the full CSE population.
 
     Returns
     -------
@@ -191,17 +201,25 @@ def analyze_duplicate_label_conflicts(
     if len(feature_df) == 0:
         return feature_df.index, DuplicateConflictReport(policy_applied=policy)
 
-    # Hash the feature vectors for fast, memory-safe duplicate detection
-    h = pd.util.hash_pandas_object(feature_df, index=False)
+    # Hash the feature vectors for fast, memory-safe duplicate detection. Reuse
+    # the caller's fingerprint when supplied; otherwise compute it once here.
+    h = (
+        precomputed_hash
+        if precomputed_hash is not None
+        else pd.util.hash_pandas_object(feature_df, index=False)
+    )
+    if len(h) != len(feature_df):
+        raise ValueError("precomputed_hash must align row-for-row with feature_df")
     dupe_vector_mask = h.duplicated(keep=False)
 
     if not dupe_vector_mask.any():
         return feature_df.index, DuplicateConflictReport(policy_applied=policy)
 
-    # Group duplicate hashes and examine labels
+    # Group duplicate hashes and examine labels. Keep only the two columns
+    # needed for the conflict decision; the full provenance frame stays out of
+    # the groupby path.
     dupe_hashes = h[dupe_vector_mask]
     dupe_labels = labels[dupe_vector_mask]
-    dupe_families = provenance_df["label_family"][dupe_vector_mask]
 
     grouped = dupe_labels.groupby(dupe_hashes)
     nunique_labels = grouped.nunique()
@@ -243,6 +261,13 @@ def analyze_duplicate_label_conflicts(
                 "sample_indices": [int(x) for x in sub_idx[:3]],
             })
 
+    # Release the large groupby intermediates before allocating the retained
+    # index. On CSE this is the difference between ~4.5M duplicated rows held
+    # in memory and a single boolean mask.
+    n_duplicate_groups = int(grouped.ngroups)
+    del grouped, dupe_hashes, dupe_labels, nunique_labels, dupe_vector_mask, conflicting_hash_ids
+    gc.collect()
+
     # Apply policy
     if policy == "reject_conflicts":
         # Reject ALL rows belonging to conflicting vectors
@@ -260,7 +285,7 @@ def analyze_duplicate_label_conflicts(
         raise ValueError(f"Unknown duplicate conflict policy: '{policy}'")
 
     report = DuplicateConflictReport(
-        total_unique_vectors_with_duplicates=int(grouped.ngroups),
+        total_unique_vectors_with_duplicates=n_duplicate_groups,
         total_conflicting_vectors=int(n_conflicting_vectors),
         total_conflicting_rows=int(n_conflicting_rows),
         benign_attack_conflicts=int(benign_attack_conflicts),
@@ -390,6 +415,14 @@ def load_dataset_population(
             cand_cols = [c for c in chunk.columns if c.strip().lower() in ("label", "attack_cat")]
             raw_label_col = cand_cols[0] if cand_cols else chunk.columns[-1]
 
+            # Preserve a real capture timestamp in provenance when the dataset
+            # provides one. It is never a model feature; it is used for temporal
+            # split construction and the L-05 leakage audit.
+            time_col = next(
+                (c for c in chunk.columns if str(c).strip().lower() == "timestamp"),
+                None,
+            )
+
             # Extract label family prior to cleaning
             # For UNSW-NB15, attack_cat holds the family if present
             if config.dataset == "unsw_nb15" and "attack_cat" in chunk.columns:
@@ -425,6 +458,19 @@ def load_dataset_population(
             clean_source_rows = pd.Series(file_chunk_indices[accepted_idx_arr], name="source_row_index")
             clean_global_orders = pd.Series(chunk_global_indices[accepted_idx_arr], name="original_order")
 
+            if time_col is not None:
+                raw_times = chunk[time_col].loc[cleaned.frame.index]
+                clean_times = pd.to_datetime(
+                    raw_times, format="%d/%m/%Y %H:%M:%S", errors="coerce"
+                )
+                if clean_times.isna().mean() > 0.5:
+                    clean_times = pd.to_datetime(raw_times, errors="coerce", dayfirst=True)
+                clean_times = clean_times.reset_index(drop=True)
+            else:
+                clean_times = pd.Series(
+                    pd.NaT, index=pd.RangeIndex(len(cleaned.frame)), dtype="datetime64[ns]"
+                )
+
             # Extract semantic fields & compute features
             semantics, _ = extract_semantics(cleaned.frame, config.dataset, registry, strict=False)
             feat_matrix, avail, unavail = compute_features(
@@ -447,6 +493,7 @@ def load_dataset_population(
             chunk_families = clean_families.iloc[finite_mask].reset_index(drop=True)
             chunk_src_rows = clean_source_rows.iloc[finite_mask].astype(np.int32).reset_index(drop=True)
             chunk_gl_orders = clean_global_orders.iloc[finite_mask].astype(np.int32).reset_index(drop=True)
+            chunk_times = clean_times.iloc[finite_mask].reset_index(drop=True)
 
             file_final_modeling_rows += n_finite
 
@@ -456,6 +503,7 @@ def load_dataset_population(
                 "source_file": path.name,
                 "source_row_index": chunk_src_rows,
                 "original_order": chunk_gl_orders,
+                "timestamp": chunk_times,
                 "label_family": chunk_families,
                 "canonical_label": chunk_canonical,
                 "binary_label": chunk_labels,
@@ -487,14 +535,19 @@ def load_dataset_population(
     if not all_features_chunks:
         raise ValueError(f"No valid modeling rows extracted across {len(file_records)} files.")
 
-    import gc
-
     combined_features = pd.concat(all_features_chunks, ignore_index=True)
     del all_features_chunks
     combined_labels = pd.concat(all_labels_chunks, ignore_index=True)
     del all_labels_chunks
     combined_prov = pd.concat(all_prov_chunks, ignore_index=True)
     del all_prov_chunks
+
+    # Repeated provenance strings dominate the memory footprint at CSE scale.
+    # Categorical codes preserve every value and group key while cutting the
+    # 8.3M-row provenance frame from object pointers to small integer codes.
+    for column in ("dataset", "source_file", "canonical_label", "raw_label", "label_family"):
+        if column in combined_prov.columns and combined_prov[column].dtype == object:
+            combined_prov[column] = combined_prov[column].astype("category")
     gc.collect()
 
     # 5. Feature-space deduplication & Conflict Analysis
@@ -503,12 +556,16 @@ def load_dataset_population(
     conflict_report = DuplicateConflictReport(policy_applied=config.duplicate_conflict_policy)
 
     if config.duplicate_policy == "deduplicate_features":
-        # First resolve conflicts
+        # Compute the row fingerprint once and reuse it for conflict analysis
+        # and deduplication. The previous implementation hashed the full 8.3M
+        # row feature frame twice, which is the memory peak on CSE.
+        feature_hash = pd.util.hash_pandas_object(combined_features, index=False)
         retain_idx, conflict_report = analyze_duplicate_label_conflicts(
             combined_features,
             combined_labels,
             combined_prov,
             policy=config.duplicate_conflict_policy,
+            precomputed_hash=feature_hash,
         )
         total_removed_conflicts = conflict_report.rows_dropped
 
@@ -516,12 +573,12 @@ def load_dataset_population(
             combined_features = combined_features.loc[retain_idx].reset_index(drop=True)
             combined_labels = combined_labels.loc[retain_idx].reset_index(drop=True)
             combined_prov = combined_prov.loc[retain_idx].reset_index(drop=True)
+            feature_hash = feature_hash.loc[retain_idx].reset_index(drop=True)
             gc.collect()
 
         # Then deduplicate remaining identical feature vectors (Policy A)
-        h = pd.util.hash_pandas_object(combined_features, index=False)
-        is_feat_dupe = h.duplicated(keep="first")
-        del h
+        is_feat_dupe = feature_hash.duplicated(keep="first")
+        del feature_hash
         n_feat_dupes = int(is_feat_dupe.sum())
         total_removed_feature_dupes = n_feat_dupes
 

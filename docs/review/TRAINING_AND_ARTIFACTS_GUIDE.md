@@ -56,7 +56,7 @@ Everything is reconciled with an accounting formula (raw − removals = final), 
   - **TRAIN** → learns scaler parameters and model weights.
   - **VALIDATION** → picks fusion weight α, calibration, thresholds/early stopping.
   - **TEST** → touched **once**, for the final number only.
-- It is a **row-level random split**, not grouped by host or time. This means near-duplicate flows from the same attack burst can still appear in both train and test. This is why the in-domain scores are optimistic, and why CSE (which has a timestamp) should also get a temporal split.
+- The primary benchmark is a **row-level random split**, not grouped by host. This means near-duplicate flows from the same attack burst can still appear in both train and test. This is why the in-domain scores are optimistic. A strict future-day temporal holdout for CSE-CIC-IDS2018 is now implemented as `EXP-P1-CSE2018-TEMPORAL-R10-001`; RF F1 falls from 0.8861 (random) to **0.0113** (temporal), and bot recall from 99.17% to 0.09%. See `docs/phase1/SPLIT_METHODOLOGY.md` and `reports/generated/temporal_split_report.md`.
 
 ---
 

@@ -56,6 +56,9 @@ SHAP_SUMMARY = REPO_ROOT / "results" / "experiments" / "EXP-P1-CIC2017-R10-001" 
 MULTI_SEED_METRICS = (
     REPO_ROOT / "results" / "experiments" / "EXP-P1-CIC2017-R10-001" / "multi_seed_metrics.json"
 )
+BOOTSTRAP_CIS = (
+    REPO_ROOT / "results" / "experiments" / "EXP-P1-CIC2017-R10-001" / "bootstrap_cis.json"
+)
 SAMPLE_PCAP = REPO_ROOT / "data" / "demo" / "sample_traffic.pcap"
 DEFAULT_MODEL_DIR = REPO_ROOT / "results" / "experiments" / "EXP-P1-CIC2017-R10-001"
 RESEARCH_THRESHOLD = 0.50
@@ -115,6 +118,43 @@ def get_dashboard_data() -> dict:
                 "models": models,
                 "source": str(MULTI_SEED_METRICS.relative_to(REPO_ROOT)),
             }
+
+            # Attach bootstrap CIs from the frozen seed-42 predictions. The
+            # mean ± std above is across seeds; the CI below is test-set
+            # sampling uncertainty for the frozen reference run.
+            if BOOTSTRAP_CIS.exists():
+                try:
+                    with open(BOOTSTRAP_CIS, "r", encoding="utf-8") as f:
+                        ci_raw = json.load(f)
+                    ci_seeds = ci_raw.get("seeds", {})
+                    seed_payload = ci_seeds.get("42") or ci_seeds.get("frozen") or {}
+                    seed_models = seed_payload.get("models", {})
+                    for name in models:
+                        model_ci = seed_models.get(name, {})
+                        threshold_metrics = model_ci.get("threshold_metrics", {})
+                        for metric in ("accuracy", "f1"):
+                            entry = threshold_metrics.get(metric)
+                            if entry and metric in models[name]:
+                                models[name][metric]["ci"] = {
+                                    "point": entry.get("point_estimate"),
+                                    "lower": entry.get("ci_lower"),
+                                    "upper": entry.get("ci_upper"),
+                                }
+                        auc_entry = model_ci.get("roc_auc")
+                        if auc_entry and "roc_auc" in models[name]:
+                            models[name]["roc_auc"]["ci"] = {
+                                "point": auc_entry.get("point_estimate"),
+                                "lower": auc_entry.get("ci_lower"),
+                                "upper": auc_entry.get("ci_upper"),
+                            }
+                    data["model_comparison"]["ci_source"] = str(
+                        BOOTSTRAP_CIS.relative_to(REPO_ROOT)
+                    )
+                    data["model_comparison"]["ci_note"] = (
+                        "95% bootstrap CI for the frozen seed-42 test predictions"
+                    )
+                except Exception as e:  # pragma: no cover - defensive
+                    data["model_comparison"]["ci_error"] = str(e)
         except Exception as e:
             data["model_comparison_error"] = str(e)
 

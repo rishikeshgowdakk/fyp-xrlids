@@ -319,7 +319,54 @@ The Live Monitor's score is the **Random Forest**, not the LSTM. This is deliber
   `experiment_record.json`, `multi_seed_metrics.json`, `model_comparisons.json`. The live notice
   states that LSTM/fusion are evaluated offline.
 
-### 2.7.2 Prove the simulator isn't bluffing (run this)
+### 2.7.2 How uncertain are the detector numbers?
+
+The per-seed 95% bootstrap intervals come directly from the saved held-out
+predictions (`predictions_test.csv`), not from a retrained model. Threshold
+metrics use an exact row-bootstrap of the full test confusion matrix
+($B=1000$); ROC-AUC uses $B=1000$ stratified resamples of a fixed 100k sample,
+with the point estimate on the full test set. The intervals quantify
+**test-set sampling uncertainty**, not training-seed variance.
+
+| Dataset | Model | F1 [95% CI] | ROC-AUC [95% CI] |
+|:---|:---|:---:|:---:|
+| CIC-IDS2017 | RF | 0.9512 [0.9500, 0.9524] | 0.9968 [0.9965, 0.9971] |
+| CIC-IDS2017 | LSTM | 0.9633 [0.9622, 0.9643] | 0.9974 [0.9971, 0.9977] |
+| CIC-IDS2017 | Fusion ($\alpha=0.50$) | 0.9745 [0.9737, 0.9754] | 0.9989 [0.9987, 0.9991] |
+| CSE-CIC-IDS2018 | RF | 0.8861 [0.8851, 0.8872] | 0.9902 [0.9893, 0.9914] |
+| CSE-CIC-IDS2018 | LSTM / Fusion ($\alpha=0.00$) | 0.9603 [0.9597, 0.9610] | 0.9966 [0.9962, 0.9972] |
+| UNSW-NB15 | RF | 0.8548 [0.8502, 0.8599] | 0.9487 [0.9462, 0.9511] |
+| UNSW-NB15 | Fusion ($\alpha=0.60$) | 0.8970 [0.8930, 0.9009] | 0.9674 [0.9654, 0.9693] |
+
+Full table: `reports/generated/bootstrap_ci_report.md`. The 3-seed mean ± std is
+a separate quantity in `reports/generated/multi_seed_report.md`; a seed-42 CI
+does not have to contain the 3-seed mean.
+
+### 2.7.3 Did it work on future traffic? (temporal holdout)
+
+No — and the system reports this explicitly. `EXP-P1-CSE2018-TEMPORAL-R10-001`
+sorts CSE-CIC-IDS2018 by its real `Timestamp` and trains on 14–20 Feb 2018,
+validates on 20–22 Feb, and tests on 22 Feb–2 Mar. The split passes the exact
+duplicate, rounded near-duplicate, and temporal-ordering audits (L-01/L-02/L-05).
+
+| Metric | Random split | Temporal holdout |
+|:---|:---:|:---:|
+| Accuracy | 0.9723 | 0.9633 |
+| Precision | 0.8242 | 0.0332 |
+| Recall | 0.9580 | 0.0068 |
+| F1 | 0.8861 | **0.0113** [0.0101, 0.0124] |
+| ROC-AUC | 0.9902 | 0.3905 |
+
+The test period contains 50,306 attacks (3.08%) after Policy A removed
+label-conflicting and duplicate rows; these are the surviving **unique** future
+attacks, not the raw day-level prevalence. Bot recall falls from 99.17%
+(random) to 0.09% (temporal), infiltration from 10.70% to 0.94%, and web/XSS/SQL
+attacks to 0.00%. The 99% headline is therefore an **in-domain upper bound**, not
+a future-day performance claim. Full comparison:
+`reports/generated/temporal_split_report.md`. The dashboard's model-comparison
+table carries the same caveat.
+
+### 2.7.4 Prove the simulator isn't bluffing (run this)
 
 The simulator only creates packets. It never writes a score. Run:
 
@@ -475,7 +522,7 @@ exact model input/output. There is no email/SMS/pager integration.
 A: No. It only creates packets; the score comes from the frozen model. Run
 `scripts/demo/explain_score.py` to see a benign control (≈0.02), the calibrated scenario (≈0.99), and
 the same two packets scoring differently as the gap changes. The UI's feature dialog shows the same
-values, and `verify_attack_scenarios.py` re-verifies all seven scenarios. See 2.7.2.
+values, and `verify_attack_scenarios.py` re-verifies all seven scenarios. See 2.7.4.
 
 **Q: Why do some flows (like the demo's DNS query) never appear as completed?**
 A: D-006 completes TCP flows on FIN/RST or 120 s of silence. The demo DNS flow is UDP with no

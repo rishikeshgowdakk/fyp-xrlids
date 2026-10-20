@@ -1,0 +1,89 @@
+{
+  "status": "pass",
+  "failed_checks": [],
+  "checks": [
+    {
+      "id": "L-01",
+      "check": "duplicate_overlap",
+      "performed": true,
+      "passed": true,
+      "detail": {
+        "train__validation": 0,
+        "train__test": 0,
+        "validation__test": 0
+      }
+    },
+    {
+      "id": "L-02",
+      "check": "near_duplicate_overlap",
+      "performed": true,
+      "passed": true,
+      "method": "exact match on feature vectors rounded to 6 decimals",
+      "detail": {
+        "train__validation": 0,
+        "train__test": 0,
+        "validation__test": 0
+      },
+      "limitation": "rounding-based proxy; cannot detect all near-duplicates"
+    },
+    {
+      "id": "L-03",
+      "check": "group_overlap",
+      "performed": false,
+      "passed": null,
+      "detail": "no group column supplied or present"
+    },
+    {
+      "id": "L-04",
+      "check": "source_ip_overlap",
+      "performed": false,
+      "passed": null,
+      "detail": "no source-IP column present"
+    },
+    {
+      "id": "L-05",
+      "check": "temporal_overlap",
+      "performed": true,
+      "passed": true,
+      "ranges": {
+        "train": [
+          "2018-02-14 01:00:00",
+          "2018-02-20 10:59:59",
+          5053051
+        ],
+        "validation": [
+          "2018-02-20 11:00:00",
+          "2018-02-22 10:59:59",
+          1627614
+        ],
+        "test": [
+          "2018-02-22 11:00:00",
+          "2018-03-02 12:59:59",
+          1631630
+        ]
+      },
+      "detail": {
+        "train__validation": false,
+        "train__test": false,
+        "validation__test": false
+      }
+    },
+    {
+      "id": "L-06",
+      "check": "sequence_overlap",
+      "performed": true,
+      "passed": true,
+      "method": "sequences are built independently within each split; index_origin is recorded per sequence",
+      "detail": "enforced by construction in xrlids.models.lstm.build_sequences"
+    }
+  ],
+  "not_performed": [
+    "group_overlap",
+    "source_ip_overlap"
+  ],
+  "split_sizes": {
+    "train": 5053051,
+    "validation": 1627614,
+    "test": 1631630
+  }
+}

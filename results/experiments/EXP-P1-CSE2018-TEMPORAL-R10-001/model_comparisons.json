@@ -1,0 +1,32 @@
+[
+  {
+    "model_a": "LR",
+    "model_b": "DT",
+    "metric": "f1",
+    "estimate_a": 0.048021,
+    "estimate_b": 0.021416,
+    "delta": 0.026605,
+    "ci_lower": 0.02499,
+    "ci_upper": 0.028158,
+    "ci_level": 0.95,
+    "p_value": 0.0,
+    "is_statistically_significant": true,
+    "superior_model": "LR",
+    "scientific_statement": "LR outperforms with statistical significance (\u0394=+0.0266, 95% CI [0.0250, 0.0282], p=0.0000)"
+  },
+  {
+    "model_a": "DT",
+    "model_b": "RF",
+    "metric": "f1",
+    "estimate_a": 0.021416,
+    "estimate_b": 0.011256,
+    "delta": 0.010161,
+    "ci_lower": 0.008943,
+    "ci_upper": 0.011369,
+    "ci_level": 0.95,
+    "p_value": 0.0,
+    "is_statistically_significant": true,
+    "superior_model": "DT",
+    "scientific_statement": "DT outperforms with statistical significance (\u0394=+0.0102, 95% CI [0.0089, 0.0114], p=0.0000)"
+  }
+]

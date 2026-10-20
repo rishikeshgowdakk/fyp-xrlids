@@ -1,0 +1,73 @@
+{
+  "experiment_id": "EXP-P1-CSE2018-TEMPORAL-R10-001",
+  "dataset_label": "CSE-CIC-IDS2018 (temporal)",
+  "threshold": 0.5,
+  "ci_level": 0.95,
+  "n_bootstraps_threshold": 1000,
+  "n_bootstraps_auc": 1000,
+  "auc_sample_size": 100000,
+  "seed": 42,
+  "method": {
+    "threshold_metrics": "exact row-bootstrap of the held-out confusion matrix (multinomial cell resampling, full test population)",
+    "roc_auc": "stratified bootstrap of a fixed test sample; point estimate on full test set"
+  },
+  "seeds": {
+    "42": {
+      "path": "/home/rishikesh/Desktop/fyp-xrlids/results/experiments/EXP-P1-CSE2018-TEMPORAL-R10-001/predictions_test.csv",
+      "n_rows": 1631630,
+      "models": {
+        "random_forest": {
+          "n": 1631630,
+          "threshold": 0.5,
+          "confusion": {
+            "tn": 1571379,
+            "fp": 9945,
+            "fn": 49965,
+            "tp": 341
+          },
+          "threshold_metrics": {
+            "accuracy": {
+              "point_estimate": 0.963282,
+              "ci_lower": 0.963,
+              "ci_upper": 0.963578,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "precision": {
+              "point_estimate": 0.033152,
+              "ci_lower": 0.029731,
+              "ci_upper": 0.036651,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "recall": {
+              "point_estimate": 0.006779,
+              "ci_lower": 0.00609,
+              "ci_upper": 0.007494,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            },
+            "f1": {
+              "point_estimate": 0.011256,
+              "ci_lower": 0.010112,
+              "ci_upper": 0.012448,
+              "n_bootstraps": 1000,
+              "ci_level": 0.95
+            }
+          },
+          "roc_auc": {
+            "point_estimate": 0.390458,
+            "ci_lower": 0.390088,
+            "ci_upper": 0.41039,
+            "n_bootstraps": 1000,
+            "ci_level": 0.95,
+            "sample_size": 100000,
+            "sample_positives": 3083,
+            "sample_negatives": 96917,
+            "method": "stratified_bootstrap_sample"
+          }
+        }
+      }
+    }
+  }
+}

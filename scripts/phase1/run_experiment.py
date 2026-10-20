@@ -219,6 +219,10 @@ def run_experiment_pipeline(
         validation=float(split_cfg.get("validation", 0.2)),
         test=float(split_cfg.get("test", 0.2)),
         seed=seed,
+        stratify=bool(split_cfg.get("stratify", True)),
+        group_column=split_cfg.get("group_column"),
+        time_column=split_cfg.get("time_column"),
+        time_fallback_group_column=split_cfg.get("time_fallback_group_column", "source_file"),
         methodology=split_cfg.get("methodology", "stratified_random"),
         rationale=f"Multi-file split with duplicate_policy={dup_policy}",
         duplicate_policy=dup_policy,
@@ -661,6 +665,14 @@ def run_experiment_pipeline(
             "Threshold objective D-003 remains open; reporting uses neutral threshold 0.5.",
             "Feature contract candidate evaluation.",
             f"Duplicate policy applied: {dup_policy}.",
+            f"Split methodology applied: {split_configuration.methodology}.",
+            (
+                "Temporal holdout: test rows are strictly later than validation rows, "
+                "and validation rows are strictly later than training rows; class "
+                "stratification is intentionally not applied."
+                if split_configuration.time_column
+                else "Random split: in-domain metrics are optimistic upper bounds."
+            ),
         ],
         artifacts={
             "population_manifest": str(out_dir / "experiment_population.json"),
@@ -686,6 +698,7 @@ def run_experiment_pipeline(
         error_analysis=error_analysis,
         shap_data=shap_summary,
         transfer_data=transfer_results,
+        split_manifest=split_result.manifest,
     )
     (out_dir / "experiment_card.md").write_text(card_md, encoding="utf-8")
     (out_dir / "experiment_report.md").write_text(card_md, encoding="utf-8")

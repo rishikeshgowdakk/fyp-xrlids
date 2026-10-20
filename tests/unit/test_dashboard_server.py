@@ -68,12 +68,15 @@ def test_get_dashboard_data_structure():
     comparison = data["model_comparison"]
     assert comparison is not None
     assert comparison["seeds"] == [42, 123, 456]
+    assert "ci_source" in comparison
     for model_name in ("random_forest", "lstm", "fusion"):
         assert model_name in comparison["models"]
         for metric in ("accuracy", "f1", "roc_auc"):
             entry = comparison["models"][model_name][metric]
             assert "mean" in entry
             assert "std" in entry
+            assert "ci" in entry
+            assert entry["ci"]["lower"] <= entry["ci"]["upper"]
 
 
 def test_live_session_sample_stream_lifecycle(tmp_path: Path):

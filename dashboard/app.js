@@ -628,9 +628,20 @@ function renderModelComparison(comparison) {
     lstm: "Offline sequence model",
     fusion: "Offline ensemble"
   };
-  const fmt = entry => entry
-    ? Number(entry.mean).toFixed(4) + " ± " + Number(entry.std).toFixed(4)
-    : "—";
+  const fmt = entry => {
+    if (!entry) return "—";
+    const base = Number(entry.mean).toFixed(4) + " ± " + Number(entry.std).toFixed(4);
+    if (entry.ci && entry.ci.lower !== null && entry.ci.upper !== null) {
+      const point = entry.ci.point !== null && entry.ci.point !== undefined
+        ? Number(entry.ci.point).toFixed(4) + " "
+        : "";
+      return base +
+        '<br><span class="muted" style="font-size: 11px;">seed-42 ' + point +
+        "95% CI [" + Number(entry.ci.lower).toFixed(4) + ", " +
+        Number(entry.ci.upper).toFixed(4) + "]</span>";
+    }
+    return base;
+  };
   tbody.innerHTML = "";
   ["random_forest", "lstm", "fusion"].forEach(name => {
     const model = comparison.models[name];

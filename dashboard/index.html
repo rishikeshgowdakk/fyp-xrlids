@@ -557,20 +557,21 @@ alert = HIGH if score &gt;= 0.85 else MEDIUM if score &gt;= 0.65 else LOW</pre>
 
     <!-- Offline Model Comparison -->
     <section>
-      <h2>Offline Model Comparison <span class="muted">(3 seeds, test set)</span></h2>
+      <h2>Offline Model Comparison — CIC-IDS2017 <span class="muted">(3 seeds, test set)</span></h2>
       <p style="font-size: 13px; margin-bottom: 10px;">
-        The Live Monitor serves the per-flow Random Forest. The LSTM (5-flow sequences) and RF+LSTM fusion
-        are evaluated offline; these are their frozen test metrics from
-        <code>multi_seed_metrics.json</code>.
+        The Live Monitor serves the per-flow Random Forest. The CIC-IDS2017 LSTM (5-flow sequences) and RF+LSTM fusion
+        are evaluated offline; the mean ± std values come from <code>multi_seed_metrics.json</code>.
+        The 95% bootstrap CI in each cell is computed from the frozen seed-42 test predictions
+        (<code>bootstrap_cis.json</code>) and quantifies test-set sampling uncertainty, not seed variance.
       </p>
       <div style="overflow-x: auto;">
         <table>
           <thead>
             <tr>
               <th>Model</th>
-              <th>Accuracy (mean ± std)</th>
-              <th>F1</th>
-              <th>ROC-AUC</th>
+              <th>Accuracy (3-seed mean ± std / seed-42 95% CI)</th>
+              <th>F1 (3-seed mean ± std / seed-42 95% CI)</th>
+              <th>ROC-AUC (3-seed mean ± std / seed-42 95% CI)</th>
               <th>Role</th>
             </tr>
           </thead>
@@ -579,6 +580,14 @@ alert = HIGH if score &gt;= 0.85 else MEDIUM if score &gt;= 0.65 else LOW</pre>
           </tbody>
         </table>
       </div>
+      <p style="font-size: 13px; margin-top: 10px; color: #ffb4a2;">
+        <strong>Temporal holdout caveat:</strong> every random-split metric here is an <em>in-domain upper bound</em>.
+        On the CSE-CIC-IDS2018 strict future-period holdout
+        (test 22 Feb–2 Mar 2018, after Policy A deduplication), the frozen RF scored
+        <strong>F1 0.0113</strong> (recall 0.0068, ROC-AUC 0.3905) on 50,306 surviving future attacks.
+        Bot recall fell from 99.17% (random) to 0.09% (temporal). See
+        <code>reports/generated/temporal_split_report.md</code> for the full comparison.
+      </p>
     </section>
 
     <!-- Flow Classification & Response Table -->

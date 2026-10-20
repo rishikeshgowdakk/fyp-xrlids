@@ -4,6 +4,10 @@ Aligned test metrics aggregated across seeds (population std, ddof=0, matching
 `multi_seed_summary.json`) via `scripts/phase1/summarize_multi_seed.py`.
 Per-seed records: `seed_*/experiment_record.json`.
 
+Bootstrap 95% confidence intervals are generated separately by
+`scripts/phase1/bootstrap_confidence_intervals.py` and published in
+`reports/generated/bootstrap_ci_report.md`.
+
 | Dataset | Model | Accuracy (mean ± std) | F1 (mean ± std) | ROC-AUC (mean ± std) | Seeds |
 |:---|:---|:---:|:---:|:---:|:---:|
 | UNSW-NB15 | random_forest | 0.8637 ± 0.0037 | 0.8580 ± 0.0029 | 0.9501 ± 0.0013 | 42, 123, 456 |

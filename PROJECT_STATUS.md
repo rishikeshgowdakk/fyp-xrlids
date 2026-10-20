@@ -1,6 +1,6 @@
 # PROJECT STATUS
 
-Last updated: 2026-10-04
+Last updated: 2026-10-20
 Project: **XRL-IDARS v1** · Repository: `fyp-xrlids`
 
 ```text
@@ -86,15 +86,15 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | --- | --- | --- |
 | Dataset acquisition | ✅ VERIFIED | All 20 physical CSV files acquired and verified against canonical manifest (8 CIC-IDS2017, 10 CSE-CIC-IDS2018, 2 UNSW-NB15) |
 | Dataset audit (real files) | ✅ COMPLETED | All 20 files audited via chunked streaming with per-file JSON artifacts in `results/audits/` |
-| Splits / leakage (real data) | ✅ VALIDATED | Policy A feature-dedup split passes L-01/L-02 cleanly (0 cross-split duplicate vectors) |
+| Splits / leakage (real data) | ✅ VALIDATED | Policy A feature-dedup random split passes L-01/L-02 cleanly (0 cross-split duplicate vectors); strict temporal holdout passes L-01/L-02/L-05 (`EXP-P1-CSE2018-TEMPORAL-R10-001`, `leakage_report.json`) |
 | CIC-IDS2017 Multi-File Baselines | ✅ EMPIRICALLY OBSERVED | Executed across all 8 files (2,830,743 raw rows -> 1,779,322 modeling rows); baseline ladder evaluated (`EXP-P1-CIC2017-R10-001`, RF test acc=0.9815, F1=0.9512) |
 | CSE-CIC-IDS2018 Multi-File Baselines | ✅ EMPIRICALLY OBSERVED | Executed across all 10 files (16,233,002 raw rows -> 8,312,295 modeling rows); baseline ladder evaluated (`EXP-P1-CSE2018-R10-MULTI-001`, RF test acc=0.9723, F1=0.8861, ROC-AUC=0.9902) |
 | UNSW-NB15 Multi-File Baselines | ✅ EMPIRICALLY OBSERVED | Executed across both files (257,673 raw rows -> 122,520 modeling rows); full baseline ladder, Supervised LSTM, and RF+LSTM Fusion evaluated under native 4-feature contract (`EXP-P1-UNSWNB15-R10-MULTI-001`, Fusion test acc=0.8996, F1=0.8970, ROC-AUC=0.9674) |
 | Supervised LSTM (Multi-file) | ✅ EMPIRICALLY OBSERVED (ALL 3 DOMAINS) | Full multi-file training executed on CIC-IDS2017 (F1=0.9633), CSE-CIC-IDS2018 (F1=0.9603), and UNSW-NB15 (F1=0.8637, outperforming RF with $\text{LSTM} - \text{RF} = +0.0089$, $p=0.0000$) |
 | Score Fusion (Multi-file) | ✅ EMPIRICALLY OBSERVED (ALL 3 DOMAINS) | Tuned fusion evaluated on CIC-IDS2017 ($\alpha=0.50$, F1=0.9745), CSE-CIC-IDS2018 ($\alpha=0.00$, F1=0.9603), and UNSW-NB15 ($\alpha=0.60$, F1=0.8970; $\Delta \text{F1}=+0.0421$ over RF, $\Delta \text{F1}=+0.0332$ over LSTM, $p=0.0000$) |
 | Multi-seed evaluation | ✅ COMPLETED | 3-seed sweep (42/123/456) executed across all three benchmarks (2026-10-17); seed 42 reproduces frozen artifacts exactly; mean ± std in `reports/generated/multi_seed_report.md` |
-| Temporal / grouped split validation | 🟡 PENDING (TRACKED) | Row-level split optimism documented (`FINAL_RESEARCH_REPORT` §8 item 9, `GAP-P06`); temporal split feasible for CSE-CIC-IDS2018 (`Timestamp` column present) but not yet executed |
-| Bootstrap confidence intervals | 🟡 PENDING (TRACKED) | 3-seed mean ± std published (`reports/generated/multi_seed_report.md`); bootstrap CIs not yet computed (`GAP-M03` exit criteria) |
+| Temporal / grouped split validation | ✅ COMPLETED (TEMPORAL) | Strict future-day holdout executed (`EXP-P1-CSE2018-TEMPORAL-R10-001`): 5,053,051 train / 1,627,614 validation / 1,631,630 test, train 14–20 Feb and test 22 Feb–2 Mar 2018. RF F1 0.0113 (recall 0.0068, ROC-AUC 0.3905) vs random-split F1 0.8861; bot recall 99.17% → 0.09%, infiltration 10.70% → 0.94%. Temporal test is 3.08% attacks after Policy A dedup (50,306 unique future attacks). L-01/L-02/L-05 pass; `reports/generated/temporal_split_report.md`. Grouped-by-host split not executed (no stable host key) |
+| Bootstrap confidence intervals | ✅ COMPLETED | Per-seed 95% bootstrap CIs computed from the saved held-out test predictions for CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15 (B=1000; `reports/generated/bootstrap_ci_report.md`; per-experiment `bootstrap_cis.json`). CIs quantify test-set sampling uncertainty; training-seed variance remains in `reports/generated/multi_seed_report.md` |
 | Cross-dataset transfer | ✅ EMPIRICALLY OBSERVED | Executed across all 6 directions: Primary R10 (CIC ↔ CSE) and Auxiliary R4 (UNSW ↔ CIC, UNSW ↔ CSE); severe domain degradation demonstrated (ΔF1 -0.52 to -0.95), answering RQ5 |
 | SHAP (real data) | ✅ EMPIRICALLY OBSERVED | TreeSHAP evaluated on CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15 Random Forest models |
 | Calibration (real data) | ✅ EMPIRICALLY OBSERVED | Platt scaling evaluated on CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15 models |
