@@ -8,25 +8,28 @@ This directory must let someone interrogate the project at five levels.
 | 2 — How? | How do RF/LSTM/Fusion/DQN work? | docs 04–08 |
 | 3 — Why? | Why these features/datasets/split/model/Reward? | decisions + feature docs |
 | 4 — Evidence? | How do you know it works? Show the test set and confusion matrix. | experiment cards + results |
-| 5 — Failure? | When does it fail? What if the model is wrong or the API crashes? | `10_LIMITATION_QUESTIONS.md`, `../failures/` |
+| 5 — Failure? | When does it fail? What if the model is wrong or the API crashes? | `FINAL_VIVA_GUIDE.md` §9, `../failures/` |
 
-## Required documents
+## Consolidated Q&A map
 
-Each question gets: **short answer · technical answer · evidence · relevant experiment**.
+The original plan proposed ten separate topic files. They are consolidated into
+`FINAL_VIVA_GUIDE.md` and the linked evidence documents; separate files are not maintained, to
+avoid duplicated or stale answers. Each topic below has a short answer, technical answer, evidence,
+and the relevant experiment.
 
-| Document | Status |
+| Topic | Covered in |
 | --- | --- |
-| `01_PROJECT_OBJECTIVE.md` | ⬜ |
-| `02_DATASET_QUESTIONS.md` | ⬜ |
-| `03_FEATURE_QUESTIONS.md` | ⬜ |
-| `04_RF_QUESTIONS.md` | ⬜ |
-| `05_LSTM_QUESTIONS.md` | ⬜ |
-| `06_FUSION_QUESTIONS.md` | ⬜ |
-| `07_SHAP_QUESTIONS.md` | ⬜ |
-| `08_DQN_QUESTIONS.md` | ⬜ |
-| `09_LIVE_SYSTEM_QUESTIONS.md` | ⬜ |
-| `10_LIMITATION_QUESTIONS.md` | ⬜ |
-| `TRAFFIC_BURST_CASE.md` | 🟡 skeleton |
+| Project objective | `FINAL_VIVA_GUIDE.md` §1 |
+| Datasets | `FINAL_VIVA_GUIDE.md` §2 |
+| Features / R10 contract | `FINAL_VIVA_GUIDE.md` §2; `../HOW_IT_WORKS.md` |
+| Random Forest | `FINAL_VIVA_GUIDE.md` §3 |
+| LSTM | `FINAL_VIVA_GUIDE.md` §3 |
+| Fusion | `FINAL_VIVA_GUIDE.md` §3 |
+| SHAP | `FINAL_VIVA_GUIDE.md` §6 |
+| DQN / autonomous response | `FINAL_VIVA_GUIDE.md` §5 and §8 |
+| Live system | `FINAL_VIVA_GUIDE.md` §7; `DEMO_AND_VIDEO_SCRIPT.md` |
+| Limitations | `FINAL_VIVA_GUIDE.md` §9; `../failures/` |
+| Traffic burst case | `TRAFFIC_BURST_CASE.md` (executed; `../phase3/PHASE3E_BURST_REPORT.md`) |
 
 ## Ground rules for answers
 
