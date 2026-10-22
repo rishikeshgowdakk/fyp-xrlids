@@ -14,6 +14,7 @@ The dashboard has **three different kinds of traffic**, and only one of them is 
 | **Sample stream** (default demo, `--sample`) | Replay of a bundled **synthetic** file: `data/demo/sample_traffic.pcap`, 42 packets, generated in code by `scripts/demo/run_replay_demo.py` | **No.** Nothing is sent or received; the file is read and restamped to "now" | Fictional demo LAN `192.168.1.50` / `192.168.1.10`, fake attacker `10.0.0.99`, and cosmetic public IPs `8.8.8.8`, `142.250.190.46`, `104.16.132.229` |
 | **Attack Simulator** (button in the Live Monitor tab) | In-memory packet scripts from `src/xrlids/demo/attack_sim.py`, pushed straight into the detection pipeline | **No.** Packets are never transmitted — they are injected *inside* the program | RFC 5737 documentation range `203.0.113.x` on purpose, so they can never collide with real hosts |
 | **Live capture** (opt-in: `sudo … --live --iface <name>`) | **REAL packets** from this machine's NIC via an AF_PACKET raw socket | **Read-only.** Captures real traffic; never sends, drops, or modifies anything | Your real network — on this laptop: WiFi `wlo1 = 192.168.0.109/24`, gateway `192.168.0.1` |
+| **Devices Observed on WiFi** (live mode panel) | Passive ARP/DHCP/mDNS/SSDP metadata plus the local neighbour cache, from the same real frames | **Read-only.** No ARP scans, pings, probes, or router login | Real device IP/MAC/vendor/hostname where observable; **not** the access point's full association table |
 
 Two independent proofs that the sample stream is synthetic, not captured:
 
@@ -424,6 +425,32 @@ this laptop plus broadcast/multicast. You will **not** see other devices' unicas
 same WiFi (that would require monitor mode, which this project deliberately does not use). Nothing
 is ever transmitted, dropped, or modified — the socket is read-only.
 
+#### Which devices can the dashboard see?
+
+Live mode also shows a **Devices Observed on WiFi** panel. This is *not* the router's client table.
+The router is the access point and knows every associated station; this laptop is a client and can
+only observe what reaches its NIC:
+
+| Evidence | What it reveals |
+|---|---|
+| Local neighbour cache (`/proc/net/arp`, `ip neigh`) | Devices this laptop recently talked to; seeded at session start |
+| ARP requests/replies | IP ↔ MAC pairs for devices that broadcast ARP |
+| DHCP options 12/60 | Hostname and vendor class from lease traffic |
+| mDNS | `.local` hostnames and A/AAAA records |
+| SSDP | Device activity and `SERVER:` hints |
+| Ethernet/IPv4 headers | MAC/IP pairs for frames to this laptop or broadcast/multicast |
+
+The panel labels `SEEN` (at least one frame observed in this session) versus `CACHED` (from the
+neighbour cache, no frame observed yet). It marks privacy/random MACs and identifies the gateway
+and this laptop. It never sends ARP scans, pings, or other probes, and it stores observations in
+memory only. Idle devices, IPv6-only devices, clients isolated by the AP, and other clients'
+unicast traffic may be missing.
+
+For the authoritative list, use the router's admin page/API, SNMP, or run the collector on the AP.
+The `DeviceTracker` implementation is `src/xrlids/live/devices.py`; the API is
+`GET /api/live/devices` (also included in `/api/live` as `devices`, `network`, and
+`device_counters`).
+
 Terminology note: "live" in the dashboard means *the Python process receives packets as they
 arrive* — the capture is real, but it is passive observation, not interception.
 
@@ -458,7 +485,8 @@ ip -brief addr
 
 | File | Responsibility |
 |---|---|
-| `src/xrlids/live/capture.py` | Packet sources: AF_PACKET live socket, PCAP reader, synthetic stream; permission checks |
+| `src/xrlids/live/capture.py` | Packet sources: AF_PACKET live socket, PCAP reader, synthetic stream; permission checks; optional passive raw-frame observer hook |
+| `src/xrlids/live/devices.py` | Passive WiFi device discovery (ARP/DHCP/mDNS/SSDP/neighbour cache; no probes) |
 | `src/xrlids/demo/pcap.py` | Packet representation (`PacketInfo`) and PCAP parsing; frame builder for tests/demos |
 | `src/xrlids/demo/flow.py` | D-006 bidirectional flow assembly + R10 feature computation |
 | `src/xrlids/demo/live_lab.py` | Per-flow observations, alert creation/bands, alert callbacks (observational only) |
@@ -507,6 +535,13 @@ shows the offline evidence; the live score is not an LSTM output.
 A: The **Detected Attack Sources** panel aggregates alerts by source IP (with targets, alert count,
 max score, and latest time). The **Live Flows** and **Alerts** tables show the full source and
 destination endpoints; simulator sources are marked `SIM` and use `203.0.113.x`.
+
+**Q: Why doesn't the device list show every phone/laptop in my house, like the router login does?**
+A: Because a WiFi client cannot read the access point's association table. The router knows every
+associated station; this laptop only sees traffic addressed to it plus broadcast/multicast (ARP,
+DHCP, mDNS, SSDP). Idle or AP-isolated clients may be missing. The dashboard labels this "observed"
+and does not send scans/probes. For the authoritative list, use the router's admin page/API or run
+the collector on the AP. See §2.8.
 
 **Q: Which traffic is blocked?**
 A: **None.** The console is observational. `BLOCK` / `THROTTLE` / `MONITOR` / `ALLOW` are

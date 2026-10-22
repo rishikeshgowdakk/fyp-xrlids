@@ -69,6 +69,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Dual-Layer Explainability Engine & Audit Cards (Phase 2E) | ✅ | `src/xrlids/response/explainability/`, `results/phase2/EXP-P2E-EXPLAINABILITY-001` (28,167 cards) |
 | Held-Out Final Test Evaluation (EXP-P2-FINAL-TEST-001) | ✅ | Single authoritative evaluation on 355,865 $D_{\text{pol\_test}}$ flows |
 | PacketCaptureService (Phase 3A) | ✅ | `src/xrlids/live/capture.py` (AF_PACKET raw socket / PCAP / synthetic streams) + tests |
+| Passive WiFi Device Discovery | ✅ implemented (live-only) | `src/xrlids/live/devices.py` (ARP/DHCP/mDNS/SSDP + neighbour cache; no probes/scans) + `/api/live/devices` and UI panel |
 | Live Flow Construction under D-006 (Phase 3B) | ✅ | `src/xrlids/live/flow_builder.py` (5-tuple, FIN/RST teardown, 120s idle timeout) + tests |
 | Live Feature Parity Verification Harness (Phase 3C) | ✅ | `src/xrlids/live/parity.py`, `docs/phase3/LIVE_FEATURE_PARITY.md` ($\text{atol} \le 10^{-4}$) + tests |
 | Dry-Run Autonomous Pipeline Runner (Phase 3B/3C) | ✅ | `src/xrlids/live/runner.py` (strict zero network mutation, fail-safe invariants) + tests |

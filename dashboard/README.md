@@ -2,7 +2,7 @@
 
 A zero-dependency, lightweight web console with two views:
 
-1. **Live Monitor** — observational live capture: packets → bidirectional flows (D-006) → frozen R10 features → frozen CIC-IDS2017 Random Forest detector. Streams per-flow records (endpoints, protocol, packet counts, threat scores, alerts), with an alert banner, a **Detected Attack Sources** summary (source IPs, targets, counts, max score), and a per-alert **features** dialog showing the exact 10 model inputs and output.
+1. **Live Monitor** — observational live capture: packets → bidirectional flows (D-006) → frozen R10 features → frozen CIC-IDS2017 Random Forest detector. Streams per-flow records (endpoints, protocol, packet counts, threat scores, alerts), with an alert banner, a **Detected Attack Sources** summary (source IPs, targets, counts, max score), a **Devices Observed on WiFi** panel (live capture only), and a per-alert **features** dialog showing the exact 10 model inputs and output.
 2. **Replay & Evidence** — reproducible PCAP replay verification statistics, an offline model comparison (3-seed RF / LSTM / RF+LSTM fusion), TreeSHAP feature attributions, and the generated research figures gallery.
 
 > **What is real vs. simulated?** See [`docs/HOW_IT_WORKS.md`](../docs/HOW_IT_WORKS.md) for the full
@@ -115,6 +115,32 @@ Or launch the server with `sudo` (no `--live`) and press **Start Capture** in th
 - **Flow completion** follows the canonical D-006 policy: TCP FIN/RST or 120 s idle timeout (pending flows are flushed when the session stops).
 - **Local only:** the server binds to `127.0.0.1`.
 
+### Observed WiFi devices (live mode only)
+
+The Live Monitor includes a **Devices Observed on WiFi** table. It is a *passive observation*
+panel, not the router's association table:
+
+| Source | What it can reveal |
+|---|---|
+| `/proc/net/arp` / `ip neigh` | Devices this laptop has recently exchanged traffic with (seeded at session start) |
+| ARP requests/replies | IP ↔ MAC mappings for devices that broadcast ARP |
+| DHCP | Hostname (option 12) and vendor class (option 60) from lease traffic |
+| mDNS | `.local` hostnames and A/AAAA records |
+| SSDP | Device activity and `SERVER:` hints |
+| Ethernet/IPv4 headers | MAC/IP pairs for frames addressed to this laptop or broadcast/multicast |
+
+A WiFi **client** cannot read the access point's client-association table. Idle devices, IPv6-only
+devices, devices behind AP isolation, and other clients' unicast traffic may be missing. The panel
+deliberately does **not** send ARP scans, pings, or probes, and it stores only in-memory
+observations (no history DB).
+
+For the authoritative list, use the router's admin page/API or run the collector on the AP.
+The panel distinguishes `SEEN` (a frame was observed in this capture) from `CACHED` (from the
+neighbour cache, no frame yet), and marks privacy/random MACs.
+
+The same data is available at `GET /api/live/devices`; `/api/live` also includes `devices`,
+`network`, `device_counters`, and `device_discovery`.
+
 ---
 
 ## File Structure
@@ -137,7 +163,8 @@ dashboard/
 | `GET` | `/app.js` | Serves JavaScript application logic |
 | `GET` | `/api/data` | Replay summary, SHAP importances, and figure listing (evidence view) |
 | `POST` | `/api/run-replay` | Runs `scripts/demo/run_replay_demo.py` and returns the refreshed summary |
-| `GET` | `/api/live` | Live session snapshot: status, counters, recent flows, recent alerts |
+| `GET` | `/api/live` | Live session snapshot: status, counters, recent flows, recent alerts, observed devices, network metadata |
+| `GET` | `/api/live/devices` | Passive device-discovery snapshot (empty outside live capture) |
 | `POST` | `/api/live/start` | Starts a session — JSON body: `{"mode": "sample"\|"live", "interface": "wlo1", "bpf_filter": "tcp port 443", "pcap": null, "pace_speed": 2.0, "loop": true, "max_packets": null}` |
 | `POST` | `/api/live/stop` | Stops the session (flushes pending flows) and returns the final snapshot |
 | `GET` | `/api/live/interfaces` | Available interface names + raw-socket permission status |
@@ -152,6 +179,7 @@ dashboard/
 | Stage | Component | Source |
 |---|---|---|
 | Packet capture (live socket / PCAP / synthetic) | `PacketCaptureService` | `src/xrlids/live/capture.py` (Phase 3A) |
+| Passive WiFi device discovery | `DeviceTracker` | `src/xrlids/live/devices.py` (ARP/DHCP/mDNS/SSDP; no probes) |
 | Flow construction (canonical 5-tuple, D-006) | `FlowBuilder` | `src/xrlids/demo/flow.py` |
 | R10 feature extraction | `flows_to_dataframe` | `src/xrlids/demo/extractor.py` |
 | Detector + thresholds | `ReplayEngine` (frozen CIC RF, $\tau=0.50$) | `src/xrlids/demo/replay.py` |

@@ -108,6 +108,9 @@
 ### Q: What is live feature parity, and why does it matter?
 **A:** Live feature parity verifies that features computed from raw streaming packets match the mathematical definitions in the offline training datasets. If feature calculations drift, trained models receive garbage inputs. We proved that our streaming engine matches offline feature definitions within $\text{atol} \le 10^{-4}$.
 
+### Q: Can the dashboard list every device connected to the WiFi, like the router login?
+**A:** No, and it does not claim to. The router is the access point and knows every associated station; the dashboard runs on a WiFi **client**, so it only receives frames addressed to this laptop plus broadcast/multicast traffic. The **Devices Observed on WiFi** panel therefore combines passive ARP, DHCP, mDNS, SSDP, and the local neighbour cache, labels `SEEN` vs `CACHED`, and states the limitation in the UI. It sends no ARP scans, pings, or probes. Idle, IPv6-only, or AP-isolated clients may be absent; the router's admin page/API or an AP-side collector is authoritative. This endpoint view is the honest scope of what an observational client can see.
+
 ### Q: What is the difference between Dry-Run and Controlled Enforcement?
 **A:** 
 - **Dry-Run Mode (Phases 3A–3F):** Ingests real packets, builds flows, runs detection, evaluates RL, logs audit cards, but executes **zero physical network changes**.

@@ -109,6 +109,11 @@ def test_live_session_sample_stream_lifecycle(tmp_path: Path):
     )
     assert snapshot["recent_flows"][-1]["prediction_label"] == "ATTACK"
     assert snapshot["recent_alerts"][-1]["alert_level"] == "HIGH"
+    # Device discovery is live-only; sample traffic is synthetic and must not
+    # populate the real-network device table.
+    assert snapshot["devices"] == []
+    assert snapshot["network"] is None
+    assert snapshot["device_discovery"]["available"] is False
 
     # Session is reusable after it stops.
     second = session.start(mode="sample", pcap=str(pcap), pace_speed=1000.0, loop=False)
@@ -217,6 +222,18 @@ def test_dashboard_http_live_endpoints():
         assert "status" in snapshot
         assert "counters" in snapshot
         assert "thresholds" in snapshot
+        assert "devices" in snapshot
+        assert isinstance(snapshot["devices"], list)
+        assert "network" in snapshot
+        assert "device_counters" in snapshot
+        assert "device_discovery" in snapshot
+
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/live/devices", timeout=5) as resp:
+            assert resp.status == 200
+            device_data = json.loads(resp.read().decode("utf-8"))
+        assert device_data["scope"] == "passive-observed"
+        assert isinstance(device_data["devices"], list)
+        assert "counters" in device_data
 
         with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/live/interfaces", timeout=5) as resp:
             assert resp.status == 200

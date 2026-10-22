@@ -86,10 +86,12 @@ class PacketCaptureService:
         *,
         pcap_path: str | Path | None = None,
         synthetic_stream: Iterable[PacketInfo] | None = None,
+        raw_packet_callback: Callable[[bytes, float], None] | None = None,
     ) -> None:
         self.config = config or CaptureConfig()
         self.pcap_path = Path(pcap_path) if pcap_path else None
         self.synthetic_stream = synthetic_stream
+        self.raw_packet_callback = raw_packet_callback
         self.stats = CaptureStats()
         self._running = False
         self._stop_event = threading.Event()
@@ -194,6 +196,14 @@ class PacketCaptureService:
                 break
 
             ts = time.time()
+            if self.raw_packet_callback is not None:
+                try:
+                    # Passive observer hook: the callback receives the raw
+                    # frame before parsing and must never send or mutate traffic.
+                    self.raw_packet_callback(raw_data, ts)
+                except Exception:  # pragma: no cover - observer must not kill capture
+                    logger.debug("Raw packet observer failed", exc_info=True)
+
             pkt_info = parse_packet_bytes(raw_data, ts)
             if pkt_info is None:
                 self.stats.malformed_packets += 1

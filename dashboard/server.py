@@ -48,6 +48,7 @@ from xrlids.demo.live_lab import AlertEvent, FlowObservation, LiveLabMonitor  # 
 from xrlids.demo.pcap import PacketInfo, PcapReader  # noqa: E402
 from xrlids.demo.replay import ReplayEngine  # noqa: E402
 from xrlids.live.capture import CaptureConfig, PacketCaptureService  # noqa: E402
+from xrlids.live.devices import DeviceTracker  # noqa: E402
 
 DASHBOARD_DIR = REPO_ROOT / "dashboard"
 FIGURES_DIR = REPO_ROOT / "reports" / "figures"
@@ -210,6 +211,7 @@ class LiveSession:
         self._capture: PacketCaptureService | None = None
         self._packet_queue: "queue.Queue[Any] | None" = None
         self._injection_thread: threading.Thread | None = None
+        self._device_tracker: DeviceTracker | None = None
 
         self.status = "stopped"  # stopped | running | error
         self.mode: str | None = None
@@ -277,6 +279,11 @@ class LiveSession:
                 return {"error": f"Unknown mode {mode!r} (expected 'sample' or 'live')."}
 
             self._reset_locked()
+            if mode == "live" and interface:
+                # Passive device discovery is created only for live capture.
+                # It reads the local neighbour cache/iw link once and then
+                # consumes raw frames through the capture callback.
+                self._device_tracker = DeviceTracker.from_system(interface)
             self.status = "running"
             self.mode = mode
             self.interface = interface if mode == "live" else None
@@ -357,6 +364,23 @@ class LiveSession:
             thread.start()
             return {"status": "injecting", "injection": dict(self.injection)}
 
+    def device_snapshot(self) -> dict[str, Any]:
+        """Return the passive device-discovery view (empty outside live mode)."""
+        with self._lock:
+            tracker = self._device_tracker
+        if tracker is None:
+            return {
+                "scope": "passive-observed",
+                "network": None,
+                "devices": [],
+                "counters": {"total": 0, "seen": 0, "cached": 0},
+                "note": (
+                    "Passive observation only. Device discovery is available in live capture "
+                    "mode; sample/simulator traffic is synthetic. No probes or scans are sent."
+                ),
+            }
+        return tracker.snapshot()
+
     def snapshot(self) -> dict[str, Any]:
         """Return a consistent view of the session for the API/UI."""
         with self._lock:
@@ -365,6 +389,7 @@ class LiveSession:
                 end = self._t_end if self._t_end is not None else time.time()
                 elapsed = max(0.0, end - self._t0)
             pps = (self.packets / elapsed) if elapsed > 0 else 0.0
+            device_data = self.device_snapshot()
             return {
                 "status": self.status,
                 "mode": self.mode,
@@ -390,6 +415,14 @@ class LiveSession:
                 "recent_flows": list(self.flows)[-500:],
                 "recent_alerts": list(self.alerts)[-100:],
                 "injection": dict(self.injection) if self.injection else None,
+                "network": device_data.get("network"),
+                "devices": device_data.get("devices", []),
+                "device_counters": device_data.get("counters", {}),
+                "device_discovery": {
+                    "available": self.mode == "live",
+                    "scope": device_data.get("scope", "passive-observed"),
+                    "note": device_data.get("note", ""),
+                },
             }
 
     # ------------------------------------------------------------- internals
@@ -404,6 +437,7 @@ class LiveSession:
         self.flows.clear()
         self.alerts.clear()
         self.injection = None
+        self._device_tracker = None
 
     def _run(
         self,
@@ -425,8 +459,11 @@ class LiveSession:
                 on_flow_callback=self._on_flow,
             )
             if mode == "live":
+                with self._lock:
+                    tracker = self._device_tracker
                 capture = PacketCaptureService(
-                    CaptureConfig(interface=interface, bpf_filter=bpf_filter, max_packets=max_packets)
+                    CaptureConfig(interface=interface, bpf_filter=bpf_filter, max_packets=max_packets),
+                    raw_packet_callback=tracker.observe_frame if tracker is not None else None,
                 )
             else:
                 pcap_path = _ensure_sample_pcap(Path(pcap) if pcap else SAMPLE_PCAP)
@@ -603,6 +640,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self.send_json(get_dashboard_data())
         elif path == "/api/live":
             self.send_json(LIVE_SESSION.snapshot())
+        elif path == "/api/live/devices":
+            self.send_json(LIVE_SESSION.device_snapshot())
         elif path == "/api/live/interfaces":
             self.send_json(
                 {

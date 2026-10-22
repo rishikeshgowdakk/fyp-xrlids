@@ -419,6 +419,53 @@
     </section>
 
     <section>
+      <h2>Devices Observed on WiFi <span class="muted">(passive — not the router's client table)</span></h2>
+      <div class="control-row">
+        <span id="device-network" class="lv-status">Live capture not active</span>
+        <span id="device-count" class="badge">0 observed</span>
+      </div>
+      <div id="device-note" class="notice">
+        This panel lists devices this laptop has actually seen on <strong>wlo1</strong>: ARP, DHCP,
+        mDNS, SSDP, and the local IPv4 neighbour cache. A WiFi client cannot read the access point's
+        association table, so idle clients, IPv6-only clients, or clients isolated by the AP may be
+        missing. No probes or scans are sent. For the authoritative list, use the router's admin
+        page/API or run the collector on the AP.
+      </div>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Device</th>
+              <th>IP</th>
+              <th>MAC</th>
+              <th>Vendor</th>
+              <th>Evidence</th>
+              <th>Pkts</th>
+              <th>Last seen</th>
+            </tr>
+          </thead>
+          <tbody id="devices-body">
+            <tr><td colspan="7" style="text-align: center;">Start live capture to discover devices on the WiFi.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="device-router-link" style="margin-top: 8px; display: none;">
+        <a id="router-admin-link" href="#" target="_blank" rel="noopener noreferrer">Open the router admin page (authoritative client list)</a>
+        <span class="muted">— requires the router's own login; this dashboard never stores it.</span>
+      </div>
+      <details class="score-explainer">
+        <summary>Why doesn't this match my router's device list?</summary>
+        <p style="margin-top: 8px;">
+          The router is the access point and knows every station associated with it. This dashboard
+          is a WiFi client, so it sees only frames addressed to this laptop plus broadcast/multicast
+          traffic. Idle clients, IPv6-only clients, or clients isolated by the AP may be missing.
+          For the authoritative list, use the router's admin page/API or run the collector on the AP.
+        </p>
+        <p><strong>No active discovery:</strong> the panel does not send ARP scans, pings, or probes.</p>
+      </details>
+    </section>
+
+    <section>
       <h2>Detected Attack Sources <span class="muted">(observational — nothing is blocked)</span></h2>
       <div class="notice" style="margin-top: 0; margin-bottom: 8px;">
         Aggregated from the Alerts table below. <strong>No traffic is blocked, dropped, or modified.</strong>

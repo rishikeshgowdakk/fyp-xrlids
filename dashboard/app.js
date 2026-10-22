@@ -30,6 +30,15 @@ let alertDetailsCache = new Map();
 let bannerScore = 0;
 let bannerHoldUntil = 0;
 
+function escapeHtml(value) {
+  return String(value === null || value === undefined ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 // ---------------------------------------------------------------- tabs
 function showTab(name) {
   document.getElementById("tab-live").style.display = name === "live" ? "block" : "none";
@@ -174,6 +183,16 @@ function renderLive(snap) {
   document.getElementById("live-dot").className = "dot" + (running ? " live" : "");
   document.getElementById("live-start-btn").disabled = running;
   document.getElementById("live-stop-btn").disabled = !running;
+  if (running && snap.mode) {
+    // Keep the controls consistent when the server was started from the CLI
+    // (e.g. `--live`), rather than from the UI.
+    const modeSelect = document.getElementById("live-mode");
+    if (modeSelect && modeSelect.value !== snap.mode) modeSelect.value = snap.mode;
+    const ifaceInput = document.getElementById("live-iface");
+    if (ifaceInput && snap.mode === "live" && snap.interface && !ifaceInput.value) {
+      ifaceInput.value = snap.interface;
+    }
+  }
 
   document.getElementById("lv-packets").textContent = (snap.counters.packets || 0).toLocaleString();
   document.getElementById("lv-flows").textContent = (snap.counters.flows || 0).toLocaleString();
@@ -221,7 +240,128 @@ function renderLive(snap) {
 
   appendLiveFlows(snap.recent_flows || []);
   appendLiveAlerts(snap.recent_alerts || [], { suppressBanner: isNewSession });
+  renderDevices(snap);
   renderAttackSources(snap.recent_alerts || []);
+}
+
+function formatAge(seconds) {
+  const value = Number(seconds);
+  if (!Number.isFinite(value) || value < 0) return "—";
+  if (value < 5) return "just now";
+  if (value < 60) return Math.round(value) + "s ago";
+  if (value < 3600) return Math.floor(value / 60) + "m ago";
+  return Math.floor(value / 3600) + "h ago";
+}
+
+function renderDevices(snap) {
+  const tbody = document.getElementById("devices-body");
+  const networkEl = document.getElementById("device-network");
+  const countEl = document.getElementById("device-count");
+  const noteEl = document.getElementById("device-note");
+  const routerLink = document.getElementById("device-router-link");
+  const routerAnchor = document.getElementById("router-admin-link");
+  if (!tbody || !networkEl || !countEl) return;
+
+  if (snap.mode !== "live") {
+    if (routerLink) routerLink.style.display = "none";
+    if (routerAnchor) routerAnchor.removeAttribute("href");
+    networkEl.textContent = snap.mode
+      ? "Live capture not active — sample/simulator mode"
+      : "Live capture not started";
+    countEl.textContent = "0 observed";
+    countEl.className = "badge";
+    if (noteEl) {
+      noteEl.className = "notice";
+      noteEl.textContent = "Device discovery is available only in live capture mode. " +
+        "Sample and simulator traffic is synthetic and is not used for device discovery.";
+    }
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">' +
+      'Start live capture (sudo … dashboard/server.py --live --iface wlo1) to discover devices on the WiFi.' +
+      '</td></tr>';
+    return;
+  }
+
+  const network = snap.network || {};
+  const networkParts = [];
+  if (network.ssid) networkParts.push("SSID " + network.ssid);
+  if (network.bssid) {
+    networkParts.push("AP " + network.bssid + (network.ap_vendor ? " (" + network.ap_vendor + ")" : ""));
+  }
+  if (network.gateway_ip) {
+    networkParts.push("gateway " + network.gateway_ip +
+      (network.gateway_vendor ? " (" + network.gateway_vendor + ")" : ""));
+  }
+  if (network.local_ip) networkParts.push("this PC " + network.local_ip);
+  if (network.signal_dbm !== null && network.signal_dbm !== undefined) {
+    networkParts.push(network.signal_dbm + " dBm");
+  }
+  networkEl.textContent = networkParts.join(" · ") || ("live capture on " + (snap.interface || "interface"));
+
+  if (routerLink && routerAnchor) {
+    const gateway = String(network.gateway_ip || "");
+    if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(gateway)) {
+      routerAnchor.href = "http://" + gateway;
+      routerLink.style.display = "";
+    } else {
+      routerLink.style.display = "none";
+      routerAnchor.removeAttribute("href");
+    }
+  }
+
+  const devices = snap.devices || [];
+  const counters = snap.device_counters || {};
+  const seen = counters.seen || 0;
+  const cached = counters.cached || 0;
+  countEl.textContent = devices.length + " observed · " + seen + " seen live · " + cached + " cached";
+  countEl.className = "badge" + (devices.length ? " badge-invert" : "");
+
+  if (noteEl) {
+    noteEl.className = "notice";
+    noteEl.textContent = snap.status === "running"
+      ? "Passive observation only. A WiFi client cannot read the access point's association table; " +
+        "idle clients or clients isolated by the AP may be missing. No probes or scans are sent."
+      : "Session stopped — this is the last observed list, not a live association table.";
+  }
+
+  if (devices.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">' +
+      'No devices observed yet. Waiting for ARP/DHCP/mDNS/SSDP traffic… (passive; no probes sent)' +
+      '</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = "";
+  devices.forEach(device => {
+    const badges = [];
+    if (device.is_local) {
+      badges.push('<span class="badge badge-invert" title="This laptop">THIS PC</span>');
+    }
+    if (device.is_gateway) {
+      badges.push('<span class="badge badge-invert" title="Default gateway / router">GATEWAY</span>');
+    }
+    if (device.is_random_mac) {
+      badges.push('<span class="badge" title="Locally administered / privacy MAC">PRIVATE MAC</span>');
+    }
+    badges.push(device.live_seen
+      ? '<span class="badge badge-invert" title="At least one frame was observed during this capture">SEEN</span>'
+      : '<span class="badge" title="From the local neighbor cache; no frame observed yet">CACHED</span>');
+    const label = device.hostname || device.label || "Unknown device";
+    const vendorHint = device.vendor_class
+      ? ' title="DHCP/SSDP hint: ' + escapeHtml(device.vendor_class) + '"'
+      : "";
+    const lastSeenTitle = device.last_seen ? new Date(device.last_seen).toLocaleString() : "";
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><strong>${escapeHtml(label)}</strong><br>${badges.join(" ")}</td>
+      <td class="mono">${escapeHtml(device.ip || "—")}</td>
+      <td class="mono">${escapeHtml(device.mac || "—")}</td>
+      <td${vendorHint}>${escapeHtml(device.vendor || "Unknown")}</td>
+      <td>${escapeHtml((device.evidence || []).join(" · ") || "—")}</td>
+      <td class="mono">${Number(device.packets || 0).toLocaleString()}</td>
+      <td class="mono" title="${escapeHtml(lastSeenTitle)}">${escapeHtml(device.live_seen ? formatAge(device.age_s) : "cached")}</td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
 
 function renderInjectionStatus(snap, running) {

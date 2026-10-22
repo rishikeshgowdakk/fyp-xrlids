@@ -14,6 +14,7 @@ script: what to run, what to click, what to say, and what to do when something b
 |---|---|
 | Frontend starts (no build step — static HTML/JS served by Python) | ✅ `dashboard/server.py 8000 --sample` → running |
 | Live Monitor tab renders + polls (`/api/live`) | ✅ counters, flows, alerts updating every 1 s |
+| Passive WiFi device panel (`/api/live/devices`) | ✅ implemented; live path needs sudo; parser verified with crafted ARP/DHCP/mDNS/SSDP frames |
 | Attack Simulator end-to-end (HTTP + UI) | ✅ `slow_http_dos` → 2-packet flow, 3250.6 ms, score **0.9910**, **HIGH** alert |
 | Scenario catalogue (`/api/live/scenarios`) | ✅ 7 scenarios with calibrated expectations |
 | Replay & Evidence tab (`/api/data`) | ✅ 42 packets / 6 flows; 7 figures; TreeSHAP table |
@@ -75,6 +76,9 @@ sudo .venv/bin/python dashboard/server.py --live --iface wlo1
 # check your interface name with: ip -brief addr
 ```
 
+In live mode, the **Devices Observed on WiFi** panel populates from passive ARP/DHCP/mDNS/SSDP
+traffic and the local neighbour cache. It is *not* the router's association table; see Q17 below.
+
 > If the examiner asks for real traffic and you cannot sudo: stay in sample mode and say so
 > explicitly. Never present sample data as live.
 
@@ -122,7 +126,8 @@ Run 3.2, then add:
 
 - **Live capture explanation (90 s)**: what live mode is (`AF_PACKET`, root), what it can see in
   managed WiFi mode (this laptop's traffic + broadcast/multicast, not other clients' unicast),
-  and why live flows look nothing like the demo IPs.
+  why live flows look nothing like the demo IPs, and what the **Devices Observed on WiFi** panel
+  adds (passive ARP/DHCP/mDNS/SSDP + neighbour cache; not the router's association table).
 - **RL/response recap (90 s)**: 6-D state, Dueling DQN, safety gate, transactional rollback;
   H0 rejected (p<0.001) but the 15% practical criterion was **not** met (11.29%/14.10% cost
   reduction) — report it as pre-registered and honest.
@@ -249,6 +254,15 @@ infiltration from 10.70% to 0.94%; web/XSS/SQL to 0%. The test is 3.08% attacks 
 dedup (50,306 unique future attacks), so this is a hard, conflict-free future set. This is a
 negative result, and we report it: the 99% headline is an in-domain upper bound, not a
 future-day readiness claim. Full comparison: `reports/generated/temporal_split_report.md`.
+
+**Q20. Does the dashboard show every device connected to the WiFi, like the router login?**
+No — and it says so. The router is the access point and knows every associated station. The
+dashboard runs on a WiFi client, so it can only observe traffic addressed to this laptop plus
+broadcast/multicast: ARP, DHCP, mDNS, SSDP, and the local neighbour cache. The **Devices Observed
+on WiFi** panel labels `SEEN` vs `CACHED` and never claims to be the router's association table.
+Idle, IPv6-only, or AP-isolated clients may be missing. It deliberately sends no ARP scans, pings,
+or probes.
+For an authoritative list, use the router's admin page/API or run the collector on the AP.
 
 ---
 
