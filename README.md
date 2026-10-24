@@ -111,54 +111,113 @@ The future test contains 50,306 attacks (3.08%) after Policy A removed conflicti
 
 ---
 
-## Run
+## How to Run
 
-### 1. Environment Setup
+### Prerequisites
+
+- **OS:** Linux (tested on Ubuntu; any distro with Python 3.10+ should work)
+- **Python:** 3.10 or later (developed and tested on 3.14.4)
+- **Hardware:** CPU-only; no GPU required
+- **Disk:** ~1 GB for the repository, models, and virtual environment
+- **Root / sudo:** Only needed for live WiFi capture (`CAP_NET_RAW`); all other modes run as a normal user
+
+### 1. Clone & Setup
 
 ```bash
+git clone https://github.com/<your-username>/fyp-xrlids.git
+cd fyp-xrlids
+
+# Create and activate the virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
+
+# Install all dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Run Test Suite
+### 2. Verify Installation (Test Suite)
 
-Execute the full 408-test verification suite:
+Run the full 408-test verification suite to confirm everything is working:
 
 ```bash
 .venv/bin/pytest -q
 ```
 
-### 3. Run Replay Demonstration
+All 408 tests should pass with 0 failures.
 
-Execute the packet-to-prediction PCAP replay demo:
+### 3. Quick Demo — PCAP Replay
+
+The fastest way to see the system in action. Replays captured network packets through the full detection pipeline (packet → flows → RF/LSTM features → frozen model → predictions):
 
 ```bash
 python scripts/demo/run_replay_demo.py
 ```
 
-### 4. Run Monitoring Dashboard (Live Monitor + Replay & Evidence)
+This runs entirely offline using the bundled sample PCAP and trained model — no network access or root needed.
 
-Launch the zero-dependency web dashboard. It has two tabs: a **Live Monitor** (observational packet capture → flows → frozen detector, with IP endpoints, a **Detected Attack Sources** summary, threat scores, per-alert feature/score provenance, and a calibrated **Attack Simulator** panel) and a **Replay & Evidence** tab (replay verification statistics, offline RF/LSTM/fusion comparison, TreeSHAP attributions, research figures):
+### 4. Dashboard — Full Web Interface
+
+The dashboard is a zero-dependency web UI with two tabs:
+
+| Tab | What it does |
+|-----|--------------|
+| **Live Monitor** | Real-time packet capture → flow construction → frozen detector scoring, with IP endpoints, attack source summary, threat scores, per-alert feature/score provenance, and an attack simulator |
+| **Replay & Evidence** | Replay verification stats, offline RF/LSTM/fusion comparison, TreeSHAP attributions, research figures |
+
+#### Option A: Sample Stream (no root needed — recommended for demos)
 
 ```bash
 python dashboard/server.py
-# Or: python scripts/demo/run_dashboard.py
 ```
 
-Open `http://localhost:8000` in your web browser.
+Open **http://localhost:8000** in your browser. Click **"Start Sample Stream"** in the Live Monitor tab — it replays `data/demo/sample_traffic.pcap` in real time through the full live pipeline (clearly labeled as sample traffic).
 
-- **Live interface capture** (real packets from your network) requires root / `CAP_NET_RAW`:
-  ```bash
-  sudo .venv/bin/python dashboard/server.py --live --iface <interface>
-  # or start it from the UI after launching the server with sudo
-  ```
-- **No root available?** Use the *Sample stream* mode in the UI: it replays `data/demo/sample_traffic.pcap` in real time through the exact same live pipeline (clearly labeled as sample traffic).
-- Live monitoring is **strictly observational** (zero firewall/routing mutations) and shows **no accuracy numbers** (live traffic has no ground truth) — only flows, alerts, and model scores.
-- In live mode, the **Devices Observed on WiFi** panel lists devices actually seen through passive ARP/DHCP/mDNS/SSDP and the local neighbour cache. It is **not** the router's association table; a WiFi client cannot read that without router access. No probes/scans are sent.
-- **Attack Simulator (simulation only):** the Live Monitor includes a calibrated attack-scenario injector — packets are synthesised **in memory** and pushed through the exact monitoring pipeline (nothing is transmitted). Scenario scores are pre-verified against the frozen detector by `scripts/demo/verify_attack_scenarios.py`; `scripts/demo/explain_score.py` prints a scenario's exact R10 features and the frozen model's `predict_proba` output (with a benign control), and the UI's **features** dialog shows the same values per alert. "Evasion demo" scenarios are documented non-detections, shown deliberately. See [`dashboard/README.md`](dashboard/README.md#attack-simulator-simulation-only).
+#### Option B: Live WiFi Capture (requires sudo)
 
-> **Note:** The replay demonstration runs immediately out of the box in user space using `data/demo/sample_traffic.pcap` and the trained model artifact in `results/experiments/EXP-P1-CIC2017-R10-001/random_forest.joblib`. Retraining on full raw benchmark datasets (~8.7 GB across 20 CSV files) requires downloading raw data into `data/raw/` as detailed in [`docs/DATASETS.md`](docs/DATASETS.md). Live namespace enforcement requires an isolated Linux testbed with root privileges.
+Captures real packets from your WiFi interface:
+
+```bash
+sudo .venv/bin/python dashboard/server.py 8000 --live --iface wlo1
+```
+
+Replace `wlo1` with your wireless interface name (find it with `ip link show`).
+
+Open **http://localhost:8000** — the Live Monitor will show:
+- Real flows and alerts from your network traffic
+- The **Devices Observed on WiFi** panel listing devices seen via passive ARP/DHCP/mDNS/SSDP
+- Network info (SSID, signal strength, gateway)
+
+> **Note:** Live monitoring is **strictly observational** — zero firewall/routing mutations. It shows flows, alerts, and model scores only (no accuracy numbers, since live traffic has no ground truth). The device panel is passive: it shows devices this laptop has actually observed on the network, **not** the router's full client table. No probes or scans are sent.
+
+#### Option C: Attack Simulator (in-memory, nothing transmitted)
+
+Available in the Live Monitor tab during any capture mode. Injects synthetic attack-scenario packets **in memory** through the exact same pipeline — nothing is transmitted on the network.
+
+- Scenario scores are pre-verified against the frozen detector by [`scripts/demo/verify_attack_scenarios.py`](scripts/demo/verify_attack_scenarios.py)
+- [`scripts/demo/explain_score.py`](scripts/demo/explain_score.py) prints a scenario's exact R10 features and the frozen model's `predict_proba` output
+- "Evasion demo" scenarios are documented non-detections, shown deliberately
+- See [`dashboard/README.md`](dashboard/README.md#attack-simulator-simulation-only) for full details
+
+### 5. Retraining (Optional — Large Data Required)
+
+The demo and dashboard work out of the box using the pre-trained model artifact at `results/experiments/EXP-P1-CIC2017-R10-001/random_forest.joblib`.
+
+To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
+
+1. Download raw data into `data/raw/` as detailed in [`docs/DATASETS.md`](docs/DATASETS.md)
+2. Run the Phase 1 training scripts in `scripts/phase1/`
+3. See [`docs/final/REPRODUCIBILITY_MAP.md`](docs/final/REPRODUCIBILITY_MAP.md) for exact reproduction commands
+
+### Quick Reference
+
+| What you want to do | Command | Root needed? |
+|---------------------|---------|:---:|
+| Run tests | `.venv/bin/pytest -q` | No |
+| Quick replay demo | `python scripts/demo/run_replay_demo.py` | No |
+| Dashboard (sample mode) | `python dashboard/server.py` | No |
+| Dashboard (live capture) | `sudo .venv/bin/python dashboard/server.py 8000 --live --iface wlo1` | Yes |
+| Verify attack scenarios | `python scripts/demo/verify_attack_scenarios.py` | No |
+| Explain a score | `python scripts/demo/explain_score.py` | No |
 
 ---
 
