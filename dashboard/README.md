@@ -21,10 +21,11 @@ python dashboard/server.py 8080       # custom port
 
 Open `http://127.0.0.1:8000/` in your browser.
 
-- **Live Monitor tab** → *Sample stream (no root)* → **Start Capture**: replays `data/demo/sample_traffic.pcap` at its original pacing (2× speed by default) through the exact live pipeline. This is sample traffic, clearly labeled as such — not your live network.
+- **Live Monitor tab** → *Benchmark Dataset Replay (CIC-IDS2017)* → **Start Capture**: streams real evaluation flows directly from the official CIC-IDS2017 benchmark dataset (DDoS, DoS Hulk, PortScan, and Benign) with verified ground truth and live Random Forest scoring. Perfect for exhibitions, project vivas, and professor evaluations (no root needed).
+- **Live Monitor tab** → *Sample PCAP stream (no root)* → **Start Capture**: replays `data/demo/sample_traffic.pcap` at its original pacing through the complete live packet pipeline.
 - **Attack Simulator panel** (inside the Live Monitor tab): injects calibrated synthetic attack scenarios on demand — see below.
 - **Detected Attack Sources**: aggregates alerts by source IP. Nothing is blocked; the policy suggestion is display-only.
-- **Alerts → features**: opens the exact R10 feature vector and the frozen model's output for that flow.
+- **Alerts → features**: opens the exact R10 feature vector, ground truth label, and the frozen model's output for that flow.
 - **Replay & Evidence tab**: static replay verification, TreeSHAP table, and research figures (including a *Run Replay Analysis* button that re-runs `scripts/demo/run_replay_demo.py`).
 
 > **Live detector vs. deep model:** the Live Monitor serves the frozen per-flow **Random Forest**.

@@ -78,11 +78,43 @@ async function loadLiveInterfaces() {
     if (data.permissions && !data.permissions.raw_socket) {
       const status = document.getElementById("live-status");
       if (!status.textContent.startsWith("running")) {
-        status.textContent = "stopped · raw sockets denied (sudo needed for live capture; sample stream available)";
+        status.textContent = "stopped · raw sockets denied (sudo needed for live capture; sample/dataset stream available)";
       }
     }
   } catch (err) {
     /* transient; keep the page usable */
+  }
+}
+
+function onLiveModeChange() {
+  const mode = document.getElementById("live-mode").value;
+  const dsCat = document.getElementById("dataset-category");
+  const iface = document.getElementById("live-iface");
+  const bpf = document.getElementById("live-bpf");
+  const notice = document.getElementById("live-notice");
+
+  if (dsCat) dsCat.style.display = mode === "dataset" ? "inline-block" : "none";
+  if (iface) iface.style.display = mode === "live" ? "inline-block" : "none";
+  if (bpf) bpf.style.display = mode === "live" ? "inline-block" : "none";
+
+  if (notice) {
+    if (mode === "dataset") {
+      notice.className = "notice";
+      notice.innerHTML =
+        "<strong>Benchmark Dataset Replay:</strong> Streams authentic flows from the CIC-IDS2017 dataset " +
+        "with ground-truth labels and real-time Random Forest threat scoring (&tau; = 0.50). " +
+        "Recommended for academic viva, demonstrations, and exhibitions without root access or network risk.";
+    } else if (mode === "sample") {
+      notice.className = "notice";
+      notice.innerHTML =
+        "<strong>Sample PCAP stream (no root):</strong> Replays recorded multi-flow capture " +
+        "<code>data/demo/sample_traffic.pcap</code> at original pacing through the complete live packet pipeline.";
+    } else {
+      notice.className = "notice";
+      notice.innerHTML =
+        "<strong>Live Interface Capture (requires root):</strong> Captures real packets from your physical network interface via AF_PACKET raw socket. " +
+        "Strictly observational: never injects, drops, or modifies traffic.";
+    }
   }
 }
 
@@ -405,6 +437,7 @@ function appendLiveFlows(flows) {
     const isSim = srcText.startsWith("203.0.113.") || dstText.startsWith("203.0.113.");
     const tr = document.createElement("tr");
     const time = flow.timestamp ? new Date(flow.timestamp).toLocaleTimeString() : "-";
+    const gt = flow.ground_truth && flow.ground_truth !== "UNKNOWN" ? flow.ground_truth : "-";
     tr.innerHTML = `
       <td class="mono">${flow.flow_id}</td>
       <td class="mono">${time}</td>
@@ -414,6 +447,7 @@ function appendLiveFlows(flows) {
       <td class="mono">${flow.packet_count}</td>
       <td class="mono">${Number(flow.duration_ms).toFixed(1)}</td>
       <td class="mono"><strong>${Number(flow.attack_score).toFixed(4)}</strong></td>
+      <td class="mono"><strong>${escapeHtml(gt)}</strong></td>
       <td><span class="badge ${isAttack ? "badge-invert" : ""}">${flow.prediction_label}</span></td>
       <td><span class="badge ${actionInfo.badgeClass}" title="Display-only policy recommendation; no traffic is blocked.">${actionInfo.action} (suggested)</span></td>
     `;
@@ -503,12 +537,14 @@ function showAlertDetails(key) {
   const score = Number(alert.confidence);
   const isSim = String(alert.src_endpoint).startsWith("203.0.113.") ||
     String(alert.dst_endpoint).startsWith("203.0.113.");
+  const gt = alert.ground_truth && alert.ground_truth !== "UNKNOWN" ? alert.ground_truth : null;
   const label = score >= 0.50 ? "ATTACK" : "BENIGN";
   document.getElementById("score-dialog-title").textContent = "Score provenance — flow " + alert.flow_id;
   document.getElementById("score-dialog-body").innerHTML = `
     <p><strong>${alert.src_endpoint} → ${alert.dst_endpoint}</strong> · ${alert.protocol} ·
       ${alert.packet_count} packets · ${Number(alert.duration_ms).toFixed(1)} ms
-      ${isSim ? '<span class="badge">SIM</span>' : ""}</p>
+      ${isSim ? '<span class="badge">SIM</span>' : ""}
+      ${gt ? ` · Ground truth: <span class="badge badge-invert">${escapeHtml(gt)}</span>` : ""}</p>
     <p>These are the R10 feature values the detector received (rounded to 4 decimals in this payload):</p>
     <table>
       <thead><tr><th>R10 feature</th><th>Value</th></tr></thead>
@@ -593,6 +629,8 @@ function renderAttackSources(alerts) {
 
 async function startLive() {
   const mode = document.getElementById("live-mode").value;
+  const dsCat = document.getElementById("dataset-category");
+  const datasetCategory = dsCat ? dsCat.value : null;
   const interfaceName = document.getElementById("live-iface").value.trim();
   const bpf = document.getElementById("live-bpf").value.trim();
   const btn = document.getElementById("live-start-btn");
@@ -604,7 +642,12 @@ async function startLive() {
     const res = await fetch("/api/live/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mode: mode, interface: interfaceName || null, bpf_filter: bpf || null })
+      body: JSON.stringify({
+        mode: mode,
+        dataset_category: datasetCategory,
+        interface: interfaceName || null,
+        bpf_filter: bpf || null
+      })
     });
     const data = await res.json();
     if (data.error) {
@@ -844,6 +887,7 @@ async function runAnalysis() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  onLiveModeChange();
   loadDashboard();
   loadLiveInterfaces();
   loadScenarios();

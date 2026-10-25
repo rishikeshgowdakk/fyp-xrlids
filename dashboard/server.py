@@ -44,6 +44,11 @@ if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from xrlids.demo.attack_sim import build_scenario_packets, get_scenario, list_scenarios  # noqa: E402
+from xrlids.demo.dataset_stream import (  # noqa: E402
+    CATEGORIES as DATASET_CATEGORIES,
+    load_dataset_samples,
+)
+from xrlids.demo.flow import FlowBuilder  # noqa: E402
 from xrlids.demo.live_lab import AlertEvent, FlowObservation, LiveLabMonitor  # noqa: E402
 from xrlids.demo.pcap import PacketInfo, PcapReader  # noqa: E402
 from xrlids.demo.replay import ReplayEngine  # noqa: E402
@@ -215,6 +220,7 @@ class LiveSession:
 
         self.status = "stopped"  # stopped | running | error
         self.mode: str | None = None
+        self.dataset_category: str | None = None
         self.interface: str | None = None
         self.bpf_filter: str | None = None
         self.pcap: str | None = None
@@ -253,7 +259,8 @@ class LiveSession:
     # ------------------------------------------------------------- control
     def start(
         self,
-        mode: str = "sample",
+        mode: str = "dataset",
+        dataset_category: str | None = "mixed",
         interface: str | None = None,
         bpf_filter: str | None = None,
         pcap: str | None = None,
@@ -275,8 +282,8 @@ class LiveSession:
                             "`sudo .venv/bin/python dashboard/server.py` — or use the Sample stream mode (no root)."
                         )
                     }
-            elif mode != "sample":
-                return {"error": f"Unknown mode {mode!r} (expected 'sample' or 'live')."}
+            elif mode not in ("sample", "dataset"):
+                return {"error": f"Unknown mode {mode!r} (expected 'dataset', 'sample', or 'live')."}
 
             self._reset_locked()
             if mode == "live" and interface:
@@ -286,6 +293,7 @@ class LiveSession:
                 self._device_tracker = DeviceTracker.from_system(interface)
             self.status = "running"
             self.mode = mode
+            self.dataset_category = dataset_category if mode == "dataset" else None
             self.interface = interface if mode == "live" else None
             self.bpf_filter = bpf_filter or None
             self.pcap = str(pcap) if pcap else (str(SAMPLE_PCAP) if mode == "sample" else None)
@@ -298,7 +306,7 @@ class LiveSession:
             self._packet_queue = packet_queue
             self._thread = threading.Thread(
                 target=self._run,
-                args=(mode, interface, bpf_filter, pcap, pace_speed, loop, max_packets, packet_queue),
+                args=(mode, interface, bpf_filter, pcap, pace_speed, loop, max_packets, dataset_category, packet_queue),
                 name="xrlids-live-session",
                 daemon=True,
             )
@@ -393,6 +401,8 @@ class LiveSession:
             return {
                 "status": self.status,
                 "mode": self.mode,
+                "dataset_category": self.dataset_category,
+                "dataset_categories": DATASET_CATEGORIES,
                 "interface": self.interface,
                 "bpf_filter": self.bpf_filter,
                 "pcap": self.pcap,
@@ -428,6 +438,7 @@ class LiveSession:
     # ------------------------------------------------------------- internals
     def _reset_locked(self) -> None:
         self.error = None
+        self.dataset_category = None
         self.packets = 0
         self.total_bytes = 0
         self.flow_count = 0
@@ -448,10 +459,21 @@ class LiveSession:
         pace_speed: float,
         loop: bool,
         max_packets: int | None,
+        dataset_category: str | None,
         packet_queue: "queue.Queue[Any]",
     ) -> None:
         try:
             engine = self._get_engine()
+            if mode == "dataset":
+                self._run_dataset_stream(
+                    engine=engine,
+                    dataset_category=dataset_category or "mixed",
+                    pace_speed=pace_speed,
+                    loop=loop,
+                    packet_queue=packet_queue,
+                )
+                return
+
             monitor = LiveLabMonitor(
                 engine=engine,
                 alert_threshold=RESEARCH_THRESHOLD,
@@ -497,6 +519,141 @@ class LiveSession:
             producer = threading.Thread(target=_produce, name="xrlids-capture-producer", daemon=True)
             producer.start()
             monitor.process_packet_stream(self._count_packets(self._merge_packets(packet_queue)))
+        except Exception as exc:
+            with self._lock:
+                if not self._stop_event.is_set():
+                    self.error = str(exc)
+                    self.status = "error"
+        finally:
+            with self._lock:
+                self._t_end = time.time()
+                self._packet_queue = None
+                if self.status == "running":
+                    self.status = "error" if self.error else "stopped"
+
+    def _run_dataset_stream(
+        self,
+        engine: ReplayEngine,
+        dataset_category: str,
+        pace_speed: float,
+        loop: bool,
+        packet_queue: "queue.Queue[Any]",
+    ) -> None:
+        """Stream real flows from the benchmark dataset into the live monitor session."""
+        samples = load_dataset_samples(dataset_category)
+        if not samples:
+            with self._lock:
+                self.error = f"No samples found for dataset category {dataset_category!r}"
+                self.status = "error"
+            return
+
+        speed = pace_speed if pace_speed and pace_speed > 0 else 1.0
+        delay = max(0.4 / speed, 0.05)
+        injected_builder = FlowBuilder(idle_timeout_s=engine.idle_timeout_s)
+        flow_idx = 0
+
+        try:
+            while not self._stop_event.is_set():
+                for item in samples:
+                    if self._stop_event.is_set():
+                        return
+
+                    # Drain any attack simulator packets injected while dataset replay is active
+                    while not packet_queue.empty():
+                        try:
+                            pkt = packet_queue.get_nowait()
+                            if pkt is not _CAPTURE_DONE:
+                                with self._lock:
+                                    self.packets += 1
+                                    self.total_bytes += pkt.packet_length
+                                for inf_flow in injected_builder.process_packet(pkt):
+                                    flow_idx += 1
+                                    pred, conf = engine._predict_flow(inf_flow)
+                                    obs = FlowObservation(
+                                        timestamp=datetime.now(timezone.utc).isoformat(),
+                                        flow_id=flow_idx,
+                                        src_endpoint=f"{inf_flow.source_first_ip}:{inf_flow.source_first_port}",
+                                        dst_endpoint=f"{inf_flow.dest_first_ip}:{inf_flow.dest_first_port}",
+                                        protocol="TCP",
+                                        packet_count=inf_flow.packet_count,
+                                        duration_ms=round(inf_flow.duration_ms, 2),
+                                        attack_score=round(conf, 4),
+                                        prediction_class=pred,
+                                        prediction_label="ATTACK" if pred == 1 else "BENIGN",
+                                        is_alert=pred == 1 and conf >= RESEARCH_THRESHOLD,
+                                        ground_truth="SIMULATED ATTACK",
+                                    )
+                                    self._on_flow(obs)
+                                    if obs.is_alert:
+                                        self._on_alert(
+                                            AlertEvent(
+                                                timestamp=obs.timestamp,
+                                                flow_id=flow_idx,
+                                                alert_level="HIGH" if conf >= 0.85 else ("MEDIUM" if conf >= 0.65 else "LOW"),
+                                                confidence=round(conf, 4),
+                                                src_endpoint=obs.src_endpoint,
+                                                dst_endpoint=obs.dst_endpoint,
+                                                protocol="TCP",
+                                                packet_count=inf_flow.packet_count,
+                                                duration_ms=round(inf_flow.duration_ms, 2),
+                                                details={k: round(v, 4) for k, v in inf_flow.to_features().items()},
+                                                ground_truth="SIMULATED ATTACK",
+                                            )
+                                        )
+                        except queue.Empty:
+                            break
+
+                    flow_idx += 1
+                    pred, score = engine.predict_features(item["features"])
+                    is_alert = pred == 1 and score >= RESEARCH_THRESHOLD
+                    gt = item.get("ground_truth", "UNKNOWN")
+
+                    obs = FlowObservation(
+                        timestamp=datetime.now(timezone.utc).isoformat(),
+                        flow_id=flow_idx,
+                        src_endpoint=item.get("src_endpoint", "172.16.0.1:49152"),
+                        dst_endpoint=item.get("dst_endpoint", "192.168.10.50:80"),
+                        protocol=item.get("protocol", "TCP"),
+                        packet_count=item.get("packet_count", 10),
+                        duration_ms=round(float(item.get("duration_ms", 1000.0)), 2),
+                        attack_score=round(score, 4),
+                        prediction_class=pred,
+                        prediction_label="ATTACK" if pred == 1 else "BENIGN",
+                        is_alert=is_alert,
+                        ground_truth=gt,
+                    )
+
+                    with self._lock:
+                        self.packets += obs.packet_count
+                        self.total_bytes += int(
+                            item["features"].get("flow_bytes_per_s", 100.0)
+                            * max(obs.duration_ms / 1000.0, 0.001)
+                        )
+
+                    self._on_flow(obs)
+
+                    if is_alert:
+                        level = "HIGH" if score >= 0.85 else ("MEDIUM" if score >= 0.65 else "LOW")
+                        alert = AlertEvent(
+                            timestamp=obs.timestamp,
+                            flow_id=flow_idx,
+                            alert_level=level,
+                            confidence=round(score, 4),
+                            src_endpoint=obs.src_endpoint,
+                            dst_endpoint=obs.dst_endpoint,
+                            protocol=obs.protocol,
+                            packet_count=obs.packet_count,
+                            duration_ms=obs.duration_ms,
+                            details={k: round(v, 4) for k, v in item["features"].items()},
+                            ground_truth=gt,
+                        )
+                        self._on_alert(alert)
+
+                    if self._stop_event.wait(delay):
+                        return
+
+                if not loop:
+                    break
         except Exception as exc:
             with self._lock:
                 if not self._stop_event.is_set():
@@ -640,6 +797,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self.send_json(get_dashboard_data())
         elif path == "/api/live":
             self.send_json(LIVE_SESSION.snapshot())
+        elif path == "/api/live/dataset-categories":
+            self.send_json({"categories": DATASET_CATEGORIES})
         elif path == "/api/live/devices":
             self.send_json(LIVE_SESSION.device_snapshot())
         elif path == "/api/live/interfaces":
@@ -681,7 +840,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
         elif parsed.path == "/api/live/start":
             body = self.read_json_body()
             result = LIVE_SESSION.start(
-                mode=str(body.get("mode", "sample")),
+                mode=str(body.get("mode", "dataset")),
+                dataset_category=body.get("dataset_category") or None,
                 interface=body.get("interface") or None,
                 bpf_filter=body.get("bpf_filter") or None,
                 pcap=body.get("pcap") or None,

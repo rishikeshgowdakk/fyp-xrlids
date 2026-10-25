@@ -122,9 +122,9 @@ class ReplayEngine:
             self.model = None
             self.preprocessor = None
 
-    def _predict_flow(self, flow: Flow) -> tuple[int, float]:
-        """Extract features and return (predicted_research_class, attack_score)."""
-        raw_df = flows_to_dataframe([flow])
+    def predict_features(self, features: dict[str, float]) -> tuple[int, float]:
+        """Predict class and attack probability from an explicit R10 feature dict."""
+        raw_df = pd.DataFrame([{f: features.get(f, 0.0) for f in R10_FEATURES}])
 
         if self.preprocessor is not None:
             feature_df = self.preprocessor.transform(raw_df)
@@ -132,9 +132,7 @@ class ReplayEngine:
             feature_df = raw_df
 
         if self.model is None:
-            # Fallback simple heuristic: high packet rate or SYN/ACK anomaly -> attack
-            feats = flow.to_features()
-            score = 0.95 if feats["flow_packets_per_s"] > 1000.0 or feats["syn_ack_ratio"] > 10.0 else 0.05
+            score = 0.95 if features.get("flow_packets_per_s", 0.0) > 1000.0 or features.get("syn_ack_ratio", 0.0) > 10.0 else 0.05
             pred = 1 if score >= self.research_threshold else 0
             return pred, float(score)
 
@@ -157,6 +155,10 @@ class ReplayEngine:
 
         pred = 1 if prob >= self.research_threshold else 0
         return pred, prob
+
+    def _predict_flow(self, flow: Flow) -> tuple[int, float]:
+        """Extract features and return (predicted_research_class, attack_score)."""
+        return self.predict_features(flow.to_features())
 
     def replay_pcap(
         self,

@@ -36,6 +36,7 @@ class AlertEvent:
     packet_count: int
     duration_ms: float
     details: dict[str, float]
+    ground_truth: str = "UNKNOWN"
 
 
 @dataclass
@@ -53,6 +54,7 @@ class FlowObservation:
     prediction_class: int
     prediction_label: str  # "BENIGN" or "ATTACK" at the research threshold
     is_alert: bool
+    ground_truth: str = "UNKNOWN"
 
 
 class LiveLabMonitor:

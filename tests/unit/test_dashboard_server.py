@@ -261,11 +261,45 @@ def test_dashboard_http_live_endpoints():
             raised = exc.code == 400
         assert raised, "inject-attack must return HTTP 400 when no session is running"
 
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/live/dataset-categories", timeout=5) as resp:
+            assert resp.status == 200
+            cat_data = json.loads(resp.read().decode("utf-8"))
+        assert "categories" in cat_data
+        assert "mixed" in cat_data["categories"]
+        assert "ddos" in cat_data["categories"]
+
         with urllib.request.urlopen(f"http://127.0.0.1:{port}/", timeout=5) as resp:
             assert resp.status == 200
             html = resp.read().decode("utf-8")
         assert "Live Monitor" in html
         assert "Replay &amp; Evidence" in html
+        assert "Benchmark Dataset Replay" in html
     finally:
         server.shutdown()
         server.server_close()
+
+
+def test_live_session_dataset_stream_lifecycle():
+    """Verify that dataset streaming mode streams benchmark flows with ground-truth labels."""
+    engine = ReplayEngine(model=_AlwaysAttackModel(), threshold=0.50)
+    session = LiveSession(engine=engine)
+
+    result = session.start(mode="dataset", dataset_category="ddos", pace_speed=1000.0, loop=False)
+    assert not result.get("error")
+    assert result["status"] == "running"
+    assert result["mode"] == "dataset"
+    assert result["dataset_category"] == "ddos"
+
+    deadline = time.time() + 10.0
+    snapshot = session.snapshot()
+    while snapshot["status"] == "running" and time.time() < deadline:
+        time.sleep(0.05)
+        snapshot = session.snapshot()
+
+    assert snapshot["status"] == "stopped"
+    assert snapshot["counters"]["flows"] >= 1
+    assert snapshot["counters"]["alerts"] >= 1
+    flows = snapshot["recent_flows"]
+    assert any(f.get("ground_truth") and f.get("ground_truth") != "UNKNOWN" for f in flows)
+    session.stop()
+

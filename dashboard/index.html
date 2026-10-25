@@ -345,23 +345,31 @@
     <section>
       <h2>Live Capture Control</h2>
       <div class="control-row">
-        <select id="live-mode" title="Capture source">
-          <option value="sample">Sample stream (no root)</option>
+        <select id="live-mode" title="Capture source" onchange="onLiveModeChange()">
+          <option value="dataset" selected>Benchmark Dataset Replay (CIC-IDS2017)</option>
+          <option value="sample">Sample PCAP stream (no root)</option>
           <option value="live">Live interface (requires root)</option>
         </select>
-        <input type="text" id="live-iface" list="iface-list" placeholder="interface e.g. wlo1" size="18" title="Interface for live capture">
+        <select id="dataset-category" title="CIC-IDS2017 Benchmark Category">
+          <option value="mixed">Curated Benchmark Mix (DDoS, DoS Hulk, PortScan, Benign)</option>
+          <option value="ddos">Friday Afternoon — DDoS Attacks + Benign</option>
+          <option value="dos">Wednesday — DoS Hulk / Slowloris + Benign</option>
+          <option value="portscan">Friday Afternoon — PortScan Recon + Benign</option>
+          <option value="benign">Monday — Normal Enterprise Benign Only</option>
+        </select>
+        <input type="text" id="live-iface" list="iface-list" placeholder="interface e.g. wlo1" size="18" title="Interface for live capture" style="display: none;">
         <datalist id="iface-list"></datalist>
-        <input type="text" id="live-bpf" placeholder="filter e.g. tcp port 443 (optional)" size="26" title="Optional capture filter">
+        <input type="text" id="live-bpf" placeholder="filter e.g. tcp port 443 (optional)" size="26" title="Optional capture filter" style="display: none;">
         <button id="live-start-btn" onclick="startLive()">Start Capture</button>
         <button id="live-stop-btn" onclick="stopLive()" disabled>Stop</button>
         <span id="live-status" class="lv-status">stopped</span>
         <span id="live-dot" class="dot" title="Session running indicator"></span>
       </div>
       <div id="live-notice" class="notice">
-        Observational only — this console never blocks, drops, or modifies firewall, routing, or traffic. Live traffic
-        has no ground truth, so accuracy is not claimed here; the score is the frozen CIC-IDS2017 Random Forest output
-        (research &tau; = 0.50). The LSTM/fusion model is a sequence model evaluated offline (see Replay &amp; Evidence).
-        Flow completion follows the D-006 policy (TCP FIN/RST or 120 s idle timeout).
+        Observational only — this console never blocks, drops, or modifies firewall, routing, or traffic.
+        <strong>Benchmark Dataset Replay</strong> streams authentic flows from the CIC-IDS2017 evaluation dataset with ground-truth comparison,
+        ideal for academic viva, demonstrations, and exhibitions without root access or network risk.
+        Scores are computed live by the frozen Random Forest detector (&tau; = 0.50).
       </div>
       <div id="alert-banner" class="alert-banner" style="display: none;" role="alert" aria-live="assertive">
         <div>
@@ -504,12 +512,13 @@
               <th>Pkts</th>
               <th>Dur (ms)</th>
               <th>Threat Score</th>
+              <th>Truth</th>
               <th>Detection (&tau;=0.50)</th>
               <th>Policy Suggestion (NOT enforced)</th>
             </tr>
           </thead>
           <tbody id="live-flows-body">
-            <tr><td colspan="10" style="text-align: center;">No live session yet — press "Start Capture".</td></tr>
+            <tr><td colspan="11" style="text-align: center;">No live session yet — press "Start Capture".</td></tr>
           </tbody>
         </table>
       </div>
