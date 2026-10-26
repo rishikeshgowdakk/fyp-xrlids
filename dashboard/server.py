@@ -616,16 +616,17 @@ class LiveSession:
                         if self._stop_event.is_set():
                             return
                         packet_queue.put(pkt)
-                except (OSError, ValueError):
+                except (OSError, ValueError, AttributeError):
                     # Raw-socket teardown on stop() may raise from a closed descriptor; treat as a clean stop.
                     if not self._stop_event.is_set():
                         with self._lock:
                             self.error = "Capture stream failed (see server log)."
                         self._stop_event.set()
                 except Exception as exc:  # pragma: no cover - defensive
-                    with self._lock:
-                        self.error = str(exc)
-                    self._stop_event.set()
+                    if not self._stop_event.is_set():
+                        with self._lock:
+                            self.error = str(exc)
+                        self._stop_event.set()
                 finally:
                     packet_queue.put(_CAPTURE_DONE)
 

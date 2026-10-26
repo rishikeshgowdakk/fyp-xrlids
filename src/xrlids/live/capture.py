@@ -181,16 +181,29 @@ class PacketCaptureService:
             if self.config.max_packets and self.stats.packets_captured >= self.config.max_packets:
                 break
 
+            sock = self._raw_socket
+            if sock is None or self._stop_event.is_set():
+                break
+
             # Poll socket with select
-            readable, _, _ = select.select([self._raw_socket], [], [], self.config.timeout_s)
-            if not readable:
+            try:
+                readable, _, _ = select.select([sock], [], [], self.config.timeout_s)
+            except (ValueError, TypeError, OSError):
+                break
+
+            if not readable or self._stop_event.is_set():
                 continue
 
             try:
-                raw_data, _ = self._raw_socket.recvfrom(self.config.snaplen)
+                sock = self._raw_socket
+                if sock is None or self._stop_event.is_set():
+                    break
+                raw_data, _ = sock.recvfrom(self.config.snaplen)
             except (BlockingIOError, InterruptedError):
                 continue
-            except OSError as err:
+            except (OSError, AttributeError) as err:
+                if self._stop_event.is_set():
+                    break
                 self.stats.errors += 1
                 logger.error("Error reading raw socket: %s", err)
                 break
