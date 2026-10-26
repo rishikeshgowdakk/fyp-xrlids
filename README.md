@@ -157,6 +157,8 @@ This runs entirely offline using the bundled sample PCAP and trained model — n
 
 ### 4. Dashboard — Full Web Interface
 
+> 📖 **Comprehensive Walkthrough & Viva Script:** See [`docs/FRONTEND_AND_DEMO_GUIDE.md`](docs/FRONTEND_AND_DEMO_GUIDE.md) for the complete presentation script (word-for-word guide for professors), component architecture, and FAQ defenses.
+
 The dashboard is a zero-dependency web UI with two tabs:
 
 | Tab | What it does |

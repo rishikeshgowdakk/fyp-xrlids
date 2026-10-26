@@ -8,6 +8,8 @@ A zero-dependency, lightweight web console with two views:
 > **What is real vs. simulated?** See [`docs/HOW_IT_WORKS.md`](../docs/HOW_IT_WORKS.md) for the full
 > end-to-end explanation: which modes use real traffic (live capture only), why the demo/simulator IPs
 > differ from your network, and how every component works in detail.
+>
+> 📖 **Full Viva Script & Frontend Presentation Guide:** See [`docs/FRONTEND_AND_DEMO_GUIDE.md`](../docs/FRONTEND_AND_DEMO_GUIDE.md) for the word-for-word viva presentation script, UI component breakdowns, and answers to tough professor questions.
 
 ---
 
