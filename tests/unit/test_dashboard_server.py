@@ -272,8 +272,8 @@ def test_dashboard_http_live_endpoints():
             assert resp.status == 200
             html = resp.read().decode("utf-8")
         assert "Live Monitor" in html
-        assert "Replay &amp; Evidence" in html
-        assert "Benchmark Dataset Replay" in html
+        assert "Evidence" in html
+        assert "Benchmark Dataset" in html
     finally:
         server.shutdown()
         server.server_close()

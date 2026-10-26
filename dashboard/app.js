@@ -1,26 +1,24 @@
-// XRL-IDARS zero-dependency dashboard: Live Monitor + Replay & Evidence views.
+// XRL-IDARS Dashboard — Clean Professional Frontend
+// Zero external dependencies. Connects to the existing server.py API.
 
 const FEATURE_DESCRIPTIONS = {
-  "packet_length_std": "Standard deviation of packet lengths in the flow (high variance indicates data transfers vs scans)",
-  "packet_length_mean": "Mean packet length in bytes across forward and backward packets",
-  "flow_packets_per_s": "Rate of packets transferred per second (floods and DoS exhibit extreme spikes)",
-  "flow_bytes_per_s": "Throughput in bytes per second across the flow lifetime",
-  "flow_duration_ms": "Total active duration of the bidirectional flow in milliseconds",
-  "ack_count": "Total count of TCP ACK flags observed in both directions",
-  "fin_count": "Total count of TCP FIN flags observed indicating graceful connection closure",
-  "syn_count": "Total count of TCP SYN flags observed (high count without ACK indicates SYN flood)",
-  "syn_ack_ratio": "Ratio of SYN flags to ACK flags in the flow handshake",
-  "rst_count": "Total count of TCP RST flags observed indicating aborted connections"
+  "packet_length_std": "Std dev of packet lengths — high variance → data transfers vs scans",
+  "packet_length_mean": "Mean packet length (bytes) across forward and backward packets",
+  "flow_packets_per_s": "Packet rate per second — floods/DoS show extreme spikes",
+  "flow_bytes_per_s": "Throughput (bytes/s) across the flow lifetime",
+  "flow_duration_ms": "Total active duration of the bidirectional flow (ms)",
+  "ack_count": "TCP ACK flag count in both directions",
+  "fin_count": "TCP FIN flag count — indicates graceful closure",
+  "syn_count": "TCP SYN flag count — high without ACK → SYN flood",
+  "syn_ack_ratio": "Ratio of SYN to ACK flags in the handshake",
+  "rst_count": "TCP RST flag count — aborted connections"
 };
 
 const LIVE_POLL_MS = 1000;
 const MAX_LIVE_ROWS = 500;
-const LIVE_NOTICE_TEXT = "Observational only — this console never blocks, drops, or modifies firewall, routing, or traffic. " +
-  "Live traffic has no ground truth, so accuracy is not claimed here; the score is the frozen CIC-IDS2017 " +
-  "Random Forest output (research \u03C4 = 0.50). The LSTM/fusion model is a sequence model evaluated offline. " +
-  "Flow completion follows the D-006 policy (TCP FIN/RST or 120 s idle timeout).";
 
 let liveSessionKey = null;
+let currentBenchmark = "cicids2017";
 let seenFlowIds = new Set();
 let seenAlertKeys = new Set();
 let renderedFlowCount = 0;
@@ -30,62 +28,31 @@ let alertDetailsCache = new Map();
 let bannerScore = 0;
 let bannerHoldUntil = 0;
 
-function escapeHtml(value) {
-  return String(value === null || value === undefined ? "" : value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+function escapeHtml(v) {
+  return String(v === null || v === undefined ? "" : v)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
-// ---------------------------------------------------------------- tabs
+// ─── Tabs ───
 function showTab(name) {
-  document.getElementById("tab-live").style.display = name === "live" ? "block" : "none";
-  document.getElementById("tab-evidence").style.display = name === "evidence" ? "block" : "none";
-  document.querySelectorAll(".tab").forEach(btn => {
+  document.querySelectorAll(".tab-content").forEach(el => {
+    el.classList.toggle("active", el.id === "tab-" + name);
+  });
+  document.querySelectorAll(".topbar-tabs button").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.tab === name);
   });
 }
 
-// ---------------------------------------------------------------- live monitor
-function determinePolicySuggestion(score) {
-  // Matches the Dueling DQN response-policy mapping. DISPLAY ONLY: the dashboard
-  // never actuates this — no firewall, routing, or traffic mutations.
-  if (score >= 0.50) {
-    return { action: "BLOCK", badgeClass: "badge-invert" };
-  } else if (score >= 0.40) {
-    return { action: "THROTTLE", badgeClass: "badge" };
-  } else if (score >= 0.20) {
-    return { action: "MONITOR", badgeClass: "badge" };
-  } else {
-    return { action: "ALLOW", badgeClass: "badge" };
-  }
+// ─── Policy suggestion (display only) ───
+function policyFor(score) {
+  if (score >= 0.50) return { action: "BLOCK", cls: "badge-red" };
+  if (score >= 0.40) return { action: "THROTTLE", cls: "badge-orange" };
+  if (score >= 0.20) return { action: "MONITOR", cls: "badge-blue" };
+  return { action: "ALLOW", cls: "badge-green" };
 }
 
-async function loadLiveInterfaces() {
-  try {
-    const res = await fetch("/api/live/interfaces");
-    if (!res.ok) return;
-    const data = await res.json();
-    const list = document.getElementById("iface-list");
-    list.innerHTML = "";
-    (data.interfaces || []).forEach(name => {
-      const opt = document.createElement("option");
-      opt.value = name;
-      list.appendChild(opt);
-    });
-    if (data.permissions && !data.permissions.raw_socket) {
-      const status = document.getElementById("live-status");
-      if (!status.textContent.startsWith("running")) {
-        status.textContent = "stopped · raw sockets denied (sudo needed for live capture; sample/dataset stream available)";
-      }
-    }
-  } catch (err) {
-    /* transient; keep the page usable */
-  }
-}
-
+// ─── Live Controls ───
 function onLiveModeChange() {
   const mode = document.getElementById("live-mode").value;
   const dsCat = document.getElementById("dataset-category");
@@ -101,534 +68,41 @@ function onLiveModeChange() {
     if (mode === "dataset") {
       notice.className = "notice";
       notice.innerHTML =
-        "<strong>Benchmark Dataset Replay:</strong> Streams authentic flows from the CIC-IDS2017 dataset " +
-        "with ground-truth labels and real-time Random Forest threat scoring (&tau; = 0.50). " +
-        "Recommended for academic viva, demonstrations, and exhibitions without root access or network risk.";
+        '<strong>Benchmark Dataset Replay:</strong> Streams authentic CIC-IDS2017 flows with ' +
+        'ground-truth labels and real-time RF threat scoring (τ = 0.50). No root access needed.';
     } else if (mode === "sample") {
       notice.className = "notice";
       notice.innerHTML =
-        "<strong>Sample PCAP stream (no root):</strong> Replays recorded multi-flow capture " +
-        "<code>data/demo/sample_traffic.pcap</code> at original pacing through the complete live packet pipeline.";
+        '<strong>Sample PCAP Stream:</strong> Replays recorded capture at original pacing through ' +
+        'the complete live pipeline. No root required.';
     } else {
       notice.className = "notice";
       notice.innerHTML =
-        "<strong>Live Interface Capture (requires root):</strong> Captures real packets from your physical network interface via AF_PACKET raw socket. " +
-        "Strictly observational: never injects, drops, or modifies traffic.";
+        '<strong>Live Interface Capture (root required):</strong> Captures real packets via AF_PACKET raw socket. ' +
+        'Strictly observational — never injects, drops, or modifies traffic.';
     }
   }
 }
 
-// ---------------------------------------------------------------- attack simulator
-async function loadScenarios() {
+async function loadLiveInterfaces() {
   try {
-    const res = await fetch("/api/live/scenarios");
+    const res = await fetch("/api/live/interfaces");
     if (!res.ok) return;
     const data = await res.json();
-    scenariosCache = data.scenarios || [];
-    const select = document.getElementById("scenario-select");
-    select.innerHTML = "";
-    scenariosCache.forEach(spec => {
+    const list = document.getElementById("iface-list");
+    list.innerHTML = "";
+    (data.interfaces || []).forEach(name => {
       const opt = document.createElement("option");
-      opt.value = spec.id;
-      opt.textContent = spec.name;
-      select.appendChild(opt);
+      opt.value = name;
+      list.appendChild(opt);
     });
-    renderScenarioInfo();
-  } catch (err) {
-    /* transient; keep the page usable */
-  }
-}
-
-function scenarioExpectationText(spec) {
-  if (!spec) return "—";
-  if (spec.expected_band === "NONE") {
-    return "calibrated: NOT DETECTED (evasion demo)";
-  }
-  return "calibrated: " + spec.expected_band + " · score ≈ " + Number(spec.expected_score).toFixed(3);
-}
-
-function renderScenarioInfo() {
-  const select = document.getElementById("scenario-select");
-  const spec = scenariosCache.find(s => s.id === select.value);
-  const badge = document.getElementById("scenario-expectation");
-  const desc = document.getElementById("scenario-desc");
-  if (!spec) {
-    badge.textContent = "—";
-    badge.className = "badge";
-    desc.textContent = "";
-    return;
-  }
-  badge.textContent = scenarioExpectationText(spec);
-  badge.className = "badge" + (spec.expected_band === "NONE" ? "" : " badge-invert");
-  desc.textContent = spec.description + " — " + spec.packet_count + " packets, " +
-    spec.expected_flows + " flow(s), " + Number(spec.duration_s).toFixed(2) + " s " +
-    "(attacker " + spec.attacker_ip + " → " + spec.victim_ip + ")";
-}
-
-async function injectAttack() {
-  const select = document.getElementById("scenario-select");
-  const statusEl = document.getElementById("inject-status");
-  const btn = document.getElementById("inject-btn");
-  if (!select.value) return;
-  btn.disabled = true;
-  try {
-    const res = await fetch("/api/live/inject-attack", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ scenario: select.value })
-    });
-    const data = await res.json();
-    if (data.error) {
-      statusEl.textContent = "error: " + data.error;
-    } else {
-      statusEl.textContent = "injecting " + select.value + " …";
-    }
-  } catch (err) {
-    statusEl.textContent = "error: " + err.message;
-  } finally {
-    pollLive();
-  }
-}
-
-async function pollLive() {
-  try {
-    const res = await fetch("/api/live");
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    renderLive(await res.json());
-  } catch (err) {
-    /* transient poll failure; next tick retries */
-  }
-}
-
-function renderLive(snap) {
-  const running = snap.status === "running";
-  const statusEl = document.getElementById("live-status");
-  if (running) {
-    statusEl.textContent = snap.mode === "live"
-      ? "running · live:" + (snap.interface || "?") + (snap.bpf_filter ? " · filter: " + snap.bpf_filter : "")
-      : "running · sample stream (bundled demo capture)";
-  } else if (snap.status === "error") {
-    statusEl.textContent = "error";
-  } else {
-    statusEl.textContent = "stopped";
-  }
-  document.getElementById("live-dot").className = "dot" + (running ? " live" : "");
-  document.getElementById("live-start-btn").disabled = running;
-  document.getElementById("live-stop-btn").disabled = !running;
-  if (running && snap.mode) {
-    // Keep the controls consistent when the server was started from the CLI
-    // (e.g. `--live`), rather than from the UI.
-    const modeSelect = document.getElementById("live-mode");
-    if (modeSelect && modeSelect.value !== snap.mode) modeSelect.value = snap.mode;
-    const ifaceInput = document.getElementById("live-iface");
-    if (ifaceInput && snap.mode === "live" && snap.interface && !ifaceInput.value) {
-      ifaceInput.value = snap.interface;
-    }
-  }
-
-  document.getElementById("lv-packets").textContent = (snap.counters.packets || 0).toLocaleString();
-  document.getElementById("lv-flows").textContent = (snap.counters.flows || 0).toLocaleString();
-  document.getElementById("lv-alerts").textContent = (snap.counters.alerts || 0).toLocaleString();
-  document.getElementById("lv-rate").textContent = (snap.counters.packets_per_s || 0).toFixed(1) + " pkt/s";
-  document.getElementById("lv-elapsed").textContent = formatDuration(snap.counters.elapsed_s || 0);
-  document.getElementById("lv-mode-label").textContent = snap.started_at
-    ? "started " + new Date(snap.started_at).toLocaleTimeString()
-    : "not started";
-
-  renderInjectionStatus(snap, running);
-
-  const notice = document.getElementById("live-notice");
-  if (snap.error) {
-    notice.className = "notice error";
-    notice.textContent = "Session error: " + snap.error;
-  } else if (snap.engine_warning) {
-    notice.className = "notice error";
-    notice.textContent = snap.engine_warning;
-  } else {
-    notice.className = "notice";
-    notice.textContent = LIVE_NOTICE_TEXT;
-  }
-
-  const isNewSession = snap.started_at !== liveSessionKey;
-  if (isNewSession) {
-    // New session (or cleared): reset rendered rows.
-    liveSessionKey = snap.started_at;
-    seenFlowIds = new Set();
-    seenAlertKeys = new Set();
-    renderedFlowCount = 0;
-    renderedAlertCount = 0;
-    alertDetailsCache = new Map();
-    dismissAlertBanner();
-    document.getElementById("live-flows-body").innerHTML =
-      '<tr><td colspan="10" style="text-align: center;">Waiting for the first completed flow…</td></tr>';
-    document.getElementById("live-alerts-body").innerHTML =
-      '<tr><td colspan="8" style="text-align: center;">No alerts.</td></tr>';
-    const sourcesBody = document.getElementById("attack-sources-body");
-    if (sourcesBody) {
-      sourcesBody.innerHTML =
-        '<tr><td colspan="6" style="text-align: center;">No detected attack sources yet.</td></tr>';
-    }
-  }
-
-  appendLiveFlows(snap.recent_flows || []);
-  appendLiveAlerts(snap.recent_alerts || [], { suppressBanner: isNewSession });
-  renderDevices(snap);
-  renderAttackSources(snap.recent_alerts || []);
-}
-
-function formatAge(seconds) {
-  const value = Number(seconds);
-  if (!Number.isFinite(value) || value < 0) return "—";
-  if (value < 5) return "just now";
-  if (value < 60) return Math.round(value) + "s ago";
-  if (value < 3600) return Math.floor(value / 60) + "m ago";
-  return Math.floor(value / 3600) + "h ago";
-}
-
-function renderDevices(snap) {
-  const tbody = document.getElementById("devices-body");
-  const networkEl = document.getElementById("device-network");
-  const countEl = document.getElementById("device-count");
-  const noteEl = document.getElementById("device-note");
-  const routerLink = document.getElementById("device-router-link");
-  const routerAnchor = document.getElementById("router-admin-link");
-  if (!tbody || !networkEl || !countEl) return;
-
-  if (snap.mode !== "live") {
-    if (routerLink) routerLink.style.display = "none";
-    if (routerAnchor) routerAnchor.removeAttribute("href");
-    networkEl.textContent = snap.mode
-      ? "Live capture not active — sample/simulator mode"
-      : "Live capture not started";
-    countEl.textContent = "0 observed";
-    countEl.className = "badge";
-    if (noteEl) {
-      noteEl.className = "notice";
-      noteEl.textContent = "Device discovery is available only in live capture mode. " +
-        "Sample and simulator traffic is synthetic and is not used for device discovery.";
-    }
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">' +
-      'Start live capture (sudo … dashboard/server.py --live --iface wlo1) to discover devices on the WiFi.' +
-      '</td></tr>';
-    return;
-  }
-
-  const network = snap.network || {};
-  const networkParts = [];
-  if (network.ssid) networkParts.push("SSID " + network.ssid);
-  if (network.bssid) {
-    networkParts.push("AP " + network.bssid + (network.ap_vendor ? " (" + network.ap_vendor + ")" : ""));
-  }
-  if (network.gateway_ip) {
-    networkParts.push("gateway " + network.gateway_ip +
-      (network.gateway_vendor ? " (" + network.gateway_vendor + ")" : ""));
-  }
-  if (network.local_ip) networkParts.push("this PC " + network.local_ip);
-  if (network.signal_dbm !== null && network.signal_dbm !== undefined) {
-    networkParts.push(network.signal_dbm + " dBm");
-  }
-  networkEl.textContent = networkParts.join(" · ") || ("live capture on " + (snap.interface || "interface"));
-
-  if (routerLink && routerAnchor) {
-    const gateway = String(network.gateway_ip || "");
-    if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(gateway)) {
-      routerAnchor.href = "http://" + gateway;
-      routerLink.style.display = "";
-    } else {
-      routerLink.style.display = "none";
-      routerAnchor.removeAttribute("href");
-    }
-  }
-
-  const devices = snap.devices || [];
-  const counters = snap.device_counters || {};
-  const seen = counters.seen || 0;
-  const cached = counters.cached || 0;
-  countEl.textContent = devices.length + " observed · " + seen + " seen live · " + cached + " cached";
-  countEl.className = "badge" + (devices.length ? " badge-invert" : "");
-
-  if (noteEl) {
-    noteEl.className = "notice";
-    noteEl.textContent = snap.status === "running"
-      ? "Passive observation only. A WiFi client cannot read the access point's association table; " +
-        "idle clients or clients isolated by the AP may be missing. No probes or scans are sent."
-      : "Session stopped — this is the last observed list, not a live association table.";
-  }
-
-  if (devices.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">' +
-      'No devices observed yet. Waiting for ARP/DHCP/mDNS/SSDP traffic… (passive; no probes sent)' +
-      '</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = "";
-  devices.forEach(device => {
-    const badges = [];
-    if (device.is_local) {
-      badges.push('<span class="badge badge-invert" title="This laptop">THIS PC</span>');
-    }
-    if (device.is_gateway) {
-      badges.push('<span class="badge badge-invert" title="Default gateway / router">GATEWAY</span>');
-    }
-    if (device.is_random_mac) {
-      badges.push('<span class="badge" title="Locally administered / privacy MAC">PRIVATE MAC</span>');
-    }
-    badges.push(device.live_seen
-      ? '<span class="badge badge-invert" title="At least one frame was observed during this capture">SEEN</span>'
-      : '<span class="badge" title="From the local neighbor cache; no frame observed yet">CACHED</span>');
-    const label = device.hostname || device.label || "Unknown device";
-    const vendorHint = device.vendor_class
-      ? ' title="DHCP/SSDP hint: ' + escapeHtml(device.vendor_class) + '"'
-      : "";
-    const lastSeenTitle = device.last_seen ? new Date(device.last_seen).toLocaleString() : "";
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td><strong>${escapeHtml(label)}</strong><br>${badges.join(" ")}</td>
-      <td class="mono">${escapeHtml(device.ip || "—")}</td>
-      <td class="mono">${escapeHtml(device.mac || "—")}</td>
-      <td${vendorHint}>${escapeHtml(device.vendor || "Unknown")}</td>
-      <td>${escapeHtml((device.evidence || []).join(" · ") || "—")}</td>
-      <td class="mono">${Number(device.packets || 0).toLocaleString()}</td>
-      <td class="mono" title="${escapeHtml(lastSeenTitle)}">${escapeHtml(device.live_seen ? formatAge(device.age_s) : "cached")}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function renderInjectionStatus(snap, running) {
-  const statusEl = document.getElementById("inject-status");
-  const btn = document.getElementById("inject-btn");
-  const inj = snap.injection;
-  if (!running) {
-    statusEl.textContent = "idle (start the monitor to inject)";
-    btn.disabled = true;
-  } else if (inj && inj.active) {
-    statusEl.textContent = "injecting " + inj.scenario + " · " + inj.packets_sent + "/" + inj.packets_total +
-      " packets · expected " + (inj.expected_band === "NONE" ? "not detected" : inj.expected_band + " ≈ " +
-      Number(inj.expected_score).toFixed(3));
-    btn.disabled = true;
-  } else if (inj) {
-    const when = inj.finished_at ? new Date(inj.finished_at).toLocaleTimeString() : "";
-    statusEl.textContent = "last injection: " + inj.scenario + " finished " + when +
-      " · expected " + (inj.expected_band === "NONE" ? "not detected" : inj.expected_band + " ≈ " +
-      Number(inj.expected_score).toFixed(3));
-    btn.disabled = false;
-  } else {
-    statusEl.textContent = "idle";
-    btn.disabled = false;
-  }
-}
-
-function appendLiveFlows(flows) {
-  const fresh = flows.filter(f => !seenFlowIds.has(f.flow_id));
-  if (fresh.length === 0) return;
-  const tbody = document.getElementById("live-flows-body");
-  if (renderedFlowCount === 0) {
-    tbody.innerHTML = "";
-  }
-  fresh.forEach(flow => {
-    seenFlowIds.add(flow.flow_id);
-    renderedFlowCount++;
-    const actionInfo = determinePolicySuggestion(flow.attack_score);
-    const isAttack = flow.prediction_class === 1;
-    const srcText = String(flow.src_endpoint);
-    const dstText = String(flow.dst_endpoint);
-    const isSim = srcText.startsWith("203.0.113.") || dstText.startsWith("203.0.113.");
-    const tr = document.createElement("tr");
-    const time = flow.timestamp ? new Date(flow.timestamp).toLocaleTimeString() : "-";
-    const gt = flow.ground_truth && flow.ground_truth !== "UNKNOWN" ? flow.ground_truth : "-";
-    tr.innerHTML = `
-      <td class="mono">${flow.flow_id}</td>
-      <td class="mono">${time}</td>
-      <td><strong>${flow.protocol}</strong></td>
-      <td class="mono">${srcText}${isSim ? ' <span class="badge" title="Attack simulator packet (synthetic, in-memory injection)">SIM</span>' : ""}</td>
-      <td class="mono">${dstText}</td>
-      <td class="mono">${flow.packet_count}</td>
-      <td class="mono">${Number(flow.duration_ms).toFixed(1)}</td>
-      <td class="mono"><strong>${Number(flow.attack_score).toFixed(4)}</strong></td>
-      <td class="mono"><strong>${escapeHtml(gt)}</strong></td>
-      <td><span class="badge ${isAttack ? "badge-invert" : ""}">${flow.prediction_label}</span></td>
-      <td><span class="badge ${actionInfo.badgeClass}" title="Display-only policy recommendation; no traffic is blocked.">${actionInfo.action} (suggested)</span></td>
-    `;
-    tbody.prepend(tr);
-  });
-  while (tbody.children.length > MAX_LIVE_ROWS) {
-    tbody.removeChild(tbody.lastChild);
-  }
-}
-
-function appendLiveAlerts(alerts, options = {}) {
-  const fresh = alerts.filter(a => !seenAlertKeys.has(a.timestamp + "|" + a.flow_id));
-  if (fresh.length === 0) return;
-  const tbody = document.getElementById("live-alerts-body");
-  if (renderedAlertCount === 0) {
-    tbody.innerHTML = "";
-  }
-  fresh.forEach(alert => {
-    const key = alert.flow_id + "|" + alert.timestamp;
-    seenAlertKeys.add(key);
-    alertDetailsCache.set(key, alert);
-    renderedAlertCount++;
-    const tr = document.createElement("tr");
-    const time = alert.timestamp ? new Date(alert.timestamp).toLocaleTimeString() : "-";
-    tr.innerHTML = `
-      <td class="mono">${time}</td>
-      <td><span class="badge ${alert.alert_level === "HIGH" ? "badge-invert" : ""}">${alert.alert_level}</span></td>
-      <td class="mono">${Number(alert.confidence).toFixed(4)}</td>
-      <td class="mono">${alert.src_endpoint}</td>
-      <td class="mono">${alert.dst_endpoint}</td>
-      <td><strong>${alert.protocol}</strong></td>
-      <td class="mono">${alert.packet_count}</td>
-      <td><button type="button" class="link-btn" data-alert-key="${key}"
-        title="Show the exact R10 features and model output for this flow">features</button></td>
-    `;
-    const detailsBtn = tr.querySelector("button[data-alert-key]");
-    if (detailsBtn) {
-      detailsBtn.addEventListener("click", () => showAlertDetails(detailsBtn.dataset.alertKey));
-    }
-    tbody.prepend(tr);
-  });
-  while (tbody.children.length > MAX_LIVE_ROWS) {
-    tbody.removeChild(tbody.lastChild);
-  }
-  if (!options.suppressBanner) {
-    showAlertBanner(fresh[fresh.length - 1]);
-  }
-}
-
-// ---------------------------------------------------------------- alerts & provenance
-function showAlertBanner(alert) {
-  const banner = document.getElementById("alert-banner");
-  if (!banner) return;
-  const score = Number(alert.confidence) || 0;
-  const now = Date.now();
-  // Keep a higher-severity alert visible for a short hold window so a stream of
-  // low-score sample alerts cannot immediately hide an injected HIGH detection.
-  if (score < bannerScore && now < bannerHoldUntil) return;
-  const level = alert.alert_level || "ALERT";
-  banner.className = "alert-banner" + (level === "HIGH" ? "" : " " + level.toLowerCase());
-  document.getElementById("alert-banner-title").textContent = level + " ALERT";
-  document.getElementById("alert-banner-text").textContent =
-    "score " + score.toFixed(4) + " · " + alert.src_endpoint + " → " +
-    alert.dst_endpoint + " · " + alert.protocol + " · flow " + alert.flow_id;
-  banner.style.display = "flex";
-  bannerScore = score;
-  bannerHoldUntil = now + (score >= 0.65 ? 15000 : 5000);
-}
-
-function dismissAlertBanner() {
-  const banner = document.getElementById("alert-banner");
-  if (banner) banner.style.display = "none";
-  bannerScore = 0;
-  bannerHoldUntil = 0;
-}
-
-function showAlertDetails(key) {
-  const alert = alertDetailsCache.get(key);
-  if (!alert) return;
-  const details = alert.details || {};
-  const detailEntries = Object.entries(details);
-  const rows = detailEntries.length
-    ? detailEntries.map(([name, value]) =>
-        `<tr><td class="mono">${name}</td><td class="mono">${Number(value).toFixed(4)}</td></tr>`
-      ).join("")
-    : '<tr><td colspan="2">No feature payload was recorded for this alert.</td></tr>';
-  const score = Number(alert.confidence);
-  const isSim = String(alert.src_endpoint).startsWith("203.0.113.") ||
-    String(alert.dst_endpoint).startsWith("203.0.113.");
-  const gt = alert.ground_truth && alert.ground_truth !== "UNKNOWN" ? alert.ground_truth : null;
-  const label = score >= 0.50 ? "ATTACK" : "BENIGN";
-  document.getElementById("score-dialog-title").textContent = "Score provenance — flow " + alert.flow_id;
-  document.getElementById("score-dialog-body").innerHTML = `
-    <p><strong>${alert.src_endpoint} → ${alert.dst_endpoint}</strong> · ${alert.protocol} ·
-      ${alert.packet_count} packets · ${Number(alert.duration_ms).toFixed(1)} ms
-      ${isSim ? '<span class="badge">SIM</span>' : ""}
-      ${gt ? ` · Ground truth: <span class="badge badge-invert">${escapeHtml(gt)}</span>` : ""}</p>
-    <p>These are the R10 feature values the detector received (rounded to 4 decimals in this payload):</p>
-    <table>
-      <thead><tr><th>R10 feature</th><th>Value</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <p>Score computed by the frozen model:</p>
-    <pre>score = random_forest.predict_proba(preprocessor.transform(R10_features))[0]
-      = ${score.toFixed(6)}
-label = ${label} (research τ = 0.50)
-alert = ${alert.alert_level} (HIGH ≥ 0.85, MEDIUM ≥ 0.65, LOW ≥ 0.50)</pre>
-    <p>${isSim
-      ? "This flow came from the attack simulator. The packets were synthesised in memory; the score above is the frozen model's real output."
-      : "This flow came from the capture stream."}</p>
-    <p><strong>Nothing is blocked.</strong> The policy suggestion is display-only; enforcement is disabled in this console.</p>
-  `;
-  const dialog = document.getElementById("score-dialog");
-  if (typeof dialog.showModal === "function") {
-    dialog.showModal();
-  } else {
-    dialog.setAttribute("open", "");
-  }
-}
-
-function closeScoreDialog() {
-  const dialog = document.getElementById("score-dialog");
-  if (!dialog) return;
-  if (typeof dialog.close === "function") {
-    dialog.close();
-  } else {
-    dialog.removeAttribute("open");
-  }
-}
-
-function renderAttackSources(alerts) {
-  const tbody = document.getElementById("attack-sources-body");
-  if (!tbody) return;
-  const byIp = new Map();
-  (alerts || []).forEach(alert => {
-    const src = String(alert.src_endpoint || "?");
-    const ip = src.includes(":") ? src.slice(0, src.lastIndexOf(":")) : src;
-    const entry = byIp.get(ip) || {
-      ip: ip,
-      alerts: 0,
-      maxScore: 0,
-      latest: "",
-      targets: new Set(),
-      levels: new Set()
-    };
-    entry.alerts += 1;
-    entry.maxScore = Math.max(entry.maxScore, Number(alert.confidence) || 0);
-    if (!entry.latest || String(alert.timestamp) > entry.latest) entry.latest = alert.timestamp;
-    entry.targets.add(String(alert.dst_endpoint || "?"));
-    entry.levels.add(alert.alert_level);
-    byIp.set(ip, entry);
-  });
-  const rows = Array.from(byIp.values()).sort((a, b) =>
-    b.alerts - a.alerts || b.maxScore - a.maxScore
-  );
-  if (rows.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="6" style="text-align: center;">No detected attack sources yet.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = "";
-  rows.forEach(entry => {
-    const suggestion = determinePolicySuggestion(entry.maxScore);
-    const isSim = entry.ip.startsWith("203.0.113.");
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td class="mono"><strong>${entry.ip}</strong>${isSim
-        ? ' <span class="badge" title="Attack simulator host (RFC 5737 documentation range)">SIM</span>' : ""}</td>
-      <td class="mono">${Array.from(entry.targets).join("<br>")}</td>
-      <td class="mono">${entry.alerts}</td>
-      <td class="mono"><strong>${entry.maxScore.toFixed(4)}</strong></td>
-      <td class="mono">${entry.latest ? new Date(entry.latest).toLocaleTimeString() : "-"}</td>
-      <td><span class="badge ${suggestion.badgeClass}"
-        title="Display-only policy recommendation; no traffic is blocked.">${suggestion.action} (suggested)</span></td>
-    `;
-    tbody.appendChild(tr);
-  });
+  } catch (_) {}
 }
 
 async function startLive() {
   const mode = document.getElementById("live-mode").value;
+  const benchmarkSelect = document.getElementById("live-benchmark");
+  const benchmark = benchmarkSelect ? benchmarkSelect.value : "cicids2017";
   const dsCat = document.getElementById("dataset-category");
   const datasetCategory = dsCat ? dsCat.value : null;
   const interfaceName = document.getElementById("live-iface").value.trim();
@@ -643,7 +117,8 @@ async function startLive() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        mode: mode,
+        mode,
+        benchmark,
         dataset_category: datasetCategory,
         interface: interfaceName || null,
         bpf_filter: bpf || null
@@ -659,10 +134,10 @@ async function startLive() {
     }
   } catch (err) {
     notice.className = "notice error";
-    notice.textContent = "Could not start capture: " + err.message;
+    notice.textContent = "Could not start: " + err.message;
     btn.disabled = false;
   } finally {
-    btn.textContent = "Start Capture";
+    btn.textContent = "▶ Start";
     pollLive();
   }
 }
@@ -673,68 +148,590 @@ async function stopLive() {
   btn.textContent = "Stopping…";
   try {
     const res = await fetch("/api/live/stop", { method: "POST" });
-    if (res.ok) {
-      renderLive(await res.json());
-    }
-  } catch (err) {
-    /* transient */
-  } finally {
-    btn.textContent = "Stop";
+    if (res.ok) renderLive(await res.json());
+  } catch (_) {}
+  finally {
+    btn.textContent = "⏹ Stop";
     pollLive();
   }
 }
 
-function formatDuration(seconds) {
-  if (!seconds || seconds <= 0) return "0s";
-  if (seconds < 60) return seconds.toFixed(1) + "s";
-  const m = Math.floor(seconds / 60);
-  const s = Math.round(seconds % 60);
-  return m + "m " + s + "s";
+// ─── Attack Simulator ───
+async function loadScenarios() {
+  try {
+    const res = await fetch("/api/live/scenarios");
+    if (!res.ok) return;
+    const data = await res.json();
+    scenariosCache = data.scenarios || [];
+    const select = document.getElementById("scenario-select");
+    select.innerHTML = "";
+    scenariosCache.forEach(spec => {
+      const opt = document.createElement("option");
+      opt.value = spec.id;
+      opt.textContent = spec.name;
+      select.appendChild(opt);
+    });
+    renderScenarioInfo();
+  } catch (_) {}
 }
 
-// ---------------------------------------------------------------- replay & evidence
-async function loadDashboard() {
-  const statusEl = document.getElementById("status-text");
+function renderScenarioInfo() {
+  const select = document.getElementById("scenario-select");
+  const spec = scenariosCache.find(s => s.id === select.value);
+  const badge = document.getElementById("scenario-expectation");
+  const desc = document.getElementById("scenario-desc");
+  if (!spec) { badge.textContent = "—"; desc.textContent = ""; return; }
+  badge.textContent = spec.expected_band === "NONE"
+    ? "calibrated: NOT DETECTED (evasion demo)"
+    : "calibrated: " + spec.expected_band + " · score ≈ " + Number(spec.expected_score).toFixed(3);
+  badge.className = spec.expected_band === "NONE" ? "badge badge-dim" : "badge badge-red";
+  desc.textContent = spec.description + " — " + spec.packet_count + " pkts, " +
+    spec.expected_flows + " flow(s), " + Number(spec.duration_s).toFixed(1) + "s " +
+    "(" + spec.attacker_ip + " → " + spec.victim_ip + ")";
+}
+
+async function injectAttack() {
+  const select = document.getElementById("scenario-select");
+  const statusEl = document.getElementById("inject-status");
+  const btn = document.getElementById("inject-btn");
+  if (!select.value) return;
+  btn.disabled = true;
   try {
-    statusEl.textContent = "Loading data...";
-    const res = await fetch("/api/data");
-    if (!res.ok) throw new Error("Failed to load data");
+    const res = await fetch("/api/live/inject-attack", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ scenario: select.value })
+    });
     const data = await res.json();
-    renderDashboard(data);
-    statusEl.textContent = "Updated " + new Date().toLocaleTimeString();
+    statusEl.textContent = data.error ? "error: " + data.error : "injecting " + select.value + " …";
   } catch (err) {
-    statusEl.textContent = "Error: " + err.message;
+    statusEl.textContent = "error: " + err.message;
+  } finally { pollLive(); }
+}
+
+// ─── Live Polling ───
+async function pollLive() {
+  try {
+    const res = await fetch("/api/live");
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    renderLive(await res.json());
+  } catch (_) {}
+}
+
+function renderLive(snap) {
+  const running = snap.status === "running";
+
+  // Status badge
+  const statusEl = document.getElementById("live-status");
+  if (running) {
+    statusEl.textContent = "● Running";
+    statusEl.className = "badge badge-green";
+  } else if (snap.status === "error") {
+    statusEl.textContent = "Error";
+    statusEl.className = "badge badge-red";
+  } else {
+    statusEl.textContent = "Stopped";
+    statusEl.className = "badge badge-dim";
+  }
+
+  // Topbar status
+  const dot = document.getElementById("live-dot");
+  dot.className = "pulse-dot" + (running ? " live" : "");
+  document.getElementById("topbar-status-text").textContent = running
+    ? (snap.mode === "dataset" ? "Dataset Stream" : snap.mode === "live" ? "Live: " + (snap.interface || "?") : "Sample Stream")
+    : "Idle";
+
+  // Buttons
+  document.getElementById("live-start-btn").disabled = running;
+  document.getElementById("live-stop-btn").disabled = !running;
+
+  // Keep mode selector synced
+  if (running && snap.mode) {
+    const modeSelect = document.getElementById("live-mode");
+    if (modeSelect && modeSelect.value !== snap.mode) modeSelect.value = snap.mode;
+  }
+
+  // Stats
+  document.getElementById("lv-packets").textContent = (snap.counters.packets || 0).toLocaleString();
+  document.getElementById("lv-flows").textContent = (snap.counters.flows || 0).toLocaleString();
+  document.getElementById("lv-alerts").textContent = (snap.counters.alerts || 0).toLocaleString();
+  document.getElementById("lv-rate").textContent = (snap.counters.packets_per_s || 0).toFixed(1) + " pkt/s";
+  document.getElementById("lv-elapsed").textContent = formatDuration(snap.counters.elapsed_s || 0);
+  document.getElementById("lv-mode-label").textContent = snap.started_at
+    ? "Since " + new Date(snap.started_at).toLocaleTimeString() : "Not started";
+
+  // Alert stat color
+  const alertCard = document.getElementById("alert-stat-card");
+  if (alertCard) {
+    const cnt = snap.counters.alerts || 0;
+    alertCard.className = cnt > 0 ? "stat-card red" : "stat-card";
+  }
+
+  // Counters
+  document.getElementById("flow-counter").textContent = (snap.counters.flows || 0) + " flows";
+  document.getElementById("alert-counter").textContent = (snap.counters.alerts || 0) + " alerts";
+
+  // Injection status
+  renderInjection(snap, running);
+
+  // Live Performance & Real-Time Analysis
+  const la = snap.live_analysis || {};
+  const isGt = Boolean(la.has_ground_truth);
+  const gtPanel = document.getElementById("live-eval-gt-panel");
+  const livePanel = document.getElementById("live-eval-live-panel");
+  const evalStatus = document.getElementById("live-eval-status");
+
+  if (evalStatus) {
+    evalStatus.textContent = running
+      ? (isGt ? "Testing Dataset Analysis Active" : "Live Wiretap Active")
+      : "Stopped";
+    evalStatus.className = "badge " + (running ? (isGt ? "badge-green" : "badge-blue") : "badge-dim");
+  }
+
+  if (gtPanel && livePanel) {
+    gtPanel.style.display = isGt ? "block" : "none";
+    livePanel.style.display = isGt ? "none" : "block";
+  }
+
+  if (isGt) {
+    const accEl = document.getElementById("live-acc-val");
+    if (accEl) accEl.textContent = (la.accuracy !== null && la.accuracy !== undefined) ? (la.accuracy * 100).toFixed(1) + "%" : "—";
+
+    const f1El = document.getElementById("live-f1-val");
+    if (f1El) f1El.textContent = (la.f1 !== null && la.f1 !== undefined) ? Number(la.f1).toFixed(4) : "—";
+
+    const recEl = document.getElementById("live-rec-val");
+    if (recEl) recEl.textContent = (la.recall !== null && la.recall !== undefined) ? (la.recall * 100).toFixed(1) + "%" : "—";
+
+    const precEl = document.getElementById("live-prec-val");
+    if (precEl) precEl.textContent = (la.precision !== null && la.precision !== undefined) ? (la.precision * 100).toFixed(1) + "%" : "—";
+
+    const tpEl = document.getElementById("cm-tp");
+    if (tpEl) tpEl.textContent = Number(la.tp || 0).toLocaleString();
+
+    const fpEl = document.getElementById("cm-fp");
+    if (fpEl) fpEl.textContent = Number(la.fp || 0).toLocaleString();
+
+    const fnEl = document.getElementById("cm-fn");
+    if (fnEl) fnEl.textContent = Number(la.fn || 0).toLocaleString();
+
+    const tnEl = document.getElementById("cm-tn");
+    if (tnEl) tnEl.textContent = Number(la.tn || 0).toLocaleString();
+  }
+
+  const spec = la.score_distribution || {};
+  const specHigh = document.getElementById("spec-high");
+  if (specHigh) specHigh.textContent = (spec.high || 0).toLocaleString();
+  const specMed = document.getElementById("spec-med");
+  if (specMed) specMed.textContent = (spec.medium || 0).toLocaleString();
+  const specLow = document.getElementById("spec-low");
+  if (specLow) specLow.textContent = (spec.low || 0).toLocaleString();
+  const specBenign = document.getElementById("spec-benign");
+  if (specBenign) specBenign.textContent = (spec.benign || 0).toLocaleString();
+
+  // Error notice
+  const notice = document.getElementById("live-notice");
+  if (snap.error) {
+    notice.className = "notice error";
+    notice.textContent = "Error: " + snap.error;
+  } else if (snap.engine_warning) {
+    notice.className = "notice error";
+    notice.textContent = snap.engine_warning;
+  }
+
+  // Pipeline source label
+  const pipeSource = document.getElementById("pipe-source");
+  if (pipeSource) {
+    pipeSource.textContent = snap.mode === "dataset" ? "📊 CIC-IDS2017"
+      : snap.mode === "live" ? "📡 " + (snap.interface || "Live")
+      : snap.mode === "sample" ? "📁 PCAP" : "📡 Source";
+  }
+
+  // New session detection
+  const isNewSession = snap.started_at !== liveSessionKey;
+  if (isNewSession) {
+    liveSessionKey = snap.started_at;
+    seenFlowIds = new Set();
+    seenAlertKeys = new Set();
+    renderedFlowCount = 0;
+    renderedAlertCount = 0;
+    alertDetailsCache = new Map();
+    dismissAlertBanner();
+    document.getElementById("live-flows-body").innerHTML =
+      '<tr><td colspan="10" style="text-align:center; padding:30px; color: var(--text-dim);">Waiting for flows…</td></tr>';
+    document.getElementById("live-alerts-body").innerHTML =
+      '<tr><td colspan="7" style="text-align:center; padding:20px; color: var(--text-dim);">No alerts</td></tr>';
+    const srcBody = document.getElementById("attack-sources-body");
+    if (srcBody) srcBody.innerHTML =
+      '<tr><td colspan="4" style="text-align:center; padding:20px; color: var(--text-dim);">No attack sources detected</td></tr>';
+  }
+
+  appendLiveFlows(snap.recent_flows || []);
+  appendLiveAlerts(snap.recent_alerts || [], { suppressBanner: isNewSession });
+  renderDevices(snap);
+  renderAttackSources(snap.recent_alerts || []);
+}
+
+function renderInjection(snap, running) {
+  const statusEl = document.getElementById("inject-status");
+  const btn = document.getElementById("inject-btn");
+  const inj = snap.injection;
+  if (!running) {
+    statusEl.textContent = "start monitor first";
+    btn.disabled = true;
+  } else if (inj && inj.active) {
+    statusEl.textContent = "⏳ " + inj.scenario + " · " + inj.packets_sent + "/" + inj.packets_total + " pkts";
+    btn.disabled = true;
+  } else if (inj) {
+    const when = inj.finished_at ? new Date(inj.finished_at).toLocaleTimeString() : "";
+    statusEl.textContent = "✓ " + inj.scenario + " done " + when;
+    btn.disabled = false;
+  } else {
+    statusEl.textContent = "ready";
+    btn.disabled = false;
   }
 }
 
+// ─── Flow Rendering ───
+function appendLiveFlows(flows) {
+  const fresh = flows.filter(f => !seenFlowIds.has(f.flow_id));
+  if (fresh.length === 0) return;
+  const tbody = document.getElementById("live-flows-body");
+  if (renderedFlowCount === 0) tbody.innerHTML = "";
+
+  fresh.forEach(flow => {
+    seenFlowIds.add(flow.flow_id);
+    renderedFlowCount++;
+    const p = policyFor(flow.attack_score);
+    const isAttack = flow.prediction_class === 1;
+    const srcText = String(flow.src_endpoint);
+    const dstText = String(flow.dst_endpoint);
+    const isSim = srcText.startsWith("203.0.113.") || dstText.startsWith("203.0.113.");
+    const gt = flow.ground_truth && flow.ground_truth !== "UNKNOWN" ? flow.ground_truth : "-";
+    const time = flow.timestamp ? new Date(flow.timestamp).toLocaleTimeString() : "-";
+    const score = Number(flow.attack_score);
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="mono">${flow.flow_id}</td>
+      <td class="mono">${time}</td>
+      <td><strong>${flow.protocol}</strong></td>
+      <td class="mono">${escapeHtml(srcText)}${isSim ? ' <span class="badge badge-sim">SIM</span>' : ""}</td>
+      <td class="mono">${escapeHtml(dstText)}</td>
+      <td class="mono">${flow.packet_count}</td>
+      <td class="mono"><strong style="color:${score >= 0.50 ? 'var(--red)' : score >= 0.20 ? 'var(--orange)' : 'var(--green)'}">${score.toFixed(4)}</strong></td>
+      <td>${gt !== "-" ? `<span class="badge ${gt === "ATTACK" || gt.includes("ATTACK") ? "badge-red" : "badge-green"}">${escapeHtml(gt)}</span>` : '<span style="color:var(--text-dim)">—</span>'}</td>
+      <td><span class="badge ${isAttack ? "badge-red" : "badge-green"}">${flow.prediction_label}</span></td>
+      <td><span class="badge ${p.cls}">${p.action}</span></td>
+    `;
+    tbody.prepend(tr);
+  });
+  while (tbody.children.length > MAX_LIVE_ROWS) tbody.removeChild(tbody.lastChild);
+}
+
+function appendLiveAlerts(alerts, options = {}) {
+  const fresh = alerts.filter(a => !seenAlertKeys.has(a.timestamp + "|" + a.flow_id));
+  if (fresh.length === 0) return;
+  const tbody = document.getElementById("live-alerts-body");
+  if (renderedAlertCount === 0) tbody.innerHTML = "";
+
+  fresh.forEach(alert => {
+    const key = alert.flow_id + "|" + alert.timestamp;
+    seenAlertKeys.add(key);
+    alertDetailsCache.set(key, alert);
+    renderedAlertCount++;
+    const time = alert.timestamp ? new Date(alert.timestamp).toLocaleTimeString() : "-";
+    const levelCls = alert.alert_level === "HIGH" ? "badge-red" : alert.alert_level === "MEDIUM" ? "badge-orange" : "badge-dim";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="mono">${time}</td>
+      <td><span class="badge ${levelCls}">${alert.alert_level}</span></td>
+      <td class="mono"><strong>${Number(alert.confidence).toFixed(4)}</strong></td>
+      <td class="mono">${escapeHtml(alert.src_endpoint)}</td>
+      <td class="mono">${escapeHtml(alert.dst_endpoint)}</td>
+      <td><strong>${alert.protocol}</strong></td>
+      <td><button class="btn-link" data-alert-key="${key}" title="Inspect R10 features">🔍 Inspect</button></td>
+    `;
+    const btn = tr.querySelector("button[data-alert-key]");
+    if (btn) btn.addEventListener("click", () => showAlertDetails(btn.dataset.alertKey));
+    tbody.prepend(tr);
+  });
+  while (tbody.children.length > MAX_LIVE_ROWS) tbody.removeChild(tbody.lastChild);
+  if (!options.suppressBanner) showAlertBanner(fresh[fresh.length - 1]);
+}
+
+// ─── Alert Banner ───
+function showAlertBanner(alert) {
+  const banner = document.getElementById("alert-banner");
+  if (!banner) return;
+  const score = Number(alert.confidence) || 0;
+  const now = Date.now();
+  if (score < bannerScore && now < bannerHoldUntil) return;
+  const level = alert.alert_level || "ALERT";
+  banner.className = "alert-banner visible" + (level === "HIGH" ? "" : level === "MEDIUM" ? " medium" : " low");
+  document.getElementById("alert-banner-title").textContent = level + " ALERT";
+  document.getElementById("alert-banner-text").textContent =
+    "Score " + score.toFixed(4) + " · " + alert.src_endpoint + " → " +
+    alert.dst_endpoint + " · " + alert.protocol + " · Flow #" + alert.flow_id;
+  bannerScore = score;
+  bannerHoldUntil = now + (score >= 0.65 ? 15000 : 5000);
+}
+
+function dismissAlertBanner() {
+  const banner = document.getElementById("alert-banner");
+  if (banner) banner.classList.remove("visible");
+  bannerScore = 0;
+  bannerHoldUntil = 0;
+}
+
+// ─── Alert Details Dialog ───
+function showAlertDetails(key) {
+  const alert = alertDetailsCache.get(key);
+  if (!alert) return;
+  const details = alert.details || {};
+  const rows = Object.entries(details).length
+    ? Object.entries(details).map(([n, v]) =>
+        `<tr><td class="mono">${n}</td><td class="mono">${Number(v).toFixed(4)}</td></tr>`
+      ).join("")
+    : '<tr><td colspan="2" style="color:var(--text-dim)">No feature payload recorded</td></tr>';
+  const score = Number(alert.confidence);
+  const isSim = String(alert.src_endpoint).startsWith("203.0.113.") || String(alert.dst_endpoint).startsWith("203.0.113.");
+  const gt = alert.ground_truth && alert.ground_truth !== "UNKNOWN" ? alert.ground_truth : null;
+  const label = score >= 0.50 ? "ATTACK" : "BENIGN";
+
+  document.getElementById("score-dialog-title").textContent = "Score Provenance — Flow #" + alert.flow_id;
+  document.getElementById("score-dialog-body").innerHTML = `
+    <p><strong>${alert.src_endpoint} → ${alert.dst_endpoint}</strong> · ${alert.protocol} ·
+      ${alert.packet_count} pkts · ${Number(alert.duration_ms).toFixed(1)} ms
+      ${isSim ? '<span class="badge badge-sim">SIM</span>' : ""}
+      ${gt ? ' · Truth: <span class="badge badge-red">' + escapeHtml(gt) + '</span>' : ""}</p>
+    <p style="margin-top:8px;">R10 feature values sent to the frozen detector:</p>
+    <table><thead><tr><th>Feature</th><th>Value</th></tr></thead><tbody>${rows}</tbody></table>
+    <p style="margin-top:8px;">Frozen model output:</p>
+    <pre>score = random_forest.predict_proba(preprocessor.transform(R10))[0]
+      = ${score.toFixed(6)}
+label = ${label} (research τ = 0.50)
+alert = ${alert.alert_level} (HIGH ≥ 0.85, MEDIUM ≥ 0.65, LOW ≥ 0.50)</pre>
+    <p style="margin-top:8px; color: var(--text-dim);">
+      ${isSim ? "This flow came from the attack simulator. Packets were synthesized in memory." :
+        "This flow came from the capture stream."}
+      <strong>Nothing is blocked</strong> — policy suggestions are display-only.
+    </p>
+  `;
+  const dialog = document.getElementById("score-dialog");
+  if (typeof dialog.showModal === "function") dialog.showModal();
+  else dialog.setAttribute("open", "");
+}
+
+function closeScoreDialog() {
+  const dialog = document.getElementById("score-dialog");
+  if (!dialog) return;
+  if (typeof dialog.close === "function") dialog.close();
+  else dialog.removeAttribute("open");
+}
+
+// ─── Attack Sources ───
+function renderAttackSources(alerts) {
+  const tbody = document.getElementById("attack-sources-body");
+  if (!tbody) return;
+  const byIp = new Map();
+  (alerts || []).forEach(alert => {
+    const src = String(alert.src_endpoint || "?");
+    const ip = src.includes(":") ? src.slice(0, src.lastIndexOf(":")) : src;
+    const e = byIp.get(ip) || { ip, alerts: 0, maxScore: 0, latest: "" };
+    e.alerts++;
+    e.maxScore = Math.max(e.maxScore, Number(alert.confidence) || 0);
+    if (!e.latest || String(alert.timestamp) > e.latest) e.latest = alert.timestamp;
+    byIp.set(ip, e);
+  });
+  const rows = Array.from(byIp.values()).sort((a, b) => b.maxScore - a.maxScore);
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--text-dim)">No attack sources</td></tr>';
+    return;
+  }
+  tbody.innerHTML = "";
+  rows.forEach(e => {
+    const p = policyFor(e.maxScore);
+    const isSim = e.ip.startsWith("203.0.113.");
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="mono"><strong>${e.ip}</strong>${isSim ? ' <span class="badge badge-sim">SIM</span>' : ""}</td>
+      <td class="mono">${e.alerts}</td>
+      <td class="mono"><strong style="color:var(--red)">${e.maxScore.toFixed(4)}</strong></td>
+      <td><span class="badge ${p.cls}">${p.action}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ─── Devices ───
+function formatAge(seconds) {
+  const v = Number(seconds);
+  if (!Number.isFinite(v) || v < 0) return "—";
+  if (v < 5) return "now";
+  if (v < 60) return Math.round(v) + "s";
+  if (v < 3600) return Math.floor(v / 60) + "m";
+  return Math.floor(v / 3600) + "h";
+}
+
+function renderDevices(snap) {
+  const tbody = document.getElementById("devices-body");
+  const networkEl = document.getElementById("device-network");
+  const countEl = document.getElementById("device-count");
+  const routerLink = document.getElementById("device-router-link");
+  const routerAnchor = document.getElementById("router-admin-link");
+  if (!tbody || !networkEl || !countEl) return;
+
+  if (snap.mode !== "live") {
+    if (routerLink) routerLink.style.display = "none";
+    networkEl.textContent = snap.mode
+      ? "Device discovery available in live capture mode only"
+      : "Live capture not started";
+    countEl.textContent = "0 observed";
+    countEl.className = "badge badge-dim";
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-dim)">Start live capture to discover devices</td></tr>';
+    return;
+  }
+
+  const network = snap.network || {};
+  const parts = [];
+  if (network.ssid) parts.push("SSID " + network.ssid);
+  if (network.gateway_ip) parts.push("GW " + network.gateway_ip);
+  if (network.local_ip) parts.push("PC " + network.local_ip);
+  if (network.signal_dbm != null) parts.push(network.signal_dbm + " dBm");
+  networkEl.textContent = parts.join(" · ") || "Live capture on " + (snap.interface || "interface");
+
+  if (routerLink && routerAnchor) {
+    const gw = String(network.gateway_ip || "");
+    if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(gw)) {
+      routerAnchor.href = "http://" + gw;
+      routerLink.style.display = "";
+    } else {
+      routerLink.style.display = "none";
+    }
+  }
+
+  const devices = snap.devices || [];
+  const c = snap.device_counters || {};
+  countEl.textContent = devices.length + " observed";
+  countEl.className = "badge" + (devices.length ? " badge-blue" : " badge-dim");
+
+  if (devices.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-dim)">Waiting for ARP/DHCP/mDNS traffic…</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = "";
+  devices.forEach(d => {
+    const badges = [];
+    if (d.is_local) badges.push('<span class="badge badge-blue">THIS PC</span>');
+    if (d.is_gateway) badges.push('<span class="badge badge-orange">GATEWAY</span>');
+    if (d.is_random_mac) badges.push('<span class="badge badge-dim">PRIVATE MAC</span>');
+    const label = d.hostname || d.label || "Unknown";
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><strong>${escapeHtml(label)}</strong><br>${badges.join(" ")}</td>
+      <td class="mono">${escapeHtml(d.ip || "—")}</td>
+      <td class="mono">${escapeHtml(d.mac || "—")}</td>
+      <td>${escapeHtml(d.vendor || "Unknown")}</td>
+      <td>${escapeHtml((d.evidence || []).join(", ") || "—")}</td>
+      <td class="mono">${Number(d.packets || 0).toLocaleString()}</td>
+      <td class="mono">${d.live_seen ? formatAge(d.age_s) : "cached"}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ─── Utilities ───
+function formatDuration(s) {
+  if (!s || s <= 0) return "0s";
+  if (s < 60) return s.toFixed(1) + "s";
+  const m = Math.floor(s / 60);
+  const sec = Math.round(s % 60);
+  return m + "m " + sec + "s";
+}
+
+// ─── Replay & Evidence ───
+async function loadDashboard(benchmarkId) {
+  const b = benchmarkId || currentBenchmark || "cicids2017";
+  currentBenchmark = b;
+  const statusEl = document.getElementById("status-text");
+  try {
+    if (statusEl) statusEl.textContent = "Loading " + b + "…";
+    const res = await fetch("/api/data?benchmark=" + encodeURIComponent(b));
+    if (!res.ok) throw new Error("Failed to load data");
+    const data = await res.json();
+    renderDashboard(data);
+    if (statusEl) statusEl.textContent = "Updated " + new Date().toLocaleTimeString();
+  } catch (err) {
+    if (statusEl) statusEl.textContent = "Error: " + err.message;
+  }
+}
+
+function switchBenchmark(benchmarkId) {
+  currentBenchmark = benchmarkId;
+  ["cicids2017", "cse2018", "unswnb15"].forEach(id => {
+    const btn = document.getElementById("bench-btn-" + id);
+    if (btn) {
+      btn.className = (id === benchmarkId) ? "btn btn-sm btn-primary" : "btn btn-sm";
+    }
+  });
+  loadDashboard(benchmarkId);
+}
+
 function renderDashboard(data) {
+  if (data.benchmark_info) {
+    const info = data.benchmark_info;
+    const titleEl = document.getElementById("model-comparison-title");
+    if (titleEl) titleEl.textContent = "Model Comparison — " + info.short_name;
+    const nameEl = document.getElementById("bench-info-name");
+    if (nameEl) nameEl.textContent = info.name;
+    const descEl = document.getElementById("bench-info-desc");
+    if (descEl) descEl.textContent = info.description || info.role;
+    const contractEl = document.getElementById("bench-info-contract");
+    if (contractEl) contractEl.textContent = "Contract: " + info.contract;
+    const popEl = document.getElementById("bench-info-pop");
+    if (popEl) popEl.textContent = "Population: " + info.test_population;
+    const caveatEl = document.getElementById("benchmark-caveat-notice");
+    if (caveatEl) {
+      if (info.id === "cse2018") {
+        caveatEl.innerHTML = "<strong>⚠️ Temporal holdout caveat:</strong> On the CSE-CIC-IDS2018 strict future-period holdout (22 Feb–2 Mar 2018), " +
+          "the Random Forest scored <strong>F1 0.0113</strong> (recall 0.0068, ROC-AUC 0.3905) on 50,306 surviving future attacks, " +
+          "demonstrating real-world vulnerability to temporal concept drift.";
+      } else if (info.id === "unswnb15") {
+        caveatEl.innerHTML = "<strong>⚠️ Degraded sensor schema (R4):</strong> Missing TCP flags (SYN, ACK, RST, FIN) in the original Argus flow exporter " +
+          "forces a degraded 4-feature contract. Cross-dataset transfer from CIC-IDS2017 to UNSW-NB15 degraded by 18.5% F1.";
+      } else {
+        caveatEl.innerHTML = "<strong>🌟 Flagship Dual-Benchmark:</strong> Evaluated under the full canonical 10-feature R10 contract. " +
+          "The Phase 2 Dueling DQN reinforcement learning response policies are calibrated against this distribution.";
+      }
+    }
+  }
+
   const replay = data.replay;
   if (replay) {
-    document.getElementById("val-packets").textContent = replay.total_packets || 0;
-    document.getElementById("val-flows").textContent = replay.total_flows || 0;
-
+    document.getElementById("val-packets").textContent = (replay.total_packets || 0).toLocaleString();
+    document.getElementById("val-flows").textContent = (replay.total_flows || 0).toLocaleString();
     if (replay.metrics_research) {
       document.getElementById("val-res-acc").textContent = (replay.metrics_research.accuracy * 100).toFixed(1) + "%";
-      document.getElementById("val-res-f1").textContent = "F1: " + replay.metrics_research.f1.toFixed(4) + " (tau = 0.50)";
+      document.getElementById("val-res-f1").textContent = "F1: " + replay.metrics_research.f1.toFixed(4) + " (τ = 0.50)";
     }
-
     if (replay.metrics_operational) {
       document.getElementById("val-ops-acc").textContent = (replay.metrics_operational.accuracy * 100).toFixed(1) + "%";
-      document.getElementById("val-ops-f1").textContent = "F1: " + replay.metrics_operational.f1.toFixed(4) + " (tau = 0.40)";
+      document.getElementById("val-ops-f1").textContent = "F1: " + replay.metrics_operational.f1.toFixed(4) + " (τ = 0.40)";
     }
 
     const tbody = document.getElementById("flows-table-body");
     tbody.innerHTML = "";
-
     const flows = replay.flow_events || [];
     if (flows.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">No flows available</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px; color:var(--text-dim)">No flows</td></tr>';
     } else {
       flows.forEach(flow => {
+        const p = policyFor(flow.attack_score);
+        const isAttack = flow.ground_truth_label === "ATTACK";
         const tr = document.createElement("tr");
-        const actionInfo = determinePolicySuggestion(flow.attack_score);
-        const isAttackTruth = flow.ground_truth_label === "ATTACK";
-
         tr.innerHTML = `
           <td class="mono">${flow.flow_id}</td>
           <td><strong>${flow.protocol_name}</strong></td>
@@ -742,10 +739,10 @@ function renderDashboard(data) {
           <td class="mono">${flow.dst_endpoint}</td>
           <td class="mono">${flow.packet_count}</td>
           <td class="mono">${flow.duration_ms.toFixed(1)}</td>
-          <td class="mono"><strong>${flow.attack_score.toFixed(4)}</strong></td>
-          <td><span class="badge ${isAttackTruth ? 'badge-invert' : ''}">${flow.ground_truth_label}</span></td>
+          <td class="mono"><strong style="color:${flow.attack_score >= 0.50 ? 'var(--red)' : 'var(--green)'}">${flow.attack_score.toFixed(4)}</strong></td>
+          <td><span class="badge ${isAttack ? 'badge-red' : 'badge-green'}">${flow.ground_truth_label}</span></td>
           <td>${flow.prediction_label} (${flow.verdict})</td>
-          <td><span class="badge ${actionInfo.badgeClass}" title="Display-only policy recommendation; no traffic is blocked.">${actionInfo.action} (suggested)</span></td>
+          <td><span class="badge ${p.cls}">${p.action}</span></td>
         `;
         tbody.appendChild(tr);
       });
@@ -754,25 +751,25 @@ function renderDashboard(data) {
 
   renderModelComparison(data.model_comparison);
 
-  // SHAP Table
+  // SHAP
   const shap = data.shap;
   if (shap && shap.global_importance) {
     const shapTbody = document.getElementById("shap-table-body");
     shapTbody.innerHTML = "";
     shap.global_importance.forEach(item => {
-      const tr = document.createElement("tr");
       const desc = FEATURE_DESCRIPTIONS[item.feature] || "Flow statistical metric";
+      const tr = document.createElement("tr");
       tr.innerHTML = `
         <td class="mono"><strong>#${item.rank}</strong></td>
         <td class="mono"><strong>${item.feature}</strong></td>
         <td class="mono">${item.mean_abs_shap.toFixed(4)}</td>
-        <td>${desc}</td>
+        <td style="color:var(--text-muted)">${desc}</td>
       `;
       shapTbody.appendChild(tr);
     });
   }
 
-  // Figures Select
+  // Figures
   const select = document.getElementById("figure-select");
   const currentVal = select.value;
   select.innerHTML = "";
@@ -783,11 +780,7 @@ function renderDashboard(data) {
       opt.textContent = formatFigureName(fig);
       select.appendChild(opt);
     });
-    if (currentVal && data.figures.includes(currentVal)) {
-      select.value = currentVal;
-    } else {
-      select.value = data.figures[0];
-    }
+    select.value = (currentVal && data.figures.includes(currentVal)) ? currentVal : data.figures[0];
     changeFigure();
   } else {
     select.innerHTML = '<option value="">No figures found</option>';
@@ -798,30 +791,17 @@ function renderModelComparison(comparison) {
   const tbody = document.getElementById("model-comparison-body");
   if (!tbody) return;
   if (!comparison || !comparison.models || Object.keys(comparison.models).length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No model comparison artifact found.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-dim)">No model data found</td></tr>';
     return;
   }
-  const labels = {
-    random_forest: "Random Forest",
-    lstm: "LSTM (5-flow sequence)",
-    fusion: "RF + LSTM fusion"
-  };
-  const roles = {
-    random_forest: "Live Monitor (per-flow)",
-    lstm: "Offline sequence model",
-    fusion: "Offline ensemble"
-  };
+  const labels = { random_forest: "Random Forest", lstm: "LSTM (5-flow)", fusion: "RF + LSTM Fusion" };
+  const roles = { random_forest: "Live per-flow detector", lstm: "Offline sequence model", fusion: "Offline ensemble" };
   const fmt = entry => {
     if (!entry) return "—";
-    const base = Number(entry.mean).toFixed(4) + " ± " + Number(entry.std).toFixed(4);
-    if (entry.ci && entry.ci.lower !== null && entry.ci.upper !== null) {
-      const point = entry.ci.point !== null && entry.ci.point !== undefined
-        ? Number(entry.ci.point).toFixed(4) + " "
-        : "";
-      return base +
-        '<br><span class="muted" style="font-size: 11px;">seed-42 ' + point +
-        "95% CI [" + Number(entry.ci.lower).toFixed(4) + ", " +
-        Number(entry.ci.upper).toFixed(4) + "]</span>";
+    let base = Number(entry.mean).toFixed(4) + " ± " + Number(entry.std).toFixed(4);
+    if (entry.ci && entry.ci.lower != null && entry.ci.upper != null) {
+      base += '<br><span style="font-size:10px; color:var(--text-dim)">95% CI [' +
+        Number(entry.ci.lower).toFixed(4) + ", " + Number(entry.ci.upper).toFixed(4) + "]</span>";
     }
     return base;
   };
@@ -835,17 +815,14 @@ function renderModelComparison(comparison) {
       <td class="mono">${fmt(model.accuracy)}</td>
       <td class="mono">${fmt(model.f1)}</td>
       <td class="mono">${fmt(model.roc_auc)}</td>
-      <td>${roles[name] || ""}</td>
+      <td style="color:var(--text-muted)">${roles[name] || ""}</td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-function formatFigureName(filename) {
-  return filename
-    .replace(".png", "")
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, l => l.toUpperCase());
+function formatFigureName(f) {
+  return f.replace(".png", "").replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
 }
 
 function changeFigure() {
@@ -853,11 +830,10 @@ function changeFigure() {
   const display = document.getElementById("figure-display");
   const caption = document.getElementById("figure-caption");
   const val = select.value;
-
   if (val) {
     display.src = "/figures/" + val;
     display.style.display = "inline-block";
-    caption.textContent = "Viewing: " + select.options[select.selectedIndex].text + " (reports/figures/" + val + ")";
+    caption.textContent = select.options[select.selectedIndex].text;
   } else {
     display.style.display = "none";
     caption.textContent = "";
@@ -867,25 +843,24 @@ function changeFigure() {
 async function runAnalysis() {
   const btn = document.getElementById("run-btn");
   const statusEl = document.getElementById("status-text");
-
   btn.disabled = true;
-  btn.textContent = "Running Analysis...";
-  statusEl.textContent = "Executing packet-to-prediction replay pipeline...";
-
+  btn.textContent = "Running…";
+  statusEl.textContent = "Executing replay pipeline…";
   try {
     const res = await fetch("/api/run-replay", { method: "POST" });
-    if (!res.ok) throw new Error("Server returned " + res.status);
+    if (!res.ok) throw new Error("Server " + res.status);
     const data = await res.json();
     renderDashboard(data);
-    statusEl.textContent = "Replay complete! Updated " + new Date().toLocaleTimeString();
+    statusEl.textContent = "✓ Complete " + new Date().toLocaleTimeString();
   } catch (err) {
-    statusEl.textContent = "Execution failed: " + err.message;
+    statusEl.textContent = "Failed: " + err.message;
   } finally {
     btn.disabled = false;
-    btn.textContent = "Run Replay Analysis";
+    btn.textContent = "▶ Run Replay";
   }
 }
 
+// ─── Init ───
 document.addEventListener("DOMContentLoaded", () => {
   onLiveModeChange();
   loadDashboard();

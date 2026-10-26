@@ -37,7 +37,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Generator
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT / "src") not in sys.path:
@@ -58,15 +58,48 @@ from xrlids.live.devices import DeviceTracker  # noqa: E402
 DASHBOARD_DIR = REPO_ROOT / "dashboard"
 FIGURES_DIR = REPO_ROOT / "reports" / "figures"
 REPLAY_SUMMARY = REPO_ROOT / "results" / "demo" / "replay_summary.json"
-SHAP_SUMMARY = REPO_ROOT / "results" / "experiments" / "EXP-P1-CIC2017-R10-001" / "shap_summary.json"
-MULTI_SEED_METRICS = (
-    REPO_ROOT / "results" / "experiments" / "EXP-P1-CIC2017-R10-001" / "multi_seed_metrics.json"
-)
-BOOTSTRAP_CIS = (
-    REPO_ROOT / "results" / "experiments" / "EXP-P1-CIC2017-R10-001" / "bootstrap_cis.json"
-)
 SAMPLE_PCAP = REPO_ROOT / "data" / "demo" / "sample_traffic.pcap"
-DEFAULT_MODEL_DIR = REPO_ROOT / "results" / "experiments" / "EXP-P1-CIC2017-R10-001"
+
+BENCHMARK_CONFIGS = {
+    "cicids2017": {
+        "id": "cicids2017",
+        "name": "CIC-IDS2017 (Flagship Benchmark)",
+        "short_name": "CIC-IDS2017",
+        "exp_dir": REPO_ROOT / "results" / "experiments" / "EXP-P1-CIC2017-R10-001",
+        "contract": "R10 (10 features)",
+        "test_population": "355,833 test flows",
+        "accuracy_fusion": "99.06%",
+        "f1_fusion": "0.9745",
+        "role": "Primary flagship; Dueling DQN autonomous response policy trained on these flow states.",
+        "description": "Enterprise lab benchmark containing Friday DDoS, Wednesday DoS (Hulk/Slowloris), and PortScan attacks.",
+    },
+    "cse2018": {
+        "id": "cse2018",
+        "name": "CSE-CIC-IDS2018 (Enterprise Cloud Benchmark)",
+        "short_name": "CSE-CIC-IDS2018",
+        "exp_dir": REPO_ROOT / "results" / "experiments" / "EXP-P1-CSE2018-R10-MULTI-001",
+        "contract": "R10 (10 features)",
+        "test_population": "1,662,419 test flows",
+        "accuracy_fusion": "99.12%",
+        "f1_fusion": "0.9603",
+        "role": "Large-scale AWS enterprise cloud testbed; 16M raw flows evaluated with Policy A deduplication.",
+        "description": "Amazon AWS infrastructure with 500 victim servers and diverse attack fleets.",
+    },
+    "unswnb15": {
+        "id": "unswnb15",
+        "name": "UNSW-NB15 (Auxiliary Schema Benchmark)",
+        "short_name": "UNSW-NB15",
+        "exp_dir": REPO_ROOT / "results" / "experiments" / "EXP-P1-UNSWNB15-R10-MULTI-001",
+        "contract": "R4 (4 features)",
+        "test_population": "24,496 test flows",
+        "accuracy_fusion": "89.96%",
+        "f1_fusion": "0.8970",
+        "role": "Sensor schema degradation & cross-dataset transfer study (Argus flow exporter omitted TCP flags).",
+        "description": "Australian Cyber Security Centre benchmark evaluated under degraded 4-feature contract.",
+    },
+}
+
+DEFAULT_MODEL_DIR = BENCHMARK_CONFIGS["cicids2017"]["exp_dir"]
 RESEARCH_THRESHOLD = 0.50
 OPERATIONAL_CANDIDATE_THRESHOLD = 0.40
 
@@ -74,10 +107,40 @@ OPERATIONAL_CANDIDATE_THRESHOLD = 0.40
 _CAPTURE_DONE = object()
 
 
-def get_dashboard_data() -> dict:
-    """Collect replay summary, SHAP data, and figure list."""
+def get_dashboard_data(benchmark: str = "cicids2017") -> dict:
+    """Collect replay summary, SHAP data, and figure list for the selected benchmark."""
+    cfg = BENCHMARK_CONFIGS.get(benchmark, BENCHMARK_CONFIGS["cicids2017"])
+    exp_dir = cfg["exp_dir"]
+    shap_summary_file = exp_dir / "shap_summary.json"
+    multi_seed_file = exp_dir / "multi_seed_metrics.json"
+    bootstrap_ci_file = exp_dir / "bootstrap_cis.json"
+
     data: dict = {
         "status": "ready",
+        "benchmark": cfg["id"],
+        "benchmark_info": {
+            "id": cfg["id"],
+            "name": cfg["name"],
+            "short_name": cfg["short_name"],
+            "contract": cfg["contract"],
+            "test_population": cfg["test_population"],
+            "accuracy_fusion": cfg["accuracy_fusion"],
+            "f1_fusion": cfg["f1_fusion"],
+            "role": cfg["role"],
+            "description": cfg["description"],
+        },
+        "benchmarks": [
+            {
+                "id": b["id"],
+                "name": b["name"],
+                "short_name": b["short_name"],
+                "contract": b["contract"],
+                "test_population": b["test_population"],
+                "accuracy": b["accuracy_fusion"],
+                "f1": b["f1_fusion"],
+            }
+            for b in BENCHMARK_CONFIGS.values()
+        ],
         "replay": None,
         "shap": None,
         "model_comparison": None,
@@ -91,9 +154,9 @@ def get_dashboard_data() -> dict:
         except Exception as e:
             data["replay_error"] = str(e)
 
-    if SHAP_SUMMARY.exists():
+    if shap_summary_file.exists():
         try:
-            with open(SHAP_SUMMARY, "r", encoding="utf-8") as f:
+            with open(shap_summary_file, "r", encoding="utf-8") as f:
                 shap_raw = json.load(f)
                 data["shap"] = {
                     "methodology": shap_raw.get("methodology", "TreeSHAP"),
@@ -102,9 +165,9 @@ def get_dashboard_data() -> dict:
         except Exception as e:
             data["shap_error"] = str(e)
 
-    if MULTI_SEED_METRICS.exists():
+    if multi_seed_file.exists():
         try:
-            with open(MULTI_SEED_METRICS, "r", encoding="utf-8") as f:
+            with open(multi_seed_file, "r", encoding="utf-8") as f:
                 raw = json.load(f)
             summary = raw.get("summary", {})
             models: dict = {}
@@ -120,17 +183,15 @@ def get_dashboard_data() -> dict:
                             "std": entry.get("std", 0.0),
                         }
             data["model_comparison"] = {
+                "benchmark": cfg["id"],
                 "seeds": raw.get("seeds", []),
                 "models": models,
-                "source": str(MULTI_SEED_METRICS.relative_to(REPO_ROOT)),
+                "source": str(multi_seed_file.relative_to(REPO_ROOT)),
             }
 
-            # Attach bootstrap CIs from the frozen seed-42 predictions. The
-            # mean ± std above is across seeds; the CI below is test-set
-            # sampling uncertainty for the frozen reference run.
-            if BOOTSTRAP_CIS.exists():
+            if bootstrap_ci_file.exists():
                 try:
-                    with open(BOOTSTRAP_CIS, "r", encoding="utf-8") as f:
+                    with open(bootstrap_ci_file, "r", encoding="utf-8") as f:
                         ci_raw = json.load(f)
                     ci_seeds = ci_raw.get("seeds", {})
                     seed_payload = ci_seeds.get("42") or ci_seeds.get("frozen") or {}
@@ -154,12 +215,12 @@ def get_dashboard_data() -> dict:
                                 "upper": auc_entry.get("ci_upper"),
                             }
                     data["model_comparison"]["ci_source"] = str(
-                        BOOTSTRAP_CIS.relative_to(REPO_ROOT)
+                        bootstrap_ci_file.relative_to(REPO_ROOT)
                     )
                     data["model_comparison"]["ci_note"] = (
                         "95% bootstrap CI for the frozen seed-42 test predictions"
                     )
-                except Exception as e:  # pragma: no cover - defensive
+                except Exception as e:
                     data["model_comparison"]["ci_error"] = str(e)
         except Exception as e:
             data["model_comparison_error"] = str(e)
@@ -235,6 +296,13 @@ class LiveSession:
         self._t0: float | None = None
         self._t_end: float | None = None
 
+        self.tp = 0
+        self.fp = 0
+        self.tn = 0
+        self.fn = 0
+        self.score_bands = {"benign": 0, "low": 0, "medium": 0, "high": 0}
+        self.traffic_types: dict[str, int] = {}
+
         self.flows: deque[dict[str, Any]] = deque(maxlen=1000)
         self.alerts: deque[dict[str, Any]] = deque(maxlen=200)
         self.injection: dict[str, Any] | None = None
@@ -267,6 +335,7 @@ class LiveSession:
         pace_speed: float = 2.0,
         loop: bool = True,
         max_packets: int | None = None,
+        benchmark: str = "cicids2017",
     ) -> dict[str, Any]:
         """Start an observational capture session; return the initial snapshot or an error dict."""
         with self._lock:
@@ -286,6 +355,12 @@ class LiveSession:
                 return {"error": f"Unknown mode {mode!r} (expected 'dataset', 'sample', or 'live')."}
 
             self._reset_locked()
+            if self._engine is None and benchmark in BENCHMARK_CONFIGS:
+                self.model_dir = BENCHMARK_CONFIGS[benchmark]["exp_dir"]
+                self.benchmark = benchmark
+            else:
+                self.benchmark = getattr(self, "benchmark", "cicids2017")
+
             if mode == "live" and interface:
                 # Passive device discovery is created only for live capture.
                 # It reads the local neighbour cache/iw link once and then
@@ -398,9 +473,27 @@ class LiveSession:
                 elapsed = max(0.0, end - self._t0)
             pps = (self.packets / elapsed) if elapsed > 0 else 0.0
             device_data = self.device_snapshot()
+
+            total_eval = self.tp + self.tn + self.fp + self.fn
+            live_acc = ((self.tp + self.tn) / total_eval) if total_eval > 0 else None
+            live_prec = (self.tp / (self.tp + self.fp)) if (self.tp + self.fp) > 0 else (1.0 if total_eval > 0 and self.tp == 0 else 1.0 if total_eval > 0 else None)
+            live_rec = (self.tp / (self.tp + self.fn)) if (self.tp + self.fn) > 0 else (1.0 if total_eval > 0 and self.tp == 0 else 1.0 if total_eval > 0 else None)
+            live_f1 = (2 * live_prec * live_rec / (live_prec + live_rec)) if (live_prec is not None and live_rec is not None and (live_prec + live_rec) > 0) else (0.0 if total_eval > 0 else None)
+
             return {
                 "status": self.status,
                 "mode": self.mode,
+                "benchmark": getattr(self, "benchmark", "cicids2017"),
+                "benchmarks": [
+                    {
+                        "id": k,
+                        "name": v["name"],
+                        "short_name": v["short_name"],
+                        "contract": v["contract"],
+                        "test_population": v["test_population"],
+                    }
+                    for k, v in BENCHMARK_CONFIGS.items()
+                ],
                 "dataset_category": self.dataset_category,
                 "dataset_categories": DATASET_CATEGORIES,
                 "interface": self.interface,
@@ -421,6 +514,20 @@ class LiveSession:
                     "alerts": self.alert_count,
                     "elapsed_s": round(elapsed, 2),
                     "packets_per_s": round(pps, 2),
+                },
+                "live_analysis": {
+                    "has_ground_truth": total_eval > 0,
+                    "total_evaluated": total_eval,
+                    "tp": self.tp,
+                    "fp": self.fp,
+                    "tn": self.tn,
+                    "fn": self.fn,
+                    "accuracy": round(live_acc, 4) if live_acc is not None else None,
+                    "precision": round(live_prec, 4) if live_prec is not None else None,
+                    "recall": round(live_rec, 4) if live_rec is not None else None,
+                    "f1": round(live_f1, 4) if live_f1 is not None else None,
+                    "score_distribution": dict(self.score_bands),
+                    "traffic_types": dict(self.traffic_types),
                 },
                 "recent_flows": list(self.flows)[-500:],
                 "recent_alerts": list(self.alerts)[-100:],
@@ -443,6 +550,12 @@ class LiveSession:
         self.total_bytes = 0
         self.flow_count = 0
         self.alert_count = 0
+        self.tp = 0
+        self.fp = 0
+        self.tn = 0
+        self.fn = 0
+        self.score_bands = {"benign": 0, "low": 0, "medium": 0, "high": 0}
+        self.traffic_types.clear()
         self._t0 = None
         self._t_end = None
         self.flows.clear()
@@ -773,6 +886,31 @@ class LiveSession:
             self.flow_count += 1
             self.flows.append(asdict(observation))
 
+            score = observation.attack_score
+            if score >= 0.85:
+                self.score_bands["high"] += 1
+            elif score >= 0.65:
+                self.score_bands["medium"] += 1
+            elif score >= 0.50:
+                self.score_bands["low"] += 1
+            else:
+                self.score_bands["benign"] += 1
+
+            gt = observation.ground_truth or "UNKNOWN"
+            self.traffic_types[gt] = self.traffic_types.get(gt, 0) + 1
+
+            if gt not in ("UNKNOWN", "SIMULATED ATTACK", None):
+                is_gt_attack = str(gt).strip().upper() != "BENIGN"
+                is_pred_attack = (observation.prediction_class == 1)
+                if is_gt_attack and is_pred_attack:
+                    self.tp += 1
+                elif not is_gt_attack and not is_pred_attack:
+                    self.tn += 1
+                elif not is_gt_attack and is_pred_attack:
+                    self.fp += 1
+                elif is_gt_attack and not is_pred_attack:
+                    self.fn += 1
+
     def _on_alert(self, alert: AlertEvent) -> None:
         with self._lock:
             self.alert_count += 1
@@ -794,7 +932,28 @@ class DashboardHandler(BaseHTTPRequestHandler):
         elif path == "/app.js":
             self.serve_file(DASHBOARD_DIR / "app.js", "application/javascript; charset=utf-8")
         elif path == "/api/data":
-            self.send_json(get_dashboard_data())
+            query = parse_qs(parsed.query)
+            bench = query.get("benchmark", ["cicids2017"])[0]
+            self.send_json(get_dashboard_data(benchmark=bench))
+        elif path == "/api/benchmarks":
+            self.send_json(
+                {
+                    "benchmarks": [
+                        {
+                            "id": k,
+                            "name": v["name"],
+                            "short_name": v["short_name"],
+                            "contract": v["contract"],
+                            "test_population": v["test_population"],
+                            "accuracy": v["accuracy_fusion"],
+                            "f1": v["f1_fusion"],
+                            "role": v["role"],
+                            "description": v["description"],
+                        }
+                        for k, v in BENCHMARK_CONFIGS.items()
+                    ]
+                }
+            )
         elif path == "/api/live":
             self.send_json(LIVE_SESSION.snapshot())
         elif path == "/api/live/dataset-categories":
@@ -841,6 +1000,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             body = self.read_json_body()
             result = LIVE_SESSION.start(
                 mode=str(body.get("mode", "dataset")),
+                benchmark=str(body.get("benchmark", "cicids2017")),
                 dataset_category=body.get("dataset_category") or None,
                 interface=body.get("interface") or None,
                 bpf_filter=body.get("bpf_filter") or None,
@@ -924,10 +1084,10 @@ def run(port: int = 8000, autostart: dict[str, Any] | None = None) -> None:
     print(f"XRL-IDARS Dashboard running at http://127.0.0.1:{port}/")
     if autostart is not None:
         result = LIVE_SESSION.start(**autostart)
-        if "error" in result:
+        if result.get("error"):
             print(f"Live session did not start: {result['error']}")
         else:
-            print(f"Live session started: mode={result['mode']} interface={result['interface'] or '-'}")
+            print(f"Live session started: mode={result['mode']} benchmark={result.get('benchmark')} interface={result.get('interface') or '-'}")
     if not PacketCaptureService.check_permissions():
         print("Note: no raw-socket permission — use the Sample stream mode, or restart with sudo for live capture.")
     print("Press Ctrl+C to stop.")
@@ -957,6 +1117,9 @@ def main(argv: list[str] | None = None) -> int:
         autostart = {"mode": "live", "interface": interface, "bpf_filter": args.bpf}
     elif args.sample:
         autostart = {"mode": "sample", "bpf_filter": args.bpf}
+    else:
+        # Default: auto-start dataset stream so the live monitor is actively streaming immediately on load!
+        autostart = {"mode": "dataset", "dataset_category": "mixed", "benchmark": "cicids2017"}
 
     run(port=args.port, autostart=autostart)
     return 0
