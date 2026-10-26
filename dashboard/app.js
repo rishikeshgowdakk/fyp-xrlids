@@ -861,6 +861,25 @@ async function runAnalysis() {
 }
 
 // ─── Init ───
+function handleUrlHash() {
+  const hash = window.location.hash;
+  if (hash === "#evidence") {
+    showTab("evidence");
+  } else if (hash === "#cse2018") {
+    showTab("evidence");
+    switchBenchmark("cse2018");
+  } else if (hash === "#unswnb15") {
+    showTab("evidence");
+    switchBenchmark("unswnb15");
+  } else if (hash === "#inspect") {
+    const firstKey = alertDetailsCache.keys().next().value;
+    if (firstKey) showAlertDetails(firstKey);
+  } else if (hash === "#flows") {
+    const el = document.getElementById("flow-counter");
+    if (el) el.scrollIntoView({ behavior: "instant" });
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   onLiveModeChange();
   loadDashboard();
@@ -868,4 +887,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadScenarios();
   pollLive();
   setInterval(pollLive, LIVE_POLL_MS);
+  window.addEventListener("hashchange", handleUrlHash);
+  setTimeout(handleUrlHash, 800);
 });

@@ -105,6 +105,8 @@ Provides empirical proof that the machine learning model is actively evaluating 
   - `🟡 Low Threat (0.50 – 0.65)`: Yellow badge (triggers `MONITOR`).
   - `✅ Benign Normal (< 0.50)`: Green badge (triggers `ALLOW`).
 
+![Live Monitor Console](images/01_full_dashboard_live.png)
+
 ### 2.5 Attack Simulator (In-Memory Synthesis)
 Allows triggering calibrated attack scenarios on demand:
 - Uses `src/xrlids/demo/attack_sim.py` to synthesize raw TCP/IP packets directly in memory.
@@ -149,6 +151,8 @@ Streams every completed bidirectional flow with:
     10. `syn_ack_ratio`: Handshake symmetry ratio.
   - Shows TreeSHAP attribution bars indicating which features drove the score higher (red) or lower (blue).
 
+![Score Provenance Modal](images/02_score_provenance_modal.png)
+
 ### 2.9 Passive WiFi Device Discovery
 - Active during `Live Interface` capture.
 - Sniffs broadcast/multicast packets (ARP, DHCP, mDNS, SSDP) and queries the OS neighbor cache (`/proc/net/arp`).
@@ -158,6 +162,10 @@ Streams every completed bidirectional flow with:
 - Replay verification metrics on the bundled sample capture.
 - Multi-benchmark model comparison table (CIC-IDS2017, CSE-CIC-IDS2018, UNSW-NB15) with 3-seed means and 95% bootstrap confidence intervals.
 - Research Figures Gallery with high-resolution ROC curves, confusion matrices, and feature distribution plots.
+
+![Analysis and Evidence](images/03_analysis_and_evidence.png)
+
+![Cross-Benchmark Comparison](images/04_cross_benchmark_comparison.png)
 
 ---
 

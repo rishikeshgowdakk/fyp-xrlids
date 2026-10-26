@@ -6,6 +6,22 @@ XRL-IDARS is a research framework for network-flow intrusion detection and contr
 
 ---
 
+## 🎯 Viva & Presentation Hub (Quick Links)
+
+Essential documentation, presentation scripts, and defense runbooks for final year project evaluations:
+
+| Document | Purpose & Key Contents |
+|----------|------------------------|
+| [📖 **Frontend Presentation & Viva Script**](docs/FRONTEND_AND_DEMO_GUIDE.md) | **Word-for-word viva presentation script**, UI layout breakdown, step-by-step click guide, and defense answers |
+| [🎓 **Final Viva Defense Guide**](docs/viva/FINAL_VIVA_GUIDE.md) | Comprehensive examiner Q&A, theoretical defense, metric rationale, and DQN safety principles |
+| [🎬 **Demo Runbook & Video Guide**](docs/viva/DEMO_AND_VIDEO_SCRIPT.md) | Step-by-step practical demo walkthrough, pre-demo checks, and contingency plans |
+| [⚙️ **System Architecture & Mechanics**](docs/HOW_IT_WORKS.md) | Full end-to-end explanation: D-006 flow policy, R10 feature contracts, and frozen model pipeline |
+| [🔄 **Reproducibility Map**](docs/final/REPRODUCIBILITY_MAP.md) | Exact commands and scripts to reproduce all experiments, models, and metric artifacts from scratch |
+| [📊 **Benchmark Datasets Guide**](docs/DATASETS.md) | Ingestion protocols, schema mapping, and preprocessing audits for CIC-IDS2017, CSE-CIC-IDS2018, UNSW-NB15 |
+| [⚠️ **Temporal Generalization Report**](reports/generated/temporal_split_report.md) | Empirical analysis of concept drift across temporal vs. random splits on CSE-CIC-IDS2018 |
+
+---
+
 ## Architecture
 
 ```text
@@ -163,8 +179,30 @@ The dashboard is a zero-dependency web UI with two tabs:
 
 | Tab | What it does |
 |-----|--------------|
-| **Live Monitor** | Real-time packet capture → flow construction → frozen detector scoring, with IP endpoints, attack source summary, threat scores, per-alert feature/score provenance, and an attack simulator |
+| **Live Monitor** | Real-time packet capture → flow construction → frozen detector scoring, with IP endpoints, attack source summary, threat scores, per-alert feature/score provenance, real-time confusion matrix, and an attack simulator |
 | **Replay & Evidence** | Replay verification stats, offline RF/LSTM/fusion comparison, TreeSHAP attributions, research figures |
+
+#### Visual Dashboard Tour & Live Console Gallery
+
+##### 1. Live Monitor — Real-Time Detection & Empirical Validation
+Streams authentic benchmark or live network flows with a real-time confusion matrix (True Positives, False Positives, False Negatives, True Negatives), threat score spectrum, in-memory attack simulator, detected attacker IP summary, and autonomous Dueling DQN mitigation policies (`BLOCK`, `THROTTLE`, `MONITOR`, `ALLOW`):
+
+![Live Monitor Console](docs/images/01_full_dashboard_live.png)
+
+##### 2. Explainable AI — TreeSHAP Feature Provenance Modal
+Clicking **`🔍 Inspect`** on any alert row displays the exact 10 R10 features sent to the frozen detector, the underlying prediction math, and TreeSHAP feature attributions:
+
+![Score Provenance Modal](docs/images/02_score_provenance_modal.png)
+
+##### 3. Analysis & Evidence — Multi-Benchmark Comparison & Research Figures
+Static reproducible evidence view displaying 3-seed benchmark metrics across CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15 with 95% bootstrap confidence intervals, TreeSHAP feature importances, and publication-ready research figures:
+
+![Analysis and Evidence Tab](docs/images/03_analysis_and_evidence.png)
+
+##### 4. Cross-Benchmark & Temporal Concept Drift Analysis
+Enterprise cloud benchmark evaluation on 1.66M flows with documented temporal concept drift caveat:
+
+![Cross Benchmark Analysis](docs/images/04_cross_benchmark_comparison.png)
 
 #### Option A: Benchmark Dataset Replay (CIC-IDS2017) (Recommended for Demos & Professors — No Root)
 
