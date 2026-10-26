@@ -33,6 +33,50 @@ Open `http://127.0.0.1:8000/` in your browser.
 > are in `results/experiments/EXP-P1-CIC2017-R10-001/multi_seed_metrics.json` and summarized in
 > [`docs/HOW_IT_WORKS.md`](../docs/HOW_IT_WORKS.md) §2.7.1. The live score is not an LSTM output.
 
+## Demonstration Guide (Exhibitions & Professor Viva)
+
+Follow these steps to demonstrate the intrusion detection and explainable AI capabilities:
+
+### Step 1: Start the Web Dashboard
+```bash
+# In the project root directory:
+source .venv/bin/activate
+python dashboard/server.py
+```
+Then navigate to **http://127.0.0.1:8000/** in your web browser.
+
+### Step 2: Benchmark Dataset Demonstration (Recommended)
+1. In the **Live Monitor** tab, select **Benchmark Dataset Replay (CIC-IDS2017)**.
+2. Select an attack category from the dropdown:
+   - `Curated Benchmark Mix (DDoS, DoS Hulk, PortScan, Benign)` *(best overall demo)*
+   - `Friday Afternoon — DDoS Attacks + Benign`
+   - `Wednesday — DoS Hulk / Slowloris + Benign`
+   - `Friday Afternoon — PortScan Recon + Benign`
+   - `Monday — Normal Enterprise Benign Only`
+3. Click **Start Capture**.
+4. Observe:
+   - Real-time flow table populating with IP endpoints, protocols, packet counts, threat scores, and **Truth** badges.
+   - High-confidence attacks triggering the red **ATTACK DETECTED** banner.
+   - The **Detected Attack Sources** table aggregating attacker IPs and suggesting Dueling DQN mitigation actions (e.g. `BLOCK`).
+   - Click the **features** link next to any flow to open the feature provenance modal, displaying the exact 10 R10 feature values and TreeSHAP feature attributions.
+
+### Step 3: Terminal CLI Commands Reference
+Run these standalone terminal commands to demonstrate technical depth and offline verification:
+
+```bash
+# 1. Run offline PCAP replay through the full detection pipeline
+python scripts/demo/run_replay_demo.py
+
+# 2. Verify all calibrated attack scenarios against the frozen detector
+python scripts/demo/verify_attack_scenarios.py
+
+# 3. Prove real-time inference and model authenticity with TreeSHAP feature vector
+python scripts/demo/explain_score.py
+
+# 4. Run the full unit & integration test suite (409 tests)
+pytest -q
+```
+
 ## Attack Simulator (simulation only)
 
 The Live Monitor tab includes an **Attack Simulator** panel: choose a calibrated scenario, press
@@ -166,7 +210,8 @@ dashboard/
 | `POST` | `/api/run-replay` | Runs `scripts/demo/run_replay_demo.py` and returns the refreshed summary |
 | `GET` | `/api/live` | Live session snapshot: status, counters, recent flows, recent alerts, observed devices, network metadata |
 | `GET` | `/api/live/devices` | Passive device-discovery snapshot (empty outside live capture) |
-| `POST` | `/api/live/start` | Starts a session — JSON body: `{"mode": "sample"\|"live", "interface": "wlo1", "bpf_filter": "tcp port 443", "pcap": null, "pace_speed": 2.0, "loop": true, "max_packets": null}` |
+| `GET` | `/api/live/dataset-categories` | Available evaluation categories for benchmark dataset replay |
+| `POST` | `/api/live/start` | Starts a session — JSON body: `{"mode": "dataset"|"sample"|"live", "dataset_category": "mixed", "interface": "wlo1", "bpf_filter": "tcp port 443", "pcap": null, "pace_speed": 2.0, "loop": true, "max_packets": null}` |
 | `POST` | `/api/live/stop` | Stops the session (flushes pending flows) and returns the final snapshot |
 | `GET` | `/api/live/interfaces` | Available interface names + raw-socket permission status |
 | `GET` | `/api/live/scenarios` | Calibrated attack-simulator scenario catalogue (metadata + expected scores/bands) |

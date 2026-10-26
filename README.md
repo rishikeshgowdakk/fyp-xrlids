@@ -137,13 +137,13 @@ pip install -r requirements.txt
 
 ### 2. Verify Installation (Test Suite)
 
-Run the full 408-test verification suite to confirm everything is working:
+Run the full 409-test verification suite to confirm everything is working:
 
 ```bash
 .venv/bin/pytest -q
 ```
 
-All 408 tests should pass with 0 failures.
+All 409 tests should pass with 0 failures.
 
 ### 3. Quick Demo — PCAP Replay
 
@@ -164,17 +164,39 @@ The dashboard is a zero-dependency web UI with two tabs:
 | **Live Monitor** | Real-time packet capture → flow construction → frozen detector scoring, with IP endpoints, attack source summary, threat scores, per-alert feature/score provenance, and an attack simulator |
 | **Replay & Evidence** | Replay verification stats, offline RF/LSTM/fusion comparison, TreeSHAP attributions, research figures |
 
-#### Option A: Sample Stream (no root needed — recommended for demos)
+#### Option A: Benchmark Dataset Replay (CIC-IDS2017) (Recommended for Demos & Professors — No Root)
+
+The best and most reliable way to demonstrate intrusion detection to professors and exhibition attendees without needing root permissions or live network attack risk:
+
+```bash
+python dashboard/server.py
+# Or: .venv/bin/python dashboard/server.py
+```
+
+1. Open **http://localhost:8000** in your browser.
+2. Under **Live Capture Control**, ensure **Benchmark Dataset Replay (CIC-IDS2017)** is selected.
+3. Choose an evaluation category:
+   - `Curated Benchmark Mix (DDoS, DoS Hulk, PortScan, Benign)` *(recommended for showing attacks vs. normal traffic)*
+   - `Friday Afternoon — DDoS Attacks + Benign`
+   - `Wednesday — DoS Hulk / Slowloris + Benign`
+   - `Friday Afternoon — PortScan Recon + Benign`
+   - `Monday — Normal Enterprise Benign Only`
+4. Click **Start Capture**:
+   - Streams authentic benchmark flows in real time with ground-truth labels displayed in the **Truth** column.
+   - Attack bursts automatically trigger the red **ATTACK DETECTED** banner, populate the **Detected Attack Sources** table, and recommend Dueling DQN mitigation policies (e.g. `BLOCK`).
+   - Click **features** on any alert to view the exact 10 R10 features and TreeSHAP explainability modal.
+
+#### Option B: Sample PCAP Stream (no root needed)
 
 ```bash
 python dashboard/server.py
 ```
 
-Open **http://localhost:8000** in your browser. Click **"Start Sample Stream"** in the Live Monitor tab — it replays `data/demo/sample_traffic.pcap` in real time through the full live pipeline (clearly labeled as sample traffic).
+Select **Sample PCAP stream (no root)** and click **Start Capture** — replays `data/demo/sample_traffic.pcap` at original pacing through the complete live packet pipeline.
 
-#### Option B: Live WiFi Capture (requires sudo)
+#### Option C: Live WiFi Capture (requires sudo)
 
-Captures real packets from your WiFi interface:
+Captures real packets from your physical WiFi interface:
 
 ```bash
 sudo .venv/bin/python dashboard/server.py 8000 --live --iface wlo1
@@ -189,7 +211,7 @@ Open **http://localhost:8000** — the Live Monitor will show:
 
 > **Note:** Live monitoring is **strictly observational** — zero firewall/routing mutations. It shows flows, alerts, and model scores only (no accuracy numbers, since live traffic has no ground truth). The device panel is passive: it shows devices this laptop has actually observed on the network, **not** the router's full client table. No probes or scans are sent.
 
-#### Option C: Attack Simulator (in-memory, nothing transmitted)
+#### Option D: Attack Simulator (in-memory, nothing transmitted)
 
 Available in the Live Monitor tab during any capture mode. Injects synthetic attack-scenario packets **in memory** through the exact same pipeline — nothing is transmitted on the network.
 
@@ -208,16 +230,16 @@ To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
 2. Run the Phase 1 training scripts in `scripts/phase1/`
 3. See [`docs/final/REPRODUCIBILITY_MAP.md`](docs/final/REPRODUCIBILITY_MAP.md) for exact reproduction commands
 
-### Quick Reference
+### Quick Reference — How to Run
 
 | What you want to do | Command | Root needed? |
 |---------------------|---------|:---:|
-| Run tests | `.venv/bin/pytest -q` | No |
-| Quick replay demo | `python scripts/demo/run_replay_demo.py` | No |
-| Dashboard (sample mode) | `python dashboard/server.py` | No |
-| Dashboard (live capture) | `sudo .venv/bin/python dashboard/server.py 8000 --live --iface wlo1` | Yes |
-| Verify attack scenarios | `python scripts/demo/verify_attack_scenarios.py` | No |
-| Explain a score | `python scripts/demo/explain_score.py` | No |
+| Run full test suite (409 tests) | `.venv/bin/pytest -q` | No |
+| **Launch Dashboard (Dataset & Sample Demo)** | `python dashboard/server.py` | **No** |
+| Run quick offline PCAP replay demo | `python scripts/demo/run_replay_demo.py` | No |
+| Dashboard with real live WiFi capture | `sudo .venv/bin/python dashboard/server.py 8000 --live --iface wlo1` | Yes |
+| Verify all calibrated attack scenarios | `python scripts/demo/verify_attack_scenarios.py` | No |
+| Explain a score with TreeSHAP features | `python scripts/demo/explain_score.py` | No |
 
 ---
 
