@@ -148,6 +148,8 @@ def build_sequences(
     label_rule: str = "last",
     groups: pd.Series | np.ndarray | None = None,
     session_column: pd.Series | np.ndarray | None = None,
+    shuffle_rows: bool = False,
+    shuffle_seed: int = 42,
 ) -> SequenceSet:
     """Build sequences inside a single split without materializing (N, T, F) in memory.
 
@@ -159,6 +161,11 @@ def build_sequences(
     Because this function only ever sees one split's rows, no window can cross a split
     boundary. If ``groups`` (or ``session_column``) is supplied (e.g. session / IP IDs / file provenance),
     sequences that cross group boundaries are discarded.
+
+    If ``shuffle_rows`` is True, the rows within the split are randomly permuted
+    prior to windowing. This provides an essential scientific ablation to verify whether
+    temporal sequence gains reflect true dynamical relationships or CSV row-locality
+    artifacts.
     """
     if groups is None and session_column is not None:
         groups = session_column
@@ -199,6 +206,14 @@ def build_sequences(
             grp_arr = np.asarray(groups)
         if len(grp_arr) != n_rows:
             raise SequenceError("groups and features have different lengths")
+
+    if shuffle_rows and n_rows > 0:
+        rng = np.random.default_rng(shuffle_seed)
+        perm = rng.permutation(n_rows)
+        features_2d = features_2d[perm]
+        targets = targets[perm]
+        if grp_arr is not None:
+            grp_arr = grp_arr[perm]
 
     # Fast prefix-sum label computation: O(1) per sequence
     csum = np.pad(np.cumsum(targets), (1, 0))
@@ -372,7 +387,8 @@ class LSTMDetector:
             )
 
         patience = int(self.params["patience"])
-        best_state = {k: v.clone() for k, v in net.state_dict().items()}
+        best_state: dict[str, Any] | None = None
+        best_train_loss = float("inf")
         epochs_without_improvement = 0
 
         for epoch in range(int(self.params["epochs"])):
@@ -404,8 +420,17 @@ class LSTMDetector:
                         val_loss_sum += float(loss.item()) * n_b
                         val_samples += n_b
                 val_loss = val_loss_sum / max(1, val_samples)
-                if val_loss < self.best_val_loss - 1e-6:
+                if not np.isnan(val_loss) and val_loss < self.best_val_loss - 1e-6:
                     self.best_val_loss = val_loss
+                    self.best_epoch = epoch
+                    best_state = {k: v.clone() for k, v in net.state_dict().items()}
+                    epochs_without_improvement = 0
+                else:
+                    epochs_without_improvement += 1
+            else:
+                # No validation split provided: track best training epoch loss
+                if not np.isnan(epoch_loss) and epoch_loss < best_train_loss - 1e-6:
+                    best_train_loss = epoch_loss
                     self.best_epoch = epoch
                     best_state = {k: v.clone() for k, v in net.state_dict().items()}
                     epochs_without_improvement = 0
@@ -420,7 +445,11 @@ class LSTMDetector:
                 print(f"       LSTM early stopping triggered at epoch {epoch + 1} (best epoch {self.best_epoch + 1})")
                 break
 
-        net.load_state_dict(best_state)
+        if best_state is not None:
+            net.load_state_dict(best_state)
+        else:
+            logger.warning("No checkpoint improvement state saved; keeping final trained epoch weights.")
+        net.eval()
         net.eval()
         logger.info("LSTM trained: seq_len=%d features=%d best_val_loss=%.6f", self.seq_len, n_features, self.best_val_loss)
         return self

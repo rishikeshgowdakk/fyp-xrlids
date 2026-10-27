@@ -274,6 +274,34 @@ def test_dashboard_http_live_endpoints():
         assert "Live Monitor" in html
         assert "Evidence" in html
         assert "Benchmark Dataset" in html
+
+        # Security check: cross-origin POST rejected with 403 Forbidden
+        evil_req = urllib.request.Request(
+            f"http://127.0.0.1:{port}/api/live/stop",
+            data=b"{}",
+            headers={"Content-Type": "application/json", "Origin": "https://malicious-site.example.com"},
+            method="POST",
+        )
+        try:
+            urllib.request.urlopen(evil_req, timeout=5)
+            origin_blocked = False
+        except urllib.error.HTTPError as exc:
+            origin_blocked = exc.code == 403
+        assert origin_blocked, "POST with external Origin header must be rejected with HTTP 403"
+
+        # Security check: path traversal or unauthorized pcap path rejected with 400 Bad Request
+        traversal_req = urllib.request.Request(
+            f"http://127.0.0.1:{port}/api/live/start",
+            data=json.dumps({"mode": "sample", "pcap": "/etc/shadow"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            urllib.request.urlopen(traversal_req, timeout=5)
+            pcap_blocked = False
+        except urllib.error.HTTPError as exc:
+            pcap_blocked = exc.code == 400
+        assert pcap_blocked, "POST with unauthorized PCAP path must be rejected with HTTP 400"
     finally:
         server.shutdown()
         server.server_close()

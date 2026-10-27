@@ -28,6 +28,15 @@ from xrlids.demo.pcap import PacketInfo, PcapReader
 from xrlids.features.definitions import R10_FEATURES
 
 
+class NoDetectorLoadedError(RuntimeError):
+    """Raised when scoring is attempted without a loaded, trained detector.
+
+    A detector-free engine must never emit a score. Substitute scores are
+    indistinguishable from real model output once written to an artifact, so
+    the failure is surfaced instead of approximated.
+    """
+
+
 @dataclass
 class FlowPredictionEvent:
     """Individual flow classification record with explicit dual-threshold reporting."""
@@ -132,9 +141,11 @@ class ReplayEngine:
             feature_df = raw_df
 
         if self.model is None:
-            score = 0.95 if features.get("flow_packets_per_s", 0.0) > 1000.0 or features.get("syn_ack_ratio", 0.0) > 10.0 else 0.05
-            pred = 1 if score >= self.research_threshold else 0
-            return pred, float(score)
+            raise NoDetectorLoadedError(
+                "no detector is loaded, so no score can be produced. Refusing to emit a "
+                "substitute heuristic score. Load a frozen artifact with "
+                "ReplayEngine(model_path=...) or ReplayEngine(model=...) before scoring."
+            )
 
         if hasattr(self.model, "predict_proba"):
             probs = self.model.predict_proba(feature_df)

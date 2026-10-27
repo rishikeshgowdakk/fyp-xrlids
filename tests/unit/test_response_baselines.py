@@ -56,6 +56,22 @@ def test_baseline_2_two_tier_threshold_3_action():
     assert p.predict_action(dummy_state, 0.85) == Action.RATE_LIMIT
 
 
+def test_baseline_4_cost_optimal_threshold():
+    """Verify Baseline 4 chooses actions minimizing expected Bayes loss."""
+    from xrlids.response.baselines import CostOptimalThresholdPolicy
+
+    # 4-action mode: ALLOW at p=0.005, ALERT at p=0.30, RATE_LIMIT at p=0.80, ISOLATE at p=0.98
+    p4 = CostOptimalThresholdPolicy(action_mode=ActionSpaceMode.FOUR_ACTION)
+    assert p4.predict_action(dummy_state, 0.005) == Action.ALLOW
+    assert p4.predict_action(dummy_state, 0.30) == Action.ALERT
+    assert p4.predict_action(dummy_state, 0.80) == Action.RATE_LIMIT
+    assert p4.predict_action(dummy_state, 0.98) == Action.ISOLATE
+
+    # 3-action mode: cannot choose ISOLATE, tops out at RATE_LIMIT
+    p3 = CostOptimalThresholdPolicy(action_mode=ActionSpaceMode.THREE_ACTION)
+    assert p3.predict_action(dummy_state, 0.98) == Action.RATE_LIMIT
+
+
 def test_baseline_3_heuristic_state_machine_escalation():
     """Verify Baseline 3 escalates from ALLOW -> ALERT -> RATE_LIMIT -> ISOLATE."""
     p = HeuristicStateMachinePolicy(

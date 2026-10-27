@@ -95,3 +95,28 @@ def test_analyze_duplicate_label_conflicts_keep_first():
     assert report.total_conflicting_vectors == 1
     assert report.rows_dropped == 0
     assert len(retain_idx) == 3
+
+
+def test_analyze_duplicate_label_conflicts_counts_beyond_max_examples():
+    # 15 distinct vectors, each appearing twice with labels 0 and 1
+    rows_f1, rows_f2, rows_y, rows_fam = [], [], [], []
+    for i in range(15):
+        rows_f1.extend([float(i), float(i)])
+        rows_f2.extend([float(i * 2), float(i * 2)])
+        rows_y.extend([0, 1])
+        rows_fam.extend(["BENIGN", f"Attack_{i}"])
+
+    features = pd.DataFrame({"f1": rows_f1, "f2": rows_f2})
+    labels = pd.Series(rows_y)
+    prov = pd.DataFrame({"label_family": rows_fam, "source_file": ["test.csv"] * 30})
+
+    retain_idx, report = analyze_duplicate_label_conflicts(
+        features, labels, prov, policy="reject_conflicts", max_examples=10
+    )
+
+    assert report.total_conflicting_vectors == 15
+    assert report.total_conflicting_rows == 30
+    # Must correctly tally all 15, not be capped at max_examples=10!
+    assert report.benign_attack_conflicts == 15
+    assert report.family_conflicts == 15
+    assert len(report.conflict_examples) == 10  # Sample list stays capped for serialization

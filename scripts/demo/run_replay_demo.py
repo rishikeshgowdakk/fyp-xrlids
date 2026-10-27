@@ -168,8 +168,6 @@ def main() -> int:
     print(f"Operational Candidate:  {args.operational_threshold} (Proposed Phase 2 Operational Parameter)")
     print(f"Output Directory:       {args.output_dir}")
     print("-" * 80)
-    print("Streaming flow classification in progress...")
-    print("-" * 80)
 
     try:
         engine = ReplayEngine(
@@ -178,12 +176,21 @@ def main() -> int:
             operational_candidate_threshold=args.operational_threshold,
         )
     except Exception as exc:
-        print(f"Warning: Could not load model from {args.model_dir} ({exc}). Using heuristic fallback.")
-        engine = ReplayEngine(
-            model=None,
-            research_threshold=args.research_threshold,
-            operational_candidate_threshold=args.operational_threshold,
+        print(
+            "ERROR: the frozen detector could not be loaded, so this replay would not be "
+            "model inference.\n"
+            f"       Model directory: {args.model_dir}\n"
+            f"       Reason: {exc}\n"
+            "       No scores were produced and no artifacts were written.\n"
+            "       Restore the artifact (see docs/final/REPRODUCIBILITY_MAP.md) or pass "
+            "--model-dir pointing at a directory containing random_forest.joblib "
+            "and preprocessor.joblib.",
+            file=sys.stderr,
         )
+        return 1
+
+    print("Streaming flow classification in progress...")
+    print("-" * 80)
 
     summary = engine.replay_pcap(
         pcap_file=pcap_path,

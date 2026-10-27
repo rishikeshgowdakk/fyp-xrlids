@@ -31,6 +31,36 @@ from xrlids.utils.logging_utils import get_logger
 logger = get_logger(__name__)
 
 
+def _class1_attributions(shap_values: Any, n_features: int) -> list[float]:
+    """Extract per-feature SHAP attributions for the ATTACK class (class 1).
+
+    shap returns different layouts across versions and model types:
+    ``(n_samples, n_features)``, a list of ``[class_0, class_1]`` arrays, or
+    ``(n_samples, n_features, n_classes)``. All three are normalised here so the
+    explainability path cannot silently return an empty attribution dict.
+    """
+    if isinstance(shap_values, list):
+        if len(shap_values) < 2:
+            raise ValueError(
+                "expected a per-class SHAP list with at least two classes, "
+                f"got length {len(shap_values)}"
+            )
+        arr = np.asarray(shap_values[1], dtype=float)
+    else:
+        arr = np.asarray(shap_values, dtype=float)
+
+    if arr.ndim == 3:
+        arr = arr[..., 1]
+    elif arr.ndim == 1:
+        arr = arr.reshape(1, -1)
+
+    if arr.ndim != 2 or arr.shape[0] == 0 or arr.shape[1] != n_features:
+        raise ValueError(
+            f"unexpected SHAP attribution shape {arr.shape} for {n_features} features"
+        )
+    return [float(v) for v in arr[0]]
+
+
 @dataclass
 class FlagshipDecision:
     """End-to-end decision output for a network flow."""
@@ -46,6 +76,9 @@ class FlagshipDecision:
     lstm_score: float
     state_vector: list[float]
     shap_attributions: dict[str, float] = field(default_factory=dict)
+    # "lstm" when the real sequence model scored this flow; "rf_fallback" when the
+    # 5-flow window was not yet full and lstm_score is a copy of rf_score.
+    lstm_score_source: str = "lstm"
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -59,6 +92,7 @@ class FlagshipDecision:
             "rf_score": round(self.rf_score, 4),
             "lstm_score": round(self.lstm_score, 4),
             "state_vector": [round(x, 4) for x in self.state_vector],
+            "lstm_score_source": self.lstm_score_source,
             "shap_attributions": {k: round(v, 4) for k, v in self.shap_attributions.items()},
         }
 
@@ -241,7 +275,8 @@ class FlagshipXRLIDS:
         if len(self._recent_flow_window) > 5:
             self._recent_flow_window.pop(0)
 
-        p_lstm = p_rf  # fallback if window < 5
+        p_lstm = p_rf  # fallback if window < 5; flagged via lstm_score_source
+        lstm_score_source = "rf_fallback"
         if self.lstm_detector is not None and len(self._recent_flow_window) == 5:
             seq_tensor = torch.tensor(
                 np.array([self._recent_flow_window]), dtype=torch.float32
@@ -249,6 +284,7 @@ class FlagshipXRLIDS:
             with torch.no_grad():
                 out = self.lstm_detector.model(seq_tensor)
                 p_lstm = float(torch.sigmoid(out).item())
+                lstm_score_source = "lstm"
 
         # Calibrated Score Fusion
         p_fusion = self.alpha * p_rf + (1.0 - self.alpha) * p_lstm
@@ -295,15 +331,12 @@ class FlagshipXRLIDS:
                 explainer = shap.TreeExplainer(self.rf_detector.model)
                 sample = df_scaled if self.preprocessor is not None else df_contract
                 shap_vals = explainer.shap_values(sample)
-                # Class 1 (attack) attribution
-                if isinstance(shap_vals, list) and len(shap_vals) > 1:
-                    vals = shap_vals[1][0]
-                else:
-                    vals = shap_vals[0]
+                vals = _class1_attributions(shap_vals, len(self.feature_columns))
                 for col, val in zip(self.feature_columns, vals):
                     shap_dict[col] = float(val)
             except Exception as e:
-                logger.debug("SHAP explanation omitted: %s", e)
+                # A requested explanation must never be silently dropped.
+                logger.warning("SHAP explanation failed and was omitted: %s", e, exc_info=True)
 
         return FlagshipDecision(
             threat_score=p_fusion,
@@ -317,6 +350,7 @@ class FlagshipXRLIDS:
             lstm_score=p_lstm,
             state_vector=state_6d.tolist(),
             shap_attributions=shap_dict,
+            lstm_score_source=lstm_score_source,
         )
 
     @staticmethod

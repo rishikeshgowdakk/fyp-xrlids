@@ -309,6 +309,12 @@ class LiveSession:
 
     # ------------------------------------------------------------- engine
     def _get_engine(self) -> ReplayEngine:
+        """Return the loaded frozen detector, or raise instead of fabricating scores.
+
+        A monitoring console that silently substitutes heuristic scores for model
+        output would present fabricated numbers as evidence. Missing artifacts are
+        therefore a hard error surfaced to the caller and the UI.
+        """
         if self._engine is not None:
             return self._engine
         if self.model_dir.exists():
@@ -316,13 +322,19 @@ class LiveSession:
                 self._engine = ReplayEngine(model_path=self.model_dir)
                 return self._engine
             except Exception as exc:  # pragma: no cover - defensive
-                self.engine_warning = f"Frozen model could not be loaded ({exc}); using heuristic fallback."
+                message = (
+                    f"Frozen detector could not be loaded from {self.model_dir}: {exc}. "
+                    "No scores will be produced."
+                )
         else:
-            self.engine_warning = (
-                f"Frozen model directory not found ({self.model_dir}); using heuristic fallback."
+            message = (
+                f"Frozen detector directory not found: {self.model_dir}. "
+                "No scores will be produced."
             )
-        self._engine = ReplayEngine(model=None)
-        return self._engine
+        self.engine_warning = message
+        self.status = "error"
+        self.error = message
+        raise RuntimeError(message)
 
     # ------------------------------------------------------------- control
     def start(
@@ -360,6 +372,15 @@ class LiveSession:
                 self.benchmark = benchmark
             else:
                 self.benchmark = getattr(self, "benchmark", "cicids2017")
+
+            # Fail before starting a session if the frozen detector is unavailable.
+            # The console must never run in a mode that scores flows without a model.
+            try:
+                self._get_engine()
+            except RuntimeError as exc:
+                self.status = "error"
+                self.error = str(exc)
+                return {"error": str(exc), "status": "error"}
 
             if mode == "live" and interface:
                 # Passive device discovery is created only for live capture.
@@ -993,19 +1014,69 @@ class DashboardHandler(BaseHTTPRequestHandler):
         else:
             self.send_error(HTTPStatus.NOT_FOUND, "Not found")
 
+    def _validate_origin(self) -> bool:
+        """Reject cross-origin or foreign host requests to prevent DNS rebinding / CSRF."""
+        host = self.headers.get("Host", "")
+        host_name = host.split(":")[0].strip().lower()
+        if host_name and host_name not in ("127.0.0.1", "localhost", "::1", "0.0.0.0", "testserver"):
+            self.send_error(HTTPStatus.FORBIDDEN, "Forbidden: Invalid Host header.")
+            return False
+
+        origin = self.headers.get("Origin")
+        if origin:
+            parsed_origin = urlparse(origin)
+            origin_host = (parsed_origin.hostname or "").lower()
+            if origin_host not in ("127.0.0.1", "localhost", "::1", "testserver"):
+                self.send_error(HTTPStatus.FORBIDDEN, "Forbidden: Cross-origin requests not allowed.")
+                return False
+
+        sec_fetch_site = self.headers.get("Sec-Fetch-Site", "").lower()
+        if sec_fetch_site == "cross-site":
+            self.send_error(HTTPStatus.FORBIDDEN, "Forbidden: Cross-site requests rejected.")
+            return False
+
+        return True
+
+    def _is_safe_pcap_path(self, pcap_str: str) -> bool:
+        """Ensure PCAP file is within allowed paths and has a valid PCAP extension."""
+        if not pcap_str:
+            return True
+        try:
+            target = Path(pcap_str).expanduser().resolve()
+            if not target.is_file():
+                return False
+            if target.suffix.lower() not in (".pcap", ".pcapng", ".cap"):
+                return False
+            repo_resolved = REPO_ROOT.resolve()
+            tmp_resolved = Path("/tmp").resolve()
+            is_under_repo = str(target).startswith(str(repo_resolved))
+            is_under_tmp = str(target).startswith(str(tmp_resolved))
+            return is_under_repo or is_under_tmp
+        except Exception:
+            return False
+
     def do_POST(self) -> None:
+        if not self._validate_origin():
+            return
         parsed = urlparse(self.path)
         if parsed.path == "/api/run-replay":
             self._handle_run_replay()
         elif parsed.path == "/api/live/start":
             body = self.read_json_body()
+            pcap_path = body.get("pcap") or None
+            if pcap_path and not self._is_safe_pcap_path(str(pcap_path)):
+                self.send_json(
+                    {"error": f"Invalid or disallowed PCAP path: '{pcap_path}'. Path must be an existing .pcap file within workspace.", "status": "error"},
+                    status=HTTPStatus.BAD_REQUEST,
+                )
+                return
             result = LIVE_SESSION.start(
                 mode=str(body.get("mode", "dataset")),
                 benchmark=str(body.get("benchmark", "cicids2017")),
                 dataset_category=body.get("dataset_category") or None,
                 interface=body.get("interface") or None,
                 bpf_filter=body.get("bpf_filter") or None,
-                pcap=body.get("pcap") or None,
+                pcap=pcap_path,
                 pace_speed=float(body.get("pace_speed", 2.0)),
                 loop=bool(body.get("loop", True)),
                 max_packets=int(body["max_packets"]) if body.get("max_packets") else None,
@@ -1043,6 +1114,10 @@ class DashboardHandler(BaseHTTPRequestHandler):
 
     def read_json_body(self) -> dict[str, Any]:
         try:
+            content_type = self.headers.get("Content-Type", "")
+            if content_type and not content_type.startswith("application/json"):
+                logger.warning("Rejected request with non-JSON Content-Type: %s", content_type)
+                return {}
             length = int(self.headers.get("Content-Length", 0))
             if length <= 0:
                 return {}

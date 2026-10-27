@@ -5,16 +5,30 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from xrlids.demo.flow import Flow
 from xrlids.demo.live_lab import AlertEvent, LiveLabMonitor
 from xrlids.demo.pcap import build_raw_packet, write_pcap
 from xrlids.demo.replay import (
     FlowPredictionEvent,
+    NoDetectorLoadedError,
     ReplayEngine,
     ReplaySummary,
     save_demo_artifacts,
 )
+from xrlids.features.definitions import R10_FEATURES
+
+
+def test_engine_without_detector_refuses_to_score():
+    """An engine with no detector must raise, never emit a substitute score.
+
+    A heuristic score written into replay artifacts is indistinguishable from
+    real model output, so the failure has to be loud.
+    """
+    engine = ReplayEngine(model=None)
+    with pytest.raises(NoDetectorLoadedError):
+        engine.predict_features({f: 0.0 for f in R10_FEATURES})
 
 
 class DummyMockModel:

@@ -232,8 +232,18 @@ def analyze_duplicate_label_conflicts(
     conflicting_mask = h.isin(conflicting_hash_ids)
     n_conflicting_rows = int(conflicting_mask.sum())
 
-    benign_attack_conflicts = 0
-    family_conflicts = 0
+    # Compute true global conflict counts across all vectors (not capped by sample limit)
+    l_min = grouped.min()
+    l_max = grouped.max()
+    benign_attack_conflicts = int(((l_min == 0) & (l_max == 1)).sum())
+
+    if "label_family" in provenance_df.columns:
+        dupe_fams = provenance_df.loc[dupe_vector_mask, "label_family"]
+        fam_nunique = dupe_fams.groupby(dupe_hashes).nunique()
+        family_conflicts = int((fam_nunique > 1).sum())
+    else:
+        family_conflicts = benign_attack_conflicts
+
     conflict_examples: list[dict[str, Any]] = []
 
     if n_conflicting_vectors > 0:
@@ -246,12 +256,11 @@ def analyze_duplicate_label_conflicts(
         for h_val in conflicting_hash_ids[:max_examples]:
             sub_idx = h[h == h_val].index
             lbls = labels.loc[sub_idx].unique().tolist()
-            fams = provenance_df.loc[sub_idx, "label_family"].unique().tolist()
-            is_ba = (0 in lbls) and (1 in lbls)
-            if is_ba:
-                benign_attack_conflicts += 1
-            if len(fams) > 1:
-                family_conflicts += 1
+            fams = (
+                provenance_df.loc[sub_idx, "label_family"].unique().tolist()
+                if "label_family" in provenance_df.columns
+                else []
+            )
 
             conflict_examples.append({
                 "hash": int(h_val),

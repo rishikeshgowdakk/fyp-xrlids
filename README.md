@@ -55,7 +55,7 @@ Controlled Response / Rollback
 | **Dataset & Preprocessing** | Leakage-safe split pipeline, chunked streaming audits, and canonical feature contracts (R10 / R4). |
 | **Random Forest** | Low-latency tabular flow classifier for statistical traffic patterns. |
 | **Supervised LSTM** | Sequence model ($T=5$) capturing multi-flow temporal dependencies. |
-| **RF + LSTM Fusion** | Calibrated convex score combination balancing spatial and temporal signals. |
+| **RF + LSTM Fusion** | Linear score blend balancing spatial and temporal signals (not probability calibration). |
 | **SHAP Explainability** | TreeSHAP feature attributions explaining classification drivers. |
 | **DQN Response Policy** | Context-aware Dueling DQN policy with Prioritized Experience Replay. |
 | **Live Packet/Flow Processing** | Pure-Python PCAP replay and streaming bidirectional flow construction. |
@@ -67,22 +67,55 @@ Controlled Response / Rollback
 
 ## Research Results
 
-### Primary Flagship Dual-Benchmark (95%+ Target Exceeded Across 2.01M Test Flows)
+### How to read these numbers
 
-The flagship models (Random Forest + LSTM Score Fusion under the canonical 10-feature R10 contract) consistently deliver **>99% accuracy** across the two enterprise-scale benchmark populations:
+All figures below are **in-domain, random-split, seed-42** results on the frozen held-out
+test populations. They are **upper bounds**, not future-day or production performance.
+Read them as three separate per-dataset results, never as a pooled average: the datasets
+use different feature contracts and have different attack prevalence.
 
-- **CIC-IDS2017:** Accuracy = **99.06% (0.9906)**, F1 = **0.9745**, ROC-AUC = **0.9989** (Fusion $\alpha = 0.50$, $N = 355,833$)
-- **CSE-CIC-IDS2018:** Accuracy = **99.12% (0.9912)**, F1 = **0.9603**, ROC-AUC = **0.9966** (LSTM / Fusion $\alpha = 0.00$, $N = 1,662,419$)
-- **Combined Primary Fleet Accuracy:** **99.11%** across 2,018,252 held-out test flows.
+| Dataset | Attack prevalence in test | Majority-class accuracy |
+|---|---:|---:|
+| CIC-IDS2017 | 18.2% (64,820 / 355,833) | 81.78% |
+| CSE-CIC-IDS2018 | 11.3% (187,161 / 1,662,419) | 88.74% |
+| UNSW-NB15 | 45.0% | 54.98% |
 
-> **Scope note (important):** these are **in-domain random-split** metrics. A strict future-day
-> holdout on CSE-CIC-IDS2018 produced RF **F1 0.0113** (recall 0.0068, ROC-AUC 0.3905) versus
-> 0.8861 on the random split. The 99% figures are upper bounds, not future-day or production
-> performance claims. See [Temporal Holdout](#temporal-holdout-cse-cic-ids2018-gap-p06) below.
+Accuracy is therefore dominated by the benign majority. **F1 and PR-AUC are the primary
+metrics** here; PR-AUC is the honest summary under class imbalance.
 
-### Auxiliary Benchmark (Degraded Sensor Schema)
+### Primary benchmarks (10-feature R10 contract, seed 42, aligned test population)
 
-- **UNSW-NB15 (Auxiliary R4 Fallback):** Accuracy = **89.96% (0.8996)**, F1 = **0.8970**, ROC-AUC = **0.9674** (Fusion $\alpha = 0.60$, $N = 24,496$). Evaluated under a 4-feature contract due to missing transport flags in Argus exporter. Cross-dataset experiments show significant domain-shift limitations documented in the research report.
+| Dataset | Model | Accuracy | **F1** | **PR-AUC** | ROC-AUC | N |
+|:---|:---|:---:|:---:|:---:|:---:|---:|
+| CIC-IDS2017 | Random Forest | 0.9815 | 0.9512 | 0.9824 | 0.9968 | 355,833 |
+| CIC-IDS2017 | Supervised LSTM | 0.9867 | 0.9633 | 0.9904 | 0.9974 | 355,833 |
+| CIC-IDS2017 | **Fusion ($\alpha$=0.50)** | 0.9906 | **0.9745** | **0.9947** | 0.9989 | 355,833 |
+| CSE-CIC-IDS2018 | Random Forest | 0.9723 | 0.8861 | 0.9676 | 0.9902 | 1,662,419 |
+| CSE-CIC-IDS2018 | **LSTM (fusion $\alpha$=0.00)** | 0.9912 | **0.9603** | **0.9865** | 0.9966 | 1,662,419 |
+
+> **On CSE-CIC-IDS2018 the validation-tuned fusion weight collapses to $\alpha = 0.00$.**
+> The "fusion" is the LSTM alone and the RF contributes nothing, so this is reported as an
+> **LSTM** result, not an RF+LSTM result. On the largest benchmark the two components are
+> not complementary.
+
+### Auxiliary benchmark (degraded 4-feature R4 contract)
+
+| Dataset | Model | Accuracy | F1 | PR-AUC | ROC-AUC | N |
+|:---|:---|:---:|:---:|:---:|:---:|---:|
+| UNSW-NB15 | Random Forest | 0.8590 | 0.8548 | 0.9323 | 0.9487 | 24,496 |
+| UNSW-NB15 | **Fusion ($\alpha$=0.60)** | 0.8996 | 0.8970 | 0.9538 | 0.9674 | 24,496 |
+
+UNSW-NB15 cannot supply 6 of the 10 R10 features (no TCP flags and no packet-length std in
+the Argus exporter) and shows ~19% false alarms on benign traffic. It is reported separately
+and **never averaged** with the R10 benchmarks. Cross-dataset transfer collapses by 0.52–0.95
+F1 in every direction.
+
+### The result that matters most: future-day holdout
+
+A strict temporal holdout on CSE-CIC-IDS2018 leaves the detector with **F1 0.0113** on
+future traffic, versus 0.8861 on the random split. **Treat the random-split numbers as an
+in-domain ceiling, not as deployment evidence.** Full detail in
+[Temporal Holdout](#temporal-holdout-cse-cic-ids2018-gap-p06) below.
 
 ### Multi-Seed Robustness (Seeds 42 / 123 / 456)
 
@@ -151,6 +184,20 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+> **Artifacts and raw data are not committed.** `data/raw/**`, `*.joblib` and `*.pt` are
+> gitignored (large files and licensed datasets). A fresh clone therefore contains **no
+> trained detector**. The demo and dashboard now **refuse to score** in that state instead
+> of substituting a heuristic, so check first:
+>
+> ```bash
+> ls results/experiments/EXP-P1-CIC2017-R10-001/random_forest.joblib
+> ls data/raw/cicids2017
+> ```
+>
+> If either is missing, restore the frozen artifacts and datasets with
+> [`docs/final/REPRODUCIBILITY_MAP.md`](docs/final/REPRODUCIBILITY_MAP.md), or retrain
+> (step 5).
+
 ### 2. Verify Installation (Test Suite)
 
 Run the full 409-test verification suite to confirm everything is working:
@@ -159,7 +206,7 @@ Run the full 409-test verification suite to confirm everything is working:
 .venv/bin/pytest -q
 ```
 
-All 409 tests should pass with 0 failures.
+All 417 tests should pass with 0 failures.
 
 ### 3. Quick Demo — PCAP Replay
 
@@ -262,7 +309,7 @@ Available in the Live Monitor tab during any capture mode. Injects synthetic att
 
 ### 5. Retraining (Optional — Large Data Required)
 
-The demo and dashboard work out of the box using the pre-trained model artifact at `results/experiments/EXP-P1-CIC2017-R10-001/random_forest.joblib`.
+The demo and dashboard work out of the box **when the frozen artifacts are present** at `results/experiments/EXP-P1-CIC2017-R10-001/random_forest.joblib` (+ the matching `preprocessor.joblib`). They are gitignored, so a fresh clone must restore or regenerate them first; without them the demo exits non-zero and writes no artifacts.
 
 To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
 
@@ -274,7 +321,7 @@ To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
 
 | What you want to do | Command | Root needed? |
 |---------------------|---------|:---:|
-| Run full test suite (409 tests) | `.venv/bin/pytest -q` | No |
+| Run full test suite (417 tests) | `.venv/bin/pytest` | No |
 | **Launch Dashboard (Dataset & Sample Demo)** | `python dashboard/server.py` | **No** |
 | Run quick offline PCAP replay demo | `python scripts/demo/run_replay_demo.py` | No |
 | Dashboard with real live WiFi capture | `sudo .venv/bin/python dashboard/server.py 8000 --live --iface wlo1` | Yes |

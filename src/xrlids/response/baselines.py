@@ -246,3 +246,75 @@ class HeuristicStateMachinePolicy(ResponsePolicy):
             "alert_density_threshold": self.alert_density_threshold,
             "cooldown_steps": self.cooldown_steps,
         }
+
+
+@dataclass
+class CostOptimalThresholdPolicy(ResponsePolicy):
+    """Baseline 4: Analytic Bayes-optimal threshold policy minimizing expected operational loss.
+
+    Under the research cost matrix C(a, y), the expected loss for an action a given
+    continuous attack probability p is:
+        E[Loss(a) | p] = (1 - p) * C(a, 0) + p * C(a, 1)
+
+    The optimal policy chooses a*(p) = argmin_a E[Loss(a) | p].
+    For Standard Enterprise costs:
+        - 3-action: ALLOW (p < 0.011), ALERT (0.011 <= p < 0.70), RATE_LIMIT (p >= 0.70)
+        - 4-action: adds ISOLATE for p >= 0.918
+    """
+
+    name: str = "Baseline_4_Cost_Optimal_Threshold"
+    action_mode: ActionSpaceMode = ActionSpaceMode.FOUR_ACTION
+    cost_matrix: dict[int, dict[Action, float]] | None = None
+
+    def __post_init__(self) -> None:
+        if self.cost_matrix is None:
+            # Default to Standard Enterprise research cost matrix
+            self.cost_matrix = {
+                0: {
+                    Action.ALLOW: 0.0,
+                    Action.ALERT: 1.0,
+                    Action.RATE_LIMIT: 15.0,
+                    Action.ISOLATE: 60.0,
+                },
+                1: {
+                    Action.ALLOW: 100.0,
+                    Action.ALERT: 12.0,
+                    Action.RATE_LIMIT: 6.0,
+                    Action.ISOLATE: 2.0,
+                },
+            }
+
+    def predict_action(
+        self,
+        state: np.ndarray,
+        attack_score: float,
+        host_id: str | None = None,
+    ) -> Action:
+        p = float(np.clip(attack_score, 0.0, 1.0))
+        allowed_actions = (
+            [Action.ALLOW, Action.ALERT, Action.RATE_LIMIT]
+            if self.action_mode == ActionSpaceMode.THREE_ACTION
+            else [Action.ALLOW, Action.ALERT, Action.RATE_LIMIT, Action.ISOLATE]
+        )
+
+        # Compute expected cost for each allowed action: (1 - p)*C(a, 0) + p*C(a, 1)
+        best_action = Action.ALLOW
+        min_cost = float("inf")
+        cm = self.cost_matrix
+        for act in allowed_actions:
+            exp_cost = (1.0 - p) * cm[0].get(act, 0.0) + p * cm[1].get(act, 0.0)
+            if exp_cost < min_cost:
+                min_cost = exp_cost
+                best_action = act
+
+        return best_action
+
+    def reset(self) -> None:
+        pass
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "policy_name": self.name,
+            "action_mode": self.action_mode.value,
+            "description": "Analytic Bayes cost-optimal threshold baseline under operational loss matrix",
+        }
