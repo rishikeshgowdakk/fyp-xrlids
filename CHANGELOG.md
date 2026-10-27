@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [Unreleased] — CSV evaluation workflow and documentation
+
+### Added
+- Custom CSV evaluation workflow in the dashboard: upload, paste, or load a sample of flow records and evaluate against compatible frozen Random Forest artifacts.
+- Explicit benchmark-to-feature-contract pairing (CIC-IDS2017/R10, CSE-CIC-IDS2018/R10, UNSW-NB15/R4), strict binary-label parsing, non-finite feature handling, row accounting, and regression coverage.
+- Evaluation export workflow and UI contract selection safeguards.
+
+### Clarifications
+- This is an addition to the dashboard's offline research workbench, not a redesign of the core packet-to-flow detection pipeline.
+- CSV evaluation does not retrain models or overwrite historical benchmark artifacts.
+- Previously reported research limitations remain: temporal generalization is weak on the CSE-CIC-IDS2018 future-day holdout, LSTM sequence-order benefit is not demonstrated by the shuffled-window ablation, and the analytic cost-optimal response baseline outperforms DQN in several evaluated regimes.
+- The README test count was removed in favour of running the current suite, so documentation does not become stale when tests are added.
+
 All notable changes to `fyp-xrlids` (project XRL-IDARS v1).
 
 ## [Unreleased] — Phase 1 implementation
