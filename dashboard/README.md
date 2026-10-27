@@ -21,6 +21,13 @@ The workbench is organized into seven specialized pages:
 - Held-out Confusion Matrix visualizer (TN, FP, FN, TP).
 - Per-class and per-attack-family breakdown tables.
 - Calibration reliability curve summary.
+- **📂 Custom CSV Dataset Evaluation & Ingestion**:
+  - Live upload, paste, or demo sample loading of arbitrary network flow CSV records.
+  - Strict contract enforcement: validates R10 (10 features) or R4 (4 features) schema.
+  - Target leakage prevention: separates ground-truth labels from inference inputs.
+  - Evaluates against frozen model artifacts (`preprocessor.joblib` + `random_forest.joblib`).
+  - Distinguishes ad-hoc evaluation from official benchmark results without altering historical artifacts.
+  - Downloadable CSV export with full evaluation metadata provenance headers.
 
 ### 2. 📋 Overview
 - Platform architecture, current Git commit, clean working-tree verification, and runtime environment.
@@ -76,6 +83,15 @@ The workbench is organized into seven specialized pages:
   - **Mode 3**: PCAP Replay (Recorded packets parsed through flow builder)
   - **Mode 4**: Synthetic Attack Simulation (In-memory packet scripts)
   - **Mode 5**: Live Packet Capture (Raw AF_PACKET socket, root required, observational only).
+- **🎯 Detected Attack Sources Panel**:
+  - Aggregates detected alert events by Source IP.
+  - Displays alert frequency, peak model confidence score, and suggested policy action.
+- **📱 WiFi Devices (Passive Discovery Panel)**:
+  - Discovers local network hosts passively via broadcast/multicast frames (ARP, DHCP, mDNS, SSDP) and neighbour cache.
+  - Resolves MAC addresses to hardware vendors via local OUI cache.
+  - Displays IP address, hostname/label, packet count, relative last-seen age, and dynamic router admin link.
+  - Active network scanning, probing, or router credential storage is strictly prohibited.
+  - Live capture only: non-live replay modes show an explicit notice and never fabricate device entries.
 
 ---
 

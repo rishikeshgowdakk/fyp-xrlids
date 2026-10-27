@@ -91,11 +91,26 @@ _PREDICTIONS_CACHE: dict[str, pd.DataFrame] = {}
 
 def get_overview_data() -> dict[str, Any]:
     """Return high-level research workbench overview and verification statuses."""
+    commit_sha = "b2a8e22790c5f06fcf6c457af0eee079e94471ef"
+    try:
+        import subprocess
+        proc = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            cwd=str(REPO_ROOT),
+            timeout=2,
+        )
+        if proc.returncode == 0 and proc.stdout.strip():
+            commit_sha = proc.stdout.strip()
+    except Exception:
+        pass
+
     return {
         "project": "XRL-IDARS",
         "title": "Explainable Reinforcement Learning-Based Intrusion Detection and Autonomous Response System",
         "role": "Research Evaluation Workbench & Forensic Model Validation",
-        "git_commit": "5989bf4b4cbd82418140f2b0c4389397a170c55c",
+        "git_commit": commit_sha,
         "branch": "main",
         "working_tree_clean": True,
         "environment": {

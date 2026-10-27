@@ -434,6 +434,159 @@
         </div>
       </div>
 
+      <!-- Custom CSV Dataset Evaluation & Ingestion Card -->
+      <div class="card section-gap">
+        <div class="card-header">
+          <h2>📂 Custom CSV Dataset Evaluation &amp; Verification</h2>
+          <span class="badge badge-orange" id="csv-eval-badge">Ad-Hoc / Custom Input</span>
+        </div>
+        <div class="card-body">
+          <div class="callout callout-amber" style="margin-bottom: 14px;">
+            <strong>Ad-Hoc Verification Mode:</strong>
+            Evaluate any custom or external network flow CSV against the frozen model artifacts (<code>preprocessor.joblib</code> + <code>random_forest.joblib</code>).
+            Ground-truth labels are strictly isolated from feature inputs to prevent target leakage.
+            <strong>Notice:</strong> This ad-hoc evaluation tests user-supplied records and does <em>not</em> alter or overwrite any historical frozen benchmark artifacts.
+          </div>
+
+          <div class="controls-bar" style="margin-bottom: 12px; background: var(--surface-2);">
+            <div class="controls-group">
+              <span class="controls-label">Feature Contract:</span>
+              <select id="csv-eval-contract">
+                <option value="R10">R10 (10 Flow Features: Duration, Rates, PktLens, TCP Flags, SynAckRatio)</option>
+                <option value="R4">R4 (4 Flow Features: Duration, Packets/s, Bytes/s, PktLenMean)</option>
+              </select>
+            </div>
+            <div class="controls-group">
+              <span class="controls-label">Target Model:</span>
+              <select id="csv-eval-model">
+                <option value="cicids2017">Random Forest (Frozen CIC-IDS2017 R10)</option>
+                <option value="cse2018">Random Forest (Frozen CSE-CIC-IDS2018 R10)</option>
+                <option value="unswnb15">Random Forest (Frozen UNSW-NB15 R4)</option>
+              </select>
+            </div>
+            <div class="controls-group">
+              <input type="file" id="csv-file-input" accept=".csv" onchange="onCsvFileSelected(event)" style="display:none;">
+              <button class="btn" onclick="document.getElementById('csv-file-input').click()">📁 Choose CSV File...</button>
+              <button class="btn" id="btn-load-sample-csv" onclick="loadSampleCsv()">🧪 Load Demo Sample (12 Flows)</button>
+              <button class="btn btn-primary" id="btn-run-csv-eval" onclick="runCsvEvaluation()">⚡ Evaluate CSV</button>
+            </div>
+          </div>
+
+          <div id="csv-file-status" style="font-size: 12px; color: var(--text-dim); margin-bottom: 8px;">
+            No file chosen. You can load demo records, upload a .csv, or paste CSV rows below.
+          </div>
+
+          <textarea id="csv-text-input" rows="4" placeholder="Or paste CSV rows here (must include header row: flow_duration_ms,flow_packets_per_s,...)" style="width: 100%; font-family: var(--mono); font-size: 12px; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px; resize: vertical;"></textarea>
+
+          <!-- Results Container (populated after evaluation) -->
+          <div id="csv-eval-results" style="display: none; margin-top: 16px;">
+            <div class="callout callout-blue" id="csv-row-accounting">
+              <!-- Accounting text inserted here -->
+            </div>
+
+            <!-- Metric Tiles (if labelled) -->
+            <div id="csv-metrics-grid" class="grid-4 section-gap" style="display: none;">
+              <div class="stat-card">
+                <div class="stat-label">Accuracy</div>
+                <div class="stat-val" id="csv-metric-acc">—</div>
+                <div class="stat-sub">Evaluated Rows</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Precision</div>
+                <div class="stat-val" id="csv-metric-prec">—</div>
+                <div class="stat-sub">TP / (TP + FP)</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Recall</div>
+                <div class="stat-val" id="csv-metric-rec">—</div>
+                <div class="stat-sub">TP / (TP + FN)</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">F1-Score</div>
+                <div class="stat-val" id="csv-metric-f1">—</div>
+                <div class="stat-sub">Harmonic Mean</div>
+              </div>
+            </div>
+
+            <!-- Score Distribution & Summary -->
+            <div class="grid-2 section-gap">
+              <div class="card" style="margin-bottom: 0;">
+                <div class="card-header">
+                  <h2>Threat Score Distribution</h2>
+                  <span class="badge badge-purple" id="csv-model-badge">Frozen Model</span>
+                </div>
+                <div class="card-body">
+                  <table style="font-size: 12px;">
+                    <tbody>
+                      <tr><td><strong>Low Threat (&lt; 0.40):</strong></td><td id="csv-dist-low" class="mono">—</td></tr>
+                      <tr><td><strong>Medium Threat (0.40 – 0.65):</strong></td><td id="csv-dist-med" class="mono">—</td></tr>
+                      <tr><td><strong>High Threat (&ge; 0.65):</strong></td><td id="csv-dist-high" class="mono">—</td></tr>
+                      <tr><td><strong>Mean Attack Score:</strong></td><td id="csv-dist-mean" class="mono">—</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="card" id="csv-cm-card" style="margin-bottom: 0; display: none;">
+                <div class="card-header">
+                  <h2>Evaluation Confusion Matrix</h2>
+                  <span class="badge badge-green">Labelled Ground Truth</span>
+                </div>
+                <div class="card-body">
+                  <div class="cm-wrapper">
+                    <div class="cm-box correct">
+                      <div class="cm-label">True Negative (TN)</div>
+                      <div class="cm-val" id="csv-cm-tn">—</div>
+                    </div>
+                    <div class="cm-box error">
+                      <div class="cm-label">False Positive (FP)</div>
+                      <div class="cm-val" id="csv-cm-fp">—</div>
+                    </div>
+                    <div class="cm-box error">
+                      <div class="cm-label">False Negative (FN)</div>
+                      <div class="cm-val" id="csv-cm-fn">—</div>
+                    </div>
+                    <div class="cm-box correct">
+                      <div class="cm-label">True Positive (TP)</div>
+                      <div class="cm-val" id="csv-cm-tp">—</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Evaluated Flows Table -->
+            <div class="card" style="margin-top: 14px;">
+              <div class="card-header">
+                <h2>Evaluated Flow Records (Sample)</h2>
+                <div class="controls-group">
+                  <button class="btn btn-sm" onclick="downloadEvaluatedCsv()">⬇️ Download Evaluated CSV</button>
+                </div>
+              </div>
+              <div class="card-body flush">
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Flow #</th>
+                        <th>Ground Truth</th>
+                        <th>Attack Score</th>
+                        <th>Prediction (τ=0.50)</th>
+                        <th>Verdict</th>
+                        <th>Key Features (Duration, Packets/s, Bytes/s)</th>
+                      </tr>
+                    </thead>
+                    <tbody id="csv-flows-tbody">
+                      <tr><td colspan="6" style="text-align:center;">No records evaluated yet.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- ═══════════════════ PAGE A: OVERVIEW ═══════════════════ -->

@@ -9,6 +9,12 @@ from xrlids.evaluation.calibration import (
     expected_calibration_error,
     reliability_curve,
 )
+from xrlids.evaluation.csv_evaluator import (
+    CSVValidationError,
+    evaluate_csv_dataset,
+    export_evaluated_csv_string,
+    get_demo_sample_csv,
+)
 from xrlids.evaluation.error_analysis import (
     analyze_model_disagreements,
     compute_error_analysis,
@@ -52,5 +58,9 @@ __all__ = [
     "OBJECTIVES",
     "compute_error_analysis",
     "analyze_model_disagreements",
+    "CSVValidationError",
+    "evaluate_csv_dataset",
+    "export_evaluated_csv_string",
+    "get_demo_sample_csv",
 ]
 

@@ -195,13 +195,13 @@ pip install -r requirements.txt
 
 ### 2. Verify Installation (Test Suite)
 
-Run the full 423-test verification suite to confirm everything is working:
+Run the full 445-test verification suite to confirm everything is working:
 
 ```bash
 .venv/bin/pytest -q
 ```
 
-All 423 tests across unit, integration, model, and data suites should pass with 0 failures.
+All 445 tests across unit, integration, model, data, workbench API, and CSV evaluation suites should pass with 0 failures.
 
 ### 3. Quick Demo — PCAP Replay
 
@@ -322,7 +322,7 @@ To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
 
 | What you want to do | Command | Root needed? |
 |---------------------|---------|:---:|
-| Run full test suite (423 tests) | `.venv/bin/pytest` | No |
+| Run full test suite (445 tests) | `.venv/bin/pytest` | No |
 | **Launch Dashboard (Dataset & Sample Demo)** | `python dashboard/server.py` | **No** |
 | Run quick offline PCAP replay demo | `python scripts/demo/run_replay_demo.py` | No |
 | Dashboard with real live WiFi capture | `sudo .venv/bin/python dashboard/server.py 8000 --live --iface wlo1` | Yes |

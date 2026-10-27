@@ -21,7 +21,7 @@ script: what to run, what to click, what to say, and what to do when something b
 | Deterministic replay metrics | ✅ research τ=0.50 → 83.3% (F1 0.8000); operational τ=0.40 → 100% (F1 1.0000) |
 | Frozen model artifacts | ✅ `EXP-P1-CIC2017-R10-001/*.joblib` present (RF 26 MB + preprocessor) |
 | Simulator calibration re-verification | ✅ 7/7 scenarios OK (`scripts/demo/verify_attack_scenarios.py`) |
-| Full test suite | ✅ **408 passed, 0 failed** (`pytest -q`, exit 0) |
+| Full test suite | ✅ **445 passed, 0 failed** (`pytest -q`, exit 0) |
 | Phase 2/3 artifacts (RL, response, burst, gate) | ✅ result directories present |
 | Root required? | ❌ No for sample mode; ✅ only for optional live WiFi capture |
 
@@ -193,7 +193,7 @@ itself only reads (live capture) — it never sends, drops, or reroutes.
 
 **Q9. How do you know live features match the training features?**
 Parity tests verify computed features against the offline definitions to `atol ≤ 1e-4`; the R10
-contract is frozen and shared by training, replay, and live paths. The test suite (408 tests)
+contract is frozen and shared by training, replay, and live paths. The test suite (445 tests)
 includes the parity and pipeline tests.
 
 **Q10. What happens if the model files are missing on the demo machine?**
@@ -216,10 +216,8 @@ A display-only mapping of the DQN response-policy bands (BLOCK ≥ 0.50, THROTTL
 is blocked"; enforcement lives in the audited transaction/safety-gate path, tested only inside
 isolated network namespaces.
 
-**Q14. Why 408 tests? What do they cover?**
-Phase 1 data/model contracts, leakage/dedup guarantees, parity, replay, Phase 2 RL, Phase 3
-observability/rollback/gate, dashboard server + simulator + HTTP endpoints. `pytest -q` is the
-single gate; expected result: 408 passed.
+**Q14. How many tests are in the suite, and what do they cover?**
+The test suite contains **445 automated tests** across 66 modules covering: Phase 1 data/model contracts, leakage/dedup guarantees, parity, and replay (408 → 417); Phase 2A Cost-Optimal baseline policies (423); Research Evaluation Workbench APIs and population reconciliations (435); and Phase D CSV dataset evaluation, target-leakage prevention, and schema enforcement (445). `pytest -q` is the single gate; expected result: 445 passed with 0 failures.
 
 **Q15. How exactly is the score calculated?**
 `score = random_forest.predict_proba(preprocessor.transform(R10_features))[0]` — the frozen RF's
@@ -328,7 +326,7 @@ For an authoritative list, use the router's admin page/API or run the collector 
 > offline evidence."
 
 **Shot 8 — Closing + limitations (6:30–7:15)**
-> "The detector and console are complete and covered by 408 passing tests. Live traffic has no
+> "The detector and console are complete and covered by 445 passing tests. Live traffic has no
 > ground truth, so we never report accuracy on it. Production deployment would require
 > authentication, TLS, durable storage, a model registry, and kernel-bypass capture. The research
 > contribution — leakage-safe training, calibrated simulation, and an honest evaluation — is
@@ -382,7 +380,7 @@ For an authoritative list, use the router's admin page/API or run the collector 
 | Simulator (evasion demos) | 0.0002 · 0.0290 · 0.0169 |
 | Proof script | benign 0.0203 · attack 0.9910 · gap sweep 0.103/0.344/0.528/0.266/0.991 |
 | Blocked traffic | 0 — policy suggestions only (`BLOCK (suggested)`, NOT enforced) |
-| Tests | 408 passed, 0 failed |
+| Tests | 445 passed, 0 failed |
 | RL hypothesis | H0 rejected (p < 0.001); cost −11.29% / −14.10%; 15% practical criterion NOT met |
 | D-006 | TCP closes on FIN/RST; otherwise 120 s idle |
 | Live capture | AF_PACKET raw socket; root/CAP_NET_RAW; read-only |

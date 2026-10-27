@@ -495,6 +495,182 @@ async function loadLimitations() {
   }
 }
 
+// ─── Custom CSV Dataset Evaluation ───
+let lastCsvEvalResult = null;
+
+function onCsvFileSelected(event) {
+  const file = event.target.files && event.target.files[0];
+  const statusEl = document.getElementById("csv-file-status");
+  const textarea = document.getElementById("csv-text-input");
+  if (!file) return;
+
+  statusEl.textContent = `Selected file: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    textarea.value = e.target.result;
+  };
+  reader.readAsText(file);
+}
+
+async function loadSampleCsv() {
+  const statusEl = document.getElementById("csv-file-status");
+  const textarea = document.getElementById("csv-text-input");
+  try {
+    statusEl.textContent = "Loading benchmark demonstration sample flows...";
+    const res = await fetch("/api/csv/sample");
+    if (!res.ok) throw new Error("Failed to load sample CSV from server");
+    const data = await res.json();
+    textarea.value = data.csv_text;
+    document.getElementById("csv-eval-contract").value = data.contract || "R10";
+    document.getElementById("csv-eval-model").value = data.benchmark || "cicids2017";
+    statusEl.textContent = "Loaded 12 curated CIC-IDS2017 demonstration flows (Benign, DDoS, DoS Hulk). Click 'Evaluate CSV' to test.";
+  } catch (err) {
+    statusEl.textContent = "Error loading sample: " + err.message;
+  }
+}
+
+async function runCsvEvaluation() {
+  const statusEl = document.getElementById("csv-file-status");
+  const textarea = document.getElementById("csv-text-input");
+  const contract = document.getElementById("csv-eval-contract").value;
+  const benchmark = document.getElementById("csv-eval-model").value;
+  const btn = document.getElementById("btn-run-csv-eval");
+
+  const csvText = textarea.value.trim();
+  if (!csvText) {
+    alert("Please choose a CSV file, load demo records, or paste CSV rows into the text area.");
+    return;
+  }
+
+  try {
+    btn.disabled = true;
+    btn.textContent = "⏳ Evaluating...";
+    statusEl.textContent = "Evaluating records against frozen model artifacts...";
+
+    const res = await fetch("/api/csv/evaluate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        csv_text: csvText,
+        contract: contract,
+        benchmark: benchmark,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      throw new Error(data.error || "Evaluation failed");
+    }
+
+    lastCsvEvalResult = data;
+    renderCsvEvaluationResults(data);
+    statusEl.textContent = `✓ Evaluation complete. Evaluated ${data.row_accounting.evaluated_rows} flows.`;
+  } catch (err) {
+    alert("CSV Evaluation Error: " + err.message);
+    statusEl.textContent = "Evaluation failed: " + err.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "⚡ Evaluate CSV";
+  }
+}
+
+function renderCsvEvaluationResults(data) {
+  const resContainer = document.getElementById("csv-eval-results");
+  if (!resContainer) return;
+  resContainer.style.display = "block";
+
+  // Row accounting
+  const accEl = document.getElementById("csv-row-accounting");
+  const acct = data.row_accounting || {};
+  accEl.innerHTML = `
+    <strong>Row Accounting:</strong> Received <strong>${acct.total_rows_received}</strong> rows ·
+    Evaluated <strong>${acct.evaluated_rows}</strong> valid rows ·
+    Dropped <strong>${acct.invalid_rows_dropped}</strong> invalid rows (${escapeHtml(acct.drop_reason)}).<br>
+    <em>Model: ${escapeHtml(data.model_identifier)} · Feature Contract: ${escapeHtml(data.contract)}</em>
+  `;
+
+  // Metrics (if labelled)
+  const metricsGrid = document.getElementById("csv-metrics-grid");
+  const cmCard = document.getElementById("csv-cm-card");
+  if (data.is_labelled && data.metrics) {
+    metricsGrid.style.display = "grid";
+    cmCard.style.display = "block";
+
+    document.getElementById("csv-metric-acc").textContent = `${(data.metrics.accuracy * 100).toFixed(2)}%`;
+    document.getElementById("csv-metric-prec").textContent = fmt(data.metrics.precision);
+    document.getElementById("csv-metric-rec").textContent = fmt(data.metrics.recall);
+    document.getElementById("csv-metric-f1").textContent = fmt(data.metrics.f1);
+
+    const cm = data.confusion_matrix || {};
+    document.getElementById("csv-cm-tn").textContent = cm.tn != null ? cm.tn.toLocaleString() : "—";
+    document.getElementById("csv-cm-fp").textContent = cm.fp != null ? cm.fp.toLocaleString() : "—";
+    document.getElementById("csv-cm-fn").textContent = cm.fn != null ? cm.fn.toLocaleString() : "—";
+    document.getElementById("csv-cm-tp").textContent = cm.tp != null ? cm.tp.toLocaleString() : "—";
+  } else {
+    metricsGrid.style.display = "none";
+    cmCard.style.display = "none";
+  }
+
+  // Distribution
+  const dist = data.score_distribution || {};
+  document.getElementById("csv-dist-low").textContent = `${dist.low_threat_under_040 || 0} flows`;
+  document.getElementById("csv-dist-med").textContent = `${dist.medium_threat_040_to_065 || 0} flows`;
+  document.getElementById("csv-dist-high").textContent = `${dist.high_threat_over_065 || 0} flows`;
+  document.getElementById("csv-dist-mean").textContent = fmt(dist.mean_score);
+  document.getElementById("csv-model-badge").textContent = escapeHtml(data.contract);
+
+  // Flows table
+  const tbody = document.getElementById("csv-flows-tbody");
+  tbody.innerHTML = "";
+  (data.flows || []).forEach(f => {
+    const isAtk = f.prediction_class === 1;
+    const predBadge = isAtk ? `<span class="badge badge-red">ATTACK</span>` : `<span class="badge badge-green">BENIGN</span>`;
+    let verdictBadge = `<span class="badge badge-dim">${escapeHtml(f.verdict)}</span>`;
+    if (f.verdict === "CORRECT") verdictBadge = `<span class="badge badge-green">CORRECT</span>`;
+    if (f.verdict === "FALSE_POSITIVE" || f.verdict === "FALSE_NEGATIVE") verdictBadge = `<span class="badge badge-red">${escapeHtml(f.verdict)}</span>`;
+
+    const feats = f.features || {};
+    const featSummary = `Dur: ${feats.flow_duration_ms || 0}ms · Pkts/s: ${fmt(feats.flow_packets_per_s, 1)} · Bytes/s: ${fmt(feats.flow_bytes_per_s, 1)}`;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="mono">#${f.flow_id}</td>
+      <td><strong>${escapeHtml(f.ground_truth_label)}</strong></td>
+      <td class="mono"><strong>${fmt(f.attack_score)}</strong></td>
+      <td>${predBadge}</td>
+      <td>${verdictBadge}</td>
+      <td class="mono" style="font-size:11px; color:var(--text-muted);">${escapeHtml(featSummary)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+async function downloadEvaluatedCsv() {
+  if (!lastCsvEvalResult) {
+    alert("No evaluated records to export. Please evaluate a CSV first.");
+    return;
+  }
+  try {
+    const res = await fetch("/api/csv/export", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eval_result: lastCsvEvalResult }),
+    });
+    if (!res.ok) throw new Error("Export failed on server");
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `xrlids_${lastCsvEvalResult.benchmark}_evaluated_flows.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    alert("Failed to export evaluated CSV: " + err.message);
+  }
+}
+
 // ─── Traffic Modes & Live Monitor ───
 function onLiveModeChange() {
   const mode = document.getElementById("live-mode").value;

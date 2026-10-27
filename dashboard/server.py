@@ -52,6 +52,12 @@ from xrlids.demo.flow import FlowBuilder  # noqa: E402
 from xrlids.demo.live_lab import AlertEvent, FlowObservation, LiveLabMonitor  # noqa: E402
 from xrlids.demo.pcap import PacketInfo, PcapReader  # noqa: E402
 from xrlids.demo.replay import ReplayEngine  # noqa: E402
+from xrlids.evaluation.csv_evaluator import (  # noqa: E402
+    CSVValidationError,
+    evaluate_csv_dataset,
+    export_evaluated_csv_string,
+    get_demo_sample_csv,
+)
 from xrlids.live.capture import CaptureConfig, PacketCaptureService  # noqa: E402
 from xrlids.live.devices import DeviceTracker  # noqa: E402
 from dashboard.workbench_data import (  # noqa: E402
@@ -1070,6 +1076,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     ),
                 }
             )
+        elif path == "/api/csv/sample":
+            sample_csv = get_demo_sample_csv()
+            self.send_json({"csv_text": sample_csv, "contract": "R10", "benchmark": "cicids2017"})
         elif path.startswith("/figures/"):
             filename = os.path.basename(path)
             fig_path = FIGURES_DIR / filename
@@ -1158,6 +1167,44 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 return
             result = LIVE_SESSION.inject_scenario(scenario_id)
             self.send_json(result, status=HTTPStatus.BAD_REQUEST if result.get("error") else HTTPStatus.OK)
+        elif parsed.path == "/api/csv/evaluate":
+            body = self.read_json_body()
+            csv_content = body.get("csv_text") or body.get("file_path") or ""
+            if not csv_content:
+                self.send_json(
+                    {"error": "Missing 'csv_text' or 'file_path' in request body.", "status": "error"},
+                    status=HTTPStatus.BAD_REQUEST,
+                )
+                return
+            contract = str(body.get("contract", "R10"))
+            benchmark = str(body.get("benchmark", "cicids2017"))
+            label_col = body.get("label_column") or None
+            threshold = float(body.get("threshold", 0.50))
+            try:
+                result = evaluate_csv_dataset(
+                    csv_source=csv_content,
+                    contract=contract,
+                    benchmark=benchmark,
+                    label_column=label_col,
+                    threshold=threshold,
+                )
+                self.send_json(result)
+            except CSVValidationError as e:
+                self.send_json({"error": str(e), "status": "validation_error"}, status=HTTPStatus.BAD_REQUEST)
+            except Exception as e:
+                logger.exception("CSV evaluation error: %s", e)
+                self.send_json({"error": f"Evaluation failed: {str(e)}", "status": "error"}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+        elif parsed.path == "/api/csv/export":
+            body = self.read_json_body()
+            eval_result = body.get("eval_result") or {}
+            csv_str = export_evaluated_csv_string(eval_result)
+            payload = csv_str.encode("utf-8")
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "text/csv; charset=utf-8")
+            self.send_header("Content-Disposition", 'attachment; filename="xrlids_custom_csv_evaluation.csv"')
+            self.send_header("Content-Length", str(len(payload)))
+            self.end_headers()
+            self.wfile.write(payload)
         else:
             self.send_error(HTTPStatus.NOT_FOUND, "Not found")
 
