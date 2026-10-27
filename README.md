@@ -49,6 +49,24 @@ Controlled Response / Rollback
 
 ---
 
+## Dashboard CSV Evaluation Workflow
+
+The dashboard also includes a **separate, offline research-evaluation path** for user-supplied CSV flow records. It is not an extra stage in live packet detection and does not retrain or replace the frozen benchmark models.
+
+```text
+CSV upload / paste / sample
+          ↓
+Header, benchmark-contract and label validation
+          ↓
+Numeric feature coercion + non-finite row accounting
+          ↓
+Compatible frozen preprocessor + Random Forest
+          ↓
+Metrics, confusion counts, row accounting and CSV export
+```
+
+Supported benchmark/feature-contract pairings are CIC-IDS2017/R10, CSE-CIC-IDS2018/R10, and UNSW-NB15/R4. Labels must be recognized as binary benign/attack values; missing or ambiguous labels are rejected. The workflow reports ad-hoc CSV results separately from the project's frozen benchmark results and must not be presented as a replacement for the reproducible benchmark pipeline.
+
 ## Key Components
 
 | Component | Description |
@@ -178,7 +196,7 @@ The future test contains 50,306 attacks (3.08%) after Policy A removed conflicti
 ### 1. Clone & Setup
 
 ```bash
-git clone https://github.com/<your-username>/fyp-xrlids.git
+git clone https://github.com/rishikeshgowdakk/fyp-xrlids.git
 cd fyp-xrlids
 
 # Create and activate the virtual environment
@@ -195,13 +213,13 @@ pip install -r requirements.txt
 
 ### 2. Verify Installation (Test Suite)
 
-Run the full 445-test verification suite to confirm everything is working:
+Run the full full verification suite to confirm everything is working:
 
 ```bash
 .venv/bin/pytest -q
 ```
 
-All 445 tests across unit, integration, model, data, workbench API, and CSV evaluation suites should pass with 0 failures.
+Run the full suite and confirm that all tests pass. The test count can change as regression coverage grows.
 
 ### 3. Quick Demo — PCAP Replay
 
@@ -322,7 +340,7 @@ To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
 
 | What you want to do | Command | Root needed? |
 |---------------------|---------|:---:|
-| Run full test suite (445 tests) | `.venv/bin/pytest` | No |
+| Run full test suite | `.venv/bin/pytest` | No |
 | **Launch Dashboard (Dataset & Sample Demo)** | `python dashboard/server.py` | **No** |
 | Run quick offline PCAP replay demo | `python scripts/demo/run_replay_demo.py` | No |
 | Dashboard with real live WiFi capture | `sudo .venv/bin/python dashboard/server.py 8000 --live --iface wlo1` | Yes |
