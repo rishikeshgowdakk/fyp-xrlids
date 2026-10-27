@@ -1,0 +1,84 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P2A-COST-OPTIMAL-001",
+    "git_commit": "18da4acbc3a1df8acb6d4ed17658fb287ddf6e76",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": 42,
+    "created_at": "2026-10-27T20:18:02.425075+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "18da4acbc3a1df8acb6d4ed17658fb287ddf6e76",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "source_artifact": "results/experiments/EXP-P1-CIC2017-R10-001/calibration_report.json",
+  "brier_score": 0.015734909912174275,
+  "expected_calibration_error": 0.01770260979977073,
+  "population_size": 355864,
+  "calibration_finding": "Raw Random Forest scores exhibit severe overconfidence in intermediate score intervals. In [0.1, 0.2), mean predicted score is 0.1335 vs observed frequency 0.0137 (~10x gap). In [0.2, 0.3), mean predicted score is 0.2465 vs observed frequency 0.0568 (~4x gap).",
+  "scientific_implication": "Because RF scores are uncalibrated ranking scores, CostOptimalThresholdPolicy is cost-optimal strictly with respect to the input score under an assumed-probability model, and cannot be claimed as a proven true Bayes-optimal policy on uncalibrated outputs.",
+  "reliability_curve_subset": [
+    {
+      "bin": 0,
+      "lower": 0.0,
+      "upper": 0.1,
+      "count": 277305,
+      "mean_predicted": 0.004682590749428467,
+      "observed_frequency": 0.0002235805340689854,
+      "gap": 0.004459010215359481
+    },
+    {
+      "bin": 1,
+      "lower": 0.1,
+      "upper": 0.2,
+      "count": 3279,
+      "mean_predicted": 0.13348287962771194,
+      "observed_frequency": 0.013723696248856358,
+      "gap": 0.11975918337885558
+    },
+    {
+      "bin": 2,
+      "lower": 0.2,
+      "upper": 0.30000000000000004,
+      "count": 1003,
+      "mean_predicted": 0.24651013931117025,
+      "observed_frequency": 0.05682951146560319,
+      "gap": 0.18968062784556705
+    },
+    {
+      "bin": 3,
+      "lower": 0.30000000000000004,
+      "upper": 0.4,
+      "count": 3846,
+      "mean_predicted": 0.349046805250551,
+      "observed_frequency": 0.10868434737389496,
+      "gap": 0.24036245787665603
+    },
+    {
+      "bin": 4,
+      "lower": 0.4,
+      "upper": 0.5,
+      "count": 462,
+      "mean_predicted": 0.44972388111965395,
+      "observed_frequency": 0.14502164502164502,
+      "gap": 0.30470223609800895
+    }
+  ]
+}

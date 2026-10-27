@@ -17,9 +17,11 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections import deque
 from dataclasses import dataclass, field
+import math
 from typing import Any
 import numpy as np
 
+from xrlids.response.costs import CostRegime, RESEARCH_COST_MATRICES
 from xrlids.response.types import Action, ActionSpaceMode
 
 
@@ -250,39 +252,96 @@ class HeuristicStateMachinePolicy(ResponsePolicy):
 
 @dataclass
 class CostOptimalThresholdPolicy(ResponsePolicy):
-    """Baseline 4: Analytic Bayes-optimal threshold policy minimizing expected operational loss.
+    """Baseline 4: Cost-optimal decision policy with respect to detector score.
 
-    Under the research cost matrix C(a, y), the expected loss for an action a given
-    continuous attack probability p is:
+    Under an operational cost matrix C(a, y) (where y in {0: benign, 1: attack}),
+    the expected operational loss of action a for an assumed attack probability p is:
         E[Loss(a) | p] = (1 - p) * C(a, 0) + p * C(a, 1)
 
-    The optimal policy chooses a*(p) = argmin_a E[Loss(a) | p].
-    For Standard Enterprise costs:
-        - 3-action: ALLOW (p < 0.011), ALERT (0.011 <= p < 0.70), RATE_LIMIT (p >= 0.70)
-        - 4-action: adds ISOLATE for p >= 0.918
+    The unconstrained optimal action is:
+        a*(p) = argmin_{a in A} E[Loss(a) | p]
+
+    CRITICAL SCIENTIFIC FRAMING:
+    This policy is cost-optimal strictly with respect to the input detector score under
+    an assumed-probability model S_t ≈ P(y=1|x).
+    Because raw detector scores (e.g. Random Forest leaf voting fractions) are not proven
+    calibrated posterior probabilities, this policy must NOT be represented as a proven
+    true Bayes-optimal policy on uncalibrated outputs.
     """
 
     name: str = "Baseline_4_Cost_Optimal_Threshold"
     action_mode: ActionSpaceMode = ActionSpaceMode.FOUR_ACTION
+    cost_regime: CostRegime = CostRegime.STANDARD_ENTERPRISE
     cost_matrix: dict[int, dict[Action, float]] | None = None
+    clip_out_of_bounds: bool = True
+    tie_breaker: str = "conservative"  # 'conservative' (min action.value) or 'aggressive' (max action.value)
 
     def __post_init__(self) -> None:
         if self.cost_matrix is None:
-            # Default to Standard Enterprise research cost matrix
-            self.cost_matrix = {
-                0: {
-                    Action.ALLOW: 0.0,
-                    Action.ALERT: 1.0,
-                    Action.RATE_LIMIT: 15.0,
-                    Action.ISOLATE: 60.0,
-                },
-                1: {
-                    Action.ALLOW: 100.0,
-                    Action.ALERT: 12.0,
-                    Action.RATE_LIMIT: 6.0,
-                    Action.ISOLATE: 2.0,
-                },
-            }
+            self.cost_matrix = RESEARCH_COST_MATRICES[self.cost_regime]
+        if 0 not in self.cost_matrix or 1 not in self.cost_matrix:
+            raise ValueError("cost_matrix must contain entries for ground truth labels 0 and 1.")
+
+    def expected_cost(self, action: Action, attack_score: float) -> float:
+        """Compute expected cost of a single action given attack score p in [0, 1]."""
+        p = self._validate_and_sanitize_score(attack_score)
+        c0 = float(self.cost_matrix[0].get(action, 0.0))
+        c1 = float(self.cost_matrix[1].get(action, 0.0))
+        return (1.0 - p) * c0 + p * c1
+
+    def _validate_and_sanitize_score(self, attack_score: float) -> float:
+        """Validate input attack score, detecting NaNs, infinities, and bounds."""
+        if math.isnan(attack_score):
+            raise ValueError("Invalid attack_score: NaN is not a valid score.")
+        if math.isinf(attack_score):
+            raise ValueError("Invalid attack_score: infinite values are not permitted.")
+
+        p = float(attack_score)
+        if p < 0.0 or p > 1.0:
+            if self.clip_out_of_bounds:
+                p = float(np.clip(p, 0.0, 1.0))
+            else:
+                raise ValueError(f"attack_score must be in [0.0, 1.0], got {attack_score}")
+        return p
+
+    def get_allowed_actions(self) -> list[Action]:
+        """Return list of permitted actions for the current action mode."""
+        if self.action_mode == ActionSpaceMode.THREE_ACTION:
+            return [Action.ALLOW, Action.ALERT, Action.RATE_LIMIT]
+        return [Action.ALLOW, Action.ALERT, Action.RATE_LIMIT, Action.ISOLATE]
+
+    def predict_unconstrained_action(self, attack_score: float) -> Action:
+        """Select action that strictly minimizes expected cost for the given score.
+
+        Separates the unconstrained decision from any downstream safety gate invariants.
+        """
+        p = self._validate_and_sanitize_score(attack_score)
+        allowed = self.get_allowed_actions()
+
+        best_action = allowed[0]
+        min_cost = float("inf")
+
+        # Evaluate expected cost across allowed actions
+        # Handle ties with configured tie-breaking policy
+        tolerance = 1e-9
+        candidate_actions: list[Action] = []
+
+        for act in allowed:
+            cost = (1.0 - p) * self.cost_matrix[0].get(act, 0.0) + p * self.cost_matrix[1].get(act, 0.0)
+            if cost < min_cost - tolerance:
+                min_cost = cost
+                candidate_actions = [act]
+            elif abs(cost - min_cost) <= tolerance:
+                candidate_actions.append(act)
+
+        if len(candidate_actions) == 1:
+            return candidate_actions[0]
+
+        # Break ties deterministically
+        if self.tie_breaker == "aggressive":
+            return max(candidate_actions, key=lambda a: a.value)
+        else:  # 'conservative' (default): prefer least disruptive action
+            return min(candidate_actions, key=lambda a: a.value)
 
     def predict_action(
         self,
@@ -290,24 +349,52 @@ class CostOptimalThresholdPolicy(ResponsePolicy):
         attack_score: float,
         host_id: str | None = None,
     ) -> Action:
-        p = float(np.clip(attack_score, 0.0, 1.0))
-        allowed_actions = (
-            [Action.ALLOW, Action.ALERT, Action.RATE_LIMIT]
-            if self.action_mode == ActionSpaceMode.THREE_ACTION
-            else [Action.ALLOW, Action.ALERT, Action.RATE_LIMIT, Action.ISOLATE]
-        )
+        """Standard ResponsePolicy entrypoint returning cost-optimal action."""
+        return self.predict_unconstrained_action(attack_score)
 
-        # Compute expected cost for each allowed action: (1 - p)*C(a, 0) + p*C(a, 1)
-        best_action = Action.ALLOW
-        min_cost = float("inf")
-        cm = self.cost_matrix
-        for act in allowed_actions:
-            exp_cost = (1.0 - p) * cm[0].get(act, 0.0) + p * cm[1].get(act, 0.0)
-            if exp_cost < min_cost:
-                min_cost = exp_cost
-                best_action = act
+    def derive_threshold_boundaries(self) -> list[dict[str, Any]]:
+        """Dynamically derive analytical threshold switching intervals on [0.0, 1.0].
 
-        return best_action
+        Returns
+        -------
+        list[dict[str, Any]]
+            Ordered list of dicts with keys 'lower', 'upper', and 'action'.
+        """
+        allowed = self.get_allowed_actions()
+        crit_points = [0.0, 1.0]
+
+        # Calculate all pairwise intersection points in [0, 1]
+        for i in range(len(allowed)):
+            for j in range(i + 1, len(allowed)):
+                a, b = allowed[i], allowed[j]
+                c0_a, c1_a = self.cost_matrix[0].get(a, 0.0), self.cost_matrix[1].get(a, 0.0)
+                c0_b, c1_b = self.cost_matrix[0].get(b, 0.0), self.cost_matrix[1].get(b, 0.0)
+                denom = (c0_b - c0_a) + (c1_a - c1_b)
+                if abs(denom) > 1e-12:
+                    p_inter = (c0_b - c0_a) / denom
+                    if 0.0 <= p_inter <= 1.0:
+                        crit_points.append(p_inter)
+
+        # Deduplicate and sort critical points
+        sorted_points = sorted(list(set([round(p, 9) for p in crit_points])))
+
+        intervals: list[dict[str, Any]] = []
+        for k in range(len(sorted_points) - 1):
+            low = sorted_points[k]
+            high = sorted_points[k + 1]
+            p_mid = (low + high) / 2.0
+            act = self.predict_unconstrained_action(p_mid)
+            intervals.append({"lower": low, "upper": high, "action": act})
+
+        # Merge adjacent intervals with identical optimal action
+        merged: list[dict[str, Any]] = []
+        for interval in intervals:
+            if merged and merged[-1]["action"] == interval["action"]:
+                merged[-1]["upper"] = interval["upper"]
+            else:
+                merged.append(interval)
+
+        return merged
 
     def reset(self) -> None:
         pass
@@ -316,5 +403,16 @@ class CostOptimalThresholdPolicy(ResponsePolicy):
         return {
             "policy_name": self.name,
             "action_mode": self.action_mode.value,
-            "description": "Analytic Bayes cost-optimal threshold baseline under operational loss matrix",
+            "cost_regime": self.cost_regime.value,
+            "tie_breaker": self.tie_breaker,
+            "clip_out_of_bounds": self.clip_out_of_bounds,
+            "threshold_intervals": [
+                {"lower": b["lower"], "upper": b["upper"], "action": b["action"].name}
+                for b in self.derive_threshold_boundaries()
+            ],
+            "scientific_note": (
+                "Cost-optimal decision policy with respect to detector score under an "
+                "assumed-probability model. Not claimed to be a true Bayes-optimal policy "
+                "on uncalibrated detector outputs."
+            ),
         }
