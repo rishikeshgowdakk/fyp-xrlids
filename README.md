@@ -145,6 +145,10 @@ Per-seed 95% bootstrap intervals from the frozen held-out predictions (B=1000; t
 
 Full table: [`reports/generated/bootstrap_ci_report.md`](reports/generated/bootstrap_ci_report.md).
 
+> [!NOTE]
+> **Evaluation Population Reconciliation (355,865 vs 355,833 Flows)**:
+> In CIC-IDS2017, the canonical held-out test split contains **355,865 tabular flows** (evaluated by Random Forest and offline flow replay). Sequence models (LSTM and Fusion) drop $(T - 1) = 4$ initial boundary flows per capture file to prevent causal sequence windows from crossing unrelated capture files. Across the 8 capture files, exactly $8 \times 4 = 32$ boundary flows are excluded, yielding **355,833 sequence-aligned flows** ($355,865 - 32 = 355,833$). Both counts are legitimate and evaluate the exact same underlying test population.
+
 ### Temporal Holdout (CSE-CIC-IDS2018, GAP-P06)
 
 `EXP-P1-CSE2018-TEMPORAL-R10-001` sorts the 8,312,295 modelling rows by the real CSE `Timestamp`, trains on 14–20 Feb 2018, validates on 20–22 Feb, and tests on 22 Feb–2 Mar. L-01/L-02/L-05 pass. The frozen RF result is a **negative generalization finding**:
@@ -185,29 +189,19 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-> **Artifacts and raw data are not committed.** `data/raw/**`, `*.joblib` and `*.pt` are
-> gitignored (large files and licensed datasets). A fresh clone therefore contains **no
-> trained detector**. The demo and dashboard now **refuse to score** in that state instead
-> of substituting a heuristic, so check first:
+> **Model Binaries and Preprocessors are Committed.** All 9 canonical model files (`models/rf/*.joblib`, `models/lstm/*.pt`, `models/dqn/*.pt`, `models/fusion/*.json`) and preprocessors are tracked directly in Git and available immediately upon cloning.
 >
-> ```bash
-> ls results/experiments/EXP-P1-CIC2017-R10-001/random_forest.joblib
-> ls data/raw/cicids2017
-> ```
->
-> If either is missing, restore the frozen artifacts and datasets with
-> [`docs/final/REPRODUCIBILITY_MAP.md`](docs/final/REPRODUCIBILITY_MAP.md), or retrain
-> (step 5).
+> **Raw benchmark CSVs (~8.7 GB across 20 files) remain uncommitted** due to license and size considerations. If you wish to retrain from scratch or re-run feature extraction on raw PCAP/CSV files, follow [`docs/DATASETS.md`](docs/DATASETS.md) and [`docs/final/REPRODUCIBILITY_MAP.md`](docs/final/REPRODUCIBILITY_MAP.md).
 
 ### 2. Verify Installation (Test Suite)
 
-Run the full 409-test verification suite to confirm everything is working:
+Run the full 711-test verification suite to confirm everything is working:
 
 ```bash
 .venv/bin/pytest -q
 ```
 
-All 417 tests should pass with 0 failures.
+All 711 tests across unit, integration, model, and data suites should pass with 0 failures.
 
 ### 3. Quick Demo — PCAP Replay
 
@@ -322,7 +316,7 @@ To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
 
 | What you want to do | Command | Root needed? |
 |---------------------|---------|:---:|
-| Run full test suite (417 tests) | `.venv/bin/pytest` | No |
+| Run full test suite (711 tests) | `.venv/bin/pytest` | No |
 | **Launch Dashboard (Dataset & Sample Demo)** | `python dashboard/server.py` | **No** |
 | Run quick offline PCAP replay demo | `python scripts/demo/run_replay_demo.py` | No |
 | Dashboard with real live WiFi capture | `sudo .venv/bin/python dashboard/server.py 8000 --live --iface wlo1` | Yes |

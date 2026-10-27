@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P2B-READINESS-AUDIT-001",
+    "git_commit": "70c17d21fa64d3379028165c8e9ed0e04f106f20",
+    "dataset_sha256": null,
+    "feature_schema_hash": null,
+    "seed": 42,
+    "created_at": "2026-10-27T20:51:30.147725+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "70c17d21fa64d3379028165c8e9ed0e04f106f20",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "tabular_test_population_flows": 355865,
+  "sequence_aligned_population_flows": 355833,
+  "discrepancy_delta": 32,
+  "mathematical_derivation": "355,865 tabular test flows - (8 capture files * 4 dropped boundary flows) = 355,833 flows. For sequence length T = 5, constructing causal sequences strictly within each capture file requires dropping the first (T - 1) = 4 flows of each file so sequences never cross unrelated files. Across the 8 CIC-IDS2017 capture files, exactly 8 * 4 = 32 boundary flows are excluded for sequence models. Tabular detectors (Random Forest and Phase 2 offline flow replay) consume per-flow tabular features and therefore evaluate the complete, unconstrained 355,865 test population.",
+  "evaluation_scope_breakdown": {
+    "tabular_rf_and_phase2_flows": {
+      "count": 355865,
+      "benign": 291045,
+      "attack": 64820,
+      "prevalence_pct": 18.21,
+      "source_split": "split_manifest.json (test split)"
+    },
+    "sequence_aligned_lstm_fusion_flows": {
+      "count": 355833,
+      "benign": 291041,
+      "attack": 64792,
+      "prevalence_pct": 18.208,
+      "dropped_boundary_flows": 32,
+      "dropped_breakdown": {
+        "benign_dropped": 4,
+        "attack_dropped": 28
+      },
+      "source_split": "test_metrics.json (aligned sequence test slice)"
+    }
+  },
+  "reconciliation_verdict": "LEGITIMATE_DESIGN_CHOICE_DOCUMENTED"
+}
