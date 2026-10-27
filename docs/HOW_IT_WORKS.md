@@ -570,3 +570,29 @@ A: No. The live pipeline uses the frozen artifact from `EXP-P1-CIC2017-R10-001` 
 A: That is a documented property/limitation of this frozen model on clean synthetic traffic (see
 2.7). The evasion demos exist so the console shows the model's real behaviour rather than a staged
 detection — an honesty feature, not a bug.
+
+
+---
+
+## Addendum — Custom CSV evaluation path (2026-10-27)
+
+The dashboard has an additional offline evaluation workflow for CSV files. Keep it conceptually separate from packet capture and live monitoring:
+
+```text
+CSV upload / paste / curated sample
+              ↓
+Benchmark + feature-contract validation
+              ↓
+Label parsing and numeric/non-finite row checks
+              ↓
+Frozen, compatible preprocessor + Random Forest
+              ↓
+Metrics, row accounting and export
+```
+
+Supported pairings are CIC-IDS2017/R10, CSE-CIC-IDS2018/R10, and UNSW-NB15/R4. Labels must be recognized binary benign/attack values; missing, ambiguous, or unknown labels are rejected. Invalid/non-finite feature rows are handled with explicit row accounting. Ground-truth labels are separated from inference features.
+
+This workflow is for **ad-hoc CSV analysis**. It does not retrain the models, alter historical experiment artifacts, or establish temporal/generalization performance. Its results should not be merged into official benchmark claims without a separately documented, reproducible experiment.
+
+The core live/PCAP pipeline remains unchanged: capture or replay packets → assemble bidirectional flows → extract the applicable canonical feature contract → run frozen detector artifacts → display scores and alerts. Live monitoring remains observational; do not describe the system as production-ready autonomous enforcement.
+
