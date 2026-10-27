@@ -1,6 +1,6 @@
 # PROJECT STATUS
 
-Last updated: 2026-10-20
+Last updated: 2026-10-28
 Project: **XRL-IDARS v1** · Repository: `fyp-xrlids`
 
 ```text
@@ -15,6 +15,18 @@ Phase: **PHASE 1 — SCIENTIFICALLY FROZEN · PHASE 2 — SCIENTIFICALLY FROZEN 
 Overall: **Phase 1 Research Frozen & Demonstration Foundation Verified (`EXP-P1-CIC2017-R10-001`). Phase 2 Scientifically Frozen (`11f32f658cde525300f8bc46088a0143e8329c21`) under pre-registered audit criteria across all stages 2A through 2E and held-out test evaluation (`EXP-P2-FINAL-TEST-001`). Phase 3 Laboratory Validation Complete across all subphases 3A through 3K (`EXP-P3K-STRESS-SECURITY-001`). Final research synthesis complete (`docs/final/FINAL_RESEARCH_REPORT.md`). Production deployment is not validated.**
 
 Legend: ✅ done / verified · 🟡 implemented / empirically observed on partial data · ⛔ blocked on research decision · ⬜ planned / not started
+
+## Dashboard CSV Evaluation Workflow (added 2026-10-27)
+
+| Area | Status | Scope / evidence |
+| --- | --- | --- |
+| Custom CSV evaluator | Implemented in repository | `src/xrlids/evaluation/csv_evaluator.py`; compatible frozen Random Forest artifacts only |
+| Benchmark/feature contract pairing | Implemented | CIC-IDS2017/R10, CSE-CIC-IDS2018/R10, UNSW-NB15/R4 |
+| Label and feature validation | Implemented with regression tests | Rejects unknown/ambiguous labels; accounts for invalid/non-finite feature rows |
+| Dashboard integration | Implemented | `dashboard/server.py`, `dashboard/index.html`, `dashboard/app.js` |
+| Research interpretation | Ad-hoc evaluation only | Does not retrain models or change frozen benchmark artifacts; not a substitute for temporal or cross-dataset validation |
+
+**Architecture note:** this workflow extends the dashboard's offline evaluation capabilities. It does not replace or fundamentally change the core live pipeline (capture → flow construction → feature extraction → frozen detection model → alert/score presentation). Production deployment remains not validated.
 
 ## Implementation status
 
