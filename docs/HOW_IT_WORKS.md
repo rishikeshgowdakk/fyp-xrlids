@@ -5,6 +5,26 @@ Every claim below can be re-checked with the commands in Part 2.9.*
 
 ---
 
+## Architecture at a glance
+
+The repository contains separate operational and evaluation paths. Do not draw the custom CSV evaluator as a stage in the live packet pipeline.
+
+```text
+LIVE / PCAP: packets → bidirectional flows → canonical features → frozen RF/LSTM
+             → score fusion / threat score → RF-only TreeSHAP explanation
+             → DQN recommendation → deterministic safety gate
+             → controlled lab response / rollback → dashboard
+
+OFFLINE CSV: CSV → schema + benchmark-contract validation → label isolation
+             → numeric/non-finite row handling → compatible frozen preprocessor
+             + Random Forest → ad-hoc metrics / row accounting / CSV export
+             → evaluation workbench
+```
+
+The CSV path does not retrain the models, feed its outputs back into live inference, or overwrite historical benchmark artifacts. Live capture remains observational outside the explicitly controlled laboratory validation environment. TreeSHAP explanations apply to the Random Forest, not automatically to the LSTM, fusion output, or DQN.
+
+---
+
 ## 0. The one thing to know first: what is real and what is synthetic
 
 The dashboard has **three different kinds of traffic**, and only one of them is real:
