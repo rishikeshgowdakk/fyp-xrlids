@@ -1,0 +1,37 @@
+{
+  "model_id": "fusion_rf_lstm_v1",
+  "model_type": "fusion",
+  "policy": "score_level_linear_combination",
+  "formula": "P_fusion = alpha * P_rf + (1 - alpha) * P_lstm",
+  "calibrated": true,
+  "configurations": {
+    "neutral_baseline": {
+      "alpha": 0.5,
+      "threshold": 0.5,
+      "notes": "Fixed neutral baseline (D-003)"
+    },
+    "cicids2017": {
+      "alpha": 0.5,
+      "threshold": 0.5,
+      "test_f1": 0.9745,
+      "test_accuracy": 0.9906,
+      "source_experiment": "EXP-P1-CIC2017-R10-001"
+    },
+    "cse_cic_ids2018": {
+      "alpha": 0.0,
+      "threshold": 0.5,
+      "test_f1": 0.9603,
+      "test_accuracy": 0.9912,
+      "source_experiment": "EXP-P1-CSE2018-R10-MULTI-001",
+      "notes": "Pure LSTM boundary optimal on multi-file temporal flows"
+    },
+    "unsw_nb15": {
+      "alpha": 0.6,
+      "threshold": 0.5,
+      "test_f1": 0.8970,
+      "test_accuracy": 0.8996,
+      "source_experiment": "EXP-P1-UNSWNB15-R10-MULTI-001",
+      "feature_contract": "R4"
+    }
+  }
+}

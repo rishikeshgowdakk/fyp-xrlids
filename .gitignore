@@ -28,16 +28,28 @@ data/processed/*
 !data/interim/.gitkeep
 !data/processed/.gitkeep
 
-# Model binaries - tracked by the model registry (hashes), not committed by default
-models/rf/*
-models/lstm/*
-models/fusion/*
-models/dqn/*
-!models/*/.gitkeep
+# Model binaries - generic ignore
 *.joblib
 *.pt
 *.pth
 results/**/predictions_test.csv
+
+# Canonical model artifacts tracked for deployment and evaluation
+!models/rf/*.joblib
+!models/lstm/*.pt
+!models/dqn/*.pt
+!models/fusion/*.json
+
+# Flagship experiment checkpoints and preprocessors for replay & dashboard
+!results/experiments/EXP-P1-CIC2017-R10-001/*.joblib
+!results/experiments/EXP-P1-CIC2017-R10-001/*.pt
+!results/experiments/EXP-P1-CSE2018-R10-MULTI-001/*.joblib
+!results/experiments/EXP-P1-CSE2018-R10-MULTI-001/*.pt
+!results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/*.joblib
+!results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/*.pt
+!results/phase2/EXP-P2B-DQN-001/checkpoints/**/best_model.pt
+results/phase2/**/checkpoint_step_*.pt
+results/phase2/**/ablation_checkpoints/**
 
 # Generated figures are regenerated from results; generated Markdown reports ARE committed
 # so the repository contains readable evidence derived from the result artifacts.
