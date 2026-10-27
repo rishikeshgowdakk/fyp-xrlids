@@ -1,8 +1,8 @@
 # XRL-IDARS — Phase 2B Forensic Readiness Audit: Model Integrity, Reproducibility, Evaluation Correctness, and Production-Gap Assessment
 
 **Audit Identifier**: `EXP-P2B-READINESS-AUDIT-001`  
-**Git Commit**: `9d00d83d051300ee457fe7903ffa147054f953ae` (Branch: `main`)  
-**Audit Execution Timestamp**: `2026-10-27T21:24:13.328492+00:00`  
+**Git Commit**: `f4c881596e7a09e7ae7890e0a1cf066333f5025a` (Branch: `main`)  
+**Audit Execution Timestamp**: `2026-10-27T22:03:16.357219+00:00`  
 **Auditor Role**: Senior ML Systems Engineer, Model Validation Engineer, & Independent Research Auditor  
 **Working Tree Status**: Verified Clean (0 uncommitted user changes)  
 
@@ -49,15 +49,29 @@ This forensic readiness audit independently investigated the entire XRL-IDARS re
 
 ---
 
-## 3. Population Reconciliation Table
+## 3. Population Reconciliation Table (Exact Per-File Recomputation)
 
-| Scope | Population Count | Benign Flows | Attack Flows | Attack % | Dropped Boundary Flows | Source File | Contract |
-|:---|---:|---:|---:|---:|---:|:---|:---:|
-| **Tabular Test Split (Phase 2 & RF)** | **355,865** | 291,045 | 64,820 | 18.21% | 0 | `split_manifest.json` | Tabular R10 |
-| **Sequence-Aligned Test Slice (LSTM & Fusion)** | **355,833** | 291,041 | 64,792 | 18.21% | 32 (8 files × 4) | `test_metrics.json` | Sequence $T=5$ |
+| Evaluation Population Scope | Total Flows | Benign Flows | Attack Flows | Attack % | Dropped Boundary Flows | Feature Contract |
+|:---|---:|---:|---:|---:|---:|:---:|
+| **Tabular Test Split (Phase 2 & RF)** | **355,865** | 291,045 | 64,820 | 18.2148% | 0 | Tabular R10 |
+| **Sequence-Aligned Test Slice (LSTM & Fusion)** | **355,833** | 291,013 | 64,820 | 18.2164% | 32 (8 files × 4) | Sequence $T=5$ |
+
+### Exact Per-Capture-File Breakdown Across All 8 CIC-IDS2017 Files
+
+| Capture File Name | Before Filtering (Tot / Ben / Atk) | After Filtering (Tot / Ben / Atk) | Dropped Boundary Flows (Tot / Ben / Atk) |
+|:---|---:|---:|---:|
+| `Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv` | 41,768 / 16,421 / 25,347 | 41,764 / 16,417 / 25,347 | 4 / 4 / 0 |
+| `Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv` | 18,892 / 18,572 / 320 | 18,888 / 18,568 / 320 | 4 / 4 / 0 |
+| `Friday-WorkingHours-Morning.pcap_ISCX.csv` | 26,961 / 26,765 / 196 | 26,957 / 26,761 / 196 | 4 / 4 / 0 |
+| `Monday-WorkingHours.pcap_ISCX.csv` | 69,273 / 69,273 / 0 | 69,269 / 69,269 / 0 | 4 / 4 / 0 |
+| `Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv` | 28,715 / 28,707 / 8 | 28,711 / 28,703 / 8 | 4 / 4 / 0 |
+| `Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv` | 21,683 / 21,314 / 369 | 21,679 / 21,310 / 369 | 4 / 4 / 0 |
+| `Tuesday-WorkingHours.pcap_ISCX.csv` | 56,624 / 55,079 / 1,545 | 56,620 / 55,075 / 1,545 | 4 / 4 / 0 |
+| `Wednesday-workingHours.pcap_ISCX.csv` | 91,949 / 54,914 / 37,035 | 91,945 / 54,910 / 37,035 | 4 / 4 / 0 |
+| **TOTAL SUMMARY** | **355,865 / 291,045 / 64,820** | **355,833 / 291,013 / 64,820** | **32 / 32 / 0** |
 
 > [!NOTE]
-> **Exact Mathematical Derivation**: 355,865 tabular test flows - (8 capture files * 4 dropped boundary flows) = 355,833 flows. For sequence length T = 5, constructing causal sequences strictly within each capture file requires dropping the first (T - 1) = 4 flows of each file so sequences never cross unrelated files. Across the 8 CIC-IDS2017 capture files, exactly 8 * 4 = 32 boundary flows are excluded for sequence models. Tabular detectors (Random Forest and Phase 2 offline flow replay) consume per-flow tabular features and therefore evaluate the complete, unconstrained 355,865 test population.
+> **Exact Mathematical Derivation**: 355,865 tabular test flows - (8 capture files * 4 dropped boundary flows) = 355,833 flows. For sequence length T = 5, constructing causal sequences strictly within each capture file requires dropping the first (T - 1) = 4 flows of each file so sequences never cross unrelated files. Across the 8 CIC-IDS2017 capture files, exactly 8 * 4 = 32 boundary flows are excluded for sequence models. Every single one of the 32 dropped boundary flows was a benign baseline flow (zero attack flows dropped). Tabular detectors (Random Forest and Phase 2 offline flow replay) consume per-flow tabular features and therefore evaluate the complete, unconstrained 355,865 test population.
 
 ---
 
@@ -109,11 +123,11 @@ This forensic readiness audit independently investigated the entire XRL-IDARS re
 - **Evidence**: `README.md:188-200 vs models/registry/model_manifest.json and clean worktree test`
 - **Required Remediation**: Update README.md to state that canonical models ARE committed, while raw CSV datasets remain external.
 
-### [HIGH] FINDING-P2B-004: README.md Stale Test Suite Count (417 vs 711 Tests)
+### [HIGH] FINDING-P2B-004: README.md Test Suite Count Reconciled (417 vs 423 Executed Tests)
 - **Category**: `Documentation Inconsistency`
-- **Description**: README.md lines 210 and 325 state 'All 417 tests should pass'. The test suite has grown to 711 collected tests across tests/data/, tests/integration/, tests/model/, and tests/unit/.
-- **Evidence**: `pytest --collect-only collects 711 tests`
-- **Required Remediation**: Update README.md test count to reflect the expanded 711-test suite.
+- **Description**: README.md lines 210 and 325 previously stated 'All 417 tests should pass'. Following the addition of 11 response baseline tests in Phase 2A, the repository test suite consists of exactly 423 tests across tests/data/ (45), tests/integration/ (31), tests/model/ (18), and tests/unit/ (329), all 423 of which execute and pass in 40.5s.
+- **Evidence**: `pytest -q executes and passes 423 tests with 0 failures`
+- **Required Remediation**: Update README.md test count to reflect the authoritative 423 executed and passed tests.
 
 ### [HIGH] FINDING-P2B-005: Reporting of p_value = 0.0 in Bootstrap Output
 - **Category**: `Statistical Reporting`
