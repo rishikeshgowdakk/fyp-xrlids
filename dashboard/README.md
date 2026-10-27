@@ -29,6 +29,8 @@ The workbench is organized into seven specialized pages:
   - Distinguishes ad-hoc evaluation from official benchmark results without altering historical artifacts.
   - Downloadable CSV export with full evaluation metadata provenance headers.
 
+**CSV evaluation validation rules:** the benchmark and feature contract are a paired configuration (CIC-IDS2017/R10, CSE-CIC-IDS2018/R10, UNSW-NB15/R4). The evaluator separates the label column from inference features, rejects unknown or ambiguous labels, coerces numeric features, accounts for dropped non-finite rows, and applies the canonical feature order. CSV evaluations are ad-hoc analyses against frozen artifacts; they do not alter historical benchmark outputs or retrain models. Treat exported records as evaluation outputs, not as new benchmark evidence.
+
 ### 2. 📋 Overview
 - Platform architecture, current Git commit, clean working-tree verification, and runtime environment.
 - Formal Component Verification Matrix with statuses:
