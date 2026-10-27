@@ -3,29 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>XRL-IDARS — Live Intrusion Detection</title>
+  <title>XRL-IDARS — Research Evaluation Workbench</title>
   <style>
     :root {
-      --bg: #0f1117;
-      --surface: #161b22;
-      --surface-2: #1c2129;
-      --border: #30363d;
-      --border-light: #21262d;
-      --text: #e6edf3;
-      --text-muted: #8b949e;
-      --text-dim: #6e7681;
-      --accent: #58a6ff;
-      --accent-glow: rgba(88,166,255,0.15);
-      --green: #3fb950;
-      --green-dim: rgba(63,185,80,0.15);
-      --red: #f85149;
-      --red-dim: rgba(248,81,73,0.12);
-      --orange: #d29922;
-      --orange-dim: rgba(210,153,34,0.15);
-      --yellow: #e3b341;
+      --bg: #0b0e14;
+      --surface: #151922;
+      --surface-2: #1b212d;
+      --surface-3: #222938;
+      --border: #2d3748;
+      --border-light: #1f2733;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.15);
+      --green: #22c55e;
+      --green-dim: rgba(34, 197, 94, 0.12);
+      --red: #ef4444;
+      --red-dim: rgba(239, 68, 68, 0.12);
+      --orange: #f59e0b;
+      --orange-dim: rgba(245, 158, 11, 0.12);
+      --purple: #a855f7;
+      --purple-dim: rgba(168, 85, 247, 0.12);
       --radius: 8px;
       --radius-sm: 6px;
-      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       --mono: "SF Mono", "Fira Code", "Fira Mono", ui-monospace, Menlo, Consolas, monospace;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,54 +41,56 @@
       min-height: 100vh;
     }
 
-    /* ── Top Navigation ── */
+    /* ── Topbar ── */
     .topbar {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(15,17,23,0.85);
+      background: rgba(11, 14, 20, 0.92);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
-      padding: 0 24px;
+      padding: 0 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 56px;
+      height: 58px;
+      gap: 16px;
     }
     .topbar-brand {
-      display: flex; align-items: center; gap: 12px;
+      display: flex; align-items: center; gap: 10px; flex-shrink: 0;
     }
     .topbar-brand .logo {
       width: 32px; height: 32px;
-      background: linear-gradient(135deg, var(--accent), #a371f7);
+      background: linear-gradient(135deg, var(--accent), var(--purple));
       border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 14px; color: #fff;
+      font-weight: 800; font-size: 13px; color: #fff;
     }
     .topbar-brand h1 {
-      font-size: 16px; font-weight: 700; letter-spacing: -0.3px;
+      font-size: 15px; font-weight: 700; letter-spacing: -0.3px;
     }
     .topbar-brand .version {
       font-size: 11px; color: var(--text-muted);
       background: var(--surface-2); border: 1px solid var(--border);
-      padding: 1px 6px; border-radius: 4px;
+      padding: 2px 6px; border-radius: 4px;
     }
     .topbar-tabs {
-      display: flex; gap: 2px;
+      display: flex; gap: 4px; overflow-x: auto;
       background: var(--surface-2); border-radius: 8px; padding: 3px;
     }
     .topbar-tabs button {
       background: transparent; border: none; color: var(--text-muted);
-      padding: 6px 16px; border-radius: 6px; font-size: 13px;
+      padding: 6px 12px; border-radius: 6px; font-size: 12px;
       font-weight: 600; cursor: pointer; transition: all 0.15s;
-      font-family: var(--font);
+      white-space: nowrap; font-family: var(--font);
     }
-    .topbar-tabs button:hover { color: var(--text); background: var(--surface); }
+    .topbar-tabs button:hover { color: var(--text); background: var(--surface-3); }
     .topbar-tabs button.active {
-      color: var(--text); background: var(--surface);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      color: #fff; background: var(--accent);
+      color: #0b0e14; font-weight: 700;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
     }
     .topbar-status {
       display: flex; align-items: center; gap: 8px;
-      font-size: 12px; color: var(--text-muted);
+      font-size: 12px; color: var(--text-muted); flex-shrink: 0;
     }
     .pulse-dot {
       width: 8px; height: 8px; border-radius: 50%;
@@ -94,351 +98,714 @@
     }
     .pulse-dot.live {
       background: var(--green);
-      box-shadow: 0 0 8px rgba(63,185,80,0.6);
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
       animation: pulse-glow 1.5s ease-in-out infinite;
     }
     @keyframes pulse-glow {
-      0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(63,185,80,0.6); }
-      50% { opacity: 0.5; box-shadow: 0 0 16px rgba(63,185,80,0.3); }
+      0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
     }
 
-    /* ── Layout ── */
-    .container { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
+    /* ── Layout & Containers ── */
+    .container { max-width: 1440px; margin: 0 auto; padding: 20px; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
+    .section-gap { margin-bottom: 20px; }
+
+    /* ── Controls Row ── */
+    .controls-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 12px 16px; margin-bottom: 20px;
+    }
+    .controls-group {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .controls-label {
+      font-size: 12px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--text-muted);
+    }
+    select, input[type="text"], input[type="number"] {
+      background: var(--surface-2); color: var(--text);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 6px 12px; font-size: 13px; font-family: var(--font);
+    }
+    select:focus, input:focus { outline: none; border-color: var(--accent); }
+    .btn {
+      background: var(--surface-3); color: var(--text);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 6px 14px; font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s; font-family: var(--font);
+    }
+    .btn:hover { background: var(--border); color: #fff; }
+    .btn-primary { background: var(--accent); color: #0b0e14; border-color: var(--accent); font-weight: 700; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-danger { background: var(--red); color: #fff; border-color: var(--red); }
 
     /* ── Cards ── */
     .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      margin-bottom: 16px;
-      overflow: hidden;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); margin-bottom: 16px; overflow: hidden;
     }
     .card-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border);
-      gap: 12px;
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.01);
     }
     .card-header h2 {
-      font-size: 13px; font-weight: 600;
-      text-transform: uppercase; letter-spacing: 0.5px;
-      color: var(--text-muted);
+      font-size: 13px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--text-muted);
       display: flex; align-items: center; gap: 8px;
     }
-    .card-header h2 .icon { font-size: 16px; }
     .card-body { padding: 16px; }
-    .card-body.compact { padding: 12px; }
     .card-body.flush { padding: 0; }
 
-    /* ── Stat Grid ── */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-    }
+    /* ── Grids ── */
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 16px; }
+
+    /* ── Metric Box ── */
     .stat-card {
-      background: var(--surface-2);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-sm);
-      padding: 14px 16px;
+      background: var(--surface-2); border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm); padding: 14px 16px;
     }
-    .stat-card .stat-label {
+    .stat-label {
       font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
-      color: var(--text-dim); font-weight: 600; margin-bottom: 4px;
+      color: var(--text-dim); font-weight: 700; margin-bottom: 4px;
     }
-    .stat-card .stat-value {
-      font-size: 28px; font-weight: 700;
-      font-family: var(--mono);
-      color: var(--text);
-      line-height: 1.2;
+    .stat-val {
+      font-size: 22px; font-weight: 800; font-family: var(--mono);
+      color: var(--text); letter-spacing: -0.5px;
     }
-    .stat-card .stat-sub {
-      font-size: 11px; color: var(--text-muted); margin-top: 2px;
-    }
-    .stat-card.accent .stat-value { color: var(--accent); }
-    .stat-card.green .stat-value { color: var(--green); }
-    .stat-card.red .stat-value { color: var(--red); }
-    .stat-card.orange .stat-value { color: var(--orange); }
-
-    /* ── Alert Banner ── */
-    .alert-banner {
-      display: none;
-      align-items: center; justify-content: space-between;
-      gap: 12px; padding: 10px 16px;
-      border-radius: var(--radius-sm);
-      background: var(--red-dim);
-      border: 1px solid var(--red);
-      margin-bottom: 12px;
-      animation: banner-slide 0.3s ease-out;
-    }
-    .alert-banner.visible { display: flex; }
-    .alert-banner.medium { background: var(--orange-dim); border-color: var(--orange); }
-    .alert-banner.low { background: var(--surface-2); border-color: var(--text-dim); }
-    .alert-banner .banner-icon { font-size: 18px; }
-    .alert-banner .banner-body { flex: 1; }
-    .alert-banner .banner-title {
-      font-size: 12px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.5px;
-    }
-    .alert-banner .banner-detail { font-size: 12px; color: var(--text-muted); }
-    @keyframes banner-slide {
-      from { opacity: 0; transform: translateY(-8px); }
-      to { opacity: 1; transform: translateY(0); }
+    .stat-sub {
+      font-size: 11px; color: var(--text-muted); margin-top: 4px;
     }
 
-    /* ── Buttons ── */
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 7px 14px; border-radius: var(--radius-sm);
-      font-size: 13px; font-weight: 600; font-family: var(--font);
-      cursor: pointer; border: 1px solid var(--border);
-      background: var(--surface-2); color: var(--text);
-      transition: all 0.15s;
+    /* ── Confusion Matrix ── */
+    .cm-wrapper {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      margin-top: 10px;
     }
-    .btn:hover:not(:disabled) { background: var(--surface); border-color: var(--text-dim); }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-primary {
-      background: var(--accent); color: #fff;
-      border-color: var(--accent);
+    .cm-box {
+      background: var(--surface-2); border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm); padding: 12px; text-align: center;
     }
-    .btn-primary:hover:not(:disabled) {
-      background: #79c0ff; border-color: #79c0ff;
-    }
-    .btn-danger {
-      background: transparent; color: var(--red);
-      border-color: rgba(248,81,73,0.4);
-    }
-    .btn-danger:hover:not(:disabled) {
-      background: var(--red-dim); border-color: var(--red);
-    }
-    .btn-sm { padding: 4px 10px; font-size: 12px; }
-    .btn-link {
-      background: none; border: none; padding: 0;
-      color: var(--accent); cursor: pointer;
-      font: inherit; font-weight: 600; font-size: 12px;
-      text-decoration: underline;
-    }
-    .btn-link:hover { color: #79c0ff; }
+    .cm-box.correct { border-left: 4px solid var(--green); }
+    .cm-box.error { border-left: 4px solid var(--red); }
+    .cm-label { font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; }
+    .cm-val { font-size: 18px; font-weight: 800; font-family: var(--mono); margin: 4px 0; }
+    .cm-pct { font-size: 11px; color: var(--text-muted); }
 
-    /* ── Form Controls ── */
-    select, input[type="text"] {
-      background: var(--surface-2);
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 7px 12px;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      font-family: var(--font);
-      outline: none;
-      transition: border-color 0.15s;
+    /* ── Callout / Notices ── */
+    .callout {
+      border-radius: var(--radius); padding: 12px 16px; margin-bottom: 16px;
+      border: 1px solid var(--border); font-size: 13px; line-height: 1.5;
     }
-    select:focus, input[type="text"]:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
+    .callout-amber {
+      background: var(--orange-dim); border-color: var(--orange); color: #fbbf24;
     }
-    select { cursor: pointer; }
-    .control-row {
-      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    .callout-red {
+      background: var(--red-dim); border-color: var(--red); color: #f87171;
     }
-
-    /* ── Tables ── */
-    table {
-      width: 100%; border-collapse: collapse;
-      font-size: 12px;
+    .callout-blue {
+      background: var(--accent-glow); border-color: var(--accent); color: #7dd3fc;
     }
-    thead th {
-      text-align: left; padding: 8px 12px;
-      font-size: 11px; font-weight: 600;
-      text-transform: uppercase; letter-spacing: 0.5px;
-      color: var(--text-dim);
-      background: var(--surface-2);
-      border-bottom: 1px solid var(--border);
-      position: sticky; top: 0;
+    .callout-purple {
+      background: var(--purple-dim); border-color: var(--purple); color: #d8b4fe;
     }
-    tbody td {
-      padding: 7px 12px;
-      border-bottom: 1px solid var(--border-light);
-      vertical-align: middle;
-    }
-    tbody tr:hover { background: rgba(88,166,255,0.04); }
-    .mono { font-family: var(--mono); font-size: 12px; }
 
     /* ── Badges ── */
     .badge {
-      display: inline-flex; align-items: center;
-      padding: 2px 8px; border-radius: 4px;
-      font-size: 11px; font-weight: 600;
-      letter-spacing: 0.3px;
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 11px; font-weight: 700; font-family: var(--mono);
+      text-transform: uppercase; letter-spacing: 0.5px;
     }
-    .badge-green { background: var(--green-dim); color: var(--green); }
-    .badge-red { background: var(--red-dim); color: var(--red); }
-    .badge-orange { background: var(--orange-dim); color: var(--orange); }
-    .badge-blue { background: var(--accent-glow); color: var(--accent); }
-    .badge-dim { background: var(--surface-2); color: var(--text-dim); border: 1px solid var(--border); }
-    .badge-sim { background: rgba(163,113,247,0.15); color: #a371f7; }
+    .badge-green { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
+    .badge-red { background: var(--red-dim); color: var(--red); border: 1px solid var(--red); }
+    .badge-orange { background: var(--orange-dim); color: var(--orange); border: 1px solid var(--orange); }
+    .badge-blue { background: var(--accent-glow); color: var(--accent); border: 1px solid var(--accent); }
+    .badge-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple); }
 
-    /* ── Notice ── */
-    .notice {
-      padding: 10px 14px; border-radius: var(--radius-sm);
-      font-size: 12px; color: var(--text-muted);
-      background: var(--surface-2);
-      border: 1px solid var(--border-light);
-      line-height: 1.6;
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      text-align: left; padding: 10px 14px;
+      background: var(--surface-2); color: var(--text-dim);
+      font-weight: 700; font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.5px; border-bottom: 1px solid var(--border);
     }
-    .notice strong { color: var(--text); }
-    .notice.error {
-      border-color: rgba(248,81,73,0.4);
-      background: var(--red-dim);
-      color: var(--red);
-    }
-    .notice code {
-      background: var(--bg); padding: 1px 5px;
-      border-radius: 3px; font-size: 11px;
-      font-family: var(--mono);
-    }
-
-    /* ── Score Explainer ── */
-    details.explainer {
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      margin-top: 12px;
-      overflow: hidden;
-    }
-    details.explainer summary {
-      cursor: pointer; padding: 10px 14px;
-      font-weight: 600; font-size: 12px;
-      color: var(--text-muted);
-      background: var(--surface-2);
-    }
-    details.explainer summary:hover { color: var(--text); }
-    details.explainer .explainer-body {
-      padding: 14px; font-size: 12px; color: var(--text-muted);
-      border-top: 1px solid var(--border);
-    }
-    details.explainer pre {
-      background: var(--bg); border: 1px solid var(--border);
-      padding: 10px 14px; border-radius: var(--radius-sm);
-      font-size: 12px; font-family: var(--mono);
-      overflow-x: auto; margin: 8px 0; color: var(--text);
-    }
-
-    /* ── Dialog ── */
-    dialog {
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--surface);
+    td {
+      padding: 10px 14px; border-bottom: 1px solid var(--border-light);
       color: var(--text);
-      padding: 0;
-      max-width: 720px;
-      width: calc(100% - 48px);
-      box-shadow: 0 16px 48px rgba(0,0,0,0.6);
     }
-    dialog::backdrop { background: rgba(0,0,0,0.6); }
-    .dialog-head {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--border);
-    }
-    .dialog-head h3 { font-size: 14px; font-weight: 700; }
-    .dialog-body { padding: 18px; font-size: 13px; line-height: 1.6; }
-    .dialog-body pre {
-      background: var(--bg); border: 1px solid var(--border);
-      padding: 12px; border-radius: var(--radius-sm);
-      font-size: 12px; font-family: var(--mono);
-      overflow-x: auto; margin: 10px 0;
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    .mono { font-family: var(--mono); }
+
+    /* ── Ground Truth vs Inference Highlight ── */
+    .gt-box {
+      background: rgba(0,0,0,0.3); border: 1px dashed var(--border);
+      border-radius: var(--radius-sm); padding: 4px 8px; display: inline-block;
     }
 
-    /* ── Scrollable Table Container ── */
-    .table-wrap {
-      max-height: 400px; overflow-y: auto;
-      border-radius: var(--radius-sm);
-    }
-    .table-wrap::-webkit-scrollbar { width: 6px; }
-    .table-wrap::-webkit-scrollbar-track { background: var(--surface); }
-    .table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-    /* ── Figure Viewer ── */
-    .figure-viewer {
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 16px;
-      text-align: center; min-height: 200px;
-    }
-    .figure-viewer img {
-      max-width: 100%; height: auto;
-      border-radius: 4px;
-      border: 1px solid var(--border);
-    }
-    .figure-caption {
-      font-size: 12px; color: var(--text-muted); margin-top: 8px;
+    /* ── Flow Explorer Filters & Pagination ── */
+    .pagination-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-top: 1px solid var(--border);
+      background: var(--surface-2); font-size: 12px; color: var(--text-muted);
     }
 
-    /* ── Footer ── */
-    .footer {
-      border-top: 1px solid var(--border);
-      padding: 16px 24px;
-      font-size: 11px; color: var(--text-dim);
-      display: flex; justify-content: space-between;
-      flex-wrap: wrap; gap: 8px;
-      max-width: 1400px; margin: 0 auto;
-    }
-
-    /* ── Section spacing ── */
-    .section-gap { margin-bottom: 16px; }
-
-    /* ── Pipeline indicator ── */
+    /* ── Pipeline Visualization Flow ── */
     .pipeline-flow {
-      display: flex; align-items: center; gap: 0;
-      flex-wrap: wrap; padding: 6px 0;
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 6px 0;
     }
     .pipeline-step {
       display: flex; align-items: center; gap: 6px;
-      padding: 5px 12px; border-radius: 4px;
+      padding: 5px 10px; border-radius: 4px;
       background: var(--surface-2); border: 1px solid var(--border-light);
       font-size: 11px; font-weight: 600; color: var(--text-muted);
-      white-space: nowrap;
     }
     .pipeline-step.active { border-color: var(--accent); color: var(--accent); }
-    .pipeline-arrow { color: var(--text-dim); font-size: 16px; padding: 0 4px; }
-
-    /* ── Grid layouts ── */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 768px) {
-      .grid-2 { grid-template-columns: 1fr; }
-      .topbar { padding: 0 12px; }
-      .container { padding: 12px; }
-      .topbar-status { display: none; }
-    }
+    .pipeline-arrow { color: var(--text-dim); font-size: 14px; }
   </style>
 </head>
 <body>
 
-  <!-- ═══════════════════ Top Bar ═══════════════════ -->
+  <!-- ═══════════════════ Topbar Navigation ═══════════════════ -->
   <nav class="topbar">
     <div class="topbar-brand">
       <div class="logo">XR</div>
       <div>
         <h1>XRL-IDARS</h1>
       </div>
-      <span class="version">v1.0</span>
+      <span class="version">v1.0 (Research Workbench)</span>
     </div>
     <div class="topbar-tabs">
-      <button class="active" data-tab="live" onclick="showTab('live')">⚡ Live Monitor</button>
-      <button data-tab="evidence" onclick="showTab('evidence')">📊 Analysis &amp; Evidence</button>
+      <button class="active" data-tab="evaluation" onclick="showTab('evaluation')">📊 Dataset Evaluation</button>
+      <button data-tab="overview" onclick="showTab('overview')">📋 Overview</button>
+      <button data-tab="comparison" onclick="showTab('comparison')">⚖️ Model Comparison</button>
+      <button data-tab="flows" onclick="showTab('flows')">🔍 Flow Explorer</button>
+      <button data-tab="explainability" onclick="showTab('explainability')">💡 Explainability</button>
+      <button data-tab="response" onclick="showTab('response')">🛡️ Autonomous Response</button>
+      <button data-tab="limitations" onclick="showTab('limitations')">⚠️ Research Limitations</button>
+      <button data-tab="live" onclick="showTab('live')">⚡ Live Monitor &amp; Traffic Modes</button>
     </div>
     <div class="topbar-status">
       <span class="pulse-dot" id="live-dot"></span>
-      <span id="topbar-status-text">Idle</span>
+      <span id="topbar-status-text">Workbench Idle</span>
     </div>
   </nav>
 
   <div class="container">
 
-    <!-- ═══════════════════ LIVE MONITOR TAB ═══════════════════ -->
-    <div id="tab-live" class="tab-content active">
+    <!-- ═══════════════════ PAGE B: DATASET EVALUATION (PRIMARY) ═══════════════════ -->
+    <div id="tab-evaluation" class="tab-content active">
 
-      <!-- Pipeline Visualization -->
+      <!-- Benchmark & Slice Selector Bar -->
+      <div class="controls-bar">
+        <div class="controls-group">
+          <span class="controls-label">Benchmark Dataset:</span>
+          <select id="eval-benchmark-select" onchange="onEvalBenchmarkChange()">
+            <option value="cicids2017">CIC-IDS2017 (Flagship — 355k Flows, R10)</option>
+            <option value="cse2018">CSE-CIC-IDS2018 (Enterprise Cloud — 1.66M Flows, R10)</option>
+            <option value="unswnb15">UNSW-NB15 (Sensor Degraded — 24k Flows, R4)</option>
+            <option value="cse2018_temporal">CSE-CIC-IDS2018 (Temporal Future Days — 1.63M Flows)</option>
+          </select>
+        </div>
+        <div class="controls-group">
+          <span class="controls-label">Evaluation Slice:</span>
+          <select id="eval-slice-select" onchange="onEvalSliceChange()">
+            <option value="aligned">Aligned Sequence Slice (355,833 Flows — Strict Comparison)</option>
+            <option value="native">Complete Tabular Split (355,865 Flows — Unconstrained)</option>
+          </select>
+        </div>
+        <div class="controls-group">
+          <span class="badge badge-green" id="eval-provenance-badge">Verified Frozen Output</span>
+        </div>
+      </div>
+
+      <!-- Population & Derivation Notice -->
+      <div id="population-derivation-notice" class="callout callout-blue">
+        <strong>Population Reconciliation Derivation:</strong>
+        <span id="pop-derivation-text">Loading...</span>
+      </div>
+
+      <!-- Key High-Level Metric Tiles -->
+      <div class="grid-4 section-gap">
+        <div class="stat-card">
+          <div class="stat-label">Model Accuracy</div>
+          <div class="stat-val" id="eval-accuracy">—</div>
+          <div class="stat-sub" id="eval-accuracy-sub">Overall Correct / Total</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Detection Precision</div>
+          <div class="stat-val" id="eval-precision">—</div>
+          <div class="stat-sub" id="eval-precision-sub">TP / (TP + FP)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Attack Recall</div>
+          <div class="stat-val" id="eval-recall">—</div>
+          <div class="stat-sub" id="eval-recall-sub">TP / (TP + FN)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">F1-Score</div>
+          <div class="stat-val" id="eval-f1">—</div>
+          <div class="stat-sub" id="eval-f1-sub">Harmonic Mean (P, R)</div>
+        </div>
+      </div>
+
+      <div class="grid-2 section-gap">
+        <!-- Model Selector & Details -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Evaluated Detector Selection</h2>
+            <div class="controls-group">
+              <select id="eval-model-select" onchange="onEvalModelSelect()">
+                <option value="fusion">RF + LSTM Fusion (Ensemble)</option>
+                <option value="random_forest">Random Forest (Frozen R10)</option>
+                <option value="lstm">Supervised LSTM (T=5)</option>
+                <option value="decision_tree">Decision Tree Baseline</option>
+                <option value="logistic_regression">Logistic Regression</option>
+                <option value="majority">Majority Prior Baseline</option>
+              </select>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="eval-model-details">
+              <table style="margin-bottom: 12px;">
+                <tbody>
+                  <tr><td><strong>Model Architecture:</strong></td><td id="m-arch">—</td></tr>
+                  <tr><td><strong>Feature Contract:</strong></td><td id="m-contract" class="mono">—</td></tr>
+                  <tr><td><strong>Research Decision Threshold:</strong></td><td id="m-thresh" class="mono">τ = 0.50</td></tr>
+                  <tr><td><strong>ROC-AUC / PR-AUC:</strong></td><td id="m-auc" class="mono">—</td></tr>
+                </tbody>
+              </table>
+              <div class="cm-label" style="margin-top: 10px;">Held-Out Confusion Matrix:</div>
+              <div class="cm-wrapper">
+                <div class="cm-box correct">
+                  <div class="cm-label">True Negative (TN)</div>
+                  <div class="cm-val" id="cm-tn">—</div>
+                  <div class="cm-pct" id="cm-tn-pct">Benign Passed</div>
+                </div>
+                <div class="cm-box error">
+                  <div class="cm-label">False Positive (FP)</div>
+                  <div class="cm-val" id="cm-fp">—</div>
+                  <div class="cm-pct" id="cm-fp-pct">False Alarms</div>
+                </div>
+                <div class="cm-box error">
+                  <div class="cm-label">False Negative (FN)</div>
+                  <div class="cm-val" id="cm-fn">—</div>
+                  <div class="cm-pct" id="cm-fn-pct">Missed Attacks</div>
+                </div>
+                <div class="cm-box correct">
+                  <div class="cm-label">True Positive (TP)</div>
+                  <div class="cm-val" id="cm-tp">—</div>
+                  <div class="cm-pct" id="cm-tp-pct">Attacks Detected</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Per-Class Metrics & Family Breakdown -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Per-Class &amp; Family Performance</h2>
+          </div>
+          <div class="card-body flush">
+            <table id="per-class-table">
+              <thead>
+                <tr>
+                  <th>Class / Family</th>
+                  <th>Precision</th>
+                  <th>Recall</th>
+                  <th>F1-Score</th>
+                  <th>Support</th>
+                </tr>
+              </thead>
+              <tbody id="per-class-tbody">
+                <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════ PAGE A: OVERVIEW ═══════════════════ -->
+    <div id="tab-overview" class="tab-content">
+      <div class="card section-gap">
+        <div class="card-header">
+          <h2>Project Purpose &amp; Scientific Platform Status</h2>
+          <span class="badge badge-purple" id="ov-commit">Commit: 5989bf4</span>
+        </div>
+        <div class="card-body">
+          <p style="margin-bottom: 12px; font-size: 14px; color: var(--text);">
+            <strong>XRL-IDARS</strong> is a research platform for explainable machine learning and reinforcement learning in network security.
+            This interface operates as a <strong>Research Evaluation Workbench</strong>, surfacing genuine held-out evaluation outputs,
+            formal component verification statuses, and empirical evidence across four benchmark configurations.
+          </p>
+          <div class="callout callout-amber">
+            <strong>Production Safety Invariant:</strong> Autonomous production enforcement is strictly <strong>NO-GO</strong>.
+            The system operates exclusively in an observational monitoring and offline simulation mode. Zero network mutations (iptables, routing, socket drops) are permitted.
+          </div>
+        </div>
+      </div>
+
+      <!-- Component Status Table -->
+      <div class="card section-gap">
+        <div class="card-header">
+          <h2>Formal Component Verification Matrix</h2>
+        </div>
+        <div class="card-body flush">
+          <table>
+            <thead>
+              <tr>
+                <th>Component</th>
+                <th>Target Scope</th>
+                <th>Formal Status</th>
+                <th>Primary Empirical Finding / Reality</th>
+              </tr>
+            </thead>
+            <tbody id="ov-components-tbody">
+              <tr><td colspan="4" style="text-align:center;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Datasets Overview Grid -->
+      <div class="card section-gap">
+        <div class="card-header">
+          <h2>Benchmark Dataset Inventory</h2>
+        </div>
+        <div class="card-body flush">
+          <table>
+            <thead>
+              <tr>
+                <th>Benchmark</th>
+                <th>Contract</th>
+                <th>Test Flows</th>
+                <th>Fusion Acc</th>
+                <th>Fusion F1</th>
+                <th>Primary Research Role</th>
+              </tr>
+            </thead>
+            <tbody id="ov-datasets-tbody">
+              <tr><td colspan="6" style="text-align:center;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ PAGE C: MODEL COMPARISON ═══════════════════ -->
+    <div id="tab-comparison" class="tab-content">
+      <!-- Degenerate Fusion Warning Banner -->
+      <div id="cmp-degenerate-alert" class="callout callout-amber" style="display: none;">
+        <strong>Degenerate Weight Alert:</strong>
+        <span id="cmp-degenerate-text"></span>
+      </div>
+
+      <div class="card section-gap">
+        <div class="card-header">
+          <h2>Model Comparative Benchmark (Aligned Slice)</h2>
+          <div class="controls-group">
+            <span class="controls-label">Benchmark:</span>
+            <select id="cmp-benchmark-select" onchange="onCmpBenchmarkChange()">
+              <option value="cicids2017">CIC-IDS2017 (Flagship)</option>
+              <option value="cse2018">CSE-CIC-IDS2018 (Enterprise Cloud)</option>
+              <option value="unswnb15">UNSW-NB15 (Auxiliary Schema)</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body flush">
+          <table>
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Accuracy (95% CI)</th>
+                <th>F1-Score (95% CI)</th>
+                <th>ROC-AUC</th>
+                <th>Weighting / Role</th>
+              </tr>
+            </thead>
+            <tbody id="cmp-models-tbody">
+              <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid-2 section-gap">
+        <!-- Fusion Weights Box -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Fusion Weighting Configuration</h2>
+          </div>
+          <div class="card-body">
+            <p style="margin-bottom: 8px;"><strong>Formula:</strong> <code class="mono" id="cmp-formula">—</code></p>
+            <p style="margin-bottom: 12px;"><strong>RF Weight (&alpha;):</strong> <span class="mono" id="cmp-alpha">—</span> | <strong>LSTM Weight (1-&alpha;):</strong> <span class="mono" id="cmp-beta">—</span></p>
+            <p style="font-size: 12px; color: var(--text-muted);">
+              Weights are selected via validation grid search. When &alpha; = 0.00 (as on CSE-CIC-IDS2018), fusion degenerates into an exact copy of the LSTM component.
+            </p>
+          </div>
+        </div>
+
+        <!-- Shuffled Window Ablation Box -->
+        <div class="card">
+          <div class="card-header">
+            <h2>LSTM Temporal Order Ablation</h2>
+          </div>
+          <div class="card-body">
+            <p style="margin-bottom: 6px;"><strong>Ordered Sequence F1:</strong> <span class="mono" id="ab-ordered">—</span></p>
+            <p style="margin-bottom: 6px;"><strong>Shuffled Sequence F1:</strong> <span class="mono" id="ab-shuffled">—</span></p>
+            <p style="margin-bottom: 12px;"><strong>Order Gain (&Delta;F1):</strong> <span class="mono" id="ab-delta">—</span></p>
+            <div class="callout callout-purple" style="margin-bottom: 0;">
+              Zero order gain indicates that the LSTM achieves high performance via local feature smoothing over flow bursts rather than causal temporal sequence modeling.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ PAGE D: FLOW EXPLORER ═══════════════════ -->
+    <div id="tab-flows" class="tab-content">
+      <div class="controls-bar">
+        <div class="controls-group">
+          <span class="controls-label">Status Filter:</span>
+          <select id="flow-filter-status" onchange="onFlowFilterChange()">
+            <option value="all">All Flows</option>
+            <option value="correct">Correct Classifications</option>
+            <option value="errors">All Errors (FP + FN)</option>
+            <option value="fp">False Positives (FP)</option>
+            <option value="fn">Missed Attacks (FN)</option>
+          </select>
+        </div>
+        <div class="controls-group">
+          <span class="controls-label">Ground Truth:</span>
+          <select id="flow-filter-label" onchange="onFlowFilterChange()">
+            <option value="all">All Labels</option>
+            <option value="benign">Benign Only</option>
+            <option value="attack">Attack Only</option>
+          </select>
+        </div>
+        <div class="controls-group">
+          <button class="btn btn-primary" onclick="exportFlowsCsv()">📥 Export Filtered Flows (CSV)</button>
+        </div>
+      </div>
+
+      <div class="callout callout-blue">
+        <strong>Ground Truth Isolation Invariant:</strong>
+        The ground truth label is displayed in a separate, isolated column for audit verification. It is never fed into inference inputs.
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Evaluated Flow Records</h2>
+          <span id="flow-count-badge" class="badge badge-blue">Loading...</span>
+        </div>
+        <div class="card-body flush">
+          <table>
+            <thead>
+              <tr>
+                <th>Flow ID</th>
+                <th>Ground Truth (Held Out)</th>
+                <th>RF Score</th>
+                <th>LSTM Score</th>
+                <th>Fusion Score</th>
+                <th>Prediction</th>
+                <th>Outcome Status</th>
+              </tr>
+            </thead>
+            <tbody id="flows-tbody">
+              <tr><td colspan="7" style="text-align:center;">Loading flows...</td></tr>
+            </tbody>
+          </table>
+          <div class="pagination-bar">
+            <div>
+              Showing page <span id="flow-current-page" class="mono">1</span> of <span id="flow-total-pages" class="mono">1</span>
+            </div>
+            <div class="controls-group">
+              <button class="btn" id="btn-prev-page" onclick="changeFlowPage(-1)">◀ Previous</button>
+              <button class="btn" id="btn-next-page" onclick="changeFlowPage(1)">Next ▶</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ PAGE E: EXPLAINABILITY ═══════════════════ -->
+    <div id="tab-explainability" class="tab-content">
+      <div class="callout callout-amber">
+        <strong>Explainer Model Scope Notice:</strong>
+        TreeSHAP feature attributions explain the tree decision paths of the <strong>Random Forest detector ONLY</strong>.
+        They do NOT explain the LSTM, the Fusion model, or the Deep Q-Network Q-values. Feature attributions indicate mathematical contribution to tree variance, not physical network causality.
+      </div>
+
+      <div class="card section-gap">
+        <div class="card-header">
+          <h2>Global Feature Importance (TreeSHAP)</h2>
+          <span class="badge badge-green" id="shap-method-badge">TreeExplainer</span>
+        </div>
+        <div class="card-body flush">
+          <table>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Feature Name</th>
+                <th>Contract</th>
+                <th>Mean |SHAP Value|</th>
+                <th>Interpretation &amp; Semantic Role</th>
+              </tr>
+            </thead>
+            <tbody id="shap-tbody">
+              <tr><td colspan="5" style="text-align:center;">Loading SHAP rankings...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ PAGE F: AUTONOMOUS RESPONSE ═══════════════════ -->
+    <div id="tab-response" class="tab-content">
+      <div class="controls-bar">
+        <div class="controls-group">
+          <span class="controls-label">Cost Scenario:</span>
+          <select id="resp-regime-select" onchange="onResponseParamsChange()">
+            <option value="standard_enterprise">Standard Enterprise (Balanced FP/FN)</option>
+            <option value="high_availability">High Availability (FP Isolate = 500)</option>
+            <option value="high_security_enclave">High Security Enclave (FN Miss = 500)</option>
+          </select>
+        </div>
+        <div class="controls-group">
+          <span class="controls-label">Action Mode:</span>
+          <select id="resp-mode-select" onchange="onResponseParamsChange()">
+            <option value="4-action">4-Action Mode (ALLOW, ALERT, RATE_LIMIT, ISOLATE)</option>
+            <option value="3-action">3-Action Mode (ALLOW, ALERT, RATE_LIMIT)</option>
+          </select>
+        </div>
+        <div class="controls-group">
+          <span class="badge badge-purple">Held-Out Test (355,865 Flows)</span>
+        </div>
+      </div>
+
+      <!-- Head to Head Callout -->
+      <div id="resp-winner-callout" class="callout callout-purple">
+        <strong>Head-to-Head Result:</strong> <span id="resp-winner-text">Loading...</span>
+      </div>
+
+      <div class="card section-gap">
+        <div class="card-header">
+          <h2>Response Policy Comparative Benchmark</h2>
+        </div>
+        <div class="card-body flush">
+          <table>
+            <thead>
+              <tr>
+                <th>Response Policy</th>
+                <th>Total Operational Cost</th>
+                <th>Mean Cost / Flow</th>
+                <th>Availability (BAS)</th>
+                <th>False Quarantine (FQR)</th>
+                <th>Action Chattering</th>
+              </tr>
+            </thead>
+            <tbody id="resp-policies-tbody">
+              <tr><td colspan="6" style="text-align:center;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid-2 section-gap">
+        <!-- Safety Gate Panel -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Deterministic Safety Gate Invariants</h2>
+            <span class="badge badge-green">100% Authoritative</span>
+          </div>
+          <div class="card-body">
+            <ul style="padding-left: 20px; line-height: 1.8; color: var(--text-muted);">
+              <li><strong>Quarantine Cap:</strong> Max 20% of concurrent hosts in isolation.</li>
+              <li><strong>Cooldown Invariant:</strong> 60s minimum hysteresis before re-isolation.</li>
+              <li><strong>Rate-Limit Fallback:</strong> Overridden isolates degrade safely to throughput throttling.</li>
+              <li><strong>Production Invariant:</strong> Autonomous enforcement is strictly NO-GO.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Latency & Efficiency Panel -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Execution Latency Advantage</h2>
+          </div>
+          <div class="card-body">
+            <p style="margin-bottom: 8px;"><strong>Analytic CostOptimal Baseline:</strong> <span class="mono">0.40 µs</span> (2.5M flows/sec)</p>
+            <p style="margin-bottom: 8px;"><strong>DQN Neural Policy:</strong> <span class="mono">21.28 µs</span> (47,000 flows/sec)</p>
+            <p style="margin-bottom: 12px;"><strong>Latency Speedup:</strong> <span class="badge badge-green">53x Faster</span></p>
+            <div class="callout callout-blue" style="margin-bottom: 0;">
+              Zero-parameter threshold policy requires zero GPU memory, executes in nanoseconds, and achieves lower cost in 4 of 6 operational regimes.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ PAGE G: RESEARCH LIMITATIONS ═══════════════════ -->
+    <div id="tab-limitations" class="tab-content">
+      <div class="card section-gap">
+        <div class="card-header">
+          <h2>XRL-IDARS Research Findings &amp; Scientific Limitations</h2>
+          <span class="badge badge-orange">Audited Evidence</span>
+        </div>
+        <div class="card-body" id="limitations-container">
+          Loading research limitations...
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ LIVE MONITOR & TRAFFIC MODES ═══════════════════ -->
+    <div id="tab-live" class="tab-content">
+      <div class="callout callout-blue">
+        <strong>Traffic Mode Separation:</strong>
+        This monitor supports 5 strictly separated execution modes. It is observational only and never mutates network firewalls or routes.
+      </div>
+
+      <!-- Capture Controls -->
+      <div class="card section-gap">
+        <div class="card-header">
+          <h2>Capture Stream Controls</h2>
+          <span class="badge badge-blue" id="live-session-status">Idle</span>
+        </div>
+        <div class="card-body">
+          <div class="controls-bar" style="margin-bottom: 0; background: transparent; border: none; padding: 0;">
+            <div class="controls-group">
+              <span class="controls-label">Mode:</span>
+              <select id="live-mode" onchange="onLiveModeChange()">
+                <option value="dataset">Mode 2: Dataset Demonstration Stream</option>
+                <option value="sample">Mode 3: PCAP Replay</option>
+                <option value="live">Mode 5: Live Packet Capture (root required)</option>
+              </select>
+              <select id="dataset-category">
+                <option value="mixed">Mixed Traffic</option>
+                <option value="ddos">DDoS Traffic</option>
+                <option value="benign">Benign Traffic</option>
+              </select>
+              <input type="text" id="live-iface" placeholder="Interface (e.g. wlo1)" style="display:none;" list="iface-list">
+              <datalist id="iface-list"></datalist>
+            </div>
+            <div class="controls-group">
+              <button class="btn btn-primary" id="btn-live-start" onclick="startLive()">▶ Start Stream</button>
+              <button class="btn btn-danger" id="btn-live-stop" onclick="stopLive()">⏹ Stop</button>
+            </div>
+          </div>
+          <div id="live-notice" style="margin-top: 10px; font-size: 12px; color: var(--text-muted);"></div>
+        </div>
+      </div>
+
+      <!-- Live Pipeline -->
       <div class="card section-gap">
         <div class="card-body compact">
           <div class="pipeline-flow">
@@ -457,488 +824,34 @@
         </div>
       </div>
 
-      <!-- Capture Controls -->
-      <div class="card section-gap">
+      <!-- Rolling Flows Table -->
+      <div class="card">
         <div class="card-header">
-          <h2><span class="icon">🎛️</span> Capture Control</h2>
-          <div class="control-row">
-            <span id="live-status" class="badge badge-dim">Stopped</span>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="control-row" style="margin-bottom: 10px;">
-            <select id="live-benchmark" title="Active Benchmark Detector" onchange="onBenchmarkChange()">
-              <option value="cicids2017" selected>🌟 Model: CIC-IDS2017 (Flagship R10)</option>
-              <option value="cse2018">🏢 Model: CSE-CIC-IDS2018 (Enterprise Cloud R10)</option>
-              <option value="unswnb15">🔬 Model: UNSW-NB15 (Auxiliary Schema R4)</option>
-            </select>
-            <select id="live-mode" title="Capture source" onchange="onLiveModeChange()">
-              <option value="dataset" selected>📊 Benchmark Dataset Replay</option>
-              <option value="sample">📁 Sample PCAP Stream (no root)</option>
-              <option value="live">📡 Live Interface (requires root)</option>
-            </select>
-            <select id="dataset-category" title="Dataset Category">
-              <option value="mixed">🔀 Curated Mix (DDoS, DoS, PortScan, Benign)</option>
-              <option value="ddos">💥 DDoS Attacks + Benign</option>
-              <option value="dos">🔨 DoS Hulk / Slowloris + Benign</option>
-              <option value="portscan">🔍 PortScan Recon + Benign</option>
-              <option value="benign">✅ Normal Enterprise Benign Only</option>
-            </select>
-            <input type="text" id="live-iface" list="iface-list" placeholder="Interface (e.g. wlo1)" size="18" style="display: none;">
-            <datalist id="iface-list"></datalist>
-            <input type="text" id="live-bpf" placeholder="BPF filter (optional)" size="22" style="display: none;">
-            <button class="btn btn-primary" id="live-start-btn" onclick="startLive()">▶ Start</button>
-            <button class="btn btn-danger" id="live-stop-btn" onclick="stopLive()" disabled>⏹ Stop</button>
-          </div>
-          <div id="live-notice" class="notice">
-            <strong>Benchmark Dataset Replay:</strong> Streams authentic flows from CIC-IDS2017 with
-            ground-truth labels. Real-time threat scoring by the frozen Random Forest (τ = 0.50).
-            Ideal for demonstrations — no root access needed.
-          </div>
-        </div>
-      </div>
-
-      <!-- Alert Banner -->
-      <div id="alert-banner" class="alert-banner" role="alert" aria-live="assertive">
-        <span class="banner-icon">🚨</span>
-        <div class="banner-body">
-          <div class="banner-title" id="alert-banner-title">ATTACK DETECTED</div>
-          <div class="banner-detail" id="alert-banner-text"></div>
-        </div>
-        <button class="btn btn-sm" onclick="dismissAlertBanner()">Dismiss</button>
-      </div>
-
-      <!-- Live Stats -->
-      <div class="stats-grid section-gap">
-        <div class="stat-card">
-          <div class="stat-label">Packets Captured</div>
-          <div class="stat-value" id="lv-packets">0</div>
-          <div class="stat-sub" id="lv-rate">0.0 pkt/s</div>
-        </div>
-        <div class="stat-card accent">
-          <div class="stat-label">Completed Flows</div>
-          <div class="stat-value" id="lv-flows">0</div>
-          <div class="stat-sub">Bidirectional (D-006)</div>
-        </div>
-        <div class="stat-card" id="alert-stat-card">
-          <div class="stat-label">Alerts (τ ≥ 0.50)</div>
-          <div class="stat-value" id="lv-alerts">0</div>
-          <div class="stat-sub">ATTACK predictions</div>
-        </div>
-        <div class="stat-card green">
-          <div class="stat-label">Session Duration</div>
-          <div class="stat-value" id="lv-elapsed">0s</div>
-          <div class="stat-sub" id="lv-mode-label">Not started</div>
-        </div>
-      </div>
-
-      <!-- Live Real-Time Analysis & Empirical Evaluation Card -->
-      <div class="card section-gap" id="live-analysis-card">
-        <div class="card-header">
-          <h2><span class="icon">📊</span> Real-Time Live Analysis &amp; Empirical Validation</h2>
-          <span class="badge badge-green" id="live-eval-status">Live Stream Active</span>
-        </div>
-        <div class="card-body">
-          <div id="live-eval-gt-panel">
-            <div class="stats-grid" style="margin-bottom: 14px;">
-              <div class="stat-card green">
-                <div class="stat-label">Live Running Accuracy</div>
-                <div class="stat-value" id="live-acc-val">—</div>
-                <div class="stat-sub">Ground Truth vs Model</div>
-              </div>
-              <div class="stat-card accent">
-                <div class="stat-label">Live F1 Score</div>
-                <div class="stat-value" id="live-f1-val">—</div>
-                <div class="stat-sub">Harmonic Mean</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-label">Detection Rate (Recall)</div>
-                <div class="stat-value" id="live-rec-val">—</div>
-                <div class="stat-sub">TP / (TP + FN)</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-label">Live Precision</div>
-                <div class="stat-value" id="live-prec-val">—</div>
-                <div class="stat-sub">TP / (TP + FP)</div>
-              </div>
-            </div>
-
-            <!-- Confusion Matrix & Spectrum -->
-            <div class="grid-2">
-              <div style="background:var(--surface-2); padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border-light);">
-                <div style="font-size:11px; text-transform:uppercase; font-weight:600; color:var(--text-dim); margin-bottom:8px;">
-                  Real-Time Confusion Matrix (Streaming Flows)
-                </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-family:var(--mono); font-size:12px;">
-                  <div style="background:rgba(63,185,80,0.12); padding:8px 10px; border-radius:4px; border:1px solid var(--green);">
-                    <span style="color:var(--text-muted); font-size:10px;">TRUE POSITIVES (ATTACKS CAUGHT)</span><br>
-                    <strong style="color:var(--green); font-size:18px;" id="cm-tp">0</strong>
-                  </div>
-                  <div style="background:rgba(248,81,73,0.12); padding:8px 10px; border-radius:4px; border:1px solid var(--red);">
-                    <span style="color:var(--text-muted); font-size:10px;">FALSE POSITIVES (FALSE ALARMS)</span><br>
-                    <strong style="color:var(--red); font-size:18px;" id="cm-fp">0</strong>
-                  </div>
-                  <div style="background:rgba(248,81,73,0.12); padding:8px 10px; border-radius:4px; border:1px solid var(--red);">
-                    <span style="color:var(--text-muted); font-size:10px;">FALSE NEGATIVES (MISSED)</span><br>
-                    <strong style="color:var(--red); font-size:18px;" id="cm-fn">0</strong>
-                  </div>
-                  <div style="background:rgba(63,185,80,0.12); padding:8px 10px; border-radius:4px; border:1px solid var(--green);">
-                    <span style="color:var(--text-muted); font-size:10px;">TRUE NEGATIVES (CORRECT BENIGN)</span><br>
-                    <strong style="color:var(--green); font-size:18px;" id="cm-tn">0</strong>
-                  </div>
-                </div>
-              </div>
-
-              <div style="background:var(--surface-2); padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border-light);">
-                <div style="font-size:11px; text-transform:uppercase; font-weight:600; color:var(--text-dim); margin-bottom:8px;">
-                  Live Threat Score Spectrum
-                </div>
-                <div style="display:flex; flex-direction:column; gap:8px;">
-                  <div style="display:flex; justify-content:space-between; font-size:12px;">
-                    <span style="color:var(--red); font-weight:600;">🚨 Critical Threat (≥ 0.85)</span>
-                    <strong id="spec-high" class="mono" style="color:var(--red);">0</strong>
-                  </div>
-                  <div style="display:flex; justify-content:space-between; font-size:12px;">
-                    <span style="color:var(--orange); font-weight:600;">⚠️ Elevated Alert (0.65 – 0.85)</span>
-                    <strong id="spec-med" class="mono" style="color:var(--orange);">0</strong>
-                  </div>
-                  <div style="display:flex; justify-content:space-between; font-size:12px;">
-                    <span style="color:var(--yellow); font-weight:600;">🟡 Low Threat (0.50 – 0.65)</span>
-                    <strong id="spec-low" class="mono" style="color:var(--yellow);">0</strong>
-                  </div>
-                  <div style="display:flex; justify-content:space-between; font-size:12px;">
-                    <span style="color:var(--green); font-weight:600;">✅ Benign Normal (&lt; 0.50)</span>
-                    <strong id="spec-benign" class="mono" style="color:var(--green);">0</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div id="live-eval-live-panel" style="display:none;">
-            <div class="notice">
-              <strong>📡 Observational WiFi Wiretap Active:</strong> Real-world network packets carry no ground-truth labels.
-              Each packet sequence is assembled into bidirectional flows (D-006) and evaluated by the frozen Random Forest classifier.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid-2 section-gap">
-        <!-- Attack Simulator -->
-        <div class="card">
-          <div class="card-header">
-            <h2><span class="icon">⚔️</span> Attack Simulator</h2>
-            <span class="badge badge-sim">Simulation Only</span>
-          </div>
-          <div class="card-body">
-            <div class="control-row" style="margin-bottom: 8px;">
-              <select id="scenario-select" title="Attack scenario" onchange="renderScenarioInfo()" style="flex:1;">
-                <option value="">Loading scenarios…</option>
-              </select>
-              <button class="btn btn-primary btn-sm" id="inject-btn" onclick="injectAttack()" disabled>⚡ Inject</button>
-            </div>
-            <div id="scenario-desc" style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;"></div>
-            <div id="scenario-expectation" class="badge badge-dim" style="margin-bottom: 8px;">—</div>
-            <div id="inject-status" style="font-size: 11px; color: var(--text-dim); font-family: var(--mono);">idle</div>
-            <div class="notice" style="margin-top: 10px;">
-              Synthesizes TCP packets <strong>in memory</strong> — nothing is transmitted on the network.
-              Flows pass through the exact same detection pipeline.
-            </div>
-          </div>
-        </div>
-
-        <!-- Detected Attack Sources -->
-        <div class="card">
-          <div class="card-header">
-            <h2><span class="icon">🎯</span> Detected Attack Sources</h2>
-            <span class="badge badge-dim">Observational</span>
-          </div>
-          <div class="card-body flush">
-            <div class="table-wrap" style="max-height: 280px;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Source IP</th>
-                    <th>Alerts</th>
-                    <th>Max Score</th>
-                    <th>Policy</th>
-                  </tr>
-                </thead>
-                <tbody id="attack-sources-body">
-                  <tr><td colspan="4" style="text-align:center; padding:20px; color: var(--text-dim);">No attack sources detected</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Live Flows Table -->
-      <div class="card section-gap">
-        <div class="card-header">
-          <h2><span class="icon">🌊</span> Live Flow Stream</h2>
-          <span class="badge badge-dim" id="flow-counter">0 flows</span>
+          <h2>Observational Flow Stream</h2>
+          <span id="live-flow-counter" class="badge badge-blue">0 flows</span>
         </div>
         <div class="card-body flush">
-          <div class="table-wrap" style="max-height: 500px;">
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Time</th>
-                  <th>Proto</th>
-                  <th>Source</th>
-                  <th>Destination</th>
-                  <th>Pkts</th>
-                  <th>Score</th>
-                  <th>Truth</th>
-                  <th>Detection</th>
-                  <th>Policy</th>
-                </tr>
-              </thead>
-              <tbody id="live-flows-body">
-                <tr><td colspan="10" style="text-align:center; padding:30px; color: var(--text-dim);">Press <strong>Start</strong> to begin monitoring</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Alerts Table -->
-      <div class="card section-gap">
-        <div class="card-header">
-          <h2><span class="icon">🔔</span> Alert Log</h2>
-          <span class="badge badge-dim" id="alert-counter">0 alerts</span>
-        </div>
-        <div class="card-body flush">
-          <div class="table-wrap" style="max-height: 350px;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Time</th>
-                  <th>Level</th>
-                  <th>Score</th>
-                  <th>Source</th>
-                  <th>Destination</th>
-                  <th>Proto</th>
-                  <th>Inspect</th>
-                </tr>
-              </thead>
-              <tbody id="live-alerts-body">
-                <tr><td colspan="7" style="text-align:center; padding:20px; color: var(--text-dim);">No alerts</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <details class="explainer">
-          <summary>ℹ️ How is the threat score calculated?</summary>
-          <div class="explainer-body">
-            <p>Each completed flow is reduced to the frozen <strong>R10</strong> feature vector and scored by
-            the frozen CIC-IDS2017 Random Forest. The score is <code>P(attack)</code>; alert threshold is 0.50.</p>
-            <pre>raw = [flow_duration_ms, flow_packets_per_s, flow_bytes_per_s,
-       packet_length_mean, packet_length_std, syn_count,
-       ack_count, rst_count, fin_count, syn_ack_ratio]
-score = random_forest.predict_proba(preprocessor.transform(raw))[0]
-label = "ATTACK" if score >= 0.50 else "BENIGN"
-alert = HIGH if score >= 0.85 else MEDIUM if score >= 0.65 else LOW</pre>
-          </div>
-        </details>
-      </div>
-
-      <!-- Devices (live only) -->
-      <div class="card section-gap">
-        <div class="card-header">
-          <h2><span class="icon">📱</span> WiFi Devices</h2>
-          <span class="badge badge-dim" id="device-count">0 observed</span>
-        </div>
-        <div class="card-body flush">
-          <div id="device-network" style="padding: 8px 12px; font-size: 12px; color: var(--text-dim); font-family: var(--mono);">
-            Live capture not active
-          </div>
-          <div class="table-wrap" style="max-height: 280px;">
-            <table>
-              <thead>
-                <tr><th>Device</th><th>IP</th><th>MAC</th><th>Vendor</th><th>Evidence</th><th>Pkts</th><th>Last seen</th></tr>
-              </thead>
-              <tbody id="devices-body">
-                <tr><td colspan="7" style="text-align:center; padding:20px; color: var(--text-dim);">Start live capture to discover devices</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div id="device-router-link" style="padding: 8px 16px; border-top: 1px solid var(--border); display: none;">
-          <a id="router-admin-link" href="#" target="_blank" rel="noopener noreferrer" style="color: var(--accent); font-size: 12px;">
-            Open router admin page →
-          </a>
+          <table>
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Endpoints</th>
+                <th>Protocol</th>
+                <th>Packets</th>
+                <th>Score</th>
+                <th>Prediction</th>
+                <th>Ground Truth</th>
+              </tr>
+            </thead>
+            <tbody id="live-flows-tbody">
+              <tr><td colspan="7" style="text-align:center;">Stream idle. Click 'Start Stream' to begin.</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <!-- ═══════════════════ ANALYSIS & EVIDENCE TAB ═══════════════════ -->
-    <div id="tab-evidence" class="tab-content">
-
-      <!-- Replay Controls -->
-      <div class="card section-gap">
-        <div class="card-header">
-          <h2><span class="icon">🔬</span> PCAP Replay Verification</h2>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <button class="btn btn-primary" id="run-btn" onclick="runAnalysis()">▶ Run Replay</button>
-            <span id="status-text" style="font-size: 12px; color: var(--text-muted); font-family: var(--mono);">Ready</span>
-          </div>
-        </div>
-        <div class="card-body compact">
-          <div class="notice">
-            Reproducible PCAP replay verification: frozen model, TreeSHAP attributions, and generated research figures.
-          </div>
-        </div>
-      </div>
-
-      <!-- Summary Metrics -->
-      <div class="stats-grid section-gap">
-        <div class="stat-card">
-          <div class="stat-label">Total Packets</div>
-          <div class="stat-value" id="val-packets">-</div>
-          <div class="stat-sub" id="val-pcap-source">PCAP Replay</div>
-        </div>
-        <div class="stat-card accent">
-          <div class="stat-label">Completed Flows</div>
-          <div class="stat-value" id="val-flows">-</div>
-          <div class="stat-sub">Bidirectional (D-006)</div>
-        </div>
-        <div class="stat-card green">
-          <div class="stat-label">Research Accuracy</div>
-          <div class="stat-value" id="val-res-acc">-</div>
-          <div class="stat-sub" id="val-res-f1">F1: - (τ = 0.50)</div>
-        </div>
-        <div class="stat-card orange">
-          <div class="stat-label">Operational Accuracy</div>
-          <div class="stat-value" id="val-ops-acc">-</div>
-          <div class="stat-sub" id="val-ops-f1">F1: - (τ = 0.40)</div>
-        </div>
-      </div>
-
-      <!-- Model Comparison -->
-      <div class="card section-gap">
-        <div class="card-header">
-          <h2><span class="icon">📈</span> <span id="model-comparison-title">Model Comparison — CIC-IDS2017</span></h2>
-          <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-            <button class="btn btn-sm btn-primary" id="bench-btn-cicids2017" onclick="switchBenchmark('cicids2017')">🌟 CIC-IDS2017</button>
-            <button class="btn btn-sm" id="bench-btn-cse2018" onclick="switchBenchmark('cse2018')">🏢 CSE-CIC-IDS2018</button>
-            <button class="btn btn-sm" id="bench-btn-unswnb15" onclick="switchBenchmark('unswnb15')">🔬 UNSW-NB15</button>
-          </div>
-        </div>
-        <div class="card-body compact" id="benchmark-info-card" style="border-bottom: 1px solid var(--border); background: var(--surface-2);">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 12px;">
-            <div>
-              <strong id="bench-info-name">CIC-IDS2017 (Flagship Benchmark)</strong> — 
-              <span id="bench-info-desc" style="color:var(--text-muted);">Enterprise lab benchmark containing Friday DDoS, Wednesday DoS (Hulk/Slowloris), and PortScan.</span>
-            </div>
-            <div style="display: flex; gap: 8px;">
-              <span class="badge badge-dim" id="bench-info-contract">Contract: R10 (10 features)</span>
-              <span class="badge badge-dim" id="bench-info-pop">Population: 355,833 flows</span>
-            </div>
-          </div>
-        </div>
-        <div class="card-body flush">
-          <div style="overflow-x: auto;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Model</th>
-                  <th>Accuracy (3-seed mean ± std / 95% CI)</th>
-                  <th>F1 (3-seed mean ± std / 95% CI)</th>
-                  <th>ROC-AUC (3-seed mean ± std / 95% CI)</th>
-                  <th>Role</th>
-                </tr>
-              </thead>
-              <tbody id="model-comparison-body">
-                <tr><td colspan="5" style="text-align:center; padding:20px; color: var(--text-dim);">Loading...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div class="card-body compact">
-          <div class="notice" id="benchmark-caveat-notice">
-            <strong>⚠️ Temporal holdout caveat:</strong> Every random-split metric is an in-domain upper bound.
-            On the CSE-CIC-IDS2018 strict future-period holdout, the RF scored <strong>F1 0.0113</strong> (recall 0.0068).
-          </div>
-        </div>
-      </div>
-
-      <!-- Flow Table -->
-      <div class="card section-gap">
-        <div class="card-header">
-          <h2><span class="icon">📋</span> Replay Flows &amp; Classifications</h2>
-        </div>
-        <div class="card-body flush">
-          <div class="table-wrap" style="max-height: 400px;">
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th><th>Proto</th><th>Source</th><th>Destination</th>
-                  <th>Pkts</th><th>Duration</th><th>Score</th><th>Truth</th>
-                  <th>Detection</th><th>Policy</th>
-                </tr>
-              </thead>
-              <tbody id="flows-table-body">
-                <tr><td colspan="10" style="text-align:center; padding:20px; color: var(--text-dim);">Run replay to see flows</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- SHAP -->
-      <div class="card section-gap">
-        <div class="card-header">
-          <h2><span class="icon">🧠</span> Explainable AI — TreeSHAP Feature Importance</h2>
-        </div>
-        <div class="card-body flush">
-          <div style="overflow-x: auto;">
-            <table>
-              <thead>
-                <tr><th>Rank</th><th>Feature</th><th>Mean |SHAP|</th><th>Significance</th></tr>
-              </thead>
-              <tbody id="shap-table-body">
-                <tr><td colspan="4" style="text-align:center; padding:20px; color: var(--text-dim);">Loading SHAP data...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Research Figures -->
-      <div class="card section-gap">
-        <div class="card-header">
-          <h2><span class="icon">🖼️</span> Research Figures Gallery</h2>
-          <select id="figure-select" onchange="changeFigure()" style="min-width: 250px;">
-            <option value="">Loading figures…</option>
-          </select>
-        </div>
-        <div class="card-body">
-          <div class="figure-viewer">
-            <img id="figure-display" src="" alt="Research Figure" style="display: none;">
-            <p id="figure-caption" class="figure-caption"></p>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
-
-  <!-- Score provenance dialog -->
-  <dialog id="score-dialog">
-    <div class="dialog-head">
-      <h3 id="score-dialog-title">Score Provenance</h3>
-      <button class="btn btn-sm" type="button" onclick="closeScoreDialog()">Close</button>
-    </div>
-    <div class="dialog-body" id="score-dialog-body"></div>
-  </dialog>
-
-  <footer class="footer">
-    <span>XRL-IDARS · Explainable Reinforcement Learning IDS &amp; Autonomous Response · Final Year Project</span>
-    <span>Observational only · 0 Host Network Mutations</span>
-  </footer>
 
   <script src="/app.js"></script>
 </body>

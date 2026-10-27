@@ -213,16 +213,22 @@ python scripts/demo/run_replay_demo.py
 
 This runs entirely offline using the bundled sample PCAP and trained model — no network access or root needed.
 
-### 4. Dashboard — Full Web Interface
+### 4. Dashboard — Research Evaluation Workbench
 
 > 📖 **Comprehensive Walkthrough & Viva Script:** See [`docs/FRONTEND_AND_DEMO_GUIDE.md`](docs/FRONTEND_AND_DEMO_GUIDE.md) for the complete presentation script (word-for-word guide for professors), component architecture, and FAQ defenses.
 
-The dashboard is a zero-dependency web UI with two tabs:
+The dashboard is engineered as a zero-dependency **Research Evaluation Workbench** centered on genuine held-out dataset evaluation across 7 research views:
 
-| Tab | What it does |
-|-----|--------------|
-| **Live Monitor** | Real-time packet capture → flow construction → frozen detector scoring, with IP endpoints, attack source summary, threat scores, per-alert feature/score provenance, real-time confusion matrix, and an attack simulator |
-| **Replay & Evidence** | Replay verification stats, offline RF/LSTM/fusion comparison, TreeSHAP attributions, research figures |
+| Page | Research Function |
+|:-----|:------------------|
+| **📊 Dataset Evaluation** | **Primary Default View:** Held-out benchmark metrics, confusion matrices (TN, FP, FN, TP), slice toggle (355k tabular vs 355k aligned), and per-family attack breakdowns |
+| **📋 Overview** | Platform architecture, formal component verification matrix (RF, LSTM, Fusion, DQN, Safety Gate), and benchmark inventory |
+| **⚖️ Model Comparison** | Comparative benchmark (RF vs LSTM vs Fusion) with 95% bootstrap CIs, fusion weights (&alpha;), degenerate weight flags, and shuffled-window temporal ablation |
+| **🔍 Flow Explorer** | Paginated inspection of held-out flows with ground-truth strictly isolated from model inputs, plus reproducible CSV export |
+| **💡 Explainability** | Global TreeSHAP feature importances on Random Forest (with explicit notice that SHAP explains RF only, not LSTM or DQN) |
+| **🛡️ Autonomous Response** | Controlled Phase 2A benchmark comparing trained DQN against the analytic Cost-Optimal baseline, highlighting that the baseline beats DQN in 4/6 regimes |
+| **⚠️ Research Limitations** | Candid plain-language breakdown of all 9 audited research findings and limitations |
+| **⚡ Live Monitor & Modes** | Separated secondary view strictly isolating Mode 1 (Offline), Mode 2 (Dataset Stream), Mode 3 (PCAP Replay), Mode 4 (Simulation), and Mode 5 (Live Capture) |
 
 #### Visual Dashboard Tour & Live Console Gallery
 

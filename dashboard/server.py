@@ -54,6 +54,17 @@ from xrlids.demo.pcap import PacketInfo, PcapReader  # noqa: E402
 from xrlids.demo.replay import ReplayEngine  # noqa: E402
 from xrlids.live.capture import CaptureConfig, PacketCaptureService  # noqa: E402
 from xrlids.live.devices import DeviceTracker  # noqa: E402
+from dashboard.workbench_data import (  # noqa: E402
+    BENCHMARK_REGISTRY,
+    get_comparison_data,
+    get_evaluation_data,
+    get_explainability_data,
+    get_flow_explorer_data,
+    get_flow_export_csv,
+    get_limitations_data,
+    get_overview_data,
+    get_response_benchmark_data,
+)
 
 DASHBOARD_DIR = REPO_ROOT / "dashboard"
 FIGURES_DIR = REPO_ROOT / "reports" / "figures"
@@ -96,6 +107,18 @@ BENCHMARK_CONFIGS = {
         "f1_fusion": "0.8970",
         "role": "Sensor schema degradation & cross-dataset transfer study (Argus flow exporter omitted TCP flags).",
         "description": "Australian Cyber Security Centre benchmark evaluated under degraded 4-feature contract.",
+    },
+    "cse2018_temporal": {
+        "id": "cse2018_temporal",
+        "name": "CSE-CIC-IDS2018 (Temporal Future-Day Holdout)",
+        "short_name": "CSE-2018 (Temporal)",
+        "exp_dir": REPO_ROOT / "results" / "experiments" / "EXP-P1-CSE2018-TEMPORAL-R10-001",
+        "contract": "R10 (10 features)",
+        "test_population": "1,631,630 test flows",
+        "accuracy_fusion": "96.33%",
+        "f1_fusion": "0.0113",
+        "role": "Chronological future-day holdout; empirical demonstration of out-of-distribution temporal generalization collapse.",
+        "description": "Chronological test partition demonstrating collapse from F1 0.8861 down to 0.0113 on future days.",
     },
 }
 
@@ -957,6 +980,49 @@ class DashboardHandler(BaseHTTPRequestHandler):
             query = parse_qs(parsed.query)
             bench = query.get("benchmark", ["cicids2017"])[0]
             self.send_json(get_dashboard_data(benchmark=bench))
+        elif path == "/api/overview":
+            self.send_json(get_overview_data())
+        elif path == "/api/evaluation":
+            query = parse_qs(parsed.query)
+            bench = query.get("benchmark", ["cicids2017"])[0]
+            slice_type = query.get("slice", ["aligned"])[0]
+            self.send_json(get_evaluation_data(bench, slice_type=slice_type))
+        elif path == "/api/comparison":
+            query = parse_qs(parsed.query)
+            bench = query.get("benchmark", ["cicids2017"])[0]
+            self.send_json(get_comparison_data(bench))
+        elif path == "/api/flows":
+            query = parse_qs(parsed.query)
+            bench = query.get("benchmark", ["cicids2017"])[0]
+            page = int(query.get("page", ["1"])[0])
+            limit = int(query.get("limit", ["50"])[0])
+            f_status = query.get("status", ["all"])[0]
+            f_label = query.get("label", ["all"])[0]
+            self.send_json(get_flow_explorer_data(bench, page=page, limit=limit, filter_status=f_status, label_filter=f_label))
+        elif path == "/api/flows/export":
+            query = parse_qs(parsed.query)
+            bench = query.get("benchmark", ["cicids2017"])[0]
+            f_status = query.get("status", ["all"])[0]
+            f_label = query.get("label", ["all"])[0]
+            csv_content = get_flow_export_csv(bench, filter_status=f_status, label_filter=f_label, limit=2000)
+            payload = csv_content.encode("utf-8")
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "text/csv; charset=utf-8")
+            self.send_header("Content-Disposition", f'attachment; filename="xrlids_{bench}_flows.csv"')
+            self.send_header("Content-Length", str(len(payload)))
+            self.end_headers()
+            self.wfile.write(payload)
+        elif path == "/api/explainability":
+            query = parse_qs(parsed.query)
+            bench = query.get("benchmark", ["cicids2017"])[0]
+            self.send_json(get_explainability_data(bench))
+        elif path == "/api/response-benchmark":
+            query = parse_qs(parsed.query)
+            regime = query.get("regime", ["standard_enterprise"])[0]
+            mode = query.get("mode", ["4-action"])[0]
+            self.send_json(get_response_benchmark_data(regime=regime, mode=mode))
+        elif path == "/api/limitations":
+            self.send_json(get_limitations_data())
         elif path == "/api/benchmarks":
             self.send_json(
                 {
@@ -1182,6 +1248,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--iface", default=None, help="Interface for --live (default: first non-loopback)")
     parser.add_argument("--bpf", default=None, help='Optional capture filter, e.g. "tcp port 443"')
     parser.add_argument("--sample", action="store_true", help="Auto-start the paced Sample stream (no root required)")
+    parser.add_argument("--stream", action="store_true", help="Auto-start the dataset demonstration stream")
     args = parser.parse_args(argv)
 
     autostart: dict[str, Any] | None = None
@@ -1193,9 +1260,11 @@ def main(argv: list[str] | None = None) -> int:
         autostart = {"mode": "live", "interface": interface, "bpf_filter": args.bpf}
     elif args.sample:
         autostart = {"mode": "sample", "bpf_filter": args.bpf}
-    else:
-        # Default: auto-start dataset stream so the live monitor is actively streaming immediately on load!
+    elif args.stream:
         autostart = {"mode": "dataset", "dataset_category": "mixed", "benchmark": "cicids2017"}
+    else:
+        # Default: Research Evaluation Workbench mode (observational state; streams start on explicit user request)
+        autostart = None
 
     run(port=args.port, autostart=autostart)
     return 0
