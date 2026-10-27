@@ -12,6 +12,7 @@ Essential documentation, presentation scripts, and defense runbooks for final ye
 
 | Document | Purpose & Key Contents |
 |----------|------------------------|
+| [📋 **End-to-End Dataset, Split & Model Audit**](docs/DATASETS_AND_MODELS_AUDIT.md) | **Exhaustive audit**: 19.3M raw rows, column inventories, NaN/Inf accounting, Policy A split proofs (60/20/20), model architectures, and cryptographic artifact hashes |
 | [📖 **Frontend Presentation & Viva Script**](docs/FRONTEND_AND_DEMO_GUIDE.md) | **Word-for-word viva presentation script**, UI layout breakdown, step-by-step click guide, and defense answers |
 | [🎓 **Final Viva Defense Guide**](docs/viva/FINAL_VIVA_GUIDE.md) | Comprehensive examiner Q&A, theoretical defense, metric rationale, and DQN safety principles |
 | [🎬 **Demo Runbook & Video Guide**](docs/viva/DEMO_AND_VIDEO_SCRIPT.md) | Step-by-step practical demo walkthrough, pre-demo checks, and contingency plans |
@@ -309,7 +310,7 @@ Available in the Live Monitor tab during any capture mode. Injects synthetic att
 
 ### 5. Retraining (Optional — Large Data Required)
 
-The demo and dashboard work out of the box **when the frozen artifacts are present** at `results/experiments/EXP-P1-CIC2017-R10-001/random_forest.joblib` (+ the matching `preprocessor.joblib`). They are gitignored, so a fresh clone must restore or regenerate them first; without them the demo exits non-zero and writes no artifacts.
+The demo and dashboard work out of the box because canonical models, preprocessors, and weights are tracked directly in the repository (`models/rf/`, `models/lstm/`, `models/fusion/`, `models/dqn/` and `results/experiments/`). A fresh clone has all required artifacts immediately available. For full artifact cryptographic provenance (SHA-256 hashes and file sizes), see [`docs/DATASETS_AND_MODELS_AUDIT.md`](docs/DATASETS_AND_MODELS_AUDIT.md).
 
 To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
 
@@ -347,6 +348,7 @@ To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
 
 ## Documentation
 
+- [`docs/DATASETS_AND_MODELS_AUDIT.md`](docs/DATASETS_AND_MODELS_AUDIT.md) — **Exhaustive Dataset, Split & Model Audit**: 19.3M raw rows, schema/column contracts (R10/R4), NaN/Inf imputation, Policy A 60/20/20 split proofs, sequence boundary isolation, model architectures (RF, LSTM, Fusion, DQN), and cryptographic SHA-256 artifact registry
 - [`PROJECT_STATUS.md`](PROJECT_STATUS.md) — Comprehensive implementation and empirical status registry
 - [`docs/final/FINAL_RESEARCH_REPORT.md`](docs/final/FINAL_RESEARCH_REPORT.md) — Comprehensive research report covering methodology, findings, and limitations
 - [`docs/final/RELEASE_AUDIT.md`](docs/final/RELEASE_AUDIT.md) — Final release audit, governance verification, and checklist
