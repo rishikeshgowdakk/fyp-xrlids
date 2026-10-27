@@ -586,12 +586,134 @@ async function pollLive() {
       document.getElementById("live-dot").className = "pulse-dot";
       document.getElementById("topbar-status-text").textContent = "Workbench Idle";
     }
+
+    // Always update attack sources and passive device discoveries
+    renderAttackSources(snap.recent_alerts || []);
+    renderDevices(snap);
   } catch (_) {}
+}
+
+function policyFor(score) {
+  if (score >= 0.50) return { action: "BLOCK (SUGGESTED)", cls: "badge-red" };
+  if (score >= 0.40) return { action: "THROTTLE (SUGGESTED)", cls: "badge-orange" };
+  if (score >= 0.20) return { action: "MONITOR", cls: "badge-blue" };
+  return { action: "ALLOW", cls: "badge-green" };
+}
+
+function formatAge(seconds) {
+  const v = Number(seconds);
+  if (!Number.isFinite(v) || v < 0) return "—";
+  if (v < 5) return "now";
+  if (v < 60) return Math.round(v) + "s";
+  if (v < 3600) return Math.floor(v / 60) + "m";
+  return Math.floor(v / 3600) + "h";
+}
+
+function renderAttackSources(alerts) {
+  const tbody = document.getElementById("attack-sources-body");
+  if (!tbody) return;
+  const byIp = new Map();
+  (alerts || []).forEach(alert => {
+    const src = String(alert.src_endpoint || "?");
+    const ip = src.includes(":") ? src.slice(0, src.lastIndexOf(":")) : src;
+    const e = byIp.get(ip) || { ip, alerts: 0, maxScore: 0, latest: "" };
+    e.alerts++;
+    e.maxScore = Math.max(e.maxScore, Number(alert.confidence) || 0);
+    if (!e.latest || String(alert.timestamp) > e.latest) e.latest = alert.timestamp;
+    byIp.set(ip, e);
+  });
+  const rows = Array.from(byIp.values()).sort((a, b) => b.maxScore - a.maxScore);
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:16px; color:var(--text-dim)">No attack sources detected</td></tr>';
+    return;
+  }
+  tbody.innerHTML = "";
+  rows.forEach(e => {
+    const p = policyFor(e.maxScore);
+    const isSim = e.ip.startsWith("203.0.113.");
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="mono"><strong>${escapeHtml(e.ip)}</strong>${isSim ? ' <span class="badge badge-sim">SIM</span>' : ""}</td>
+      <td class="mono">${e.alerts}</td>
+      <td class="mono"><strong style="color:var(--red)">${fmt(e.maxScore)}</strong></td>
+      <td><span class="badge ${p.cls}">${p.action}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderDevices(snap) {
+  const tbody = document.getElementById("devices-body");
+  const networkEl = document.getElementById("device-network");
+  const countEl = document.getElementById("device-count");
+  const routerLink = document.getElementById("device-router-link");
+  const routerAnchor = document.getElementById("router-admin-link");
+  if (!tbody || !networkEl || !countEl) return;
+
+  if (snap.mode !== "live") {
+    if (routerLink) routerLink.style.display = "none";
+    networkEl.textContent = snap.mode
+      ? "Device discovery available in live capture mode only"
+      : "Live capture not active";
+    countEl.textContent = "0 observed";
+    countEl.className = "badge badge-dim";
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:16px; color:var(--text-dim)">Start live capture to discover devices</td></tr>';
+    return;
+  }
+
+  const network = snap.network || {};
+  const parts = [];
+  if (network.ssid) parts.push("SSID " + network.ssid);
+  if (network.gateway_ip) parts.push("GW " + network.gateway_ip);
+  if (network.local_ip) parts.push("PC " + network.local_ip);
+  if (network.signal_dbm != null) parts.push(network.signal_dbm + " dBm");
+  networkEl.textContent = parts.join(" · ") || "Live capture on " + (snap.interface || "interface");
+
+  if (routerLink && routerAnchor) {
+    const gw = String(network.gateway_ip || "");
+    if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(gw)) {
+      routerAnchor.href = "http://" + gw;
+      routerLink.style.display = "";
+    } else {
+      routerLink.style.display = "none";
+    }
+  }
+
+  const devices = snap.devices || [];
+  countEl.textContent = devices.length + " observed";
+  countEl.className = "badge" + (devices.length ? " badge-blue" : " badge-dim");
+
+  if (devices.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:16px; color:var(--text-dim)">Waiting for ARP/DHCP/mDNS traffic…</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = "";
+  devices.forEach(d => {
+    const badges = [];
+    if (d.is_local) badges.push('<span class="badge badge-blue">THIS PC</span>');
+    if (d.is_gateway) badges.push('<span class="badge badge-orange">GATEWAY</span>');
+    if (d.is_random_mac) badges.push('<span class="badge badge-dim">PRIVATE MAC</span>');
+    const label = d.hostname || d.label || "Unknown";
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><strong>${escapeHtml(label)}</strong><br>${badges.join(" ")}</td>
+      <td class="mono">${escapeHtml(d.ip || "—")}</td>
+      <td class="mono">${escapeHtml(d.mac || "—")}</td>
+      <td>${escapeHtml(d.vendor || "Unknown")}</td>
+      <td>${escapeHtml((d.evidence || []).join(", ") || "—")}</td>
+      <td class="mono">${Number(d.packets || 0).toLocaleString()}</td>
+      <td class="mono">${d.live_seen ? formatAge(d.age_s) : "cached"}</td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
 
 // ─── Initialization ───
 document.addEventListener("DOMContentLoaded", () => {
   onLiveModeChange();
+  renderAttackSources([]);
+  renderDevices({ mode: null });
   loadEvaluation(); // Default active tab is Page B (Dataset Evaluation)
   setInterval(pollLive, LIVE_POLL_MS);
 });

@@ -226,6 +226,9 @@
     .badge-orange { background: var(--orange-dim); color: var(--orange); border: 1px solid var(--orange); }
     .badge-blue { background: var(--accent-glow); color: var(--accent); border: 1px solid var(--accent); }
     .badge-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple); }
+    .badge-dim { background: var(--surface-3); color: var(--text-dim); border: 1px solid var(--border); }
+    .badge-sim { background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple); }
+    .table-wrap { overflow-x: auto; max-height: 320px; overflow-y: auto; }
 
     /* ── Tables ── */
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -824,29 +827,87 @@
         </div>
       </div>
 
-      <!-- Rolling Flows Table -->
-      <div class="card">
+      <!-- Live Observational Tables Grid -->
+      <div class="grid-2 section-gap">
+        <!-- Rolling Flows Table -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Observational Flow Stream</h2>
+            <span id="live-flow-counter" class="badge badge-blue">0 flows</span>
+          </div>
+          <div class="card-body flush">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Endpoints</th>
+                    <th>Protocol</th>
+                    <th>Packets</th>
+                    <th>Score</th>
+                    <th>Prediction</th>
+                    <th>Ground Truth</th>
+                  </tr>
+                </thead>
+                <tbody id="live-flows-tbody">
+                  <tr><td colspan="7" style="text-align:center; padding:16px;">Stream idle. Click 'Start Stream' to begin.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detected Attack Sources -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Detected Attack Sources</h2>
+            <span class="badge badge-dim">Observational</span>
+          </div>
+          <div class="card-body flush">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Source IP</th>
+                    <th>Alerts</th>
+                    <th>Max Score</th>
+                    <th>Suggested Policy</th>
+                  </tr>
+                </thead>
+                <tbody id="attack-sources-body">
+                  <tr><td colspan="4" style="text-align:center; padding:16px; color: var(--text-dim);">No attack sources detected</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WiFi Devices (Passive Discovery, Live Mode Only) -->
+      <div class="card section-gap">
         <div class="card-header">
-          <h2>Observational Flow Stream</h2>
-          <span id="live-flow-counter" class="badge badge-blue">0 flows</span>
+          <h2>📱 WiFi Devices (Passive Discovery)</h2>
+          <span class="badge badge-dim" id="device-count">0 observed</span>
         </div>
         <div class="card-body flush">
-          <table>
-            <thead>
-              <tr>
-                <th>Timestamp</th>
-                <th>Endpoints</th>
-                <th>Protocol</th>
-                <th>Packets</th>
-                <th>Score</th>
-                <th>Prediction</th>
-                <th>Ground Truth</th>
-              </tr>
-            </thead>
-            <tbody id="live-flows-tbody">
-              <tr><td colspan="7" style="text-align:center;">Stream idle. Click 'Start Stream' to begin.</td></tr>
-            </tbody>
-          </table>
+          <div id="device-network" style="padding: 8px 16px; font-size: 12px; color: var(--text-dim); font-family: var(--mono); border-bottom: 1px solid var(--border-light);">
+            Live capture not active
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Device</th><th>IP</th><th>MAC</th><th>Vendor</th><th>Evidence</th><th>Pkts</th><th>Last seen</th></tr>
+              </thead>
+              <tbody id="devices-body">
+                <tr><td colspan="7" style="text-align:center; padding:16px; color: var(--text-dim);">Start live capture to discover devices</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div id="device-router-link" style="padding: 8px 16px; border-top: 1px solid var(--border); display: none;">
+          <a id="router-admin-link" href="#" target="_blank" rel="noopener noreferrer" style="color: var(--accent); font-size: 12px; text-decoration: none;">
+            Open router admin page →
+          </a>
         </div>
       </div>
     </div>
