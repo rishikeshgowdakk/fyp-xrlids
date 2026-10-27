@@ -1,8 +1,8 @@
 # XRL-IDARS — Phase 2B Forensic Readiness Audit: Model Integrity, Reproducibility, Evaluation Correctness, and Production-Gap Assessment
 
 **Audit Identifier**: `EXP-P2B-READINESS-AUDIT-001`  
-**Git Commit**: `70c17d21fa64d3379028165c8e9ed0e04f106f20` (Branch: `main`)  
-**Audit Execution Timestamp**: `2026-10-27T20:51:30.161615+00:00`  
+**Git Commit**: `9d00d83d051300ee457fe7903ffa147054f953ae` (Branch: `main`)  
+**Audit Execution Timestamp**: `2026-10-27T21:24:13.328492+00:00`  
 **Auditor Role**: Senior ML Systems Engineer, Model Validation Engineer, & Independent Research Auditor  
 **Working Tree Status**: Verified Clean (0 uncommitted user changes)  
 

@@ -37,8 +37,12 @@ models/
 | **CIC-IDS2017** | R10 (10 feat) | **RF + LSTM Fusion ($\alpha=0.50$)** | **0.9906 (99.06%)** | **0.9745** | **0.9989** | **0.9947** | 355,833 |
 | **CSE-CIC-IDS2018** | R10 (10 feat) | Random Forest | 0.9723 | 0.8861 | 0.9902 | 0.9676 | 1,662,419 |
 | **CSE-CIC-IDS2018** | R10 (10 feat) | **Supervised LSTM** | **0.9912 (99.12%)** | **0.9603** | **0.9966** | **0.9865** | 1,662,419 |
-| **CSE-CIC-IDS2018** | R10 (10 feat) | **RF + LSTM Fusion ($\alpha=0.00$)** | **0.9912 (99.12%)** | **0.9603** | **0.9966** | **0.9865** | 1,662,419 |
+| **CSE-CIC-IDS2018** | R10 (10 feat) | **RF + LSTM Fusion ($\alpha=0.00$)\*** | **0.9912 (99.12%)** | **0.9603** | **0.9966** | **0.9865** | 1,662,419 |
 | **Primary Fleet Total** | **R10** | **Flagship System** | **0.9911 (99.11%)** | — | — | — | **2,018,252** |
+
+> \* **Note on CSE-CIC-IDS2018 Fusion ($\alpha=0.00$):** In `models/fusion/fusion_weights.json`, the optimal fusion weight for CSE-2018 is $\alpha = 0.00$. The Random Forest contributes 0% weight, making this result mathematically and empirically identical to the single LSTM detector, NOT evidence of multi-model synergy.
+>
+> **Note on Population Reconciliation (355,865 vs 355,833 Flows):** The tabular held-out test split contains **355,865 flows** (evaluated by Random Forest and the Phase 2 response simulator). Sequence models (LSTM and Fusion) drop $(T - 1) = 4$ initial boundary flows from each of the 8 capture files to prevent sequences crossing file boundaries, yielding **355,833 sequence-aligned flows** ($355,865 - (8 \times 4) = 355,833$). Both counts evaluate the exact same underlying population.
 
 ### Auxiliary Benchmark (Degraded 4-Feature NetFlow Schema)
 
@@ -71,6 +75,12 @@ DQN agents are reinforcement-learning policies, not classifiers — F1/accuracy 
 
 FQR = False Quarantine Rate · BAS = Business Availability Score · ACI = Action Chattering Index.
 Source: `results/phase2/EXP-P2-FINAL-TEST-001/final_test_metrics.json` (full metric block in [`registry/model_manifest.json`](registry/model_manifest.json)).
+
+> **Cost-Optimal Baseline Comparison (EXP-P2A-COST-OPTIMAL-001):**
+> When evaluated against the zero-parameter analytic `CostOptimalThresholdPolicy` on the 355,865 held-out flows:
+> - The Cost-Optimal baseline achieved lower operational cost than the trained DQN in **4 of 6 benchmark settings** (e.g. 20.12% lower cost in 4-action High Availability).
+> - In the 2 settings where DQN had lower cost, its advantage was only ~8.8%, failing the pre-registered 15.0% target.
+> - **Calibration Warning:** Raw Random Forest voting scores exhibit severe probability distortion in intermediate score bins (e.g. predicted 0.1335 vs observed 0.0137, ~10× overconfidence). Analytical thresholds are cost-optimal with respect to an assumed score, not proven Bayes-optimal under true attack risk.
 
 ## Model Verification & Integrity
 
