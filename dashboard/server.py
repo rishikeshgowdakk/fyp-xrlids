@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import os
 import queue
 import socket
@@ -43,6 +44,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
+logger = logging.getLogger("dashboard.server")
+
 from xrlids.demo.attack_sim import build_scenario_packets, get_scenario, list_scenarios  # noqa: E402
 from xrlids.demo.dataset_stream import (  # noqa: E402
     CATEGORIES as DATASET_CATEGORIES,
@@ -56,6 +59,7 @@ from xrlids.evaluation.csv_evaluator import (  # noqa: E402
     CSVValidationError,
     evaluate_csv_dataset,
     export_evaluated_csv_string,
+    get_cached_evaluation,
     get_demo_sample_csv,
 )
 from xrlids.live.capture import CaptureConfig, PacketCaptureService  # noqa: E402
@@ -1188,7 +1192,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     label_column=label_col,
                     threshold=threshold,
                 )
-                self.send_json(result)
+                # Return clean client payload without bloat of internal full export records
+                client_result = {k: v for k, v in result.items() if k != "_full_records"}
+                self.send_json(client_result)
             except CSVValidationError as e:
                 self.send_json({"error": str(e), "status": "validation_error"}, status=HTTPStatus.BAD_REQUEST)
             except Exception as e:
@@ -1196,8 +1202,23 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 self.send_json({"error": f"Evaluation failed: {str(e)}", "status": "error"}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
         elif parsed.path == "/api/csv/export":
             body = self.read_json_body()
-            eval_result = body.get("eval_result") or {}
-            csv_str = export_evaluated_csv_string(eval_result)
+            evaluation_id = body.get("evaluation_id")
+            cached_eval: dict[str, Any] | None = None
+            if evaluation_id:
+                cached_eval = get_cached_evaluation(evaluation_id)
+            if cached_eval is None and isinstance(body.get("eval_result"), dict):
+                fallback_id = body["eval_result"].get("evaluation_id")
+                if fallback_id:
+                    cached_eval = get_cached_evaluation(fallback_id)
+                if cached_eval is None:
+                    cached_eval = body["eval_result"]
+            if not cached_eval:
+                self.send_json(
+                    {"error": "Evaluation session not found or empty. Please run evaluation first.", "status": "not_found"},
+                    status=HTTPStatus.NOT_FOUND,
+                )
+                return
+            csv_str = export_evaluated_csv_string(cached_eval, export_all=True)
             payload = csv_str.encode("utf-8")
             self.send_response(HTTPStatus.OK)
             self.send_header("Content-Type", "text/csv; charset=utf-8")

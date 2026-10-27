@@ -498,6 +498,48 @@ async function loadLimitations() {
 // ─── Custom CSV Dataset Evaluation ───
 let lastCsvEvalResult = null;
 
+const BENCHMARK_CONTRACT_MAP = {
+  cicids2017: "R10",
+  cse2018: "R10",
+  unswnb15: "R4",
+};
+
+function onCsvModelChange() {
+  const model = document.getElementById("csv-eval-model").value;
+  const contractSelect = document.getElementById("csv-eval-contract");
+  if (!contractSelect) return;
+  if (model === "unswnb15") {
+    contractSelect.value = "R4";
+    for (let opt of contractSelect.options) {
+      opt.disabled = (opt.value !== "R4");
+    }
+  } else {
+    contractSelect.value = "R10";
+    for (let opt of contractSelect.options) {
+      opt.disabled = (opt.value !== "R10");
+    }
+  }
+}
+
+function onCsvContractChange() {
+  const contract = document.getElementById("csv-eval-contract").value;
+  const modelSelect = document.getElementById("csv-eval-model");
+  if (!modelSelect) return;
+  if (contract === "R4") {
+    modelSelect.value = "unswnb15";
+    for (let opt of modelSelect.options) {
+      opt.disabled = (opt.value !== "unswnb15");
+    }
+  } else {
+    if (modelSelect.value === "unswnb15") {
+      modelSelect.value = "cicids2017";
+    }
+    for (let opt of modelSelect.options) {
+      opt.disabled = (opt.value === "unswnb15");
+    }
+  }
+}
+
 function onCsvFileSelected(event) {
   const file = event.target.files && event.target.files[0];
   const statusEl = document.getElementById("csv-file-status");
@@ -521,8 +563,9 @@ async function loadSampleCsv() {
     if (!res.ok) throw new Error("Failed to load sample CSV from server");
     const data = await res.json();
     textarea.value = data.csv_text;
-    document.getElementById("csv-eval-contract").value = data.contract || "R10";
     document.getElementById("csv-eval-model").value = data.benchmark || "cicids2017";
+    document.getElementById("csv-eval-contract").value = data.contract || "R10";
+    onCsvModelChange();
     statusEl.textContent = "Loaded 12 curated CIC-IDS2017 demonstration flows (Benign, DDoS, DoS Hulk). Click 'Evaluate CSV' to test.";
   } catch (err) {
     statusEl.textContent = "Error loading sample: " + err.message;
@@ -535,6 +578,12 @@ async function runCsvEvaluation() {
   const contract = document.getElementById("csv-eval-contract").value;
   const benchmark = document.getElementById("csv-eval-model").value;
   const btn = document.getElementById("btn-run-csv-eval");
+
+  const expectedContract = BENCHMARK_CONTRACT_MAP[benchmark];
+  if (expectedContract && contract !== expectedContract) {
+    alert(`Configuration mismatch: Benchmark '${benchmark}' requires feature contract '${expectedContract}', but '${contract}' was selected.`);
+    return;
+  }
 
   const csvText = textarea.value.trim();
   if (!csvText) {
@@ -654,7 +703,10 @@ async function downloadEvaluatedCsv() {
     const res = await fetch("/api/csv/export", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ eval_result: lastCsvEvalResult }),
+      body: JSON.stringify({
+        evaluation_id: lastCsvEvalResult.evaluation_id,
+        eval_result: lastCsvEvalResult,
+      }),
     });
     if (!res.ok) throw new Error("Export failed on server");
     const blob = await res.blob();
@@ -888,6 +940,7 @@ function renderDevices(snap) {
 // ─── Initialization ───
 document.addEventListener("DOMContentLoaded", () => {
   onLiveModeChange();
+  onCsvModelChange();
   renderAttackSources([]);
   renderDevices({ mode: null });
   loadEvaluation(); // Default active tab is Page B (Dataset Evaluation)

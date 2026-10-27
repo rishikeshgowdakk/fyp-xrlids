@@ -450,18 +450,18 @@
 
           <div class="controls-bar" style="margin-bottom: 12px; background: var(--surface-2);">
             <div class="controls-group">
-              <span class="controls-label">Feature Contract:</span>
-              <select id="csv-eval-contract">
-                <option value="R10">R10 (10 Flow Features: Duration, Rates, PktLens, TCP Flags, SynAckRatio)</option>
-                <option value="R4">R4 (4 Flow Features: Duration, Packets/s, Bytes/s, PktLenMean)</option>
-              </select>
-            </div>
-            <div class="controls-group">
               <span class="controls-label">Target Model:</span>
-              <select id="csv-eval-model">
+              <select id="csv-eval-model" onchange="onCsvModelChange()">
                 <option value="cicids2017">Random Forest (Frozen CIC-IDS2017 R10)</option>
                 <option value="cse2018">Random Forest (Frozen CSE-CIC-IDS2018 R10)</option>
                 <option value="unswnb15">Random Forest (Frozen UNSW-NB15 R4)</option>
+              </select>
+            </div>
+            <div class="controls-group">
+              <span class="controls-label">Feature Contract:</span>
+              <select id="csv-eval-contract" onchange="onCsvContractChange()">
+                <option value="R10">R10 (10 Flow Features: Duration, Rates, PktLens, TCP Flags, SynAckRatio)</option>
+                <option value="R4">R4 (4 Flow Features: Duration, Packets/s, Bytes/s, PktLenMean)</option>
               </select>
             </div>
             <div class="controls-group">

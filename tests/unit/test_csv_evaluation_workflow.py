@@ -28,9 +28,12 @@ import pytest
 from dashboard.server import create_server
 from xrlids.evaluation.csv_evaluator import (
     CSVValidationError,
+    clear_cached_evaluations,
     evaluate_csv_dataset,
     export_evaluated_csv_string,
+    get_cached_evaluation,
     get_demo_sample_csv,
+    parse_strict_binary_label,
 )
 from xrlids.features.definitions import R4_FEATURES, R10_FEATURES
 
@@ -223,3 +226,224 @@ def test_csv_frozen_artifacts_untouched():
 
     assert _file_hash(prep_path) == h_prep_before, "Preprocessor artifact was altered!"
     assert _file_hash(model_path) == h_model_before, "Model artifact was altered!"
+
+
+def test_csv_benchmark_contract_incompatibility_rejected():
+    """Unsupported combinations of benchmark and contract are rejected before artifact loading."""
+    dummy_data = {f: [100.0] for f in R10_FEATURES}
+    df_r10 = pd.DataFrame(dummy_data)
+    dummy_r4 = {f: [100.0] for f in R4_FEATURES}
+    df_r4 = pd.DataFrame(dummy_r4)
+
+    # UNSW-NB15 requires R4, rejecting R10
+    with pytest.raises(CSVValidationError, match="Incompatible benchmark and feature contract.*unswnb15.*R4"):
+        evaluate_csv_dataset(df_r10, contract="R10", benchmark="unswnb15")
+
+    # CICIDS2017 requires R10, rejecting R4
+    with pytest.raises(CSVValidationError, match="Incompatible benchmark and feature contract.*cicids2017.*R10"):
+        evaluate_csv_dataset(df_r4, contract="R4", benchmark="cicids2017")
+
+    # CSE-CIC-IDS2018 requires R10, rejecting R4
+    with pytest.raises(CSVValidationError, match="Incompatible benchmark and feature contract.*cse2018.*R10"):
+        evaluate_csv_dataset(df_r4, contract="R4", benchmark="cse2018")
+
+    # Unknown benchmark
+    with pytest.raises(CSVValidationError, match="Unknown benchmark 'unknown_bench'"):
+        evaluate_csv_dataset(df_r10, contract="R10", benchmark="unknown_bench")
+
+
+def test_strict_binary_label_parsing_valid():
+    """Verify strict parsing for valid binary numeric and textual labels."""
+    assert parse_strict_binary_label(0, 0) == 0
+    assert parse_strict_binary_label(0.0, 1) == 0
+    assert parse_strict_binary_label(1, 2) == 1
+    assert parse_strict_binary_label(1.0, 3) == 1
+
+    # String numeric
+    assert parse_strict_binary_label("0", 4) == 0
+    assert parse_strict_binary_label("0.0", 5) == 0
+    assert parse_strict_binary_label("1", 6) == 1
+    assert parse_strict_binary_label("1.0", 7) == 1
+
+    # Textual benign
+    assert parse_strict_binary_label("BENIGN", 8) == 0
+    assert parse_strict_binary_label("benign", 9) == 0
+    assert parse_strict_binary_label("NORMAL", 10) == 0
+    assert parse_strict_binary_label("clean", 11) == 0
+
+    # Textual attacks and families
+    assert parse_strict_binary_label("ATTACK", 12) == 1
+    assert parse_strict_binary_label("attack", 13) == 1
+    assert parse_strict_binary_label("DDoS", 14) == 1
+    assert parse_strict_binary_label("DoS Hulk", 15) == 1
+    assert parse_strict_binary_label("PortScan", 16) == 1
+    assert parse_strict_binary_label("FTP-Patator", 17) == 1
+    assert parse_strict_binary_label("Exploits", 18) == 1
+    assert parse_strict_binary_label("Fuzzers", 19) == 1
+
+
+def test_strict_binary_label_parsing_invalid():
+    """Non-binary, ambiguous, unrecognized, or missing labels raise CSVValidationError."""
+    # Invalid numeric
+    with pytest.raises(CSVValidationError, match="Invalid numeric ground-truth label '2'"):
+        parse_strict_binary_label(2, 0)
+    with pytest.raises(CSVValidationError, match="Invalid numeric ground-truth label '-1'"):
+        parse_strict_binary_label(-1, 1)
+    with pytest.raises(CSVValidationError, match="Invalid numeric ground-truth label '0.5'"):
+        parse_strict_binary_label(0.5, 2)
+
+    # Invalid numeric strings
+    with pytest.raises(CSVValidationError, match="Invalid numeric ground-truth label string '2.0'"):
+        parse_strict_binary_label("2.0", 3)
+    with pytest.raises(CSVValidationError, match="Invalid numeric ground-truth label string '-1'"):
+        parse_strict_binary_label("-1", 4)
+
+    # Missing / Null
+    with pytest.raises(CSVValidationError, match="missing or null"):
+        parse_strict_binary_label(None, 5)
+    with pytest.raises(CSVValidationError, match="missing or null"):
+        parse_strict_binary_label(float("nan"), 6)
+    with pytest.raises(CSVValidationError, match="label string is empty"):
+        parse_strict_binary_label("   ", 7)
+
+    # Unrecognized string
+    with pytest.raises(CSVValidationError, match="Invalid or unrecognized ground-truth label 'random_malware'"):
+        parse_strict_binary_label("random_malware", 8)
+
+
+def test_csv_evaluation_row_accounting_reconciliation_mixed():
+    """Verify exact total == evaluated + dropped accounting across mixed NaN, +Inf, -Inf, and string errors."""
+    data = {f: [1200.0] * 8 for f in R10_FEATURES}
+    data["label"] = [0, 1, 0, 1, 0, 1, 0, 1]
+
+    # Row 0: valid
+    # Row 1: valid
+    # Row 2: valid
+    # Row 3: valid
+    # Row 4: +Inf in flow_duration_ms
+    data["flow_duration_ms"][4] = float("inf")
+    # Row 5: -Inf in flow_packets_per_s
+    data["flow_packets_per_s"][5] = float("-inf")
+    # Row 6: NaN in syn_count
+    data["syn_count"][6] = float("nan")
+    # Row 7: Unparseable non-numeric string in ack_count
+    data["ack_count"][7] = "corrupt_text"
+
+    df = pd.DataFrame(data)
+    assert len(df) == 8
+
+    res = evaluate_csv_dataset(df, contract="R10", benchmark="cicids2017")
+    acct = res["row_accounting"]
+
+    assert acct["total_rows_received"] == 8
+    assert acct["evaluated_rows"] == 4
+    assert acct["invalid_rows_dropped"] == 4
+    assert acct["inf_rows_dropped"] == 2
+    assert acct["nan_rows_dropped"] == 2
+    assert acct["total_rows_received"] == acct["evaluated_rows"] + acct["invalid_rows_dropped"]
+    assert "2 rows with Infinity/-Infinity" in acct["drop_reason"]
+    assert "2 rows with NaN" in acct["drop_reason"]
+
+    # Strict 1:1 index alignment check
+    assert res["is_labelled"] is True
+    assert res["metrics"]["population"] == 4
+    assert len(res["flows"]) == 4
+    # The valid rows correspond to original indices 0, 1, 2, 3
+    valid_ids = [f["flow_id"] for f in res["flows"]]
+    assert valid_ids == [0, 1, 2, 3]
+
+
+def test_csv_evaluation_single_class_edge_cases():
+    """Verify single-class benign and single-class attack datasets evaluate gracefully without uncaught errors."""
+    # All benign
+    data_benign = {f: [1200.0, 800.0, 950.0] for f in R10_FEATURES}
+    data_benign["label"] = [0, 0, 0]
+    df_benign = pd.DataFrame(data_benign)
+
+    res_b = evaluate_csv_dataset(df_benign, contract="R10", benchmark="cicids2017")
+    assert res_b["is_labelled"] is True
+    assert res_b["metrics"]["accuracy"] is not None
+    assert res_b["confusion_matrix"]["tp"] == 0
+    assert res_b["confusion_matrix"]["fn"] == 0
+
+    # All attack
+    data_attack = {f: [1200.0, 800.0, 950.0] for f in R10_FEATURES}
+    data_attack["label"] = [1, 1, 1]
+    df_attack = pd.DataFrame(data_attack)
+
+    res_a = evaluate_csv_dataset(df_attack, contract="R10", benchmark="cicids2017")
+    assert res_a["is_labelled"] is True
+    assert res_a["metrics"]["accuracy"] is not None
+    assert res_a["confusion_matrix"]["tn"] == 0
+    assert res_a["confusion_matrix"]["fp"] == 0
+
+
+def test_csv_server_cache_and_export_authoritative(csv_server):
+    """Verify server cache prevents tampering and exports full authoritative population."""
+    sample = get_demo_sample_csv(n_samples=4)
+    eval_req = urllib.request.Request(
+        f"{csv_server}/api/csv/evaluate",
+        data=json.dumps({
+            "csv_text": sample,
+            "contract": "R10",
+            "benchmark": "cicids2017",
+        }).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(eval_req, timeout=5) as resp:
+        assert resp.status == 200
+        res_data = json.loads(resp.read().decode("utf-8"))
+
+    eval_id = res_data["evaluation_id"]
+    assert eval_id is not None
+    # Client should not have _full_records
+    assert "_full_records" not in res_data
+
+    # Server cache MUST have it
+    cached = get_cached_evaluation(eval_id)
+    assert cached is not None
+    assert "_full_records" in cached
+
+    # Export using evaluation_id
+    export_req = urllib.request.Request(
+        f"{csv_server}/api/csv/export",
+        data=json.dumps({"evaluation_id": eval_id}).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(export_req, timeout=5) as resp:
+        assert resp.status == 200
+        csv_body = resp.read().decode("utf-8")
+
+    assert f"# Evaluation ID: {eval_id}" in csv_body
+    assert "Complete Evaluated Population" in csv_body
+    assert "flow_id,attack_score" in csv_body
+
+    # Attempt export with non-existent evaluation_id -> 404
+    missing_req = urllib.request.Request(
+        f"{csv_server}/api/csv/export",
+        data=json.dumps({"evaluation_id": "00000000-0000-0000-0000-000000000000"}).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
+    with pytest.raises(urllib.error.HTTPError) as exc_info:
+        urllib.request.urlopen(missing_req, timeout=5)
+    assert exc_info.value.code == 404
+
+
+def test_csv_api_incompatible_benchmark_contract_rejected(csv_server):
+    """POST /api/csv/evaluate rejects incompatible benchmark/contract with HTTP 400."""
+    sample = get_demo_sample_csv(n_samples=2)
+    req = urllib.request.Request(
+        f"{csv_server}/api/csv/evaluate",
+        data=json.dumps({
+            "csv_text": sample,
+            "contract": "R10",
+            "benchmark": "unswnb15",  # UNSW-NB15 requires R4
+        }).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
+    with pytest.raises(urllib.error.HTTPError) as exc_info:
+        urllib.request.urlopen(req, timeout=5)
+    assert exc_info.value.code == 400
+    err_body = json.loads(exc_info.value.read().decode("utf-8"))
+    assert err_body["status"] == "validation_error"
+    assert "Incompatible benchmark and feature contract" in err_body["error"]
