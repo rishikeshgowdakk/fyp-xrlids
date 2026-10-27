@@ -25,27 +25,49 @@ Essential documentation, presentation scripts, and defense runbooks for final ye
 
 ## Architecture
 
+XRL-IDARS has two related but distinct paths: the packet/flow detection path and the dashboard's offline CSV evaluation path. The CSV evaluator is **not** inserted into live detection, and it does not retrain the frozen models.
+
 ```text
+                 LIVE / PCAP DETECTION PATH
 Network / PCAP
       ↓
-Packet Capture
+Packet Capture or PCAP Replay
       ↓
-Flow Construction
+Bidirectional Flow Construction
       ↓
-Feature Extraction
+Canonical Feature Extraction (R10 / compatible R4)
       ↓
-   RF + LSTM
+Frozen RF + LSTM inference (where configured)
       ↓
-    Fusion
+Score Fusion / Threat Scoring
+      ├──────────────→ TreeSHAP explanation (RF only)
       ↓
-SHAP + Threat Score
+DQN response-policy recommendation
       ↓
-  DQN Response
+Deterministic Safety Gate
       ↓
-  Safety Gate
+Controlled lab response / transaction rollback
       ↓
-Controlled Response / Rollback
+Dashboard alerts and flow inspection
+
+                 OFFLINE CSV EVALUATION PATH
+CSV upload / paste / curated sample
+      ↓
+Schema + benchmark/feature-contract validation
+      ↓
+Label isolation + numeric/non-finite row validation
+      ↓
+Compatible frozen preprocessor + Random Forest
+      ↓
+Ad-hoc metrics + row accounting + CSV export
+      ↓
+Dashboard evaluation workbench
+
+IMPORTANT: CSV evaluation is separate from live inference. It does not
+retrain models, rewrite historical benchmark results, or prove live accuracy.
 ```
+
+**Scope note:** live network monitoring is observational. Any response enforcement is restricted to the documented controlled laboratory setup; production deployment is not validated.
 
 ---
 
