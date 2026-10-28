@@ -80,6 +80,19 @@ def compute_sha256(path: Path | str) -> str:
     return h.hexdigest()
 
 
+def decode_git_quoted_path(p: str) -> str:
+    """Decode a Git C-style quoted path representation if present."""
+    if len(p) >= 2 and p.startswith('"') and p.endswith('"'):
+        inner = p[1:-1]
+        try:
+            import codecs
+            raw_bytes, _ = codecs.escape_decode(inner.encode("latin1"))
+            return raw_bytes.decode("utf-8", errors="replace")
+        except Exception:
+            return inner
+    return p
+
+
 def check_working_tree_clean(
     repo_root: Path | str = ".",
     out_dir: Path | str | None = None,
@@ -165,11 +178,10 @@ def check_working_tree_clean(
                 dest_path = rest
                 if (status_code[0] in "RC" or (len(status_code) > 1 and status_code[1] in "RC")) and " -> " in rest:
                     orig_part, dest_part = rest.split(" -> ", 1)
-                    orig_path = orig_part.strip().strip('"')
-                    dest_path = dest_part.strip().strip('"')
+                    orig_path = decode_git_quoted_path(orig_part.strip())
+                    dest_path = decode_git_quoted_path(dest_part.strip())
                 else:
-                    if dest_path.startswith('"') and dest_path.endswith('"'):
-                        dest_path = dest_path[1:-1]
+                    dest_path = decode_git_quoted_path(dest_path)
                 records.append((status_code, dest_path, orig_path))
 
         for status_code, dest_path, orig_path in records:

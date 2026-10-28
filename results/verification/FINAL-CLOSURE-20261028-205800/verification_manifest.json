@@ -1,0 +1,174 @@
+{
+  "verification_id": "FINAL-CLOSURE-20261028-205800",
+  "timestamp": "2026-10-28T20:58:00+05:30",
+  "timezone": "+05:30",
+  "repository": {
+    "identifier": "rishikeshgowdakk/fyp-xrlids",
+    "url": "https://github.com/rishikeshgowdakk/fyp-xrlids",
+    "branch": "main",
+    "local_head_sha": "3c4b9d374e1ebd86d0935a9c06f64cf62eff2ca1",
+    "remote_head_sha": "3c4b9d374e1ebd86d0935a9c06f64cf62eff2ca1",
+    "alignment": "EXACT_MATCH"
+  },
+  "working_tree_state": {
+    "clean": false,
+    "state_category": "DIRTY_UNSTAGED_ONLY",
+    "tracked_modified_count": 4,
+    "tracked_modified_files": [
+      "README.md",
+      "docs/HOW_IT_WORKS.md",
+      "reports/generated/phase1_final_report.md",
+      "scripts/phase2/run_phase2b_readiness_audit.py"
+    ],
+    "untracked_count": 2,
+    "untracked_files": [
+      ".github/workflows/ci.yml",
+      "results/verification/FINAL-CLOSURE-20261028-205800/"
+    ],
+    "description": "Clean base checkout with documentation updates, hardened path decoder, minimal CI workflow, and new verification evidence."
+  },
+  "environment": {
+    "os": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "python_version": "3.14.4",
+    "git_version": "git version 2.43.0",
+    "packages": {
+      "torch": "2.14.0+cpu",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1",
+      "numpy": "2.5.3",
+      "pandas": "3.0.6",
+      "shap": "0.52.0",
+      "matplotlib": "3.11.2",
+      "pyyaml": "6.0.3",
+      "pytest": "9.1.1"
+    }
+  },
+  "test_execution": {
+    "command": ".venv/bin/pytest tests/ -v -ra --tb=short",
+    "exit_code": 0,
+    "total_collected": 481,
+    "passed": 481,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "deselected": 0,
+    "warnings": 13,
+    "duration_seconds": 53.31,
+    "tier_breakdown": {
+      "tier1_focused_working_tree": 15,
+      "tier2_data_independent": 434,
+      "tier3_artifact_backed": 18,
+      "tier4_dataset_dependent": 14,
+      "suite_distribution": {
+        "unit": 387,
+        "data": 45,
+        "integration": 31,
+        "model": 18
+      }
+    }
+  },
+  "dataset_prerequisites": {
+    "cicids2017": {
+      "status": "LOCAL_AVAILABLE",
+      "source": "data/raw/cicids2017/",
+      "feature_contract": "R10"
+    },
+    "cse_cic_ids2018": {
+      "status": "LOCAL_AVAILABLE",
+      "source": "data/raw/cse_cic_ids2018/",
+      "feature_contract": "R10"
+    },
+    "unsw_nb15": {
+      "status": "LOCAL_AVAILABLE",
+      "source": "data/raw/unsw_nb15/",
+      "feature_contract": "R4"
+    },
+    "raw_datasets_committed_to_git": false,
+    "clean_checkout_behavior": "Tier C tests skip gracefully with explanatory message when data/raw/ benchmark files (~8.7 GB) are absent."
+  },
+  "artifact_verification": {
+    "total_canonical_models": 9,
+    "verified_checksum_match_count": 9,
+    "all_canonical_models_cryptographically_verified": true,
+    "artifacts": [
+      {
+        "name": "random_forest_cicids2017.joblib",
+        "sha256": "7c6ad493b773b687da24a2a12dcb21bd03bd56b76809462b983454aeacf2b774",
+        "size_bytes": 26363055,
+        "match": true
+      },
+      {
+        "name": "random_forest_cse2018.joblib",
+        "sha256": "b7d2dc7bacca1a46f4da35aee2c19e1604020d429a5d29b72d742130215ba9b3",
+        "size_bytes": 68240031,
+        "match": true
+      },
+      {
+        "name": "random_forest_unswnb15.joblib",
+        "sha256": "c432eb067507ad5b29a542b372ac6d35e609e783a9e6094c9764d0cfe654ec7c",
+        "size_bytes": 22639151,
+        "match": true
+      },
+      {
+        "name": "lstm_cicids2017.pt",
+        "sha256": "18b0bfb48d3b031c17b26d3abd12485e09f8dd8c330fad26858320f11f818be1",
+        "size_bytes": 60437,
+        "match": true
+      },
+      {
+        "name": "lstm_cse2018.pt",
+        "sha256": "ea5b8198c20faa15d5d45ae7d081b754a76dbae1342a93b8234e0e06cfe8a33a",
+        "size_bytes": 60949,
+        "match": true
+      },
+      {
+        "name": "lstm_unswnb15.pt",
+        "sha256": "4d9386ff44c99eed822f8ace5c64429fab571b4f8aad847d6cc78bae5f308fbd",
+        "size_bytes": 57813,
+        "match": true
+      },
+      {
+        "name": "dqn_4action_best.pt",
+        "sha256": "6a5afc669b4e699ecd2b1c01df885cef9030c93b8888b487dd386533920ce954",
+        "size_bytes": 43189,
+        "match": true
+      },
+      {
+        "name": "dqn_3action_best.pt",
+        "sha256": "c06a61fb7777511600efd6db776745c4539da30c710fed8993145ed1b926be31",
+        "size_bytes": 42997,
+        "match": true
+      },
+      {
+        "name": "fusion_weights.json",
+        "sha256": "fd50a413119d3ec3b0c7515125cf6e0f4a605aa52ca2739b9fcd951f8e081c72",
+        "size_bytes": 1005,
+        "match": true
+      }
+    ]
+  },
+  "continuous_integration": {
+    "status": "LOCAL_WORKFLOW_PREPARED",
+    "workflow_file": ".github/workflows/ci.yml",
+    "workflow_syntax_valid": true,
+    "remote_runs_count": 0,
+    "remote_status": "PENDING_PUBLICATION",
+    "notes": "Minimal, robust GitHub Actions CI workflow created; runs data-independent test tiers on main pushes/PRs without external dataset dependencies."
+  },
+  "known_limitations_and_blockers": [
+    "Production autonomous firewall enforcement remains STRICT NO-GO; response policies verified only in simulation, dry-run, and network namespace sandbox.",
+    "Raw benchmark datasets (~8.7 GB across 20 CSV files) are uncommitted by design and must be provisioned externally for from-scratch retraining.",
+    "TreeSHAP explanations apply strictly to Random Forest; neural LSTM and linear fusion scores are not explained by TreeSHAP.",
+    "CSE-CIC-IDS2018 exhibits temporal distribution shift collapse (F1=0.0113 under chronological split vs 0.8861 under random split).",
+    "DQN does not outperform the zero-parameter CostOptimalThresholdPolicy in 4 of 6 benchmark regimes; network environment functions as an asymmetric-loss contextual bandit with hysteresis rather than an interactive sequential MDP."
+  ],
+  "evidence_file_paths": [
+    "results/verification/FINAL-CLOSURE-20261028-205800/FINAL_REPORT.md",
+    "results/verification/FINAL-CLOSURE-20261028-205800/verification_manifest.json",
+    "results/verification/FINAL-CLOSURE-20261028-205800/test_results.txt",
+    "results/verification/FINAL-CLOSURE-20261028-205800/environment.txt",
+    "results/verification/FINAL-CLOSURE-20261028-205800/git_state.txt",
+    "results/verification/FINAL-CLOSURE-20261028-205800/checksums.sha256"
+  ],
+  "verdict": "PASS WITH LIMITATIONS"
+}

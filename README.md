@@ -283,7 +283,7 @@ pip install -r requirements.txt
 
 ### 2. Verify Installation (Test Suite)
 
-Run the full 466-test verification suite to confirm everything is working:
+Run the full 481-test verification suite to confirm everything is working:
 
 ```bash
 ./run.sh test
@@ -291,7 +291,7 @@ Run the full 466-test verification suite to confirm everything is working:
 .venv/bin/pytest -q
 ```
 
-All 466 tests across unit (372), data (45), integration (31), and model (18) test suites pass with 0 failures.
+All 481 tests across unit (387), data (45), integration (31), and model (18) test suites pass with 0 failures.
 
 ### 3. Quick Demo — PCAP Replay
 
@@ -435,7 +435,7 @@ To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
 |---------------------|:--------:|----------------|:---:|
 | **Launch Dashboard (Web UI)** | `./run.sh` | `.venv/bin/python dashboard/server.py` | **No** |
 | Run quick offline PCAP replay demo | `./run.sh demo` | `.venv/bin/python scripts/demo/run_replay_demo.py` | No |
-| Run full test suite (466 tests) | `./run.sh test` | `.venv/bin/pytest -q` | No |
+| Run full test suite (481 tests) | `./run.sh test` | `.venv/bin/pytest -q` | No |
 | Run CSV evaluation test suite (29 tests) | — | `.venv/bin/pytest tests/unit/test_csv_evaluation_workflow.py -v` | No |
 | Verify all calibrated attack scenarios | — | `.venv/bin/python scripts/demo/verify_attack_scenarios.py` | No |
 | Explain a score with TreeSHAP features | — | `.venv/bin/python scripts/demo/explain_score.py` | No |
