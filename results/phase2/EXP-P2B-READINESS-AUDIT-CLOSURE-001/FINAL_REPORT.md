@@ -1,11 +1,15 @@
 # XRL-IDARS — Phase 2B Forensic Readiness Audit: Model Integrity, Reproducibility, Evaluation Correctness, and Production-Gap Assessment
 
 - **Audit Identifier**: `EXP-P2B-READINESS-AUDIT-CLOSURE-001`
-- **Git Commit (HEAD)**: `f15be7e78fb1abfa545a65d4ff832ecd602bf461` (Branch: `main`)
-- **Code Revision Tested**: `f15be7e78fb1abfa545a65d4ff832ecd602bf461+dirty`
-- **Audit Execution Timestamp**: `2026-10-28T13:55:10.786973+00:00`
+- **Git Commit (HEAD)**: `958992f2e0c75688dc1300008f3ac41f97d30db3` (Branch: `main`)
+- **Code Revision Tested**: `958992f2e0c75688dc1300008f3ac41f97d30db3+dirty`
+- **Audit Execution Timestamp**: `2026-10-28T14:07:20.357549+00:00`
 - **Auditor Role**: Senior ML Systems Engineer, Model Validation Engineer, & Independent Research Auditor
-- **Working Tree Status**: DIRTY / UNCOMMITTED (4 modified tracked files: M README.md, M reports/generated/phase1_final_report.md, M reports/generated/phase1_status.md, M scripts/phase2/run_phase2b_readiness_audit.py)
+- **Working Tree Status**: DIRTY / UNCOMMITTED (Total: 3 tracked modified files across repository: 3 external to audit dir, 0 in audit dir; snapshot: pre_artifact_generation)
+- **Total Tracked Modifications (Repository-Wide)**: 3 files
+- **Scoped External Modifications (Outside Audit Dir)**: 3 files
+- **Scoped Audit Output Modifications (Within Audit Dir)**: 0 files
+- **Total Untracked Files**: 0 files
 
 ---
 

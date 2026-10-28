@@ -83,6 +83,7 @@ def compute_sha256(path: Path | str) -> str:
 def check_working_tree_clean(
     repo_root: Path | str = ".",
     out_dir: Path | str | None = None,
+    timing_label: str = "pre_artifact_generation",
 ) -> dict[str, Any]:
     import subprocess
     try:
@@ -94,8 +95,14 @@ def check_working_tree_clean(
             check=True,
         )
         lines = out.stdout.splitlines()
-        tracked_changes: list[str] = []
-        untracked_files: list[str] = []
+        all_tracked_changes: list[str] = []
+        all_untracked_files: list[str] = []
+
+        external_tracked_changes: list[str] = []
+        external_untracked_files: list[str] = []
+
+        audit_dir_tracked_changes: list[str] = []
+        audit_dir_untracked_files: list[str] = []
 
         out_dir_str = str(Path(out_dir).resolve()) if out_dir else None
         root_path = Path(repo_root).resolve()
@@ -105,34 +112,79 @@ def check_working_tree_clean(
                 continue
             path_part = line[3:].strip()
             abs_path = (root_path / path_part).resolve()
-            # Exclude the current target output directory so it doesn't report self-recursion
-            if out_dir_str and (abs_path == Path(out_dir_str) or str(abs_path).startswith(out_dir_str + "/")):
-                continue
-            if line.startswith("??"):
-                untracked_files.append(path_part)
-            else:
-                tracked_changes.append(line.strip())
+            is_audit_dir = bool(out_dir_str and (abs_path == Path(out_dir_str) or str(abs_path).startswith(out_dir_str + "/")))
 
-        is_clean = (len(tracked_changes) == 0)
-        if is_clean:
-            if not untracked_files:
-                summary = "Verified Clean (0 uncommitted tracked changes, 0 untracked files)"
+            if line.startswith("??"):
+                all_untracked_files.append(path_part)
+                if is_audit_dir:
+                    audit_dir_untracked_files.append(path_part)
+                else:
+                    external_untracked_files.append(path_part)
             else:
-                summary = f"Verified Clean (0 uncommitted tracked changes; {len(untracked_files)} untracked paths present: {', '.join(untracked_files[:3])})"
+                all_tracked_changes.append(line.strip())
+                if is_audit_dir:
+                    audit_dir_tracked_changes.append(line.strip())
+                else:
+                    external_tracked_changes.append(line.strip())
+
+        is_clean = (len(all_tracked_changes) == 0)
+
+        if is_clean:
+            if not all_untracked_files:
+                summary = f"Verified Clean (0 uncommitted tracked changes, 0 untracked files; snapshot: {timing_label})"
+            else:
+                summary = (
+                    f"Verified Clean (0 uncommitted tracked changes; {len(all_untracked_files)} untracked paths; "
+                    f"snapshot: {timing_label})"
+                )
         else:
-            summary = f"DIRTY / UNCOMMITTED ({len(tracked_changes)} modified tracked files: {', '.join(tracked_changes)})"
+            summary = (
+                f"DIRTY / UNCOMMITTED (Total: {len(all_tracked_changes)} tracked modified files across repository: "
+                f"{len(external_tracked_changes)} external to audit dir, {len(audit_dir_tracked_changes)} in audit dir; "
+                f"snapshot: {timing_label})"
+            )
 
         return {
             "clean": is_clean,
-            "tracked_modified_count": len(tracked_changes),
-            "tracked_modified_files": tracked_changes,
-            "untracked_count": len(untracked_files),
-            "untracked_files": untracked_files,
+            "snapshot_timing": timing_label,
+            # Complete repository-wide accounting
+            "total_tracked_modified_count": len(all_tracked_changes),
+            "total_tracked_modified_files": all_tracked_changes,
+            "total_untracked_count": len(all_untracked_files),
+            "total_untracked_files": all_untracked_files,
+            # Explicitly scoped external accounting
+            "external_tracked_modified_count": len(external_tracked_changes),
+            "external_tracked_modified_files": external_tracked_changes,
+            "external_untracked_count": len(external_untracked_files),
+            "external_untracked_files": external_untracked_files,
+            # Audit directory scoped accounting
+            "audit_dir_tracked_modified_count": len(audit_dir_tracked_changes),
+            "audit_dir_tracked_modified_files": audit_dir_tracked_changes,
+            "audit_dir_untracked_count": len(audit_dir_untracked_files),
+            "audit_dir_untracked_files": audit_dir_untracked_files,
+            # Standard legacy fields
+            "tracked_modified_count": len(all_tracked_changes),
+            "tracked_modified_files": all_tracked_changes,
+            "untracked_count": len(all_untracked_files),
+            "untracked_files": all_untracked_files,
             "summary": summary,
         }
     except Exception as exc:
         return {
             "clean": False,
+            "snapshot_timing": timing_label,
+            "total_tracked_modified_count": -1,
+            "total_tracked_modified_files": [],
+            "external_tracked_modified_count": -1,
+            "external_tracked_modified_files": [],
+            "audit_dir_tracked_modified_count": -1,
+            "audit_dir_tracked_modified_files": [],
+            "total_untracked_count": -1,
+            "total_untracked_files": [],
+            "external_untracked_count": -1,
+            "external_untracked_files": [],
+            "audit_dir_untracked_count": -1,
+            "audit_dir_untracked_files": [],
             "tracked_modified_count": -1,
             "tracked_modified_files": [],
             "untracked_count": -1,
@@ -147,7 +199,7 @@ def audit_phase0_provenance(out_dir: Path, git_sha: str, audit_timestamp: str | 
     p_pred = Path("results/experiments/EXP-P1-CIC2017-R10-001/predictions_test.csv")
     d_pol_sha = sha256_file(p_pol_test) if p_pol_test.exists() else "UNAVAILABLE"
     pred_sha = sha256_file(p_pred) if p_pred.exists() else "UNAVAILABLE"
-    wt_info = check_working_tree_clean(out_dir=out_dir)
+    wt_info = check_working_tree_clean(out_dir=out_dir, timing_label="pre_artifact_generation")
     is_clean = wt_info["clean"]
     revision_desc = git_sha if is_clean else f"{git_sha}+dirty"
     audit_id = out_dir.name if out_dir.name.startswith("EXP-") else "EXP-P2B-READINESS-AUDIT-001"
@@ -803,6 +855,10 @@ def generate_final_report_md(
         f"- **Audit Execution Timestamp**: `{timestamp}`",
         f"- **Auditor Role**: Senior ML Systems Engineer, Model Validation Engineer, & Independent Research Auditor",
         f"- **Working Tree Status**: {prov.get('working_tree_status', 'Verified Clean')}",
+        f"- **Total Tracked Modifications (Repository-Wide)**: {prov.get('working_tree_details', {}).get('total_tracked_modified_count', 0)} files",
+        f"- **Scoped External Modifications (Outside Audit Dir)**: {prov.get('working_tree_details', {}).get('external_tracked_modified_count', 0)} files",
+        f"- **Scoped Audit Output Modifications (Within Audit Dir)**: {prov.get('working_tree_details', {}).get('audit_dir_tracked_modified_count', 0)} files",
+        f"- **Total Untracked Files**: {prov.get('working_tree_details', {}).get('total_untracked_count', 0)} files",
         "",
         "---",
         "",
@@ -1022,9 +1078,22 @@ def main() -> int:
         extra={
             "working_tree_clean": prov.get("working_tree_clean", True),
             "working_tree_status": prov.get("working_tree_status", "Verified Clean"),
-            "tracked_modified_count": prov.get("working_tree_details", {}).get("tracked_modified_count", 0),
-            "tracked_modified_files": prov.get("working_tree_details", {}).get("tracked_modified_files", []),
-            "untracked_count": prov.get("working_tree_details", {}).get("untracked_count", 0),
+            "snapshot_timing": prov.get("working_tree_details", {}).get("snapshot_timing", "pre_artifact_generation"),
+            "total_tracked_modified_count": prov.get("working_tree_details", {}).get("total_tracked_modified_count", 0),
+            "total_tracked_modified_files": prov.get("working_tree_details", {}).get("total_tracked_modified_files", []),
+            "external_tracked_modified_count": prov.get("working_tree_details", {}).get("external_tracked_modified_count", 0),
+            "external_tracked_modified_files": prov.get("working_tree_details", {}).get("external_tracked_modified_files", []),
+            "audit_dir_tracked_modified_count": prov.get("working_tree_details", {}).get("audit_dir_tracked_modified_count", 0),
+            "audit_dir_tracked_modified_files": prov.get("working_tree_details", {}).get("audit_dir_tracked_modified_files", []),
+            "total_untracked_count": prov.get("working_tree_details", {}).get("total_untracked_count", 0),
+            "total_untracked_files": prov.get("working_tree_details", {}).get("total_untracked_files", []),
+            "external_untracked_count": prov.get("working_tree_details", {}).get("external_untracked_count", 0),
+            "external_untracked_files": prov.get("working_tree_details", {}).get("external_untracked_files", []),
+            # Standard legacy fields
+            "tracked_modified_count": prov.get("working_tree_details", {}).get("total_tracked_modified_count", 0),
+            "tracked_modified_files": prov.get("working_tree_details", {}).get("total_tracked_modified_files", []),
+            "untracked_count": prov.get("working_tree_details", {}).get("total_untracked_count", 0),
+            "untracked_files": prov.get("working_tree_details", {}).get("total_untracked_files", []),
         },
     )
 
