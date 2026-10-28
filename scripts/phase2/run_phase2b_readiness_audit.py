@@ -85,6 +85,28 @@ def check_working_tree_clean(
     out_dir: Path | str | None = None,
     timing_label: str = "pre_artifact_generation",
 ) -> dict[str, Any]:
+    """Inspect Git working-tree status with strict, non-contradictory semantics.
+
+    Semantics definition:
+    1. Clean (CLEAN):
+       - 0 staged changes, 0 unstaged tracked changes, 0 untracked files.
+       - clean = True.
+    2. Untracked files only (DIRTY_UNTRACKED_ONLY):
+       - 0 tracked changes, >0 untracked files.
+       - clean = False (untracked files prevent clean verification).
+    3. Staged changes only (DIRTY_STAGED_ONLY):
+       - >0 staged changes in index, 0 unstaged changes, 0 untracked files.
+       - clean = False.
+    4. Unstaged tracked changes only (DIRTY_UNSTAGED_ONLY):
+       - 0 staged changes, >0 unstaged tracked changes, 0 untracked files.
+       - clean = False.
+    5. Mixed changes (DIRTY_MIXED):
+       - Changes present across multiple categories (e.g. staged + unstaged, or tracked + untracked).
+       - clean = False.
+    6. Git inspection failure (GIT_INSPECTION_FAILED):
+       - Subprocess error, missing git binary, or non-git directory.
+       - clean = False.
+    """
     import subprocess
     try:
         out = subprocess.run(
@@ -98,6 +120,9 @@ def check_working_tree_clean(
         all_tracked_changes: list[str] = []
         all_untracked_files: list[str] = []
 
+        staged_tracked_changes: list[str] = []
+        unstaged_tracked_changes: list[str] = []
+
         external_tracked_changes: list[str] = []
         external_untracked_files: list[str] = []
 
@@ -110,43 +135,74 @@ def check_working_tree_clean(
         for line in lines:
             if not line.strip():
                 continue
+            status_code = line[:2]
             path_part = line[3:].strip()
             abs_path = (root_path / path_part).resolve()
             is_audit_dir = bool(out_dir_str and (abs_path == Path(out_dir_str) or str(abs_path).startswith(out_dir_str + "/")))
 
-            if line.startswith("??"):
+            if status_code == "??":
                 all_untracked_files.append(path_part)
                 if is_audit_dir:
                     audit_dir_untracked_files.append(path_part)
                 else:
                     external_untracked_files.append(path_part)
             else:
-                all_tracked_changes.append(line.strip())
-                if is_audit_dir:
-                    audit_dir_tracked_changes.append(line.strip())
-                else:
-                    external_tracked_changes.append(line.strip())
+                entry = line.strip()
+                all_tracked_changes.append(entry)
 
-        is_clean = (len(all_tracked_changes) == 0)
+                idx_status = status_code[0]
+                wt_status = status_code[1]
+                if idx_status in "MADRCU":
+                    staged_tracked_changes.append(entry)
+                if wt_status in "MADU":
+                    unstaged_tracked_changes.append(entry)
+
+                if is_audit_dir:
+                    audit_dir_tracked_changes.append(entry)
+                else:
+                    external_tracked_changes.append(entry)
+
+        # Strict clean semantics: clean IF AND ONLY IF zero tracked AND zero untracked changes
+        is_clean = (len(all_tracked_changes) == 0 and len(all_untracked_files) == 0)
 
         if is_clean:
-            if not all_untracked_files:
-                summary = f"Verified Clean (0 uncommitted tracked changes, 0 untracked files; snapshot: {timing_label})"
-            else:
-                summary = (
-                    f"Verified Clean (0 uncommitted tracked changes; {len(all_untracked_files)} untracked paths; "
-                    f"snapshot: {timing_label})"
-                )
-        else:
+            state_category = "CLEAN"
+            summary = f"Verified Clean (0 uncommitted changes: 0 staged, 0 unstaged, 0 untracked; snapshot: {timing_label})"
+        elif len(all_tracked_changes) == 0 and len(all_untracked_files) > 0:
+            state_category = "DIRTY_UNTRACKED_ONLY"
             summary = (
-                f"DIRTY / UNCOMMITTED (Total: {len(all_tracked_changes)} tracked modified files across repository: "
-                f"{len(external_tracked_changes)} external to audit dir, {len(audit_dir_tracked_changes)} in audit dir; "
-                f"snapshot: {timing_label})"
+                f"DIRTY / UNCOMMITTED ({len(all_untracked_files)} untracked files; "
+                f"0 tracked changes; snapshot: {timing_label})"
+            )
+        elif len(staged_tracked_changes) > 0 and len(unstaged_tracked_changes) == 0 and len(all_untracked_files) == 0:
+            state_category = "DIRTY_STAGED_ONLY"
+            summary = (
+                f"DIRTY / UNCOMMITTED ({len(staged_tracked_changes)} staged changes in index; "
+                f"0 unstaged, 0 untracked; snapshot: {timing_label})"
+            )
+        elif len(staged_tracked_changes) == 0 and len(unstaged_tracked_changes) > 0 and len(all_untracked_files) == 0:
+            state_category = "DIRTY_UNSTAGED_ONLY"
+            summary = (
+                f"DIRTY / UNCOMMITTED ({len(unstaged_tracked_changes)} unstaged tracked changes; "
+                f"0 staged, 0 untracked; snapshot: {timing_label})"
+            )
+        else:
+            state_category = "DIRTY_MIXED"
+            summary = (
+                f"DIRTY / UNCOMMITTED ({len(all_tracked_changes)} tracked changes "
+                f"[{len(staged_tracked_changes)} staged, {len(unstaged_tracked_changes)} unstaged], "
+                f"{len(all_untracked_files)} untracked files; snapshot: {timing_label})"
             )
 
         return {
             "clean": is_clean,
+            "state_category": state_category,
             "snapshot_timing": timing_label,
+            # Staged vs unstaged breakdown
+            "staged_tracked_count": len(staged_tracked_changes),
+            "staged_tracked_files": staged_tracked_changes,
+            "unstaged_tracked_count": len(unstaged_tracked_changes),
+            "unstaged_tracked_files": unstaged_tracked_changes,
             # Complete repository-wide accounting
             "total_tracked_modified_count": len(all_tracked_changes),
             "total_tracked_modified_files": all_tracked_changes,
@@ -172,7 +228,12 @@ def check_working_tree_clean(
     except Exception as exc:
         return {
             "clean": False,
+            "state_category": "GIT_INSPECTION_FAILED",
             "snapshot_timing": timing_label,
+            "staged_tracked_count": -1,
+            "staged_tracked_files": [],
+            "unstaged_tracked_count": -1,
+            "unstaged_tracked_files": [],
             "total_tracked_modified_count": -1,
             "total_tracked_modified_files": [],
             "external_tracked_modified_count": -1,
