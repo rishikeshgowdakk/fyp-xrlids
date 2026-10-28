@@ -80,18 +80,41 @@ def compute_sha256(path: Path | str) -> str:
     return h.hexdigest()
 
 
+def check_working_tree_clean(repo_root: Path | str = ".") -> tuple[bool, str]:
+    import subprocess
+    try:
+        out = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        tracked_changes = [line for line in out.stdout.splitlines() if not line.startswith("??")]
+        if not tracked_changes:
+            return True, "Verified Clean (0 uncommitted tracked changes)"
+        return False, f"DIRTY / UNCOMMITTED ({len(tracked_changes)} modified tracked files: {', '.join([c.strip() for c in tracked_changes[:5]])})"
+    except Exception as exc:
+        return False, f"UNKNOWN (git check failed: {exc})"
+
+
 def audit_phase0_provenance(out_dir: Path, git_sha: str) -> dict[str, Any]:
     """Phase 0: Record full system provenance and environment details."""
     p_pol_test = Path("data/processed/phase2_cache/d_pol_test_flows.joblib")
     p_pred = Path("results/experiments/EXP-P1-CIC2017-R10-001/predictions_test.csv")
     d_pol_sha = sha256_file(p_pol_test) if p_pol_test.exists() else "UNAVAILABLE"
     pred_sha = sha256_file(p_pred) if p_pred.exists() else "UNAVAILABLE"
+    is_clean, wt_status = check_working_tree_clean()
+    revision_desc = git_sha if is_clean else f"{git_sha}+dirty"
 
     prov = {
         "audit_id": "EXP-P2B-READINESS-AUDIT-001",
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "git_commit": git_sha,
         "branch": "main",
+        "working_tree_clean": is_clean,
+        "working_tree_status": wt_status,
+        "code_revision_tested": revision_desc,
         "software_environment": {
             "python_version": sys.version,
             "platform": platform.platform(),
@@ -101,7 +124,6 @@ def audit_phase0_provenance(out_dir: Path, git_sha: str) -> dict[str, Any]:
             "sklearn_version": sklearn.__version__,
             "joblib_version": joblib.__version__,
         },
-        "working_tree_clean": True,
         "external_lfs_required": False,
         "historical_git_provenance": {
             "EXP-P1-CIC2017-R10-001": {
@@ -727,10 +749,11 @@ def generate_final_report_md(
         "# XRL-IDARS — Phase 2B Forensic Readiness Audit: Model Integrity, Reproducibility, Evaluation Correctness, and Production-Gap Assessment",
         "",
         f"**Audit Identifier**: `EXP-P2B-READINESS-AUDIT-001`  ",
-        f"**Git Commit**: `{prov['git_commit']}` (Branch: `{prov['branch']}`)  ",
+        f"**Git Commit (HEAD)**: `{prov['git_commit']}` (Branch: `{prov['branch']}`)  ",
+        f"**Code Revision Tested**: `{prov.get('code_revision_tested', prov['git_commit'])}`  ",
         f"**Audit Execution Timestamp**: `{timestamp}`  ",
         f"**Auditor Role**: Senior ML Systems Engineer, Model Validation Engineer, & Independent Research Auditor  ",
-        f"**Working Tree Status**: Verified Clean (0 uncommitted user changes)  ",
+        f"**Working Tree Status**: {prov.get('working_tree_status', 'Verified Clean')}  ",
         "",
         "---",
         "",
@@ -941,10 +964,14 @@ def main() -> int:
     # Write all machine-readable artifacts
     meta = ArtifactMetadata(
         experiment_id="EXP-P2B-READINESS-AUDIT-001",
-        git_commit=git_sha,
+        git_commit=prov.get("code_revision_tested", git_sha),
         dataset_sha256=prov["dataset_and_schema_hashes"]["d_pol_test_flows_joblib_sha256"],
         feature_schema_hash=prov["dataset_and_schema_hashes"]["r10_feature_schema_hash"],
         seed=42,
+        extra={
+            "working_tree_clean": prov.get("working_tree_clean", True),
+            "working_tree_status": prov.get("working_tree_status", "Verified Clean"),
+        },
     )
 
     write_json_artifact(out_dir / "audit_manifest.json", prov, meta)

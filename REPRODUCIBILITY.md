@@ -33,7 +33,7 @@ Verify runtime environment:
 
 ---
 
-## 2. Test Suite Execution (465 Tests)
+## 2. Test Suite Execution (466 Tests)
 
 ```bash
 ./run.sh test
@@ -41,14 +41,14 @@ Verify runtime environment:
 .venv/bin/pytest -q
 ```
 
-All **465 tests** across `tests/unit/` (371), `tests/data/` (45), `tests/integration/` (31), and `tests/model/` (18) pass with zero failures.
+All **466 tests** across `tests/unit/` (372), `tests/data/` (45), `tests/integration/` (31), and `tests/model/` (18) pass with zero failures.
 
 To run only the response policy and safety subsystem verification suite (43 tests):
 ```bash
 .venv/bin/pytest tests/unit/test_response* -v
 ```
 
-To run the custom CSV and exhibition evaluation test suite (28 tests):
+To run the custom CSV and exhibition evaluation test suite (29 tests):
 ```bash
 .venv/bin/pytest tests/unit/test_csv_evaluation_workflow.py -v
 ```
