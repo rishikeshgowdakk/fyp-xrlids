@@ -53,7 +53,7 @@
 
 Radom-Forest hyperparameters actually baked into the CIC artifact: `n_estimators=100, max_depth=16, min_samples_leaf=2, class_weight=balanced_subsample, random_state=42`.
 
-**Artifacts load and predict.** I loaded `random_forest.joblib` + `preprocessor.joblib` from `EXP-P1-CIC2017-R10-001`; the preprocessor exposes the frozen 10-feature R10 contract and the RF returns a calibrated probability. The artifact set is complete per experiment (model, preprocessor, split manifest, leakage report, metrics, per-family CSV, calibration, threshold candidates, SHAP, predictions).
+**Artifacts load and predict.** I loaded `random_forest.joblib` + `preprocessor.joblib` from `EXP-P1-CIC2017-R10-001`; the preprocessor exposes the frozen 10-feature R10 contract and the RF returns an uncalibrated tree-vote score; Platt calibration is a separate validation-fit artifact, not a property of the raw score. The artifact set is complete per experiment (model, preprocessor, split manifest, leakage report, metrics, per-family CSV, calibration, threshold candidates, SHAP, predictions).
 
 ### Training weaknesses (not bugs, but limitations)
 

@@ -511,7 +511,7 @@ curl -s http://127.0.0.1:8000/api/live/scenarios | .venv/bin/python -m json.tool
 
 # In the UI, click "features" on any alert to see the same values and output
 
-# Full test suite (481 tests)
+# Full test suite (493 tests)
 .venv/bin/pytest -q
 
 # This laptop's real addresses (compare against dashboard IPs)

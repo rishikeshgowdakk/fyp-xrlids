@@ -81,7 +81,7 @@ The workbench is organized into seven specialized pages:
 ### 8. ⚡ Live Monitor & Traffic Modes (Secondary View)
 - Strictly separates the 5 traffic execution modes:
   - **Mode 1**: Offline Dataset Evaluation (Frozen test split)
-  - **Mode 2**: Dataset Demonstration Stream (Curated benchmark flow streaming)
+  - **Mode 2**: Dataset Demonstration Stream (Curated benchmark feature vectors; display endpoints are synthetic)
   - **Mode 3**: PCAP Replay (Recorded packets parsed through flow builder)
   - **Mode 4**: Synthetic Attack Simulation (In-memory packet scripts)
   - **Mode 5**: Live Packet Capture (Raw AF_PACKET socket, root required, observational only).

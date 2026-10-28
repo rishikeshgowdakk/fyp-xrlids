@@ -19,8 +19,8 @@ The audit protocol enforces strict evidence-based auditing: claims are classifie
 
 | Component | Architecture / Mechanism | Scope / Dataset | Formal Validation Status | Primary Finding / Empirical Reality |
 |:---|:---|:---|:---:|:---|
-| **Random Forest Detector** | `RandomForestClassifier` (200 trees, depth 16) | CIC-IDS2017 (`R10`), CSE-2018 (`R10`), UNSW (`R4`) | **`VERIFIED_FOR_DEFINED_SCOPE`** | Highly accurate on random splits (F1 0.9512 / 0.8861 / 0.8548), but exhibits significant calibration gap in [0.1, 0.8] range and collapses to F1 0.0113 under temporal holdout. |
-| **Supervised LSTM** | 2-layer LSTM (hidden 64, dropout 0.2, $T=5$) | CIC-IDS2017 (`R10`), CSE-2018 (`R10`), UNSW (`R4`) | **`PARTIALLY_VERIFIED`** | F1 0.9633 verified on aligned slice; however, shuffled-window ablation shows zero order gain ($\Delta \text{F1} = -0.0038$), proving the model performs local window smoothing rather than temporal reasoning. |
+| **Random Forest Detector** | `RandomForestClassifier` (100 trees, depth 16) | CIC-IDS2017 (`R10`), CSE-2018 (`R10`), UNSW (`R4`) | **`VERIFIED_FOR_DEFINED_SCOPE`** | Highly accurate on random splits (F1 0.9512 / 0.8861 / 0.8548), but exhibits significant calibration gap in [0.1, 0.8] range and collapses to F1 0.0113 under temporal holdout. |
+| **Supervised LSTM** | 2-layer LSTM (hidden 32, dropout 0.2, $T=5$) | CIC-IDS2017 (`R10`), CSE-2018 (`R10`), UNSW (`R4`) | **`PARTIALLY_VERIFIED`** | F1 0.9633 verified on aligned slice; however, shuffled-window ablation shows zero order gain ($\Delta \text{F1} = -0.0038$), proving the model performs local window smoothing rather than temporal reasoning. |
 | **RF–LSTM Fusion** | Linear score weighting: $\alpha P_{\text{rf}} + (1-\alpha) P_{\text{lstm}}$ | CIC-IDS2017 ($\alpha=0.5$), CSE-2018 ($\alpha=0.0$), UNSW ($\alpha=0.6$) | **`PARTIALLY_VERIFIED`** | CIC-IDS2017 fusion achieves F1 0.9745 (+0.0112 over LSTM). On CSE-CIC-IDS2018, $\alpha = 0.00$, making fusion mathematically identical to standalone LSTM (degenerate configuration). |
 | **Feature Contracts** | Semantic mapping: `R10` (10 features) vs `R4` (4 features) | Cross-dataset feature registry | **`VERIFIED_FOR_DEFINED_SCOPE`** | Rigid schemas enforced in `src/xrlids/features/definitions.py`. UNSW-NB15 correctly isolated to R4 because Argus flow exporter omitted TCP flags. |
 | **Flow Semantics & Parity** | `FlowBuilder` (D-006 completion, 120s timeout) | Streaming packets vs canonical offline mapping | **`PARTIALLY_VERIFIED`** | Live extractor matches offline feature specification ($\text{atol} \le 10^{-4}$). However, original CICFlowMeter/Argus batch quirks differ from live streaming heuristics. |
@@ -49,12 +49,12 @@ All 9 canonical models registered in `models/registry/model_manifest.json` are c
 | `models/rf/random_forest_cicids2017.joblib` | RF | `R10` | `7c6ad493b773b687da24a2a12dcb21bd03bd56b76809462b983454aeacf2b774` | 26.4 MB | REGISTERED |
 | `models/rf/random_forest_cse2018.joblib` | RF | `R10` | `b7d2dc7bacca1a46f4da35aee2c19e1604020d429a5d29b72d742130215ba9b3` | 68.2 MB | REGISTERED |
 | `models/rf/random_forest_unswnb15.joblib` | RF | `R4` | `c432eb067507ad5b29a542b372ac6d35e609e783a9e6094c9764d0cfe654ec7c` | 22.6 MB | REGISTERED |
-| `models/lstm/lstm_cicids2017.pt` | LSTM | `R10` | `18b0bfb48d3b031c17b26d3abd12485e09f8dd8c330fad26858320f11f818be1` | 60.4 KB | REGISTERED |
+| `models/lstm/lstm_cicids2017.pt` | LSTM | `R10` | `2cdbf88d2eda358619d66a5d001fa7dde8ab3a36d8e0548c8c529ae8e8870f5c` | 60.9 KB | REGISTERED |
 | `models/lstm/lstm_cse2018.pt` | LSTM | `R10` | `ea5b8198c20faa15d5d45ae7d081b754a76dbae1342a93b8234e0e06cfe8a33a` | 60.9 KB | REGISTERED |
 | `models/lstm/lstm_unswnb15.pt` | LSTM | `R4` | `4d9386ff44c99eed822f8ace5c64429fab571b4f8aad847d6cc78bae5f308fbd` | 57.8 KB | REGISTERED |
 | `models/dqn/dqn_3action_best.pt` | DQN | `response_state_v1` | `c06a61fb7777511600efd6db776745c4539da30c710fed8993145ed1b926be31` | 43.0 KB | REGISTERED |
 | `models/dqn/dqn_4action_best.pt` | DQN | `response_state_v1` | `6a5afc669b4e699ecd2b1c01df885cef9030c93b8888b487dd386533920ce954` | 43.2 KB | REGISTERED |
-| `models/fusion/fusion_weights.json` | Fusion | Multi | `fd50a413119d3ec3b0c7515125cf6e0f4a605aa52ca2739b9fcd951f8e081c72` | 1.0 KB | REGISTERED |
+| `models/fusion/fusion_weights.json` | Fusion | Multi | `e35df25179a4574c83192bf35ebd0041772007c8b360151df489a5d9bd5450d0` | 1.2 KB | REGISTERED |
 
 ### 2.3 Historical Git Provenance Trace
 - **Phase 1 Baseline (`EXP-P1-CIC2017-R10-001`)**: Trained and frozen at commit `fa370a9001fb328cde9f3cfa1d6ae48d3a72679c`.

@@ -11,17 +11,17 @@
 
 All 9 canonical model artifacts are committed and tracked directly in the repository. Their SHA-256 hashes reconcile perfectly with [`models/registry/model_manifest.json`](file:///home/rishikesh/Desktop/fyp-xrlids/models/registry/model_manifest.json):
 
-| Artifact File | Model Type | Feature Contract | Checksum (SHA-256) | Training Population | Checkpoint Class |
+| Artifact File | Model Type | Feature Contract | Checksum (SHA-256) | Training Population / Scope | Checkpoint Class |
 |:---|:---:|:---:|:---|---:|:---:|
-| `random_forest_cicids2017.joblib` | Random Forest | R10 (10 features) | `7c6ad493b773b687da24a2a12dcb21bd03bd56b76809462b983454aeacf2b774` | 2,123,172 | Tabular Detector |
-| `random_forest_cse2018.joblib` | Random Forest | R10 (10 features) | `b7d2dc7bacca1a46f4da35aee2c19e1604020d429a5d29b72d742130215ba9b3` | 11,363,799 | Tabular Detector |
-| `random_forest_unswnb15.joblib` | Random Forest | R4 (4 features) | `c432eb067507ad5b29a542b372ac6d35e609e783a9e6094c9764d0cfe654ec7c` | 175,341 | Tabular Detector |
-| `lstm_cicids2017.pt` | Supervised LSTM | R10 ($T=5$, hidden=64) | `18b0bfb48d3b031c17b26d3abd12485e09f8dd8c330fad26858320f11f818be1` | 2,123,140 | Sequence Detector |
-| `lstm_cse2018.pt` | Supervised LSTM | R10 ($T=5$, hidden=64) | `ea5b8198c20faa15d5d45ae7d081b754a76dbae1342a93b8234e0e06cfe8a33a` | 11,363,759 | Sequence Detector |
-| `lstm_unswnb15.pt` | Supervised LSTM | R4 ($T=5$, hidden=64) | `4d9386ff44c99eed822f8ace5c64429fab571b4f8aad847d6cc78bae5f308fbd` | 175,333 | Sequence Detector |
-| `dqn_4action_best.pt` | Dueling DQN | 6D State, 4 Actions | `6a5afc669b4e699ecd2b1c01df885cef9030c93b8888b487dd386533920ce954` | 355,865 ($D_{\text{pol}}$) | Response Policy |
-| `dqn_3action_best.pt` | Dueling DQN | 6D State, 3 Actions | `c06a61fb7777511600efd6db776745c4539da30c710fed8993145ed1b926be31` | 355,865 ($D_{\text{pol}}$) | Response Policy |
-| `fusion_weights.json` | Convex Weights | Aligned Populations | `fd50a413119d3ec3b0c7515125cf6e0f4a605aa52ca2739b9fcd951f8e081c72` | 2,018,252 | Decision Calibrator |
+| `random_forest_cicids2017.joblib` | Random Forest | R10 (10 features) | `7c6ad493b773b687da24a2a12dcb21bd03bd56b76809462b983454aeacf2b774` | 1,067,593 train rows | Tabular Detector |
+| `random_forest_cse2018.joblib` | Random Forest | R10 (10 features) | `b7d2dc7bacca1a46f4da35aee2c19e1604020d429a5d29b72d742130215ba9b3` | 4,987,377 train rows | Tabular Detector |
+| `random_forest_unswnb15.joblib` | Random Forest | R4 (4 features) | `c432eb067507ad5b29a542b372ac6d35e609e783a9e6094c9764d0cfe654ec7c` | 73,512 train rows | Tabular Detector |
+| `lstm_cicids2017.pt` | Supervised LSTM | R10 ($T=5$, hidden=32) | `2cdbf88d2eda358619d66a5d001fa7dde8ab3a36d8e0548c8c529ae8e8870f5c` | 1,067,593 train rows | Sequence Detector |
+| `lstm_cse2018.pt` | Supervised LSTM | R10 ($T=5$, hidden=32) | `ea5b8198c20faa15d5d45ae7d081b754a76dbae1342a93b8234e0e06cfe8a33a` | 4,987,377 train rows | Sequence Detector |
+| `lstm_unswnb15.pt` | Supervised LSTM | R4 ($T=5$, hidden=32) | `4d9386ff44c99eed822f8ace5c64429fab571b4f8aad847d6cc78bae5f308fbd` | 73,512 train rows | Sequence Detector |
+| `dqn_4action_best.pt` | Dueling DQN | 6D State, 4 Actions | `6a5afc669b4e699ecd2b1c01df885cef9030c93b8888b487dd386533920ce954` | 213,518 ($D_{\text{pol\_train}}$); 142,346 validation | Response Policy |
+| `dqn_3action_best.pt` | Dueling DQN | 6D State, 3 Actions | `c06a61fb7777511600efd6db776745c4539da30c710fed8993145ed1b926be31` | 213,518 ($D_{\text{pol\_train}}$); 142,346 validation | Response Policy |
+| `fusion_weights.json` | Convex Score Weights | Aligned Populations | `e35df25179a4574c83192bf35ebd0041772007c8b360151df489a5d9bd5450d0` | 2,018,252 aligned test flows for evaluation; $\alpha$ tuned on validation | Decision Policy |
 
 ---
 
@@ -37,9 +37,11 @@ All 9 canonical model artifacts are committed and tracked directly in the reposi
 | **CSE-CIC-IDS2018** | Random Forest (R10) | 0.9723 | 0.8861 | 0.9902 | 0.9676 | 1,662,419 |
 | **CSE-CIC-IDS2018** | Supervised LSTM (R10, $T=5$) | 0.9912 | 0.9603 | 0.9966 | 0.9865 | 1,662,419 |
 | **CSE-CIC-IDS2018** | **RF + LSTM Fusion ($\alpha=0.00$)\*** | **0.9912 (99.12%)** | **0.9603** | **0.9966** | **0.9865** | **1,662,419** |
-| **Combined Fleet** | **Flagship Integrated System** | **0.9911 (99.11%)** | — | — | — | **2,018,252** |
+| **Population-weighted mean (CIC + CSE)** | **Descriptive aggregate; not a single model** | **0.9911 (99.11%)** | — | — | — | **2,018,252** |
 
 > \* **Note on CSE-CIC-IDS2018 Fusion ($\alpha=0.00$):** In `models/fusion/fusion_weights.json`, the optimal weight for CSE-2018 is $\alpha = 0.00$. The Random Forest contributes 0% weight, making the output empirically identical to the standalone LSTM.
+>
+> The 99.11% figure is the population-weighted mean of the CIC-IDS2017 and CSE-CIC-IDS2018 test accuracies. It is not the accuracy of a jointly trained model and should not be read as a fleet-wide generalization estimate.
 
 ### Auxiliary Benchmark (UNSW-NB15 on Degraded 4-Feature NetFlow Schema)
 
@@ -54,15 +56,15 @@ All 9 canonical model artifacts are committed and tracked directly in the reposi
 ## 3. Methodological Rigor & Leakage Defense
 
 1. **Split Isolation:** 
-   - Splits generated via deterministic seeded hash partitioning (`src/xrlids/splitting/splitter.py`).
-   - Training: 75%, Validation: 12.5%, Test: 12.5%.
+   - Splits generated with scikit-learn `train_test_split`, stratified by binary label and seeded at 42 (`src/xrlids/splitting/splitter.py`).
+   - Training: 60%, Validation: 20%, Test: 20%.
    - Preprocessor fits imputation medians and `StandardScaler` on the training split only.
 2. **Boundary Disconnection Invariant:**
    - In sequence models (LSTM and Fusion), $T-1=4$ boundary flows per PCAP file are dropped so sequence windows never cross file or session boundaries.
    - Reconciles the population count: $355,865 \text{ tabular rows} - (8 \text{ files} \times 4 \text{ boundary drops}) = 355,833 \text{ sequence flows}$.
 3. **Multi-Seed Robustness:**
    - Evaluated across seeds `42`, `123`, and `456`.
-   - CIC-IDS2017 Fusion accuracy: $0.9903 \pm 0.0005$, F1: $0.9735 \pm 0.0016$. Seed 42 reproduces canonical frozen artifacts.
+   - CIC-IDS2017 Fusion accuracy: $0.9903 \pm 0.0005$, F1: $0.9735 \pm 0.0016$. Seed 42 reproduces the canonical predictions to floating-point tolerance; serialized joblib/`.pt` bytes are not expected to be identical across library versions.
 
 ---
 
@@ -70,19 +72,19 @@ All 9 canonical model artifacts are committed and tracked directly in the reposi
 
 ### DQN Agent Architecture & State Formulation
 - **State Vector $s_t \in \mathbb{R}^6$:** $[S_t, \Delta S_t, N_{\text{alert}}, a_{t-1}, c_t, v_t]$
-  - $S_t$: Calibrated threat score
+  - $S_t$: Uncalibrated detector score (RF or fusion output; no probability calibration is applied in the DQN state)
   - $\Delta S_t$: First-order velocity
   - $N_{\text{alert}}$: Alert density in rolling window
   - $a_{t-1}$: Previous action index
   - $c_t$: Host business criticality
   - $v_t$: Normalized flow byte rate
-- **Network:** Dueling Q-Network (Value stream: Linear $6 \to 64 \to 1$; Advantage stream: Linear $6 \to 64 \to 4$).
+- **Network:** Dueling Q-Network with a shared 2-layer MLP backbone ($6 \to 64 \to 64$, LayerNorm + LeakyReLU), then separate value and advantage heads ($64 \to 32 \to 1$ and $64 \to 32 \to |A|$).
 - **Action Space:** 0: ALLOW, 1: ALERT, 2: RATE_LIMIT, 3: ISOLATE.
 
 ### The Cost-Optimal Baseline Comparison (EXP-P2A-COST-OPTIMAL-001) & Reconciled Figures
 - **Evaluation Populations & Discrepancy Resolution:**
-  - *Validation Population ($D_{\text{pol\_val}}$, 142,346 flows in `EXP-P2B-DQN-001`):* DQN achieved **+9.71%** cost reduction vs Baseline 1 ($\tau=0.50$) and **+10.82%** vs Baseline 2 ($\tau=0.40/0.75$), failing the pre-registered practical significance target of $\ge 15.0\%$.
-  - *Final Test Population ($D_{\text{pol\_test}}$, 355,865 flows in `EXP-P2-FINAL-TEST-001`):* DQN achieved **+28.80%** cost reduction vs Baseline 1 ($\tau=0.50$), but only **+14.10%** vs Baseline 2 ($\tau=0.40/0.75$), still failing the $\ge 15.0\%$ threshold against the best existing baseline.
+  - *Validation Population ($D_{\text{pol\_val}}$, 142,346 flows in `EXP-P2B-DQN-001`):* In the 4-action space, DQN achieved **+9.71%** cost reduction vs Baseline 1 ($\tau=0.50$) and **+10.82%** vs Baseline 2 ($\tau=0.40/0.75$), failing the pre-registered practical significance target of $\ge 15.0\%$.
+  - *Final Test Population ($D_{\text{pol\_test}}$, 355,865 flows in `EXP-P2-FINAL-TEST-001`):* In the 4-action space, DQN achieved **+28.80%** cost reduction vs Baseline 1 ($\tau=0.50$) and **+14.10%** vs Baseline 2 ($\tau=0.40/0.75$); in the 3-action space it achieved **+15.99%** vs Baseline 1 and **+11.29%** vs Baseline 2. Neither action space reaches the $\ge 15.0\%$ target against the best existing baseline.
   - *Analytic Baseline Comparison (`EXP-P2A-COST-OPTIMAL-001`):* When evaluated against the zero-parameter analytic `CostOptimalThresholdPolicy` on the identical 355,865 test flows, the zero-parameter baseline achieved lower operational cost than the trained DQN in **4 of 6 benchmark settings** (e.g., 20.12% lower cost in 4-action High Availability). In the remaining 2 settings, DQN's margin was only ~8.8%.
 - **Scientific Interpretation:** The response problem functions as an asymmetric-loss contextual bandit with hysteresis rather than an interactive sequential MDP.
 

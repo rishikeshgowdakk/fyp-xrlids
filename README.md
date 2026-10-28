@@ -79,11 +79,11 @@ flowchart TD
 For empirical verification of research checkpoints and held-out test splits, the workbench provides a multi-model evaluation engine supporting three distinct operational modes:
 
 1. **Mode B — Fixed Exhibition Subset (Recommended Demo)**:
-   - **Provenance**: Deterministic 200-flow exhibition samples selected from the authoritative held-out test splits for each benchmark:
-     - **CIC-IDS2017**: 166 Benign, 34 Attack (12 DDoS, 12 PortScan, 10 DoS Hulk), R10 contract, endpoints `192.168.10.X -> 142.250.190.40:80 [TCP]`.
-     - **CSE-CIC-IDS2018**: 166 Benign, 34 Attack (17 DoS GoldenEye, 17 DoS Slowloris), R10 contract, endpoints `172.31.65.X -> 172.31.0.2:80 [TCP]`.
-     - **UNSW-NB15**: 166 Benign, 34 Attack (17 Exploits, 17 Fuzzers), R4 contract, endpoints `10.40.85.X -> 172.16.2.50:443 [TCP]`.
-   - **Metadata**: Preserves real network endpoints without feature contamination.
+   - **Provenance**: Deterministic 200-flow exhibition samples drawn from the canonical held-out test splits (seed 42), each restricted to one real source file:
+     - **CIC-IDS2017**: 166 Benign, 34 Attack (28 DoS Hulk, 5 DoS GoldenEye, 1 DoS Slowhttptest), R10 contract, source file `Wednesday-workingHours.pcap_ISCX.csv`.
+     - **CSE-CIC-IDS2018**: 166 Benign, 34 Attack (34 DDoS LOIC-HTTP), R10 contract, source file `Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv`.
+     - **UNSW-NB15**: 166 Benign, 34 Attack (18 Exploits, 10 Fuzzers, 4 Reconnaissance, 1 Generic, 1 DoS), R4 contract, source file `UNSW_NB15_testing-set.csv`.
+   - **Metadata**: Source file and real timestamps (where the source table provides them) are preserved. The distributable feature tables contain no IP addresses, so endpoints are synthetic RFC 5737 documentation addresses for display only (`192.0.2.X -> 198.51.100.X`), and protocol is shown as `N/A`; this is recorded in each demo JSON's `metadata_provenance`.
    - **Evaluation**: Evaluates RF, LSTM ($T=5$, initial 4 flows marked `WARM_UP`, 196 aligned flows), and Score Fusion independently.
    - **Inspection**: On-demand TreeSHAP explanation and Dueling DQN response recommendations (`ALLOW`, `ALERT`, `RATE_LIMIT`, `ISOLATE`).
 2. **Mode A — Full Held-Out Test Evaluation**:
@@ -98,9 +98,9 @@ For empirical verification of research checkpoints and held-out test splits, the
 ```mermaid
 flowchart LR
     S1["1. Mode & Contract Gate\nPairwise check of\nbenchmark & R10/R4"] --> S2["2. Isolation & Audit\nExtract metadata sidecar\nStrict matrix X validation"]
-    S2 --> S3["3. Multi-Model Inference\nRF (Tabular) + LSTM (T=5)\nCalibrated Score Fusion (alpha)"]
+    S2 -->    S3["3. Multi-Model Inference\nRF (Tabular) + LSTM (T=5)\nValidation-tuned Fusion (alpha; not calibrated)"]
     S3 --> S4["4. Metrics & Explainability\nRF, LSTM & Fusion Metrics\nOn-demand TreeSHAP & DQN"]
-    S4 --> S5["5. Authoritative Export\nPreserved flow endpoints\nServer cache & CSV export"]
+    S4 --> S5["5. Authoritative Export\nPreserved metadata (labeled endpoints)\nServer cache & CSV export"]
 
     style S1 fill:#eff6ff,stroke:#3b82f6
     style S2 fill:#fef3c7,stroke:#f59e0b
@@ -283,7 +283,7 @@ pip install -e .[dev]
 
 ### 2. Verify Installation (Test Suite)
 
-Run the full 482-test verification suite to confirm everything is working:
+Run the full 493-test verification suite to confirm everything is working:
 
 ```bash
 ./run.sh test
@@ -291,7 +291,7 @@ Run the full 482-test verification suite to confirm everything is working:
 .venv/bin/pytest -q
 ```
 
-All 482 tests across unit (388), data (45), integration (31), and model (18) test suites pass with 0 failures.
+All 493 tests across unit (399), data (45), integration (31), and model (18) test suites pass with 0 failures.
 
 ### 3. Quick Demo — PCAP Replay
 
@@ -404,7 +404,7 @@ Evaluate held-out test splits or custom flow CSV files against the complete mult
 1. Open the **📊 Dataset Evaluation** page on the dashboard (`http://localhost:8000`).
 2. Scroll to the **⚡ Flow Evaluation, Exhibition Demo & Multi-Model Inference Engine** card.
 3. Select your desired evaluation mode:
-   - **Mode B: 200 Exhibition Demo (Recommended):** Instant, deterministic verification using 200 held-out test flows (166 Benign, 34 Attack) with preserved IP/port endpoint metadata.
+   - **Mode B: 200 Exhibition Demo (Recommended):** Instant, deterministic verification using 200 held-out test flows (166 Benign, 34 Attack) with source-file provenance and clearly labeled synthetic display endpoints.
    - **Mode A: Full Held-Out Test:** Evaluates the complete authoritative test split (e.g. 355k CIC-IDS2017 flows) or a selectable batch.
    - **Mode C: Custom CSV Upload:** Upload or paste external flow records matching the R10 or R4 contract.
 4. Click **⚡ Run Evaluation**:
@@ -417,7 +417,7 @@ Evaluate held-out test splits or custom flow CSV files against the complete mult
    - View on-demand TreeSHAP local feature attribution bars (top positive/negative contributors to RF prediction).
    - View the 6D Dueling DQN state vector and simulated autonomous response action (`ALLOW`, `ALERT`, `RATE_LIMIT`, `ISOLATE`).
 6. Export results:
-   - Click **⬇️ Download Evaluated CSV** to export server-cached results preserving flow IDs, endpoints, and all three model scores.
+   - Click **⬇️ Download Evaluated CSV** to export server-cached results preserving flow IDs, labeled display endpoints, and all three model scores.
 
 ### 5. Retraining (Optional — Large Data Required)
 
@@ -435,7 +435,7 @@ To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
 |---------------------|:--------:|----------------|:---:|
 | **Launch Dashboard (Web UI)** | `./run.sh` | `.venv/bin/python dashboard/server.py` | **No** |
 | Run quick offline PCAP replay demo | `./run.sh demo` | `.venv/bin/python scripts/demo/run_replay_demo.py` | No |
-| Run full test suite (481 tests) | `./run.sh test` | `.venv/bin/pytest -q` | No |
+| Run full test suite (493 tests) | `./run.sh test` | `.venv/bin/pytest -q` | No |
 | Run CSV evaluation test suite (29 tests) | — | `.venv/bin/pytest tests/unit/test_csv_evaluation_workflow.py -v` | No |
 | Verify all calibrated attack scenarios | — | `.venv/bin/python scripts/demo/verify_attack_scenarios.py` | No |
 | Explain a score with TreeSHAP features | — | `.venv/bin/python scripts/demo/explain_score.py` | No |

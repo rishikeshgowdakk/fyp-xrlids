@@ -1,3009 +1,3618 @@
 {
-  "dataset": "UNSW-NB15",
+  "dataset": "unswnb15",
+  "benchmark_name": "UNSW-NB15",
+  "split": "held_out_test_exhibition_subset",
   "total_flows": 200,
   "benign_flows": 166,
   "attack_flows": 34,
+  "attack_prevalence_pct": 17.0,
   "feature_contract": "R4",
+  "provenance": "Deterministic 200-flow subset drawn from the canonical held-out test partition (seed=42), restricted to source file UNSW_NB15_testing-set.csv.",
+  "metadata_provenance": {
+    "endpoints": "Synthetic RFC 5737 documentation addresses for display only. The distributable flow tables do not contain source/destination IP addresses.",
+    "protocol": "Not retained by the feature loader; shown as N/A.",
+    "packet_count": "Not derivable from the R10/R4 feature contract; omitted."
+  },
   "flows": [
     {
       "flow_id": 0,
       "features": {
-        "flow_duration_ms": 0.011,
-        "flow_packets_per_s": 181818.18181818182,
-        "flow_bytes_per_s": 45090909.09090909,
-        "packet_length_mean": 248.0
+        "flow_duration_ms": 1387.7950439453125,
+        "flow_packets_per_s": 15.852485656738281,
+        "flow_bytes_per_s": 1384.9307861328125,
+        "packet_length_mean": 87.36363983154297
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.10:30000",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Fuzzers",
+      "category": "fuzzers",
+      "src_endpoint": "192.0.2.10:40000",
+      "dst_endpoint": "198.51.100.10:443",
+      "protocol": "N/A",
+      "duration_ms": 1387.795044,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 1,
       "features": {
-        "flow_duration_ms": 0.008,
-        "flow_packets_per_s": 250000.0,
-        "flow_bytes_per_s": 220250000.0,
-        "packet_length_mean": 881.0
+        "flow_duration_ms": 296.0299987792969,
+        "flow_packets_per_s": 60.804649353027344,
+        "flow_bytes_per_s": 7161.4365234375,
+        "packet_length_mean": 117.77777862548828
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.11:30001",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.11:40001",
+      "dst_endpoint": "198.51.100.11:443",
+      "protocol": "N/A",
+      "duration_ms": 296.029999,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 2,
       "features": {
-        "flow_duration_ms": 0.005,
-        "flow_packets_per_s": 399999.99999999994,
-        "flow_bytes_per_s": 213599999.99999997,
-        "packet_length_mean": 534.0
+        "flow_duration_ms": 1212.2559814453125,
+        "flow_packets_per_s": 16.498165130615234,
+        "flow_bytes_per_s": 1430.3909912109375,
+        "packet_length_mean": 86.69999694824219
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.12:30002",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Fuzzers",
+      "category": "fuzzers",
+      "src_endpoint": "192.0.2.12:40002",
+      "dst_endpoint": "198.51.100.12:443",
+      "protocol": "N/A",
+      "duration_ms": 1212.255981,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 3,
       "features": {
-        "flow_duration_ms": 0.006,
-        "flow_packets_per_s": 333333.3333333333,
-        "flow_bytes_per_s": 150000000.0,
-        "packet_length_mean": 450.0
+        "flow_duration_ms": 429.4779968261719,
+        "flow_packets_per_s": 37.2545280456543,
+        "flow_bytes_per_s": 2863.94189453125,
+        "packet_length_mean": 76.875
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.13:30003",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.13:40003",
+      "dst_endpoint": "198.51.100.13:443",
+      "protocol": "N/A",
+      "duration_ms": 429.477997,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 4,
       "features": {
-        "flow_duration_ms": 0.01,
-        "flow_packets_per_s": 199999.99999999997,
-        "flow_bytes_per_s": 212599999.99999997,
-        "packet_length_mean": 1063.0
+        "flow_duration_ms": 282.94000244140625,
+        "flow_packets_per_s": 63.61772918701172,
+        "flow_bytes_per_s": 10638.2978515625,
+        "packet_length_mean": 167.22222900390625
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.14:30004",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.14:40004",
+      "dst_endpoint": "198.51.100.14:443",
+      "protocol": "N/A",
+      "duration_ms": 282.940002,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 5,
       "features": {
-        "flow_duration_ms": 0.003,
-        "flow_packets_per_s": 666666.6666666666,
-        "flow_bytes_per_s": 261333333.3333333,
-        "packet_length_mean": 392.0
+        "flow_duration_ms": 5735.6767578125,
+        "flow_packets_per_s": 116.46401977539062,
+        "flow_bytes_per_s": 130121.171875,
+        "packet_length_mean": 1117.2650146484375
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.15:30005",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.15:40005",
+      "dst_endpoint": "198.51.100.15:443",
+      "protocol": "N/A",
+      "duration_ms": 5735.676758,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 6,
       "features": {
-        "flow_duration_ms": 0.006,
-        "flow_packets_per_s": 333333.3333333333,
-        "flow_bytes_per_s": 326666666.6666667,
-        "packet_length_mean": 980.0
+        "flow_duration_ms": 195.94500732421875,
+        "flow_packets_per_s": 81.65556335449219,
+        "flow_bytes_per_s": 5726.0966796875,
+        "packet_length_mean": 70.125
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.16:30006",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Reconnaissance",
+      "category": "reconnaissance",
+      "src_endpoint": "192.0.2.16:40006",
+      "dst_endpoint": "198.51.100.16:443",
+      "protocol": "N/A",
+      "duration_ms": 195.945007,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 7,
       "features": {
-        "flow_duration_ms": 0.028,
-        "flow_packets_per_s": 71428.57142857143,
-        "flow_bytes_per_s": 49428571.42857143,
-        "packet_length_mean": 692.0
+        "flow_duration_ms": 1178.782958984375,
+        "flow_packets_per_s": 20.359981536865234,
+        "flow_bytes_per_s": 2936.92724609375,
+        "packet_length_mean": 144.25
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.17:30007",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.17:40007",
+      "dst_endpoint": "198.51.100.17:443",
+      "protocol": "N/A",
+      "duration_ms": 1178.782959,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 8,
       "features": {
-        "flow_duration_ms": 0.001,
-        "flow_packets_per_s": 1000000.0,
-        "flow_bytes_per_s": 46000000.0,
-        "packet_length_mean": 46.0
+        "flow_duration_ms": 588.6610107421875,
+        "flow_packets_per_s": 30.577871322631836,
+        "flow_bytes_per_s": 2130.25830078125,
+        "packet_length_mean": 69.66666412353516
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.18:30008",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "ARP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.18:40008",
+      "dst_endpoint": "198.51.100.18:443",
+      "protocol": "N/A",
+      "duration_ms": 588.661011,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 9,
       "features": {
-        "flow_duration_ms": 0.001,
-        "flow_packets_per_s": 1000000.0,
-        "flow_bytes_per_s": 46000000.0,
-        "packet_length_mean": 46.0
+        "flow_duration_ms": 702.5260009765625,
+        "flow_packets_per_s": 62.631134033203125,
+        "flow_bytes_per_s": 10543.3818359375,
+        "packet_length_mean": 168.34091186523438
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.19:30009",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "ARP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.19:40009",
+      "dst_endpoint": "198.51.100.19:443",
+      "protocol": "N/A",
+      "duration_ms": 702.526001,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 10,
       "features": {
-        "flow_duration_ms": 0.001,
-        "flow_packets_per_s": 1000000.0,
-        "flow_bytes_per_s": 46000000.0,
-        "packet_length_mean": 46.0
+        "flow_duration_ms": 266.9729919433594,
+        "flow_packets_per_s": 74.9139404296875,
+        "flow_bytes_per_s": 23013.5625,
+        "packet_length_mean": 307.20001220703125
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.20:30010",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "ARP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.20:40010",
+      "dst_endpoint": "198.51.100.20:443",
+      "protocol": "N/A",
+      "duration_ms": 266.972992,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 11,
       "features": {
-        "flow_duration_ms": 0.001,
-        "flow_packets_per_s": 1000000.0,
-        "flow_bytes_per_s": 46000000.0,
-        "packet_length_mean": 46.0
+        "flow_duration_ms": 902.3880004882812,
+        "flow_packets_per_s": 19.947072982788086,
+        "flow_bytes_per_s": 1562.520751953125,
+        "packet_length_mean": 78.33333587646484
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.21:30011",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "ARP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.21:40011",
+      "dst_endpoint": "198.51.100.21:443",
+      "protocol": "N/A",
+      "duration_ms": 902.388,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 12,
       "features": {
-        "flow_duration_ms": 0.004,
-        "flow_packets_per_s": 500000.0,
-        "flow_bytes_per_s": 363500000.0,
-        "packet_length_mean": 727.0
+        "flow_duration_ms": 6717.1748046875,
+        "flow_packets_per_s": 70.26763153076172,
+        "flow_bytes_per_s": 75505.8515625,
+        "packet_length_mean": 1074.546630859375
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.22:30012",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.22:40012",
+      "dst_endpoint": "198.51.100.22:443",
+      "protocol": "N/A",
+      "duration_ms": 6717.174805,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 13,
       "features": {
-        "flow_duration_ms": 0.007,
-        "flow_packets_per_s": 285714.28571428574,
-        "flow_bytes_per_s": 294571428.5714286,
-        "packet_length_mean": 1031.0
+        "flow_duration_ms": 1193.8370361328125,
+        "flow_packets_per_s": 36.855953216552734,
+        "flow_bytes_per_s": 2338.677734375,
+        "packet_length_mean": 63.45454406738281
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.23:30013",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.23:40013",
+      "dst_endpoint": "198.51.100.23:443",
+      "protocol": "N/A",
+      "duration_ms": 1193.837036,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 14,
       "features": {
-        "flow_duration_ms": 0.011,
-        "flow_packets_per_s": 181818.18181818182,
-        "flow_bytes_per_s": 185454545.45454547,
-        "packet_length_mean": 1020.0
+        "flow_duration_ms": 15.324999809265137,
+        "flow_packets_per_s": 5481.23974609375,
+        "flow_bytes_per_s": 1543360.5,
+        "packet_length_mean": 281.5714416503906
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.24:30014",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.24:40014",
+      "dst_endpoint": "198.51.100.24:443",
+      "protocol": "N/A",
+      "duration_ms": 15.325,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 15,
       "features": {
-        "flow_duration_ms": 0.004,
-        "flow_packets_per_s": 500000.0,
-        "flow_bytes_per_s": 263000000.0,
-        "packet_length_mean": 526.0
+        "flow_duration_ms": 124.76100158691406,
+        "flow_packets_per_s": 1074.0535888671875,
+        "flow_bytes_per_s": 496212.75,
+        "packet_length_mean": 462.0
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.25:30015",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.25:40015",
+      "dst_endpoint": "198.51.100.25:443",
+      "protocol": "N/A",
+      "duration_ms": 124.761002,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 16,
       "features": {
-        "flow_duration_ms": 0.003,
-        "flow_packets_per_s": 666666.6666666666,
-        "flow_bytes_per_s": 104666666.66666666,
-        "packet_length_mean": 157.0
+        "flow_duration_ms": 14.843000411987305,
+        "flow_packets_per_s": 5255.00244140625,
+        "flow_bytes_per_s": 1524759.125,
+        "packet_length_mean": 290.1538391113281
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.26:30016",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.26:40016",
+      "dst_endpoint": "198.51.100.26:443",
+      "protocol": "N/A",
+      "duration_ms": 14.843,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 17,
       "features": {
-        "flow_duration_ms": 0.01,
-        "flow_packets_per_s": 199999.99999999997,
-        "flow_bytes_per_s": 177400000.0,
-        "packet_length_mean": 887.0
+        "flow_duration_ms": 32032.275390625,
+        "flow_packets_per_s": 33.55990219116211,
+        "flow_bytes_per_s": 33607.6640625,
+        "packet_length_mean": 1001.4232788085938
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.27:30017",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.27:40017",
+      "dst_endpoint": "198.51.100.27:443",
+      "protocol": "N/A",
+      "duration_ms": 32032.275391,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 18,
       "features": {
-        "flow_duration_ms": 0.002,
-        "flow_packets_per_s": 1000000.0,
-        "flow_bytes_per_s": 784000000.0,
-        "packet_length_mean": 784.0
+        "flow_duration_ms": 1.7410000562667847,
+        "flow_packets_per_s": 4595.060546875,
+        "flow_bytes_per_s": 482481.34375,
+        "packet_length_mean": 105.0
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.28:30018",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.28:40018",
+      "dst_endpoint": "198.51.100.28:443",
+      "protocol": "N/A",
+      "duration_ms": 1.741,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 19,
       "features": {
-        "flow_duration_ms": 0.004,
-        "flow_packets_per_s": 500000.0,
-        "flow_bytes_per_s": 513500000.0,
-        "packet_length_mean": 1027.0
+        "flow_duration_ms": 11845.0244140625,
+        "flow_packets_per_s": 39.51026153564453,
+        "flow_bytes_per_s": 4550.43408203125,
+        "packet_length_mean": 115.17093658447266
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.29:30019",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.29:40019",
+      "dst_endpoint": "198.51.100.29:443",
+      "protocol": "N/A",
+      "duration_ms": 11845.024414,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 20,
       "features": {
-        "flow_duration_ms": 0.01,
-        "flow_packets_per_s": 199999.99999999997,
-        "flow_bytes_per_s": 216999999.99999997,
-        "packet_length_mean": 1085.0
+        "flow_duration_ms": 12456.2177734375,
+        "flow_packets_per_s": 77.39106750488281,
+        "flow_bytes_per_s": 66234.0703125,
+        "packet_length_mean": 855.8361206054688
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.30:30020",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.30:40020",
+      "dst_endpoint": "198.51.100.30:443",
+      "protocol": "N/A",
+      "duration_ms": 12456.217773,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 21,
       "features": {
-        "flow_duration_ms": 0.009000000000000001,
-        "flow_packets_per_s": 222222.22222222222,
-        "flow_bytes_per_s": 22444444.444444444,
-        "packet_length_mean": 101.0
+        "flow_duration_ms": 113.87799835205078,
+        "flow_packets_per_s": 1071.3218994140625,
+        "flow_bytes_per_s": 465023.96875,
+        "packet_length_mean": 434.0655822753906
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.31:30021",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.31:40021",
+      "dst_endpoint": "198.51.100.31:443",
+      "protocol": "N/A",
+      "duration_ms": 113.877998,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 22,
       "features": {
-        "flow_duration_ms": 0.01,
-        "flow_packets_per_s": 199999.99999999997,
-        "flow_bytes_per_s": 133399999.99999999,
-        "packet_length_mean": 667.0
+        "flow_duration_ms": 492.8550109863281,
+        "flow_packets_per_s": 190.7254638671875,
+        "flow_bytes_per_s": 82559.78125,
+        "packet_length_mean": 432.8723449707031
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.32:30022",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.32:40022",
+      "dst_endpoint": "198.51.100.32:443",
+      "protocol": "N/A",
+      "duration_ms": 492.855011,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 23,
       "features": {
-        "flow_duration_ms": 0.005,
-        "flow_packets_per_s": 399999.99999999994,
-        "flow_bytes_per_s": 411599999.99999994,
-        "packet_length_mean": 1029.0
+        "flow_duration_ms": 37.63600158691406,
+        "flow_packets_per_s": 6589.435546875,
+        "flow_bytes_per_s": 629503.6875,
+        "packet_length_mean": 95.53225708007812
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.33:30023",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.33:40023",
+      "dst_endpoint": "198.51.100.33:443",
+      "protocol": "N/A",
+      "duration_ms": 37.636002,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 24,
       "features": {
-        "flow_duration_ms": 0.003,
-        "flow_packets_per_s": 666666.6666666666,
-        "flow_bytes_per_s": 95333333.33333333,
-        "packet_length_mean": 143.0
+        "flow_duration_ms": 4.124000072479248,
+        "flow_packets_per_s": 4364.6943359375,
+        "flow_bytes_per_s": 451988.375,
+        "packet_length_mean": 103.55555725097656
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.34:30024",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.34:40024",
+      "dst_endpoint": "198.51.100.34:443",
+      "protocol": "N/A",
+      "duration_ms": 4.124,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 25,
       "features": {
-        "flow_duration_ms": 0.007,
-        "flow_packets_per_s": 285714.28571428574,
-        "flow_bytes_per_s": 214285714.2857143,
-        "packet_length_mean": 750.0
+        "flow_duration_ms": 9.904999732971191,
+        "flow_packets_per_s": 7470.97412109375,
+        "flow_bytes_per_s": 1880262.5,
+        "packet_length_mean": 251.67567443847656
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.35:30025",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.35:40025",
+      "dst_endpoint": "198.51.100.35:443",
+      "protocol": "N/A",
+      "duration_ms": 9.905,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 26,
       "features": {
-        "flow_duration_ms": 0.006,
-        "flow_packets_per_s": 333333.3333333333,
-        "flow_bytes_per_s": 150333333.33333334,
-        "packet_length_mean": 451.0
+        "flow_duration_ms": 157.8000030517578,
+        "flow_packets_per_s": 1596.9581298828125,
+        "flow_bytes_per_s": 1256755.375,
+        "packet_length_mean": 786.96826171875
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.36:30026",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.36:40026",
+      "dst_endpoint": "198.51.100.36:443",
+      "protocol": "N/A",
+      "duration_ms": 157.800003,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 27,
       "features": {
-        "flow_duration_ms": 0.002,
-        "flow_packets_per_s": 1000000.0,
-        "flow_bytes_per_s": 813000000.0,
-        "packet_length_mean": 813.0
+        "flow_duration_ms": 4.1529998779296875,
+        "flow_packets_per_s": 4334.21630859375,
+        "flow_bytes_per_s": 448832.15625,
+        "packet_length_mean": 103.55555725097656
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.37:30027",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.37:40027",
+      "dst_endpoint": "198.51.100.37:443",
+      "protocol": "N/A",
+      "duration_ms": 4.153,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 28,
       "features": {
-        "flow_duration_ms": 0.007,
-        "flow_packets_per_s": 285714.28571428574,
-        "flow_bytes_per_s": 52000000.0,
-        "packet_length_mean": 182.0
+        "flow_duration_ms": 4.947999954223633,
+        "flow_packets_per_s": 1616.8148193359375,
+        "flow_bytes_per_s": 179466.453125,
+        "packet_length_mean": 111.0
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.38:30028",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.38:40028",
+      "dst_endpoint": "198.51.100.38:443",
+      "protocol": "N/A",
+      "duration_ms": 4.948,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 29,
       "features": {
-        "flow_duration_ms": 1434.166,
-        "flow_packets_per_s": 11.15630966010908,
-        "flow_bytes_per_s": 556.4209442979404,
-        "packet_length_mean": 49.875
+        "flow_duration_ms": 428.9540100097656,
+        "flow_packets_per_s": 79.26258087158203,
+        "flow_bytes_per_s": 7422.70751953125,
+        "packet_length_mean": 93.64705657958984
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.39:30029",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.39:40029",
+      "dst_endpoint": "198.51.100.39:443",
+      "protocol": "N/A",
+      "duration_ms": 428.95401,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 30,
       "features": {
-        "flow_duration_ms": 0.007,
-        "flow_packets_per_s": 285714.28571428574,
-        "flow_bytes_per_s": 104285714.28571428,
-        "packet_length_mean": 365.0
+        "flow_duration_ms": 918.4019775390625,
+        "flow_packets_per_s": 63.15317153930664,
+        "flow_bytes_per_s": 7918.10107421875,
+        "packet_length_mean": 125.37931060791016
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.40:30030",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.40:40030",
+      "dst_endpoint": "198.51.100.40:443",
+      "protocol": "N/A",
+      "duration_ms": 918.401978,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 31,
       "features": {
-        "flow_duration_ms": 1924.287,
-        "flow_packets_per_s": 9.354114017295757,
-        "flow_bytes_per_s": 459.39093284941384,
-        "packet_length_mean": 49.111111111111114
+        "flow_duration_ms": 1.1419999599456787,
+        "flow_packets_per_s": 3502.626953125,
+        "flow_bytes_per_s": 259194.390625,
+        "packet_length_mean": 74.0
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.41:30031",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.41:40031",
+      "dst_endpoint": "198.51.100.41:443",
+      "protocol": "N/A",
+      "duration_ms": 1.142,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 32,
       "features": {
-        "flow_duration_ms": 2773.779,
-        "flow_packets_per_s": 7.931417751738692,
-        "flow_bytes_per_s": 2995.1917582475025,
-        "packet_length_mean": 377.6363636363636
+        "flow_duration_ms": 95.86399841308594,
+        "flow_packets_per_s": 2086.288818359375,
+        "flow_bytes_per_s": 330113.5,
+        "packet_length_mean": 158.22999572753906
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.42:30032",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.42:40032",
+      "dst_endpoint": "198.51.100.42:443",
+      "protocol": "N/A",
+      "duration_ms": 95.863998,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 33,
       "features": {
-        "flow_duration_ms": 0.01,
-        "flow_packets_per_s": 199999.99999999997,
-        "flow_bytes_per_s": 79400000.0,
-        "packet_length_mean": 397.0
+        "flow_duration_ms": 18676.140625,
+        "flow_packets_per_s": 57.827796936035156,
+        "flow_bytes_per_s": 59206.55859375,
+        "packet_length_mean": 1023.8425903320312
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.43:30033",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.43:40033",
+      "dst_endpoint": "198.51.100.43:443",
+      "protocol": "N/A",
+      "duration_ms": 18676.140625,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 34,
       "features": {
-        "flow_duration_ms": 1465.041,
-        "flow_packets_per_s": 12.286345569850946,
-        "flow_bytes_per_s": 1958.9895436373452,
-        "packet_length_mean": 159.44444444444446
+        "flow_duration_ms": 10.331000328063965,
+        "flow_packets_per_s": 7162.90771484375,
+        "flow_bytes_per_s": 1802729.625,
+        "packet_length_mean": 251.67567443847656
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.44:30034",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.44:40034",
+      "dst_endpoint": "198.51.100.44:443",
+      "protocol": "N/A",
+      "duration_ms": 10.331,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 35,
       "features": {
-        "flow_duration_ms": 983.874,
-        "flow_packets_per_s": 18.295025582544106,
-        "flow_bytes_per_s": 2020.5839365609822,
-        "packet_length_mean": 110.44444444444444
+        "flow_duration_ms": 4.546000003814697,
+        "flow_packets_per_s": 7919.0498046875,
+        "flow_bytes_per_s": 703475.5625,
+        "packet_length_mean": 88.83333587646484
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.45:30035",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.45:40035",
+      "dst_endpoint": "198.51.100.45:443",
+      "protocol": "N/A",
+      "duration_ms": 4.546,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 36,
       "features": {
-        "flow_duration_ms": 714.182,
-        "flow_packets_per_s": 22.40325295232868,
-        "flow_bytes_per_s": 1122.963054235475,
-        "packet_length_mean": 50.125
+        "flow_duration_ms": 541.5440063476562,
+        "flow_packets_per_s": 107.10118103027344,
+        "flow_bytes_per_s": 13428.271484375,
+        "packet_length_mean": 125.37931060791016
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.46:30036",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.46:40036",
+      "dst_endpoint": "198.51.100.46:443",
+      "protocol": "N/A",
+      "duration_ms": 541.544006,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 37,
       "features": {
-        "flow_duration_ms": 59995.674,
-        "flow_packets_per_s": 0.033335736839959496,
-        "flow_bytes_per_s": 1.5334438946381368,
-        "packet_length_mean": 46.0
+        "flow_duration_ms": 18.825000762939453,
+        "flow_packets_per_s": 1806.10888671875,
+        "flow_bytes_per_s": 169136.78125,
+        "packet_length_mean": 93.64705657958984
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.47:30037",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "ARP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.47:40037",
+      "dst_endpoint": "198.51.100.47:443",
+      "protocol": "N/A",
+      "duration_ms": 18.825001,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 38,
       "features": {
-        "flow_duration_ms": 59995.678,
-        "flow_packets_per_s": 0.03333573461741694,
-        "flow_bytes_per_s": 1.5334437924011795,
-        "packet_length_mean": 46.0
+        "flow_duration_ms": 53.882999420166016,
+        "flow_packets_per_s": 1670.28564453125,
+        "flow_bytes_per_s": 496817.1875,
+        "packet_length_mean": 297.4444580078125
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.48:30038",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "ARP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.48:40038",
+      "dst_endpoint": "198.51.100.48:443",
+      "protocol": "N/A",
+      "duration_ms": 53.882999,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 39,
       "features": {
-        "flow_duration_ms": 59995.674,
-        "flow_packets_per_s": 0.033335736839959496,
-        "flow_bytes_per_s": 1.5334438946381368,
-        "packet_length_mean": 46.0
+        "flow_duration_ms": 1405.6710205078125,
+        "flow_packets_per_s": 66.87197875976562,
+        "flow_bytes_per_s": 28917.150390625,
+        "packet_length_mean": 432.425537109375
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.49:30039",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "ARP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.49:40039",
+      "dst_endpoint": "198.51.100.49:443",
+      "protocol": "N/A",
+      "duration_ms": 1405.671021,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 40,
       "features": {
-        "flow_duration_ms": 1535.254,
-        "flow_packets_per_s": 13.027160326564855,
-        "flow_bytes_per_s": 1362.640970158684,
-        "packet_length_mean": 104.6
+        "flow_duration_ms": 759.5900268554688,
+        "flow_packets_per_s": 326.4919128417969,
+        "flow_bytes_per_s": 29615.9765625,
+        "packet_length_mean": 90.70967864990234
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.50:30040",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.50:40040",
+      "dst_endpoint": "198.51.100.50:443",
+      "protocol": "N/A",
+      "duration_ms": 759.590027,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 41,
       "features": {
-        "flow_duration_ms": 59995.678,
-        "flow_packets_per_s": 0.03333573461741694,
-        "flow_bytes_per_s": 1.5334437924011795,
-        "packet_length_mean": 46.0
+        "flow_duration_ms": 4.745999813079834,
+        "flow_packets_per_s": 1685.6300048828125,
+        "flow_bytes_per_s": 183733.671875,
+        "packet_length_mean": 109.0
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.51:30041",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "ARP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.51:40041",
+      "dst_endpoint": "198.51.100.51:443",
+      "protocol": "N/A",
+      "duration_ms": 4.746,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 42,
       "features": {
-        "flow_duration_ms": 757.2950000000001,
-        "flow_packets_per_s": 21.127829973788284,
-        "flow_bytes_per_s": 1059.0324774361377,
-        "packet_length_mean": 50.125
+        "flow_duration_ms": 37.01300048828125,
+        "flow_packets_per_s": 2647.71826171875,
+        "flow_bytes_per_s": 954421.4375,
+        "packet_length_mean": 360.4693908691406
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.52:30042",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.52:40042",
+      "dst_endpoint": "198.51.100.52:443",
+      "protocol": "N/A",
+      "duration_ms": 37.013,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 43,
       "features": {
-        "flow_duration_ms": 759.306,
-        "flow_packets_per_s": 23.70585771744198,
-        "flow_bytes_per_s": 1169.4889807271377,
-        "packet_length_mean": 49.333333333333336
+        "flow_duration_ms": 86.3499984741211,
+        "flow_packets_per_s": 92.64620971679688,
+        "flow_bytes_per_s": 10098.4365234375,
+        "packet_length_mean": 109.0
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.53:30043",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.53:40043",
+      "dst_endpoint": "198.51.100.53:443",
+      "protocol": "N/A",
+      "duration_ms": 86.349998,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 44,
       "features": {
-        "flow_duration_ms": 1294.036,
-        "flow_packets_per_s": 13.909968501649104,
-        "flow_bytes_per_s": 2217.8671999851626,
-        "packet_length_mean": 159.44444444444446
+        "flow_duration_ms": 4210.60791015625,
+        "flow_packets_per_s": 157.6969451904297,
+        "flow_bytes_per_s": 133295.234375,
+        "packet_length_mean": 845.2620239257812
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.54:30044",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.54:40044",
+      "dst_endpoint": "198.51.100.54:443",
+      "protocol": "N/A",
+      "duration_ms": 4210.60791,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 45,
       "features": {
-        "flow_duration_ms": 1059.359,
-        "flow_packets_per_s": 16.99140706785896,
-        "flow_bytes_per_s": 1853.9513045152778,
-        "packet_length_mean": 109.11111111111111
+        "flow_duration_ms": 818.9959716796875,
+        "flow_packets_per_s": 312.5778503417969,
+        "flow_bytes_per_s": 242399.234375,
+        "packet_length_mean": 775.484375
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.55:30045",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.55:40045",
+      "dst_endpoint": "198.51.100.55:443",
+      "protocol": "N/A",
+      "duration_ms": 818.995972,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 46,
       "features": {
-        "flow_duration_ms": 624.048,
-        "flow_packets_per_s": 25.639053406148243,
-        "flow_bytes_per_s": 1285.1575519831806,
-        "packet_length_mean": 50.125
+        "flow_duration_ms": 1348.9019775390625,
+        "flow_packets_per_s": 149.75143432617188,
+        "flow_bytes_per_s": 23537.662109375,
+        "packet_length_mean": 157.17822265625
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.56:30046",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.56:40046",
+      "dst_endpoint": "198.51.100.56:443",
+      "protocol": "N/A",
+      "duration_ms": 1348.901978,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 47,
       "features": {
-        "flow_duration_ms": 1190.292,
-        "flow_packets_per_s": 15.12233972840278,
-        "flow_bytes_per_s": 2411.173056695332,
-        "packet_length_mean": 159.44444444444446
+        "flow_duration_ms": 1120.1090087890625,
+        "flow_packets_per_s": 28.568647384643555,
+        "flow_bytes_per_s": 10581.11328125,
+        "packet_length_mean": 370.375
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.57:30047",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.57:40047",
+      "dst_endpoint": "198.51.100.57:443",
+      "protocol": "N/A",
+      "duration_ms": 1120.109009,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 48,
       "features": {
-        "flow_duration_ms": 999.472,
-        "flow_packets_per_s": 16.00845246290041,
-        "flow_bytes_per_s": 802.4236797028831,
-        "packet_length_mean": 50.125
+        "flow_duration_ms": 8.281000137329102,
+        "flow_packets_per_s": 4347.30126953125,
+        "flow_bytes_per_s": 740007.25,
+        "packet_length_mean": 170.22222900390625
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.58:30048",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.58:40048",
+      "dst_endpoint": "198.51.100.58:443",
+      "protocol": "N/A",
+      "duration_ms": 8.281,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 49,
       "features": {
-        "flow_duration_ms": 990.548,
-        "flow_packets_per_s": 20.190843856128122,
-        "flow_bytes_per_s": 2239.1645836446087,
-        "packet_length_mean": 110.9
+        "flow_duration_ms": 50.801998138427734,
+        "flow_packets_per_s": 3346.324951171875,
+        "flow_bytes_per_s": 1616826.125,
+        "packet_length_mean": 483.1647033691406
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.59:30049",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.59:40049",
+      "dst_endpoint": "198.51.100.59:443",
+      "protocol": "N/A",
+      "duration_ms": 50.801998,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 50,
       "features": {
-        "flow_duration_ms": 655.618,
-        "flow_packets_per_s": 24.40445503326632,
-        "flow_bytes_per_s": 1223.2733085424743,
-        "packet_length_mean": 50.125
+        "flow_duration_ms": 392.4460144042969,
+        "flow_packets_per_s": 147.79103088378906,
+        "flow_bytes_per_s": 20018.041015625,
+        "packet_length_mean": 135.44827270507812
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.60:30050",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.60:40050",
+      "dst_endpoint": "198.51.100.60:443",
+      "protocol": "N/A",
+      "duration_ms": 392.446014,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 51,
       "features": {
-        "flow_duration_ms": 810.1669999999999,
-        "flow_packets_per_s": 22.217641547977145,
-        "flow_bytes_per_s": 3542.479513483023,
-        "packet_length_mean": 159.44444444444446
+        "flow_duration_ms": 4.40500020980835,
+        "flow_packets_per_s": 4086.265625,
+        "flow_bytes_per_s": 423155.5,
+        "packet_length_mean": 103.55555725097656
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.61:30051",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.61:40051",
+      "dst_endpoint": "198.51.100.61:443",
+      "protocol": "N/A",
+      "duration_ms": 4.405,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 52,
       "features": {
-        "flow_duration_ms": 14846.565,
-        "flow_packets_per_s": 1.481824246888085,
-        "flow_bytes_per_s": 66.68209110996382,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 311.4590148925781,
+        "flow_packets_per_s": 64.21391296386719,
+        "flow_bytes_per_s": 29692.51171875,
+        "packet_length_mean": 462.3999938964844
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.62:30052",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.62:40052",
+      "dst_endpoint": "198.51.100.62:443",
+      "protocol": "N/A",
+      "duration_ms": 311.459015,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 53,
       "features": {
-        "flow_duration_ms": 14846.565,
-        "flow_packets_per_s": 1.481824246888085,
-        "flow_bytes_per_s": 66.68209110996382,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 93.91699981689453,
+        "flow_packets_per_s": 383.3171691894531,
+        "flow_bytes_per_s": 34051.34375,
+        "packet_length_mean": 88.83333587646484
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.63:30053",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.63:40053",
+      "dst_endpoint": "198.51.100.63:443",
+      "protocol": "N/A",
+      "duration_ms": 93.917,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 54,
       "features": {
-        "flow_duration_ms": 14846.565,
-        "flow_packets_per_s": 1.481824246888085,
-        "flow_bytes_per_s": 66.68209110996382,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 18.2189998626709,
+        "flow_packets_per_s": 1866.18359375,
+        "flow_bytes_per_s": 174762.609375,
+        "packet_length_mean": 93.64705657958984
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.64:30054",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.64:40054",
+      "dst_endpoint": "198.51.100.64:443",
+      "protocol": "N/A",
+      "duration_ms": 18.219,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 55,
       "features": {
-        "flow_duration_ms": 1588.788,
-        "flow_packets_per_s": 10.070569515882546,
-        "flow_bytes_per_s": 504.78729698361263,
-        "packet_length_mean": 50.125
+        "flow_duration_ms": 1.1430000066757202,
+        "flow_packets_per_s": 3499.5625,
+        "flow_bytes_per_s": 283464.5625,
+        "packet_length_mean": 81.0
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.65:30055",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.65:40055",
+      "dst_endpoint": "198.51.100.65:443",
+      "protocol": "N/A",
+      "duration_ms": 1.143,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 56,
       "features": {
-        "flow_duration_ms": 1151.373,
-        "flow_packets_per_s": 15.633508862896733,
-        "flow_bytes_per_s": 2492.676135361868,
-        "packet_length_mean": 159.44444444444446
+        "flow_duration_ms": 369.8739929199219,
+        "flow_packets_per_s": 524.5029296875,
+        "flow_bytes_per_s": 265582.34375,
+        "packet_length_mean": 506.35052490234375
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.66:30056",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.66:40056",
+      "dst_endpoint": "198.51.100.66:443",
+      "protocol": "N/A",
+      "duration_ms": 369.873993,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 57,
       "features": {
-        "flow_duration_ms": 14355.273000000001,
-        "flow_packets_per_s": 1.3932162766949816,
-        "flow_bytes_per_s": 62.69473245127418,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 1012.4340209960938,
+        "flow_packets_per_s": 596.5820922851562,
+        "flow_bytes_per_s": 501431.21875,
+        "packet_length_mean": 840.5066528320312
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.67:30057",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.67:40057",
+      "dst_endpoint": "198.51.100.67:443",
+      "protocol": "N/A",
+      "duration_ms": 1012.434021,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 58,
       "features": {
-        "flow_duration_ms": 14355.273000000001,
-        "flow_packets_per_s": 1.3932162766949816,
-        "flow_bytes_per_s": 62.69473245127418,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 1013.7379760742188,
+        "flow_packets_per_s": 29.59344482421875,
+        "flow_bytes_per_s": 11588.79296875,
+        "packet_length_mean": 391.6000061035156
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.68:30058",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.68:40058",
+      "dst_endpoint": "198.51.100.68:443",
+      "protocol": "N/A",
+      "duration_ms": 1013.737976,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 59,
       "features": {
-        "flow_duration_ms": 14355.273000000001,
-        "flow_packets_per_s": 1.3932162766949816,
-        "flow_bytes_per_s": 62.69473245127418,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 296.3580017089844,
+        "flow_packets_per_s": 182.21205139160156,
+        "flow_bytes_per_s": 23836.037109375,
+        "packet_length_mean": 130.8148193359375
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.69:30059",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.69:40059",
+      "dst_endpoint": "198.51.100.69:443",
+      "protocol": "N/A",
+      "duration_ms": 296.358002,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 60,
       "features": {
-        "flow_duration_ms": 15532.349999999999,
-        "flow_packets_per_s": 1.2876351614533539,
-        "flow_bytes_per_s": 57.94358226540093,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 28.01099967956543,
+        "flow_packets_per_s": 3355.824462890625,
+        "flow_bytes_per_s": 1195101.875,
+        "packet_length_mean": 356.1276550292969
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.70:30060",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.70:40060",
+      "dst_endpoint": "198.51.100.70:443",
+      "protocol": "N/A",
+      "duration_ms": 28.011,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 61,
       "features": {
-        "flow_duration_ms": 15590.977,
-        "flow_packets_per_s": 1.2827932463757723,
-        "flow_bytes_per_s": 57.72569608690976,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 35.7859992980957,
+        "flow_packets_per_s": 4750.4609375,
+        "flow_bytes_per_s": 2295255.25,
+        "packet_length_mean": 483.1647033691406
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.71:30061",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.71:40061",
+      "dst_endpoint": "198.51.100.71:443",
+      "protocol": "N/A",
+      "duration_ms": 35.785999,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 62,
       "features": {
-        "flow_duration_ms": 15532.349999999999,
-        "flow_packets_per_s": 1.2876351614533539,
-        "flow_bytes_per_s": 57.94358226540093,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 1005.7860107421875,
+        "flow_packets_per_s": 31.8159122467041,
+        "flow_bytes_per_s": 11783.818359375,
+        "packet_length_mean": 370.375
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.72:30062",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.72:40062",
+      "dst_endpoint": "198.51.100.72:443",
+      "protocol": "N/A",
+      "duration_ms": 1005.786011,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 63,
       "features": {
-        "flow_duration_ms": 15532.349999999999,
-        "flow_packets_per_s": 1.2876351614533539,
-        "flow_bytes_per_s": 57.94358226540093,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 1.0110000371932983,
+        "flow_packets_per_s": 3956.478759765625,
+        "flow_bytes_per_s": 292779.4375,
+        "packet_length_mean": 74.0
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.73:30063",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.73:40063",
+      "dst_endpoint": "198.51.100.73:443",
+      "protocol": "N/A",
+      "duration_ms": 1.011,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 64,
       "features": {
-        "flow_duration_ms": 15590.977,
-        "flow_packets_per_s": 1.2827932463757723,
-        "flow_bytes_per_s": 57.72569608690976,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 19.04599952697754,
+        "flow_packets_per_s": 3675.3125,
+        "flow_bytes_per_s": 814764.25,
+        "packet_length_mean": 221.6857147216797
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.74:30064",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.74:40064",
+      "dst_endpoint": "198.51.100.74:443",
+      "protocol": "N/A",
+      "duration_ms": 19.046,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 65,
       "features": {
-        "flow_duration_ms": 15590.977,
-        "flow_packets_per_s": 1.2827932463757723,
-        "flow_bytes_per_s": 57.72569608690976,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 201.88600158691406,
+        "flow_packets_per_s": 168.41188049316406,
+        "flow_bytes_per_s": 15771.27734375,
+        "packet_length_mean": 93.64705657958984
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.75:30065",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.75:40065",
+      "dst_endpoint": "198.51.100.75:443",
+      "protocol": "N/A",
+      "duration_ms": 201.886002,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 66,
       "features": {
-        "flow_duration_ms": 1074.4940000000001,
-        "flow_packets_per_s": 16.752071207470678,
-        "flow_bytes_per_s": 2671.024686968936,
-        "packet_length_mean": 159.44444444444446
+        "flow_duration_ms": 9.013999938964844,
+        "flow_packets_per_s": 7765.69775390625,
+        "flow_bytes_per_s": 1721544.25,
+        "packet_length_mean": 221.6857147216797
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.76:30066",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.76:40066",
+      "dst_endpoint": "198.51.100.76:443",
+      "protocol": "N/A",
+      "duration_ms": 9.014,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 67,
       "features": {
-        "flow_duration_ms": 15979.696,
-        "flow_packets_per_s": 1.1264294389580378,
-        "flow_bytes_per_s": 50.6893247531117,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 2506.8779296875,
+        "flow_packets_per_s": 277.63616943359375,
+        "flow_bytes_per_s": 30413.126953125,
+        "packet_length_mean": 109.54310607910156
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.77:30067",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.77:40067",
+      "dst_endpoint": "198.51.100.77:443",
+      "protocol": "N/A",
+      "duration_ms": 2506.87793,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 68,
       "features": {
-        "flow_duration_ms": 15226.356,
-        "flow_packets_per_s": 1.182160721843099,
-        "flow_bytes_per_s": 53.197232482939455,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 476.1199951171875,
+        "flow_packets_per_s": 197.42921447753906,
+        "flow_bytes_per_s": 85297.8203125,
+        "packet_length_mean": 432.04254150390625
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.78:30068",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.78:40068",
+      "dst_endpoint": "198.51.100.78:443",
+      "protocol": "N/A",
+      "duration_ms": 476.119995,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 69,
       "features": {
-        "flow_duration_ms": 15979.696,
-        "flow_packets_per_s": 1.1264294389580378,
-        "flow_bytes_per_s": 50.6893247531117,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 6.650000095367432,
+        "flow_packets_per_s": 5413.53369140625,
+        "flow_bytes_per_s": 1055037.625,
+        "packet_length_mean": 194.88888549804688
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.79:30069",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.79:40069",
+      "dst_endpoint": "198.51.100.79:443",
+      "protocol": "N/A",
+      "duration_ms": 6.65,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 70,
       "features": {
-        "flow_duration_ms": 15226.356,
-        "flow_packets_per_s": 1.182160721843099,
-        "flow_bytes_per_s": 53.197232482939455,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 102.15399932861328,
+        "flow_packets_per_s": 1664.1541748046875,
+        "flow_bytes_per_s": 804060.5625,
+        "packet_length_mean": 483.1647033691406
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.80:30070",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.80:40070",
+      "dst_endpoint": "198.51.100.80:443",
+      "protocol": "N/A",
+      "duration_ms": 102.153999,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 71,
       "features": {
-        "flow_duration_ms": 15979.696,
-        "flow_packets_per_s": 1.1264294389580378,
-        "flow_bytes_per_s": 50.6893247531117,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 1010.739013671875,
+        "flow_packets_per_s": 31.660003662109375,
+        "flow_bytes_per_s": 11726.0732421875,
+        "packet_length_mean": 370.375
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.81:30071",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.81:40071",
+      "dst_endpoint": "198.51.100.81:443",
+      "protocol": "N/A",
+      "duration_ms": 1010.739014,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 72,
       "features": {
-        "flow_duration_ms": 1303.518,
-        "flow_packets_per_s": 15.343094610124295,
-        "flow_bytes_per_s": 1548.1182461615413,
-        "packet_length_mean": 100.9
+        "flow_duration_ms": 331.64599609375,
+        "flow_packets_per_s": 1815.1884765625,
+        "flow_bytes_per_s": 1530433.0,
+        "packet_length_mean": 843.126220703125
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.82:30072",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.82:40072",
+      "dst_endpoint": "198.51.100.82:443",
+      "protocol": "N/A",
+      "duration_ms": 331.645996,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 73,
       "features": {
-        "flow_duration_ms": 15226.356,
-        "flow_packets_per_s": 1.182160721843099,
-        "flow_bytes_per_s": 53.197232482939455,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 59.895999908447266,
+        "flow_packets_per_s": 1569.386962890625,
+        "flow_bytes_per_s": 558902.125,
+        "packet_length_mean": 356.1276550292969
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.83:30073",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.83:40073",
+      "dst_endpoint": "198.51.100.83:443",
+      "protocol": "N/A",
+      "duration_ms": 59.896,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 74,
       "features": {
-        "flow_duration_ms": 15374.568,
-        "flow_packets_per_s": 1.0406796470639046,
-        "flow_bytes_per_s": 46.8305841178757,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 650.0070190429688,
+        "flow_packets_per_s": 113.84492492675781,
+        "flow_bytes_per_s": 30928.8984375,
+        "packet_length_mean": 271.6756896972656
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.84:30074",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.84:40074",
+      "dst_endpoint": "198.51.100.84:443",
+      "protocol": "N/A",
+      "duration_ms": 650.007019,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 75,
       "features": {
-        "flow_duration_ms": 15374.568,
-        "flow_packets_per_s": 1.0406796470639046,
-        "flow_bytes_per_s": 46.8305841178757,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 956.697998046875,
+        "flow_packets_per_s": 45.99152374267578,
+        "flow_bytes_per_s": 4260.48779296875,
+        "packet_length_mean": 92.63636016845703
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.85:30075",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.85:40075",
+      "dst_endpoint": "198.51.100.85:443",
+      "protocol": "N/A",
+      "duration_ms": 956.697998,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 76,
       "features": {
-        "flow_duration_ms": 15374.568,
-        "flow_packets_per_s": 1.0406796470639046,
-        "flow_bytes_per_s": 46.8305841178757,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.86:30076",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 77,
-      "features": {
-        "flow_duration_ms": 582.389,
-        "flow_packets_per_s": 27.473046365916936,
-        "flow_bytes_per_s": 1377.0864490915865,
-        "packet_length_mean": 50.125
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.87:30077",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 78,
-      "features": {
-        "flow_duration_ms": 16448.053,
-        "flow_packets_per_s": 0.8511645724876981,
-        "flow_bytes_per_s": 38.30240576194641,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.88:30078",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 79,
-      "features": {
-        "flow_duration_ms": 16766.71,
-        "flow_packets_per_s": 0.8349879016217254,
-        "flow_bytes_per_s": 37.57445557297765,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.89:30079",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 80,
-      "features": {
-        "flow_duration_ms": 16766.71,
-        "flow_packets_per_s": 0.8349879016217254,
-        "flow_bytes_per_s": 37.57445557297765,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.90:30080",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 81,
-      "features": {
-        "flow_duration_ms": 15402.789999999999,
-        "flow_packets_per_s": 0.9089262399863921,
-        "flow_bytes_per_s": 40.90168079938764,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.91:30081",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 82,
-      "features": {
-        "flow_duration_ms": 16448.053,
-        "flow_packets_per_s": 0.8511645724876981,
-        "flow_bytes_per_s": 38.30240576194641,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.92:30082",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 83,
-      "features": {
-        "flow_duration_ms": 2462.774,
-        "flow_packets_per_s": 7.308831423427403,
-        "flow_bytes_per_s": 1165.3525658464805,
-        "packet_length_mean": 159.44444444444446
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.93:30083",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 84,
-      "features": {
-        "flow_duration_ms": 1047.169,
-        "flow_packets_per_s": 17.18920250694969,
-        "flow_bytes_per_s": 848.000657009518,
-        "packet_length_mean": 49.333333333333336
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.94:30084",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 85,
-      "features": {
-        "flow_duration_ms": 16766.71,
-        "flow_packets_per_s": 0.8349879016217254,
-        "flow_bytes_per_s": 37.57445557297765,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.95:30085",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 86,
-      "features": {
-        "flow_duration_ms": 16448.053,
-        "flow_packets_per_s": 0.8511645724876981,
-        "flow_bytes_per_s": 38.30240576194641,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.96:30086",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 87,
-      "features": {
-        "flow_duration_ms": 15402.789999999999,
-        "flow_packets_per_s": 0.9089262399863921,
-        "flow_bytes_per_s": 40.90168079938764,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.97:30087",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 88,
-      "features": {
-        "flow_duration_ms": 15402.789999999999,
-        "flow_packets_per_s": 0.9089262399863921,
-        "flow_bytes_per_s": 40.90168079938764,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.98:30088",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 89,
-      "features": {
-        "flow_duration_ms": 2417.396,
-        "flow_packets_per_s": 9.100701746838332,
-        "flow_bytes_per_s": 843.0559163662056,
-        "packet_length_mean": 92.63636363636364
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.99:30089",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 90,
-      "features": {
-        "flow_duration_ms": 16044.232999999998,
-        "flow_packets_per_s": 0.7479322944262902,
-        "flow_bytes_per_s": 33.65695324918306,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.100:30090",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 91,
-      "features": {
-        "flow_duration_ms": 16352.577,
-        "flow_packets_per_s": 0.733829291860237,
-        "flow_bytes_per_s": 33.02231813371067,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.101:30091",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 92,
-      "features": {
-        "flow_duration_ms": 16044.232999999998,
-        "flow_packets_per_s": 0.7479322944262902,
-        "flow_bytes_per_s": 33.65695324918306,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.102:30092",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 93,
-      "features": {
-        "flow_duration_ms": 16352.577,
-        "flow_packets_per_s": 0.733829291860237,
-        "flow_bytes_per_s": 33.02231813371067,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.103:30093",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 94,
-      "features": {
-        "flow_duration_ms": 16352.577,
-        "flow_packets_per_s": 0.733829291860237,
-        "flow_bytes_per_s": 33.02231813371067,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.104:30094",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 95,
-      "features": {
-        "flow_duration_ms": 16044.232999999998,
-        "flow_packets_per_s": 0.7479322944262902,
-        "flow_bytes_per_s": 33.65695324918306,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.105:30095",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 96,
-      "features": {
-        "flow_duration_ms": 664.512,
-        "flow_packets_per_s": 24.077819512664934,
-        "flow_bytes_per_s": 1206.9007030723299,
-        "packet_length_mean": 50.125
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.106:30096",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 97,
-      "features": {
-        "flow_duration_ms": 860.208,
-        "flow_packets_per_s": 18.600152521250674,
-        "flow_bytes_per_s": 932.3326451276901,
-        "packet_length_mean": 50.125
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.107:30097",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 98,
-      "features": {
-        "flow_duration_ms": 15102.544,
-        "flow_packets_per_s": 0.6621401003698449,
-        "flow_bytes_per_s": 29.796304516643023,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.108:30098",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 99,
-      "features": {
-        "flow_duration_ms": 1979.445,
-        "flow_packets_per_s": 10.103842238607287,
-        "flow_bytes_per_s": 1029.5815241140826,
-        "packet_length_mean": 101.9
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.109:30099",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 100,
-      "features": {
-        "flow_duration_ms": 15102.544,
-        "flow_packets_per_s": 0.6621401003698449,
-        "flow_bytes_per_s": 29.796304516643023,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.110:30100",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 101,
-      "features": {
-        "flow_duration_ms": 1763.2250000000001,
-        "flow_packets_per_s": 10.20856668887975,
-        "flow_bytes_per_s": 1627.6992442824937,
-        "packet_length_mean": 159.44444444444446
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.111:30101",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 102,
-      "features": {
-        "flow_duration_ms": 651.652,
-        "flow_packets_per_s": 24.55298226660856,
-        "flow_bytes_per_s": 1230.7182361137538,
-        "packet_length_mean": 50.125
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.112:30102",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 103,
-      "features": {
-        "flow_duration_ms": 15684.376,
-        "flow_packets_per_s": 0.6375771659643966,
-        "flow_bytes_per_s": 28.69097246839785,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.113:30103",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 104,
-      "features": {
-        "flow_duration_ms": 15684.376,
-        "flow_packets_per_s": 0.6375771659643966,
-        "flow_bytes_per_s": 28.69097246839785,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.114:30104",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 105,
-      "features": {
-        "flow_duration_ms": 15008.936,
-        "flow_packets_per_s": 0.5330157980552386,
-        "flow_bytes_per_s": 23.985710912485736,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.115:30105",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 106,
-      "features": {
-        "flow_duration_ms": 15008.936,
-        "flow_packets_per_s": 0.5330157980552386,
-        "flow_bytes_per_s": 23.985710912485736,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.116:30106",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 107,
-      "features": {
-        "flow_duration_ms": 1159.3500000000001,
-        "flow_packets_per_s": 15.525941260188898,
-        "flow_bytes_per_s": 765.9464355026523,
-        "packet_length_mean": 49.333333333333336
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.117:30107",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 108,
-      "features": {
-        "flow_duration_ms": 16131.803999999998,
-        "flow_packets_per_s": 0.4959147780372239,
-        "flow_bytes_per_s": 22.316165011675075,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.118:30108",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 109,
-      "features": {
-        "flow_duration_ms": 16131.803999999998,
-        "flow_packets_per_s": 0.4959147780372239,
-        "flow_bytes_per_s": 22.316165011675075,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.119:30109",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 110,
-      "features": {
-        "flow_duration_ms": 717.487,
-        "flow_packets_per_s": 22.30005561076368,
-        "flow_bytes_per_s": 1117.7902874895294,
-        "packet_length_mean": 50.125
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.120:30110",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 111,
-      "features": {
-        "flow_duration_ms": 16488.672000000002,
-        "flow_packets_per_s": 0.3638861880447376,
-        "flow_bytes_per_s": 16.374878462013193,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.121:30111",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 112,
-      "features": {
-        "flow_duration_ms": 874.834,
-        "flow_packets_per_s": 20.575332005843393,
-        "flow_bytes_per_s": 3280.6223809316966,
-        "packet_length_mean": 159.44444444444446
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.122:30112",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 113,
-      "features": {
-        "flow_duration_ms": 16800.188,
-        "flow_packets_per_s": 0.35713886058894107,
-        "flow_bytes_per_s": 16.071248726502347,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.123:30113",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 114,
-      "features": {
-        "flow_duration_ms": 16488.672000000002,
-        "flow_packets_per_s": 0.3638861880447376,
-        "flow_bytes_per_s": 16.374878462013193,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.124:30114",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 115,
-      "features": {
-        "flow_duration_ms": 16800.188,
-        "flow_packets_per_s": 0.35713886058894107,
-        "flow_bytes_per_s": 16.071248726502347,
-        "packet_length_mean": 45.0
-      },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.125:30115",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
-    },
-    {
-      "flow_id": 116,
-      "features": {
-        "flow_duration_ms": 1538.604,
-        "flow_packets_per_s": 12.998796311461557,
-        "flow_bytes_per_s": 1351.874816392002,
+        "flow_duration_ms": 1.7100000381469727,
+        "flow_packets_per_s": 4678.36279296875,
+        "flow_bytes_per_s": 486549.71875,
         "packet_length_mean": 104.0
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.126:30116",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.86:40076",
+      "dst_endpoint": "198.51.100.86:443",
+      "protocol": "N/A",
+      "duration_ms": 1.71,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 77,
+      "features": {
+        "flow_duration_ms": 67.86599731445312,
+        "flow_packets_per_s": 2504.936279296875,
+        "flow_bytes_per_s": 1248696.0,
+        "packet_length_mean": 498.4941101074219
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.87:40077",
+      "dst_endpoint": "198.51.100.87:443",
+      "protocol": "N/A",
+      "duration_ms": 67.865997,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 78,
+      "features": {
+        "flow_duration_ms": 50.12799835205078,
+        "flow_packets_per_s": 2593.361083984375,
+        "flow_bytes_per_s": 1113549.375,
+        "packet_length_mean": 429.3846130371094
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.88:40078",
+      "dst_endpoint": "198.51.100.88:443",
+      "protocol": "N/A",
+      "duration_ms": 50.127998,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 79,
+      "features": {
+        "flow_duration_ms": 5.255000114440918,
+        "flow_packets_per_s": 8372.978515625,
+        "flow_bytes_per_s": 775642.25,
+        "packet_length_mean": 92.63636016845703
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.89:40079",
+      "dst_endpoint": "198.51.100.89:443",
+      "protocol": "N/A",
+      "duration_ms": 5.255,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 80,
+      "features": {
+        "flow_duration_ms": 1005.8250122070312,
+        "flow_packets_per_s": 29.826261520385742,
+        "flow_bytes_per_s": 11679.9638671875,
+        "packet_length_mean": 391.6000061035156
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.90:40080",
+      "dst_endpoint": "198.51.100.90:443",
+      "protocol": "N/A",
+      "duration_ms": 1005.825012,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 81,
+      "features": {
+        "flow_duration_ms": 1.7929999828338623,
+        "flow_packets_per_s": 4461.7958984375,
+        "flow_bytes_per_s": 459564.96875,
+        "packet_length_mean": 103.0
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.91:40081",
+      "dst_endpoint": "198.51.100.91:443",
+      "protocol": "N/A",
+      "duration_ms": 1.793,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 82,
+      "features": {
+        "flow_duration_ms": 15.91100025177002,
+        "flow_packets_per_s": 5907.8623046875,
+        "flow_bytes_per_s": 2103953.25,
+        "packet_length_mean": 356.1276550292969
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.92:40082",
+      "dst_endpoint": "198.51.100.92:443",
+      "protocol": "N/A",
+      "duration_ms": 15.911,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 83,
+      "features": {
+        "flow_duration_ms": 3.2880001068115234,
+        "flow_packets_per_s": 1216.5450439453125,
+        "flow_bytes_per_s": 98540.1484375,
+        "packet_length_mean": 81.0
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.93:40083",
+      "dst_endpoint": "198.51.100.93:443",
+      "protocol": "N/A",
+      "duration_ms": 3.288,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 84,
+      "features": {
+        "flow_duration_ms": 46.42499923706055,
+        "flow_packets_per_s": 301.5616455078125,
+        "flow_bytes_per_s": 46268.17578125,
+        "packet_length_mean": 153.42857360839844
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.94:40084",
+      "dst_endpoint": "198.51.100.94:443",
+      "protocol": "N/A",
+      "duration_ms": 46.424999,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 85,
+      "features": {
+        "flow_duration_ms": 42.16400146484375,
+        "flow_packets_per_s": 2229.389892578125,
+        "flow_bytes_per_s": 969974.375,
+        "packet_length_mean": 435.0851135253906
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.95:40085",
+      "dst_endpoint": "198.51.100.95:443",
+      "protocol": "N/A",
+      "duration_ms": 42.164001,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 86,
+      "features": {
+        "flow_duration_ms": 43.391998291015625,
+        "flow_packets_per_s": 3479.904052734375,
+        "flow_bytes_per_s": 1692017.0,
+        "packet_length_mean": 486.22515869140625
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.96:40086",
+      "dst_endpoint": "198.51.100.96:443",
+      "protocol": "N/A",
+      "duration_ms": 43.391998,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 87,
+      "features": {
+        "flow_duration_ms": 70.45500183105469,
+        "flow_packets_per_s": 198.70838928222656,
+        "flow_bytes_per_s": 30487.544921875,
+        "packet_length_mean": 153.42857360839844
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.97:40087",
+      "dst_endpoint": "198.51.100.97:443",
+      "protocol": "N/A",
+      "duration_ms": 70.455002,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 88,
+      "features": {
+        "flow_duration_ms": 72.16100311279297,
+        "flow_packets_per_s": 2355.84326171875,
+        "flow_bytes_per_s": 1174374.0,
+        "packet_length_mean": 498.4941101074219
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.98:40088",
+      "dst_endpoint": "198.51.100.98:443",
+      "protocol": "N/A",
+      "duration_ms": 72.161003,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 89,
+      "features": {
+        "flow_duration_ms": 57.25299835205078,
+        "flow_packets_per_s": 2585.017333984375,
+        "flow_bytes_per_s": 1142298.25,
+        "packet_length_mean": 441.89190673828125
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.99:40089",
+      "dst_endpoint": "198.51.100.99:443",
+      "protocol": "N/A",
+      "duration_ms": 57.252998,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 90,
+      "features": {
+        "flow_duration_ms": 14.104000091552734,
+        "flow_packets_per_s": 1276.233642578125,
+        "flow_bytes_per_s": 132444.703125,
+        "packet_length_mean": 103.77777862548828
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.100:40090",
+      "dst_endpoint": "198.51.100.100:443",
+      "protocol": "N/A",
+      "duration_ms": 14.104,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 91,
+      "features": {
+        "flow_duration_ms": 530.3189697265625,
+        "flow_packets_per_s": 33.94183349609375,
+        "flow_bytes_per_s": 3673.2607421875,
+        "packet_length_mean": 108.22222137451172
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.101:40091",
+      "dst_endpoint": "198.51.100.101:443",
+      "protocol": "N/A",
+      "duration_ms": 530.31897,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 92,
+      "features": {
+        "flow_duration_ms": 754.9869995117188,
+        "flow_packets_per_s": 26.490522384643555,
+        "flow_bytes_per_s": 2696.735107421875,
+        "packet_length_mean": 101.80000305175781
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.102:40092",
+      "dst_endpoint": "198.51.100.102:443",
+      "protocol": "N/A",
+      "duration_ms": 754.987,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 93,
+      "features": {
+        "flow_duration_ms": 891.843017578125,
+        "flow_packets_per_s": 22.425472259521484,
+        "flow_bytes_per_s": 2287.398193359375,
+        "packet_length_mean": 102.0
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.103:40093",
+      "dst_endpoint": "198.51.100.103:443",
+      "protocol": "N/A",
+      "duration_ms": 891.843018,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 94,
+      "features": {
+        "flow_duration_ms": 843.8699951171875,
+        "flow_packets_per_s": 23.700332641601562,
+        "flow_bytes_per_s": 2346.3330078125,
+        "packet_length_mean": 99.0
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.104:40094",
+      "dst_endpoint": "198.51.100.104:443",
+      "protocol": "N/A",
+      "duration_ms": 843.869995,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 95,
+      "features": {
+        "flow_duration_ms": 537.6849975585938,
+        "flow_packets_per_s": 14.878600120544434,
+        "flow_bytes_per_s": 2016.05029296875,
+        "packet_length_mean": 135.5
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.105:40095",
+      "dst_endpoint": "198.51.100.105:443",
+      "protocol": "N/A",
+      "duration_ms": 537.684998,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 96,
+      "features": {
+        "flow_duration_ms": 153.26300048828125,
+        "flow_packets_per_s": 52.19785690307617,
+        "flow_bytes_per_s": 7072.8095703125,
+        "packet_length_mean": 135.5
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.106:40096",
+      "dst_endpoint": "198.51.100.106:443",
+      "protocol": "N/A",
+      "duration_ms": 153.263,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 97,
+      "features": {
+        "flow_duration_ms": 688.0269775390625,
+        "flow_packets_per_s": 23.254901885986328,
+        "flow_bytes_per_s": 4380.64208984375,
+        "packet_length_mean": 188.375
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.107:40097",
+      "dst_endpoint": "198.51.100.107:443",
+      "protocol": "N/A",
+      "duration_ms": 688.026978,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 98,
+      "features": {
+        "flow_duration_ms": 0.03799999877810478,
+        "flow_packets_per_s": 52631.578125,
+        "flow_bytes_per_s": 28000000.0,
+        "packet_length_mean": 532.0
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.108:40098",
+      "dst_endpoint": "198.51.100.108:443",
+      "protocol": "N/A",
+      "duration_ms": 0.038,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 99,
+      "features": {
+        "flow_duration_ms": 556.9539794921875,
+        "flow_packets_per_s": 28.727685928344727,
+        "flow_bytes_per_s": 1439.975341796875,
+        "packet_length_mean": 50.125
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.109:40099",
+      "dst_endpoint": "198.51.100.109:443",
+      "protocol": "N/A",
+      "duration_ms": 556.953979,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 100,
+      "features": {
+        "flow_duration_ms": 739.8839721679688,
+        "flow_packets_per_s": 21.625011444091797,
+        "flow_bytes_per_s": 1083.9537353515625,
+        "packet_length_mean": 50.125
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.110:40100",
+      "dst_endpoint": "198.51.100.110:443",
+      "protocol": "N/A",
+      "duration_ms": 739.883972,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 101,
+      "features": {
+        "flow_duration_ms": 1194.6429443359375,
+        "flow_packets_per_s": 15.067262649536133,
+        "flow_bytes_per_s": 743.3182983398438,
+        "packet_length_mean": 49.33333206176758
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.111:40101",
+      "dst_endpoint": "198.51.100.111:443",
+      "protocol": "N/A",
+      "duration_ms": 1194.642944,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 102,
+      "features": {
+        "flow_duration_ms": 1540.5350341796875,
+        "flow_packets_per_s": 19.4737548828125,
+        "flow_bytes_per_s": 1891.5506591796875,
+        "packet_length_mean": 97.13333129882812
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.112:40102",
+      "dst_endpoint": "198.51.100.112:443",
+      "protocol": "N/A",
+      "duration_ms": 1540.535034,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 103,
+      "features": {
+        "flow_duration_ms": 702.5089721679688,
+        "flow_packets_per_s": 37.01020050048828,
+        "flow_bytes_per_s": 3003.520263671875,
+        "packet_length_mean": 81.15384674072266
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.113:40103",
+      "dst_endpoint": "198.51.100.113:443",
+      "protocol": "N/A",
+      "duration_ms": 702.508972,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 104,
+      "features": {
+        "flow_duration_ms": 900.3300170898438,
+        "flow_packets_per_s": 31.099708557128906,
+        "flow_bytes_per_s": 2436.88427734375,
+        "packet_length_mean": 78.35713958740234
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.114:40104",
+      "dst_endpoint": "198.51.100.114:443",
+      "protocol": "N/A",
+      "duration_ms": 900.330017,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 105,
+      "features": {
+        "flow_duration_ms": 900.8519897460938,
+        "flow_packets_per_s": 33.30180740356445,
+        "flow_bytes_per_s": 1878.221923828125,
+        "packet_length_mean": 56.400001525878906
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.115:40105",
+      "dst_endpoint": "198.51.100.115:443",
+      "protocol": "N/A",
+      "duration_ms": 900.85199,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 106,
+      "features": {
+        "flow_duration_ms": 791.7109985351562,
+        "flow_packets_per_s": 37.892616271972656,
+        "flow_bytes_per_s": 2137.1435546875,
+        "packet_length_mean": 56.400001525878906
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.116:40106",
+      "dst_endpoint": "198.51.100.116:443",
+      "protocol": "N/A",
+      "duration_ms": 791.710999,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 107,
+      "features": {
+        "flow_duration_ms": 1306.885986328125,
+        "flow_packets_per_s": 13.773198127746582,
+        "flow_bytes_per_s": 2196.06005859375,
+        "packet_length_mean": 159.44444274902344
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.117:40107",
+      "dst_endpoint": "198.51.100.117:443",
+      "protocol": "N/A",
+      "duration_ms": 1306.885986,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 108,
+      "features": {
+        "flow_duration_ms": 1000.2830200195312,
+        "flow_packets_per_s": 15.99547290802002,
+        "flow_bytes_per_s": 905.74365234375,
+        "packet_length_mean": 56.625
+      },
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.118:40108",
+      "dst_endpoint": "198.51.100.118:443",
+      "protocol": "N/A",
+      "duration_ms": 1000.28302,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 109,
+      "features": {
+        "flow_duration_ms": 1253.6719970703125,
+        "flow_packets_per_s": 15.953136444091797,
+        "flow_bytes_per_s": 1480.4510498046875,
+        "packet_length_mean": 92.80000305175781
+      },
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Fuzzers",
+      "category": "fuzzers",
+      "src_endpoint": "192.0.2.119:40109",
+      "dst_endpoint": "198.51.100.119:443",
+      "protocol": "N/A",
+      "duration_ms": 1253.671997,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 110,
+      "features": {
+        "flow_duration_ms": 1109.6180419921875,
+        "flow_packets_per_s": 21.629064559936523,
+        "flow_bytes_per_s": 1185.9937744140625,
+        "packet_length_mean": 54.83333206176758
+      },
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.120:40110",
+      "dst_endpoint": "198.51.100.120:443",
+      "protocol": "N/A",
+      "duration_ms": 1109.618042,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 111,
+      "features": {
+        "flow_duration_ms": 773.5269775390625,
+        "flow_packets_per_s": 23.270034790039062,
+        "flow_bytes_per_s": 5101.30859375,
+        "packet_length_mean": 219.22222900390625
+      },
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Fuzzers",
+      "category": "fuzzers",
+      "src_endpoint": "192.0.2.121:40111",
+      "dst_endpoint": "198.51.100.121:443",
+      "protocol": "N/A",
+      "duration_ms": 773.526978,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 112,
+      "features": {
+        "flow_duration_ms": 183.85499572753906,
+        "flow_packets_per_s": 87.02510070800781,
+        "flow_bytes_per_s": 6244.05078125,
+        "packet_length_mean": 71.75
+      },
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.122:40112",
+      "dst_endpoint": "198.51.100.122:443",
+      "protocol": "N/A",
+      "duration_ms": 183.854996,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 113,
+      "features": {
+        "flow_duration_ms": 1254.10498046875,
+        "flow_packets_per_s": 15.947628021240234,
+        "flow_bytes_per_s": 1149.823974609375,
+        "packet_length_mean": 72.0999984741211
+      },
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Generic",
+      "category": "generic",
+      "src_endpoint": "192.0.2.123:40113",
+      "dst_endpoint": "198.51.100.123:443",
+      "protocol": "N/A",
+      "duration_ms": 1254.10498,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 114,
+      "features": {
+        "flow_duration_ms": 648.9619750976562,
+        "flow_packets_per_s": 27.736600875854492,
+        "flow_bytes_per_s": 1414.566650390625,
+        "packet_length_mean": 51.0
+      },
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Reconnaissance",
+      "category": "reconnaissance",
+      "src_endpoint": "192.0.2.124:40114",
+      "dst_endpoint": "198.51.100.124:443",
+      "protocol": "N/A",
+      "duration_ms": 648.961975,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 115,
+      "features": {
+        "flow_duration_ms": 415.2300109863281,
+        "flow_packets_per_s": 38.532859802246094,
+        "flow_bytes_per_s": 3703.97119140625,
+        "packet_length_mean": 96.125
+      },
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.125:40115",
+      "dst_endpoint": "198.51.100.125:443",
+      "protocol": "N/A",
+      "duration_ms": 415.230011,
+      "source_file": "UNSW_NB15_testing-set.csv"
+    },
+    {
+      "flow_id": 116,
+      "features": {
+        "flow_duration_ms": 634.6719970703125,
+        "flow_packets_per_s": 28.361106872558594,
+        "flow_bytes_per_s": 1748.9349365234375,
+        "packet_length_mean": 61.66666793823242
+      },
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Fuzzers",
+      "category": "fuzzers",
+      "src_endpoint": "192.0.2.126:40116",
+      "dst_endpoint": "198.51.100.126:443",
+      "protocol": "N/A",
+      "duration_ms": 634.671997,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 117,
       "features": {
-        "flow_duration_ms": 16136.994999999999,
-        "flow_packets_per_s": 0.37181643794275204,
-        "flow_bytes_per_s": 16.73173970742384,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 992.4509887695312,
+        "flow_packets_per_s": 18.13691520690918,
+        "flow_bytes_per_s": 1344.14697265625,
+        "packet_length_mean": 74.11111450195312
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.127:30117",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.127:40117",
+      "dst_endpoint": "198.51.100.127:443",
+      "protocol": "N/A",
+      "duration_ms": 992.450989,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 118,
       "features": {
-        "flow_duration_ms": 16136.994999999999,
-        "flow_packets_per_s": 0.37181643794275204,
-        "flow_bytes_per_s": 16.73173970742384,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 1437.9539794921875,
+        "flow_packets_per_s": 20.86297607421875,
+        "flow_bytes_per_s": 1723.2818603515625,
+        "packet_length_mean": 82.5999984741211
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.128:30118",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.128:40118",
+      "dst_endpoint": "198.51.100.128:443",
+      "protocol": "N/A",
+      "duration_ms": 1437.953979,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 119,
       "features": {
-        "flow_duration_ms": 17272.808,
-        "flow_packets_per_s": 0.23157786504660965,
-        "flow_bytes_per_s": 10.421003927097434,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 444.2690124511719,
+        "flow_packets_per_s": 36.014217376708984,
+        "flow_bytes_per_s": 1931.2623291015625,
+        "packet_length_mean": 53.625
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.129:30119",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Fuzzers",
+      "category": "fuzzers",
+      "src_endpoint": "192.0.2.129:40119",
+      "dst_endpoint": "198.51.100.129:443",
+      "protocol": "N/A",
+      "duration_ms": 444.269012,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 120,
       "features": {
-        "flow_duration_ms": 17267.853,
-        "flow_packets_per_s": 0.23164431617526512,
-        "flow_bytes_per_s": 10.423994227886931,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 221.28799438476562,
+        "flow_packets_per_s": 72.30396270751953,
+        "flow_bytes_per_s": 4699.7578125,
+        "packet_length_mean": 65.0
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.130:30120",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Reconnaissance",
+      "category": "reconnaissance",
+      "src_endpoint": "192.0.2.130:40120",
+      "dst_endpoint": "198.51.100.130:443",
+      "protocol": "N/A",
+      "duration_ms": 221.287994,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 121,
       "features": {
-        "flow_duration_ms": 17267.853,
-        "flow_packets_per_s": 0.23164431617526512,
-        "flow_bytes_per_s": 10.423994227886931,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 833.3159790039062,
+        "flow_packets_per_s": 21.600448608398438,
+        "flow_bytes_per_s": 1101.6229248046875,
+        "packet_length_mean": 51.0
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.131:30121",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Reconnaissance",
+      "category": "reconnaissance",
+      "src_endpoint": "192.0.2.131:40121",
+      "dst_endpoint": "198.51.100.131:443",
+      "protocol": "N/A",
+      "duration_ms": 833.315979,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 122,
       "features": {
-        "flow_duration_ms": 869.206,
-        "flow_packets_per_s": 18.40760418128729,
-        "flow_bytes_per_s": 922.6811595870254,
-        "packet_length_mean": 50.125
+        "flow_duration_ms": 572.7760009765625,
+        "flow_packets_per_s": 41.90119552612305,
+        "flow_bytes_per_s": 2322.024658203125,
+        "packet_length_mean": 55.41666793823242
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.132:30122",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Fuzzers",
+      "category": "fuzzers",
+      "src_endpoint": "192.0.2.132:40122",
+      "dst_endpoint": "198.51.100.132:443",
+      "protocol": "N/A",
+      "duration_ms": 572.776001,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 123,
       "features": {
-        "flow_duration_ms": 19176.811,
-        "flow_packets_per_s": 0.208585254347034,
-        "flow_bytes_per_s": 9.38633644561653,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 951.8800048828125,
+        "flow_packets_per_s": 18.90994644165039,
+        "flow_bytes_per_s": 3651.720703125,
+        "packet_length_mean": 193.11111450195312
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.133:30123",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.133:40123",
+      "dst_endpoint": "198.51.100.133:443",
+      "protocol": "N/A",
+      "duration_ms": 951.880005,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 124,
       "features": {
-        "flow_duration_ms": 17272.808,
-        "flow_packets_per_s": 0.23157786504660965,
-        "flow_bytes_per_s": 10.421003927097434,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 396.8559875488281,
+        "flow_packets_per_s": 40.316890716552734,
+        "flow_bytes_per_s": 2020.8841552734375,
+        "packet_length_mean": 50.125
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.134:30124",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Fuzzers",
+      "category": "fuzzers",
+      "src_endpoint": "192.0.2.134:40124",
+      "dst_endpoint": "198.51.100.134:443",
+      "protocol": "N/A",
+      "duration_ms": 396.855988,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 125,
       "features": {
-        "flow_duration_ms": 16687.513,
-        "flow_packets_per_s": 0.23970018779910465,
-        "flow_bytes_per_s": 10.78650845095971,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 621.625,
+        "flow_packets_per_s": 35.39111328125,
+        "flow_bytes_per_s": 3011.4619140625,
+        "packet_length_mean": 85.09091186523438
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.135:30125",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Fuzzers",
+      "category": "fuzzers",
+      "src_endpoint": "192.0.2.135:40125",
+      "dst_endpoint": "198.51.100.135:443",
+      "protocol": "N/A",
+      "duration_ms": 621.625,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 126,
       "features": {
-        "flow_duration_ms": 19176.811,
-        "flow_packets_per_s": 0.208585254347034,
-        "flow_bytes_per_s": 9.38633644561653,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 229.9980010986328,
+        "flow_packets_per_s": 69.5658187866211,
+        "flow_bytes_per_s": 6391.35986328125,
+        "packet_length_mean": 91.875
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.136:30126",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Exploits",
+      "category": "exploits",
+      "src_endpoint": "192.0.2.136:40126",
+      "dst_endpoint": "198.51.100.136:443",
+      "protocol": "N/A",
+      "duration_ms": 229.998001,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 127,
       "features": {
-        "flow_duration_ms": 816.781,
-        "flow_packets_per_s": 19.58909426149727,
-        "flow_bytes_per_s": 3408.5024015005247,
-        "packet_length_mean": 174.0
+        "flow_duration_ms": 0.013000000268220901,
+        "flow_packets_per_s": 153846.15625,
+        "flow_bytes_per_s": 82769232.0,
+        "packet_length_mean": 538.0
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.137:30127",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "Fuzzers",
+      "category": "fuzzers",
+      "src_endpoint": "192.0.2.137:40127",
+      "dst_endpoint": "198.51.100.137:443",
+      "protocol": "N/A",
+      "duration_ms": 0.013,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 128,
       "features": {
-        "flow_duration_ms": 16687.513,
-        "flow_packets_per_s": 0.23970018779910465,
-        "flow_bytes_per_s": 10.78650845095971,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 2539.5869140625,
+        "flow_packets_per_s": 15.750592231750488,
+        "flow_bytes_per_s": 1674.2879638671875,
+        "packet_length_mean": 106.30000305175781
       },
-      "label": "BENIGN",
-      "is_attack": false,
-      "src_endpoint": "10.40.85.138:30128",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "ATTACK",
+      "is_attack": true,
+      "ground_truth": "DoS",
+      "category": "dos",
+      "src_endpoint": "192.0.2.138:40128",
+      "dst_endpoint": "198.51.100.138:443",
+      "protocol": "N/A",
+      "duration_ms": 2539.586914,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 129,
       "features": {
-        "flow_duration_ms": 724.897,
-        "flow_packets_per_s": 22.072101277836712,
-        "flow_bytes_per_s": 1106.3640765515652,
-        "packet_length_mean": 50.125
+        "flow_duration_ms": 630.1179809570312,
+        "flow_packets_per_s": 25.39206886291504,
+        "flow_bytes_per_s": 1717.138671875,
+        "packet_length_mean": 67.625
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.139:30129",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.139:40129",
+      "dst_endpoint": "198.51.100.139:443",
+      "protocol": "N/A",
+      "duration_ms": 630.117981,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 130,
       "features": {
-        "flow_duration_ms": 1625.287,
-        "flow_packets_per_s": 12.305518963727637,
-        "flow_bytes_per_s": 1266.2379013675738,
-        "packet_length_mean": 102.9
+        "flow_duration_ms": 2006.9630126953125,
+        "flow_packets_per_s": 8.968774795532227,
+        "flow_bytes_per_s": 671.66162109375,
+        "packet_length_mean": 74.88888549804688
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.140:30130",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.140:40130",
+      "dst_endpoint": "198.51.100.140:443",
+      "protocol": "N/A",
+      "duration_ms": 2006.963013,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 131,
       "features": {
-        "flow_duration_ms": 1739.142,
-        "flow_packets_per_s": 10.3499311729577,
-        "flow_bytes_per_s": 1650.2390259104777,
-        "packet_length_mean": 159.44444444444446
+        "flow_duration_ms": 723.5250244140625,
+        "flow_packets_per_s": 22.113956451416016,
+        "flow_bytes_per_s": 1213.5032958984375,
+        "packet_length_mean": 54.875
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.141:30131",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.141:40131",
+      "dst_endpoint": "198.51.100.141:443",
+      "protocol": "N/A",
+      "duration_ms": 723.525024,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 132,
       "features": {
-        "flow_duration_ms": 885.835,
-        "flow_packets_per_s": 18.06205444580537,
-        "flow_bytes_per_s": 905.3604790959942,
-        "packet_length_mean": 50.125
+        "flow_duration_ms": 582.5700073242188,
+        "flow_packets_per_s": 27.464509963989258,
+        "flow_bytes_per_s": 1301.1312255859375,
+        "packet_length_mean": 47.375
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.142:30132",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.142:40132",
+      "dst_endpoint": "198.51.100.142:443",
+      "protocol": "N/A",
+      "duration_ms": 582.570007,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 133,
       "features": {
-        "flow_duration_ms": 1179.485,
-        "flow_packets_per_s": 15.260897764702392,
-        "flow_bytes_per_s": 752.8709563919847,
-        "packet_length_mean": 49.333333333333336
+        "flow_duration_ms": 667.708984375,
+        "flow_packets_per_s": 29.953168869018555,
+        "flow_bytes_per_s": 2611.916259765625,
+        "packet_length_mean": 87.19999694824219
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.143:30133",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.143:40133",
+      "dst_endpoint": "198.51.100.143:443",
+      "protocol": "N/A",
+      "duration_ms": 667.708984,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 134,
       "features": {
-        "flow_duration_ms": 1318.945,
-        "flow_packets_per_s": 13.647271114413414,
-        "flow_bytes_per_s": 2175.981561020361,
-        "packet_length_mean": 159.44444444444446
+        "flow_duration_ms": 843.364990234375,
+        "flow_packets_per_s": 18.971620559692383,
+        "flow_bytes_per_s": 950.9524536132812,
+        "packet_length_mean": 50.125
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.144:30134",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.144:40134",
+      "dst_endpoint": "198.51.100.144:443",
+      "protocol": "N/A",
+      "duration_ms": 843.36499,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 135,
       "features": {
-        "flow_duration_ms": 1048.635,
-        "flow_packets_per_s": 17.165171866283313,
-        "flow_bytes_per_s": 1935.8499382530624,
-        "packet_length_mean": 112.77777777777777
+        "flow_duration_ms": 710.1909790039062,
+        "flow_packets_per_s": 25.345294952392578,
+        "flow_bytes_per_s": 2740.10791015625,
+        "packet_length_mean": 108.11111450195312
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.145:30135",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.145:40135",
+      "dst_endpoint": "198.51.100.145:443",
+      "protocol": "N/A",
+      "duration_ms": 710.190979,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 136,
       "features": {
-        "flow_duration_ms": 1493.3799999999999,
-        "flow_packets_per_s": 13.392438629149982,
-        "flow_bytes_per_s": 1473.168249206498,
-        "packet_length_mean": 110.0
+        "flow_duration_ms": 1459.9659423828125,
+        "flow_packets_per_s": 12.32905387878418,
+        "flow_bytes_per_s": 1965.7991943359375,
+        "packet_length_mean": 159.44444274902344
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.146:30136",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.146:40136",
+      "dst_endpoint": "198.51.100.146:443",
+      "protocol": "N/A",
+      "duration_ms": 1459.965942,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 137,
       "features": {
-        "flow_duration_ms": 1493.3799999999999,
-        "flow_packets_per_s": 13.392438629149982,
-        "flow_bytes_per_s": 1473.168249206498,
-        "packet_length_mean": 110.0
+        "flow_duration_ms": 661.0700073242188,
+        "flow_packets_per_s": 30.253982543945312,
+        "flow_bytes_per_s": 3158.515625,
+        "packet_length_mean": 104.4000015258789
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.147:30137",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.147:40137",
+      "dst_endpoint": "198.51.100.147:443",
+      "protocol": "N/A",
+      "duration_ms": 661.070007,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 138,
       "features": {
-        "flow_duration_ms": 657.843,
-        "flow_packets_per_s": 27.362151759614378,
-        "flow_bytes_per_s": 1349.8661534743094,
-        "packet_length_mean": 49.333333333333336
+        "flow_duration_ms": 1004.8809814453125,
+        "flow_packets_per_s": 25.87371063232422,
+        "flow_bytes_per_s": 1409.1220703125,
+        "packet_length_mean": 54.46154022216797
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.148:30138",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.148:40138",
+      "dst_endpoint": "198.51.100.148:443",
+      "protocol": "N/A",
+      "duration_ms": 1004.880981,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 139,
       "features": {
-        "flow_duration_ms": 1493.3799999999999,
-        "flow_packets_per_s": 13.392438629149982,
-        "flow_bytes_per_s": 1473.168249206498,
-        "packet_length_mean": 110.0
+        "flow_duration_ms": 1009.875,
+        "flow_packets_per_s": 25.745759963989258,
+        "flow_bytes_per_s": 1402.1536865234375,
+        "packet_length_mean": 54.46154022216797
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.149:30139",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.149:40139",
+      "dst_endpoint": "198.51.100.149:443",
+      "protocol": "N/A",
+      "duration_ms": 1009.875,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 140,
       "features": {
-        "flow_duration_ms": 1450.415,
-        "flow_packets_per_s": 12.410241206827012,
-        "flow_bytes_per_s": 1978.7440146440847,
-        "packet_length_mean": 159.44444444444446
+        "flow_duration_ms": 918.1669921875,
+        "flow_packets_per_s": 8.713011741638184,
+        "flow_bytes_per_s": 1195.86083984375,
+        "packet_length_mean": 137.25
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.150:30140",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.150:40140",
+      "dst_endpoint": "198.51.100.150:443",
+      "protocol": "N/A",
+      "duration_ms": 918.166992,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 141,
       "features": {
-        "flow_duration_ms": 1450.18,
-        "flow_packets_per_s": 12.412252272131735,
-        "flow_bytes_per_s": 612.337778758499,
-        "packet_length_mean": 49.333333333333336
+        "flow_duration_ms": 413.2969970703125,
+        "flow_packets_per_s": 19.35654067993164,
+        "flow_bytes_per_s": 2656.68505859375,
+        "packet_length_mean": 137.25
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.151:30141",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.151:40141",
+      "dst_endpoint": "198.51.100.151:443",
+      "protocol": "N/A",
+      "duration_ms": 413.296997,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 142,
       "features": {
-        "flow_duration_ms": 1302.269,
-        "flow_packets_per_s": 13.82202908922811,
-        "flow_bytes_per_s": 681.8867684019201,
-        "packet_length_mean": 49.333333333333336
+        "flow_duration_ms": 479.96099853515625,
+        "flow_packets_per_s": 16.668020248413086,
+        "flow_bytes_per_s": 2287.685791015625,
+        "packet_length_mean": 137.25
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.152:30142",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.152:40142",
+      "dst_endpoint": "198.51.100.152:443",
+      "protocol": "N/A",
+      "duration_ms": 479.960999,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 143,
       "features": {
-        "flow_duration_ms": 1209.46,
-        "flow_packets_per_s": 14.88267491277099,
-        "flow_bytes_per_s": 1744.5802258859326,
-        "packet_length_mean": 117.22222222222223
+        "flow_duration_ms": 976.885009765625,
+        "flow_packets_per_s": 8.189295768737793,
+        "flow_bytes_per_s": 1123.9808349609375,
+        "packet_length_mean": 137.25
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.153:30143",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.153:40143",
+      "dst_endpoint": "198.51.100.153:443",
+      "protocol": "N/A",
+      "duration_ms": 976.88501,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 144,
       "features": {
-        "flow_duration_ms": 638.839,
-        "flow_packets_per_s": 25.04543398258403,
-        "flow_bytes_per_s": 4357.905512969621,
-        "packet_length_mean": 174.0
+        "flow_duration_ms": 746.8289794921875,
+        "flow_packets_per_s": 10.711956977844238,
+        "flow_bytes_per_s": 1470.216064453125,
+        "packet_length_mean": 137.25
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.154:30144",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.154:40144",
+      "dst_endpoint": "198.51.100.154:443",
+      "protocol": "N/A",
+      "duration_ms": 746.828979,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 145,
       "features": {
-        "flow_duration_ms": 1368.3529999999998,
-        "flow_packets_per_s": 14.61611148585197,
-        "flow_bytes_per_s": 1423.6092587219819,
-        "packet_length_mean": 97.4
+        "flow_duration_ms": 1133.876953125,
+        "flow_packets_per_s": 15.874737739562988,
+        "flow_bytes_per_s": 783.1537475585938,
+        "packet_length_mean": 49.33333206176758
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.155:30145",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.155:40145",
+      "dst_endpoint": "198.51.100.155:443",
+      "protocol": "N/A",
+      "duration_ms": 1133.876953,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 146,
       "features": {
-        "flow_duration_ms": 1368.3529999999998,
-        "flow_packets_per_s": 14.61611148585197,
-        "flow_bytes_per_s": 1423.6092587219819,
-        "packet_length_mean": 97.4
+        "flow_duration_ms": 771.0800170898438,
+        "flow_packets_per_s": 23.343881607055664,
+        "flow_bytes_per_s": 1151.6314697265625,
+        "packet_length_mean": 49.33333206176758
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.156:30146",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.156:40146",
+      "dst_endpoint": "198.51.100.156:443",
+      "protocol": "N/A",
+      "duration_ms": 771.080017,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 147,
       "features": {
-        "flow_duration_ms": 963.874,
-        "flow_packets_per_s": 18.674640046313108,
-        "flow_bytes_per_s": 2977.5676073843674,
-        "packet_length_mean": 159.44444444444446
+        "flow_duration_ms": 598.2839965820312,
+        "flow_packets_per_s": 26.743152618408203,
+        "flow_bytes_per_s": 1340.50048828125,
+        "packet_length_mean": 50.125
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.157:30147",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.157:40147",
+      "dst_endpoint": "198.51.100.157:443",
+      "protocol": "N/A",
+      "duration_ms": 598.283997,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 148,
       "features": {
-        "flow_duration_ms": 866.189,
-        "flow_packets_per_s": 20.780684123210985,
-        "flow_bytes_per_s": 1025.1804167450753,
-        "packet_length_mean": 49.333333333333336
+        "flow_duration_ms": 2576.89892578125,
+        "flow_packets_per_s": 9.313519477844238,
+        "flow_bytes_per_s": 553.3782958984375,
+        "packet_length_mean": 59.41666793823242
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.158:30148",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.158:40148",
+      "dst_endpoint": "198.51.100.158:443",
+      "protocol": "N/A",
+      "duration_ms": 2576.898926,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 149,
       "features": {
-        "flow_duration_ms": 720.9649999999999,
-        "flow_packets_per_s": 24.966537904059145,
-        "flow_bytes_per_s": 2837.863141761389,
-        "packet_length_mean": 113.66666666666667
+        "flow_duration_ms": 522.5440063476562,
+        "flow_packets_per_s": 30.619430541992188,
+        "flow_bytes_per_s": 1534.7989501953125,
+        "packet_length_mean": 50.125
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.159:30149",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.159:40149",
+      "dst_endpoint": "198.51.100.159:443",
+      "protocol": "N/A",
+      "duration_ms": 522.544006,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 150,
       "features": {
-        "flow_duration_ms": 650.809,
-        "flow_packets_per_s": 24.584786012486,
-        "flow_bytes_per_s": 4277.7527661725635,
-        "packet_length_mean": 174.0
+        "flow_duration_ms": 924.0130004882812,
+        "flow_packets_per_s": 51.947322845458984,
+        "flow_bytes_per_s": 31670.55078125,
+        "packet_length_mean": 609.6666870117188
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.160:30150",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.160:40150",
+      "dst_endpoint": "198.51.100.160:443",
+      "protocol": "N/A",
+      "duration_ms": 924.013,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 151,
       "features": {
-        "flow_duration_ms": 1097.5600000000002,
-        "flow_packets_per_s": 18.222238419767482,
-        "flow_bytes_per_s": 1760.2682313495388,
-        "packet_length_mean": 96.6
+        "flow_duration_ms": 315.63800048828125,
+        "flow_packets_per_s": 50.690982818603516,
+        "flow_bytes_per_s": 5956.1904296875,
+        "packet_length_mean": 117.5
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.161:30151",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.161:40151",
+      "dst_endpoint": "198.51.100.161:443",
+      "protocol": "N/A",
+      "duration_ms": 315.638,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 152,
       "features": {
-        "flow_duration_ms": 847.0269999999999,
-        "flow_packets_per_s": 18.88959856061259,
-        "flow_bytes_per_s": 946.8411278507061,
-        "packet_length_mean": 50.125
+        "flow_duration_ms": 551.1820068359375,
+        "flow_packets_per_s": 29.02852439880371,
+        "flow_bytes_per_s": 1545.7689208984375,
+        "packet_length_mean": 53.25
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.162:30152",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.162:40152",
+      "dst_endpoint": "198.51.100.162:443",
+      "protocol": "N/A",
+      "duration_ms": 551.182007,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 153,
       "features": {
-        "flow_duration_ms": 698.707,
-        "flow_packets_per_s": 22.899441396751428,
-        "flow_bytes_per_s": 3984.5028030347485,
-        "packet_length_mean": 174.0
+        "flow_duration_ms": 809.8699951171875,
+        "flow_packets_per_s": 19.756258010864258,
+        "flow_bytes_per_s": 1007.569091796875,
+        "packet_length_mean": 51.0
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.163:30153",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.163:40153",
+      "dst_endpoint": "198.51.100.163:443",
+      "protocol": "N/A",
+      "duration_ms": 809.869995,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 154,
       "features": {
-        "flow_duration_ms": 1058.935,
-        "flow_packets_per_s": 16.998210466175923,
-        "flow_bytes_per_s": 2710.270224329161,
-        "packet_length_mean": 159.44444444444446
+        "flow_duration_ms": 579.5130004882812,
+        "flow_packets_per_s": 27.60938835144043,
+        "flow_bytes_per_s": 5428.6962890625,
+        "packet_length_mean": 196.625
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.164:30154",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.164:40154",
+      "dst_endpoint": "198.51.100.164:443",
+      "protocol": "N/A",
+      "duration_ms": 579.513,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 155,
       "features": {
-        "flow_duration_ms": 762.124,
-        "flow_packets_per_s": 23.618203861838754,
-        "flow_bytes_per_s": 1165.1647238507119,
-        "packet_length_mean": 49.333333333333336
+        "flow_duration_ms": 999.7529907226562,
+        "flow_packets_per_s": 16.003952026367188,
+        "flow_bytes_per_s": 1196.2955322265625,
+        "packet_length_mean": 74.75
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.165:30155",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.165:40155",
+      "dst_endpoint": "198.51.100.165:443",
+      "protocol": "N/A",
+      "duration_ms": 999.752991,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 156,
       "features": {
-        "flow_duration_ms": 696.721,
-        "flow_packets_per_s": 25.835305667548415,
-        "flow_bytes_per_s": 4119.2959592146635,
-        "packet_length_mean": 159.44444444444446
+        "flow_duration_ms": 2161.137939453125,
+        "flow_packets_per_s": 8.32894515991211,
+        "flow_bytes_per_s": 552.4866943359375,
+        "packet_length_mean": 66.33333587646484
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.166:30156",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.166:40156",
+      "dst_endpoint": "198.51.100.166:443",
+      "protocol": "N/A",
+      "duration_ms": 2161.137939,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 157,
       "features": {
-        "flow_duration_ms": 1552.2720000000002,
-        "flow_packets_per_s": 11.595905872166734,
-        "flow_bytes_per_s": 1251.069400208211,
-        "packet_length_mean": 107.88888888888889
+        "flow_duration_ms": 2595.97998046875,
+        "flow_packets_per_s": 6.933797836303711,
+        "flow_bytes_per_s": 449.156005859375,
+        "packet_length_mean": 64.77777862548828
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.167:30157",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.167:40157",
+      "dst_endpoint": "198.51.100.167:443",
+      "protocol": "N/A",
+      "duration_ms": 2595.97998,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 158,
       "features": {
-        "flow_duration_ms": 1080.7720000000002,
-        "flow_packets_per_s": 16.654761596340393,
-        "flow_bytes_per_s": 821.6349054194594,
-        "packet_length_mean": 49.333333333333336
+        "flow_duration_ms": 5554.5849609375,
+        "flow_packets_per_s": 46.80817794799805,
+        "flow_bytes_per_s": 48981.87890625,
+        "packet_length_mean": 1046.4384765625
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.168:30158",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.168:40158",
+      "dst_endpoint": "198.51.100.168:443",
+      "protocol": "N/A",
+      "duration_ms": 5554.584961,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 159,
       "features": {
-        "flow_duration_ms": 685.279,
-        "flow_packets_per_s": 23.34815454727199,
-        "flow_bytes_per_s": 1170.3262466820083,
-        "packet_length_mean": 50.125
+        "flow_duration_ms": 9587.638671875,
+        "flow_packets_per_s": 1.8774173259735107,
+        "flow_bytes_per_s": 113.89665222167969,
+        "packet_length_mean": 60.66666793823242
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.169:30159",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.169:40159",
+      "dst_endpoint": "198.51.100.169:443",
+      "protocol": "N/A",
+      "duration_ms": 9587.638672,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 160,
       "features": {
-        "flow_duration_ms": 874.161,
-        "flow_packets_per_s": 22.879080627024084,
-        "flow_bytes_per_s": 2274.180614326194,
-        "packet_length_mean": 99.4
+        "flow_duration_ms": 1360.468994140625,
+        "flow_packets_per_s": 16.170894622802734,
+        "flow_bytes_per_s": 1348.0645751953125,
+        "packet_length_mean": 83.36363983154297
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.170:30160",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.170:40160",
+      "dst_endpoint": "198.51.100.170:443",
+      "protocol": "N/A",
+      "duration_ms": 1360.468994,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 161,
       "features": {
-        "flow_duration_ms": 633.5070000000001,
-        "flow_packets_per_s": 25.256232369965918,
-        "flow_bytes_per_s": 4394.584432374069,
-        "packet_length_mean": 174.0
+        "flow_duration_ms": 1463.27197265625,
+        "flow_packets_per_s": 12.301198959350586,
+        "flow_bytes_per_s": 658.7975463867188,
+        "packet_length_mean": 53.55555725097656
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.171:30161",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.171:40161",
+      "dst_endpoint": "198.51.100.171:443",
+      "protocol": "N/A",
+      "duration_ms": 1463.271973,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 162,
       "features": {
-        "flow_duration_ms": 418.529,
-        "flow_packets_per_s": 38.22913107574386,
-        "flow_bytes_per_s": 1916.2351951716607,
-        "packet_length_mean": 50.125
+        "flow_duration_ms": 700.75,
+        "flow_packets_per_s": 22.832679748535156,
+        "flow_bytes_per_s": 1161.612548828125,
+        "packet_length_mean": 50.875
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.172:30162",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.172:40162",
+      "dst_endpoint": "198.51.100.172:443",
+      "protocol": "N/A",
+      "duration_ms": 700.75,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 163,
       "features": {
-        "flow_duration_ms": 9734.114,
-        "flow_packets_per_s": 1.2327778367913094,
-        "flow_bytes_per_s": 55.475002655608925,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 322.18798828125,
+        "flow_packets_per_s": 49.66044616699219,
+        "flow_bytes_per_s": 2340.24853515625,
+        "packet_length_mean": 47.125
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.173:30163",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.173:40163",
+      "dst_endpoint": "198.51.100.173:443",
+      "protocol": "N/A",
+      "duration_ms": 322.187988,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 164,
       "features": {
-        "flow_duration_ms": 9053.73,
-        "flow_packets_per_s": 1.3254205725154162,
-        "flow_bytes_per_s": 59.643925763193735,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 579.8209838867188,
+        "flow_packets_per_s": 31.044063568115234,
+        "flow_bytes_per_s": 1690.1767578125,
+        "packet_length_mean": 54.44444274902344
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.174:30164",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.174:40164",
+      "dst_endpoint": "198.51.100.174:443",
+      "protocol": "N/A",
+      "duration_ms": 579.820984,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 165,
       "features": {
-        "flow_duration_ms": 8834.706,
-        "flow_packets_per_s": 1.3582794945298688,
-        "flow_bytes_per_s": 61.1225772538441,
-        "packet_length_mean": 45.0
+        "flow_duration_ms": 841.2080078125,
+        "flow_packets_per_s": 26.15286636352539,
+        "flow_bytes_per_s": 2199.21826171875,
+        "packet_length_mean": 84.09091186523438
       },
       "label": "BENIGN",
       "is_attack": false,
-      "src_endpoint": "10.40.85.175:30165",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.175:40165",
+      "dst_endpoint": "198.51.100.175:443",
+      "protocol": "N/A",
+      "duration_ms": 841.208008,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 166,
       "features": {
-        "flow_duration_ms": 0.009000000000000001,
-        "flow_packets_per_s": 222222.22222222222,
-        "flow_bytes_per_s": 11555555.555555556,
-        "packet_length_mean": 52.0
+        "flow_duration_ms": 2291.2109375,
+        "flow_packets_per_s": 8.729008674621582,
+        "flow_bytes_per_s": 853.697021484375,
+        "packet_length_mean": 97.80000305175781
       },
-      "label": "Exploits",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.176:30166",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "SCTP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.176:40166",
+      "dst_endpoint": "198.51.100.176:443",
+      "protocol": "N/A",
+      "duration_ms": 2291.210938,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 167,
       "features": {
-        "flow_duration_ms": 0.009000000000000001,
-        "flow_packets_per_s": 222222.22222222222,
-        "flow_bytes_per_s": 17333333.333333332,
-        "packet_length_mean": 78.0
+        "flow_duration_ms": 1625.220947265625,
+        "flow_packets_per_s": 11.075416564941406,
+        "flow_bytes_per_s": 1260.1363525390625,
+        "packet_length_mean": 113.77777862548828
       },
-      "label": "Exploits",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.177:30167",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "GRE",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.177:40167",
+      "dst_endpoint": "198.51.100.177:443",
+      "protocol": "N/A",
+      "duration_ms": 1625.220947,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 168,
       "features": {
-        "flow_duration_ms": 0.009000000000000001,
-        "flow_packets_per_s": 222222.22222222222,
-        "flow_bytes_per_s": 17333333.333333332,
-        "packet_length_mean": 78.0
+        "flow_duration_ms": 619.4849853515625,
+        "flow_packets_per_s": 29.056392669677734,
+        "flow_bytes_per_s": 3115.4912109375,
+        "packet_length_mean": 107.22222137451172
       },
-      "label": "Exploits",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.178:30168",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "GRE",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.178:40168",
+      "dst_endpoint": "198.51.100.178:443",
+      "protocol": "N/A",
+      "duration_ms": 619.484985,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 169,
       "features": {
-        "flow_duration_ms": 0.009000000000000001,
-        "flow_packets_per_s": 222222.22222222222,
-        "flow_bytes_per_s": 17333333.333333332,
-        "packet_length_mean": 78.0
+        "flow_duration_ms": 2265.89697265625,
+        "flow_packets_per_s": 8.826526641845703,
+        "flow_bytes_per_s": 868.5302124023438,
+        "packet_length_mean": 98.4000015258789
       },
-      "label": "Exploits",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.179:30169",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "GRE",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.179:40169",
+      "dst_endpoint": "198.51.100.179:443",
+      "protocol": "N/A",
+      "duration_ms": 2265.896973,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 170,
       "features": {
-        "flow_duration_ms": 0.016,
-        "flow_packets_per_s": 125000.0,
-        "flow_bytes_per_s": 12250000.0,
-        "packet_length_mean": 98.0
+        "flow_duration_ms": 1546.166015625,
+        "flow_packets_per_s": 11.64169979095459,
+        "flow_bytes_per_s": 1411.232666015625,
+        "packet_length_mean": 121.22222137451172
       },
-      "label": "Exploits",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.180:30170",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "UDP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.180:40170",
+      "dst_endpoint": "198.51.100.180:443",
+      "protocol": "N/A",
+      "duration_ms": 1546.166016,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 171,
       "features": {
-        "flow_duration_ms": 224.524,
-        "flow_packets_per_s": 80.16960324954125,
-        "flow_bytes_per_s": 7972.421656482158,
-        "packet_length_mean": 99.44444444444444
+        "flow_duration_ms": 711.7990112304688,
+        "flow_packets_per_s": 25.28803825378418,
+        "flow_bytes_per_s": 4032.037109375,
+        "packet_length_mean": 159.44444274902344
       },
-      "label": "Exploits",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.181:30171",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.181:40171",
+      "dst_endpoint": "198.51.100.181:443",
+      "protocol": "N/A",
+      "duration_ms": 711.799011,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 172,
       "features": {
-        "flow_duration_ms": 409.782,
-        "flow_packets_per_s": 43.925794690835616,
-        "flow_bytes_per_s": 5339.424376863796,
-        "packet_length_mean": 121.55555555555556
+        "flow_duration_ms": 728.1740112304688,
+        "flow_packets_per_s": 24.7193660736084,
+        "flow_bytes_per_s": 2856.460205078125,
+        "packet_length_mean": 115.55555725097656
       },
-      "label": "Exploits",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.182:30172",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.182:40172",
+      "dst_endpoint": "198.51.100.182:443",
+      "protocol": "N/A",
+      "duration_ms": 728.174011,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 173,
       "features": {
-        "flow_duration_ms": 258.515,
-        "flow_packets_per_s": 61.89195984759105,
-        "flow_bytes_per_s": 5152.505657311955,
-        "packet_length_mean": 83.25
+        "flow_duration_ms": 645.7540283203125,
+        "flow_packets_per_s": 27.874391555786133,
+        "flow_bytes_per_s": 3242.720947265625,
+        "packet_length_mean": 116.33333587646484
       },
-      "label": "Exploits",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.183:30173",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.183:40173",
+      "dst_endpoint": "198.51.100.183:443",
+      "protocol": "N/A",
+      "duration_ms": 645.754028,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 174,
       "features": {
-        "flow_duration_ms": 5600.3910000000005,
-        "flow_packets_per_s": 4.2854150719119435,
-        "flow_bytes_per_s": 1093.1379612602047,
-        "packet_length_mean": 255.08333333333334
+        "flow_duration_ms": 887.0659790039062,
+        "flow_packets_per_s": 27.055484771728516,
+        "flow_bytes_per_s": 1499.32470703125,
+        "packet_length_mean": 55.41666793823242
       },
-      "label": "Exploits",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.184:30174",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.184:40174",
+      "dst_endpoint": "198.51.100.184:443",
+      "protocol": "N/A",
+      "duration_ms": 887.065979,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 175,
       "features": {
-        "flow_duration_ms": 285.988,
-        "flow_packets_per_s": 62.93970376379428,
-        "flow_bytes_per_s": 7650.670657510105,
-        "packet_length_mean": 121.55555555555556
+        "flow_duration_ms": 830.0750122070312,
+        "flow_packets_per_s": 31.322471618652344,
+        "flow_bytes_per_s": 1705.8699951171875,
+        "packet_length_mean": 54.46154022216797
       },
-      "label": "Exploits",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.185:30175",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.185:40175",
+      "dst_endpoint": "198.51.100.185:443",
+      "protocol": "N/A",
+      "duration_ms": 830.075012,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 176,
       "features": {
-        "flow_duration_ms": 7629.429,
-        "flow_packets_per_s": 196.08282611975287,
-        "flow_bytes_per_s": 230187.60643817513,
-        "packet_length_mean": 1173.9304812834225
+        "flow_duration_ms": 353.0379943847656,
+        "flow_packets_per_s": 45.320899963378906,
+        "flow_bytes_per_s": 2900.53759765625,
+        "packet_length_mean": 64.0
       },
-      "label": "Exploits",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.186:30176",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.186:40176",
+      "dst_endpoint": "198.51.100.186:443",
+      "protocol": "N/A",
+      "duration_ms": 353.037994,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 177,
       "features": {
-        "flow_duration_ms": 502.39199999999994,
-        "flow_packets_per_s": 35.828595996751545,
-        "flow_bytes_per_s": 2571.697001544611,
-        "packet_length_mean": 71.77777777777777
+        "flow_duration_ms": 649.6500244140625,
+        "flow_packets_per_s": 113.90748596191406,
+        "flow_bytes_per_s": 105923.1875,
+        "packet_length_mean": 929.9053955078125
       },
-      "label": "Exploits",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.187:30177",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.187:40177",
+      "dst_endpoint": "198.51.100.187:443",
+      "protocol": "N/A",
+      "duration_ms": 649.650024,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 178,
       "features": {
-        "flow_duration_ms": 460.161,
-        "flow_packets_per_s": 69.54087808397496,
-        "flow_bytes_per_s": 41281.203752599635,
-        "packet_length_mean": 593.625
+        "flow_duration_ms": 658.572998046875,
+        "flow_packets_per_s": 12.147476196289062,
+        "flow_bytes_per_s": 1615.6143798828125,
+        "packet_length_mean": 133.0
       },
-      "label": "Exploits",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.188:30178",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.188:40178",
+      "dst_endpoint": "198.51.100.188:443",
+      "protocol": "N/A",
+      "duration_ms": 658.572998,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 179,
       "features": {
-        "flow_duration_ms": 1244.202,
-        "flow_packets_per_s": 22.50438433630552,
-        "flow_bytes_per_s": 2430.473508320996,
-        "packet_length_mean": 108.0
+        "flow_duration_ms": 163.08599853515625,
+        "flow_packets_per_s": 49.05387496948242,
+        "flow_bytes_per_s": 6524.1650390625,
+        "packet_length_mean": 133.0
       },
-      "label": "Exploits",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.189:30179",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "OSPF",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.189:40179",
+      "dst_endpoint": "198.51.100.189:443",
+      "protocol": "N/A",
+      "duration_ms": 163.085999,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 180,
       "features": {
-        "flow_duration_ms": 1244.202,
-        "flow_packets_per_s": 22.50438433630552,
-        "flow_bytes_per_s": 2430.473508320996,
-        "packet_length_mean": 108.0
+        "flow_duration_ms": 132.99899291992188,
+        "flow_packets_per_s": 60.15082931518555,
+        "flow_bytes_per_s": 8000.06005859375,
+        "packet_length_mean": 133.0
       },
-      "label": "Exploits",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.190:30180",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "OSPF",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.190:40180",
+      "dst_endpoint": "198.51.100.190:443",
+      "protocol": "N/A",
+      "duration_ms": 132.998993,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 181,
       "features": {
-        "flow_duration_ms": 1244.202,
-        "flow_packets_per_s": 22.50438433630552,
-        "flow_bytes_per_s": 2430.473508320996,
-        "packet_length_mean": 108.0
+        "flow_duration_ms": 563.9329833984375,
+        "flow_packets_per_s": 28.37216567993164,
+        "flow_bytes_per_s": 1422.15478515625,
+        "packet_length_mean": 50.125
       },
-      "label": "Exploits",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.191:30181",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "OSPF",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.191:40181",
+      "dst_endpoint": "198.51.100.191:443",
+      "protocol": "N/A",
+      "duration_ms": 563.932983,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 182,
       "features": {
-        "flow_duration_ms": 1244.202,
-        "flow_packets_per_s": 22.50438433630552,
-        "flow_bytes_per_s": 2430.473508320996,
-        "packet_length_mean": 108.0
+        "flow_duration_ms": 493.5459899902344,
+        "flow_packets_per_s": 32.41845703125,
+        "flow_bytes_per_s": 1624.9752197265625,
+        "packet_length_mean": 50.125
       },
-      "label": "Exploits",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.192:30182",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "OSPF",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.192:40182",
+      "dst_endpoint": "198.51.100.192:443",
+      "protocol": "N/A",
+      "duration_ms": 493.54599,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 183,
       "features": {
-        "flow_duration_ms": 1244.202,
-        "flow_packets_per_s": 22.50438433630552,
-        "flow_bytes_per_s": 2430.473508320996,
-        "packet_length_mean": 108.0
+        "flow_duration_ms": 736.3989868164062,
+        "flow_packets_per_s": 21.727352142333984,
+        "flow_bytes_per_s": 1162.413330078125,
+        "packet_length_mean": 53.5
       },
-      "label": "Fuzzers",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.193:30183",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "OSPF",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.193:40183",
+      "dst_endpoint": "198.51.100.193:443",
+      "protocol": "N/A",
+      "duration_ms": 736.398987,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 184,
       "features": {
-        "flow_duration_ms": 209.133,
-        "flow_packets_per_s": 76.50633807194464,
-        "flow_bytes_per_s": 3710.557396489315,
-        "packet_length_mean": 48.5
+        "flow_duration_ms": 503.2449951171875,
+        "flow_packets_per_s": 35.76786804199219,
+        "flow_bytes_per_s": 1764.548095703125,
+        "packet_length_mean": 49.33333206176758
       },
-      "label": "Fuzzers",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.194:30184",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.194:40184",
+      "dst_endpoint": "198.51.100.194:443",
+      "protocol": "N/A",
+      "duration_ms": 503.244995,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 185,
       "features": {
-        "flow_duration_ms": 197.552,
-        "flow_packets_per_s": 80.99133392726978,
-        "flow_bytes_per_s": 5193.569288086174,
-        "packet_length_mean": 64.125
+        "flow_duration_ms": 891.7559814453125,
+        "flow_packets_per_s": 29.15595817565918,
+        "flow_bytes_per_s": 3090.531494140625,
+        "packet_length_mean": 106.0
       },
-      "label": "Fuzzers",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.195:30185",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.195:40185",
+      "dst_endpoint": "198.51.100.195:443",
+      "protocol": "N/A",
+      "duration_ms": 891.755981,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 186,
       "features": {
-        "flow_duration_ms": 483.00399999999996,
-        "flow_packets_per_s": 37.266772117829255,
-        "flow_bytes_per_s": 1904.7461304668284,
-        "packet_length_mean": 51.111111111111114
+        "flow_duration_ms": 740.1229858398438,
+        "flow_packets_per_s": 24.320281982421875,
+        "flow_bytes_per_s": 3923.672119140625,
+        "packet_length_mean": 161.3333282470703
       },
-      "label": "Fuzzers",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.196:30186",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.196:40186",
+      "dst_endpoint": "198.51.100.196:443",
+      "protocol": "N/A",
+      "duration_ms": 740.122986,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 187,
       "features": {
-        "flow_duration_ms": 523.646,
-        "flow_packets_per_s": 30.554993258804615,
-        "flow_bytes_per_s": 1798.9252281121217,
-        "packet_length_mean": 58.875
+        "flow_duration_ms": 569.1589965820312,
+        "flow_packets_per_s": 28.111652374267578,
+        "flow_bytes_per_s": 1641.0177001953125,
+        "packet_length_mean": 58.375
       },
-      "label": "Fuzzers",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.197:30187",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.197:40187",
+      "dst_endpoint": "198.51.100.197:443",
+      "protocol": "N/A",
+      "duration_ms": 569.158997,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 188,
       "features": {
-        "flow_duration_ms": 681.871,
-        "flow_packets_per_s": 41.063485615314335,
-        "flow_bytes_per_s": 25840.664876494233,
-        "packet_length_mean": 629.2857142857143
+        "flow_duration_ms": 1811.0689697265625,
+        "flow_packets_per_s": 24.2950439453125,
+        "flow_bytes_per_s": 12818.9482421875,
+        "packet_length_mean": 527.6363525390625
       },
-      "label": "Fuzzers",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.198:30188",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.198:40188",
+      "dst_endpoint": "198.51.100.198:443",
+      "protocol": "N/A",
+      "duration_ms": 1811.06897,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 189,
       "features": {
-        "flow_duration_ms": 566.928,
-        "flow_packets_per_s": 28.222278666779555,
-        "flow_bytes_per_s": 1337.0304518386815,
-        "packet_length_mean": 47.375
+        "flow_duration_ms": 1166.0450439453125,
+        "flow_packets_per_s": 15.436797142028809,
+        "flow_bytes_per_s": 986.2398071289062,
+        "packet_length_mean": 63.88888931274414
       },
-      "label": "Fuzzers",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.199:30189",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.199:40189",
+      "dst_endpoint": "198.51.100.199:443",
+      "protocol": "N/A",
+      "duration_ms": 1166.045044,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 190,
       "features": {
-        "flow_duration_ms": 833.8539999999999,
-        "flow_packets_per_s": 21.586512746835776,
-        "flow_bytes_per_s": 1309.581773308037,
-        "packet_length_mean": 60.666666666666664
+        "flow_duration_ms": 1466.1259765625,
+        "flow_packets_per_s": 12.277253150939941,
+        "flow_bytes_per_s": 607.0419311523438,
+        "packet_length_mean": 49.44444274902344
       },
-      "label": "Fuzzers",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.200:30190",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.200:40190",
+      "dst_endpoint": "198.51.100.200:443",
+      "protocol": "N/A",
+      "duration_ms": 1466.125977,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 191,
       "features": {
-        "flow_duration_ms": 766.293,
-        "flow_packets_per_s": 20.879741821992372,
-        "flow_bytes_per_s": 2315.041374513404,
-        "packet_length_mean": 110.875
+        "flow_duration_ms": 716.3319702148438,
+        "flow_packets_per_s": 22.33601188659668,
+        "flow_bytes_per_s": 1136.3446044921875,
+        "packet_length_mean": 50.875
       },
-      "label": "Fuzzers",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.201:30191",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.201:40191",
+      "dst_endpoint": "198.51.100.201:443",
+      "protocol": "N/A",
+      "duration_ms": 716.33197,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 192,
       "features": {
-        "flow_duration_ms": 451.172,
-        "flow_packets_per_s": 35.46319363790306,
-        "flow_bytes_per_s": 1680.0687985956574,
-        "packet_length_mean": 47.375
+        "flow_duration_ms": 981.1290283203125,
+        "flow_packets_per_s": 16.307743072509766,
+        "flow_bytes_per_s": 2837.54736328125,
+        "packet_length_mean": 174.0
       },
-      "label": "Fuzzers",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.202:30192",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.202:40192",
+      "dst_endpoint": "198.51.100.202:443",
+      "protocol": "N/A",
+      "duration_ms": 981.129028,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 193,
       "features": {
-        "flow_duration_ms": 694.908,
-        "flow_packets_per_s": 25.90270942340569,
-        "flow_bytes_per_s": 1295.1354711702845,
-        "packet_length_mean": 50.0
+        "flow_duration_ms": 1411.6319580078125,
+        "flow_packets_per_s": 14.167998313903809,
+        "flow_bytes_per_s": 1381.3798828125,
+        "packet_length_mean": 97.5
       },
-      "label": "Fuzzers",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.203:30193",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.203:40193",
+      "dst_endpoint": "198.51.100.203:443",
+      "protocol": "N/A",
+      "duration_ms": 1411.631958,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 194,
       "features": {
-        "flow_duration_ms": 534.477,
-        "flow_packets_per_s": 33.67778220578248,
-        "flow_bytes_per_s": 1683.889110289124,
-        "packet_length_mean": 50.0
+        "flow_duration_ms": 180.61399841308594,
+        "flow_packets_per_s": 44.29335403442383,
+        "flow_bytes_per_s": 6001.74951171875,
+        "packet_length_mean": 135.5
       },
-      "label": "Fuzzers",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.204:30194",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.204:40194",
+      "dst_endpoint": "198.51.100.204:443",
+      "protocol": "N/A",
+      "duration_ms": 180.613998,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 195,
       "features": {
-        "flow_duration_ms": 322.297,
-        "flow_packets_per_s": 49.643651662907196,
-        "flow_bytes_per_s": 2525.6207783504037,
-        "packet_length_mean": 50.875
+        "flow_duration_ms": 136.9980010986328,
+        "flow_packets_per_s": 58.39501190185547,
+        "flow_bytes_per_s": 7912.5244140625,
+        "packet_length_mean": 135.5
       },
-      "label": "Fuzzers",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.205:30195",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.205:40195",
+      "dst_endpoint": "198.51.100.205:443",
+      "protocol": "N/A",
+      "duration_ms": 136.998001,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 196,
       "features": {
-        "flow_duration_ms": 537.852,
-        "flow_packets_per_s": 33.46645545614779,
-        "flow_bytes_per_s": 1558.0494262362138,
-        "packet_length_mean": 46.55555555555556
+        "flow_duration_ms": 446.6059875488281,
+        "flow_packets_per_s": 35.82575988769531,
+        "flow_bytes_per_s": 1795.7662353515625,
+        "packet_length_mean": 50.125
       },
-      "label": "Fuzzers",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.206:30196",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.206:40196",
+      "dst_endpoint": "198.51.100.206:443",
+      "protocol": "N/A",
+      "duration_ms": 446.605988,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 197,
       "features": {
-        "flow_duration_ms": 379.788,
-        "flow_packets_per_s": 42.1287665750366,
-        "flow_bytes_per_s": 4112.820836887948,
-        "packet_length_mean": 97.625
+        "flow_duration_ms": 860.5880126953125,
+        "flow_packets_per_s": 20.915931701660156,
+        "flow_bytes_per_s": 1031.8526611328125,
+        "packet_length_mean": 49.33333206176758
       },
-      "label": "Fuzzers",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.207:30197",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.207:40197",
+      "dst_endpoint": "198.51.100.207:443",
+      "protocol": "N/A",
+      "duration_ms": 860.588013,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 198,
       "features": {
-        "flow_duration_ms": 588.943,
-        "flow_packets_per_s": 27.167315003319505,
-        "flow_bytes_per_s": 3956.240247358403,
-        "packet_length_mean": 145.625
+        "flow_duration_ms": 601.2529907226562,
+        "flow_packets_per_s": 26.611093521118164,
+        "flow_bytes_per_s": 1333.881103515625,
+        "packet_length_mean": 50.125
       },
-      "label": "Fuzzers",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.208:30198",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.208:40198",
+      "dst_endpoint": "198.51.100.208:443",
+      "protocol": "N/A",
+      "duration_ms": 601.252991,
+      "source_file": "UNSW_NB15_testing-set.csv"
     },
     {
       "flow_id": 199,
       "features": {
-        "flow_duration_ms": 596.682,
-        "flow_packets_per_s": 30.16682252858306,
-        "flow_bytes_per_s": 6613.237872099376,
-        "packet_length_mean": 219.22222222222223
+        "flow_duration_ms": 971.427001953125,
+        "flow_packets_per_s": 18.529441833496094,
+        "flow_bytes_per_s": 969.7074584960938,
+        "packet_length_mean": 52.33333206176758
       },
-      "label": "Fuzzers",
-      "is_attack": true,
-      "src_endpoint": "10.40.85.209:30199",
-      "dst_endpoint": "172.16.2.50:443",
-      "protocol": "TCP",
-      "timestamp": "2015-01-22 14:00:00"
+      "label": "BENIGN",
+      "is_attack": false,
+      "ground_truth": "Normal",
+      "category": "normal",
+      "src_endpoint": "192.0.2.209:40199",
+      "dst_endpoint": "198.51.100.209:443",
+      "protocol": "N/A",
+      "duration_ms": 971.427002,
+      "source_file": "UNSW_NB15_testing-set.csv"
     }
   ]
 }

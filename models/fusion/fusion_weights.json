@@ -2,8 +2,7 @@
   "model_id": "fusion_rf_lstm_v1",
   "model_type": "fusion",
   "policy": "score_level_linear_combination",
-  "formula": "P_fusion = alpha * P_rf + (1 - alpha) * P_lstm",
-  "calibrated": true,
+  "formula": "S_fusion = alpha * S_rf + (1 - alpha) * S_lstm",
   "configurations": {
     "neutral_baseline": {
       "alpha": 0.5,
@@ -28,10 +27,13 @@
     "unsw_nb15": {
       "alpha": 0.6,
       "threshold": 0.5,
-      "test_f1": 0.8970,
+      "test_f1": 0.897,
       "test_accuracy": 0.8996,
       "source_experiment": "EXP-P1-UNSWNB15-R10-MULTI-001",
       "feature_contract": "R4"
     }
-  }
+  },
+  "probability_calibrated": false,
+  "alpha_tuned_on_validation": true,
+  "calibration_note": "Alpha is tuned on validation data. The fused score is a convex combination of RF and LSTM scores and is not a calibrated probability."
 }

@@ -40,7 +40,7 @@
 **A:** Network intrusions often occur as temporal multi-flow campaigns (e.g., sequential port scans, progressive brute-force authentication, multi-stage infiltration). A sequence model ($T=5$ consecutive flows) captures inter-flow temporal dependencies that independent tabular classifiers miss, reducing false alarms by up to 66% on structured traffic.
 
 ### Q: Why Score Fusion?
-**A:** Tabular trees and recurrent neural networks make complementary errors. A calibrated convex score fusion ($S_{\text{fusion}} = \alpha \cdot S_{\text{RF}} + (1 - \alpha) \cdot S_{\text{LSTM}}$) leverages the high precision of the RF with the temporal context of the LSTM, achieving statistically significant F1 improvements across all evaluated benchmarks (e.g., CIC-IDS2017 F1 = 0.9745 vs RF 0.9512).
+**A:** Tabular trees and recurrent neural networks make complementary errors. A validation-tuned convex score fusion ($S_{\text{fusion}} = \alpha \cdot S_{\text{RF}} + (1 - \alpha) \cdot S_{\text{LSTM}}$; the blended score is not a calibrated probability) leverages the high precision of the RF with the temporal context of the LSTM, achieving statistically significant F1 improvements across all evaluated benchmarks (e.g., CIC-IDS2017 F1 = 0.9745 vs RF 0.9512).
 
 ---
 

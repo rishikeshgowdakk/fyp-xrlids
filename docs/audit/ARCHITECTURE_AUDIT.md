@@ -26,7 +26,7 @@ flowchart TD
 
     subgraph ModelTier ["3. Perception Tier (Dual-Model Fusion)"]
         B2 -->|Standardized Vector| C1["Random Forest Classifier<br/>(Joblib model, R10, n=200)"]
-        B2 -->|Causal 5-Flow Sequence| C2["Supervised LSTM<br/>(PyTorch .pt, T=5, hidden=64)"]
+        B2 -->|Causal 5-Flow Sequence| C2["Supervised LSTM<br/>(PyTorch .pt, T=5, hidden=32)"]
         C1 -->|P_rf ∈ [0, 1]| C3["Convex Score Fusion<br/>S = α·P_rf + (1-α)·P_lstm"]
         C2 -->|P_lstm ∈ [0, 1]| C3
     end

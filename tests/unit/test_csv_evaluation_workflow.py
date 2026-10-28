@@ -491,7 +491,9 @@ def test_csv_multi_model_rf_lstm_fusion():
 
 def test_csv_mode_b_exhibition_200():
     """Verify Mode B (Exhibition 200 subset) loads 166 benign and 34 attack records and scores them."""
-    res = evaluate_csv_dataset(mode="exhibition", contract="R10", benchmark="cicids2017")
+    res = evaluate_csv_dataset(
+        mode="exhibition", contract="R10", benchmark="cicids2017", max_display_flows=200
+    )
     assert res["status"] == "success"
     assert res["evaluation_mode"] == "exhibition"
     assert res["evaluation_type"] == "fixed_exhibition_subset"
@@ -512,11 +514,17 @@ def test_csv_mode_b_exhibition_200():
     assert 0.80 <= m_rf["accuracy"] <= 1.00
     assert 0.80 <= m_fusion["accuracy"] <= 1.00
 
-    # Verify flow records preserve endpoints
+    aligned = [f for f in res["flows"] if f["lstm_status"] == "ALIGNED"]
+    aligned_attacks = sum(1 for f in aligned if f["ground_truth_class"] == 1)
+    assert res["confusion_matrix"]["tp"] + res["confusion_matrix"]["fn"] == aligned_attacks
+    assert res["confusion_matrix"]["tn"] + res["confusion_matrix"]["fp"] == len(aligned) - aligned_attacks
+
+    # Endpoints are deterministic display-only RFC 5737 addresses, not source IPs.
     flows = res["flows"]
-    assert len(flows) == 100  # display limit
-    assert flows[0]["metadata"]["src_endpoint"] != "Not available in source data"
-    assert flows[0]["metadata"]["dst_endpoint"] != "Not available in source data"
+    assert len(flows) == 200
+    assert flows[0]["metadata"]["src_endpoint"].startswith("192.0.2.")
+    assert flows[0]["metadata"]["dst_endpoint"].startswith("198.51.100.")
+    assert "RFC 5737" in res["metadata_provenance"]["endpoints"]
 
 
 def test_csv_mode_a_full_held_out_test():
@@ -646,11 +654,13 @@ def test_csv_mode_b_all_three_benchmarks(csv_server):
     assert res_cic["rf_confusion_matrix"]["tp"] + res_cic["rf_confusion_matrix"]["fn"] == 34
     assert res_cic["rf_confusion_matrix"]["tn"] + res_cic["rf_confusion_matrix"]["fp"] == 166
     # Sequence LSTM & Fusion evaluated on 196 aligned flows (4 warmup flows)
-    assert res_cic["confusion_matrix"]["tp"] + res_cic["confusion_matrix"]["fn"] == 34
-    assert res_cic["confusion_matrix"]["tn"] + res_cic["confusion_matrix"]["fp"] == 162
+    aligned_cic = [f for f in res_cic["flows"] if f["lstm_status"] == "ALIGNED"]
+    aligned_cic_attacks = sum(1 for f in aligned_cic if f["ground_truth_class"] == 1)
+    assert res_cic["confusion_matrix"]["tp"] + res_cic["confusion_matrix"]["fn"] == aligned_cic_attacks
+    assert res_cic["confusion_matrix"]["tn"] + res_cic["confusion_matrix"]["fp"] == len(aligned_cic) - aligned_cic_attacks
     assert "rf_metrics" in res_cic and "lstm_metrics" in res_cic and "fusion_metrics" in res_cic
     assert len(res_cic["flows"]) == 200
-    assert "192.168.10" in res_cic["flows"][0]["metadata"]["src_endpoint"]
+    assert res_cic["flows"][0]["metadata"]["src_endpoint"].startswith("192.0.2.")
 
     # 2. CSE-CIC-IDS2018 Mode B
     res_cse = evaluate_csv_dataset(contract="R10", benchmark="cse2018", mode="exhibition", max_display_flows=200)
@@ -660,11 +670,13 @@ def test_csv_mode_b_all_three_benchmarks(csv_server):
     assert res_cse["row_accounting"]["aligned_sequence_rows"] == 196
     assert res_cse["rf_confusion_matrix"]["tp"] + res_cse["rf_confusion_matrix"]["fn"] == 34
     assert res_cse["rf_confusion_matrix"]["tn"] + res_cse["rf_confusion_matrix"]["fp"] == 166
-    assert res_cse["confusion_matrix"]["tp"] + res_cse["confusion_matrix"]["fn"] == 34
-    assert res_cse["confusion_matrix"]["tn"] + res_cse["confusion_matrix"]["fp"] == 162
+    aligned_cse = [f for f in res_cse["flows"] if f["lstm_status"] == "ALIGNED"]
+    aligned_cse_attacks = sum(1 for f in aligned_cse if f["ground_truth_class"] == 1)
+    assert res_cse["confusion_matrix"]["tp"] + res_cse["confusion_matrix"]["fn"] == aligned_cse_attacks
+    assert res_cse["confusion_matrix"]["tn"] + res_cse["confusion_matrix"]["fp"] == len(aligned_cse) - aligned_cse_attacks
     assert "rf_metrics" in res_cse and "lstm_metrics" in res_cse and "fusion_metrics" in res_cse
     assert len(res_cse["flows"]) == 200
-    assert "172.31.65" in res_cse["flows"][0]["metadata"]["src_endpoint"]
+    assert res_cse["flows"][0]["metadata"]["src_endpoint"].startswith("192.0.2.")
 
     # 3. UNSW-NB15 Mode B
     res_unsw = evaluate_csv_dataset(contract="R4", benchmark="unswnb15", mode="exhibition", max_display_flows=200)
@@ -674,17 +686,19 @@ def test_csv_mode_b_all_three_benchmarks(csv_server):
     assert res_unsw["row_accounting"]["aligned_sequence_rows"] == 196
     assert res_unsw["rf_confusion_matrix"]["tp"] + res_unsw["rf_confusion_matrix"]["fn"] == 34
     assert res_unsw["rf_confusion_matrix"]["tn"] + res_unsw["rf_confusion_matrix"]["fp"] == 166
-    assert res_unsw["confusion_matrix"]["tp"] + res_unsw["confusion_matrix"]["fn"] == 34
-    assert res_unsw["confusion_matrix"]["tn"] + res_unsw["confusion_matrix"]["fp"] == 162
+    aligned_unsw = [f for f in res_unsw["flows"] if f["lstm_status"] == "ALIGNED"]
+    aligned_unsw_attacks = sum(1 for f in aligned_unsw if f["ground_truth_class"] == 1)
+    assert res_unsw["confusion_matrix"]["tp"] + res_unsw["confusion_matrix"]["fn"] == aligned_unsw_attacks
+    assert res_unsw["confusion_matrix"]["tn"] + res_unsw["confusion_matrix"]["fp"] == len(aligned_unsw) - aligned_unsw_attacks
     assert "rf_metrics" in res_unsw and "lstm_metrics" in res_unsw and "fusion_metrics" in res_unsw
     assert len(res_unsw["flows"]) == 200
-    assert "10.40.85" in res_unsw["flows"][0]["metadata"]["src_endpoint"]
+    assert res_unsw["flows"][0]["metadata"]["src_endpoint"].startswith("192.0.2.")
 
     # 4. HTTP Sample Retrieval for all 3 datasets
-    for bench, expected_contract, expected_sub in [
-        ("cicids2017", "R10", "192.168.10"),
-        ("cse2018", "R10", "172.31.65"),
-        ("unswnb15", "R4", "10.40.85"),
+    for bench, expected_contract in [
+        ("cicids2017", "R10"),
+        ("cse2018", "R10"),
+        ("unswnb15", "R4"),
     ]:
         with urllib.request.urlopen(f"{csv_server}/api/csv/sample?benchmark={bench}", timeout=5) as resp:
             assert resp.status == 200
@@ -692,7 +706,8 @@ def test_csv_mode_b_all_three_benchmarks(csv_server):
             assert sdata["benchmark"] == bench
             assert sdata["contract"] == expected_contract
             assert sdata["rows"] == 200
-            assert expected_sub in sdata["csv_text"]
+            assert "192.0.2." in sdata["csv_text"]
+            assert "source_file" in sdata["csv_text"].splitlines()[0]
 
 
 def test_sequence_boundary_safety_multiple_segments():

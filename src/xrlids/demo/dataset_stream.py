@@ -1,8 +1,9 @@
 """Curated benchmark dataset streaming for demonstration and validation.
 
-Streams real traffic flows from the official CIC-IDS2017 benchmark dataset
-(DDoS, DoS Hulk, PortScan, and Benign enterprise traffic) with ground-truth
-verification for live demonstrations to professors, evaluators, and exhibitions.
+Streams curated CIC-IDS2017 feature vectors (DDoS, DoS Hulk, PortScan, and Benign
+enterprise traffic) with ground-truth verification for live demonstrations. The
+distributable feature table has no IP addresses; display endpoints in the sample
+file are synthetic placeholders and are not capture metadata.
 """
 
 from __future__ import annotations
@@ -39,8 +40,10 @@ def load_dataset_samples(
     """
     path = Path(filepath) if filepath else DEFAULT_SAMPLES_FILE
     if not path.exists():
-        # Fallback generator if sample file was deleted
-        _generate_fallback_samples(path)
+        raise FileNotFoundError(
+            f"Dataset stream sample file not found: {path}. "
+            "Restore the committed data/demo/dataset_samples.json; no synthetic fallback is used."
+        )
 
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -96,60 +99,3 @@ def _build_mixed_stream(data: dict[str, list[dict[str, Any]]]) -> list[dict[str,
             s_idx += 1
 
     return mixed if mixed else data.get("ddos", [])
-
-
-def _generate_fallback_samples(path: Path) -> None:
-    """Ensure sample file exists with calibrated fallback flows."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fallback: dict[str, list[dict[str, Any]]] = {
-        "ddos": [
-            {
-                "category": "ddos",
-                "is_attack": True,
-                "ground_truth": "DDoS",
-                "src_endpoint": "172.16.0.1:49152",
-                "dst_endpoint": "192.168.10.50:80",
-                "protocol": "TCP",
-                "packet_count": 8,
-                "duration_ms": 3250.0,
-                "features": {
-                    "flow_duration_ms": 3250.0,
-                    "flow_packets_per_s": 2.46,
-                    "flow_bytes_per_s": 120.0,
-                    "packet_length_mean": 49.0,
-                    "packet_length_std": 12.0,
-                    "syn_count": 1.0,
-                    "ack_count": 7.0,
-                    "rst_count": 0.0,
-                    "fin_count": 1.0,
-                    "syn_ack_ratio": 0.1429,
-                },
-            }
-        ],
-        "benign": [
-            {
-                "category": "benign",
-                "is_attack": False,
-                "ground_truth": "BENIGN",
-                "src_endpoint": "192.168.10.15:52310",
-                "dst_endpoint": "142.250.190.46:443",
-                "protocol": "TCP",
-                "packet_count": 14,
-                "duration_ms": 1500.0,
-                "features": {
-                    "flow_duration_ms": 1500.0,
-                    "flow_packets_per_s": 9.33,
-                    "flow_bytes_per_s": 2500.0,
-                    "packet_length_mean": 268.0,
-                    "packet_length_std": 350.0,
-                    "syn_count": 2.0,
-                    "ack_count": 12.0,
-                    "rst_count": 0.0,
-                    "fin_count": 2.0,
-                    "syn_ack_ratio": 0.1667,
-                },
-            }
-        ],
-    }
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(fallback, f, indent=2)

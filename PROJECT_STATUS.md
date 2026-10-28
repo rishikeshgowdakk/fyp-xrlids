@@ -20,7 +20,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 
 | Area | Status | Scope / evidence |
 | --- | --- | --- |
-| Multi-model flow evaluator | Implemented & verified | `src/xrlids/evaluation/csv_evaluator.py`; loads frozen RF (`preprocessor.joblib` + `random_forest.joblib`), Supervised LSTM (`lstm.pt`, $T=5$, causal sequences), and calibrated Score Fusion ($\alpha$). |
+| Multi-model flow evaluator | Implemented & verified | `src/xrlids/evaluation/csv_evaluator.py`; loads frozen RF (`preprocessor.joblib` + `random_forest.joblib`), Supervised LSTM (`lstm.pt`, $T=5$, causal sequences), and validation-tuned Score Fusion ($\alpha$; blended scores are not calibrated probabilities). |
 | Evaluation modes | Implemented | Mode B: 200 Exhibition Demo (`data/demo/cicids2017_exhibition_200.json`, 166 Benign, 34 Attack); Mode A: Full Held-Out Test Evaluation; Mode C: Custom CSV Upload / Paste. |
 | Flow network metadata isolation | Implemented & tested | Source/destination endpoints, ports, protocol, and timestamps preserved in metadata sidecar without numeric feature matrix $X$ or label leakage. |
 | Explainability & Response Policy | Implemented & tested | On-demand TreeSHAP local feature attribution (`/api/csv/explain`, RF model only); Dueling DQN response recommendations (`models/dqn/dqn_4action_best.pt`, strictly observational `RULE_DRY_RUN`, zero live firewall mutations). |
@@ -69,7 +69,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Dataset audit module | ✅ | `src/xrlids/datasets/audit.py` + tests |
 | CLI | ✅ | `src/xrlids/cli.py` |
 | Report generation from artifacts | ✅ | `scripts/phase1/generate_reports.py` (dynamic git hashes, live manifests) |
-| Test suite | ✅ | 482 unit, data, integration, and model tests passing (0 failures); full Phase 1, Phase 2, and Phase 3 verification suite |
+| Test suite | ✅ | 493 unit, data, integration, and model tests passing (0 failures); full Phase 1, Phase 2, and Phase 3 verification suite |
 | SHAP explainability module | ✅ | `src/xrlids/explainability/shap_analysis.py` + tests |
 | Cross-dataset transfer module | ✅ | `src/xrlids/experiments/transfer.py` + `scripts/phase1/run_transfer.py` + configs (6 directions executed) |
 | Pure-Python PCAP reader / writer | ✅ | `src/xrlids/demo/pcap.py` (zero external C-dependencies) + tests |

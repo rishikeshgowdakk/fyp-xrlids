@@ -2,6 +2,10 @@
 
 This directory contains the canonical trained model weights and artifact registry for the XRLIDS framework.
 
+> **CIC-IDS2017 LSTM checkpoint note (2026-10-29):** the canonical `lstm_cicids2017.pt` was replaced with the seed-42 checkpoint that carries the real `best_epoch`, `best_val_loss`, and training `history`. The model weights are bit-identical to the previous canonical file; only the metadata payload and file checksum changed. Historical `results/verification/FINAL-CLOSURE-*` records refer to the previous checksum.
+>
+> **Fusion metadata note (2026-10-29):** `fusion_weights.json` previously declared `"calibrated": true`. The alpha values are unchanged, but the flag was corrected to `"probability_calibrated": false` because the convex blend is not a calibrated probability.
+
 ## Structure
 
 ```
@@ -18,8 +22,8 @@ models/
 │   ├── dqn_4action_best.pt               # 4-Action response agent (ALLOW, ALERT, RATE_LIMIT, ISOLATE)
 │   └── dqn_3action_best.pt               # 3-Action response agent (ALLOW, ALERT, RATE_LIMIT)
 ├── fusion/              # Score-level fusion configurations (.json)
-│   └── fusion_weights.json               # Calibrated convex fusion achieving highest aggregate accuracy:
-│                                         #   Primary: CIC-IDS2017 (99.06%), CSE-CIC-IDS2018 (99.12%) -> 99.11% Fleet Acc
+│   └── fusion_weights.json               # Score-level convex fusion (alpha tuned on validation; no probability calibration):
+│                                         #   Primary: CIC-IDS2017 (99.06%), CSE-CIC-IDS2018 (99.12%) -> 99.11% population-weighted mean
 │                                         #   Auxiliary: UNSW-NB15 (89.96%, alpha=0.60)
 └── registry/            # Machine-readable artifact registries
     ├── model_manifest.json               # JSON registry with SHA-256 hashes and metadata
@@ -38,7 +42,7 @@ models/
 | **CSE-CIC-IDS2018** | R10 (10 feat) | Random Forest | 0.9723 | 0.8861 | 0.9902 | 0.9676 | 1,662,419 |
 | **CSE-CIC-IDS2018** | R10 (10 feat) | **Supervised LSTM** | **0.9912 (99.12%)** | **0.9603** | **0.9966** | **0.9865** | 1,662,419 |
 | **CSE-CIC-IDS2018** | R10 (10 feat) | **RF + LSTM Fusion ($\alpha=0.00$)\*** | **0.9912 (99.12%)** | **0.9603** | **0.9966** | **0.9865** | 1,662,419 |
-| **Primary Fleet Total** | **R10** | **Flagship System** | **0.9911 (99.11%)** | — | — | — | **2,018,252** |
+| **Population-weighted mean (CIC + CSE)** | **R10** | **Descriptive aggregate; not a single model** | **0.9911 (99.11%)** | — | — | — | **2,018,252** |
 
 > \* **Note on CSE-CIC-IDS2018 Fusion ($\alpha=0.00$):** In `models/fusion/fusion_weights.json`, the optimal fusion weight for CSE-2018 is $\alpha = 0.00$. The Random Forest contributes 0% weight, making this result mathematically and empirically identical to the single LSTM detector, NOT evidence of multi-model synergy.
 >
@@ -54,7 +58,7 @@ models/
 
 ### Multi-Seed Robustness (Seeds 42 / 123 / 456)
 
-All benchmarks re-run end-to-end with three seeds (population std); seed 42 reproduces the frozen artifacts exactly. Fusion detector, mean ± std:
+All benchmarks re-run end-to-end with three seeds (population std); seed 42 reproduces the frozen predictions to floating-point tolerance (serialized joblib/`.pt` bytes can differ across library versions). Fusion detector, mean ± std:
 
 | Dataset | Accuracy | F1 | ROC-AUC |
 |:---|:---:|:---:|:---:|

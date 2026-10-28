@@ -31,7 +31,7 @@ The XRL-IDARS research programme spans three benchmark network intrusion dataset
 | **CIC-IDS2017** | `cicids2017` | Canadian Institute for Cybersecurity (UNB Lab) | 8 CSV files | **2,830,743** | 79 columns | `AVAILABLE (VERIFIED)` |
 | **CSE-CIC-IDS2018** | `cse_cic_ids2018` | AWS Enterprise Cloud Testbed (CSE / UNB) | 10 CSV files | **16,233,002** | 80–84 columns | `AVAILABLE (VERIFIED)` |
 | **UNSW-NB15** | `unsw_nb15` | IXIA PerfectStorm Testbed (UNSW Canberra) | 2 CSV files | **257,673** | 45 columns | `AVAILABLE (VERIFIED)` |
-| **Fleet Total** | — | — | **20 files** | **19,321,418** | — | **100% AUDITED** |
+| **Dataset Total** | — | — | **20 files** | **19,321,418** | — | **100% AUDITED** |
 
 ---
 
@@ -306,12 +306,12 @@ All canonical models are cryptographically tracked, version-controlled, and vali
 | `models/rf/random_forest_cicids2017.joblib` | Random Forest (R10) | CIC-IDS2017 | 26.36 MB | `7c6ad493b773b687da24a2a12dcb21bd03bd56b76809462b983454aeacf2b774` |
 | `models/rf/random_forest_cse2018.joblib` | Random Forest (R10) | CSE-CIC-IDS2018 | 68.24 MB | `b7d2dc7bacca1a46f4da35aee2c19e1604020d429a5d29b72d742130215ba9b3` |
 | `models/rf/random_forest_unswnb15.joblib` | Random Forest (R4) | UNSW-NB15 | 22.64 MB | `c432eb067507ad5b29a542b372ac6d35e609e783a9e6094c9764d0cfe654ec7c` |
-| `models/lstm/lstm_cicids2017.pt` | Supervised LSTM ($T=5$) | CIC-IDS2017 | 60.44 KB | `18b0bfb48d3b031c17b26d3abd12485e09f8dd8c330fad26858320f11f818be1` |
+| `models/lstm/lstm_cicids2017.pt` | Supervised LSTM ($T=5$) | CIC-IDS2017 | 60.95 KB | `2cdbf88d2eda358619d66a5d001fa7dde8ab3a36d8e0548c8c529ae8e8870f5c` |
 | `models/lstm/lstm_cse2018.pt` | Supervised LSTM ($T=5$) | CSE-CIC-IDS2018 | 60.95 KB | `ea5b8198c20faa15d5d45ae7d081b754a76dbae1342a93b8234e0e06cfe8a33a` |
 | `models/lstm/lstm_unswnb15.pt` | Supervised LSTM ($T=5$) | UNSW-NB15 | 57.81 KB | `4d9386ff44c99eed822f8ace5c64429fab571b4f8aad847d6cc78bae5f308fbd` |
 | `models/dqn/dqn_4action_best.pt` | Dueling DQN (4-Action) | CIC-IDS2017 | 43.19 KB | `6a5afc669b4e699ecd2b1c01df885cef9030c93b8888b487dd386533920ce954` |
 | `models/dqn/dqn_3action_best.pt` | Dueling DQN (3-Action) | CIC-IDS2017 | 43.00 KB | `eb26792ad69389e6ebdafeaa844788a44ecadce6a42250ea54e38bf3e7b1652f` |
-| `models/fusion/fusion_weights.json` | Fleet Convex Fusion Weights | Fleet | 1.01 KB | Convex blend parameters ($\alpha \in \{0.50, 0.00, 0.60\}$) |
+| `models/fusion/fusion_weights.json` | Score Fusion Weights | Cross-benchmark | 1.21 KB | Validation-tuned convex blend parameters ($\alpha \in \{0.50, 0.00, 0.60\}$); scores are not probability-calibrated |
 
 ---
 

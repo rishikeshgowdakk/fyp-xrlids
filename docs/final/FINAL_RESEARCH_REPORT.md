@@ -64,12 +64,12 @@ All ten research questions defined in [`docs/00_PROJECT/RESEARCH_QUESTIONS.md`](
 
 ### RQ3: Does RF + LSTM fusion outperform the individual models?
 - **Exact Question:** *Does RF + LSTM fusion outperform the individual models?*
-- **Empirical Answer:** **YES, when component scores are properly calibrated.** Tuned convex score fusion ($S_{\text{fusion}} = \alpha \cdot S_{\text{RF}} + (1 - \alpha) \cdot S_{\text{LSTM}}$) achieved the highest overall detection quality across all three domains:
+- **Empirical Answer:** **YES on these held-out test populations.** Validation-tuned convex score fusion ($S_{\text{fusion}} = \alpha \cdot S_{\text{RF}} + (1 - \alpha) \cdot S_{\text{LSTM}}$; the blended score is not a calibrated probability) achieved the highest overall detection quality across all three domains:
   - **CIC-IDS2017 ($\alpha=0.50$):** F1 = 0.9745 (+0.0233 over RF, +0.0112 over LSTM, $p < 0.0001$).
   - **CSE-CIC-IDS2018 ($\alpha=0.00$):** F1 = 0.9603 (LSTM dominated; pure temporal model selected).
   - **UNSW-NB15 ($\alpha=0.60$):** F1 = 0.8970 (+0.0422 over RF, +0.0333 over LSTM, $p < 0.0001$).
 - **Primary Artifacts:** `results/experiments/EXP-P1-*-R10-MULTI-001/test_metrics.json`.
-- **Limitations:** Optimal mixing parameter $\alpha$ varies substantially across network environments (ranging from 0.0 to 0.6), requiring target-domain calibration.
+- **Limitations:** Optimal mixing parameter $\alpha$ varies substantially across network environments (ranging from 0.0 to 0.6), requiring target-domain weight tuning.
 
 ---
 

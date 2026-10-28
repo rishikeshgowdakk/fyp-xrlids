@@ -68,12 +68,12 @@ All 9 canonical models are tracked directly in Git and verify against [`models/r
 | `models/rf/random_forest_cicids2017.joblib` | RF | CIC-IDS2017 | `R10` (10 features) | `7c6ad493b773b687...` (VERIFIED) |
 | `models/rf/random_forest_cse2018.joblib` | RF | CSE-CIC-IDS2018 | `R10` (10 features) | `b7d2dc7bacca1a46...` (VERIFIED) |
 | `models/rf/random_forest_unswnb15.joblib` | RF | UNSW-NB15 | `R4` (4 features) | `c432eb067507ad5b...` (VERIFIED) |
-| `models/lstm/lstm_cicids2017.pt` | LSTM | CIC-IDS2017 | `R10` (Sequence $T=5$) | `18b0bfb48d3b031c...` (VERIFIED) |
+| `models/lstm/lstm_cicids2017.pt` | LSTM | CIC-IDS2017 | `R10` (Sequence $T=5$) | `2cdbf88d2eda3586...` (VERIFIED) |
 | `models/lstm/lstm_cse2018.pt` | LSTM | CSE-CIC-IDS2018 | `R10` (Sequence $T=5$) | `ea5b8198c20faa15...` (VERIFIED) |
 | `models/lstm/lstm_unswnb15.pt` | LSTM | UNSW-NB15 | `R4` (Sequence $T=5$) | `4d9386ff44c99eed...` (VERIFIED) |
 | `models/dqn/dqn_4action_best.pt` | DQN | CIC-IDS2017 | `response_state_v1` (6D) | `6a5afc669b4e699e...` (VERIFIED) |
 | `models/dqn/dqn_3action_best.pt` | DQN | CIC-IDS2017 | `response_state_v1` (6D) | `c06a61fb77775116...` (VERIFIED) |
-| `models/fusion/fusion_weights.json` | Fusion | All | Score Combination | `fd50a413119d3ec3...` (VERIFIED) |
+| `models/fusion/fusion_weights.json` | Fusion | All | Score Combination | `e35df25179a4574c...` (VERIFIED) |
 
 ---
 

@@ -119,7 +119,7 @@ live demo fails, play the recording and narrate over it.
    - **CIC-IDS2017**: 355,833 aligned test flows, R10 contract, Fusion F1=0.9745 ($\alpha=0.50$).
    - **CSE-CIC-IDS2018**: 1,662,419 aligned test flows, R10 contract, LSTM F1=0.9603 ($\alpha=0.00$).
    - **UNSW-NB15**: 24,496 aligned test flows, R4 contract, Fusion F1=0.8970 ($\alpha=0.60$).
-7. **Flow Evaluation & Exhibition Demo (Modes A, B, C) (60 s)** — demonstrate Mode B (200 flows) across all three benchmarks with side-by-side RF, LSTM ($T=5$, causal sequence), and Fusion metrics, 3 confusion matrices, preserved IP/port endpoint metadata, on-demand TreeSHAP explanations, and Dueling DQN dry-run actions.
+7. **Flow Evaluation & Exhibition Demo (Modes A, B, C) (60 s)** — demonstrate Mode B (200 flows) across all three benchmarks with side-by-side RF, LSTM ($T=5$, causal sequence), and Fusion metrics, 3 confusion matrices, source-file provenance with clearly labeled synthetic display endpoints, on-demand TreeSHAP explanations, and Dueling DQN dry-run actions.
 8. **Limitations + production path (45 s)** — live traffic has no ground truth (never claim accuracy); production gaps: auth/TLS, persistence, model registry, eBPF/XDP, CI.
 
 ### 3.3 Twelve-minute full demo

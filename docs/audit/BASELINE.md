@@ -8,6 +8,8 @@
 **Remote `origin/main` Ref:** `7d6bcd446b7d99bf5625173870bd0a7325eac467` (Up to date with origin/main)  
 **Working-Tree State:** Clean (zero uncommitted or untracked changes at baseline capture)
 
+> **Historical snapshot:** This document records the suite at baseline commit `7d6bcd4` (481 tests). The current repository suite collects **493 tests**; see `docs/audit/FINAL_AUDIT_REPORT.md` for the current inventory.
+
 ---
 
 ## 1. Authoritative Git Baseline & Commit History

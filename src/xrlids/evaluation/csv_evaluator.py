@@ -550,6 +550,7 @@ def evaluate_csv_dataset(
     # =========================================================================
     # MODE B: FIXED EXHIBITION SUBSET (200 FLOWS: 166 BENIGN, 34 ATTACK)
     # =========================================================================
+    exhibition_metadata_provenance: dict[str, Any] | None = None
     if mode_clean in ("exhibition", "mode_b", "demo_200"):
         if bench_key == "cse2018":
             exh_json = REPO_ROOT / "data" / "demo" / "cse2018_exhibition_200.json"
@@ -564,15 +565,19 @@ def evaluate_csv_dataset(
         if exh_json.exists():
             with open(exh_json, "r", encoding="utf-8") as f:
                 exh_data = json.load(f)
+            exhibition_metadata_provenance = exh_data.get("metadata_provenance")
             df_exh = pd.DataFrame([
                 {
                     **fl.get("features", {}),
                     "label": 1 if fl.get("is_attack") else 0,
-                    "src_endpoint": fl.get("src_endpoint", "192.168.10.10:40000"),
-                    "dst_endpoint": fl.get("dst_endpoint", "142.250.190.40:80"),
-                    "protocol": fl.get("protocol", "TCP"),
-                    "category": fl.get("category", "benign"),
+                    "src_endpoint": fl.get("src_endpoint", "Not available in source data"),
+                    "dst_endpoint": fl.get("dst_endpoint", "Not available in source data"),
+                    "protocol": fl.get("protocol", "N/A"),
+                    "category": fl.get("category", "traffic"),
                     "flow_id": fl.get("flow_id", idx),
+                    "source_file": fl.get("source_file"),
+                    "timestamp": fl.get("timestamp"),
+                    "duration_ms": fl.get("duration_ms"),
                 }
                 for idx, fl in enumerate(exh_data.get("flows", []))
             ])
@@ -976,8 +981,10 @@ def evaluate_csv_dataset(
     eval_type = "fixed_exhibition_subset" if is_exhibition else "ad_hoc_csv_evaluation"
 
     disclaimer = (
-        f"Deterministic 200-flow exhibition subset derived from the authoritative {bench_info['name']} "
-        "held-out test split (166 Benign, 34 Attack). Shows identical reproducible predictions."
+        f"Deterministic 200-flow exhibition subset drawn from the canonical {bench_info['name']} "
+        "held-out test split (166 Benign, 34 Attack). Predictions are reproducible frozen-model outputs. "
+        "Source/destination endpoints are synthetic display-only placeholders where the benchmark "
+        "feature tables do not contain IP addresses; see metadata_provenance in the demo JSON."
         if is_exhibition else
         "Ad-hoc CSV evaluation evaluated against frozen model artifacts. "
         "This run tests user-supplied records and does NOT alter or overwrite "
@@ -1003,6 +1010,7 @@ def evaluate_csv_dataset(
         "evaluation_type": eval_type,
         "official_frozen_benchmark": False,
         "disclaimer": disclaimer,
+        "metadata_provenance": exhibition_metadata_provenance,
         "benchmark": bench_key,
         "contract": contract_key,
         "model_identifier": bench_info["name"],
@@ -1123,9 +1131,9 @@ def _evaluate_mode_full_test(
         flows.append({
             "flow_id": fid,
             "metadata": {
-                "src_endpoint": f"host-{fid % 250}:50000",
-                "dst_endpoint": "10.0.0.1:80",
-                "protocol": "TCP",
+                "src_endpoint": "Not available in source data",
+                "dst_endpoint": "Not available in source data",
+                "protocol": "N/A",
                 "category": "held_out_test_flow",
             },
             "features": {},
@@ -1289,62 +1297,51 @@ def export_evaluated_csv_string(
 
 
 def get_demo_sample_csv(n_samples: int = 200, benchmark: str = "cicids2017") -> str:
-    """Generate or retrieve a clean, ready-to-evaluate CSV sample containing real benchmark flows."""
+    """Return a ready-to-evaluate CSV slice of the real exhibition data.
+
+    The slice is read from the committed exhibition JSON, which is itself generated from
+    the canonical held-out test split. If that file is absent, fail explicitly rather than
+    fabricating synthetic traffic.
+    """
+    if n_samples <= 0:
+        raise CSVValidationError("n_samples must be positive")
+
     bench_clean = str(benchmark).lower().strip()
     if bench_clean in ("cse2018", "cse-cic-ids2018", "cse_cic_ids2018"):
-        exh_csv = REPO_ROOT / "data" / "demo" / "cse2018_exhibition_200.csv"
+        exh_json = REPO_ROOT / "data" / "demo" / "cse2018_exhibition_200.json"
+        features = list(R10_FEATURES)
     elif bench_clean in ("unswnb15", "unsw-nb15", "unsw_nb15"):
-        exh_csv = REPO_ROOT / "data" / "demo" / "unswnb15_exhibition_200.csv"
+        exh_json = REPO_ROOT / "data" / "demo" / "unswnb15_exhibition_200.json"
+        features = list(R4_FEATURES)
     else:
-        exh_csv = REPO_ROOT / "data" / "demo" / "cicids2017_exhibition_200.csv"
+        exh_json = REPO_ROOT / "data" / "demo" / "cicids2017_exhibition_200.json"
+        features = list(R10_FEATURES)
 
-    if exh_csv.exists() and n_samples >= 200:
-        with open(exh_csv, "r", encoding="utf-8") as f:
-            return f.read()
+    if not exh_json.exists():
+        raise CSVValidationError(
+            f"Exhibition data not found: {exh_json}. "
+            "Rebuild it with scripts/demo/build_exhibition_subset.py; no synthetic fallback is used."
+        )
 
-    samples_file = REPO_ROOT / "data" / "demo" / "dataset_samples.json"
-    rows: list[dict[str, Any]] = []
-
-    if samples_file.exists():
-        with open(samples_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        benign = data.get("benign", [])[: max(1, n_samples // 2)]
-        ddos = [x for x in data.get("ddos", []) if x.get("is_attack")][: max(1, n_samples // 4)]
-        dos = [x for x in data.get("dos", []) if x.get("is_attack")][: max(1, n_samples // 4)]
-        pool = benign + ddos + dos
-        for item in pool[:n_samples]:
-            feats = dict(item.get("features", {}))
-            feats["label"] = 1 if item.get("is_attack") else 0
-            feats["src_endpoint"] = item.get("src_endpoint", "192.168.10.10:40000")
-            feats["dst_endpoint"] = item.get("dst_endpoint", "142.250.190.40:80")
-            feats["protocol"] = item.get("protocol", "TCP")
-            rows.append(feats)
-
+    with open(exh_json, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    rows = data.get("flows", [])[:n_samples]
     if not rows:
-        for i in range(n_samples):
-            is_atk = 1 if i % 2 == 1 else 0
-            row = {
-                "flow_duration_ms": 1200.0 + i * 50,
-                "flow_packets_per_s": 15.0 if not is_atk else 450.0,
-                "flow_bytes_per_s": 8000.0 if not is_atk else 125000.0,
-                "packet_length_mean": 512.0 if not is_atk else 1400.0,
-                "packet_length_std": 120.0,
-                "syn_count": 1.0 if not is_atk else 10.0,
-                "ack_count": 1.0,
-                "rst_count": 0.0,
-                "fin_count": 1.0 if not is_atk else 0.0,
-                "syn_ack_ratio": 1.0 if not is_atk else 5.0,
-                "label": is_atk,
-                "src_endpoint": f"192.168.10.{10 + i % 50}:50000",
-                "dst_endpoint": "10.0.0.1:80",
-                "protocol": "TCP",
-            }
-            rows.append(row)
+        raise CSVValidationError(f"Exhibition data contains no flows: {exh_json}")
 
     output = io.StringIO()
-    cols = ["src_endpoint", "dst_endpoint", "protocol"] + list(R10_FEATURES) + ["label"]
+    cols = ["flow_id", "src_endpoint", "dst_endpoint", "protocol", "source_file", *features, "label"]
     writer = csv.DictWriter(output, fieldnames=cols)
     writer.writeheader()
-    for r in rows:
-        writer.writerow({k: r.get(k, 0.0) for k in cols})
+    for item in rows:
+        row = {
+            "flow_id": item.get("flow_id", ""),
+            "src_endpoint": item.get("src_endpoint", ""),
+            "dst_endpoint": item.get("dst_endpoint", ""),
+            "protocol": item.get("protocol", "N/A"),
+            "source_file": item.get("source_file", ""),
+            "label": item.get("label", 1 if item.get("is_attack") else 0),
+        }
+        row.update({name: item.get("features", {}).get(name, "") for name in features})
+        writer.writerow(row)
     return output.getvalue()
