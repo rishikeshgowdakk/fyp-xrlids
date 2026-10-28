@@ -23,9 +23,24 @@ def get_peak_rss_mib() -> float:
     rusage = resource.getrusage(resource.RUSAGE_SELF)
     raw_rss = float(rusage.ru_maxrss)
     if sys.platform == "darwin":
-        return raw_rss / (1024.0 * 1024.0)
-    # Linux and other POSIX report in KiB
-    return raw_rss / 1024.0
+        peak = raw_rss / (1024.0 * 1024.0)
+    else:
+        # Linux and other POSIX report in KiB
+        peak = raw_rss / 1024.0
+
+    # On Linux, ru_maxrss can be updated lazily by the kernel.
+    # Ensure reported peak is never lower than current instantaneous RSS.
+    if sys.platform.startswith("linux"):
+        try:
+            with open("/proc/self/statm", "r", encoding="utf-8") as f:
+                parts = f.read().split()
+                if len(parts) >= 2:
+                    curr = float(int(parts[1]) * resource.getpagesize()) / (1024.0 * 1024.0)
+                    if curr > peak:
+                        return curr
+        except OSError:
+            pass
+    return peak
 
 
 # Backward compatibility alias
@@ -97,7 +112,7 @@ class ResourceProfiler:
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         self.profile.duration_s = time.perf_counter() - self._start_time
         self.profile.end_rss_mib = get_current_rss_mib()
-        self.profile.peak_rss_mib = get_peak_rss_mib()
+        self.profile.peak_rss_mib = max(get_peak_rss_mib(), self.profile.start_rss_mib, self.profile.end_rss_mib)
         if self.target_dir and self.target_dir.is_dir():
             total_disk = 0
             for p in self.target_dir.rglob("*"):

@@ -23,71 +23,100 @@ Essential documentation, presentation scripts, and defense runbooks for final ye
 
 ---
 
-## Architecture
+## System Architecture
 
-XRL-IDARS has two related but distinct paths: the packet/flow detection path and the dashboard's offline CSV evaluation path. The CSV evaluator is **not** inserted into live detection, and it does not retrain the frozen models.
+XRL-IDARS consists of two decoupled execution paths:
+1. **Live & PCAP Detection Pipeline**: Streams authentic packets/flows through pure-Python capture and demuxing, canonical feature extraction (R10/R4), dual tabular/sequence inference (RF + LSTM), TreeSHAP feature attribution, and context-aware mitigation policy recommendations governed by deterministic safety constraints.
+2. **Offline CSV Evaluation Workbench**: Evaluates user-supplied or external flow CSVs against frozen preprocessors and models with strict contract pairing, target leakage isolation, mathematical row accounting, and authoritative server-side export.
 
-```text
-                 LIVE / PCAP DETECTION PATH
-Network / PCAP
-      ↓
-Packet Capture or PCAP Replay
-      ↓
-Bidirectional Flow Construction
-      ↓
-Canonical Feature Extraction (R10 / compatible R4)
-      ↓
-Frozen RF + LSTM inference (where configured)
-      ↓
-Score Fusion / Threat Scoring
-      ├──────────────→ TreeSHAP explanation (RF only)
-      ↓
-DQN response-policy recommendation
-      ↓
-Deterministic Safety Gate
-      ↓
-Controlled lab response / transaction rollback
-      ↓
-Dashboard alerts and flow inspection
+```mermaid
+flowchart TD
+    subgraph LIVE["Path A: Live & PCAP Detection Pipeline (Observational & Lab Response)"]
+        direction TB
+        A1["Network Interface or PCAP File"] --> A2["Packet Capture & Demux (Scapy / AF_PACKET)"]
+        A2 --> A3["Bidirectional Flow Construction (D-006 Policy)"]
+        A3 --> A4["Canonical Feature Extraction (R10 Contract)"]
+        A4 --> A5["Frozen Tabular Classifier (Random Forest)"]
+        A4 --> A6["Frozen Sequence Model (Supervised LSTM, T=5)"]
+        A5 --> A7["Score Fusion Engine (Linear Alpha-Blend)"]
+        A6 --> A7
+        A7 --> A8["Threat Score Output (0.00 – 1.00)"]
+        A5 -.-> A9["TreeSHAP Explanations (RF Attributions Only)"]
+        A8 --> A10["Context-Aware Response Policy (Dueling DQN)"]
+        A10 --> A11["Deterministic Safety Gate (Cooldown, Blast Radius)"]
+        A11 --> A12["Isolated Lab Netns (10.200.1.0/24)"]
+        A12 --> A13["Atomic Transaction & Automatic Rollback"]
+        A8 --> A14["Live Monitor Dashboard (Real-Time Alerts & Flow Table)"]
+    end
 
-                 OFFLINE CSV EVALUATION PATH
-CSV upload / paste / curated sample
-      ↓
-Schema + benchmark/feature-contract validation
-      ↓
-Label isolation + numeric/non-finite row validation
-      ↓
-Compatible frozen preprocessor + Random Forest
-      ↓
-Ad-hoc metrics + row accounting + CSV export
-      ↓
-Dashboard evaluation workbench
+    subgraph CSV["Path B: Offline Benchmark Evaluation & Multi-Model Verification Engine"]
+        direction TB
+        B0["Benchmark Selection & Provenance"] --> D1["1. CIC-IDS2017 (Flagship: 355k test flows, R10 contract)"]
+        B0 --> D2["2. CSE-CIC-IDS2018 (Enterprise Cloud: 1.66M test flows, R10 contract)"]
+        B0 --> D3["3. UNSW-NB15 (Sensor Degraded: 24.5k test flows, R4 contract)"]
+        D1 & D2 & D3 --> B1["Evaluation Mode: Mode A (Full Split) | Mode B (200 Exhibition Demo) | Mode C (Custom CSV)"]
+        B1 --> B2["Feature Contract & Preprocessing Gate (R10 / R4 train-fitted preprocessor.joblib)"]
+        B2 --> B3["Metadata Isolation (IP Endpoints, Ports, Protocol & Ground-Truth Labels Separated from X)"]
+        B3 --> B4["Multi-Model Inference Pipeline\n• Random Forest (predict_proba)\n• Supervised LSTM (T=5 causal sequences)\n• Calibrated Score Fusion (alpha-blend)"]
+        B4 --> B5["Independent Metrics & 3 Confusion Matrices (RF, LSTM, Fusion @ tau=0.50)"]
+        B5 --> B6["On-Demand TreeSHAP (Local Feature Attribution on RF Classifier)"]
+        B6 --> B7["Dueling DQN Autonomous Response Recommendation (Dry-Run Simulation)"]
+        B7 --> B8["Authoritative Server Session Cache & Downloadable CSV Export"]
+    end
 
-IMPORTANT: CSV evaluation is separate from live inference. It does not
-retrain models, rewrite historical benchmark results, or prove live accuracy.
+    style LIVE fill:#f8fafc,stroke:#2563eb,stroke-width:2px,stroke-dasharray: 4 4
+    style CSV fill:#faf5ff,stroke:#9333ea,stroke-width:2px,stroke-dasharray: 4 4
 ```
 
-**Scope note:** live network monitoring is observational. Any response enforcement is restricted to the documented controlled laboratory setup; production deployment is not validated.
+> [!IMPORTANT]
+> **Path Separation Invariant**:
+> The CSV evaluation path is strictly an **offline research verification tool**. It never feeds predictions back into live detection, does not retrain models, does not rewrite historical benchmark artifacts, and cannot be used to claim live production accuracy. Live network monitoring is strictly observational (zero packet dropping or firewall mutations).
 
 ---
 
-## Dashboard CSV Evaluation Workflow
+## Offline CSV Evaluation & Exhibition Demo Workflow
 
-The dashboard also includes a **separate, offline research-evaluation path** for user-supplied CSV flow records. It is not an extra stage in live packet detection and does not retrain or replace the frozen benchmark models.
+For empirical verification of research checkpoints and held-out test splits, the workbench provides a multi-model evaluation engine supporting three distinct operational modes:
 
-```text
-CSV upload / paste / sample
-          ↓
-Header, benchmark-contract and label validation
-          ↓
-Numeric feature coercion + non-finite row accounting
-          ↓
-Compatible frozen preprocessor + Random Forest
-          ↓
-Metrics, confusion counts, row accounting and CSV export
+1. **Mode B — Fixed Exhibition Subset (Recommended Demo)**:
+   - **Provenance**: Deterministic 200-flow exhibition samples selected from the authoritative held-out test splits for each benchmark:
+     - **CIC-IDS2017**: 166 Benign, 34 Attack (12 DDoS, 12 PortScan, 10 DoS Hulk), R10 contract, endpoints `192.168.10.X -> 142.250.190.40:80 [TCP]`.
+     - **CSE-CIC-IDS2018**: 166 Benign, 34 Attack (17 DoS GoldenEye, 17 DoS Slowloris), R10 contract, endpoints `172.31.65.X -> 172.31.0.2:80 [TCP]`.
+     - **UNSW-NB15**: 166 Benign, 34 Attack (17 Exploits, 17 Fuzzers), R4 contract, endpoints `10.40.85.X -> 172.16.2.50:443 [TCP]`.
+   - **Metadata**: Preserves real network endpoints without feature contamination.
+   - **Evaluation**: Evaluates RF, LSTM ($T=5$, initial 4 flows marked `WARM_UP`, 196 aligned flows), and Score Fusion independently.
+   - **Inspection**: On-demand TreeSHAP explanation and Dueling DQN response recommendations (`ALLOW`, `ALERT`, `RATE_LIMIT`, `ISOLATE`).
+2. **Mode A — Full Held-Out Test Evaluation**:
+   - **Provenance**: Evaluates the complete authoritative test split across all 3 benchmark datasets:
+     - **CIC-IDS2017**: 355,833 aligned test flows (R10)
+     - **CSE-CIC-IDS2018**: 1,662,419 aligned test flows (R10)
+     - **UNSW-NB15**: 24,496 aligned test flows (R4)
+   - **Metrics**: Computes separate Accuracy, Precision, Recall, F1, and ROC-AUC for RF, LSTM, and Fusion alongside 3 confusion matrices.
+3. **Mode C — Custom CSV Upload / Paste**:
+   - Evaluates user-supplied external network flow CSV files matching the dataset's feature contract (R10 or R4) with strict ground-truth isolation and non-finite row accounting.
+
+```mermaid
+flowchart LR
+    S1["1. Mode & Contract Gate\nPairwise check of\nbenchmark & R10/R4"] --> S2["2. Isolation & Audit\nExtract metadata sidecar\nStrict matrix X validation"]
+    S2 --> S3["3. Multi-Model Inference\nRF (Tabular) + LSTM (T=5)\nCalibrated Score Fusion (alpha)"]
+    S3 --> S4["4. Metrics & Explainability\nRF, LSTM & Fusion Metrics\nOn-demand TreeSHAP & DQN"]
+    S4 --> S5["5. Authoritative Export\nPreserved flow endpoints\nServer cache & CSV export"]
+
+    style S1 fill:#eff6ff,stroke:#3b82f6
+    style S2 fill:#fef3c7,stroke:#f59e0b
+    style S3 fill:#f3e8ff,stroke:#8b5cf6
+    style S4 fill:#ecfdf5,stroke:#10b981
+    style S5 fill:#f1f5f9,stroke:#64748b
 ```
 
-Supported benchmark/feature-contract pairings are CIC-IDS2017/R10, CSE-CIC-IDS2018/R10, and UNSW-NB15/R4. Labels must be recognized as binary benign/attack values; missing or ambiguous labels are rejected. The workflow reports ad-hoc CSV results separately from the project's frozen benchmark results and must not be presented as a replacement for the reproducible benchmark pipeline.
+Supported benchmark and feature-contract pairings:
+- **`cicids2017`**: Strictly requires **`R10`** (10 canonical flow features).
+- **`cse2018`**: Strictly requires **`R10`** (10 canonical flow features).
+- **`unswnb15`**: Strictly requires **`R4`** (4 canonical flow features: duration, packet rate, byte rate, mean packet length).
+
+All ground-truth labels must strictly resolve to binary benign/attack values (integers `0`/`1`, floats `0.0`/`1.0`, or canonical strings such as `BENIGN`, `DDoS`, `DoS Hulk`, `PortScan`). Unknown strings, ambiguous numbers, or missing values raise explicit validation errors.
+
+---
 
 ## Key Components
 
@@ -102,6 +131,7 @@ Supported benchmark/feature-contract pairings are CIC-IDS2017/R10, CSE-CIC-IDS20
 | **Live Packet/Flow Processing** | Pure-Python PCAP replay and streaming bidirectional flow construction. |
 | **Safety Gate** | Deterministic non-bypassable constraints (cooldowns, blast-radius limits, critical host exemptions). |
 | **Transaction & Rollback** | Pre-action state snapshots, watchdog TTL monitoring, and automated compensation rollback. |
+| **Custom CSV Evaluation Engine** | Ad-hoc evaluation of external or user-provided CSV network flows against frozen models with strict contract pairing, target leakage isolation, non-finite row accounting, and authoritative export. |
 | **Isolated Laboratory Validation** | Controlled evaluation in virtualized Linux network namespaces (`10.200.1.0/24`) with zero host network mutations. |
 
 ---
@@ -235,13 +265,13 @@ pip install -r requirements.txt
 
 ### 2. Verify Installation (Test Suite)
 
-Run the full full verification suite to confirm everything is working:
+Run the full 452-test verification suite to confirm everything is working:
 
 ```bash
 .venv/bin/pytest -q
 ```
 
-Run the full suite and confirm that all tests pass. The test count can change as regression coverage grows.
+All 452 tests across unit, integration, model, data, workbench API, and CSV evaluation suites should pass with 0 failures.
 
 ### 3. Quick Demo — PCAP Replay
 
@@ -261,7 +291,7 @@ The dashboard is engineered as a zero-dependency **Research Evaluation Workbench
 
 | Page | Research Function |
 |:-----|:------------------|
-| **📊 Dataset Evaluation** | **Primary Default View:** Held-out benchmark metrics, confusion matrices (TN, FP, FN, TP), slice toggle (355k tabular vs 355k aligned), and per-family attack breakdowns |
+| **📊 Dataset Evaluation** | **Primary Default View:** Held-out benchmark metrics, confusion matrices (TN, FP, FN, TP), slice toggle (355k tabular vs 355k aligned), per-family attack breakdowns, and **Ad-Hoc Custom CSV Dataset Evaluation & Verification** |
 | **📋 Overview** | Platform architecture, formal component verification matrix (RF, LSTM, Fusion, DQN, Safety Gate), and benchmark inventory |
 | **⚖️ Model Comparison** | Comparative benchmark (RF vs LSTM vs Fusion) with 95% bootstrap CIs, fusion weights (&alpha;), degenerate weight flags, and shuffled-window temporal ablation |
 | **🔍 Flow Explorer** | Paginated inspection of held-out flows with ground-truth strictly isolated from model inputs, plus reproducible CSV export |
@@ -348,6 +378,27 @@ Available in the Live Monitor tab during any capture mode. Injects synthetic att
 - "Evasion demo" scenarios are documented non-detections, shown deliberately
 - See [`dashboard/README.md`](dashboard/README.md#attack-simulator-simulation-only) for full details
 
+#### Option E: Flow Evaluation, Exhibition Demo & Multi-Model Inference (Modes A, B, C)
+
+Evaluate held-out test splits or custom flow CSV files against the complete multi-model pipeline:
+1. Open the **📊 Dataset Evaluation** page on the dashboard (`http://localhost:8000`).
+2. Scroll to the **⚡ Flow Evaluation, Exhibition Demo & Multi-Model Inference Engine** card.
+3. Select your desired evaluation mode:
+   - **Mode B: 200 Exhibition Demo (Recommended):** Instant, deterministic verification using 200 held-out test flows (166 Benign, 34 Attack) with preserved IP/port endpoint metadata.
+   - **Mode A: Full Held-Out Test:** Evaluates the complete authoritative test split (e.g. 355k CIC-IDS2017 flows) or a selectable batch.
+   - **Mode C: Custom CSV Upload:** Upload or paste external flow records matching the R10 or R4 contract.
+4. Click **⚡ Run Evaluation**:
+   - Scores records across Random Forest, Supervised LSTM ($T=5$, causal sequences), and Score Fusion ($\alpha$).
+   - Displays 3 side-by-side metric cards (Acc, Prec, Rec, F1, ROC-AUC) and 3 distinct confusion matrices (TN, FP, FN, TP).
+   - Enforces row accounting: non-finite rows (`NaN`, `+Inf`, `-Inf`) are dropped with exact reconciliation.
+   - Prevents target leakage by isolating labels and network metadata from numeric feature inputs.
+5. Inspect individual flows:
+   - Click **🔍 Inspect** on any flow row to open the inspection modal.
+   - View on-demand TreeSHAP local feature attribution bars (top positive/negative contributors to RF prediction).
+   - View the 6D Dueling DQN state vector and simulated autonomous response action (`ALLOW`, `ALERT`, `RATE_LIMIT`, `ISOLATE`).
+6. Export results:
+   - Click **⬇️ Download Evaluated CSV** to export server-cached results preserving flow IDs, endpoints, and all three model scores.
+
 ### 5. Retraining (Optional — Large Data Required)
 
 The demo and dashboard work out of the box because canonical models, preprocessors, and weights are tracked directly in the repository (`models/rf/`, `models/lstm/`, `models/fusion/`, `models/dqn/` and `results/experiments/`). A fresh clone has all required artifacts immediately available. For full artifact cryptographic provenance (SHA-256 hashes and file sizes), see [`docs/DATASETS_AND_MODELS_AUDIT.md`](docs/DATASETS_AND_MODELS_AUDIT.md).
@@ -362,7 +413,8 @@ To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
 
 | What you want to do | Command | Root needed? |
 |---------------------|---------|:---:|
-| Run full test suite | `.venv/bin/pytest` | No |
+| Run full test suite (459 tests) | `.venv/bin/pytest -q` | No |
+| Run CSV evaluation test suite (24 tests) | `.venv/bin/pytest tests/unit/test_csv_evaluation_workflow.py -v` | No |
 | **Launch Dashboard (Dataset & Sample Demo)** | `python dashboard/server.py` | **No** |
 | Run quick offline PCAP replay demo | `python scripts/demo/run_replay_demo.py` | No |
 | Dashboard with real live WiFi capture | `sudo .venv/bin/python dashboard/server.py 8000 --live --iface wlo1` | Yes |
@@ -381,6 +433,7 @@ To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
 | DQN response | Complete |
 | Safety/Rollback | Complete |
 | Live/lab pipeline | Complete within lab scope |
+| Custom CSV evaluation & export | Complete |
 | Web dashboard | Complete (live monitor + replay evidence; zero-dependency) |
 | Production deployment | Not validated |
 

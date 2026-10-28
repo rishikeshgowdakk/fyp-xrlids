@@ -447,3 +447,252 @@ def test_csv_api_incompatible_benchmark_contract_rejected(csv_server):
     err_body = json.loads(exc_info.value.read().decode("utf-8"))
     assert err_body["status"] == "validation_error"
     assert "Incompatible benchmark and feature contract" in err_body["error"]
+
+
+def test_csv_multi_model_rf_lstm_fusion():
+    """Verify that CSV evaluation produces RF, LSTM, and Fusion outputs and tracks warm-up."""
+    # Create 8 flows (T=5, so 4 warm-up flows and 4 aligned sequence flows)
+    data = {f: [100.0 * (i + 1) for i in range(8)] for f in R10_FEATURES}
+    data["label"] = [0, 0, 0, 0, 1, 1, 1, 1]
+    df = pd.DataFrame(data)
+
+    res = evaluate_csv_dataset(df, contract="R10", benchmark="cicids2017")
+    assert res["status"] == "success"
+    assert "model_metrics" in res
+    assert "rf" in res["model_metrics"]
+    assert "lstm" in res["model_metrics"]
+    assert "fusion" in res["model_metrics"]
+
+    # Check row accounting for sequences and warm-up
+    acct = res["row_accounting"]
+    assert acct["evaluated_rows"] == 8
+    assert acct["aligned_sequence_rows"] == 4
+    assert acct["warmup_rows"] == 4
+
+    # Check flows output
+    flows = res["flows"]
+    assert len(flows) == 8
+
+    # First 4 flows are in warm-up
+    for i in range(4):
+        assert flows[i]["lstm_status"] == "WARM_UP"
+        assert flows[i]["lstm_score"] is None
+        assert 0.0 <= flows[i]["rf_score"] <= 1.0
+        assert flows[i]["fusion_score"] == flows[i]["rf_score"]
+
+    # Flows 4-7 are sequence-aligned
+    for i in range(4, 8):
+        assert flows[i]["lstm_status"] == "ALIGNED"
+        assert flows[i]["lstm_score"] is not None
+        assert 0.0 <= flows[i]["lstm_score"] <= 1.0
+        expected_fusion = round(0.5 * flows[i]["rf_score"] + 0.5 * flows[i]["lstm_score"], 4)
+        assert abs(flows[i]["fusion_score"] - expected_fusion) <= 0.0002
+
+
+def test_csv_mode_b_exhibition_200():
+    """Verify Mode B (Exhibition 200 subset) loads 166 benign and 34 attack records and scores them."""
+    res = evaluate_csv_dataset(mode="exhibition", contract="R10", benchmark="cicids2017")
+    assert res["status"] == "success"
+    assert res["evaluation_mode"] == "exhibition"
+    assert res["evaluation_type"] == "fixed_exhibition_subset"
+    assert res["row_accounting"]["total_rows_received"] == 200
+    assert res["row_accounting"]["evaluated_rows"] == 200
+    assert res["row_accounting"]["aligned_sequence_rows"] == 196
+    assert res["row_accounting"]["warmup_rows"] == 4
+
+    # Verify metrics for all 3 models
+    m_rf = res["model_metrics"]["rf"]
+    m_lstm = res["model_metrics"]["lstm"]
+    m_fusion = res["model_metrics"]["fusion"]
+
+    assert m_rf["population"] == 200
+    assert m_lstm["population"] == 196
+    assert m_fusion["population"] == 196
+
+    assert 0.80 <= m_rf["accuracy"] <= 1.00
+    assert 0.80 <= m_fusion["accuracy"] <= 1.00
+
+    # Verify flow records preserve endpoints
+    flows = res["flows"]
+    assert len(flows) == 100  # display limit
+    assert flows[0]["metadata"]["src_endpoint"] != "Not available in source data"
+    assert flows[0]["metadata"]["dst_endpoint"] != "Not available in source data"
+
+
+def test_csv_mode_a_full_held_out_test():
+    """Verify Mode A (Full Test) returns authoritative held-out metrics from research artifacts."""
+    res = evaluate_csv_dataset(mode="full_test", contract="R10", benchmark="cicids2017")
+    assert res["status"] == "success"
+    assert res["evaluation_mode"] == "full_test"
+    assert res["official_frozen_benchmark"] is True
+    assert res["row_accounting"]["evaluated_rows"] == 355865
+    assert res["row_accounting"]["aligned_sequence_rows"] == 355833
+    assert res["row_accounting"]["warmup_rows"] == 32
+
+    # Verify frozen fusion metrics match published research
+    assert res["metrics"]["population"] == 355833
+    assert abs(res["metrics"]["accuracy"] - 0.9906) <= 0.001
+    assert abs(res["metrics"]["f1"] - 0.9745) <= 0.001
+
+
+def test_csv_metadata_preservation_and_isolation():
+    """Verify network flow metadata is preserved in output without contaminating ML feature matrix."""
+    data = {f: [1200.0, 500.0] for f in R10_FEATURES}
+    data["label"] = [0, 1]
+    data["src_endpoint"] = ["192.168.10.15:45000", "172.16.0.1:58000"]
+    data["dst_endpoint"] = ["142.250.190.40:443", "192.168.10.50:80"]
+    data["protocol"] = ["TCP", "TCP"]
+    df = pd.DataFrame(data)
+
+    res = evaluate_csv_dataset(df, contract="R10", benchmark="cicids2017")
+    assert res["status"] == "success"
+    flows = res["flows"]
+    assert len(flows) == 2
+
+    # Metadata correctly populated
+    assert flows[0]["metadata"]["src_endpoint"] == "192.168.10.15:45000"
+    assert flows[0]["metadata"]["dst_endpoint"] == "142.250.190.40:443"
+    assert flows[1]["metadata"]["src_endpoint"] == "172.16.0.1:58000"
+    assert flows[1]["metadata"]["dst_endpoint"] == "192.168.10.50:80"
+
+    # Feature dictionary contains ONLY expected R10 features
+    for fl in flows:
+        assert set(fl["features"].keys()) == set(R10_FEATURES)
+        assert "src_endpoint" not in fl["features"]
+        assert "dst_endpoint" not in fl["features"]
+        assert "protocol" not in fl["features"]
+        assert "label" not in fl["features"]
+
+
+def test_csv_explain_api_and_dqn_response(csv_server):
+    """Verify POST /api/csv/explain returns TreeSHAP and flow contains DQN recommendations."""
+    # 1. Test /api/csv/explain
+    explain_req = urllib.request.Request(
+        f"{csv_server}/api/csv/explain",
+        data=json.dumps({
+            "features": {f: 100.0 for f in R10_FEATURES},
+            "benchmark": "cicids2017",
+        }).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(explain_req, timeout=5) as resp:
+        assert resp.status == 200
+        exp_data = json.loads(resp.read().decode("utf-8"))
+        assert "features" in exp_data
+        assert len(exp_data["features"]) == 10
+        assert "TreeExplainer" in exp_data["explainer_model"]
+        assert "TreeSHAP explains Random Forest tree decisions only" in exp_data["scientific_notices"][0]
+
+    # 2. Test DQN recommendation in flow evaluation output
+    sample = get_demo_sample_csv(n_samples=2)
+    eval_res = evaluate_csv_dataset(sample, contract="R10", benchmark="cicids2017")
+    flow0 = eval_res["flows"][0]
+    assert "response" in flow0
+    resp_policy = flow0["response"]
+    assert resp_policy["recommended_action"] in ("ALLOW", "ALERT", "RATE_LIMIT", "ISOLATE")
+    assert "DRY_RUN" in resp_policy["execution_mode"]
+
+
+def test_csv_mode_a_full_test_evaluation(csv_server):
+    """Verify Mode A evaluates the authoritative held-out test split (CIC-IDS2017, CSE-2018, UNSW-NB15)."""
+    # 1. Direct evaluate_csv_dataset call in full_test mode
+    res_a = evaluate_csv_dataset(
+        contract="R10",
+        benchmark="cicids2017",
+        mode="full_test",
+        max_display_flows=50,
+    )
+    assert res_a["mode"] == "full_test"
+    assert res_a["split_name"] == "held_out_test"
+    assert res_a["row_accounting"]["evaluated_rows"] == 355865
+    assert res_a["is_labelled"] is True
+    assert "rf_metrics" in res_a
+    assert "lstm_metrics" in res_a
+    assert "fusion_metrics" in res_a
+
+    # 2. HTTP POST in full_test mode
+    req = urllib.request.Request(
+        f"{csv_server}/api/csv/evaluate",
+        data=json.dumps({
+            "mode": "full_test",
+            "benchmark": "cicids2017",
+            "contract": "R10",
+            "max_rows": 25,
+        }).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        assert resp.status == 200
+        http_data = json.loads(resp.read().decode("utf-8"))
+        assert http_data["mode"] == "full_test"
+        assert http_data["row_accounting"]["evaluated_rows"] == 355865
+        assert len(http_data["flows"]) == 25
+        # Verify first flow has valid multi-model predictions
+        f0 = http_data["flows"][0]
+        assert "rf_score" in f0
+        assert "lstm_score" in f0
+        assert "attack_score" in f0
+
+
+def test_csv_mode_b_all_three_benchmarks(csv_server):
+    """Verify Mode B exhibition demo for all 3 benchmark datasets (CICIDS2017, CSE-2018, UNSW-NB15)."""
+    # 1. CIC-IDS2017 Mode B
+    res_cic = evaluate_csv_dataset(contract="R10", benchmark="cicids2017", mode="exhibition", max_display_flows=200)
+    assert res_cic["status"] == "success"
+    assert res_cic["mode"] == "exhibition"
+    assert res_cic["row_accounting"]["evaluated_rows"] == 200
+    assert res_cic["row_accounting"]["aligned_sequence_rows"] == 196
+    # Tabular RF evaluated on all 200 flows
+    assert res_cic["rf_confusion_matrix"]["tp"] + res_cic["rf_confusion_matrix"]["fn"] == 34
+    assert res_cic["rf_confusion_matrix"]["tn"] + res_cic["rf_confusion_matrix"]["fp"] == 166
+    # Sequence LSTM & Fusion evaluated on 196 aligned flows (4 warmup flows)
+    assert res_cic["confusion_matrix"]["tp"] + res_cic["confusion_matrix"]["fn"] == 34
+    assert res_cic["confusion_matrix"]["tn"] + res_cic["confusion_matrix"]["fp"] == 162
+    assert "rf_metrics" in res_cic and "lstm_metrics" in res_cic and "fusion_metrics" in res_cic
+    assert len(res_cic["flows"]) == 200
+    assert "192.168.10" in res_cic["flows"][0]["metadata"]["src_endpoint"]
+
+    # 2. CSE-CIC-IDS2018 Mode B
+    res_cse = evaluate_csv_dataset(contract="R10", benchmark="cse2018", mode="exhibition", max_display_flows=200)
+    assert res_cse["status"] == "success"
+    assert res_cse["mode"] == "exhibition"
+    assert res_cse["row_accounting"]["evaluated_rows"] == 200
+    assert res_cse["row_accounting"]["aligned_sequence_rows"] == 196
+    assert res_cse["rf_confusion_matrix"]["tp"] + res_cse["rf_confusion_matrix"]["fn"] == 34
+    assert res_cse["rf_confusion_matrix"]["tn"] + res_cse["rf_confusion_matrix"]["fp"] == 166
+    assert res_cse["confusion_matrix"]["tp"] + res_cse["confusion_matrix"]["fn"] == 34
+    assert res_cse["confusion_matrix"]["tn"] + res_cse["confusion_matrix"]["fp"] == 162
+    assert "rf_metrics" in res_cse and "lstm_metrics" in res_cse and "fusion_metrics" in res_cse
+    assert len(res_cse["flows"]) == 200
+    assert "172.31.65" in res_cse["flows"][0]["metadata"]["src_endpoint"]
+
+    # 3. UNSW-NB15 Mode B
+    res_unsw = evaluate_csv_dataset(contract="R4", benchmark="unswnb15", mode="exhibition", max_display_flows=200)
+    assert res_unsw["status"] == "success"
+    assert res_unsw["mode"] == "exhibition"
+    assert res_unsw["row_accounting"]["evaluated_rows"] == 200
+    assert res_unsw["row_accounting"]["aligned_sequence_rows"] == 196
+    assert res_unsw["rf_confusion_matrix"]["tp"] + res_unsw["rf_confusion_matrix"]["fn"] == 34
+    assert res_unsw["rf_confusion_matrix"]["tn"] + res_unsw["rf_confusion_matrix"]["fp"] == 166
+    assert res_unsw["confusion_matrix"]["tp"] + res_unsw["confusion_matrix"]["fn"] == 34
+    assert res_unsw["confusion_matrix"]["tn"] + res_unsw["confusion_matrix"]["fp"] == 162
+    assert "rf_metrics" in res_unsw and "lstm_metrics" in res_unsw and "fusion_metrics" in res_unsw
+    assert len(res_unsw["flows"]) == 200
+    assert "10.40.85" in res_unsw["flows"][0]["metadata"]["src_endpoint"]
+
+    # 4. HTTP Sample Retrieval for all 3 datasets
+    for bench, expected_contract, expected_sub in [
+        ("cicids2017", "R10", "192.168.10"),
+        ("cse2018", "R10", "172.31.65"),
+        ("unswnb15", "R4", "10.40.85"),
+    ]:
+        with urllib.request.urlopen(f"{csv_server}/api/csv/sample?benchmark={bench}", timeout=5) as resp:
+            assert resp.status == 200
+            sdata = json.loads(resp.read().decode("utf-8"))
+            assert sdata["benchmark"] == bench
+            assert sdata["contract"] == expected_contract
+            assert sdata["rows"] == 200
+            assert expected_sub in sdata["csv_text"]
+
+
+

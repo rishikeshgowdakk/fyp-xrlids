@@ -21,7 +21,7 @@ script: what to run, what to click, what to say, and what to do when something b
 | Deterministic replay metrics | ✅ research τ=0.50 → 83.3% (F1 0.8000); operational τ=0.40 → 100% (F1 1.0000) |
 | Frozen model artifacts | ✅ `EXP-P1-CIC2017-R10-001/*.joblib` present (RF 26 MB + preprocessor) |
 | Simulator calibration re-verification | ✅ 7/7 scenarios OK (`scripts/demo/verify_attack_scenarios.py`) |
-| Full test suite | ✅ **445 passed, 0 failed** (`pytest -q`, exit 0) |
+| Full test suite | ✅ **452 passed, 0 failed** (`pytest -q`, exit 0) |
 | Phase 2/3 artifacts (RL, response, burst, gate) | ✅ result directories present |
 | Root required? | ❌ No for sample mode; ✅ only for optional live WiFi capture |
 
@@ -115,10 +115,12 @@ live demo fails, play the recording and narrate over it.
 5. **Replay & Evidence tab (90 s)** — 42-packet deterministic replay; 6 flows with ground truth;
    research τ=0.50 → 83.3% (one borderline miss at 0.4692 shown explicitly), operational τ=0.40 →
    100%. TreeSHAP feature importance below.
-6. **Datasets + model evidence (60 s)** — 19,321,418 raw rows → 10,214,137 modeling rows after
-   dedup/conflict rejection; 3-seed fusion metrics (CIC 0.9903 ± 0.0005 accuracy, AUC 0.9986).
-7. **Limitations + production path (45 s)** — live traffic has no ground truth (never claim
-   accuracy); production gaps: auth/TLS, persistence, model registry, eBPF/XDP, CI.
+6. **All three benchmarks + model evidence (60 s)** — 19,321,418 raw rows across all three datasets (CIC-IDS2017, CSE-CIC-IDS2018, UNSW-NB15) with separate held-out test splits, feature contracts (R10 vs R4), and independent evaluations:
+   - **CIC-IDS2017**: 355,833 aligned test flows, R10 contract, Fusion F1=0.9745 ($\alpha=0.50$).
+   - **CSE-CIC-IDS2018**: 1,662,419 aligned test flows, R10 contract, LSTM F1=0.9603 ($\alpha=0.00$).
+   - **UNSW-NB15**: 24,496 aligned test flows, R4 contract, Fusion F1=0.8970 ($\alpha=0.60$).
+7. **Flow Evaluation & Exhibition Demo (Modes A, B, C) (60 s)** — demonstrate Mode B (200 flows) across all three benchmarks with side-by-side RF, LSTM ($T=5$, causal sequence), and Fusion metrics, 3 confusion matrices, preserved IP/port endpoint metadata, on-demand TreeSHAP explanations, and Dueling DQN dry-run actions.
+8. **Limitations + production path (45 s)** — live traffic has no ground truth (never claim accuracy); production gaps: auth/TLS, persistence, model registry, eBPF/XDP, CI.
 
 ### 3.3 Twelve-minute full demo
 
@@ -193,7 +195,7 @@ itself only reads (live capture) — it never sends, drops, or reroutes.
 
 **Q9. How do you know live features match the training features?**
 Parity tests verify computed features against the offline definitions to `atol ≤ 1e-4`; the R10
-contract is frozen and shared by training, replay, and live paths. The test suite (445 tests)
+contract is frozen and shared by training, replay, and live paths. The test suite (452 tests)
 includes the parity and pipeline tests.
 
 **Q10. What happens if the model files are missing on the demo machine?**
@@ -217,7 +219,7 @@ is blocked"; enforcement lives in the audited transaction/safety-gate path, test
 isolated network namespaces.
 
 **Q14. How many tests are in the suite, and what do they cover?**
-The test suite contains **445 automated tests** across 66 modules covering: Phase 1 data/model contracts, leakage/dedup guarantees, parity, and replay (408 → 417); Phase 2A Cost-Optimal baseline policies (423); Research Evaluation Workbench APIs and population reconciliations (435); and Phase D CSV dataset evaluation, target-leakage prevention, and schema enforcement (445). `pytest -q` is the single gate; expected result: 445 passed with 0 failures.
+The test suite contains **452 automated tests** across 66 modules covering: Phase 1 data/model contracts, leakage/dedup guarantees, parity, and replay (408 → 417); Phase 2A Cost-Optimal baseline policies (423); Research Evaluation Workbench APIs and population reconciliations (435); and Phase D CSV dataset evaluation, target-leakage prevention, strict label parsing, non-finite row reconciliation, and schema enforcement (452). `pytest -q` is the single gate; expected result: 452 passed with 0 failures.
 
 **Q15. How exactly is the score calculated?**
 `score = random_forest.predict_proba(preprocessor.transform(R10_features))[0]` — the frozen RF's
@@ -326,7 +328,7 @@ For an authoritative list, use the router's admin page/API or run the collector 
 > offline evidence."
 
 **Shot 8 — Closing + limitations (6:30–7:15)**
-> "The detector and console are complete and covered by 445 passing tests. Live traffic has no
+> "The detector and console are complete and covered by 452 passing tests. Live traffic has no
 > ground truth, so we never report accuracy on it. Production deployment would require
 > authentication, TLS, durable storage, a model registry, and kernel-bypass capture. The research
 > contribution — leakage-safe training, calibrated simulation, and an honest evaluation — is
@@ -380,7 +382,7 @@ For an authoritative list, use the router's admin page/API or run the collector 
 | Simulator (evasion demos) | 0.0002 · 0.0290 · 0.0169 |
 | Proof script | benign 0.0203 · attack 0.9910 · gap sweep 0.103/0.344/0.528/0.266/0.991 |
 | Blocked traffic | 0 — policy suggestions only (`BLOCK (suggested)`, NOT enforced) |
-| Tests | 445 passed, 0 failed |
+| Tests | 452 passed, 0 failed |
 | RL hypothesis | H0 rejected (p < 0.001); cost −11.29% / −14.10%; 15% practical criterion NOT met |
 | D-006 | TCP closes on FIN/RST; otherwise 120 s idle |
 | Live capture | AF_PACKET raw socket; root/CAP_NET_RAW; read-only |

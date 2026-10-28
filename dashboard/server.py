@@ -1080,9 +1080,19 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     ),
                 }
             )
-        elif path == "/api/csv/sample":
-            sample_csv = get_demo_sample_csv()
-            self.send_json({"csv_text": sample_csv, "contract": "R10", "benchmark": "cicids2017"})
+        elif path == "/api/csv/sample" or path.startswith("/api/csv/sample?"):
+            query = parse_qs(urlparse(self.path).query)
+            n_samples = int(query.get("limit", [200])[0]) if "limit" in query else 200
+            bench = query.get("benchmark", ["cicids2017"])[0]
+            sample_csv = get_demo_sample_csv(n_samples=n_samples, benchmark=bench)
+            contract = "R4" if "unsw" in bench.lower() else "R10"
+            self.send_json({
+                "csv_text": sample_csv,
+                "contract": contract,
+                "benchmark": bench,
+                "rows": 200 if n_samples >= 200 else n_samples,
+                "mode": "exhibition",
+            })
         elif path.startswith("/figures/"):
             filename = os.path.basename(path)
             fig_path = FIGURES_DIR / filename
@@ -1173,8 +1183,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self.send_json(result, status=HTTPStatus.BAD_REQUEST if result.get("error") else HTTPStatus.OK)
         elif parsed.path == "/api/csv/evaluate":
             body = self.read_json_body()
+            mode = str(body.get("mode", "custom")).strip().lower()
             csv_content = body.get("csv_text") or body.get("file_path") or ""
-            if not csv_content:
+            if mode not in ("full_test", "exhibition") and not csv_content:
                 self.send_json(
                     {"error": "Missing 'csv_text' or 'file_path' in request body.", "status": "error"},
                     status=HTTPStatus.BAD_REQUEST,
@@ -1186,11 +1197,13 @@ class DashboardHandler(BaseHTTPRequestHandler):
             threshold = float(body.get("threshold", 0.50))
             try:
                 result = evaluate_csv_dataset(
-                    csv_source=csv_content,
+                    csv_source=csv_content if mode not in ("full_test", "exhibition") else None,
                     contract=contract,
                     benchmark=benchmark,
                     label_column=label_col,
                     threshold=threshold,
+                    max_display_flows=int(body.get("max_rows", 100)),
+                    mode=mode,
                 )
                 # Return clean client payload without bloat of internal full export records
                 client_result = {k: v for k, v in result.items() if k != "_full_records"}
@@ -1200,6 +1213,17 @@ class DashboardHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 logger.exception("CSV evaluation error: %s", e)
                 self.send_json({"error": f"Evaluation failed: {str(e)}", "status": "error"}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+        elif parsed.path == "/api/csv/explain":
+            body = self.read_json_body()
+            features = body.get("features", {})
+            benchmark = str(body.get("benchmark", "cicids2017"))
+            try:
+                from xrlids.evaluation.csv_evaluator import explain_flow_prediction
+                explanation = explain_flow_prediction(features, benchmark=benchmark)
+                self.send_json(explanation)
+            except Exception as e:
+                logger.exception("SHAP explain error: %s", e)
+                self.send_json({"error": str(e), "status": "error"}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
         elif parsed.path == "/api/csv/export":
             body = self.read_json_body()
             evaluation_id = body.get("evaluation_id")

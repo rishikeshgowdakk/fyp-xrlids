@@ -16,15 +16,18 @@ Overall: **Phase 1 Research Frozen & Demonstration Foundation Verified (`EXP-P1-
 
 Legend: ✅ done / verified · 🟡 implemented / empirically observed on partial data · ⛔ blocked on research decision · ⬜ planned / not started
 
-## Dashboard CSV Evaluation Workflow (added 2026-10-27)
+## Dashboard Flow Evaluation & Exhibition Demo Workflow (Upgraded 2026-10-28)
 
 | Area | Status | Scope / evidence |
 | --- | --- | --- |
-| Custom CSV evaluator | Implemented in repository | `src/xrlids/evaluation/csv_evaluator.py`; compatible frozen Random Forest artifacts only |
-| Benchmark/feature contract pairing | Implemented | CIC-IDS2017/R10, CSE-CIC-IDS2018/R10, UNSW-NB15/R4 |
-| Label and feature validation | Implemented with regression tests | Rejects unknown/ambiguous labels; accounts for invalid/non-finite feature rows |
-| Dashboard integration | Implemented | `dashboard/server.py`, `dashboard/index.html`, `dashboard/app.js` |
-| Research interpretation | Ad-hoc evaluation only | Does not retrain models or change frozen benchmark artifacts; not a substitute for temporal or cross-dataset validation |
+| Multi-model flow evaluator | Implemented & verified | `src/xrlids/evaluation/csv_evaluator.py`; loads frozen RF (`preprocessor.joblib` + `random_forest.joblib`), Supervised LSTM (`lstm.pt`, $T=5$, causal sequences), and calibrated Score Fusion ($\alpha$). |
+| Evaluation modes | Implemented | Mode B: 200 Exhibition Demo (`data/demo/cicids2017_exhibition_200.json`, 166 Benign, 34 Attack); Mode A: Full Held-Out Test Evaluation; Mode C: Custom CSV Upload / Paste. |
+| Flow network metadata isolation | Implemented & tested | Source/destination endpoints, ports, protocol, and timestamps preserved in metadata sidecar without numeric feature matrix $X$ or label leakage. |
+| Explainability & Response Policy | Implemented & tested | On-demand TreeSHAP local feature attribution (`/api/csv/explain`, RF model only); Dueling DQN response recommendations (`models/dqn/dqn_4action_best.pt`, strictly observational `RULE_DRY_RUN`, zero live firewall mutations). |
+| Benchmark/feature contract pairing | Implemented & enforced | CIC-IDS2017/R10, CSE-CIC-IDS2018/R10, UNSW-NB15/R4. Mismatches rejected with HTTP 400. |
+| Label and feature validation | Implemented with 23 regression tests | Rejects unknown/ambiguous labels; mathematically accounts for invalid/non-finite feature rows; drops NaN/Inf with exact reconciliation. |
+| Dashboard integration | Implemented | `dashboard/server.py`, `dashboard/index.html`, `dashboard/app.js` with mode pills, 3-model metric cards, 3 confusion matrices, flow inspection modal, and server-side CSV export (`/api/csv/export`). |
+| Research interpretation | Authoritative evaluation | Preserves historical frozen benchmark artifacts; does not retrain models; distinguishes held-out test splits from demo subsets. |
 
 **Architecture note:** this workflow extends the dashboard's offline evaluation capabilities. It does not replace or fundamentally change the core live pipeline (capture → flow construction → feature extraction → frozen detection model → alert/score presentation). Production deployment remains not validated.
 

@@ -9,16 +9,33 @@ Every claim below can be re-checked with the commands in Part 2.9.*
 
 The repository contains separate operational and evaluation paths. Do not draw the custom CSV evaluator as a stage in the live packet pipeline.
 
-```text
-LIVE / PCAP: packets → bidirectional flows → canonical features → frozen RF/LSTM
-             → score fusion / threat score → RF-only TreeSHAP explanation
-             → DQN recommendation → deterministic safety gate
-             → controlled lab response / rollback → dashboard
+```mermaid
+flowchart TD
+    subgraph LIVE_PIPE["Live / PCAP Operational Path"]
+        direction TB
+        P1["Raw Packets"] --> P2["Bidirectional Flows"]
+        P2 --> P3["Canonical Features (R10 / R4)"]
+        P3 --> P4["Frozen RF & LSTM Inference"]
+        P4 --> P5["Score Fusion & Threat Score"]
+        P4 -.-> P6["TreeSHAP Explanations (RF only)"]
+        P5 --> P7["DQN Response Suggestion"]
+        P7 --> P8["Deterministic Safety Gate"]
+        P8 --> P9["Controlled Lab Netns Response & Rollback"]
+        P5 --> P10["Live Monitor Dashboard"]
+    end
 
-OFFLINE CSV: CSV → schema + benchmark-contract validation → label isolation
-             → numeric/non-finite row handling → compatible frozen preprocessor
-             + Random Forest → ad-hoc metrics / row accounting / CSV export
-             → evaluation workbench
+    subgraph OFFLINE_CSV["Offline CSV Evaluation Path"]
+        direction TB
+        C1["User CSV Input"] --> C2["Schema & Benchmark-Contract Gate"]
+        C2 --> C3["Label Isolation & Strict Parsing"]
+        C3 --> C4["Numeric Coercion & Non-Finite Row Drop"]
+        C4 --> C5["Compatible Frozen Preprocessor & RF"]
+        C5 --> C6["Ad-Hoc Metrics, Row Accounting & CSV Export"]
+        C6 --> C7["Workbench Evaluation Dashboard"]
+    end
+
+    style LIVE_PIPE fill:#f8fafc,stroke:#2563eb,stroke-width:1.5px
+    style OFFLINE_CSV fill:#faf5ff,stroke:#9333ea,stroke-width:1.5px
 ```
 
 The CSV path does not retrain the models, feed its outputs back into live inference, or overwrite historical benchmark artifacts. Live capture remains observational outside the explicitly controlled laboratory validation environment. TreeSHAP explanations apply to the Random Forest, not automatically to the LSTM, fusion output, or DQN.
@@ -598,16 +615,18 @@ detection — an honesty feature, not a bug.
 
 The dashboard has an additional offline evaluation workflow for CSV files. Keep it conceptually separate from packet capture and live monitoring:
 
-```text
-CSV upload / paste / curated sample
-              ↓
-Benchmark + feature-contract validation
-              ↓
-Label parsing and numeric/non-finite row checks
-              ↓
-Frozen, compatible preprocessor + Random Forest
-              ↓
-Metrics, row accounting and export
+```mermaid
+flowchart TD
+    C1["CSV Upload / Paste / Curated Sample"] --> C2["Benchmark & Feature-Contract Gate"]
+    C2 --> C3["Strict Label Parsing & Non-Finite Row Checks"]
+    C3 --> C4["Frozen, Compatible Preprocessor + Random Forest"]
+    C4 --> C5["Metrics, Row Accounting & Authoritative Export"]
+
+    style C1 fill:#eff6ff,stroke:#3b82f6
+    style C2 fill:#fef3c7,stroke:#f59e0b
+    style C3 fill:#fef2f2,stroke:#ef4444
+    style C4 fill:#f3e8ff,stroke:#8b5cf6
+    style C5 fill:#ecfdf5,stroke:#10b981
 ```
 
 Supported pairings are CIC-IDS2017/R10, CSE-CIC-IDS2018/R10, and UNSW-NB15/R4. Labels must be recognized binary benign/attack values; missing, ambiguous, or unknown labels are rejected. Invalid/non-finite feature rows are handled with explicit row accounting. Ground-truth labels are separated from inference features.

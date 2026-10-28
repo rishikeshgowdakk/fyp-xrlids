@@ -497,12 +497,84 @@ async function loadLimitations() {
 
 // ─── Custom CSV Dataset Evaluation ───
 let lastCsvEvalResult = null;
+let currentCsvMode = "exhibition";
 
 const BENCHMARK_CONTRACT_MAP = {
   cicids2017: "R10",
   cse2018: "R10",
   unswnb15: "R4",
 };
+
+function onCsvModeSelect(mode) {
+  currentCsvMode = mode;
+  const pillEx = document.getElementById("mode-pill-exhibition");
+  const pillFull = document.getElementById("mode-pill-full-test");
+  const pillCust = document.getElementById("mode-pill-custom");
+  if (pillEx) pillEx.classList.toggle("active", mode === "exhibition");
+  if (pillFull) pillFull.classList.toggle("active", mode === "full_test");
+  if (pillCust) pillCust.classList.toggle("active", mode === "custom");
+
+  const descEl = document.getElementById("csv-mode-description");
+  const maxRowsGroup = document.getElementById("csv-max-rows-group");
+  const customUploadControls = document.getElementById("csv-custom-upload-controls");
+  const customInputArea = document.getElementById("csv-custom-input-area");
+  const statusEl = document.getElementById("csv-file-status");
+  const badgeEl = document.getElementById("csv-eval-badge");
+
+  if (mode === "exhibition") {
+    if (badgeEl) {
+      badgeEl.textContent = "Mode B: 200 Exhibition Demo";
+      badgeEl.className = "badge badge-purple";
+    }
+    updateModeBDescription();
+    if (maxRowsGroup) maxRowsGroup.style.display = "none";
+    if (customUploadControls) customUploadControls.style.display = "none";
+    if (customInputArea) customInputArea.style.display = "none";
+    if (statusEl) statusEl.textContent = "Ready. Click 'Run Evaluation' to score the 200 held-out test flows against RF + LSTM + Fusion.";
+  } else if (mode === "full_test") {
+    if (badgeEl) {
+      badgeEl.textContent = "Mode A: Full Held-Out Test";
+      badgeEl.className = "badge badge-blue";
+    }
+    if (descEl) {
+      descEl.innerHTML = `<strong>Mode A — Full Held-Out Test Evaluation:</strong>
+        Evaluates the complete authoritative test split directly against the frozen multi-model pipeline. Select the dataset and max evaluation rows, then click 'Run Evaluation'.`;
+    }
+    if (maxRowsGroup) maxRowsGroup.style.display = "flex";
+    if (customUploadControls) customUploadControls.style.display = "none";
+    if (customInputArea) customInputArea.style.display = "none";
+    if (statusEl) statusEl.textContent = "Ready. Select dataset and max rows, then click 'Run Evaluation'.";
+  } else {
+    if (badgeEl) {
+      badgeEl.textContent = "Mode C: Custom CSV Upload";
+      badgeEl.className = "badge badge-orange";
+    }
+    if (descEl) {
+      descEl.innerHTML = `<strong>Mode C — Custom CSV Dataset Evaluation:</strong>
+        Evaluate any external or custom network flow CSV matching the dataset's feature contract. Ground-truth labels are strictly isolated from feature inputs.`;
+    }
+    if (maxRowsGroup) maxRowsGroup.style.display = "none";
+    if (customUploadControls) customUploadControls.style.display = "flex";
+    if (customInputArea) customInputArea.style.display = "block";
+    if (statusEl) statusEl.textContent = "Ready. Choose a CSV file or paste flow rows below, then click 'Run Evaluation'.";
+  }
+}
+
+function updateModeBDescription() {
+  const descEl = document.getElementById("csv-mode-description");
+  if (!descEl) return;
+  const model = document.getElementById("csv-eval-model") ? document.getElementById("csv-eval-model").value : "cicids2017";
+  if (model === "cse2018") {
+    descEl.innerHTML = `<strong>Mode B — CSE-CIC-IDS2018 Fixed Exhibition Subset:</strong>
+      Fast, deterministic verification using 200 flows (166 Benign, 34 Attack: DoS GoldenEye, DoS Slowloris) from the authoritative CSE-CIC-IDS2018 held-out test split. Preserves AWS cloud enterprise IP/port endpoint metadata (172.31.65.X &rarr; 172.31.0.2:80 [TCP]), evaluates RF + LSTM (T=5) + Score Fusion (&alpha;=0.00), runs TreeSHAP explanation on demand, and simulates Dueling DQN response recommendations.`;
+  } else if (model === "unswnb15") {
+    descEl.innerHTML = `<strong>Mode B — UNSW-NB15 Fixed Exhibition Subset:</strong>
+      Fast, deterministic verification using 200 flows (166 Benign, 34 Attack: Exploits, Fuzzers) from the authoritative UNSW-NB15 held-out test split under R4 sensor degradation contract. Preserves telemetry IP/port endpoint metadata (10.40.85.X &rarr; 172.16.2.50:443 [TCP]), evaluates RF + LSTM (T=5) + Score Fusion (&alpha;=0.60), runs TreeSHAP explanation on demand, and simulates Dueling DQN response recommendations.`;
+  } else {
+    descEl.innerHTML = `<strong>Mode B — CIC-IDS2017 Fixed Exhibition Subset (Recommended Demo):</strong>
+      Fast, deterministic verification using 200 flows (166 Benign, 34 Attack: DDoS, PortScan, Hulk) from the authoritative CIC-IDS2017 held-out test split. Preserves source and destination IP/port endpoint metadata (192.168.10.X &rarr; 142.250.190.40:80 [TCP]), evaluates RF + LSTM (T=5) + Score Fusion (&alpha;=0.50), runs TreeSHAP explanation on demand, and simulates Dueling DQN response recommendations.`;
+  }
+}
 
 function onCsvModelChange() {
   const model = document.getElementById("csv-eval-model").value;
@@ -518,6 +590,25 @@ function onCsvModelChange() {
     for (let opt of contractSelect.options) {
       opt.disabled = (opt.value !== "R10");
     }
+  }
+  if (currentCsvMode === "exhibition") {
+    updateModeBDescription();
+  }
+}
+
+async function loadSampleCsvIntoTextarea() {
+  const model = document.getElementById("csv-eval-model").value;
+  const textarea = document.getElementById("csv-text-input");
+  const statusEl = document.getElementById("csv-file-status");
+  try {
+    statusEl.textContent = `Loading 200 sample flows for benchmark ${model}...`;
+    const res = await fetch(`/api/csv/sample?benchmark=${model}&limit=200`);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    if (textarea) textarea.value = data.csv_text;
+    statusEl.textContent = `✓ Loaded ${data.rows} sample flows for ${data.benchmark} (Contract: ${data.contract}). Ready to evaluate.`;
+  } catch (err) {
+    statusEl.textContent = "Failed to load sample: " + err.message;
   }
 }
 
@@ -554,24 +645,6 @@ function onCsvFileSelected(event) {
   reader.readAsText(file);
 }
 
-async function loadSampleCsv() {
-  const statusEl = document.getElementById("csv-file-status");
-  const textarea = document.getElementById("csv-text-input");
-  try {
-    statusEl.textContent = "Loading benchmark demonstration sample flows...";
-    const res = await fetch("/api/csv/sample");
-    if (!res.ok) throw new Error("Failed to load sample CSV from server");
-    const data = await res.json();
-    textarea.value = data.csv_text;
-    document.getElementById("csv-eval-model").value = data.benchmark || "cicids2017";
-    document.getElementById("csv-eval-contract").value = data.contract || "R10";
-    onCsvModelChange();
-    statusEl.textContent = "Loaded 12 curated CIC-IDS2017 demonstration flows (Benign, DDoS, DoS Hulk). Click 'Evaluate CSV' to test.";
-  } catch (err) {
-    statusEl.textContent = "Error loading sample: " + err.message;
-  }
-}
-
 async function runCsvEvaluation() {
   const statusEl = document.getElementById("csv-file-status");
   const textarea = document.getElementById("csv-text-input");
@@ -585,25 +658,34 @@ async function runCsvEvaluation() {
     return;
   }
 
-  const csvText = textarea.value.trim();
-  if (!csvText) {
-    alert("Please choose a CSV file, load demo records, or paste CSV rows into the text area.");
-    return;
+  const payload = {
+    mode: currentCsvMode,
+    benchmark: benchmark,
+    contract: contract,
+  };
+
+  if (currentCsvMode === "custom") {
+    const csvText = textarea ? textarea.value.trim() : "";
+    if (!csvText) {
+      alert("Please choose a CSV file or paste CSV rows into the text area for Mode C.");
+      return;
+    }
+    payload.csv_text = csvText;
+  } else if (currentCsvMode === "full_test") {
+    const maxRowsSelect = document.getElementById("csv-eval-max-rows");
+    const maxRows = parseInt(maxRowsSelect ? maxRowsSelect.value : "1000", 10);
+    payload.max_rows = maxRows;
   }
 
   try {
     btn.disabled = true;
     btn.textContent = "⏳ Evaluating...";
-    statusEl.textContent = "Evaluating records against frozen model artifacts...";
+    statusEl.textContent = `Evaluating flows in ${currentCsvMode} mode against RF + LSTM (T=5) + Fusion...`;
 
     const res = await fetch("/api/csv/evaluate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        csv_text: csvText,
-        contract: contract,
-        benchmark: benchmark,
-      }),
+      body: JSON.stringify(payload),
     });
 
     const data = await res.json();
@@ -613,13 +695,13 @@ async function runCsvEvaluation() {
 
     lastCsvEvalResult = data;
     renderCsvEvaluationResults(data);
-    statusEl.textContent = `✓ Evaluation complete. Evaluated ${data.row_accounting.evaluated_rows} flows.`;
+    statusEl.textContent = `✓ Evaluation complete. Mode: ${data.mode} · Evaluated: ${data.row_accounting.evaluated_rows} flows · Latency: ${(data.evaluation_latency_ms || 0).toFixed(1)} ms · Throughput: ${(data.throughput_flows_per_s || 0).toFixed(0)} flows/s.`;
   } catch (err) {
-    alert("CSV Evaluation Error: " + err.message);
+    alert("Evaluation Error: " + err.message);
     statusEl.textContent = "Evaluation failed: " + err.message;
   } finally {
     btn.disabled = false;
-    btn.textContent = "⚡ Evaluate CSV";
+    btn.textContent = "⚡ Run Evaluation";
   }
 }
 
@@ -631,67 +713,230 @@ function renderCsvEvaluationResults(data) {
   // Row accounting
   const accEl = document.getElementById("csv-row-accounting");
   const acct = data.row_accounting || {};
+  const lat = (data.evaluation_latency_ms || 0).toFixed(1);
+  const thru = (data.throughput_flows_per_s || 0).toFixed(0);
   accEl.innerHTML = `
-    <strong>Row Accounting:</strong> Received <strong>${acct.total_rows_received}</strong> rows ·
-    Evaluated <strong>${acct.evaluated_rows}</strong> valid rows ·
-    Dropped <strong>${acct.invalid_rows_dropped}</strong> invalid rows (${escapeHtml(acct.drop_reason)}).<br>
-    <em>Model: ${escapeHtml(data.model_identifier)} · Feature Contract: ${escapeHtml(data.contract)}</em>
+    <strong>Row Accounting &amp; Provenance:</strong> Mode: <strong>${escapeHtml(data.mode)}</strong> &middot;
+    Dataset: <strong>${escapeHtml(data.benchmark)}</strong> (${escapeHtml(data.split_name || 'test')}) &middot;
+    Received: <strong>${acct.total_rows_received}</strong> &middot;
+    Evaluated: <strong>${acct.evaluated_rows}</strong> valid rows &middot;
+    Dropped: <strong>${acct.invalid_rows_dropped}</strong> (${escapeHtml(acct.drop_reason || 'none')}) &middot;
+    Inference Latency: <strong>${lat} ms</strong> &middot;
+    Throughput: <strong>${thru} flows/s</strong><br>
+    <em>Artifacts: ${escapeHtml(data.model_identifier)} &middot; Feature Contract: ${escapeHtml(data.contract)}</em>
   `;
 
-  // Metrics (if labelled)
-  const metricsGrid = document.getElementById("csv-metrics-grid");
-  const cmCard = document.getElementById("csv-cm-card");
-  if (data.is_labelled && data.metrics) {
-    metricsGrid.style.display = "grid";
-    cmCard.style.display = "block";
+  // Multi-Model Metrics
+  const metricsGrid = document.getElementById("csv-multi-model-metrics");
+  const cmRow = document.getElementById("csv-cm-row");
+  const rfM = data.rf_metrics || data.metrics || {};
+  const lstmM = data.lstm_metrics || {};
+  const fusM = data.fusion_metrics || {};
 
-    document.getElementById("csv-metric-acc").textContent = `${(data.metrics.accuracy * 100).toFixed(2)}%`;
-    document.getElementById("csv-metric-prec").textContent = fmt(data.metrics.precision);
-    document.getElementById("csv-metric-rec").textContent = fmt(data.metrics.recall);
-    document.getElementById("csv-metric-f1").textContent = fmt(data.metrics.f1);
+  if (data.is_labelled && (rfM.accuracy != null || lstmM.accuracy != null)) {
+    if (metricsGrid) metricsGrid.style.display = "block";
+    if (cmRow) cmRow.style.display = "grid";
 
-    const cm = data.confusion_matrix || {};
-    document.getElementById("csv-cm-tn").textContent = cm.tn != null ? cm.tn.toLocaleString() : "—";
-    document.getElementById("csv-cm-fp").textContent = cm.fp != null ? cm.fp.toLocaleString() : "—";
-    document.getElementById("csv-cm-fn").textContent = cm.fn != null ? cm.fn.toLocaleString() : "—";
-    document.getElementById("csv-cm-tp").textContent = cm.tp != null ? cm.tp.toLocaleString() : "—";
+    // Random Forest
+    document.getElementById("csv-rf-f1").textContent = fmt(rfM.f1);
+    document.getElementById("csv-rf-acc").textContent = `${((rfM.accuracy || 0) * 100).toFixed(2)}%`;
+    document.getElementById("csv-rf-prec").textContent = fmt(rfM.precision);
+    document.getElementById("csv-rf-rec").textContent = fmt(rfM.recall);
+    document.getElementById("csv-rf-auc").textContent = rfM.roc_auc != null ? fmt(rfM.roc_auc) : "—";
+
+    const rfCm = data.rf_confusion_matrix || data.confusion_matrix || {};
+    document.getElementById("csv-rf-tn").textContent = rfCm.tn != null ? rfCm.tn.toLocaleString() : "—";
+    document.getElementById("csv-rf-fp").textContent = rfCm.fp != null ? rfCm.fp.toLocaleString() : "—";
+    document.getElementById("csv-rf-fn").textContent = rfCm.fn != null ? rfCm.fn.toLocaleString() : "—";
+    document.getElementById("csv-rf-tp").textContent = rfCm.tp != null ? rfCm.tp.toLocaleString() : "—";
+
+    // LSTM
+    document.getElementById("csv-lstm-f1").textContent = fmt(lstmM.f1);
+    document.getElementById("csv-lstm-acc").textContent = `${((lstmM.accuracy || 0) * 100).toFixed(2)}%`;
+    document.getElementById("csv-lstm-prec").textContent = fmt(lstmM.precision);
+    document.getElementById("csv-lstm-rec").textContent = fmt(lstmM.recall);
+    document.getElementById("csv-lstm-auc").textContent = lstmM.roc_auc != null ? fmt(lstmM.roc_auc) : "—";
+    document.getElementById("csv-lstm-aligned-count").textContent = `${lstmM.aligned_flows_count || 0} flows`;
+
+    const lstmCm = data.lstm_confusion_matrix || {};
+    document.getElementById("csv-lstm-tn").textContent = lstmCm.tn != null ? lstmCm.tn.toLocaleString() : "—";
+    document.getElementById("csv-lstm-fp").textContent = lstmCm.fp != null ? lstmCm.fp.toLocaleString() : "—";
+    document.getElementById("csv-lstm-fn").textContent = lstmCm.fn != null ? lstmCm.fn.toLocaleString() : "—";
+    document.getElementById("csv-lstm-tp").textContent = lstmCm.tp != null ? lstmCm.tp.toLocaleString() : "—";
+
+    // Score Fusion
+    const alpha = data.fusion_alpha != null ? data.fusion_alpha : 0.5;
+    document.getElementById("csv-fusion-alpha-badge").textContent = `α = ${alpha.toFixed(2)}`;
+    document.getElementById("csv-fusion-f1").textContent = fmt(fusM.f1);
+    document.getElementById("csv-fusion-acc").textContent = `${((fusM.accuracy || 0) * 100).toFixed(2)}%`;
+    document.getElementById("csv-fusion-prec").textContent = fmt(fusM.precision);
+    document.getElementById("csv-fusion-rec").textContent = fmt(fusM.recall);
+    document.getElementById("csv-fusion-auc").textContent = fusM.roc_auc != null ? fmt(fusM.roc_auc) : "—";
+    document.getElementById("csv-fusion-formula").textContent = `${alpha.toFixed(2)}·RF + ${(1 - alpha).toFixed(2)}·LSTM`;
+
+    const fusCm = data.fusion_confusion_matrix || {};
+    document.getElementById("csv-fusion-tn").textContent = fusCm.tn != null ? fusCm.tn.toLocaleString() : "—";
+    document.getElementById("csv-fusion-fp").textContent = fusCm.fp != null ? fusCm.fp.toLocaleString() : "—";
+    document.getElementById("csv-fusion-fn").textContent = fusCm.fn != null ? fusCm.fn.toLocaleString() : "—";
+    document.getElementById("csv-fusion-tp").textContent = fusCm.tp != null ? fusCm.tp.toLocaleString() : "—";
   } else {
-    metricsGrid.style.display = "none";
-    cmCard.style.display = "none";
+    if (metricsGrid) metricsGrid.style.display = "none";
+    if (cmRow) cmRow.style.display = "none";
   }
-
-  // Distribution
-  const dist = data.score_distribution || {};
-  document.getElementById("csv-dist-low").textContent = `${dist.low_threat_under_040 || 0} flows`;
-  document.getElementById("csv-dist-med").textContent = `${dist.medium_threat_040_to_065 || 0} flows`;
-  document.getElementById("csv-dist-high").textContent = `${dist.high_threat_over_065 || 0} flows`;
-  document.getElementById("csv-dist-mean").textContent = fmt(dist.mean_score);
-  document.getElementById("csv-model-badge").textContent = escapeHtml(data.contract);
 
   // Flows table
   const tbody = document.getElementById("csv-flows-tbody");
   tbody.innerHTML = "";
   (data.flows || []).forEach(f => {
-    const isAtk = f.prediction_class === 1;
-    const predBadge = isAtk ? `<span class="badge badge-red">ATTACK</span>` : `<span class="badge badge-green">BENIGN</span>`;
-    let verdictBadge = `<span class="badge badge-dim">${escapeHtml(f.verdict)}</span>`;
+    let verdictBadge = `<span class="badge badge-dim">${escapeHtml(f.verdict || 'UNLABELLED')}</span>`;
     if (f.verdict === "CORRECT") verdictBadge = `<span class="badge badge-green">CORRECT</span>`;
     if (f.verdict === "FALSE_POSITIVE" || f.verdict === "FALSE_NEGATIVE") verdictBadge = `<span class="badge badge-red">${escapeHtml(f.verdict)}</span>`;
 
-    const feats = f.features || {};
-    const featSummary = `Dur: ${feats.flow_duration_ms || 0}ms · Pkts/s: ${fmt(feats.flow_packets_per_s, 1)} · Bytes/s: ${fmt(feats.flow_bytes_per_s, 1)}`;
+    let lstmDisplay = "—";
+    if (f.lstm_status === "WARM_UP") {
+      lstmDisplay = `<span class="badge badge-dim" title="Initial T-1 causal warm-up flow">WARM-UP</span>`;
+    } else if (f.lstm_score != null) {
+      lstmDisplay = `<span class="mono">${fmt(f.lstm_score)}</span>`;
+    }
+
+    let endpointDisplay = `<span style="color:var(--text-dim); font-size:11px;">Not available in source</span>`;
+    if (f.src_endpoint && f.dst_endpoint) {
+      endpointDisplay = `<span class="mono" style="font-size:11px;">${escapeHtml(f.src_endpoint)} &rarr; ${escapeHtml(f.dst_endpoint)} [${escapeHtml(f.protocol || 'TCP')}]</span>`;
+    }
+
+    const action = f.response_action || "ALLOW";
+    let actionBadge = `<span class="badge badge-green">${escapeHtml(action)}</span>`;
+    if (action === "ALERT") actionBadge = `<span class="badge badge-orange">${escapeHtml(action)}</span>`;
+    if (action === "RATE_LIMIT") actionBadge = `<span class="badge badge-purple">${escapeHtml(action)}</span>`;
+    if (action === "ISOLATE") actionBadge = `<span class="badge badge-red">${escapeHtml(action)}</span>`;
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td class="mono">#${f.flow_id}</td>
-      <td><strong>${escapeHtml(f.ground_truth_label)}</strong></td>
-      <td class="mono"><strong>${fmt(f.attack_score)}</strong></td>
-      <td>${predBadge}</td>
+      <td>${endpointDisplay}</td>
+      <td><strong>${escapeHtml(f.ground_truth_label || 'Unknown')}</strong></td>
+      <td class="mono">${fmt(f.rf_score)}</td>
+      <td>${lstmDisplay}</td>
+      <td class="mono" style="color:var(--accent); font-weight:700;">${fmt(f.attack_score)}</td>
       <td>${verdictBadge}</td>
-      <td class="mono" style="font-size:11px; color:var(--text-muted);">${escapeHtml(featSummary)}</td>
+      <td>${actionBadge}</td>
+      <td><button class="btn btn-sm" onclick="inspectFlow(${f.flow_id})">🔍 Inspect</button></td>
     `;
     tbody.appendChild(tr);
   });
+}
+
+async function inspectFlow(flowId) {
+  if (!lastCsvEvalResult || !lastCsvEvalResult.flows) return;
+  const flow = lastCsvEvalResult.flows.find(f => f.flow_id === flowId);
+  if (!flow) return;
+
+  const modal = document.getElementById("flow-inspect-modal");
+  if (!modal) return;
+  modal.classList.add("active");
+
+  document.getElementById("modal-flow-id").textContent = `Flow #${flow.flow_id}`;
+  if (flow.src_endpoint && flow.dst_endpoint) {
+    document.getElementById("modal-endpoints").textContent = `${flow.src_endpoint} → ${flow.dst_endpoint} [${flow.protocol || 'TCP'}]`;
+  } else {
+    document.getElementById("modal-endpoints").textContent = "Endpoint metadata not available in benchmark split";
+  }
+  document.getElementById("modal-gt").textContent = flow.ground_truth_label || "Unlabelled";
+
+  document.getElementById("modal-rf-score").textContent = fmt(flow.rf_score);
+  document.getElementById("modal-lstm-score").textContent = flow.lstm_status === "WARM_UP" ? "WARM-UP" : fmt(flow.lstm_score);
+  document.getElementById("modal-fusion-score").textContent = fmt(flow.attack_score);
+
+  const decBadge = document.getElementById("modal-decision-badge");
+  const isAttack = flow.attack_score >= 0.50;
+  decBadge.textContent = isAttack ? "ATTACK" : "BENIGN";
+  decBadge.className = `badge ${isAttack ? 'badge-red' : 'badge-green'}`;
+
+  // DQN response recommendation
+  const action = flow.response_action || "ALLOW";
+  const actionEl = document.getElementById("modal-dqn-action");
+  actionEl.textContent = action;
+  actionEl.style.color = action === "ISOLATE" ? "var(--red)" : action === "RATE_LIMIT" ? "var(--purple)" : action === "ALERT" ? "var(--orange)" : "var(--green)";
+
+  const descMap = {
+    ALLOW: "Normal flow behavior; allow uninterrupted network transmission.",
+    ALERT: "Anomalous flow characteristics observed; logged for SOC security analyst review.",
+    RATE_LIMIT: "High throughput or suspicious burst detected; flow rate-limited to throttle abuse.",
+    ISOLATE: "Confirmed malicious threat; dynamic IP/port quarantine recommended."
+  };
+  document.getElementById("modal-dqn-desc").textContent = descMap[action] || "Policy action recommended.";
+
+  const feats = flow.features || {};
+  const bytes = feats.flow_bytes_per_s || 0;
+  const bytesNorm = Math.min(1.0, (bytes / 100000.0)).toFixed(3);
+  document.getElementById("modal-dqn-state").textContent =
+    `[S=${fmt(flow.attack_score)}, BytesNorm=${bytesNorm}, HostCrit=0.50, CurrQ=0.00, Cooldown=0.00, Hist=0.00]`;
+
+  // Fetch TreeSHAP explanation on demand
+  const shapContainer = document.getElementById("modal-shap-container");
+  shapContainer.innerHTML = `<div style="text-align: center; color: var(--text-dim); padding: 12px;">Computing TreeSHAP local attribution for Flow #${flow.flow_id}...</div>`;
+
+  try {
+    const res = await fetch("/api/csv/explain", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        evaluation_id: lastCsvEvalResult.evaluation_id,
+        flow_id: flow.flow_id,
+        features: flow.features,
+        benchmark: lastCsvEvalResult.benchmark,
+        contract: lastCsvEvalResult.contract,
+      }),
+    });
+    const expData = await res.json();
+    if (!res.ok || expData.error) {
+      throw new Error(expData.error || "Explanation failed");
+    }
+
+    renderShapAttributions(expData.attributions || [], expData.base_value);
+  } catch (err) {
+    shapContainer.innerHTML = `<div style="color: var(--orange); font-size: 12px; padding: 8px;">Notice: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function renderShapAttributions(attributions, baseValue) {
+  const container = document.getElementById("modal-shap-container");
+  if (!attributions || attributions.length === 0) {
+    container.innerHTML = `<div style="color: var(--text-dim); font-size: 12px;">No attribution values returned.</div>`;
+    return;
+  }
+
+  const maxVal = Math.max(...attributions.map(a => Math.abs(a.attribution)), 0.001);
+
+  let html = `<div style="margin-bottom: 8px; font-size: 11px; color: var(--text-dim);">
+    Model Expected Value (Base Attack Rate): <span class="mono">${fmt(baseValue)}</span>
+  </div>`;
+
+  attributions.forEach(item => {
+    const val = item.attribution;
+    const isPos = val >= 0;
+    const pct = Math.min(100, (Math.abs(val) / maxVal) * 50);
+
+    html += `
+      <div class="shap-bar-row">
+        <div class="shap-feat-name" title="${escapeHtml(item.feature)}">${escapeHtml(item.feature)}</div>
+        <div class="shap-bar-track">
+          <div class="shap-bar-center"></div>
+          <div class="shap-bar-fill ${isPos ? 'pos' : 'neg'}" style="width: ${pct}%;"></div>
+        </div>
+        <div class="shap-val mono" style="color: ${isPos ? 'var(--red)' : 'var(--accent)'}; text-align: right;">
+          ${isPos ? '+' : ''}${val.toFixed(4)}
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+function closeFlowModal() {
+  const modal = document.getElementById("flow-inspect-modal");
+  if (modal) modal.classList.remove("active");
 }
 
 async function downloadEvaluatedCsv() {

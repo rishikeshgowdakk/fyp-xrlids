@@ -149,7 +149,7 @@ class ResourceMonitor:
         """Record initial resource baseline."""
         self.start_time = time.monotonic()
         self.start_rss_mib = get_current_rss_mib()
-        self.peak_rss_mib = get_peak_rss_mib()
+        self.peak_rss_mib = max(get_peak_rss_mib(), self.start_rss_mib)
         self.start_cpu = os.times()
         self.start_threads = threading.active_count()
         self.peak_threads = self.start_threads
@@ -159,9 +159,8 @@ class ResourceMonitor:
         """Capture instantaneous resource sample."""
         with self.lock:
             current_rss = get_current_rss_mib()
-            peak_rss = get_peak_rss_mib()
-            if peak_rss > self.peak_rss_mib:
-                self.peak_rss_mib = peak_rss
+            peak_rss = max(get_peak_rss_mib(), current_rss, self.peak_rss_mib)
+            self.peak_rss_mib = peak_rss
             threads = threading.active_count()
             if threads > self.peak_threads:
                 self.peak_threads = threads
@@ -179,7 +178,7 @@ class ResourceMonitor:
         """Finalize resource metrics and detect any leaks."""
         self.end_time = time.monotonic()
         self.end_rss_mib = get_current_rss_mib()
-        self.peak_rss_mib = get_peak_rss_mib()
+        self.peak_rss_mib = max(self.peak_rss_mib, get_peak_rss_mib(), self.end_rss_mib)
         self.end_cpu = os.times()
         self.end_threads = threading.active_count()
         self.sample(label="END", flow_count=0)

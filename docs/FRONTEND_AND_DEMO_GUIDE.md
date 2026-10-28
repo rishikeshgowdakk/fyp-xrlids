@@ -73,3 +73,26 @@ The primary user experience is **Held-Out Dataset Evaluation**, not a synthetic 
 ### Act 7: Research Limitations & Candid Viva Defense (Page G)
 - *Click on `⚠️ Research Limitations`:*
 - "Finally, Page G details our nine audited limitations in plain language. For example, on CSE-CIC-IDS2018, when tested on genuine chronological future days, Random Forest F1 collapses from **0.8861 down to 0.0113**. We present these limitations honestly because rigorous negative results are fundamental to credible computer science research."
+
+### Act 8: Demonstrating the Flow Evaluation, Exhibition Demo & Multi-Model Inference Engine
+- *Return to `📊 Dataset Evaluation` and scroll to the Multi-Model Inference Engine card:*
+- "Examiners, we also provide an interactive Multi-Model Verification Engine supporting three distinct modes:
+  1. **Mode B (200 Exhibition Demo):** Evaluates a deterministic, held-out sample of 200 real network flows (166 Benign, 34 Attack) across any of our three benchmark datasets (CIC-IDS2017, CSE-CIC-IDS2018, or UNSW-NB15). Preserves source/destination IP endpoints (`192.168.10.X -> 142.250.190.40:80 [TCP]`) without feature leakage, and displays side-by-side metric cards and 3 confusion matrices for Random Forest, Supervised LSTM ($T=5$, causal sequences), and Score Fusion.
+  2. **Mode A (Full Held-Out Test):** Allows instant verification of our complete authoritative held-out splits (355k CIC-IDS2017, 1.66M CSE-2018, or 24.5k UNSW-NB15 flows).
+  3. **Mode C (Custom CSV Upload):** Allows uploading external CSV flow records matching the R10 or R4 contract, with strict non-finite row accounting."
+- *Click `🔍 Inspect` on an attack flow:*
+  - "Notice our drill-down modal: examiners can inspect on-demand TreeSHAP feature attributions explaining why the Random Forest classified this flow as an attack (e.g. packet length variance or packet rate), alongside the Dueling DQN's simulated action recommendation."
+
+---
+
+## 4. Live Wi-Fi Demonstration vs Offline Benchmark Evaluation
+
+> [!WARNING]
+> **Scientific Separation Invariant — Live Wi-Fi Demonstration**:
+> The live Wi-Fi demonstration uses the same verified model pipeline (`random_forest_cicids2017.joblib` and `lstm_cicids2017.pt`) **only because the live Scapy/AF_PACKET feature extractor outputs a compatible R10 feature vector**.
+> 
+> **Critical Scientific Disclaimers for Examiners**:
+> 1. **Zero Production Mutation:** Live network capture is strictly observational. No packets are dropped, no live firewall rules are mutated, and no host network connections are disrupted.
+> 2. **No Claim of Live Benchmark Equivalence:** Benchmark test results (e.g., 99.06% accuracy on CIC-IDS2017) are offline, held-out upper bounds. They **do not prove or imply equivalent detection performance on live unlabelled Wi-Fi traffic**, due to environmental concept drift, consumer application diversity, and missing ground truth.
+> 3. **Isolation Invariant:** CSV evaluations and live monitoring operate on strictly decoupled execution paths; CSV evaluations never feed back into live detection.
+
