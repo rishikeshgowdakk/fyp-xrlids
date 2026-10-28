@@ -1,11 +1,11 @@
 # XRL-IDARS — Phase 2B Forensic Readiness Audit: Model Integrity, Reproducibility, Evaluation Correctness, and Production-Gap Assessment
 
-**Audit Identifier**: `EXP-P2B-READINESS-AUDIT-001`  
-**Git Commit (HEAD)**: `1adf49a26c2bc34afdfa0d8e050dfe422e9d1baf` (Branch: `main`)  
-**Code Revision Tested**: `1adf49a26c2bc34afdfa0d8e050dfe422e9d1baf+dirty`  
-**Audit Execution Timestamp**: `2026-10-28T13:37:58.720733+00:00`  
-**Auditor Role**: Senior ML Systems Engineer, Model Validation Engineer, & Independent Research Auditor  
-**Working Tree Status**: DIRTY / UNCOMMITTED (6 modified tracked files: M reports/generated/phase1_final_report.md, M reports/generated/phase1_status.md, M results/demo/demo_report.md, M results/demo/replay_summary.json, M scripts/phase1/generate_reports.py, M scripts/phase2/run_phase2b_readiness_audit.py)  
+- **Audit Identifier**: `EXP-P2B-READINESS-AUDIT-CLOSURE-001`
+- **Git Commit (HEAD)**: `f15be7e78fb1abfa545a65d4ff832ecd602bf461` (Branch: `main`)
+- **Code Revision Tested**: `f15be7e78fb1abfa545a65d4ff832ecd602bf461+dirty`
+- **Audit Execution Timestamp**: `2026-10-28T13:55:10.786973+00:00`
+- **Auditor Role**: Senior ML Systems Engineer, Model Validation Engineer, & Independent Research Auditor
+- **Working Tree Status**: DIRTY / UNCOMMITTED (4 modified tracked files: M README.md, M reports/generated/phase1_final_report.md, M reports/generated/phase1_status.md, M scripts/phase2/run_phase2b_readiness_audit.py)
 
 ---
 

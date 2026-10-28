@@ -103,13 +103,13 @@ def check_working_tree_clean(
         for line in lines:
             if not line.strip():
                 continue
+            path_part = line[3:].strip()
+            abs_path = (root_path / path_part).resolve()
+            # Exclude the current target output directory so it doesn't report self-recursion
+            if out_dir_str and (abs_path == Path(out_dir_str) or str(abs_path).startswith(out_dir_str + "/")):
+                continue
             if line.startswith("??"):
-                untracked_path = line[3:].strip()
-                abs_untracked = (root_path / untracked_path).resolve()
-                # Exclude the current target output directory so it doesn't report self-recursion
-                if out_dir_str and (abs_untracked == Path(out_dir_str) or str(abs_untracked).startswith(out_dir_str + "/")):
-                    continue
-                untracked_files.append(untracked_path)
+                untracked_files.append(path_part)
             else:
                 tracked_changes.append(line.strip())
 
@@ -141,7 +141,7 @@ def check_working_tree_clean(
         }
 
 
-def audit_phase0_provenance(out_dir: Path, git_sha: str) -> dict[str, Any]:
+def audit_phase0_provenance(out_dir: Path, git_sha: str, audit_timestamp: str | None = None) -> dict[str, Any]:
     """Phase 0: Record full system provenance and environment details."""
     p_pol_test = Path("data/processed/phase2_cache/d_pol_test_flows.joblib")
     p_pred = Path("results/experiments/EXP-P1-CIC2017-R10-001/predictions_test.csv")
@@ -150,10 +150,13 @@ def audit_phase0_provenance(out_dir: Path, git_sha: str) -> dict[str, Any]:
     wt_info = check_working_tree_clean(out_dir=out_dir)
     is_clean = wt_info["clean"]
     revision_desc = git_sha if is_clean else f"{git_sha}+dirty"
+    audit_id = out_dir.name if out_dir.name.startswith("EXP-") else "EXP-P2B-READINESS-AUDIT-001"
+    if audit_timestamp is None:
+        audit_timestamp = datetime.now(timezone.utc).isoformat()
 
     prov = {
-        "audit_id": "EXP-P2B-READINESS-AUDIT-001",
-        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "audit_id": audit_id,
+        "timestamp_utc": audit_timestamp,
         "git_commit": git_sha,
         "branch": "main",
         "working_tree_clean": is_clean,
@@ -788,17 +791,18 @@ def generate_final_report_md(
     findings: list[dict[str, Any]],
 ) -> None:
     """Generate comprehensive Phase 2B Readiness Audit markdown report."""
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp = prov.get("timestamp_utc", datetime.now(timezone.utc).isoformat())
+    audit_id = prov.get("audit_id", "EXP-P2B-READINESS-AUDIT-001")
 
     lines = [
         "# XRL-IDARS — Phase 2B Forensic Readiness Audit: Model Integrity, Reproducibility, Evaluation Correctness, and Production-Gap Assessment",
         "",
-        f"**Audit Identifier**: `EXP-P2B-READINESS-AUDIT-001`  ",
-        f"**Git Commit (HEAD)**: `{prov['git_commit']}` (Branch: `{prov['branch']}`)  ",
-        f"**Code Revision Tested**: `{prov.get('code_revision_tested', prov['git_commit'])}`  ",
-        f"**Audit Execution Timestamp**: `{timestamp}`  ",
-        f"**Auditor Role**: Senior ML Systems Engineer, Model Validation Engineer, & Independent Research Auditor  ",
-        f"**Working Tree Status**: {prov.get('working_tree_status', 'Verified Clean')}  ",
+        f"- **Audit Identifier**: `{audit_id}`",
+        f"- **Git Commit (HEAD)**: `{prov['git_commit']}` (Branch: `{prov['branch']}`)",
+        f"- **Code Revision Tested**: `{prov.get('code_revision_tested', prov['git_commit'])}`",
+        f"- **Audit Execution Timestamp**: `{timestamp}`",
+        f"- **Auditor Role**: Senior ML Systems Engineer, Model Validation Engineer, & Independent Research Auditor",
+        f"- **Working Tree Status**: {prov.get('working_tree_status', 'Verified Clean')}",
         "",
         "---",
         "",
@@ -940,6 +944,7 @@ def generate_final_report_md(
 
 def main() -> int:
     t_start = time.time()
+    audit_timestamp = datetime.now(timezone.utc).isoformat()
     parser = argparse.ArgumentParser(description="Phase 2B Readiness Audit")
     parser.add_argument("--out-dir", type=str, default="results/phase2/EXP-P2B-READINESS-AUDIT-001")
     args = parser.parse_args()
@@ -956,7 +961,7 @@ def main() -> int:
 
     # Phase 0
     print("\n[1/8] Auditing provenance and environment...")
-    prov = audit_phase0_provenance(out_dir, git_sha)
+    prov = audit_phase0_provenance(out_dir, git_sha, audit_timestamp=audit_timestamp)
 
     # Phase 1
     print("\n[2/8] Auditing canonical artifact integrity against registry...")
@@ -1008,11 +1013,12 @@ def main() -> int:
 
     # Write all machine-readable artifacts
     meta = ArtifactMetadata(
-        experiment_id="EXP-P2B-READINESS-AUDIT-001",
+        experiment_id=prov.get("audit_id", "EXP-P2B-READINESS-AUDIT-001"),
         git_commit=prov.get("code_revision_tested", git_sha),
         dataset_sha256=prov["dataset_and_schema_hashes"]["d_pol_test_flows_joblib_sha256"],
         feature_schema_hash=prov["dataset_and_schema_hashes"]["r10_feature_schema_hash"],
         seed=42,
+        created_at=prov["timestamp_utc"],
         extra={
             "working_tree_clean": prov.get("working_tree_clean", True),
             "working_tree_status": prov.get("working_tree_status", "Verified Clean"),

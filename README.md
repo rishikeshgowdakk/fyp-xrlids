@@ -436,7 +436,7 @@ To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
 | **Launch Dashboard (Web UI)** | `./run.sh` | `.venv/bin/python dashboard/server.py` | **No** |
 | Run quick offline PCAP replay demo | `./run.sh demo` | `.venv/bin/python scripts/demo/run_replay_demo.py` | No |
 | Run full test suite (466 tests) | `./run.sh test` | `.venv/bin/pytest -q` | No |
-| Run CSV evaluation test suite (28 tests) | — | `.venv/bin/pytest tests/unit/test_csv_evaluation_workflow.py -v` | No |
+| Run CSV evaluation test suite (29 tests) | — | `.venv/bin/pytest tests/unit/test_csv_evaluation_workflow.py -v` | No |
 | Verify all calibrated attack scenarios | — | `.venv/bin/python scripts/demo/verify_attack_scenarios.py` | No |
 | Explain a score with TreeSHAP features | — | `.venv/bin/python scripts/demo/explain_score.py` | No |
 | Dashboard with real live WiFi capture | — | `sudo .venv/bin/python dashboard/server.py 8000 --live --iface wlo1` | Yes |
