@@ -1,0 +1,79 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P2B-READINESS-AUDIT-001",
+    "git_commit": "ffd7962a84ba7c5a21dadcecc4d173af9c30fe9d",
+    "dataset_sha256": "7f494baf191955808e6e47dbdedb6f430877b7440209d743c8e557825065f6ac",
+    "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+    "seed": 42,
+    "created_at": "2026-10-28T09:25:53.489518+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "ffd7962a84ba7c5a21dadcecc4d173af9c30fe9d",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "all_safety_tests_passed": true,
+  "total_safety_tests": 6,
+  "tests": [
+    {
+      "test_name": "critical_host_gateway_isolation_attempt",
+      "expected": "ALERT",
+      "observed": "ALERT",
+      "overridden": true,
+      "override_reason": "CRITICAL_INFRASTRUCTURE_EXEMPTION",
+      "pass": true
+    },
+    {
+      "test_name": "3_action_clamp_isolate_to_rate_limit",
+      "expected": "RATE_LIMIT",
+      "observed": "RATE_LIMIT",
+      "overridden": true,
+      "override_reason": "ACTION_MODE_3_ACTION_CLAMP",
+      "pass": true
+    },
+    {
+      "test_name": "mandatory_cooldown_deescalation_thrash_block",
+      "expected": "RATE_LIMIT",
+      "observed": "RATE_LIMIT",
+      "overridden": true,
+      "override_reason": "MANDATORY_ACTION_COOLDOWN",
+      "pass": true
+    },
+    {
+      "test_name": "blast_radius_circuit_breaker_isolation_cap",
+      "expected": "ALERT",
+      "observed": "ALERT",
+      "overridden": true,
+      "override_reason": "BLAST_RADIUS_CIRCUIT_BREAKER",
+      "pass": true
+    },
+    {
+      "test_name": "cost_optimal_nan_score_rejection",
+      "expected": "ValueError",
+      "observed": "ValueError",
+      "pass": true
+    },
+    {
+      "test_name": "cost_optimal_inf_score_rejection",
+      "expected": "ValueError",
+      "observed": "ValueError",
+      "pass": true
+    }
+  ]
+}

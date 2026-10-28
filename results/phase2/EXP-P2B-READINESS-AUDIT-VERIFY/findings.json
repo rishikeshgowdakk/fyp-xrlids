@@ -1,0 +1,96 @@
+{
+  "metadata": {
+    "experiment_id": "EXP-P2B-READINESS-AUDIT-001",
+    "git_commit": "ffd7962a84ba7c5a21dadcecc4d173af9c30fe9d",
+    "dataset_sha256": "7f494baf191955808e6e47dbdedb6f430877b7440209d743c8e557825065f6ac",
+    "feature_schema_hash": "d74897f18b669ea806488222fda4514b28b335921ce019ebd41fc49ff6b65e21",
+    "seed": 42,
+    "created_at": "2026-10-28T09:25:53.489518+00:00",
+    "software_environment": {
+      "python_version": "3.14.4",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "machine": "x86_64",
+      "processor_count": null,
+      "cuda_available": false,
+      "cuda_version": null,
+      "git_commit": "ffd7962a84ba7c5a21dadcecc4d173af9c30fe9d",
+      "packages": {
+        "numpy": "2.5.3",
+        "pandas": "3.0.6",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1",
+        "torch": "2.14.0+cpu",
+        "shap": "0.52.0",
+        "matplotlib": "3.11.2",
+        "PyYAML": "6.0.3"
+      }
+    },
+    "artifact_version": "1",
+    "extra": {}
+  },
+  "findings": [
+    {
+      "id": "FINDING-P2B-001",
+      "severity": "CRITICAL",
+      "category": "Scientific Integrity / Reinforcement Learning Justification",
+      "title": "Response Simulation Environment Is an Asymmetric Contextual Bandit, Not a Sequential MDP",
+      "description": "Tracing of src/xrlids/response/environment.py demonstrates that network flow arrivals are strictly exogenous replay from pre-recorded datasets. Agent actions have zero causal influence over future traffic arrivals, packet timing, detector scores, or adversary behavior. Setting discount factor gamma = 0.95 optimizes noise correlations over 20 steps of exogenous traffic rather than genuine environmental transitions.",
+      "evidence": "src/xrlids/response/environment.py:204 next_flow = self.flows[self._current_step]",
+      "remediation": "Re-frame response architecture as an Asymmetric-Loss Contextual Decision Policy."
+    },
+    {
+      "id": "FINDING-P2B-002",
+      "severity": "CRITICAL",
+      "category": "Empirical Claim Validity",
+      "title": "DQN Fails to Outperform Zero-Parameter Analytic Baseline in 4 of 6 Benchmark Settings",
+      "description": "In EXP-P2A-COST-OPTIMAL-001 on the 355,865 held-out test flows, the zero-parameter analytic CostOptimalThresholdPolicy achieved lower operational cost than the trained DQN in 4 out of 6 settings. In 4-action High Availability, Cost-Optimal beat DQN by 20.12%. In the 2 settings where DQN achieved lower cost, its advantage was only ~8.8%, failing the pre-registered 15.0% practical significance target.",
+      "evidence": "results/phase2/EXP-P2A-COST-OPTIMAL-001/baseline_results.json",
+      "remediation": "Honestly report negative findings regarding DQN superiority; do not claim DQN advantage over optimal baselines."
+    },
+    {
+      "id": "FINDING-P2B-003",
+      "severity": "HIGH",
+      "category": "Documentation Inconsistency",
+      "title": "README.md Outdated Disclaimer Regarding Missing Model Artifacts",
+      "description": "README.md lines 188-200 claimed 'Artifacts and raw data are not committed... A fresh clone therefore contains no trained detector'. However, commit 29d8c1f explicitly unignored and tracked all 9 canonical model binaries and preprocessors directly in git. A clean checkout has all models immediately available.",
+      "evidence": "README.md:188-200 vs models/registry/model_manifest.json and clean worktree test",
+      "remediation": "Update README.md to state that canonical models ARE committed, while raw CSV datasets remain external."
+    },
+    {
+      "id": "FINDING-P2B-004",
+      "severity": "HIGH",
+      "category": "Documentation Inconsistency",
+      "title": "README.md Test Suite Count Reconciled (417 vs 423 Executed Tests)",
+      "description": "README.md lines 210 and 325 previously stated 'All 417 tests should pass'. Following the addition of 11 response baseline tests in Phase 2A, the repository test suite consists of exactly 423 tests across tests/data/ (45), tests/integration/ (31), tests/model/ (18), and tests/unit/ (329), all 423 of which execute and pass in 40.5s.",
+      "evidence": "pytest -q executes and passes 423 tests with 0 failures",
+      "remediation": "Update README.md test count to reflect the authoritative 423 executed and passed tests."
+    },
+    {
+      "id": "FINDING-P2B-005",
+      "severity": "HIGH",
+      "category": "Statistical Reporting",
+      "title": "Reporting of p_value = 0.0 in Bootstrap Output",
+      "description": "Exported JSON files report p_value: 0.0 when 0 of 1,000 bootstrap resamples cross zero. In finite Monte Carlo resampling, the empirical resolution is bounded by p < 1/(B+1) = 0.000999 < 0.001. Claiming exact zero is statistically improper.",
+      "evidence": "results/phase2/EXP-P2A-COST-OPTIMAL-001/paired_comparisons.json",
+      "remediation": "Bound empirical bootstrap p-values by p < 1/(B+1) in documentation and schema."
+    },
+    {
+      "id": "FINDING-P2B-006",
+      "severity": "MEDIUM",
+      "category": "Model Calibration",
+      "title": "Raw Random Forest Voting Scores Exhibit Severe Intermediate Probability Distortion",
+      "description": "Calibration report indicates that in [0.1, 0.2), mean predicted score is 0.1335 vs observed frequency 0.0137 (~10x gap). Analytical thresholds derived assuming S_t = P(y=1|x) are cost-optimal with respect to the assumed score, not proven Bayes-optimal.",
+      "evidence": "results/experiments/EXP-P1-CIC2017-R10-001/calibration_report.json",
+      "remediation": "Preserve explicit disclaimer in CostOptimalThresholdPolicy docstrings and reports."
+    },
+    {
+      "id": "FINDING-P2B-007",
+      "severity": "MEDIUM",
+      "category": "Benchmark Architecture",
+      "title": "CSE-CIC-IDS2018 Fusion Weight alpha = 0.00 (LSTM-Only Result)",
+      "description": "In models/fusion/fusion_weights.json, CSE-2018 has alpha = 0.00. The fusion model contributes 0% Random Forest and 100% LSTM. Describing this as fusion outperforming individual models is misleading.",
+      "evidence": "models/fusion/fusion_weights.json",
+      "remediation": "Explicitly document that CSE-2018 fusion is mathematically identical to the single LSTM detector."
+    }
+  ]
+}
