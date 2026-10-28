@@ -79,11 +79,12 @@ All 9 canonical model artifacts are committed and tracked directly in the reposi
 - **Network:** Dueling Q-Network (Value stream: Linear $6 \to 64 \to 1$; Advantage stream: Linear $6 \to 64 \to 4$).
 - **Action Space:** 0: ALLOW, 1: ALERT, 2: RATE_LIMIT, 3: ISOLATE.
 
-### The Cost-Optimal Baseline Comparison (EXP-P2A-COST-OPTIMAL-001)
-- Evaluated against the zero-parameter analytic `CostOptimalThresholdPolicy` on the 355,865 held-out flows:
-  - **Result:** The zero-parameter baseline achieved lower operational cost than the trained DQN in **4 of 6 benchmark settings** (e.g. 20.12% lower cost in 4-action High Availability).
-  - In the 2 settings where DQN had lower cost, its advantage was only ~8.8%, failing the pre-registered 15.0% target.
-  - **Scientific Interpretation:** The response problem functions as an asymmetric-loss contextual bandit with hysteresis rather than an interactive sequential MDP.
+### The Cost-Optimal Baseline Comparison (EXP-P2A-COST-OPTIMAL-001) & Reconciled Figures
+- **Evaluation Populations & Discrepancy Resolution:**
+  - *Validation Population ($D_{\text{pol\_val}}$, 142,346 flows in `EXP-P2B-DQN-001`):* DQN achieved **+9.71%** cost reduction vs Baseline 1 ($\tau=0.50$) and **+10.82%** vs Baseline 2 ($\tau=0.40/0.75$), failing the pre-registered practical significance target of $\ge 15.0\%$.
+  - *Final Test Population ($D_{\text{pol\_test}}$, 355,865 flows in `EXP-P2-FINAL-TEST-001`):* DQN achieved **+28.80%** cost reduction vs Baseline 1 ($\tau=0.50$), but only **+14.10%** vs Baseline 2 ($\tau=0.40/0.75$), still failing the $\ge 15.0\%$ threshold against the best existing baseline.
+  - *Analytic Baseline Comparison (`EXP-P2A-COST-OPTIMAL-001`):* When evaluated against the zero-parameter analytic `CostOptimalThresholdPolicy` on the identical 355,865 test flows, the zero-parameter baseline achieved lower operational cost than the trained DQN in **4 of 6 benchmark settings** (e.g., 20.12% lower cost in 4-action High Availability). In the remaining 2 settings, DQN's margin was only ~8.8%.
+- **Scientific Interpretation:** The response problem functions as an asymmetric-loss contextual bandit with hysteresis rather than an interactive sequential MDP.
 
 ---
 
@@ -91,7 +92,12 @@ All 9 canonical model artifacts are committed and tracked directly in the reposi
 
 1. **Temporal Generalization Collapse (CSE-CIC-IDS2018):**
    - Under chronological day-to-day evaluation (training on Day 1-8, testing on Day 9-10), Random Forest performance collapses to $F_1 = 0.0113$ (compared to $0.8861$ on random split).
-   - *Cause:* Extreme concept drift and non-stationary background traffic across distinct calendar days.
+   - *Cause:* Extreme concept drift and non-stationary background traffic across distinct calendar days, coupled with unseen attack families (Ares Botnet on March 2, Infiltration on Feb 28).
+   - *Empirical Anomaly Baseline Evaluation (`scripts/phase1/evaluate_temporal_anomaly_baseline.py`):*
+     - Evaluated on 20,361 genuine flows from raw CSV files on disk (`data/raw/cse_cic_ids2018/`).
+     - Supervised Random Forest detected only **0.04%** of Bot flows and **0.00%** of Web XSS/SQL attacks (overall recall: **1.75%**).
+     - Unsupervised `IsolationForestDetector` (trained strictly on benign flows from Feb 14-15) achieved **50.02%** Bot detection, **58.23%** Web brute force detection, **50.63%** XSS detection, and **64.71%** SQL injection detection.
+     - *Trade-off:* Background benign traffic naturally drifted across weeks, causing an anomaly False Positive Rate of **39.39%**. Anomaly detection is therefore suitable as a triage/escalation tier, not an unconstrained autonomous blocker.
 2. **TreeSHAP Methodological Boundary:**
    - TreeSHAP explains solely the Random Forest model. It does not explain the neural LSTM or the linear fusion score.
 3. **Probability Distortion in Raw Voting Scores:**

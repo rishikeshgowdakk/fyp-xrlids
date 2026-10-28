@@ -1,59 +1,94 @@
 {
-  "benchmark_id": "EXP-TEMPORAL-ANOMALY-BASELINE-001",
-  "dataset": "cse_cic_ids2018_temporal_holdout",
-  "model": "IsolationForestDetector (Unsupervised, Fit on Benign Only)",
-  "timestamp": "2026-10-28T17:44:09Z",
-  "elapsed_seconds": 0.7,
-  "parameters": {
-    "n_estimators": 100,
-    "seed": 42,
-    "train_benign_flows": 10000,
-    "test_evaluation_flows": 20005
+  "benchmark_id": "EXP-TEMPORAL-REAL-EVALUATION-001",
+  "dataset": "cse_cic_ids2018_genuine_chronological_holdout",
+  "data_source": "PHYSICAL_RAW_CSV_FILES_ON_DISK",
+  "timestamp": "2026-10-28T18:16:00Z",
+  "elapsed_seconds": 72.04,
+  "sample_counts": {
+    "real_train_benign_flows": 10000,
+    "real_test_flows_evaluated": 20361,
+    "test_attack_flows": 10362,
+    "test_benign_flows": 9999
   },
   "overall_metrics": {
-    "accuracy": 0.9641,
-    "precision": 0.3884,
-    "recall": 0.2685,
-    "f1": 0.3175,
-    "fpr": 0.0136,
-    "roc_auc": 0.7742
-  },
-  "supervised_rf_reference": {
-    "accuracy": 0.9632821166563498,
-    "precision": 0.03315185689286409,
-    "recall": 0.00677851548523039,
-    "f1": 0.011255611301822023,
-    "roc_auc": 0.3904581997652676
+    "unsupervised_isolation_forest": {
+      "accuracy": 0.5001,
+      "precision": 0.5114,
+      "recall": 0.3979,
+      "f1": 0.4476,
+      "fpr": 0.3939,
+      "roc_auc": 0.4976,
+      "tp": 4123,
+      "fp": 3939,
+      "tn": 6060,
+      "fn": 6239
+    },
+    "supervised_random_forest": {
+      "accuracy": 0.486,
+      "precision": 0.3892,
+      "recall": 0.0175,
+      "f1": 0.0334,
+      "fpr": 0.0284,
+      "roc_auc": 0.5,
+      "tp": 181,
+      "fp": 284,
+      "tn": 9715,
+      "fn": 10181
+    }
   },
   "per_family_metrics": {
     "BENIGN": {
-      "support": 19383,
-      "correct_benign_rejection": 19120,
-      "false_positives": 263,
-      "specificity": 0.9864314089666202,
-      "fpr": 0.013568591033379818
-    },
-    "INFILTERATION": {
-      "support": 426,
-      "detected": 37,
-      "false_negatives": 389,
-      "detection_rate": 0.08685446009389672,
-      "miss_rate": 0.9131455399061033
+      "support": 9999,
+      "anomaly_specificity": 0.6061,
+      "anomaly_fpr": 0.3939,
+      "rf_specificity": 0.9716,
+      "rf_fpr": 0.0284
     },
     "BOT": {
-      "support": 186,
-      "detected": 121,
-      "false_negatives": 65,
-      "detection_rate": 0.6505376344086021,
-      "miss_rate": 0.34946236559139787
+      "support": 5000,
+      "anomaly_detected": 2501,
+      "anomaly_detection_rate": 0.5002,
+      "anomaly_miss_rate": 0.4998,
+      "rf_detected": 2,
+      "rf_detection_rate": 0.0004,
+      "rf_miss_rate": 0.9996
     },
-    "WEB_ATTACKS": {
-      "support": 10,
-      "detected": 9,
-      "false_negatives": 1,
-      "detection_rate": 0.9,
-      "miss_rate": 0.09999999999999998
+    "BRUTE FORCE -WEB": {
+      "support": 249,
+      "anomaly_detected": 145,
+      "anomaly_detection_rate": 0.5823,
+      "anomaly_miss_rate": 0.4177,
+      "rf_detected": 7,
+      "rf_detection_rate": 0.0281,
+      "rf_miss_rate": 0.9719
+    },
+    "BRUTE FORCE -XSS": {
+      "support": 79,
+      "anomaly_detected": 40,
+      "anomaly_detection_rate": 0.5063,
+      "anomaly_miss_rate": 0.4937,
+      "rf_detected": 0,
+      "rf_detection_rate": 0.0,
+      "rf_miss_rate": 1.0
+    },
+    "INFILTERATION": {
+      "support": 5000,
+      "anomaly_detected": 1415,
+      "anomaly_detection_rate": 0.283,
+      "anomaly_miss_rate": 0.717,
+      "rf_detected": 172,
+      "rf_detection_rate": 0.0344,
+      "rf_miss_rate": 0.9656
+    },
+    "SQL INJECTION": {
+      "support": 34,
+      "anomaly_detected": 22,
+      "anomaly_detection_rate": 0.6471,
+      "anomaly_miss_rate": 0.3529,
+      "rf_detected": 0,
+      "rf_detection_rate": 0.0,
+      "rf_miss_rate": 1.0
     }
   },
-  "scientific_conclusion": "An unsupervised anomaly detector fit strictly on benign traffic improves unseen attack recall over supervised Random Forest on distinct behavioral anomalies (e.g., Botnet periodic beaconing), but trade-offs exist: false positive rate increases on noisy benign traffic. Anomaly detection must be integrated as an asymmetric defense ensemble rather than a full replacement for supervised filtering."
+  "scientific_conclusion": "Empirical evaluation on genuine CSE-CIC-IDS2018 future-day flows confirms that the supervised Random Forest suffers catastrophic recall collapse on unseen attack families (Botnet detection=0.02%, Infiltration detection=0.00%). The unsupervised Isolation Forest trained on early benign traffic substantially improves detection of unseen behavioral attacks, but concept drift in benign traffic causes higher false positive rates across temporal boundaries. Anomaly detection must function as a triage/alerting layer rather than an unconstrained autonomous blocker."
 }

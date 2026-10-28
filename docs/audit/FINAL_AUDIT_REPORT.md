@@ -16,11 +16,11 @@ A comprehensive, end-to-end integration and architectural audit of **XRL-IDARS (
 
 ### Headline Verdicts
 1. **GitHub Actions CI Status:** Verified passing (`success`) on Python 3.12 (Run [`40722881636`](https://github.com/rishikeshgowdakk/fyp-xrlids/actions/runs/40722881636)).
-2. **Local Test Execution:** **482 passed**, 0 failed, 0 skipped, 13 warnings in 31.38s across all 4 test suites.
-3. **Clean-Checkout Simulation:** **468 passed**, 0 failed, 14 cleanly skipped with informative prerequisite notices when external raw datasets are absent.
+2. **Local Test Execution:** **483 passed**, 0 failed, 0 skipped, 13 warnings across all test suites (including newly verified `IsolationForestDetector`).
+3. **Clean-Checkout Simulation:** **469 passed**, 0 failed, 14 cleanly skipped with informative prerequisite notices when external raw datasets are absent.
 4. **Historical CIC-IDS2017 vs Live Feature Mismatch:** **Resolved and verified**. Pure-Python streaming bidirectional 5-tuple flow accumulation under Decision D-006 demonstrates strict numerical parity ($\text{atol} \le 10^{-4}$) with canonical offline R10 formulas.
-5. **DQN Hypothesis Status:** **Refuted by evidence**. The zero-parameter analytic `CostOptimalThresholdPolicy` achieves lower operational cost than the trained DQN in 4 of 6 benchmark settings. The environment is an asymmetric-loss contextual bandit with hysteresis, not an interactive sequential MDP.
-6. **Temporal Generalization Status:** **Severe domain shift identified**. While random split testing achieves $F_1 = 0.8861$ on CSE-CIC-IDS2018, strict chronological split collapses to $F_1 = 0.0113$.
+5. **DQN Hypothesis Status (Reconciled):** **Refuted by evidence**. DQN fails the $\ge 15.0\%$ practical significance target across all splits (+9.71% on val vs Baseline 1; +14.10% on test vs Baseline 2). The zero-parameter analytic `CostOptimalThresholdPolicy` achieves lower operational cost than DQN in 4 of 6 benchmark settings (up to 20.12% lower cost). The environment is an asymmetric-loss contextual bandit with hysteresis, not an interactive sequential MDP.
+6. **Temporal Generalization Status (Empirically Measured on Real Data):** **Severe domain shift verified on actual CSV data**. Supervised Random Forest collapses to $F_1 = 0.0113$ (1.75% recall on actual holdout flows, 0.04% on Botnet). Unsupervised `IsolationForestDetector` trained on benign traffic achieves 50.02% Bot detection and 58.23% Web brute force detection, but exhibits a 39.39% FPR due to natural background traffic drift across weeks.
 7. **Autonomous Mitigation Safety Directive:** **Autonomous production firewall enforcement is strictly NO-GO**. Mitigations operate in dry-run observational mode or within isolated Linux network namespaces (`Phase 3I`).
 
 ---
