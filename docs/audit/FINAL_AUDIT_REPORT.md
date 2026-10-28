@@ -16,7 +16,7 @@ A comprehensive, end-to-end integration and architectural audit of **XRL-IDARS (
 
 ### Headline Verdicts
 1. **GitHub Actions CI Status:** Verified passing (`success`) on Python 3.12 (Run [`40722881636`](https://github.com/rishikeshgowdakk/fyp-xrlids/actions/runs/40722881636)).
-2. **Local Test Execution:** **483 passed**, 0 failed, 0 skipped, 13 warnings across all test suites (including newly verified `IsolationForestDetector`).
+2. **Local Test Execution:** **490 passed**, 0 failed, 0 skipped, 15 warnings across all test suites (including newly verified `IsolationForestDetector` and temporal anomaly benchmark unit tests).
 3. **Clean-Checkout Simulation:** **469 passed**, 0 failed, 14 cleanly skipped with informative prerequisite notices when external raw datasets are absent.
 4. **Historical CIC-IDS2017 vs Live Feature Mismatch:** **Resolved and verified**. Pure-Python streaming bidirectional 5-tuple flow accumulation under Decision D-006 demonstrates strict numerical parity ($\text{atol} \le 10^{-4}$) with canonical offline R10 formulas.
 5. **DQN Hypothesis Status (Reconciled):** **Refuted by evidence**. DQN fails the $\ge 15.0\%$ practical significance target across all splits (+9.71% on val vs Baseline 1; +14.10% on test vs Baseline 2). The zero-parameter analytic `CostOptimalThresholdPolicy` achieves lower operational cost than DQN in 4 of 6 benchmark settings (up to 20.12% lower cost). The environment is an asymmetric-loss contextual bandit with hysteresis, not an interactive sequential MDP.

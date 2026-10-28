@@ -193,14 +193,31 @@ class DecisionTreeDetector:
 class IsolationForestDetector:
     """Unsupervised anomaly detection baseline fit exclusively on benign traffic (y == 0).
 
-    CRITICAL SCIENTIFIC ROLE:
-    1. Fits only on training data where ground truth label y == 0 (benign baseline).
-       Supervised attack labels are never exposed during training.
-    2. Uses Isolation Forest decision_function() to evaluate anomaly scores.
-    3. Transforms anomaly scores to [0.0, 1.0] pseudo-probabilities where higher
-       values indicate higher anomaly/attack likelihood.
-    4. Provides an empirical benchmark for zero-day / unseen attack family detection
-       where supervised models experience temporal distribution collapse.
+    CRITICAL SCIENTIFIC & MATHEMATICAL SEMANTICS:
+    1. Training Paradigm:
+       Fits exclusively on training data where ground truth label y == 0 (benign baseline).
+       Supervised attack labels (y == 1) are NEVER exposed during training.
+    2. Score Orientation & Raw Metrics:
+       - score_samples(X): scikit-learn's opposite of anomaly score (higher = more normal / inlier).
+       - decision_function(X): score_samples(X) - offset_. Inliers yield positive values,
+         outliers yield negative values.
+    3. Uncalibrated Monotonic Anomaly Score:
+       - anomaly_score(X): maps decision_function(X) to [0.0, 1.0] via logistic sigmoid:
+           anomaly_score(x) = 1.0 / (1.0 + exp(sigmoid_scale * decision_function(x)))
+         Under this mapping, decision_function < 0 (outliers) maps to anomaly_score > 0.5,
+         and decision_function > 0 (inliers) maps to anomaly_score < 0.5.
+       - IMPORTANT: anomaly_score is an UNCALIBRATED monotonic outlierness metric, NOT a
+         calibrated Bayesian posterior probability P(attack | x). True posterior calibration
+         requires supervised calibration sets (e.g. Platt scaling / Isotonic regression)
+         which violates the unsupervised zero-attack-exposure premise.
+    4. Estimator Compatibility:
+       - predict_proba(X): returns anomaly_score(X) for API compatibility with binary
+         estimators.
+    5. Rank Invariance:
+       - Since the logistic sigmoid is strictly monotonic decreasing in decision_function,
+         the rank ordering of anomaly_score is identical to -decision_function.
+         Therefore, continuous rank metrics like ROC-AUC are mathematically invariant
+         to the sigmoid transformation.
     """
 
     def __init__(
@@ -244,22 +261,44 @@ class IsolationForestDetector:
         self.fitted = True
         return self
 
-    def predict_proba(self, X: pd.DataFrame | np.ndarray) -> np.ndarray:
-        """Return continuous anomaly score in [0.0, 1.0] where higher = more anomalous.
+    def decision_function(self, X: pd.DataFrame | np.ndarray) -> np.ndarray:
+        """Return raw scikit-learn decision function (positive = inlier, negative = outlier)."""
+        if not self.fitted:
+            raise RuntimeError("IsolationForestDetector must be fitted before decision_function().")
+        X_mat = X.to_numpy(dtype=np.float32) if isinstance(X, pd.DataFrame) else np.asarray(X, dtype=np.float32)
+        return self.model.decision_function(X_mat)
+
+    def score_samples(self, X: pd.DataFrame | np.ndarray) -> np.ndarray:
+        """Return raw scikit-learn score samples (higher = more normal / inlier)."""
+        if not self.fitted:
+            raise RuntimeError("IsolationForestDetector must be fitted before score_samples().")
+        X_mat = X.to_numpy(dtype=np.float32) if isinstance(X, pd.DataFrame) else np.asarray(X, dtype=np.float32)
+        return self.model.score_samples(X_mat)
+
+    def anomaly_score(self, X: pd.DataFrame | np.ndarray) -> np.ndarray:
+        """Return uncalibrated continuous anomaly score in [0.0, 1.0] where higher = more anomalous.
 
         IsolationForest.decision_function(X) outputs positive values for inliers (normal)
         and negative values for outliers (anomalous). We invert the sign and pass through
         a logistic sigmoid: P(anomaly) = 1 / (1 + exp(scale * decision_function(X))).
+
+        NOTE: This is a monotonic ranking metric of outlierness, NOT a calibrated Bayesian
+        posterior probability P(attack | x).
         """
-        if not self.fitted:
-            raise RuntimeError("IsolationForestDetector must be fitted before predict_proba().")
-        X_mat = X.to_numpy(dtype=np.float32) if isinstance(X, pd.DataFrame) else np.asarray(X, dtype=np.float32)
-        df = self.model.decision_function(X_mat)
-        probs = 1.0 / (1.0 + np.exp(self.sigmoid_scale * df))
-        return probs.astype(np.float32)
+        df = self.decision_function(X)
+        scores = 1.0 / (1.0 + np.exp(self.sigmoid_scale * df))
+        return scores.astype(np.float32)
+
+    def predict_proba(self, X: pd.DataFrame | np.ndarray) -> np.ndarray:
+        """Estimator compatibility alias for anomaly_score(X).
+
+        Returns continuous uncalibrated anomaly scores in [0.0, 1.0] where higher = more anomalous.
+        Satisfies scikit-learn probability interface expectations for binary evaluation.
+        """
+        return self.anomaly_score(X)
 
     def predict(self, X: pd.DataFrame | np.ndarray, threshold: float = 0.5) -> np.ndarray:
-        return (self.predict_proba(X) >= threshold).astype(int)
+        return (self.anomaly_score(X) >= threshold).astype(int)
 
     def config(self) -> dict[str, Any]:
         return {
