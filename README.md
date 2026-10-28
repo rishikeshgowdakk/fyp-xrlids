@@ -411,15 +411,15 @@ To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
 
 ### Quick Reference — How to Run
 
-| What you want to do | Command | Root needed? |
-|---------------------|---------|:---:|
-| Run full test suite (459 tests) | `.venv/bin/pytest -q` | No |
-| Run CSV evaluation test suite (24 tests) | `.venv/bin/pytest tests/unit/test_csv_evaluation_workflow.py -v` | No |
-| **Launch Dashboard (Dataset & Sample Demo)** | `python dashboard/server.py` | **No** |
-| Run quick offline PCAP replay demo | `python scripts/demo/run_replay_demo.py` | No |
-| Dashboard with real live WiFi capture | `sudo .venv/bin/python dashboard/server.py 8000 --live --iface wlo1` | Yes |
-| Verify all calibrated attack scenarios | `python scripts/demo/verify_attack_scenarios.py` | No |
-| Explain a score with TreeSHAP features | `python scripts/demo/explain_score.py` | No |
+| What you want to do | Shortcut | Direct Command | Root needed? |
+|---------------------|:--------:|----------------|:---:|
+| **Launch Dashboard (Web UI)** | `./run.sh` | `.venv/bin/python dashboard/server.py` | **No** |
+| Run quick offline PCAP replay demo | `./run.sh demo` | `.venv/bin/python scripts/demo/run_replay_demo.py` | No |
+| Run full test suite (459 tests) | `./run.sh test` | `.venv/bin/pytest -q` | No |
+| Run CSV evaluation test suite (24 tests) | — | `.venv/bin/pytest tests/unit/test_csv_evaluation_workflow.py -v` | No |
+| Verify all calibrated attack scenarios | — | `.venv/bin/python scripts/demo/verify_attack_scenarios.py` | No |
+| Explain a score with TreeSHAP features | — | `.venv/bin/python scripts/demo/explain_score.py` | No |
+| Dashboard with real live WiFi capture | — | `sudo .venv/bin/python dashboard/server.py 8000 --live --iface wlo1` | Yes |
 
 ---
 
