@@ -1,0 +1,59 @@
+{
+  "benchmark_id": "EXP-TEMPORAL-ANOMALY-BASELINE-001",
+  "dataset": "cse_cic_ids2018_temporal_holdout",
+  "model": "IsolationForestDetector (Unsupervised, Fit on Benign Only)",
+  "timestamp": "2026-10-28T17:44:09Z",
+  "elapsed_seconds": 0.7,
+  "parameters": {
+    "n_estimators": 100,
+    "seed": 42,
+    "train_benign_flows": 10000,
+    "test_evaluation_flows": 20005
+  },
+  "overall_metrics": {
+    "accuracy": 0.9641,
+    "precision": 0.3884,
+    "recall": 0.2685,
+    "f1": 0.3175,
+    "fpr": 0.0136,
+    "roc_auc": 0.7742
+  },
+  "supervised_rf_reference": {
+    "accuracy": 0.9632821166563498,
+    "precision": 0.03315185689286409,
+    "recall": 0.00677851548523039,
+    "f1": 0.011255611301822023,
+    "roc_auc": 0.3904581997652676
+  },
+  "per_family_metrics": {
+    "BENIGN": {
+      "support": 19383,
+      "correct_benign_rejection": 19120,
+      "false_positives": 263,
+      "specificity": 0.9864314089666202,
+      "fpr": 0.013568591033379818
+    },
+    "INFILTERATION": {
+      "support": 426,
+      "detected": 37,
+      "false_negatives": 389,
+      "detection_rate": 0.08685446009389672,
+      "miss_rate": 0.9131455399061033
+    },
+    "BOT": {
+      "support": 186,
+      "detected": 121,
+      "false_negatives": 65,
+      "detection_rate": 0.6505376344086021,
+      "miss_rate": 0.34946236559139787
+    },
+    "WEB_ATTACKS": {
+      "support": 10,
+      "detected": 9,
+      "false_negatives": 1,
+      "detection_rate": 0.9,
+      "miss_rate": 0.09999999999999998
+    }
+  },
+  "scientific_conclusion": "An unsupervised anomaly detector fit strictly on benign traffic improves unseen attack recall over supervised Random Forest on distinct behavioral anomalies (e.g., Botnet periodic beaconing), but trade-offs exist: false positive rate increases on noisy benign traffic. Anomaly detection must be integrated as an asymmetric defense ensemble rather than a full replacement for supervised filtering."
+}

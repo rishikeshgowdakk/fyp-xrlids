@@ -8,6 +8,7 @@ import pytest
 
 from xrlids.models.baselines import (
     DecisionTreeDetector,
+    IsolationForestDetector,
     LogisticRegressionDetector,
     MajorityClassDetector,
 )
@@ -68,3 +69,45 @@ def test_decision_tree_detector(synthetic_data, tmp_path):
     save_path = detector.save(tmp_path)
     loaded = DecisionTreeDetector.load(save_path)
     np.testing.assert_allclose(probs, loaded.predict_proba(X))
+
+
+def test_isolation_forest_detector(tmp_path):
+    rng = np.random.default_rng(42)
+    X_benign = pd.DataFrame({
+        "feat1": rng.normal(0, 1, 200),
+        "feat2": rng.normal(0, 1, 200),
+    })
+    y_benign = pd.Series(np.zeros(200, dtype=int))
+
+    X_anom = pd.DataFrame({
+        "feat1": rng.normal(5, 1, 50),
+        "feat2": rng.normal(5, 1, 50),
+    })
+    y_anom = pd.Series(np.ones(50, dtype=int))
+
+    X_all = pd.concat([X_benign, X_anom], ignore_index=True)
+    y_all = pd.concat([y_benign, y_anom], ignore_index=True)
+
+    # 1. Fit on benign only via y filter
+    detector = IsolationForestDetector(seed=42).fit(X_all, y_all)
+    assert detector.fitted
+
+    probs = detector.predict_proba(X_all)
+    preds = detector.predict(X_all, threshold=0.5)
+
+    assert len(probs) == len(X_all)
+    assert np.all((probs >= 0.0) & (probs <= 1.0))
+    assert np.all((preds == 0) | (preds == 1))
+
+    # Anomalies should have significantly higher scores than benign
+    benign_scores = probs[:200]
+    anom_scores = probs[200:]
+    assert np.mean(anom_scores) > np.mean(benign_scores)
+    assert np.median(anom_scores) > np.median(benign_scores)
+
+    # Persistence
+    save_path = detector.save(tmp_path)
+    loaded = IsolationForestDetector.load(save_path)
+    np.testing.assert_allclose(probs, loaded.predict_proba(X_all))
+    assert loaded.config()["model_type"] == "isolation_forest"
+
