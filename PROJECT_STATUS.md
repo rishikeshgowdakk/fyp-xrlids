@@ -25,7 +25,8 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Flow network metadata isolation | Implemented & tested | Source/destination endpoints, ports, protocol, and timestamps preserved in metadata sidecar without numeric feature matrix $X$ or label leakage. |
 | Explainability & Response Policy | Implemented & tested | On-demand TreeSHAP local feature attribution (`/api/csv/explain`, RF model only); Dueling DQN response recommendations (`models/dqn/dqn_4action_best.pt`, strictly observational `RULE_DRY_RUN`, zero live firewall mutations). |
 | Benchmark/feature contract pairing | Implemented & enforced | CIC-IDS2017/R10, CSE-CIC-IDS2018/R10, UNSW-NB15/R4. Mismatches rejected with HTTP 400. |
-| Label and feature validation | Implemented with 23 regression tests | Rejects unknown/ambiguous labels; mathematically accounts for invalid/non-finite feature rows; drops NaN/Inf with exact reconciliation. |
+| Label and feature validation | Implemented with 28 regression tests | Rejects unknown/ambiguous labels; mathematically accounts for invalid/non-finite feature rows; drops NaN/Inf with exact reconciliation. |
+| Sequence boundary isolation & segment accounting | Implemented & verified | Detects capture/session boundaries (`source_file`, `session_id`, etc.); strictly isolates sequences per capture; isolates RF tabular evaluation on all rows; documents explicit single-stream fallback when boundary column absent. |
 | Dashboard integration | Implemented | `dashboard/server.py`, `dashboard/index.html`, `dashboard/app.js` with mode pills, 3-model metric cards, 3 confusion matrices, flow inspection modal, and server-side CSV export (`/api/csv/export`). |
 | Research interpretation | Authoritative evaluation | Preserves historical frozen benchmark artifacts; does not retrain models; distinguishes held-out test splits from demo subsets. |
 
@@ -68,7 +69,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Dataset audit module | ✅ | `src/xrlids/datasets/audit.py` + tests |
 | CLI | ✅ | `src/xrlids/cli.py` |
 | Report generation from artifacts | ✅ | `scripts/phase1/generate_reports.py` (dynamic git hashes, live manifests) |
-| Test suite | ✅ | 417 unit and integration tests passing (0 failures); full Phase 1, Phase 2, and Phase 3 verification suite |
+| Test suite | ✅ | 465 unit and integration tests passing (0 failures); full Phase 1, Phase 2, and Phase 3 verification suite |
 | SHAP explainability module | ✅ | `src/xrlids/explainability/shap_analysis.py` + tests |
 | Cross-dataset transfer module | ✅ | `src/xrlids/experiments/transfer.py` + `scripts/phase1/run_transfer.py` + configs (6 directions executed) |
 | Pure-Python PCAP reader / writer | ✅ | `src/xrlids/demo/pcap.py` (zero external C-dependencies) + tests |

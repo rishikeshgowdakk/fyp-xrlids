@@ -695,4 +695,168 @@ def test_csv_mode_b_all_three_benchmarks(csv_server):
             assert expected_sub in sdata["csv_text"]
 
 
+def test_sequence_boundary_safety_multiple_segments():
+    """Verify that LSTM sequences never cross independent capture boundaries.
+
+    Segment 1: 6 flows from file_A.pcap -> 2 valid sequences (targets 4, 5), 4 warmup (0..3)
+    Segment 2: 4 flows from file_B.pcap -> 0 valid sequences (length 4 < T=5), 4 warmup (6..9)
+    Segment 3: 7 flows from file_C.pcap -> 3 valid sequences (targets 14, 15, 16), 4 warmup (10..13)
+    Total flows: 17
+    RF evaluated rows: 17 (RF does not lose rows to sequence warmup)
+    LSTM aligned rows: 5 (targets 4, 5, 14, 15, 16)
+    Total warmup rows: 12
+    """
+    total_n = 17
+    data = {f: [100.0 + i for i in range(total_n)] for f in R10_FEATURES}
+    data["label"] = [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0]
+    data["source_file"] = (
+        ["file_A.pcap"] * 6 +
+        ["file_B.pcap"] * 4 +
+        ["file_C.pcap"] * 7
+    )
+    df = pd.DataFrame(data)
+
+    res = evaluate_csv_dataset(csv_source=df, contract="R10", benchmark="cicids2017")
+
+    assert res["status"] == "success"
+    acct = res["row_accounting"]
+    assert acct["total_rows_received"] == 17
+    assert acct["evaluated_rows"] == 17
+    assert acct["boundary_isolation_applied"] is True
+    assert acct["boundary_column"] == "source_file"
+    assert acct["boundary_segments_count"] == 3
+    assert acct["aligned_sequence_rows"] == 5
+    assert acct["warmup_rows"] == 12
+
+    # Per-segment verification
+    segs = acct["segments"]
+    assert len(segs) == 3
+    assert segs[0] == {"segment_id": "file_A.pcap", "total_flows": 6, "aligned_flows": 2, "warmup_flows": 4}
+    assert segs[1] == {"segment_id": "file_B.pcap", "total_flows": 4, "aligned_flows": 0, "warmup_flows": 4}
+    assert segs[2] == {"segment_id": "file_C.pcap", "total_flows": 7, "aligned_flows": 3, "warmup_flows": 4}
+
+    # Verify model evaluation populations
+    # 1. Random Forest evaluates ALL 17 rows
+    rf_m = res["rf_metrics"]
+    assert rf_m["population"] == 17
+    rf_cm = res["rf_confusion_matrix"]
+    assert rf_cm["tp"] + rf_cm["tn"] + rf_cm["fp"] + rf_cm["fn"] == 17
+
+    # 2. Sequence models (LSTM and Fusion) evaluate strictly the 5 aligned sequence targets
+    lstm_m = res["lstm_metrics"]
+    assert lstm_m["population"] == 5
+    lstm_cm = res["lstm_confusion_matrix"]
+    assert lstm_cm["tp"] + lstm_cm["tn"] + lstm_cm["fp"] + lstm_cm["fn"] == 5
+
+    fusion_m = res["fusion_metrics"]
+    assert fusion_m["population"] == 5
+    fusion_cm = res["fusion_confusion_matrix"]
+    assert fusion_cm["tp"] + fusion_cm["tn"] + fusion_cm["fp"] + fusion_cm["fn"] == 5
+
+    # Target alignment check in individual flows
+    flows = res["flows"]
+    assert len(flows) == 17
+    # Segment 1: flows 0..3 are WARM_UP; flows 4, 5 are ALIGNED
+    for i in range(4):
+        assert flows[i]["lstm_status"] == "WARM_UP"
+    assert flows[4]["lstm_status"] == "ALIGNED"
+    assert flows[5]["lstm_status"] == "ALIGNED"
+
+    # Segment 2: flows 6..9 ALL WARM_UP (under length threshold)
+    for i in range(6, 10):
+        assert flows[i]["lstm_status"] == "WARM_UP"
+
+    # Segment 3: flows 10..13 are WARM_UP; flows 14, 15, 16 are ALIGNED
+    for i in range(10, 14):
+        assert flows[i]["lstm_status"] == "WARM_UP"
+    for i in range(14, 17):
+        assert flows[i]["lstm_status"] == "ALIGNED"
+
+
+def test_csv_absence_of_boundary_column_defaults_to_single_stream():
+    """Verify safe, explicit documentation and behavior when no boundary column is provided."""
+    n = 10
+    data = {f: [50.0 + i for i in range(n)] for f in R10_FEATURES}
+    data["label"] = [0] * n
+    df = pd.DataFrame(data)
+
+    res = evaluate_csv_dataset(csv_source=df, contract="R10", benchmark="cicids2017")
+    acct = res["row_accounting"]
+    assert acct["boundary_isolation_applied"] is False
+    assert acct["boundary_column"] is None
+    assert acct["boundary_segments_count"] == 1
+    assert "No capture boundary column detected" in acct["boundary_isolation_note"]
+    assert acct["evaluated_rows"] == 10
+    assert acct["aligned_sequence_rows"] == 6  # 10 - 5 + 1
+    assert acct["warmup_rows"] == 4
+
+
+def test_dqn_action_fallback_and_disclosure(monkeypatch):
+    """Verify DQN recommendation disclosure vs rule fallback disclosure."""
+    from xrlids.evaluation.csv_evaluator import _get_dqn_action
+
+    # 1. Normal DQN inference (checkpoint exists)
+    resp = _get_dqn_action(attack_score=0.92, flow_bytes=5000.0)
+    assert resp["recommended_action"] in ["ALLOW", "ALERT", "RATE_LIMIT", "ISOLATE"]
+    assert resp["policy_type"] == "DQN_NEURAL_POLICY (DuelingQNetwork)"
+    assert resp["is_fallback"] is False
+    assert resp["q_values"] is not None
+    assert "ALLOW" in resp["q_values"]
+    assert "DRY_RUN" in resp["execution_mode"]
+
+    # 2. Simulated checkpoint absence -> must explicitly disclose fallback
+    import xrlids.evaluation.csv_evaluator as ce
+    monkeypatch.setattr(ce, "REPO_ROOT", Path("/nonexistent/repo/root"))
+    resp_fallback = ce._get_dqn_action(attack_score=0.92)
+    assert resp_fallback["is_fallback"] is True
+    assert "RULE_DRY_RUN" in resp_fallback["policy_type"]
+    assert resp_fallback["q_values"] is None
+    assert "fallback_reason" in resp_fallback
+    assert "DQN checkpoint absent" in resp_fallback["fallback_reason"]
+    assert resp_fallback["recommended_action"] == "ISOLATE"
+
+
+def test_all_benchmarks_row_accounting_and_confusion_matrix_reconciliation():
+    """Verify that evaluated rows = TP + TN + FP + FN across all three benchmarks."""
+    benchmarks = [
+        ("cicids2017", "R10", 355865, 355833, 32),
+        ("cse2018", "R10", 1662459, 1662419, 40),
+        ("unswnb15", "R4", 24504, 24496, 8),
+    ]
+
+    for bench, contract, exp_tabular, exp_aligned, exp_warmup in benchmarks:
+        res = evaluate_csv_dataset(mode="full_test", contract=contract, benchmark=bench)
+        acct = res["row_accounting"]
+        assert acct["evaluated_rows"] == exp_tabular
+        assert acct["total_rows_received"] == exp_tabular
+        assert acct["aligned_sequence_rows"] == exp_aligned
+        assert acct["warmup_rows"] == exp_warmup
+        assert acct["aligned_sequence_rows"] + acct["warmup_rows"] == acct["evaluated_rows"]
+
+        # Random Forest Tabular evaluation on all rows
+        rf_tab_cm = res["rf_tabular_confusion_matrix"]
+        rf_tab_sum = rf_tab_cm["tp"] + rf_tab_cm["tn"] + rf_tab_cm["fp"] + rf_tab_cm["fn"]
+        assert rf_tab_sum == exp_tabular
+        assert res["rf_tabular_metrics"]["population"] == exp_tabular
+
+        # Random Forest Aligned evaluation on sequence slice
+        rf_cm = res["rf_confusion_matrix"]
+        rf_sum = rf_cm["tp"] + rf_cm["tn"] + rf_cm["fp"] + rf_cm["fn"]
+        assert rf_sum == exp_aligned
+        assert res["rf_metrics"]["population"] == exp_aligned
+
+        # Supervised LSTM on aligned slice
+        lstm_cm = res["lstm_confusion_matrix"]
+        lstm_sum = lstm_cm["tp"] + lstm_cm["tn"] + lstm_cm["fp"] + lstm_cm["fn"]
+        assert lstm_sum == exp_aligned
+        assert res["lstm_metrics"]["population"] == exp_aligned
+
+        # Fusion on aligned slice
+        fusion_cm = res["fusion_confusion_matrix"]
+        fusion_sum = fusion_cm["tp"] + fusion_cm["tn"] + fusion_cm["fp"] + fusion_cm["fn"]
+        assert fusion_sum == exp_aligned
+        assert res["fusion_metrics"]["population"] == exp_aligned
+
+
+
 

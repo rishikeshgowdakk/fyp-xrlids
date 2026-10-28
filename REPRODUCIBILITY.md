@@ -33,17 +33,24 @@ Verify runtime environment:
 
 ---
 
-## 2. Test Suite Execution (423 Tests)
+## 2. Test Suite Execution (465 Tests)
 
 ```bash
+./run.sh test
+# or directly via pytest:
 .venv/bin/pytest -q
 ```
 
-All **423 tests** across `tests/unit/` (329), `tests/data/` (45), `tests/integration/` (31), and `tests/model/` (18) pass with zero failures.
+All **465 tests** across `tests/unit/` (371), `tests/data/` (45), `tests/integration/` (31), and `tests/model/` (18) pass with zero failures.
 
 To run only the response policy and safety subsystem verification suite (43 tests):
 ```bash
 .venv/bin/pytest tests/unit/test_response* -v
+```
+
+To run the custom CSV and exhibition evaluation test suite (28 tests):
+```bash
+.venv/bin/pytest tests/unit/test_csv_evaluation_workflow.py -v
 ```
 
 ---
@@ -70,14 +77,21 @@ All 9 canonical models are tracked directly in Git and verify against [`models/r
 
 ---
 
-## 4. Evaluation Population Reconciliation (355,865 vs 355,833 Flows)
+## 4. Evaluation Population Reconciliation (Tabular vs Sequence-Aligned Flows)
 
-In CIC-IDS2017, evaluations use two mathematically consistent population numbers:
+Across all three benchmarks, evaluations distinguish between full tabular test populations and sequence-aligned test slices:
 
-$$\text{Sequence Aligned Flows} = 355,865 - (8 \text{ capture files} \times 4 \text{ boundary flows dropped for } T=5) = 355,833$$
+$$\text{Sequence-Aligned Flows} = N_{\text{tabular}} - (N_{\text{capture\_files}} \times (T - 1))$$
 
-1. **Tabular Held-Out Split (355,865 flows):** Evaluated by the primary Random Forest detector and the Phase 2 offline response simulator (`d_pol_test_flows.joblib`). Evaluates all individual flows without temporal sequence constraints (291,045 benign, 64,820 attack).
-2. **Sequence-Aligned Test Slice (355,833 flows):** Evaluated by the supervised LSTM and score-level Fusion models. For sequence length $T=5$, constructing causal sequences strictly within each capture file requires dropping the first $(T-1)=4$ flows of each file so sequences never cross unrelated capture files. Across the 8 capture files, exactly 32 flows (all benign) are dropped (291,013 benign, 64,820 attack).
+| Dataset | Total Test (Tabular) | Capture Files | Dropped Boundary Rows ($T-1=4$) | Aligned Test Population | Legitimate Evaluation Scope |
+|:---|:---:|:---:|:---:|:---:|:---|
+| **CIC-IDS2017** | **355,865** | 8 files | 32 rows | **355,833** | Tabular RF evaluates 355,865; LSTM & Fusion evaluate 355,833. Direct ladder comparison on aligned 355,833. |
+| **CSE-CIC-IDS2018** | **1,662,459** | 10 files | 40 rows | **1,662,419** | Tabular RF evaluates 1,662,459; LSTM & Fusion evaluate 1,662,419. Direct ladder comparison on aligned 1,662,419. |
+| **UNSW-NB15** | **24,504** | 2 files | 8 rows | **24,496** | Tabular RF evaluates 24,504; LSTM & Fusion evaluate 24,496. Direct ladder comparison on aligned 24,496. |
+
+1. **Tabular Held-Out Split ($N_{\text{tabular}}$):** Evaluated by Random Forest detectors without temporal sequence constraints. Every valid, non-finite row is evaluated without sequence loss.
+2. **Sequence-Aligned Test Slice ($N_{\text{aligned}}$):** Evaluated by supervised LSTM and score-level Fusion models. For sequence length $T=5$, constructing causal sequences strictly within each independent capture file requires dropping the first $(T-1)=4$ warm-up flows of each file so causal sequence windows never cross unrelated capture files.
+3. **Exact Accounting Invariant:** For every model on every evaluation slice, evaluated flows strictly equal $\text{TP} + \text{TN} + \text{FP} + \text{FN}$. RF evaluated on the aligned slice excludes only the file boundary flows to ensure fair, identical-population comparison against sequence models.
 
 ---
 

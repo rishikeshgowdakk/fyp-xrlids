@@ -48,7 +48,7 @@ from xrlids.evaluation.metrics import (
     score_metrics,
 )
 from xrlids.features.definitions import R4_FEATURES, R10_FEATURES
-from xrlids.models.lstm import LSTMDetector, SequenceSet
+from xrlids.models.lstm import LSTMDetector, SequenceSet, build_sequences
 
 logger = logging.getLogger("xrlids.evaluation.csv_evaluator")
 
@@ -60,6 +60,18 @@ SUPPORTED_BENCHMARK_CONTRACTS: dict[str, str] = {
     "cse2018": "R10",
     "unswnb15": "R4",
 }
+
+# Candidate columns indicating independent capture file, session, or PCAP segment boundaries
+BOUNDARY_CANDIDATE_COLUMNS: tuple[str, ...] = (
+    "source_file",
+    "filename",
+    "file_name",
+    "capture_file",
+    "capture_id",
+    "session_id",
+    "pcap_file",
+    "segment_id",
+)
 
 # Canonical candidate label column names
 LABEL_CANDIDATE_COLUMNS: tuple[str, ...] = (
@@ -91,6 +103,14 @@ METADATA_CANDIDATE_COLUMNS: tuple[str, ...] = (
     "host_id",
     "duration_ms",
     "packet_count",
+    "source_file",
+    "filename",
+    "file_name",
+    "capture_file",
+    "capture_id",
+    "session_id",
+    "pcap_file",
+    "segment_id",
 )
 
 # Canonical string representations for benign traffic
@@ -367,9 +387,11 @@ def _get_dqn_action(attack_score: float, flow_bytes: float = 1000.0) -> dict[str
             "recommended_action": rec_act,
             "policy_type": "RULE_DRY_RUN (CostOptimalThresholdPolicy)",
             "checkpoint": "none (analytic baseline)",
-            "safety_status": "PASSED",
+            "safety_status": "PASSED (Rule-based analytic baseline)",
             "execution_mode": "DRY_RUN (Observational only; zero firewall mutation)",
             "q_values": None,
+            "is_fallback": True,
+            "fallback_reason": f"DQN checkpoint absent at {dqn_path}",
         }
 
     try:
@@ -400,6 +422,7 @@ def _get_dqn_action(attack_score: float, flow_bytes: float = 1000.0) -> dict[str
             "safety_status": "PASSED (Within 20% quarantine budget and cooldown invariants)",
             "execution_mode": "DRY_RUN (Observational only; zero firewall mutation)",
             "q_values": {act: round(float(q_vals[0, i].item()), 4) for i, act in enumerate(actions)},
+            "is_fallback": False,
         }
     except Exception as exc:
         logger.warning("DQN inference failed, falling back to rule baseline: %s", exc)
@@ -408,9 +431,11 @@ def _get_dqn_action(attack_score: float, flow_bytes: float = 1000.0) -> dict[str
             "recommended_action": rec_act,
             "policy_type": "RULE_DRY_RUN (CostOptimalFallback)",
             "checkpoint": "fallback",
-            "safety_status": "PASSED",
+            "safety_status": "FALLBACK_TRIGGERED (DQN load/inference error)",
             "execution_mode": "DRY_RUN (Observational only; zero firewall mutation)",
             "q_values": None,
+            "is_fallback": True,
+            "fallback_reason": f"DQN error: {exc}",
         }
 
 
@@ -683,28 +708,40 @@ def evaluate_csv_dataset(
         rf_scores = rf_scores[:, 1]
     rf_scores = np.asarray(rf_scores, dtype=float).ravel()
 
-    # 8. Supervised LSTM Sequence Inference (T=5)
+    # 8. Supervised LSTM Sequence Inference (T=5) with Sequence Boundary Isolation
     seq_len = 5
     n_flows = len(X_valid)
     lstm_scores = np.full(n_flows, np.nan, dtype=float)
     lstm_statuses: list[str] = []
 
+    # Detect independent capture file or session boundary column if present
+    resolved_boundary_col: str | None = None
+    for cand in BOUNDARY_CANDIDATE_COLUMNS:
+        if cand in df.columns:
+            resolved_boundary_col = cand
+            break
+
+    boundary_groups = None
+    if resolved_boundary_col is not None:
+        boundary_groups = df.loc[valid_mask, resolved_boundary_col].to_numpy()
+
     if n_flows >= seq_len and hasattr(lstm, "model") and lstm.model is not None:
-        origins = np.arange(0, n_flows - seq_len + 1)
-        dummy_y = y_true_binary[origins + seq_len - 1] if y_true_binary is not None else np.zeros(len(origins), dtype=int)
-        seq_set = SequenceSet(
-            features_2d=X_scaled.to_numpy(dtype=np.float32),
-            y=dummy_y,
+        dummy_y = y_true_binary if y_true_binary is not None else np.zeros(n_flows, dtype=int)
+        seq_set = build_sequences(
+            features=X_scaled,
+            labels=dummy_y,
             split="test",
-            origins=origins,
             seq_len=seq_len,
+            stride=1,
             label_rule="last",
+            groups=boundary_groups,
         )
-        lstm_aligned_raw = lstm.predict_proba(seq_set)
-        # Attribute sequence prediction to final flow in window (index origins + seq_len - 1)
-        for seq_i, orig in enumerate(origins):
-            target_idx = orig + seq_len - 1
-            lstm_scores[target_idx] = float(lstm_aligned_raw[seq_i])
+        if len(seq_set) > 0:
+            lstm_aligned_raw = lstm.predict_proba(seq_set)
+            # Attribute sequence prediction to final flow in window (index origins + seq_len - 1)
+            for seq_i, orig in enumerate(seq_set.origins):
+                target_idx = orig + seq_len - 1
+                lstm_scores[target_idx] = float(lstm_aligned_raw[seq_i])
 
     # Assign statuses and causal warm-up fallback
     for i in range(n_flows):
@@ -712,6 +749,23 @@ def evaluate_csv_dataset(
             lstm_statuses.append("WARM_UP")
         else:
             lstm_statuses.append("ALIGNED")
+
+    # Independent segment accounting when boundary column is present
+    segment_accounting: list[dict[str, Any]] = []
+    if resolved_boundary_col is not None and boundary_groups is not None:
+        unique_segments = pd.unique(boundary_groups)
+        for seg_id in unique_segments:
+            seg_mask = (boundary_groups == seg_id)
+            seg_flow_count = int(np.sum(seg_mask))
+            seg_indices = np.where(seg_mask)[0]
+            seg_aligned_count = int(sum(1 for idx in seg_indices if not np.isnan(lstm_scores[idx])))
+            seg_warmup_count = seg_flow_count - seg_aligned_count
+            segment_accounting.append({
+                "segment_id": str(seg_id),
+                "total_flows": seg_flow_count,
+                "aligned_flows": seg_aligned_count,
+                "warmup_flows": seg_warmup_count,
+            })
 
     # 9. Calibrated Score-Level Fusion: S_fusion = alpha * S_rf + (1 - alpha) * S_lstm
     fusion_scores = np.full(n_flows, np.nan, dtype=float)
@@ -971,6 +1025,15 @@ def evaluate_csv_dataset(
             "drop_reason": drop_reason_str,
             "aligned_sequence_rows": len(aligned_indices),
             "warmup_rows": evaluated_count - len(aligned_indices),
+            "boundary_column": resolved_boundary_col,
+            "boundary_isolation_applied": (resolved_boundary_col is not None),
+            "boundary_segments_count": len(segment_accounting) if resolved_boundary_col is not None else 1,
+            "boundary_isolation_note": (
+                f"Sequence boundary isolation applied across {len(segment_accounting)} independent capture/session segments using column '{resolved_boundary_col}'."
+                if resolved_boundary_col is not None else
+                "No capture boundary column detected (e.g. 'source_file', 'session_id'). Assuming single continuous stream with T-1 (4) warm-up rows."
+            ),
+            "segments": segment_accounting,
         },
         "is_labelled": is_labelled,
         "label_column_detected": resolved_label_col,
@@ -1023,11 +1086,13 @@ def _evaluate_mode_full_test(
     )
 
     eval_data = get_evaluation_data(benchmark, slice_type="aligned")
+    eval_data_native = get_evaluation_data(benchmark, slice_type="native")
     comp_data = get_comparison_data(benchmark)
     explorer_data = get_flow_explorer_data(benchmark_id=benchmark, page=1, limit=max_display_flows)
 
     models_data = eval_data.get("models", {})
     rf_m = models_data.get("random_forest", {})
+    rf_native_m = eval_data_native.get("models", {}).get("random_forest", {})
     lstm_m = models_data.get("lstm") or models_data.get("supervised_lstm", {})
     fusion_m = models_data.get("fusion", {})
 
@@ -1107,19 +1172,24 @@ def _evaluate_mode_full_test(
             "nan_rows_dropped": 0,
             "aligned_sequence_rows": eval_data.get("aligned_population", 0),
             "warmup_rows": eval_data.get("dropped_boundary_flows", 0),
+            "boundary_isolation_applied": True,
+            "boundary_isolation_note": eval_data.get("dropped_derivation", ""),
         },
         "is_labelled": True,
         "label_column_detected": "true_label",
         "metrics": primary_metrics,
         "rf_metrics": rf_m,
+        "rf_tabular_metrics": rf_native_m,
         "lstm_metrics": lstm_m,
         "fusion_metrics": fusion_m,
         "confusion_matrix": fusion_m.get("confusion", {}),
         "rf_confusion_matrix": rf_m.get("confusion", {}),
+        "rf_tabular_confusion_matrix": rf_native_m.get("confusion", {}),
         "lstm_confusion_matrix": lstm_m.get("confusion", {}),
         "fusion_confusion_matrix": fusion_m.get("confusion", {}),
         "model_metrics": {
             "rf": rf_m,
+            "rf_tabular": rf_native_m,
             "lstm": lstm_m,
             "fusion": fusion_m,
         },

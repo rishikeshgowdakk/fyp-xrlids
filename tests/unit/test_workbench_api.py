@@ -83,6 +83,34 @@ def test_workbench_cicids2017_population_reconciliation():
     assert "8 capture files" in aligned["dropped_derivation"]
 
 
+def test_workbench_cse2018_population_reconciliation():
+    aligned = get_evaluation_data("cse2018", slice_type="aligned")
+    native = get_evaluation_data("cse2018", slice_type="native")
+
+    assert native["tabular_population"] == 1662459
+    assert aligned["aligned_population"] == 1662419
+    assert aligned["dropped_boundary_flows"] == 40
+    assert "10 capture files" in aligned["dropped_derivation"]
+    assert native["models"]["random_forest"]["population"] == 1662459
+    assert sum(native["models"]["random_forest"]["confusion"].values()) == 1662459
+    assert aligned["models"]["random_forest"]["population"] == 1662419
+    assert sum(aligned["models"]["random_forest"]["confusion"].values()) == 1662419
+
+
+def test_workbench_unswnb15_population_reconciliation():
+    aligned = get_evaluation_data("unswnb15", slice_type="aligned")
+    native = get_evaluation_data("unswnb15", slice_type="native")
+
+    assert native["tabular_population"] == 24504
+    assert aligned["aligned_population"] == 24496
+    assert aligned["dropped_boundary_flows"] == 8
+    assert "2 capture files" in aligned["dropped_derivation"]
+    assert native["models"]["random_forest"]["population"] == 24504
+    assert sum(native["models"]["random_forest"]["confusion"].values()) == 24504
+    assert aligned["models"]["random_forest"]["population"] == 24496
+    assert sum(aligned["models"]["random_forest"]["confusion"].values()) == 24496
+
+
 def test_workbench_comparison_degenerate_fusion_detection(workbench_server):
     # CSE-CIC-IDS2018 validation selected alpha = 0.00 -> pure LSTM (degenerate)
     url = f"{workbench_server}/api/comparison?benchmark=cse2018"

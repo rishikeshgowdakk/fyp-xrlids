@@ -216,8 +216,26 @@ Per-seed 95% bootstrap intervals from the frozen held-out predictions (B=1000; t
 Full table: [`reports/generated/bootstrap_ci_report.md`](reports/generated/bootstrap_ci_report.md).
 
 > [!NOTE]
-> **Evaluation Population Reconciliation (355,865 vs 355,833 Flows)**:
-> In CIC-IDS2017, the canonical held-out test split contains **355,865 tabular flows** (evaluated by Random Forest and offline flow replay). Sequence models (LSTM and Fusion) drop $(T - 1) = 4$ initial boundary flows per capture file to prevent causal sequence windows from crossing unrelated capture files. Across the 8 capture files, exactly $8 \times 4 = 32$ boundary flows are excluded, yielding **355,833 sequence-aligned flows** ($355,865 - 32 = 355,833$). Both counts are legitimate and evaluate the exact same underlying test population.
+> **Evaluation Population Reconciliation & Metric Accounting Across All Benchmarks**:
+> Evaluated populations strictly distinguish between **tabular held-out test sets** and **sequence-aligned test slices**:
+>
+> | Benchmark | Raw Rows | Cleaned Modeling Rows | Test Split (Tabular) | Capture Files | Dropped Boundary Warm-Up ($T-1=4$) | Sequence-Aligned Test Slice |
+> |:---|:---:|:---:|:---:|:---:|:---:|:---:|
+> | **CIC-IDS2017** | 2,830,743 | 1,779,322 | **355,865** | 8 files | 32 rows | **355,833** |
+> | **CSE-CIC-IDS2018** | 16,233,002 | 8,312,295 | **1,662,459** | 10 files | 40 rows | **1,662,419** |
+> | **UNSW-NB15** | 257,673 | 122,520 | **24,504** | 2 files | 8 rows | **24,496** |
+>
+> 1. **Tabular Evaluation ($N_{\text{tabular}}$):** Random Forest evaluates all valid, non-finite rows without sequence warm-up losses:
+>    - CIC-IDS2017 RF: $\text{TP}=64,180, \text{TN}=285,094, \text{FP}=5,951, \text{FN}=640 \implies \sum = 355,865$
+>    - CSE-CIC-IDS2018 RF: $\text{TP}=179,297, \text{TN}=1,437,059, \text{FP}=38,239, \text{FN}=7,864 \implies \sum = 1,662,459$
+>    - UNSW-NB15 RF: $\text{TP}=10,171, \text{TN}=10,873, \text{FP}=2,603, \text{FN}=857 \implies \sum = 24,504$
+> 2. **Sequence-Aligned Evaluation ($N_{\text{aligned}}$):** For sequence models (LSTM and Score Fusion), constructing causal sliding windows ($T=5$) strictly within each capture file requires dropping the first $(T-1)=4$ flows of each file so causal sequence windows never span across independent capture files.
+>    - Across the 8 capture files of CIC-IDS2017, exactly $8 \times 4 = 32$ boundary flows are excluded ($355,865 - 32 = 355,833$).
+>    - Across the 10 capture files of CSE-CIC-IDS2018, exactly $10 \times 4 = 40$ boundary flows are excluded ($1,662,459 - 40 = 1,662,419$).
+>    - Across the 2 capture files of UNSW-NB15, exactly $2 \times 4 = 8$ boundary flows are excluded ($24,504 - 8 = 24,496$).
+> 3. **Direct Baseline Ladder Comparison:** The primary benchmark tables report models on the **aligned test slice** to ensure scientifically rigorous, identical-population comparisons across RF, LSTM, and Fusion ($\text{evaluated rows} = \text{TP} + \text{TN} + \text{FP} + \text{FN}$).
+> 4. **UNSW-NB15 Artifact Provenance:** The directory name `EXP-P1-UNSWNB15-R10-MULTI-001` is a legacy execution suite identifier; all models, preprocessors, and feature matrices within it operate strictly on the verified 4-feature contract `R4` under Decision D-002, matching the Argus sensor capabilities.
+> 5. **Degenerate Fusion Weighting:** On CSE-CIC-IDS2018, validation tuning selected $\alpha = 0.00$. Under $S_{\text{fusion}} = \alpha \cdot S_{\text{rf}} + (1 - \alpha) \cdot S_{\text{lstm}}$, this yields an LSTM-only result with zero ensemble gain over standalone LSTM.
 
 ### Temporal Holdout (CSE-CIC-IDS2018, GAP-P06)
 
@@ -265,13 +283,15 @@ pip install -r requirements.txt
 
 ### 2. Verify Installation (Test Suite)
 
-Run the full 452-test verification suite to confirm everything is working:
+Run the full 465-test verification suite to confirm everything is working:
 
 ```bash
+./run.sh test
+# or directly:
 .venv/bin/pytest -q
 ```
 
-All 452 tests across unit, integration, model, data, workbench API, and CSV evaluation suites should pass with 0 failures.
+All 465 tests across unit (371), data (45), integration (31), and model (18) test suites pass with 0 failures.
 
 ### 3. Quick Demo — PCAP Replay
 
@@ -415,8 +435,8 @@ To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
 |---------------------|:--------:|----------------|:---:|
 | **Launch Dashboard (Web UI)** | `./run.sh` | `.venv/bin/python dashboard/server.py` | **No** |
 | Run quick offline PCAP replay demo | `./run.sh demo` | `.venv/bin/python scripts/demo/run_replay_demo.py` | No |
-| Run full test suite (459 tests) | `./run.sh test` | `.venv/bin/pytest -q` | No |
-| Run CSV evaluation test suite (24 tests) | — | `.venv/bin/pytest tests/unit/test_csv_evaluation_workflow.py -v` | No |
+| Run full test suite (465 tests) | `./run.sh test` | `.venv/bin/pytest -q` | No |
+| Run CSV evaluation test suite (28 tests) | — | `.venv/bin/pytest tests/unit/test_csv_evaluation_workflow.py -v` | No |
 | Verify all calibrated attack scenarios | — | `.venv/bin/python scripts/demo/verify_attack_scenarios.py` | No |
 | Explain a score with TreeSHAP features | — | `.venv/bin/python scripts/demo/explain_score.py` | No |
 | Dashboard with real live WiFi capture | — | `sudo .venv/bin/python dashboard/server.py 8000 --live --iface wlo1` | Yes |
