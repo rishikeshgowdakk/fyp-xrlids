@@ -81,6 +81,14 @@ def test_workbench_cicids2017_population_reconciliation():
     assert aligned["aligned_population"] == 355833
     assert aligned["dropped_boundary_flows"] == 32
     assert "8 capture files" in aligned["dropped_derivation"]
+    assert native["models"]["random_forest"]["population"] == 355865
+    assert sum(native["models"]["random_forest"]["confusion"].values()) == 355865
+    assert aligned["models"]["random_forest"]["population"] == 355833
+    assert sum(aligned["models"]["random_forest"]["confusion"].values()) == 355833
+    assert native["models"]["random_forest"]["accuracy"] == pytest.approx(0.9815, abs=1e-4)
+    assert native["models"]["random_forest"]["f1"] == pytest.approx(0.9512, abs=1e-4)
+    assert aligned["models"]["random_forest"]["accuracy"] == pytest.approx(0.9815, abs=1e-4)
+    assert aligned["models"]["random_forest"]["f1"] == pytest.approx(0.9512, abs=1e-4)
 
 
 def test_workbench_cse2018_population_reconciliation():
@@ -95,6 +103,10 @@ def test_workbench_cse2018_population_reconciliation():
     assert sum(native["models"]["random_forest"]["confusion"].values()) == 1662459
     assert aligned["models"]["random_forest"]["population"] == 1662419
     assert sum(aligned["models"]["random_forest"]["confusion"].values()) == 1662419
+    assert native["models"]["random_forest"]["accuracy"] == pytest.approx(0.9723, abs=1e-4)
+    assert native["models"]["random_forest"]["f1"] == pytest.approx(0.8861, abs=1e-4)
+    assert aligned["models"]["random_forest"]["accuracy"] == pytest.approx(0.9723, abs=1e-4)
+    assert aligned["models"]["random_forest"]["f1"] == pytest.approx(0.8861, abs=1e-4)
 
 
 def test_workbench_unswnb15_population_reconciliation():
@@ -109,6 +121,21 @@ def test_workbench_unswnb15_population_reconciliation():
     assert sum(native["models"]["random_forest"]["confusion"].values()) == 24504
     assert aligned["models"]["random_forest"]["population"] == 24496
     assert sum(aligned["models"]["random_forest"]["confusion"].values()) == 24496
+
+    # Verify authoritative F1 and Accuracy distinction:
+    # Tabular (N=24,504, FP=2,603): Acc=0.8588, F1=0.8546
+    # Aligned (N=24,496, FP=2,597): Acc=0.8590, F1=0.8548
+    rf_nat = native["models"]["random_forest"]
+    assert rf_nat["accuracy"] == pytest.approx(0.8588, abs=1e-4)
+    assert rf_nat["f1"] == pytest.approx(0.8546, abs=1e-4)
+    assert rf_nat["precision"] == pytest.approx(0.7962, abs=1e-4)
+    assert rf_nat["recall"] == pytest.approx(0.9223, abs=1e-4)
+
+    rf_ali = aligned["models"]["random_forest"]
+    assert rf_ali["accuracy"] == pytest.approx(0.8590, abs=1e-4)
+    assert rf_ali["f1"] == pytest.approx(0.8548, abs=1e-4)
+    assert rf_ali["precision"] == pytest.approx(0.7966, abs=1e-4)
+    assert rf_ali["recall"] == pytest.approx(0.9223, abs=1e-4)
 
 
 def test_workbench_comparison_degenerate_fusion_detection(workbench_server):

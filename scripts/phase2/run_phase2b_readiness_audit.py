@@ -562,7 +562,7 @@ def audit_phase8_reproducibility_matrix() -> dict[str, Any]:
             "command": ".venv/bin/pytest --collect-only -q",
             "prerequisites": "None",
             "exit_code": 0,
-            "status": "VERIFIED_COLLECTED (465 tests collected across unit, data, integration, and model suites)",
+            "status": "VERIFIED_COLLECTED (466 tests collected across unit, data, integration, and model suites)",
         },
         {
             "task": "RF Model Loading & Scoring",
@@ -755,7 +755,7 @@ def generate_final_report_md(
         "   - The simulation environment is an **Asymmetric-Loss Contextual Bandit with Hysteresis Constraints**, NOT a sequential Markov Decision Process. Network flow arrivals are purely exogenous replay.",
         "5. **Documentation Contradictions Identified & Resolved**:",
         "   - `README.md` lines 188-200 contained outdated text claiming model artifacts were uncommitted. Reconciled: model binaries are committed; raw CSV datasets remain external.",
-        "   - `README.md` test count stated 417/459 tests. Reconciled: the test suite now collects and passes **465 tests** (371 unit, 45 data, 31 integration, 18 model).",
+        "   - `README.md` test count stated 417/459 tests. Reconciled: the test suite now collects and passes **466 tests** (372 unit, 45 data, 31 integration, 18 model).",
         "",
         "---",
         "",
@@ -768,7 +768,7 @@ def generate_final_report_md(
     for art in integrity["artifacts"]:
         lines.append(
             f"| `{art['model_id']}` | `{art['model_type']}` | `{art['dataset']}` | `{art['feature_contract']}` | "
-            f"{art['actual_size_bytes']:,} | `{art['actual_sha256'][:16]}...` | `{art['status']}` | `PASS` |"
+            f"{art['actual_size_bytes']:,} | `{art['actual_sha256']}` | `{art['status']}` | `PASS` |"
         )
 
     lines.extend([

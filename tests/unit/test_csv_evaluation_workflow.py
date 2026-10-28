@@ -819,12 +819,12 @@ def test_dqn_action_fallback_and_disclosure(monkeypatch):
 def test_all_benchmarks_row_accounting_and_confusion_matrix_reconciliation():
     """Verify that evaluated rows = TP + TN + FP + FN across all three benchmarks."""
     benchmarks = [
-        ("cicids2017", "R10", 355865, 355833, 32),
-        ("cse2018", "R10", 1662459, 1662419, 40),
-        ("unswnb15", "R4", 24504, 24496, 8),
+        ("cicids2017", "R10", 355865, 355833, 32, 0.9815, 0.9512, 0.9815, 0.9512),
+        ("cse2018", "R10", 1662459, 1662419, 40, 0.9723, 0.8861, 0.9723, 0.8861),
+        ("unswnb15", "R4", 24504, 24496, 8, 0.8588, 0.8546, 0.8590, 0.8548),
     ]
 
-    for bench, contract, exp_tabular, exp_aligned, exp_warmup in benchmarks:
+    for bench, contract, exp_tabular, exp_aligned, exp_warmup, tab_acc, tab_f1, ali_acc, ali_f1 in benchmarks:
         res = evaluate_csv_dataset(mode="full_test", contract=contract, benchmark=bench)
         acct = res["row_accounting"]
         assert acct["evaluated_rows"] == exp_tabular
@@ -838,12 +838,16 @@ def test_all_benchmarks_row_accounting_and_confusion_matrix_reconciliation():
         rf_tab_sum = rf_tab_cm["tp"] + rf_tab_cm["tn"] + rf_tab_cm["fp"] + rf_tab_cm["fn"]
         assert rf_tab_sum == exp_tabular
         assert res["rf_tabular_metrics"]["population"] == exp_tabular
+        assert res["rf_tabular_metrics"]["accuracy"] == pytest.approx(tab_acc, abs=1e-4)
+        assert res["rf_tabular_metrics"]["f1"] == pytest.approx(tab_f1, abs=1e-4)
 
         # Random Forest Aligned evaluation on sequence slice
         rf_cm = res["rf_confusion_matrix"]
         rf_sum = rf_cm["tp"] + rf_cm["tn"] + rf_cm["fp"] + rf_cm["fn"]
         assert rf_sum == exp_aligned
         assert res["rf_metrics"]["population"] == exp_aligned
+        assert res["rf_metrics"]["accuracy"] == pytest.approx(ali_acc, abs=1e-4)
+        assert res["rf_metrics"]["f1"] == pytest.approx(ali_f1, abs=1e-4)
 
         # Supervised LSTM on aligned slice
         lstm_cm = res["lstm_confusion_matrix"]
@@ -856,6 +860,57 @@ def test_all_benchmarks_row_accounting_and_confusion_matrix_reconciliation():
         fusion_sum = fusion_cm["tp"] + fusion_cm["tn"] + fusion_cm["fp"] + fusion_cm["fn"]
         assert fusion_sum == exp_aligned
         assert res["fusion_metrics"]["population"] == exp_aligned
+
+
+def test_unsw_nb15_tabular_vs_aligned_f1_mathematical_proof():
+    """Independently recompute and mathematically verify UNSW-NB15 metrics.
+
+    Proof of F1 discrepancy resolution:
+    - Tabular RF (N=24,504): TP=10171, TN=10873, FP=2603, FN=857
+      Precision = 10171 / (10171 + 2603) = 0.7962267
+      Recall = 10171 / (10171 + 857) = 0.9222887
+      F1 = 2 * P * R / (P + R) = 20342 / (20342 + 2603 + 857) = 20342 / 23802 = 0.85463406... (~0.8546)
+
+    - Aligned RF (N=24,496, 8 warmup flows dropped: 2 TN and 6 FP dropped):
+      TP=10171, TN=10871, FP=2597, FN=857
+      Precision = 10171 / (10171 + 2597) = 0.7966009
+      Recall = 10171 / (10171 + 857) = 0.9222887
+      F1 = 2 * P * R / (P + R) = 20342 / (20342 + 2597 + 857) = 20342 / 23796 = 0.85484955... (~0.8548)
+    """
+    # 1. Pure mathematical verification
+    tp, fn = 10171, 857
+    fp_tab, tn_tab = 2603, 10873
+    fp_ali, tn_ali = 2597, 10871
+
+    # Tabular
+    acc_tab = (tp + tn_tab) / (tp + tn_tab + fp_tab + fn)
+    prec_tab = tp / (tp + fp_tab)
+    rec_tab = tp / (tp + fn)
+    f1_tab = 2 * prec_tab * rec_tab / (prec_tab + rec_tab)
+
+    assert round(acc_tab, 4) == 0.8588
+    assert round(f1_tab, 4) == 0.8546
+
+    # Aligned
+    acc_ali = (tp + tn_ali) / (tp + tn_ali + fp_ali + fn)
+    prec_ali = tp / (tp + fp_ali)
+    rec_ali = tp / (tp + fn)
+    f1_ali = 2 * prec_ali * rec_ali / (prec_ali + rec_ali)
+
+    assert round(acc_ali, 4) == 0.8590
+    assert round(f1_ali, 4) == 0.8548
+
+    # 2. Verification from predictions_test.csv
+    pred_path = REPO_ROOT / "results" / "experiments" / "EXP-P1-UNSWNB15-R10-MULTI-001" / "predictions_test.csv"
+    if pred_path.exists():
+        df_pred = pd.read_csv(pred_path)
+        assert len(df_pred) == 24496
+        y_true = df_pred["true_label"].values
+        y_pred = (df_pred["rf_score"].values >= 0.50).astype(int)
+
+        from sklearn.metrics import accuracy_score, f1_score
+        assert accuracy_score(y_true, y_pred) == pytest.approx(0.858997, abs=1e-5)
+        assert f1_score(y_true, y_pred) == pytest.approx(0.854850, abs=1e-5)
 
 
 

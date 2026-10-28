@@ -226,9 +226,9 @@ Full table: [`reports/generated/bootstrap_ci_report.md`](reports/generated/boots
 > | **UNSW-NB15** | 257,673 | 122,520 | **24,504** | 2 files | 8 rows | **24,496** |
 >
 > 1. **Tabular Evaluation ($N_{\text{tabular}}$):** Random Forest evaluates all valid, non-finite rows without sequence warm-up losses:
->    - CIC-IDS2017 RF: $\text{TP}=64,180, \text{TN}=285,094, \text{FP}=5,951, \text{FN}=640 \implies \sum = 355,865$
->    - CSE-CIC-IDS2018 RF: $\text{TP}=179,297, \text{TN}=1,437,059, \text{FP}=38,239, \text{FN}=7,864 \implies \sum = 1,662,459$
->    - UNSW-NB15 RF: $\text{TP}=10,171, \text{TN}=10,873, \text{FP}=2,603, \text{FN}=857 \implies \sum = 24,504$
+>    - CIC-IDS2017 RF: $\text{TP}=64,180, \text{TN}=285,094, \text{FP}=5,951, \text{FN}=640 \implies \sum = 355,865$ ($\text{Acc}=0.9815, \text{F1}=0.9512$).
+>    - CSE-CIC-IDS2018 RF: $\text{TP}=179,297, \text{TN}=1,437,059, \text{FP}=38,239, \text{FN}=7,864 \implies \sum = 1,662,459$ ($\text{Acc}=0.9723, \text{F1}=0.8861$).
+>    - UNSW-NB15 RF: $\text{TP}=10,171, \text{TN}=10,873, \text{FP}=2,603, \text{FN}=857 \implies \sum = 24,504$ ($\text{Acc}=0.8588, \text{F1}=\mathbf{0.8546}$). (Note: On the 24,496 aligned slice, 6 FP and 2 TN warm-up rows are excluded, yielding $\text{FP}=2,597$ and $\text{F1}=\mathbf{0.8548}$).
 > 2. **Sequence-Aligned Evaluation ($N_{\text{aligned}}$):** For sequence models (LSTM and Score Fusion), constructing causal sliding windows ($T=5$) strictly within each capture file requires dropping the first $(T-1)=4$ flows of each file so causal sequence windows never span across independent capture files.
 >    - Across the 8 capture files of CIC-IDS2017, exactly $8 \times 4 = 32$ boundary flows are excluded ($355,865 - 32 = 355,833$).
 >    - Across the 10 capture files of CSE-CIC-IDS2018, exactly $10 \times 4 = 40$ boundary flows are excluded ($1,662,459 - 40 = 1,662,419$).
@@ -283,7 +283,7 @@ pip install -r requirements.txt
 
 ### 2. Verify Installation (Test Suite)
 
-Run the full 465-test verification suite to confirm everything is working:
+Run the full 466-test verification suite to confirm everything is working:
 
 ```bash
 ./run.sh test
@@ -291,7 +291,7 @@ Run the full 465-test verification suite to confirm everything is working:
 .venv/bin/pytest -q
 ```
 
-All 465 tests across unit (371), data (45), integration (31), and model (18) test suites pass with 0 failures.
+All 466 tests across unit (372), data (45), integration (31), and model (18) test suites pass with 0 failures.
 
 ### 3. Quick Demo — PCAP Replay
 
@@ -435,7 +435,7 @@ To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
 |---------------------|:--------:|----------------|:---:|
 | **Launch Dashboard (Web UI)** | `./run.sh` | `.venv/bin/python dashboard/server.py` | **No** |
 | Run quick offline PCAP replay demo | `./run.sh demo` | `.venv/bin/python scripts/demo/run_replay_demo.py` | No |
-| Run full test suite (465 tests) | `./run.sh test` | `.venv/bin/pytest -q` | No |
+| Run full test suite (466 tests) | `./run.sh test` | `.venv/bin/pytest -q` | No |
 | Run CSV evaluation test suite (28 tests) | — | `.venv/bin/pytest tests/unit/test_csv_evaluation_workflow.py -v` | No |
 | Verify all calibrated attack scenarios | — | `.venv/bin/python scripts/demo/verify_attack_scenarios.py` | No |
 | Explain a score with TreeSHAP features | — | `.venv/bin/python scripts/demo/explain_score.py` | No |
