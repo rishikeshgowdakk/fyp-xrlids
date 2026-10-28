@@ -80,7 +80,10 @@ def compute_sha256(path: Path | str) -> str:
     return h.hexdigest()
 
 
-def check_working_tree_clean(repo_root: Path | str = ".") -> tuple[bool, str]:
+def check_working_tree_clean(
+    repo_root: Path | str = ".",
+    out_dir: Path | str | None = None,
+) -> dict[str, Any]:
     import subprocess
     try:
         out = subprocess.run(
@@ -90,12 +93,52 @@ def check_working_tree_clean(repo_root: Path | str = ".") -> tuple[bool, str]:
             text=True,
             check=True,
         )
-        tracked_changes = [line for line in out.stdout.splitlines() if not line.startswith("??")]
-        if not tracked_changes:
-            return True, "Verified Clean (0 uncommitted tracked changes)"
-        return False, f"DIRTY / UNCOMMITTED ({len(tracked_changes)} modified tracked files: {', '.join([c.strip() for c in tracked_changes[:5]])})"
+        lines = out.stdout.splitlines()
+        tracked_changes: list[str] = []
+        untracked_files: list[str] = []
+
+        out_dir_str = str(Path(out_dir).resolve()) if out_dir else None
+        root_path = Path(repo_root).resolve()
+
+        for line in lines:
+            if not line.strip():
+                continue
+            if line.startswith("??"):
+                untracked_path = line[3:].strip()
+                abs_untracked = (root_path / untracked_path).resolve()
+                # Exclude the current target output directory so it doesn't report self-recursion
+                if out_dir_str and (abs_untracked == Path(out_dir_str) or str(abs_untracked).startswith(out_dir_str + "/")):
+                    continue
+                untracked_files.append(untracked_path)
+            else:
+                tracked_changes.append(line.strip())
+
+        is_clean = (len(tracked_changes) == 0)
+        if is_clean:
+            if not untracked_files:
+                summary = "Verified Clean (0 uncommitted tracked changes, 0 untracked files)"
+            else:
+                summary = f"Verified Clean (0 uncommitted tracked changes; {len(untracked_files)} untracked paths present: {', '.join(untracked_files[:3])})"
+        else:
+            summary = f"DIRTY / UNCOMMITTED ({len(tracked_changes)} modified tracked files: {', '.join(tracked_changes)})"
+
+        return {
+            "clean": is_clean,
+            "tracked_modified_count": len(tracked_changes),
+            "tracked_modified_files": tracked_changes,
+            "untracked_count": len(untracked_files),
+            "untracked_files": untracked_files,
+            "summary": summary,
+        }
     except Exception as exc:
-        return False, f"UNKNOWN (git check failed: {exc})"
+        return {
+            "clean": False,
+            "tracked_modified_count": -1,
+            "tracked_modified_files": [],
+            "untracked_count": -1,
+            "untracked_files": [],
+            "summary": f"UNKNOWN (git check failed: {exc})",
+        }
 
 
 def audit_phase0_provenance(out_dir: Path, git_sha: str) -> dict[str, Any]:
@@ -104,7 +147,8 @@ def audit_phase0_provenance(out_dir: Path, git_sha: str) -> dict[str, Any]:
     p_pred = Path("results/experiments/EXP-P1-CIC2017-R10-001/predictions_test.csv")
     d_pol_sha = sha256_file(p_pol_test) if p_pol_test.exists() else "UNAVAILABLE"
     pred_sha = sha256_file(p_pred) if p_pred.exists() else "UNAVAILABLE"
-    is_clean, wt_status = check_working_tree_clean()
+    wt_info = check_working_tree_clean(out_dir=out_dir)
+    is_clean = wt_info["clean"]
     revision_desc = git_sha if is_clean else f"{git_sha}+dirty"
 
     prov = {
@@ -113,7 +157,8 @@ def audit_phase0_provenance(out_dir: Path, git_sha: str) -> dict[str, Any]:
         "git_commit": git_sha,
         "branch": "main",
         "working_tree_clean": is_clean,
-        "working_tree_status": wt_status,
+        "working_tree_status": wt_info["summary"],
+        "working_tree_details": wt_info,
         "code_revision_tested": revision_desc,
         "software_environment": {
             "python_version": sys.version,
@@ -156,8 +201,8 @@ def audit_phase0_provenance(out_dir: Path, git_sha: str) -> dict[str, Any]:
             "raw_benchmark_csvs_status": "UNAVAILABLE_RAW_DATA_NOT_COMMITTED",
         },
         "test_execution_inventory": {
-            "full_suite_collected": 423,
-            "full_suite_passed": 423,
+            "full_suite_collected": 466,
+            "full_suite_passed": 466,
             "full_suite_failed": 0,
             "response_subsystem_tests": 43,
             "safety_invariant_tests": 6,
@@ -681,15 +726,15 @@ def audit_phase9_findings() -> list[dict[str, Any]]:
             "id": "FINDING-P2B-004",
             "severity": "HIGH",
             "category": "Documentation Inconsistency",
-            "title": "README.md Test Suite Count Reconciled (417 vs 423 Executed Tests)",
+            "title": "README.md Test Suite Count Reconciled (417 vs 466 Executed Tests)",
             "description": (
-                "README.md lines 210 and 325 previously stated 'All 417 tests should pass'. "
-                "Following the addition of 11 response baseline tests in Phase 2A, the repository test suite "
-                "consists of exactly 423 tests across tests/data/ (45), tests/integration/ (31), "
-                "tests/model/ (18), and tests/unit/ (329), all 423 of which execute and pass in 40.5s."
+                "README.md lines previously stated 'All 417 tests should pass'. "
+                "Following the addition of Phase 2A/2B response and CSV workflow regression tests, the repository test suite "
+                "consists of exactly 466 tests across tests/data/ (45), tests/integration/ (31), "
+                "tests/model/ (18), and tests/unit/ (372), all 466 of which execute and pass in ~48s."
             ),
-            "evidence": "pytest -q executes and passes 423 tests with 0 failures",
-            "remediation": "Update README.md test count to reflect the authoritative 423 executed and passed tests.",
+            "evidence": "pytest executes and passes 466 tests with 0 failures",
+            "remediation": "Update README.md test count to reflect the authoritative 466 executed and passed tests.",
         },
         {
             "id": "FINDING-P2B-005",
@@ -971,6 +1016,9 @@ def main() -> int:
         extra={
             "working_tree_clean": prov.get("working_tree_clean", True),
             "working_tree_status": prov.get("working_tree_status", "Verified Clean"),
+            "tracked_modified_count": prov.get("working_tree_details", {}).get("tracked_modified_count", 0),
+            "tracked_modified_files": prov.get("working_tree_details", {}).get("tracked_modified_files", []),
+            "untracked_count": prov.get("working_tree_details", {}).get("untracked_count", 0),
         },
     )
 
