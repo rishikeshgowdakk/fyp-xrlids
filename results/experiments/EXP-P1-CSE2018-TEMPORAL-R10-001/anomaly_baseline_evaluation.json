@@ -2,8 +2,24 @@
   "benchmark_id": "EXP-TEMPORAL-REAL-EVALUATION-001",
   "dataset": "cse_cic_ids2018_genuine_chronological_holdout",
   "data_source": "PHYSICAL_RAW_CSV_FILES_ON_DISK",
-  "timestamp": "2026-10-28T20:35:04Z",
-  "elapsed_seconds": 58.12,
+  "timestamp": "2026-10-28T21:09:54Z",
+  "elapsed_seconds": 28.43,
+  "evaluation_config": {
+    "train_files": [
+      "Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv",
+      "Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv"
+    ],
+    "test_files": [
+      "Friday-02-03-2018_TrafficForML_CICFlowMeter.csv",
+      "Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv",
+      "Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv"
+    ],
+    "test_descriptions": [
+      "2018-03-02 (Ares Botnet & Drifted Benign)",
+      "2018-02-28 (Infiltration & Drifted Benign)",
+      "2018-02-22 (Web Attacks & Drifted Benign)"
+    ]
+  },
   "sample_counts": {
     "real_train_benign_flows": 10000,
     "real_test_flows_evaluated": 20361,
@@ -16,6 +32,60 @@
     "sigmoid_mapping": "1 / (1 + exp(scale * decision_function))",
     "calibration_status": "uncalibrated_monotonic_outlierness_metric",
     "bayesian_probability": false
+  },
+  "score_direction_verification": {
+    "auc_from_anomaly_scores": 0.4976,
+    "auc_from_negated_decision_function": 0.4976,
+    "auc_from_raw_decision_function": 0.5024,
+    "rank_invariance_verified": true,
+    "interpretation": "ROC-AUC(y, anomaly_score) matches ROC-AUC(y, -df). Raw decision_function yields 1 - AUC = 0.5024, confirming true near-chance discriminability rather than sign inversion."
+  },
+  "drift_analysis": {
+    "feature_drift": {
+      "flow_duration_ms": {
+        "train_benign_mean": 13110.6463,
+        "test_benign_mean": 33827.6792,
+        "ratio": 2.58
+      },
+      "flow_bytes_per_s": {
+        "train_benign_mean": 262275.1914,
+        "test_benign_mean": 305215.9069,
+        "ratio": 1.16
+      },
+      "flow_packets_per_s": {
+        "train_benign_mean": 29572.0002,
+        "test_benign_mean": 41676.8672,
+        "ratio": 1.41
+      },
+      "rst_count": {
+        "train_benign_mean": 0.0504,
+        "test_benign_mean": 0.2389,
+        "ratio": 4.74
+      },
+      "syn_count": {
+        "train_benign_mean": 0.0355,
+        "test_benign_mean": 0.0893,
+        "ratio": 2.52
+      }
+    },
+    "score_distribution": {
+      "train_benign": {
+        "decision_function_mean": 0.1336,
+        "anomaly_score_mean": 0.219
+      },
+      "test_benign_holdout": {
+        "decision_function_mean": 0.046,
+        "anomaly_score_mean": 0.4099
+      },
+      "test_bot_holdout": {
+        "decision_function_mean": 0.0342,
+        "anomaly_score_mean": 0.4447
+      },
+      "test_infil_holdout": {
+        "decision_function_mean": 0.0754,
+        "anomaly_score_mean": 0.347
+      }
+    }
   },
   "overall_metrics": {
     "unsupervised_isolation_forest": {
