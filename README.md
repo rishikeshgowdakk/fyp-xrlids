@@ -283,7 +283,7 @@ pip install -e .[dev]
 
 ### 2. Verify Installation (Test Suite)
 
-Run the full 481-test verification suite to confirm everything is working:
+Run the full 482-test verification suite to confirm everything is working:
 
 ```bash
 ./run.sh test
@@ -291,7 +291,7 @@ Run the full 481-test verification suite to confirm everything is working:
 .venv/bin/pytest -q
 ```
 
-All 481 tests across unit (387), data (45), integration (31), and model (18) test suites pass with 0 failures.
+All 482 tests across unit (388), data (45), integration (31), and model (18) test suites pass with 0 failures.
 
 ### 3. Quick Demo — PCAP Replay
 

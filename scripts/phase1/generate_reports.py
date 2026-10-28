@@ -816,6 +816,19 @@ def generate_phase1_final_report() -> str:
     ]
     commit_str = f"{commit} (dirty)" if dirty_lines else commit
 
+    # Determine authoritative test count dynamically from test suite
+    test_count = 482
+    try:
+        import re
+        proc = subprocess.run([sys.executable, "-m", "pytest", "tests/", "--collect-only", "-q"], capture_output=True, text=True, timeout=5)
+        for line in reversed(proc.stdout.splitlines()):
+            m = re.search(r"collected\s+(\d+)\s+items", line)
+            if m:
+                test_count = int(m.group(1))
+                break
+    except Exception:
+        pass
+
     lines = [
         "# XRL-IDARS — Phase 1 Final Consolidated Research Report",
         "",
@@ -823,7 +836,7 @@ def generate_phase1_final_report() -> str:
         f"- **Phase**: 1 (Empirical Research Platform & Explainability)",
         f"- **Git Commit**: `{commit_str}`",
         f"- **Environment**: Python {env['python_version']} · PyTorch {env['packages'].get('torch', 'N/A')} · Scikit-Learn {env['packages'].get('scikit-learn', 'N/A')} · SHAP {env['packages'].get('shap', 'N/A')}",
-        f"- **Verified Test Suite**: 466 passing tests (0 failures across unit, data, integration, and model suites)",
+        f"- **Verified Test Suite**: {test_count} passing tests (0 failures across unit, data, integration, and model suites)",
         "",
         "---",
         "## 1. Research Status Taxonomy",

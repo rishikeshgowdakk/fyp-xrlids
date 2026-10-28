@@ -71,6 +71,30 @@ def test_parse_invalid_or_truncated_bytes():
     assert parse_packet_bytes(invalid_eth, 1.0) is None
 
 
+def test_parse_vlan_tagged_packet():
+    """Verify 802.1Q VLAN tagged frames are correctly parsed without dropping."""
+    raw = build_raw_packet(
+        src_ip="192.168.10.5",
+        dst_ip="172.16.0.1",
+        src_port=44321,
+        dst_port=8080,
+        protocol=6,
+        flags={"syn": True, "ack": False, "rst": False, "fin": False},
+        payload_len=64,
+    )
+    # Insert 802.1Q VLAN header: 0x8100 (TPID) + 0x0064 (VLAN 100) + 0x0800 (inner IPv4)
+    vlan_raw = raw[:12] + b"\x81\x00\x00\x64\x08\x00" + raw[14:]
+    pkt = parse_packet_bytes(vlan_raw, timestamp=1700000002.5)
+    assert pkt is not None
+    assert pkt.timestamp == 1700000002.5
+    assert pkt.src_ip == "192.168.10.5"
+    assert pkt.dst_ip == "172.16.0.1"
+    assert pkt.src_port == 44321
+    assert pkt.dst_port == 8080
+    assert pkt.protocol == 6
+    assert pkt.syn is True
+
+
 def test_pcap_file_roundtrip(tmp_path: Path):
     """Verify writing and reading a PCAP file."""
     pcap_file = tmp_path / "test.pcap"

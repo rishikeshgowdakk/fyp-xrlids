@@ -82,13 +82,24 @@ def parse_packet_bytes(raw_bytes: bytes, timestamp: float) -> PacketInfo | None:
     if len(raw_bytes) < 14:
         return None
 
-    eth_type = struct.unpack("!H", raw_bytes[12:14])[0]
+    offset = 12
+    eth_type = struct.unpack("!H", raw_bytes[offset:offset + 2])[0]
+    offset += 2
+
+    # Support 802.1Q and 802.1ad VLAN tags (0x8100, 0x88A8, 0x9100)
+    while eth_type in (0x8100, 0x88A8, 0x9100):
+        if len(raw_bytes) < offset + 4:
+            return None
+        offset += 2  # skip 2-byte TCI (Priority + VLAN ID)
+        eth_type = struct.unpack("!H", raw_bytes[offset:offset + 2])[0]
+        offset += 2
+
     if eth_type != 0x0800:
         # Not IPv4
         return None
 
     # IPv4 Header
-    ip_bytes = raw_bytes[14:]
+    ip_bytes = raw_bytes[offset:]
     if len(ip_bytes) < 20:
         return None
 
