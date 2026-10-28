@@ -1,0 +1,55 @@
+{
+  "addendum_id": "ADDENDUM-CI-VERIFICATION-20261028",
+  "generated_at": "2026-10-28T21:26:00+05:30",
+  "base_commit": "fbb375b07f2953c9ebfed14030d28b1013a17272",
+  "python_version_support": {
+    "supported_minimum": ">=3.12",
+    "verified_local": "3.14.4",
+    "verified_ci": "3.12"
+  },
+  "test_inventory": {
+    "total_collected": 481,
+    "suite_distribution": {
+      "unit": 387,
+      "data": 45,
+      "integration": 31,
+      "model": 18
+    },
+    "tier_reconciliation": {
+      "tier1_working_tree_clean": 15,
+      "tier2_data_independent": 434,
+      "tier3_artifact_backed": 18,
+      "tier4_dataset_dependent": 14,
+      "sum_check": 481,
+      "arithmetic_gap_explanation": "434 + 18 + 14 = 466 omitted Tier 1 (15 tests); 15 + 434 + 18 + 14 = 481"
+    },
+    "local_execution": {
+      "collected": 481,
+      "passed": 481,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0
+    },
+    "clean_checkout_ci_simulation": {
+      "collected": 481,
+      "passed": 467,
+      "failed": 0,
+      "skipped": 14,
+      "exit_code": 0
+    }
+  },
+  "ci_fixes": [
+    {
+      "file": ".github/workflows/ci.yml",
+      "change": "Updated matrix to Python 3.12; replaced fallback install with deterministic pip install -e .[dev]; added xrlids import check"
+    },
+    {
+      "file": "pyproject.toml",
+      "change": "Aligned requires-python to >=3.12"
+    },
+    {
+      "file": "README.md",
+      "change": "Aligned Python prerequisite to 3.12+; updated pip install command to pip install -e .[dev]"
+    }
+  ]
+}

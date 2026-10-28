@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.12"]
 
     steps:
       - name: Check out repository
@@ -28,14 +28,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
-      - name: Install dependencies
+      - name: Install package and dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt || pip install -e .[dev]
+          pip install --extra-index-url https://download.pytorch.org/whl/cpu -e .[dev]
 
       - name: Verify Environment and Model Checkpoints
         run: |
-          python -c "import torch, sklearn, shap; print('Dependencies loaded successfully.')"
+          python -c "import xrlids, torch, sklearn, shap; print('xrlids and dependencies loaded successfully.')"
           python -c "from scripts.phase2.run_phase2b_readiness_audit import check_working_tree_clean; print('Working-tree audit script callable.')"
 
       - name: Run Core Test Suite (Tiers 1, 2, 3)

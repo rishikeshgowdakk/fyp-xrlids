@@ -257,8 +257,8 @@ The future test contains 50,306 attacks (3.08%) after Policy A removed conflicti
 
 ### Prerequisites
 
-- **OS:** Linux (tested on Ubuntu; any distro with Python 3.10+ should work)
-- **Python:** 3.10 or later (developed and tested on 3.14.4)
+- **OS:** Linux (tested on Ubuntu; any distro with Python 3.12+ should work)
+- **Python:** 3.12 or later (developed and tested on 3.14.4; verified on 3.12 in CI)
 - **Hardware:** CPU-only; no GPU required
 - **Disk:** ~1 GB for the repository, models, and virtual environment
 - **Root / sudo:** Only needed for live WiFi capture (`CAP_NET_RAW`); all other modes run as a normal user
@@ -273,8 +273,8 @@ cd fyp-xrlids
 python3 -m venv .venv
 source .venv/bin/activate
 
-# Install all dependencies
-pip install -r requirements.txt
+# Install package and all dependencies
+pip install -e .[dev]
 ```
 
 > **Model Binaries and Preprocessors are Committed.** All 9 canonical model files (`models/rf/*.joblib`, `models/lstm/*.pt`, `models/dqn/*.pt`, `models/fusion/*.json`) and preprocessors are tracked directly in Git and available immediately upon cloning.
