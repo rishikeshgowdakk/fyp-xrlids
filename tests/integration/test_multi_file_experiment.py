@@ -16,6 +16,17 @@ from scripts.phase1.run_experiment import run_experiment
 
 
 def test_multi_file_experiment_execution(tmp_path):
+    # Tier C Prerequisite: requires physical raw CSV files for unsw_nb15
+    from xrlids.datasets.loading import dataset_availability, load_manifest
+
+    manifest = load_manifest()
+    avail = dataset_availability(manifest, "unsw_nb15")
+    if avail["status"] != "available" and not avail.get("existing_files"):
+        pytest.skip(
+            "Tier C Integration Test skipped: physical raw CSV files for 'unsw_nb15' are not present in data/raw/. "
+            "Raw benchmark datasets (~3.5 GB) are excluded from Git by design and must be provisioned externally."
+        )
+
     # Create test experiment config using real verified UNSW files with sample limit
     exp_dir = tmp_path / "test_exp"
     config_dict = {

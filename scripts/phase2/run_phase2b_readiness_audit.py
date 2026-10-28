@@ -110,13 +110,13 @@ def check_working_tree_clean(
     import subprocess
     try:
         out = subprocess.run(
-            ["git", "status", "--porcelain"],
+            ["git", "status", "--porcelain=v1", "-uall", "-z"],
             cwd=str(repo_root),
             capture_output=True,
             text=True,
             check=True,
         )
-        lines = out.stdout.splitlines()
+        raw_output = out.stdout
         all_tracked_changes: list[str] = []
         all_untracked_files: list[str] = []
 
@@ -129,32 +129,79 @@ def check_working_tree_clean(
         audit_dir_tracked_changes: list[str] = []
         audit_dir_untracked_files: list[str] = []
 
-        out_dir_str = str(Path(out_dir).resolve()) if out_dir else None
+        out_dir_path = Path(out_dir).resolve() if out_dir else None
         root_path = Path(repo_root).resolve()
 
-        for line in lines:
-            if not line.strip():
-                continue
-            status_code = line[:2]
-            path_part = line[3:].strip()
-            abs_path = (root_path / path_part).resolve()
-            is_audit_dir = bool(out_dir_str and (abs_path == Path(out_dir_str) or str(abs_path).startswith(out_dir_str + "/")))
+        # Parse records supporting both NUL-delimited (-z) and line-delimited output
+        records: list[tuple[str, str, str | None]] = []
+        if "\0" in raw_output:
+            tokens = raw_output.split("\0")
+            i = 0
+            while i < len(tokens):
+                token = tokens[i]
+                if not token:
+                    i += 1
+                    continue
+                status_code = token[:2]
+                dest_path = token[3:]
+                orig_path = None
+                if status_code[0] in "RC" or (len(status_code) > 1 and status_code[1] in "RC"):
+                    if i + 1 < len(tokens):
+                        orig_path = tokens[i + 1]
+                        i += 2
+                    else:
+                        i += 1
+                else:
+                    i += 1
+                records.append((status_code, dest_path, orig_path))
+        else:
+            lines = raw_output.splitlines()
+            for line in lines:
+                if not line.strip():
+                    continue
+                status_code = line[:2]
+                rest = line[3:].strip()
+                orig_path = None
+                dest_path = rest
+                if (status_code[0] in "RC" or (len(status_code) > 1 and status_code[1] in "RC")) and " -> " in rest:
+                    orig_part, dest_part = rest.split(" -> ", 1)
+                    orig_path = orig_part.strip().strip('"')
+                    dest_path = dest_part.strip().strip('"')
+                else:
+                    if dest_path.startswith('"') and dest_path.endswith('"'):
+                        dest_path = dest_path[1:-1]
+                records.append((status_code, dest_path, orig_path))
+
+        for status_code, dest_path, orig_path in records:
+            dest_abs = (root_path / dest_path).resolve()
+            orig_abs = (root_path / orig_path).resolve() if orig_path else None
+
+            # Accurate audit-directory scoping using is_relative_to (prevents string-prefix sibling errors)
+            is_dest_in_audit = bool(out_dir_path and ((dest_abs == out_dir_path) or dest_abs.is_relative_to(out_dir_path)))
+            is_orig_in_audit = bool(out_dir_path and orig_abs and ((orig_abs == out_dir_path) or orig_abs.is_relative_to(out_dir_path)))
+            is_audit_dir = is_dest_in_audit or is_orig_in_audit
 
             if status_code == "??":
-                all_untracked_files.append(path_part)
+                all_untracked_files.append(dest_path)
                 if is_audit_dir:
-                    audit_dir_untracked_files.append(path_part)
+                    audit_dir_untracked_files.append(dest_path)
                 else:
-                    external_untracked_files.append(path_part)
+                    external_untracked_files.append(dest_path)
             else:
-                entry = line.strip()
+                entry = f"{status_code} {orig_path} -> {dest_path}" if orig_path else f"{status_code} {dest_path}"
                 all_tracked_changes.append(entry)
 
                 idx_status = status_code[0]
-                wt_status = status_code[1]
-                if idx_status in "MADRCU":
+                wt_status = status_code[1] if len(status_code) > 1 else " "
+                is_conflict = (status_code in {"DD", "AU", "UD", "UA", "DU", "AA", "UU"} or "U" in status_code)
+
+                # Complete character coverage: M, A, D, R, C, T (typechange), U (unmerged conflict)
+                has_staged = (idx_status in "MADRCTU") or is_conflict
+                has_unstaged = (wt_status in "MADTU") or is_conflict
+
+                if has_staged:
                     staged_tracked_changes.append(entry)
-                if wt_status in "MADU":
+                if has_unstaged:
                     unstaged_tracked_changes.append(entry)
 
                 if is_audit_dir:
