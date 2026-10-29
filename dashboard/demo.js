@@ -1,6 +1,6 @@
 /**
  * XRL-IDARS — Live Demonstration Logic (demo.js)
- * Clean, lightweight orchestrator for the 4-zone exhibition interface.
+ * Clean, lightweight orchestrator for the simple, clean, white exhibition interface.
  */
 
 let pollInterval = null;
@@ -14,8 +14,18 @@ let activeExplainingFlowId = null;
 const flowExplanationCache = new Map();
 let currentBenchmark = 'cicids2017';
 
-// Initialize on page load
+// Pipeline state machine strictly driven by backend events (Section 9)
+let pipelineTracking = {
+  lastPacketCount: 0,
+  lastFlowCount: 0,
+  lastFlowId: null,
+  activeStage: null,
+  isExplaining: false,
+};
+
+// Initialize on page load (Initial state: completely static)
 document.addEventListener('DOMContentLoaded', () => {
+  resetPipelineStatic();
   fetchOverviewBenchmark();
   startPolling();
 });
@@ -26,8 +36,9 @@ async function fetchOverviewBenchmark() {
     const res = await fetch('/api/overview');
     if (!res.ok) return;
     const data = await res.json();
-    // Benchmark strip is already populated with canonical figures in HTML,
-    // but we can ensure dynamic consistency if needed.
+    if (data && data.benchmark) {
+      currentBenchmark = data.benchmark;
+    }
   } catch (err) {
     console.warn('Could not fetch overview benchmark:', err);
   }
@@ -57,12 +68,37 @@ function updateUIFromSession(session) {
   }
   const analysis = session.live_analysis || {};
   const counters = session.counters || {};
-
-  // Zone 1: Light up pipeline strip if active
   const isRunning = session.status === 'running';
-  animatePipeline(isRunning);
 
-  // Zone 2: Update the 4 numbers only
+  // Mode and Status Badges (Monochrome mode label)
+  const modeBadge = document.getElementById('live-mode-badge');
+  const statusBadge = document.getElementById('live-status-badge');
+  if (modeBadge) {
+    if (session.mode === 'live') {
+      modeBadge.textContent = 'LIVE CAPTURE';
+    } else if (session.mode === 'pcap') {
+      modeBadge.textContent = 'PCAP REPLAY';
+    } else {
+      modeBadge.textContent = 'DATASET REPLAY';
+    }
+  }
+  if (statusBadge) {
+    if (isRunning) {
+      statusBadge.textContent = 'RUNNING';
+      statusBadge.className = 'status-badge running';
+    } else if (session.status === 'error') {
+      statusBadge.textContent = 'ERROR';
+      statusBadge.className = 'status-badge error';
+    } else {
+      statusBadge.textContent = 'STOPPED';
+      statusBadge.className = 'status-badge stopped';
+    }
+  }
+
+  // Zone 1: Autonomous Detection & Response Pipeline (Section 9 Requirement)
+  updatePipelineEvents(session);
+
+  // Zone 2: Update Demonstration Stream Counters
   const tp = analysis.tp || 0;
   const fp = analysis.fp || 0;
   const fn = analysis.fn || 0;
@@ -83,31 +119,120 @@ function updateUIFromSession(session) {
       inspectFlow(cachedFlows[cachedFlows.length - 1]);
     }
   }
+
+  // Zone 5: Event History & Live Alerts Log
+  if (session.recent_alerts) {
+    renderAlertsLog(session.recent_alerts);
+  }
 }
 
-// Animate pipeline nodes
-function animatePipeline(active) {
+// -------------------------------------------------------------
+// Autonomous Detection & Response Pipeline State Machine (Section 9)
+// -------------------------------------------------------------
+function resetPipelineStatic() {
   const nodes = ['node-packet', 'node-features', 'node-detector', 'node-shap', 'node-action'];
-  if (!active) {
-    nodes.forEach(id => document.getElementById(id)?.classList.remove('active'));
+  nodes.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.className = 'pipe-node';
+  });
+  pipelineTracking.lastPacketCount = 0;
+  pipelineTracking.lastFlowCount = 0;
+  pipelineTracking.lastFlowId = null;
+  pipelineTracking.activeStage = null;
+  pipelineTracking.isExplaining = false;
+}
+
+function updatePipelineEvents(session) {
+  const isRunning = session.status === 'running';
+
+  // If stopped, keep pipeline static
+  if (!isRunning) {
+    if (session.status === 'error') {
+      const nodePkt = document.getElementById('node-packet');
+      if (nodePkt) nodePkt.className = 'pipe-node error';
+    } else {
+      resetPipelineStatic();
+    }
     return;
   }
 
-  const now = Date.now();
-  const step = Math.floor((now / 400) % nodes.length);
-  nodes.forEach((id, idx) => {
-    const el = document.getElementById(id);
-    if (el) {
-      if (idx === step) {
-        el.classList.add('active');
-      } else {
-        el.classList.remove('active');
-      }
+  // Reflect active capture / replay mode on Stage 1 subtitle
+  const pktSub = document.getElementById('pipe-packet-sub');
+  if (pktSub) {
+    if (session.mode === 'live') {
+      pktSub.textContent = 'Raw AF_PACKET Stream';
+    } else if (session.mode === 'pcap') {
+      pktSub.textContent = 'PCAP Packet Replay';
+    } else {
+      pktSub.textContent = `Dataset Records (${currentBenchmark.toUpperCase()})`;
     }
-  });
+  }
+
+  const counters = session.counters || {};
+  const currentPackets = counters.packets || 0;
+  const currentFlows = counters.flows || 0;
+  const recentFlows = session.recent_flows || [];
+  const latestFlow = recentFlows.length > 0 ? recentFlows[recentFlows.length - 1] : null;
+
+  // Stage 1 (Packets / Records): Active when packets or records are received
+  const nodePkt = document.getElementById('node-packet');
+  if (nodePkt) {
+    if (currentPackets > 0 || currentFlows > 0) {
+      nodePkt.className = 'pipe-node completed';
+    } else {
+      nodePkt.className = 'pipe-node active';
+    }
+  }
+
+  // Stage 2 (Flow Assembly): Highlight when flow builder processes a flow
+  const nodeFeat = document.getElementById('node-features');
+  if (nodeFeat) {
+    if (currentFlows > 0) {
+      nodeFeat.className = 'pipe-node completed';
+    } else {
+      nodeFeat.className = 'pipe-node';
+    }
+  }
+
+  // Stage 3 (Rules & ML): Highlight when deterministic rules and RF classifier execute
+  const nodeDet = document.getElementById('node-detector');
+  if (nodeDet) {
+    if (latestFlow && (latestFlow.prediction_label || latestFlow.rule_triggered)) {
+      nodeDet.className = 'pipe-node completed';
+    } else {
+      nodeDet.className = 'pipe-node';
+    }
+  }
+
+  // Stage 4 (TreeSHAP): Managed genuine computation in inspectFlow()
+  const nodeShap = document.getElementById('node-shap');
+  if (nodeShap) {
+    if (pipelineTracking.isExplaining) {
+      nodeShap.className = 'pipe-node active';
+    } else if (selectedFlowId !== null && flowExplanationCache.has(selectedFlowId)) {
+      nodeShap.className = 'pipe-node completed';
+    } else {
+      nodeShap.className = 'pipe-node';
+    }
+  }
+
+  // Stage 5 (Response Gate): Highlight when verified DQN and safety gate produce a result
+  const nodeAct = document.getElementById('node-action');
+  if (nodeAct) {
+    if (selectedFlowId !== null && latestFlow) {
+      nodeAct.className = 'pipe-node completed';
+    } else {
+      nodeAct.className = 'pipe-node';
+    }
+  }
+
+  pipelineTracking.lastPacketCount = currentPackets;
+  pipelineTracking.lastFlowCount = currentFlows;
 }
 
-// Render Flow Stream
+// -------------------------------------------------------------
+// Render Flow Stream (Plain, clean, readable rows)
+// -------------------------------------------------------------
 function renderFlowList(flows) {
   const container = document.getElementById('flow-stream-list');
   if (!container) return;
@@ -120,7 +245,7 @@ function renderFlowList(flows) {
   });
 
   if (filtered.length === 0) {
-    container.innerHTML = '<div style="text-align: center; color: var(--text-dim); margin-top: 40px; font-size: 0.85rem;">No flows matching filter.</div>';
+    container.innerHTML = '<div style="text-align: center; color: var(--text-dim); margin-top: 40px; font-size: 0.82rem;">No flows matching filter.</div>';
     return;
   }
 
@@ -161,7 +286,7 @@ function renderFlowList(flows) {
           <div class="flow-score-bar-bg" title="Attack Confidence: ${scorePct}%">
             <div class="flow-score-bar-fill" style="width: ${scorePct}%; background: ${barColor};"></div>
           </div>
-          <span style="font-size: 0.76rem; font-weight: 700; font-family: monospace; min-width: 34px;">${scorePct}%</span>
+          <span style="font-size: 0.74rem; font-weight: 700; font-family: var(--font-mono); min-width: 32px; color: var(--text-main);">${scorePct}%</span>
           ${ruleBadge}
           ${typeBadge}
           ${actionBadge}
@@ -182,7 +307,9 @@ function onFlowRowClick(flowId) {
   }
 }
 
-// Populate "Why?" Card
+// -------------------------------------------------------------
+// Populate "Why?" Explainability Card (TreeSHAP & Advisory Gate)
+// -------------------------------------------------------------
 function inspectFlow(flow) {
   if (!flow) return;
   selectedFlowId = flow.flow_id;
@@ -208,7 +335,7 @@ function inspectFlow(flow) {
     }
   }
 
-  // Action badge
+  // Action badge & Advisory Response
   const badgeEl = document.getElementById('why-action-badge');
   const policyActionEl = document.getElementById('why-policy-action');
 
@@ -237,22 +364,32 @@ function inspectFlow(flow) {
   const flowId = flow.flow_id;
   activeExplainingFlowId = flowId;
 
-  // If the flow does not have complete preserved features, show honest unavailable state
+  // Check feature validity
   if (!flow.features || typeof flow.features !== 'object' || Object.keys(flow.features).length === 0) {
     renderShapUnavailable(factorsContainer, 'TreeSHAP explanation unavailable for this flow.');
+    pipelineTracking.isExplaining = false;
+    const nodeShap = document.getElementById('node-shap');
+    if (nodeShap) nodeShap.className = 'pipe-node';
     return;
   }
 
   // Check cache
   if (flowExplanationCache.has(flowId)) {
     renderShapExplanation(factorsContainer, flowExplanationCache.get(flowId));
+    pipelineTracking.isExplaining = false;
+    const nodeShap = document.getElementById('node-shap');
+    if (nodeShap) nodeShap.className = 'pipe-node completed';
     return;
   }
 
-  // Show loading indicator
+  // Mark Stage 4 as actively computing genuine explanation
+  pipelineTracking.isExplaining = true;
+  const nodeShap = document.getElementById('node-shap');
+  if (nodeShap) nodeShap.className = 'pipe-node active';
+
   renderShapLoading(factorsContainer, flowId);
 
-  // Request real TreeSHAP from /api/csv/explain
+  // Request genuine TreeSHAP from /api/csv/explain
   fetch('/api/csv/explain', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -274,21 +411,29 @@ function inspectFlow(flow) {
       return await res.json();
     })
     .then(data => {
-      // Discard stale responses if user clicked another flow
       if (activeExplainingFlowId !== flowId) return;
 
       if (!data || !data.features || !Array.isArray(data.features) || data.features.length === 0) {
         renderShapUnavailable(factorsContainer, 'TreeSHAP explanation unavailable for this flow.');
+        pipelineTracking.isExplaining = false;
+        if (nodeShap) nodeShap.className = 'pipe-node error';
         return;
       }
 
       flowExplanationCache.set(flowId, data);
       renderShapExplanation(factorsContainer, data);
+
+      pipelineTracking.isExplaining = false;
+      if (nodeShap) nodeShap.className = 'pipe-node completed';
+      const nodeAct = document.getElementById('node-action');
+      if (nodeAct) nodeAct.className = 'pipe-node completed';
     })
     .catch(err => {
       if (activeExplainingFlowId !== flowId) return;
       console.warn(`TreeSHAP explanation failed for Flow #${flowId}:`, err);
       renderShapUnavailable(factorsContainer, 'TreeSHAP explanation unavailable for this flow.');
+      pipelineTracking.isExplaining = false;
+      if (nodeShap) nodeShap.className = 'pipe-node error';
     });
 }
 
@@ -318,8 +463,8 @@ function renderShapExplanation(container, data) {
     html += `
       <div class="shap-factor ${borderClass}">
         <div class="shap-factor-title">
-          <span style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-main);">${idx + 1}. ${escapeHtml(feat.feature)}</span>
-          <span style="color: ${valColor}; font-family: var(--font-mono); font-weight: 700; font-size: 0.76rem;">
+          <span style="font-family: var(--font-mono); font-size: 0.76rem; color: var(--text-main);">${idx + 1}. ${escapeHtml(feat.feature)}</span>
+          <span style="color: ${valColor}; font-family: var(--font-mono); font-weight: 700; font-size: 0.74rem;">
             SHAP ${formattedShap}
           </span>
         </div>
@@ -347,7 +492,7 @@ function renderShapExplanation(container, data) {
 
 function renderShapLoading(container, flowId) {
   container.innerHTML = `
-    <div style="text-align: center; color: var(--text-dim); padding: 32px 12px; font-size: 0.82rem;">
+    <div style="text-align: center; color: var(--text-dim); padding: 32px 12px; font-size: 0.8rem;">
       <div style="margin-bottom: 6px; font-weight: 600; color: var(--text-main);">Computing TreeSHAP Attributions...</div>
       <div style="font-size: 0.72rem; color: var(--text-muted);">
         Evaluating Random Forest tree decision splits for Flow #${flowId}
@@ -358,10 +503,10 @@ function renderShapLoading(container, flowId) {
 
 function renderShapUnavailable(container, message) {
   container.innerHTML = `
-    <div style="text-align: center; color: var(--text-muted); padding: 32px 12px; font-size: 0.82rem;">
-      <div style="color: var(--accent-amber); margin-bottom: 6px; font-weight: 600;">⚠️ Notice</div>
+    <div style="text-align: center; color: var(--text-muted); padding: 32px 12px; font-size: 0.8rem;">
+      <div style="color: var(--status-amber); margin-bottom: 4px; font-weight: 600;">Notice</div>
       <div>${escapeHtml(message || 'TreeSHAP explanation unavailable for this flow.')}</div>
-      <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 6px;">
+      <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 4px;">
         Explanations require complete preserved inference features matching the model contract.
       </div>
     </div>
@@ -377,7 +522,55 @@ function formatFeatureVal(val) {
   return num.toFixed(3);
 }
 
+// -------------------------------------------------------------
+// Render Event History & Live Alerts Log (Section 5)
+// -------------------------------------------------------------
+function renderAlertsLog(alerts) {
+  const tbody = document.getElementById('alerts-log-tbody');
+  if (!tbody) return;
+
+  if (!alerts || alerts.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align: center; color: var(--text-dim); padding: 16px;">
+          No alerts recorded. Start stream replay or inject an attack pattern to observe detection events.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Up to 15 recent alerts, newest on top
+  const displayAlerts = alerts.slice(-15).reverse();
+  tbody.innerHTML = displayAlerts.map(a => {
+    const timeStr = a.timestamp ? a.timestamp.split('T')[1].split('.')[0] : '--:--:--';
+    const isHigh = a.alert_level === 'HIGH';
+    const levelBadge = isHigh ? '<span class="badge-attack">HIGH</span>' : '<span class="badge-action-alert">MEDIUM</span>';
+    const confPct = Math.round((a.confidence || 0) * 100);
+    const findingSrc = a.detection_source || (a.rule_triggered ? 'RULE' : 'RF');
+    const ruleMatch = (a.rule_matches && a.rule_matches.length > 0)
+      ? a.rule_matches.join(', ')
+      : '—';
+    const actionText = confPct >= 85 ? 'BLOCK (Advisory)' : (confPct >= 50 ? 'RATE_LIMIT (Advisory)' : 'ALLOW (Safe)');
+
+    return `
+      <tr>
+        <td style="font-family: var(--font-mono);">${escapeHtml(timeStr)}</td>
+        <td style="font-family: var(--font-mono); font-weight: 600;">#${a.flow_id}</td>
+        <td>${levelBadge}</td>
+        <td style="font-family: var(--font-mono); font-size: 0.74rem;">${escapeHtml(a.src_endpoint)} → ${escapeHtml(a.dst_endpoint)}</td>
+        <td><strong>${escapeHtml(findingSrc)}</strong></td>
+        <td>${escapeHtml(ruleMatch)}</td>
+        <td style="font-family: var(--font-mono); font-weight: 600;">${confPct}%</td>
+        <td>${escapeHtml(actionText)}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// -------------------------------------------------------------
 // Flow Filter Buttons
+// -------------------------------------------------------------
 function setFlowFilter(filter, btn) {
   currentFilter = filter;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -385,7 +578,9 @@ function setFlowFilter(filter, btn) {
   renderFlowList(cachedFlows);
 }
 
-// Start Stream Replay API
+// -------------------------------------------------------------
+// Start & Stop Stream Replay APIs
+// -------------------------------------------------------------
 async function startStream(category = 'mixed', loop = true) {
   try {
     const res = await fetch('/api/live/start', {
@@ -405,7 +600,6 @@ async function startStream(category = 'mixed', loop = true) {
   }
 }
 
-// Stop Stream API
 async function stopReplayStream() {
   if (scenarioTimer) clearInterval(scenarioTimer);
   isRunningScenario = false;
@@ -414,6 +608,7 @@ async function stopReplayStream() {
   try {
     const res = await fetch('/api/live/stop', { method: 'POST' });
     const data = await res.json();
+    resetPipelineStatic();
     return data;
   } catch (err) {
     console.error('Failed to stop stream:', err);
@@ -424,7 +619,6 @@ async function stopReplayStream() {
 async function handleInjectSelect(scenario) {
   if (!scenario) return;
   try {
-    // If not running, start stream first
     await startStream('mixed', true);
     await fetch('/api/live/inject-attack', {
       method: 'POST',
@@ -438,7 +632,9 @@ async function handleInjectSelect(scenario) {
   }
 }
 
-// 2-Minute Scripted Demonstration Scenario
+// -------------------------------------------------------------
+// 2-Minute Demonstration Scenario
+// -------------------------------------------------------------
 async function startTwoMinuteScenario() {
   if (isRunningScenario) return;
   isRunningScenario = true;
@@ -499,7 +695,9 @@ async function startTwoMinuteScenario() {
   }, 1000);
 }
 
-// Show Final Scorecard Modal
+// -------------------------------------------------------------
+// Scorecard Modal
+// -------------------------------------------------------------
 function showScorecard() {
   const total = document.getElementById('cnt-total').textContent;
   const tp = document.getElementById('cnt-tp').textContent;

@@ -6,43 +6,51 @@
   <title>XRL-IDARS — Live Demonstration &amp; Research Evaluation</title>
   <style>
     :root {
-      --bg-primary: #0d1117;
-      --bg-surface: #161b22;
-      --bg-surface-hover: #1c2128;
-      --bg-subtle: #21262d;
-      --border: #30363d;
-      --border-accent: #2563eb;
-      --text-main: #f0f6fc;
-      --text-muted: #8b949e;
-      --text-dim: #6e7681;
-      --accent: #2563eb;
-      --accent-hover: #1d4ed8;
-      --accent-subtle: rgba(37, 99, 235, 0.12);
-      --status-green: #22c55e;
-      --status-green-bg: rgba(34, 197, 94, 0.12);
-      --status-green-border: rgba(34, 197, 94, 0.35);
-      --status-amber: #f59e0b;
-      --status-amber-bg: rgba(245, 158, 11, 0.12);
-      --status-amber-border: rgba(245, 158, 11, 0.35);
-      --status-red: #ef4444;
-      --status-red-bg: rgba(239, 68, 68, 0.12);
-      --status-red-border: rgba(239, 68, 68, 0.35);
-      --radius: 6px;
-      --radius-sm: 4px;
-      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
+      --bg-page: #ffffff;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f9fafb;
+      --bg-hover: #f3f4f6;
+      --border: #d1d5db;
+      --border-light: #e5e7eb;
+      --text-main: #111827;
+      --text-muted: #4b5563;
+      --text-dim: #6b7280;
+      --accent: #0969da;
+      --accent-subtle: #f0f7ff;
+      --status-green: #1a7f37;
+      --status-green-bg: #f0fdf4;
+      --status-green-border: #bbf7d0;
+      --status-amber: #9a6700;
+      --status-amber-bg: #fffbeb;
+      --status-amber-border: #fde68a;
+      --status-red: #cf222e;
+      --status-red-bg: #fef2f2;
+      --status-red-border: #fecaca;
+      --radius: 3px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, Helvetica, sans-serif;
       --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: var(--bg-primary);
+      background: var(--bg-page);
       color: var(--text-main);
       font-family: var(--font);
       font-size: 13px;
       line-height: 1.5;
-      padding: 16px 24px;
+      padding: 16px 20px;
       min-height: 100vh;
+    }
+
+    /* Accessibility: Respect reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
     }
 
     /* Top Navigation Header */
@@ -50,31 +58,61 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 14px;
+      padding-bottom: 12px;
       border-bottom: 1px solid var(--border);
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       flex-wrap: wrap;
       gap: 12px;
     }
     .brand-title {
       font-size: 1.25rem;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-main);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       letter-spacing: -0.01em;
     }
     .brand-badge {
       font-size: 0.7rem;
-      padding: 2px 8px;
+      padding: 2px 6px;
       background: var(--bg-subtle);
       color: var(--text-muted);
       border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
+      border-radius: var(--radius);
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.03em;
+    }
+    .mode-badge {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      background: var(--bg-surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .status-badge {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      background: var(--bg-surface);
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .status-badge.running {
+      color: var(--status-green);
+      border-color: var(--status-green-border);
+      background: var(--status-green-bg);
+    }
+    .status-badge.stopped {
+      color: var(--text-dim);
+      border-color: var(--border);
+      background: var(--bg-subtle);
     }
     .brand-subtitle {
       font-size: 0.8rem;
@@ -88,9 +126,9 @@
       flex-wrap: wrap;
     }
 
-    /* Standard Buttons */
+    /* Plain Rectangular Buttons */
     .btn {
-      padding: 7px 14px;
+      padding: 6px 13px;
       border-radius: var(--radius);
       font-weight: 600;
       font-size: 0.82rem;
@@ -98,37 +136,37 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: background-color 0.15s ease, border-color 0.15s ease;
+      transition: background-color 0.1s ease, border-color 0.1s ease;
       border: 1px solid transparent;
       text-decoration: none;
-      line-height: 1.2;
+      line-height: 1.25;
+      font-family: inherit;
     }
     .btn-primary {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
+      background: var(--text-main);
+      color: #ffffff;
+      border-color: var(--text-main);
     }
     .btn-primary:hover {
-      background: var(--accent-hover);
-      border-color: var(--accent-hover);
+      background: #374151;
+      border-color: #374151;
     }
     .btn-secondary {
       background: var(--bg-surface);
       color: var(--text-main);
-      border-color: var(--border);
+      border: 1px solid var(--border);
     }
     .btn-secondary:hover {
-      background: var(--bg-subtle);
-      border-color: var(--text-muted);
+      background: var(--bg-hover);
+      border-color: #9ca3af;
     }
     .btn-danger {
-      background: transparent;
+      background: var(--bg-surface);
       color: var(--status-red);
-      border-color: var(--status-red-border);
+      border: 1px solid var(--status-red);
     }
     .btn-danger:hover {
       background: var(--status-red-bg);
-      border-color: var(--status-red);
     }
 
     /* Select Control */
@@ -137,16 +175,17 @@
       display: inline-flex;
     }
     .select-control {
-      padding: 7px 26px 7px 12px;
+      padding: 6px 24px 6px 10px;
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       color: var(--text-main);
       font-size: 0.82rem;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
       appearance: none;
       -webkit-appearance: none;
+      font-family: inherit;
     }
     .select-control:focus {
       outline: none;
@@ -154,33 +193,33 @@
     }
     .select-arrow {
       position: absolute;
-      right: 9px;
+      right: 8px;
       top: 50%;
       transform: translateY(-50%);
       pointer-events: none;
       font-size: 0.65rem;
-      color: var(--text-muted);
+      color: var(--text-dim);
     }
 
-    /* System Overview Banner (Minimal & Informative) */
+    /* Minimal System Overview Banner */
     .overview-banner {
       background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-left: 3px solid var(--accent);
+      border-left: 3px solid var(--text-main);
       border-radius: var(--radius);
-      padding: 12px 16px;
-      margin-bottom: 16px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
     }
     .overview-title {
-      font-size: 0.78rem;
+      font-size: 0.74rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-main);
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
     .overview-text {
-      font-size: 0.84rem;
+      font-size: 0.82rem;
       color: var(--text-muted);
       line-height: 1.45;
     }
@@ -190,47 +229,48 @@
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 12px 16px;
-      margin-bottom: 16px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
       display: none;
     }
     .scenario-progress-header {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 8px;
-      font-size: 0.82rem;
+      margin-bottom: 6px;
+      font-size: 0.8rem;
       font-weight: 600;
       color: var(--text-main);
     }
     .progress-bar-track {
       height: 6px;
-      background: var(--bg-subtle);
-      border-radius: 3px;
+      background: var(--bg-hover);
+      border: 1px solid var(--border-light);
+      border-radius: 2px;
       overflow: hidden;
       position: relative;
     }
     .progress-bar-fill {
       height: 100%;
-      background: var(--accent);
+      background: var(--text-main);
       width: 0%;
-      transition: width 0.3s ease;
+      transition: width 0.25s linear;
     }
 
-    /* SECTION 1: Detection & Response Pipeline */
+    /* SECTION 1: Five-Stage Pipeline Strip (Section 9 Requirement) */
     .zone-pipeline {
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 14px 18px;
-      margin-bottom: 16px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
     }
     .zone-title {
-      font-size: 0.76rem;
+      font-size: 0.74rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.05em;
       color: var(--text-muted);
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -241,96 +281,105 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
       overflow-x: auto;
-      padding: 4px 0;
+      padding: 2px 0;
     }
     .pipe-node {
-      background: var(--bg-subtle);
+      background: #ffffff;
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 9px 12px;
+      padding: 8px 10px;
       flex: 1;
       min-width: 130px;
       text-align: center;
       position: relative;
-      transition: border-color 0.2s ease, background-color 0.2s ease;
+      transition: border-color 0.15s ease, background-color 0.15s ease;
     }
+    /* State styling for pipeline stages (No timer cycling; purely backend driven) */
     .pipe-node.active {
-      border-color: var(--accent);
-      background: #182234;
+      border: 2px solid var(--accent);
+      background: var(--accent-subtle);
+    }
+    .pipe-node.completed {
+      border: 1px solid var(--accent);
+      background: #ffffff;
+    }
+    .pipe-node.error {
+      border: 2px solid var(--status-red);
+      background: var(--status-red-bg);
     }
     .pipe-node-title {
-      font-size: 0.84rem;
+      font-size: 0.82rem;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-main);
       margin-bottom: 2px;
     }
     .pipe-node-sub {
       font-size: 0.7rem;
-      color: var(--text-muted);
+      color: var(--text-dim);
     }
     .pipe-arrow {
       color: var(--text-dim);
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: bold;
       flex-shrink: 0;
     }
     .pipeline-footnote {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--text-dim);
-      margin-top: 8px;
+      margin-top: 6px;
       text-align: right;
     }
 
     /* SECTION 2: Demonstration Stream Counters */
     .zone-four-numbers {
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
     .counter-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
+      gap: 10px;
     }
     .counter-card {
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 14px 16px;
+      padding: 10px 14px;
       text-align: left;
     }
-    .counter-card.total { border-top: 2px solid var(--border); }
+    .counter-card.total { border-top: 2px solid var(--text-main); }
     .counter-card.tp { border-top: 2px solid var(--status-green); }
     .counter-card.fn { border-top: 2px solid var(--status-red); }
     .counter-card.fp { border-top: 2px solid var(--status-amber); }
 
     .counter-label {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
     .counter-val {
-      font-size: 1.85rem;
+      font-size: 1.6rem;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-main);
       line-height: 1.15;
-      margin: 4px 0 2px;
+      margin: 3px 0 1px;
       font-variant-numeric: tabular-nums;
       font-family: var(--font-mono);
     }
     .counter-hint {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       color: var(--text-dim);
     }
 
     /* SECTION 3: Traffic & Explainability Split View */
     .zone-split {
       display: grid;
-      grid-template-columns: 1.35fr 1fr;
-      gap: 14px;
-      margin-bottom: 16px;
+      grid-template-columns: 1.45fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
     }
     @media (max-width: 992px) {
       .zone-split { grid-template-columns: 1fr; }
@@ -344,16 +393,16 @@
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 14px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      height: 480px;
+      height: 460px;
     }
     .stream-toolbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       gap: 8px;
       flex-wrap: wrap;
     }
@@ -362,57 +411,58 @@
       gap: 4px;
     }
     .filter-btn {
-      padding: 3px 8px;
-      background: var(--bg-subtle);
+      padding: 2px 8px;
+      background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
+      border-radius: var(--radius);
       color: var(--text-muted);
-      font-size: 0.74rem;
+      font-size: 0.72rem;
       cursor: pointer;
       font-weight: 500;
+      font-family: inherit;
     }
     .filter-btn.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
+      background: var(--text-main);
+      color: #ffffff;
+      border-color: var(--text-main);
     }
     .flow-list {
       flex: 1;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      padding-right: 4px;
+      gap: 4px;
+      padding-right: 2px;
     }
     .flow-row {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 8px 10px;
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 6px 8px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
-      transition: background-color 0.12s ease, border-color 0.12s ease;
-      font-size: 0.8rem;
+      transition: background-color 0.1s ease, border-color 0.1s ease;
+      font-size: 0.78rem;
     }
     .flow-row:hover {
-      background: var(--bg-surface-hover);
-      border-color: var(--text-dim);
+      background: var(--bg-hover);
+      border-color: var(--border);
     }
     .flow-row.selected {
-      border-color: var(--accent);
-      background: #182234;
+      border: 1px solid var(--accent);
+      background: var(--accent-subtle);
     }
     .flow-main {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 1px;
       min-width: 0;
     }
     .flow-endpoints {
       font-family: var(--font-mono);
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--text-main);
       font-weight: 600;
       overflow: hidden;
@@ -420,19 +470,19 @@
       white-space: nowrap;
     }
     .flow-meta {
-      font-size: 0.7rem;
+      font-size: 0.69rem;
       color: var(--text-dim);
     }
     .flow-badge-group {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       flex-shrink: 0;
     }
     .flow-score-bar-bg {
-      width: 50px;
+      width: 44px;
       height: 4px;
-      background: var(--bg-primary);
+      background: var(--border-light);
       border-radius: 2px;
       overflow: hidden;
     }
@@ -440,100 +490,102 @@
       height: 100%;
       border-radius: 2px;
     }
+
+    /* Restrained Status Badges */
     .badge-attack {
       background: var(--status-red-bg);
       color: var(--status-red);
       border: 1px solid var(--status-red-border);
-      padding: 1px 6px;
-      border-radius: var(--radius-sm);
+      padding: 1px 5px;
+      border-radius: var(--radius);
       font-weight: 700;
-      font-size: 0.7rem;
+      font-size: 0.68rem;
     }
     .badge-benign {
-      background: var(--status-green-bg);
-      color: var(--status-green);
-      border: 1px solid var(--status-green-border);
-      padding: 1px 6px;
-      border-radius: var(--radius-sm);
-      font-weight: 700;
-      font-size: 0.7rem;
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      border: 1px solid var(--border-light);
+      padding: 1px 5px;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 0.68rem;
     }
     .badge-rule {
       background: var(--bg-subtle);
       color: var(--text-muted);
       border: 1px solid var(--border);
-      padding: 1px 6px;
-      border-radius: var(--radius-sm);
-      font-size: 0.68rem;
+      padding: 1px 5px;
+      border-radius: var(--radius);
+      font-size: 0.66rem;
       font-weight: 600;
     }
     .badge-action-allow {
       background: var(--status-green-bg);
       color: var(--status-green);
       border: 1px solid var(--status-green-border);
-      padding: 1px 6px;
-      border-radius: var(--radius-sm);
-      font-size: 0.68rem;
+      padding: 1px 5px;
+      border-radius: var(--radius);
+      font-size: 0.66rem;
       font-weight: 700;
     }
     .badge-action-block {
       background: var(--status-red-bg);
       color: var(--status-red);
       border: 1px solid var(--status-red-border);
-      padding: 1px 6px;
-      border-radius: var(--radius-sm);
-      font-size: 0.68rem;
+      padding: 1px 5px;
+      border-radius: var(--radius);
+      font-size: 0.66rem;
       font-weight: 700;
     }
     .badge-action-alert {
       background: var(--status-amber-bg);
       color: var(--status-amber);
       border: 1px solid var(--status-amber-border);
-      padding: 1px 6px;
-      border-radius: var(--radius-sm);
-      font-size: 0.68rem;
+      padding: 1px 5px;
+      border-radius: var(--radius);
+      font-size: 0.66rem;
       font-weight: 700;
     }
 
-    /* "Why?" Card (TreeSHAP & Advisory Action) */
+    /* "Why?" Explainability Card */
     .why-card {
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 16px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      height: 480px;
+      height: 460px;
     }
     .why-header {
       border-bottom: 1px solid var(--border);
-      padding-bottom: 10px;
-      margin-bottom: 12px;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
     }
     .why-title {
-      font-size: 0.96rem;
+      font-size: 0.9rem;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-main);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     .why-meta-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 10px;
-      font-size: 0.78rem;
+      gap: 6px;
+      margin-top: 8px;
+      font-size: 0.76rem;
     }
     .why-meta-item {
       background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      padding: 6px 8px;
-      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-light);
+      padding: 5px 8px;
+      border-radius: var(--radius);
     }
     .why-meta-label {
       color: var(--text-dim);
-      font-size: 0.68rem;
+      font-size: 0.66rem;
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
@@ -541,71 +593,71 @@
       color: var(--text-main);
       font-weight: 600;
       font-family: var(--font-mono);
-      font-size: 0.78rem;
+      font-size: 0.76rem;
     }
 
     .why-shap-container {
       flex: 1;
       overflow-y: auto;
-      margin-top: 6px;
+      margin-top: 4px;
     }
     .why-shap-title {
-      font-size: 0.76rem;
+      font-size: 0.72rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
       color: var(--text-muted);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
     }
     .shap-factor {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
+      background: #ffffff;
+      border: 1px solid var(--border-light);
       border-left: 3px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 8px 10px;
-      margin-bottom: 6px;
+      border-radius: var(--radius);
+      padding: 6px 8px;
+      margin-bottom: 5px;
     }
     .shap-factor.threat-increase {
       border-left-color: var(--status-red);
-      background: rgba(239, 68, 68, 0.04);
+      background: #ffffff;
     }
     .shap-factor.threat-decrease {
       border-left-color: var(--status-green);
-      background: rgba(34, 197, 94, 0.04);
+      background: #ffffff;
     }
     .shap-scientific-notice {
       background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 8px 10px;
-      margin-top: 8px;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 6px 8px;
+      margin-top: 6px;
       margin-bottom: 4px;
     }
     .shap-factor-title {
-      font-size: 0.8rem;
+      font-size: 0.76rem;
       font-weight: 700;
       color: var(--text-main);
       display: flex;
       justify-content: space-between;
     }
     .shap-factor-desc {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--text-muted);
       margin-top: 2px;
     }
 
     .why-policy-box {
       margin-top: auto;
-      padding-top: 10px;
+      padding-top: 8px;
       border-top: 1px solid var(--border);
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      padding: 8px 10px;
-      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-light);
+      padding: 6px 8px;
+      border-radius: var(--radius);
     }
     .why-policy-decision {
       display: flex;
@@ -620,37 +672,38 @@
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 16px 18px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
     }
     .benchmark-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
     }
     .benchmark-title {
-      font-size: 0.95rem;
+      font-size: 0.88rem;
       font-weight: 700;
       color: var(--text-main);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     .benchmark-tag {
       background: var(--bg-subtle);
       color: var(--text-muted);
       border: 1px solid var(--border);
-      font-size: 0.7rem;
-      padding: 2px 7px;
-      border-radius: var(--radius-sm);
+      font-size: 0.68rem;
+      padding: 1px 6px;
+      border-radius: var(--radius);
       font-weight: 600;
     }
     .benchmark-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
+      gap: 10px;
     }
     @media (max-width: 992px) {
       .benchmark-grid { grid-template-columns: repeat(2, 1fr); }
@@ -659,20 +712,20 @@
       .benchmark-grid { grid-template-columns: 1fr; }
     }
     .benchmark-tile {
-      background: var(--bg-subtle);
+      background: #ffffff;
       border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 12px 14px;
+      border-radius: var(--radius);
+      padding: 10px 12px;
       text-align: left;
     }
     .benchmark-tile-name {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
       font-weight: 600;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
     .benchmark-tile-score {
-      font-size: 1.6rem;
+      font-size: 1.45rem;
       font-weight: 700;
       color: var(--text-main);
       font-variant-numeric: tabular-nums;
@@ -680,63 +733,100 @@
       line-height: 1.15;
     }
     .benchmark-tile-detail {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       color: var(--text-dim);
-      margin-top: 4px;
+      margin-top: 3px;
+    }
+
+    /* SECTION 5: Live Alert & Event History Log */
+    .zone-alerts-log {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.76rem;
+      text-align: left;
+    }
+    .data-table th {
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      font-weight: 600;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .data-table td {
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text-main);
+    }
+    .data-table tr:hover td {
+      background: var(--bg-subtle);
     }
 
     /* Modal Scorecard */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.45);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 1000;
-      padding: 20px;
+      padding: 16px;
     }
     .modal-card {
-      background: var(--bg-surface);
+      background: #ffffff;
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 24px;
-      max-width: 500px;
+      padding: 20px;
+      max-width: 480px;
       width: 100%;
       text-align: left;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
     .modal-title {
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       font-weight: 700;
-      color: #fff;
-      margin-bottom: 6px;
+      color: var(--text-main);
+      margin-bottom: 4px;
     }
     .modal-desc {
       color: var(--text-muted);
-      font-size: 0.82rem;
-      margin-bottom: 16px;
+      font-size: 0.8rem;
+      margin-bottom: 14px;
       line-height: 1.4;
     }
     .modal-stats {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-bottom: 16px;
+      gap: 8px;
+      margin-bottom: 14px;
     }
     .modal-stat-box {
       background: var(--bg-subtle);
       border: 1px solid var(--border);
-      padding: 10px 12px;
-      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      border-radius: var(--radius);
     }
     .modal-stat-val {
-      font-size: 1.35rem;
+      font-size: 1.25rem;
       font-weight: 700;
       color: var(--text-main);
       font-family: var(--font-mono);
     }
     .modal-stat-label {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       color: var(--text-dim);
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -744,19 +834,19 @@
     .modal-takeaway {
       background: var(--bg-subtle);
       border: 1px solid var(--border);
-      border-left: 3px solid var(--accent);
-      padding: 10px 12px;
-      border-radius: var(--radius-sm);
-      font-size: 0.8rem;
+      border-left: 3px solid var(--text-main);
+      padding: 8px 10px;
+      border-radius: var(--radius);
+      font-size: 0.78rem;
       color: var(--text-muted);
-      margin-bottom: 16px;
-      line-height: 1.45;
+      margin-bottom: 14px;
+      line-height: 1.4;
     }
     .modal-takeaway strong {
       color: var(--text-main);
       display: block;
       margin-bottom: 2px;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
     }
     .modal-actions {
       display: flex;
@@ -773,6 +863,8 @@
       <div class="brand-title">
         <span>XRL-IDARS</span>
         <span class="brand-badge">Research Exhibition</span>
+        <span class="mode-badge" id="live-mode-badge">DATASET REPLAY</span>
+        <span class="status-badge stopped" id="live-status-badge">STOPPED</span>
       </div>
       <div class="brand-subtitle">
         Explainable Reinforcement Learning Intrusion Detection &amp; Autonomous Response System
@@ -796,13 +888,13 @@
       <button id="btn-stop-stream" class="btn btn-danger" onclick="stopReplayStream()">
         ⏹ Stop
       </button>
-      <a href="/index.html" class="btn btn-secondary" title="Open the full 5-section research workbench">
+      <a href="/index.html" class="btn btn-secondary" title="Open the full research workbench">
         Research Workbench →
       </a>
     </div>
   </header>
 
-  <!-- System Overview Banner -->
+  <!-- Minimal System Overview Banner -->
   <div class="overview-banner">
     <div class="overview-title">System Overview</div>
     <div class="overview-text">
@@ -821,18 +913,18 @@
     </div>
   </div>
 
-  <!-- SECTION 1: Pipeline Strip -->
+  <!-- SECTION 1: Autonomous Detection & Response Pipeline (Section 9 Requirement) -->
   <section class="zone-pipeline">
     <div class="zone-title">
       <span>1. Autonomous Detection &amp; Response Pipeline</span>
-      <span style="font-weight: normal; text-transform: none; font-size: 0.72rem; color: var(--text-dim);">
+      <span style="font-weight: normal; text-transform: none; font-size: 0.7rem; color: var(--text-dim);">
         End-to-End Latency: ~37.5 ms P50 (Burst Queue) · ~3.5 ms RF Single-Vector
       </span>
     </div>
     <div class="pipeline-strip">
       <div class="pipe-node" id="node-packet">
-        <div class="pipe-node-title">1. Packets</div>
-        <div class="pipe-node-sub">AF_PACKET / PCAP Stream</div>
+        <div class="pipe-node-title">1. Packets / Records</div>
+        <div class="pipe-node-sub" id="pipe-packet-sub">Dataset Records (CIC-IDS2017)</div>
       </div>
       <div class="pipe-arrow">→</div>
       <div class="pipe-node" id="node-features">
@@ -856,7 +948,7 @@
       </div>
     </div>
     <div class="pipeline-footnote">
-      * Live and replay monitoring operates on Random Forest R10 tabular flows. Supervised LSTM and RF-LSTM fusion are evaluated in the offline benchmark suite. Mitigation actions remain strictly advisory in dry-run mode.
+      * Initial state is static. Stage highlighting is driven strictly by backend processing events. Supervised LSTM and RF-LSTM fusion are evaluated in offline benchmarks. Response actions are observational / dry-run advisory recommendations.
     </div>
   </section>
 
@@ -864,7 +956,7 @@
   <section class="zone-four-numbers">
     <div class="zone-title">
       <span>2. Demonstration Stream Counters</span>
-      <span style="font-weight: normal; text-transform: none; font-size: 0.72rem; color: var(--text-muted);">
+      <span style="font-weight: normal; text-transform: none; font-size: 0.7rem; color: var(--text-dim);">
         Replay sample statistics · Strictly separated from held-out benchmark evaluation
       </span>
     </div>
@@ -897,7 +989,7 @@
     <!-- Left: Flow Stream -->
     <div class="stream-container">
       <div class="stream-toolbar">
-        <div style="font-size: 0.82rem; font-weight: 700; color: #fff;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-main);">
           3. Incoming Flow Stream
         </div>
         <div class="stream-filters">
@@ -907,7 +999,7 @@
         </div>
       </div>
       <div class="flow-list" id="flow-stream-list">
-        <div style="text-align: center; color: var(--text-dim); margin-top: 80px; font-size: 0.85rem;">
+        <div style="text-align: center; color: var(--text-dim); margin-top: 80px; font-size: 0.82rem;">
           Click "▶ Run Demonstration Scenario" or "Inject Attack Pattern" above to begin live stream replay.
         </div>
       </div>
@@ -946,7 +1038,7 @@
       </div>
 
       <div class="why-shap-container" id="why-shap-factors">
-        <div style="text-align: center; color: var(--text-dim); padding: 32px 12px; font-size: 0.82rem;">
+        <div style="text-align: center; color: var(--text-dim); padding: 32px 12px; font-size: 0.8rem;">
           Select a flow from the stream to view genuine Random Forest TreeSHAP attributions.
         </div>
       </div>
@@ -956,21 +1048,21 @@
           <span>Action Recommendation:</span>
           <span id="why-policy-action" style="color: var(--text-main);">Cost-Optimal Gate: ALLOW (Safe)</span>
         </div>
-        <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 3px;">
+        <div style="font-size: 0.69rem; color: var(--text-dim); margin-top: 3px;">
           Enforcement Invariant: Advisory dry-run mode. Network mutations and firewall changes are disabled.
         </div>
       </div>
     </div>
   </section>
 
-  <!-- SECTION 4: Held-Out Research Benchmark Strip -->
+  <!-- SECTION 4: Research Benchmark Evaluation Strip -->
   <section class="zone-benchmark-strip">
     <div class="benchmark-header">
       <div class="benchmark-title">
         <span>4. Research Benchmark Evaluation (Offline Test Sets)</span>
         <span class="benchmark-tag">355,833 Held-Out Flows</span>
       </div>
-      <div style="font-size: 0.74rem; color: var(--text-muted);">
+      <div style="font-size: 0.72rem; color: var(--text-dim);">
         Frozen Seed-42 Artifacts · Strictly Separated from Replay Demonstration
       </div>
     </div>
@@ -995,6 +1087,39 @@
         <div class="benchmark-tile-score">~51.4x</div>
         <div class="benchmark-tile-detail">Cost-Optimal: 1.95 µs vs Dueling DQN: 100.23 µs</div>
       </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: Live Alert & Event History Log -->
+  <section class="zone-alerts-log">
+    <div class="zone-title">
+      <span>5. Event History &amp; Decision Audit Log</span>
+      <span style="font-weight: normal; text-transform: none; font-size: 0.7rem; color: var(--text-dim);">
+        Real-time detection events and rule triggers
+      </span>
+    </div>
+    <div class="table-container">
+      <table class="data-table" id="alerts-log-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Flow ID</th>
+            <th>Severity</th>
+            <th>Endpoints</th>
+            <th>Source</th>
+            <th>Ground Truth / Rule</th>
+            <th>Confidence</th>
+            <th>Advisory Response</th>
+          </tr>
+        </thead>
+        <tbody id="alerts-log-tbody">
+          <tr>
+            <td colspan="8" style="text-align: center; color: var(--text-dim); padding: 16px;">
+              No alerts recorded. Start stream replay or inject an attack pattern to observe detection events.
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </section>
 
