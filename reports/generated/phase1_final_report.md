@@ -1,5 +1,8 @@
 # XRL-IDARS — Phase 1 Final Consolidated Research Report
 
+
+> **Freshness notice (2026-10-29):** This snapshot was not regenerated for the current repository HEAD. The commit/environment metadata below is historical, and the test count is not proof that the current HEAD passes.
+
 - **Platform**: XRL-IDARS (Intrusion Detection and Autonomous Response System)
 - **Phase**: 1 (Empirical Research Platform & Explainability)
 - **Git Commit**: `c030c15bb77bd7207b7fe77a5aa17b12b890437c (dirty)`
