@@ -60,50 +60,52 @@ http://localhost:8000
 
 ## 3. High-Impact 5-to-7-Minute Demonstration Sequence
 
-This chronological demonstration runbook is optimized for a 5-to-7-minute viva defense or exhibition evaluation. It guides the examiner step-by-step through empirical verification, explainability, autonomous response, live traffic observation, and candid scientific boundary disclosures.
+This chronological demonstration runbook is optimized for a 5-to-7-minute viva defense or exhibition evaluation. It guides the examiner step-by-step through empirical verification, multi-dataset benchmarking, performance scope reconciliation, explainability, autonomous response, live traffic observation, and candid scientific boundary disclosures.
 
 ```mermaid
 flowchart LR
-    M1["1. Overview\n(0:00 - 1:00)\nIntegrity & Status"] --> M2["2. Benchmarks\n(1:00 - 2:30)\nRF, LSTM, Fusion"]
-    M2 --> M3["3. Comparison\n(2:30 - 3:30)\nDegenerate Fusion & Ablation"]
-    M3 --> M4["4. Explainability\n(3:30 - 4:30)\nTreeSHAP Attributions"]
-    M4 --> M5["5. Autonomous Response\n(4:30 - 5:30)\nDQN vs Cost-Optimal"]
-    M5 --> M6["6. Live Observational Replay\n(5:30 - 6:30)\nPCAP & Synthetic Attacks"]
-    M6 --> M7["7. Limitations & Viva Defense\n(6:30 - 7:00)\nTemporal Drift & NO-GO"]
+    M1["1. Overview\n(0:00 - 0:45)\nSystem Integrity & Matrix"] --> M2["2. Dataset Explorer\n(0:45 - 2:00)\n3 Benchmarks, CSV & Mode B"]
+    M2 --> M3["3. Model Comparison\n(2:00 - 3:00)\nDegenerate Fusion & Ablation"]
+    M3 --> M4["4. Benchmarks & Scopes\n(3:00 - 4:00)\nScope Reconciliation & Speedup"]
+    M4 --> M5["5. Explainability & Attacks\n(4:00 - 4:50)\nTreeSHAP & Critical Blind Spots"]
+    M5 --> M6["6. Autonomous Response\n(4:50 - 5:40)\nCost-Optimal vs DQN & Gate"]
+    M6 --> M7["7. Live Exhibition Demo\n(5:40 - 6:30)\nPCAP Replay & Attack Simulation"]
+    M7 --> M8["8. Limitations & Wrap-Up\n(6:30 - 7:00)\nTemporal Drift & NO-GO Policy"]
 ```
 
 ---
 
-### Step 1: System Overview & Component Integrity (Minute 0:00 – 1:00)
-- **UI Location**: Click **`📋 Overview`** tab (Page A).
+### Step 1: System Overview & Component Integrity (Minute 0:00 – 0:45)
+- **UI Location**: Mode: **`🔬 Research & Model Validation`** → Click **`📋 Overview`** tab.
 - **Examiner Talking Points**:
   - *"Examiners, XRL-IDARS addresses two core questions in intrusion detection: first, whether deep sequence models and multi-model fusion actually provide measurable value over tuned decision-tree ensembles under real capture constraints; second, whether reinforcement learning provides an operational advantage over cost-sensitive decision rules for autonomous response."*
   - *"We do not assume models are perfect or that high benchmark metrics equate to production readiness. We audit every claim against held-out ground truth."*
 - **What to Point Out on Screen**:
-  - Point to the **Git Commit Hash** and environment fingerprint (Python 3.14, PyTorch, Scikit-Learn, SHAP).
+  - Point to the **Git Commit Hash** and environment fingerprint (Python 3.14, PyTorch 2.14, Scikit-Learn 1.9.1, SHAP 0.52).
   - Highlight the **Verified Test Suite**: `493 passed, 0 failed (100% pass rate)`.
   - Point to the **Component Verification Matrix**: all 20 benchmark CSVs verified, Policy A feature deduplication enforced (0 cross-split duplicates).
 
 ---
 
-### Step 2: Primary Benchmark Evaluation & Multi-Model Engine (Minute 1:00 – 2:30)
-- **UI Location**: Click **`📊 Dataset Evaluation`** tab (Page B — Default Landing View).
+### Step 2: Dataset Explorer, Benchmark Evaluation & Mode B Demo (Minute 0:45 – 2:00)
+- **UI Location**: Click **`📊 1. Dataset Explorer`** (Default Active View).
 - **Examiner Talking Points**:
-  - *"Here we evaluate our primary benchmark, CIC-IDS2017, across 355,833 held-out test flows under our frozen 10-feature contract (R10)."*
-  - *"Random Forest achieves F1 = 0.9512 with 98.15% accuracy. Supervised LSTM with length-5 causal sequences achieves F1 = 0.9633. Blending both via score fusion reaches F1 = 0.9745."*
-  - *"Notice the population derivation box: the 32-flow difference between tabular (355,865) and sequence (355,833) is mathematically proven by file-boundary isolation: for sequence length $T=5$, the first 4 context flows across each of the 8 capture files cannot form a sequence without crossing disjoint capture boundaries ($8 \times 4 = 32$ dropped benign flows)."*
+  - *"Here we explore three major datasets (19.3M raw rows): CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15 under strict feature contracts (R10 and R4)."*
+  - *"On our flagship benchmark, CIC-IDS2017 (355,833 aligned test flows), Random Forest achieves F1 = 0.9512 with 98.15% accuracy. Supervised LSTM with length-5 causal sequences achieves F1 = 0.9633. Blending both via score fusion reaches F1 = 0.9745."*
+  - *"Notice the population derivation note: the 32-flow difference between tabular (355,865) and sequence (355,833) is mathematically proven by file-boundary isolation: for sequence length $T=5$, the first 4 context flows across each of the 8 capture files cannot form a sequence without crossing disjoint capture boundaries ($8 \times 4 = 32$ dropped benign flows)."*
 - **Action**:
-  - Scroll down to the **Multi-Model Inference Engine** card.
-  - Click **`Run Mode B (200 Exhibition Demo)`**.
+  - Switch between the **CIC-IDS2017**, **CSE-CIC-IDS2018**, and **UNSW-NB15** cards to show consistent dataset schemas and class breakdowns.
+  - Scroll down to the **Multi-Model Inference Engine** card and click **`Run Mode B (200 Exhibition Demo)`**.
 - **What to Point Out on Screen**:
-  - Watch the live execution of 200 real network flows (166 benign, 34 attacks) across all 3 models.
-  - Point to the side-by-side metric cards and 3 confusion matrices for Random Forest, Supervised LSTM, and Score Fusion.
+  - Watch the live execution of 200 real network flows (166 benign, 34 attacks) across Random Forest, Supervised LSTM, and Score Fusion.
+  - Point to the side-by-side metric cards and 3 confusion matrices.
   - Click **`🔍 Inspect`** on any flagged attack flow to view its feature values and threat score.
+  - Highlight the **Custom CSV Upload & Evaluation** panel: examiners can upload or paste external network flow records to evaluate them against frozen model artifacts without target data leakage.
 
 ---
 
-### Step 3: Head-to-Head Comparison & Negative Results Disclosure (Minute 2:30 – 3:30)
-- **UI Location**: Click **`⚖️ Model Comparison`** tab (Page C).
+### Step 3: Head-to-Head Comparison & Negative Results Disclosure (Minute 2:00 – 3:00)
+- **UI Location**: Click **`⚖️ 2. Model Comparison`** tab.
 - **Examiner Talking Points**:
   - *"Good science requires disclosing where models fail. On CIC-IDS2017, validation grid search gave fusion weight $\alpha = 0.50$. But now look at CSE-CIC-IDS2018:"*
   - Switch benchmark dropdown to **CSE-CIC-IDS2018**.
@@ -112,26 +114,41 @@ flowchart LR
 - **What to Point Out on Screen**:
   - The amber **Degenerate Fusion Warning ($\alpha = 0.00$)**.
   - The **Shuffled-Window Ablation Box** showing $\Delta \text{F1} = -0.0038$.
-  - The paired bootstrap confidence intervals (B=1000).
+  - The paired bootstrap confidence intervals (B=1000) across all 6 models.
 
 ---
 
-### Step 4: Explainable AI with TreeSHAP (Minute 3:30 – 4:30)
-- **UI Location**: Click **`💡 Explainability`** tab (Page E).
+### Step 4: Performance Benchmarks & Measurement Scope Reconciliation (Minute 3:00 – 4:00)
+- **UI Location**: Click **`⏱️ 3. Performance Benchmarks`** tab.
+- **Examiner Talking Points**:
+  - *"A critical issue in published IDS benchmarks is conflating different measurement scopes. In this section, every figure is dynamically loaded from 10 canonical result artifacts on disk."*
+  - *"Notice our Empirical Measurement Scope Reconciliation banner:"*
+    - *"Latency Scope 1 (Microbenchmark)*: Pure 100-tree RF traversal on an isolated pre-extracted feature vector is **~3.53 ms** on CPU (53.87 µs/flow in vectorized batches of 100). The analytic Cost-Optimal policy evaluates in **1.95 µs**, which is **~51.4x faster** than neural DQN forward passes (100.23 µs).*
+    - *"Latency Scope 2 (Streaming Burst Pipeline Queue)*: Under a 1,000-packet line-rate burst (`EXP-P3-BURST-1000-001`), end-to-end packet capture (0.50 µs), flow assembly (12.89 µs), feature extraction (763.72 µs), dual-model sequence queuing with thread contention (**~35.42 ms P50**), and safety verification result in a median end-to-end flow completion latency of **37.51 ms P50**.*
+    - *"Memory Scopes*: Quiescent model weight RAM is **123.2 MB** (RF 117.4M, LSTM 1.2M, DQN 0.4M, hash table 4.2M). Under intense socket stress (`EXP-P3K-STRESS-SECURITY-001`), transient flood buffers cause peak RSS to reach **1,049.45 MiB (~1.05 GiB)**, safely dropping back to **175.74 MiB** post-soak with only **12.05 MiB (7.36%)** net permanent growth over 10,000 soak flows.*
+- **What to Point Out on Screen**:
+  - The **Scope Reconciliation Cards** (Microbenchmark vs Burst Stream Queue; Quiescent RAM vs Peak Flood Stress RSS).
+  - The **Canonical Experiment Artifacts Registry Table** showing all 10 verified JSON files dynamically loaded from disk.
+
+---
+
+### Step 5: Explainable AI & Critical Attack Blind Spots (Minute 4:00 – 4:50)
+- **UI Location**: Click **`💡 4. Explainability & Attacks`** tab.
 - **Examiner Talking Points**:
   - *"For explainability, we compute TreeSHAP feature attributions on our Random Forest detector."*
-  - *"Features like `packet_length_std`, `packet_length_mean`, and `flow_packets_per_s` dominate the decision attributions across attack families."*
-  - *"Crucially, we include a strict scientific disclaimer: TreeSHAP explains tree decisions for Random Forest ONLY. It does not explain the LSTM, the Fusion model, or the DQN Q-values, and feature importance reflects correlation within this dataset, not physical causality."*
+  - *"Features like `packet_length_std`, `packet_length_mean`, and `flow_packets_per_s` dominate the decision attributions across volumetric attacks."*
+  - *"However, look at our Critical Attack Blind Spots panel: low-footprint application attacks suffer catastrophic detection failure (Infiltration recall 0.00%, SQL Injection recall 0.00%, XSS recall 2.78%). Attack payloads reside inside HTTP URIs or single packets, leaving statistical flow features completely indistinguishable from normal web surfing."*
+  - *"Notice our scientific notice: TreeSHAP explains tree decisions for Random Forest ONLY; it does not explain the LSTM, the Fusion model, or the DQN."*
 - **What to Point Out on Screen**:
   - The horizontal bar chart of mean absolute SHAP values.
-  - The scientific disclaimer banner at the top of the page.
+  - The **Critical Blind Spots Cards** detailing zero-day and application-layer detection gaps.
 
 ---
 
-### Step 5: Autonomous Response — DQN vs Analytic Cost-Optimal Baseline (Minute 4:30 – 5:30)
-- **UI Location**: Click **`🛡️ Autonomous Response`** tab (Page F).
+### Step 6: Autonomous Response — DQN vs Analytic Cost-Optimal Baseline (Minute 4:50 – 5:40)
+- **UI Location**: Click **`🛡️ 5. Autonomous Response`** tab.
 - **Examiner Talking Points**:
-  - *"In Phase 2, we investigated whether Deep Q-Networks justify their complexity for autonomous response. We benchmarked our trained Dueling DQN against a zero-parameter `CostOptimalThresholdPolicy` across six operational cost regimes."*
+  - *"In Phase 2, we investigated whether Deep Q-Networks justify their complexity for autonomous response. We benchmarked our trained Dueling DQN against a zero-parameter `CostOptimalThresholdPolicy` across six operational cost regimes on held-out 355k test flows."*
   - Select **High Availability (4-Action)** from the regime dropdown.
   - *"Look at the result: in High Availability 4-action, the analytic baseline achieves a **20.12% lower cost than the trained DQN** ($1,547,511$ vs $1,937,476$) while executing in **1.95 µs**—a **~51x latency advantage** over neural inference (1.95 µs vs 100.23 µs)."*
   - *"Furthermore, analyzing the environment proves traffic arrivals are purely exogenous replay. Response actions do not alter future packet arrivals. Therefore, non-zero discount factors ($\gamma = 0.95$) lack physical justification."*
@@ -139,12 +156,12 @@ flowchart LR
 - **What to Point Out on Screen**:
   - The cost comparison table showing Cost-Optimal winning by 20.12%.
   - The latency comparison badge: 1.95 µs vs 100.23 µs.
-  - The Safety Gate status: deterministic cooldowns, blast radius caps, and production NO-GO policy.
+  - The Safety Gate status: deterministic cooldowns, blast radius caps, atomic rollbacks (`EXP-P3G-ROLLBACK-001`), and production NO-GO policy.
 
 ---
 
-### Step 6: Live Observational Replay & Attack Simulation (Minute 5:30 – 6:30)
-- **UI Location**: Click **`📡 Traffic & Live Modes`** tab (Header / Live Monitor).
+### Step 7: Live Observational Traffic Replay & Attack Simulation (Minute 5:40 – 6:30)
+- **UI Location**: Switch top-level mode button to **`⚡ Live Exhibition Demo`**.
 - **Examiner Talking Points**:
   - *"To demonstrate real-time packet processing without endangering networks, we provide pure-Python streaming replay and in-memory attack simulation."*
   - Point to the **⚠️ Scientific Disclaimer & Strict Operational Mode Separation** banner:
@@ -156,14 +173,15 @@ flowchart LR
 - **What to Point Out on Screen**:
   - Watch the real-time threat gauge swing from green (0.02) to red (0.95+).
   - See the flow table populate with extracted R10 features.
+  - Point out the **Detected Attack Sources** aggregation table and **WiFi Devices** passive discovery panel.
   - Observe the **Policy Suggestion** (`MONITOR`, `THROTTLE`, `BLOCK`) derived from fixed score thresholds, demonstrating advisory decision support.
 
 ---
 
-### Step 7: Audited Research Limitations & Viva Wrap-Up (Minute 6:30 – 7:00)
-- **UI Location**: Click **`⚠️ Research Limitations`** tab (Page G).
+### Step 8: Audited Research Limitations & Viva Wrap-Up (Minute 6:30 – 7:00)
+- **UI Location**: Switch back to **`🔬 Research & Model Validation`** → Click **`⚠️ Research Limitations`** tab.
 - **Examiner Talking Points**:
-  - *"Finally, Page G documents our nine audited research limitations in plain language."*
+  - *"Finally, our Limitations tab documents all nine audited research limitations in plain language."*
   - *"For example, on CSE-CIC-IDS2018, when tested on genuine chronological future days, Random Forest F1 collapses from **0.8861 down to 0.0113** because attack patterns change."*
   - *"Similarly, transferring between CIC and CSE causes a 52% to 95% F1 collapse due to covariate shift."*
   - *"We conclude that transparent disclosure of failure modes, rigorous negative findings, and deterministic safety bounds are essential to transforming IDS from academic benchmark exercises into credible computer science research."*
@@ -174,20 +192,25 @@ flowchart LR
 
 Use this quick-reference table to confirm that the dashboard is displaying the exact audited values during your presentation:
 
-| Screen / Page | Metric / Element | Expected Audited Value | Note |
+| Screen / Section | Metric / Element | Expected Audited Value | Note |
 |:---|:---|:---|:---|
-| **Page A (Overview)** | Test Suite Pass Rate | `493 passed, 0 failed (100%)` | Authoritative pytest suite |
-| **Page B (Evaluation)** | CIC-IDS2017 RF F1 | `0.9512` (98.15% accuracy) | Tabular test split (355,865 flows) |
-| **Page B (Evaluation)** | CIC-IDS2017 LSTM F1 | `0.9633` (98.67% accuracy) | Sequence test split (355,833 flows) |
-| **Page B (Evaluation)** | CIC-IDS2017 Fusion F1 | `0.9745` (99.06% accuracy) | Convex blend $\alpha = 0.50$ |
-| **Page B (Mode B Demo)** | 200 Exhibition Sample | 166 Benign, 34 Attack flows | Real held-out flows, RFC 5737 IPs |
-| **Page C (Comparison)** | CSE-2018 Fusion Weight | `α = 0.00` (Amber Alert) | Degenerate fusion; identical to LSTM |
-| **Page C (Comparison)** | Shuffled-Window Ablation | $\Delta \text{F1} = -0.0038$ | Proves spatial burst smoothing |
-| **Page E (Explain)** | Top Feature Drivers | `packet_length_std`, `flow_packets_per_s` | TreeSHAP on Random Forest only |
-| **Page F (Response)** | High Availability Cost | Cost-Optimal beats DQN by **20.12%** | $1,547,511.0$ vs $1,937,476.5$ |
-| **Page F (Response)** | Policy Latency Advantage | **~51x faster** (1.95 µs vs 100.23 µs) | Zero-parameter threshold rule |
-| **Page G (Limitations)** | Future-Day Holdout F1 | Collapses from `0.8861` to `0.0113` | Chronological concept drift |
-| **Live Monitor** | Network Enforcement | `DISABLED (Observational Only)` | Strictly read-only; no iptables |
+| **📋 Overview** | Test Suite Pass Rate | `493 passed, 0 failed (100%)` | Authoritative pytest suite |
+| **📊 1. Dataset Explorer** | CIC-IDS2017 RF F1 | `0.9512` (98.15% accuracy) | Tabular test split (355,865 flows) |
+| **📊 1. Dataset Explorer** | CIC-IDS2017 LSTM F1 | `0.9633` (98.67% accuracy) | Sequence test split (355,833 flows) |
+| **📊 1. Dataset Explorer** | CIC-IDS2017 Fusion F1 | `0.9745` (99.06% accuracy) | Convex blend $\alpha = 0.50$ |
+| **📊 1. Dataset Explorer** | Mode B 200 Exhibition Sample | 166 Benign, 34 Attack flows | Real held-out flows, RFC 5737 IPs |
+| **⚖️ 2. Model Comparison** | CSE-2018 Fusion Weight | `α = 0.00` (Amber Alert) | Degenerate fusion; identical to LSTM |
+| **⚖️ 2. Model Comparison** | Shuffled-Window Ablation | $\Delta \text{F1} = -0.0038$ | Proves spatial burst smoothing |
+| **⏱️ 3. Performance Benchmarks** | Policy Latency Advantage | **~51.4x faster** (1.95 µs vs 100.23 µs) | Cost-Optimal vs Dueling DQN |
+| **⏱️ 3. Performance Benchmarks** | Latency Reconciliation | Micro: ~3.53 ms / Burst: ~35.42 ms P50 | Isolated tree traversal vs burst queue |
+| **⏱️ 3. Performance Benchmarks** | Memory Reconciliation | Quiescent: 123.2 MB / Peak Stress: 1,049 MiB | Cold weights vs flood stress peak RSS |
+| **⏱️ 3. Performance Benchmarks** | Canonical Artifacts Loaded | `10 / 10 Canonical Artifacts` | Dynamically verified from disk |
+| **💡 4. Explainability & Attacks** | Top Feature Drivers | `packet_length_std`, `flow_packets_per_s` | TreeSHAP on Random Forest only |
+| **💡 4. Explainability & Attacks** | Critical Blind Spots | Infiltration (0%), SQLi (0%), XSS (2.78%) | Statistical flow invariance failure |
+| **🛡️ 5. Autonomous Response** | High Availability Cost | Cost-Optimal beats DQN by **20.12%** | $1,547,511.0$ vs $1,937,476.5$ |
+| **⚡ Live Exhibition Demo** | Network Enforcement | `DISABLED (Observational Only)` | Strictly read-only; zero iptables mutations |
+| **⚠️ Research Limitations** | Future-Day Holdout F1 | Collapses from `0.8861` to `0.0113` | Chronological concept drift |
+
 
 ---
 

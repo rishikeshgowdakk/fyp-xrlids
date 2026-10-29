@@ -2,24 +2,27 @@
 
 A zero-dependency web interface and forensic evaluation workbench for the **Explainable Reinforcement Learning-Based Intrusion Detection and Autonomous Response System (XRL-IDARS)**.
 
-The interface is structured as a **Research Evaluation Workbench**, prioritizing genuine held-out evaluation outputs, statistical confidence bounds, and candid empirical findings over synthetic demonstrations.
+The interface is structured as an authoritative **Research Evaluation Workbench**, prioritizing genuine held-out evaluation outputs, statistical confidence bounds, and candid empirical findings over synthetic demonstrations.
 
 ---
 
-## 🏛️ Workbench Architecture (7 Research Views)
+## 🏛️ Workbench Architecture (2 Modes & 5 Core Research Sections)
 
-The workbench is organized into seven specialized pages:
+The workbench is organized into two top-level operating modes with five core research sections:
 
-### 1. 📊 Dataset Evaluation (Primary Page — Default Active View)
-- Evaluates held-out benchmark splits across four benchmark settings:
+### Mode 1: 🔬 Research & Model Validation (Default Mode)
+Dedicated to held-out empirical benchmark evaluations, multi-model comparisons, runtime microbenchmarks, TreeSHAP attributions, autonomous response policies, and audited scientific limitations:
+
+#### 1. 📊 Section 1: Dataset Explorer & Evaluation
+- Evaluates held-out benchmark splits across four benchmark configurations:
   - **CIC-IDS2017** (Flagship — 355,833 aligned test flows, R10 contract)
   - **CSE-CIC-IDS2018** (Enterprise Cloud — 1,662,419 test flows, R10 contract)
   - **UNSW-NB15** (Sensor Degraded — 24,496 test flows, R4 contract)
   - **CSE-CIC-IDS2018 Temporal Holdout** (1,631,630 test flows across chronological future days)
-- Population slice toggle: Aligned Sequence Slice ($355,833$) vs Tabular Split ($355,865$), with the exact 32-flow boundary derivation documented.
+- Population slice toggle: Aligned Sequence Slice ($355,833$) vs Tabular Split ($355,865$), with the exact 32-flow boundary derivation documented ($8 \text{ capture files} \times (T-1) \text{ boundary flows for } T=5$).
 - High-level metric tiles: Accuracy, Precision, Recall, F1-Score, ROC-AUC, PR-AUC.
 - Held-out Confusion Matrix visualizer (TN, FP, FN, TP).
-- Per-class and per-attack-family breakdown tables.
+- Per-class and per-attack-family breakdown tables with support counts.
 - Calibration reliability curve summary.
 - **📂 Custom CSV Dataset Evaluation & Ingestion**:
   - Live upload, paste, or demo sample loading of arbitrary network flow CSV records.
@@ -29,56 +32,45 @@ The workbench is organized into seven specialized pages:
   - Distinguishes ad-hoc evaluation from official benchmark results without altering historical artifacts.
   - Downloadable CSV export with full evaluation metadata provenance headers.
 
-**CSV evaluation validation rules:** the benchmark and feature contract are a paired configuration (CIC-IDS2017/R10, CSE-CIC-IDS2018/R10, UNSW-NB15/R4). The evaluator separates the label column from inference features, rejects unknown or ambiguous labels, coerces numeric features, accounts for dropped non-finite rows, and applies the canonical feature order. CSV evaluations are ad-hoc analyses against frozen artifacts; they do not alter historical benchmark outputs or retrain models. Treat exported records as evaluation outputs, not as new benchmark evidence.
-
-### 2. 📋 Overview
-- Platform architecture, current Git commit, clean working-tree verification, and runtime environment.
-- Formal Component Verification Matrix with statuses:
-  - Random Forest: `VERIFIED_FOR_DEFINED_SCOPE`
-  - Supervised LSTM: `PARTIALLY_VERIFIED`
-  - RF-LSTM Fusion: `PARTIALLY_VERIFIED`
-  - Deep Q-Network: `REQUIRES_REFORMULATION`
-  - Deterministic Safety Gate: `VERIFIED_FOR_DEFINED_SCOPE`
-- Benchmark inventory table and audit links.
-
-### 3. ⚖️ Model Comparison
+#### 2. ⚖️ Section 2: Model Comparison
 - Aligned comparative benchmark comparing Majority Baseline, Logistic Regression, Decision Tree, Random Forest, Supervised LSTM, and Fusion.
-- 95% bootstrap confidence intervals and multi-seed stability (seeds 42, 123, 456).
+- 95% empirical bootstrap confidence intervals and multi-seed stability (seeds 42, 123, 456).
 - **Fusion Weighting Configuration**: Exposes $\alpha$ and $(1-\alpha)$. Clearly flags degenerate configurations (e.g. $\alpha = 0.00$ on CSE-CIC-IDS2018 where fusion reduces to pure LSTM).
 - **LSTM Shuffled-Window Ablation**: Exposes the empirical finding that sequence order gain is zero ($\Delta \text{F1} = -0.0038$), proving spatial pooling rather than temporal reasoning.
 - **Temporal Generalization Gap**: Highlights the collapse of CSE-2018 RF from F1 0.8861 down to 0.0113 on future days.
 
-### 4. 🔍 Flow Explorer
-- Paginated, filterable browsing of evaluated test flows directly from `predictions_test.csv`.
-- Filters: All Flows, Correct Classifications, Classification Errors, False Positives (FP), Missed Attacks (FN).
-- **Ground Truth Isolation Invariant**: Ground truth is displayed in a separate, isolated visual container, never fed into model inputs.
-- Export Button: Generates and downloads a CSV export of filtered flows with research metadata headers.
+#### 3. ⏱️ Section 3: Performance Benchmarks & Scope Reconciliation
+- Evaluates decision policy latencies: analytic Cost-Optimal (1.95 µs) is **~51.4x faster** than neural Dueling DQN (100.23 µs).
+- **Dual Latency Scope Reconciliation**:
+  - *Scope 1 (Isolated Microbenchmark)*: Pure 100-tree RF traversal on a pre-extracted float32 feature vector is **3,525.08 µs (~3.53 ms)** single-thread (53.87 µs/flow in vectorized batches of 100).
+  - *Scope 2 (Streaming Burst Pipeline Queue)*: Under a 1,000-packet line-rate burst (`EXP-P3-BURST-1000-001`), packet capture (0.50 µs), flow assembly (12.89 µs), feature extraction (763.72 µs), dual-model sequence queuing with thread contention (**35,416.18 µs / ~35.42 ms P50**), policy evaluation (916.16 µs), and safety checks (14.12 µs) yield a median end-to-end flow completion latency of **37,513.87 µs (~37.51 ms P50)**.
+- **Dual Memory Scope Reconciliation**:
+  - *Scope 1 (Quiescent Weights)*: Cold process RAM with loaded weights is **~123.2 MB** (RF 117.4 MB, LSTM 1.2 MB, DQN 0.4 MB, hash table 4.2 MB) with 0.2% idle CPU.
+  - *Scope 2 (Peak Flood Stress RSS)*: Continuous socket stress and 10,000 soak flows (`EXP-P3K-STRESS-SECURITY-001`) cause peak transient RSS to reach **1,049.45 MiB (~1.05 GiB)** before safely returning to **175.74 MiB** post-soak (+12.05 MiB / 7.36% net growth over 10k flows; zero unbounded memory leaks).
+- **Canonical Artifacts Registry**: 10 canonical JSON result files dynamically loaded, parsed, and validated directly from disk.
 
-### 5. 💡 Explainability
-- Explains the Random Forest detector via TreeSHAP (TreeExplainer).
+#### 4. 💡 Section 4: Explainability & Attack Analysis
+- Explains the Random Forest detector via TreeSHAP (TreeExplainer) on evaluated test flows.
 - Global feature importance rankings with mean absolute SHAP values.
+- **Critical Attack Blind Spots**: Discloses severe detection failures on low-footprint application attacks (Infiltration recall 0.00%, SQL Injection recall 0.00%, XSS recall 2.78%) due to L3/L4 flow statistical invariance.
 - **Scientific Notice**: TreeSHAP explains tree decision paths of the Random Forest ONLY; it does not explain the LSTM, the Fusion model, or the DQN.
 
-### 6. 🛡️ Autonomous Response
-- Controlled benchmark comparing the trained Deep Q-Network against the zero-parameter `CostOptimalThresholdPolicy` on held-out 355k test flows.
+#### 5. 🛡️ Section 5: Autonomous Response
+- Controlled benchmark comparing trained Deep Q-Network against the zero-parameter `CostOptimalThresholdPolicy` on held-out 355k test flows.
 - Multi-regime selector: Standard Enterprise, High Availability, High Security Enclave across 3-action and 4-action modes.
 - Paired statistical comparison with 95% bootstrap CI and p-values.
 - Highlights that the analytic Cost-Optimal baseline beats DQN in 4 of 6 settings (up to 20.12% lower cost) and executes ~51x faster (1.95 µs vs 100.23 µs policy-only).
 - Deterministic Safety Gate status: 100% authoritative override on invalid actions. Production autonomous enforcement remains strictly `NO-GO`.
 
-### 7. ⚠️ Research Limitations
-- Plain-language review of all 9 audited limitations:
-  1. Random Split vs Temporal Holdout Generalization Gap
-  2. Random Forest Probability Calibration Gap
-  3. Supervised LSTM Sequence Locality
-  4. Degenerate Fusion Weighting ($\alpha = 0.00$)
-  5. Sensor Schema Degradation on UNSW-NB15 (R4 vs R10)
-  6. Exogenous Flow Replay vs Sequential MDP ($\gamma = 0.95$ ungrounded)
-  7. DQN Inferiority to Analytic Cost-Optimal Baseline
-  8. Observational Live Capture vs Network-Wide Visibility
-  9. Strict Prohibition of Autonomous Production Enforcement.
+#### Supporting Research Views:
+- **📋 Platform Overview**: System architecture, current Git commit, clean working-tree verification, runtime environment, and component verification matrix.
+- **🔍 Flow Explorer**: Paginated, filterable browsing of evaluated test flows directly from `predictions_test.csv` with strict ground truth visual isolation.
+- **⚠️ Research Limitations**: Candid plain-language review of all 9 audited scientific limitations.
 
-### 8. ⚡ Live Monitor & Traffic Modes (Secondary View)
+---
+
+### Mode 2: ⚡ Live Exhibition Demo (Observational Traffic & Attack Simulation)
+Dedicated to live packet inspection, pure-Python streaming replay, and in-memory attack simulation without production network mutations:
 - Strictly separates the 5 traffic execution modes:
   - **Mode 1**: Offline Dataset Evaluation (Frozen test split)
   - **Mode 2**: Dataset Demonstration Stream (Curated benchmark feature vectors; display endpoints are synthetic)
@@ -93,7 +85,10 @@ The workbench is organized into seven specialized pages:
   - Resolves MAC addresses to hardware vendors via local OUI cache.
   - Displays IP address, hostname/label, packet count, relative last-seen age, and dynamic router admin link.
   - Active network scanning, probing, or router credential storage is strictly prohibited.
-  - Live capture only: non-live replay modes show an explicit notice and never fabricate device entries.
+- **⚡ Attack Simulator**:
+  - 7 calibrated attack scenarios (Slowloris, SYN Flood, UDP Flood, Port Sweep, Slow HTTP DoS, Shrew, Normal Traffic).
+- **⚠️ Operational Disclaimer Banner**:
+  - Prominently warns that live operational traffic lacks ground-truth labels and that benchmark accuracy on closed datasets does not prove live operational accuracy.
 
 ---
 
@@ -111,4 +106,5 @@ python dashboard/server.py 8080
 ```
 
 Open `http://127.0.0.1:8000/` in your browser.
-By default, the workbench opens in idle observational mode on **Page B: Dataset Evaluation**, ready for interactive inspection of verified experimental results.
+By default, the workbench opens in idle observational mode on **🔬 Research & Model Validation** (Section 1: Dataset Explorer), ready for interactive inspection of verified experimental results.
+

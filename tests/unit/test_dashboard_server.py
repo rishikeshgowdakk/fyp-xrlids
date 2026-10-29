@@ -298,6 +298,11 @@ def test_dashboard_http_live_endpoints():
             assert "burst_traffic_benchmark" in pb
             assert "speedup_comparison" in pb
             assert "resource_profile" in pb
+            assert pb.get("artifacts_dynamically_loaded") is True
+            assert pb.get("loaded_artifacts_count", 0) >= 10
+            assert "measurement_scopes" in pb
+            assert "latency_reconciliation" in pb["measurement_scopes"]
+            assert "resource_reconciliation" in pb["measurement_scopes"]
 
         with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/comparison?benchmark=cicids2017", timeout=5) as resp:
             assert resp.status == 200

@@ -21,7 +21,7 @@ script: what to run, what to click, what to say, and what to do when something b
 | Deterministic replay metrics | ✅ research τ=0.50 → 83.3% (F1 0.8000); operational τ=0.40 → 100% (F1 1.0000) |
 | Frozen model artifacts | ✅ `EXP-P1-CIC2017-R10-001/*.joblib` present (RF 26 MB + preprocessor) |
 | Simulator calibration re-verification | ✅ 7/7 scenarios OK (`scripts/demo/verify_attack_scenarios.py`) |
-| Full test suite | ✅ **452 passed, 0 failed** (`pytest -q`, exit 0) |
+| Full test suite | ✅ **493 passed, 0 failed** (`pytest -q`, exit 0) |
 | Phase 2/3 artifacts (RL, response, burst, gate) | ✅ result directories present |
 | Root required? | ❌ No for sample mode; ✅ only for optional live WiFi capture |
 
@@ -195,7 +195,7 @@ itself only reads (live capture) — it never sends, drops, or reroutes.
 
 **Q9. How do you know live features match the training features?**
 Parity tests verify computed features against the offline definitions to `atol ≤ 1e-4`; the R10
-contract is frozen and shared by training, replay, and live paths. The test suite (452 tests)
+contract is frozen and shared by training, replay, and live paths. The test suite (493 tests)
 includes the parity and pipeline tests.
 
 **Q10. What happens if the model files are missing on the demo machine?**
@@ -335,7 +335,7 @@ For an authoritative list, use the router's admin page/API or run the collector 
 > offline evidence."
 
 **Shot 8 — Closing + limitations (6:30–7:15)**
-> "The detector and console are complete and covered by 452 passing tests. Live traffic has no
+> "The detector and console are complete and covered by 493 passing tests. Live traffic has no
 > ground truth, so we never report accuracy on it. Production deployment would require
 > authentication, TLS, durable storage, a model registry, and kernel-bypass capture. The research
 > contribution — leakage-safe training, calibrated simulation, and an honest evaluation — is
@@ -389,7 +389,8 @@ For an authoritative list, use the router's admin page/API or run the collector 
 | Simulator (evasion demos) | 0.0002 · 0.0290 · 0.0169 |
 | Proof script | benign 0.0203 · attack 0.9910 · gap sweep 0.103/0.344/0.528/0.266/0.991 |
 | Blocked traffic | 0 — policy suggestions only (`BLOCK (suggested)`, NOT enforced) |
-| Tests | 452 passed, 0 failed |
+| Tests | 493 passed, 0 failed |
+
 | RL hypothesis | H0 rejected (p < 0.001); cost −11.29% / −14.10%; 15% practical criterion NOT met |
 | D-006 | TCP closes on FIN/RST; otherwise 120 s idle |
 | Live capture | AF_PACKET raw socket; root/CAP_NET_RAW; read-only |
