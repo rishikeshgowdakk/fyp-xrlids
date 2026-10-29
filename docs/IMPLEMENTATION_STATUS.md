@@ -2,8 +2,8 @@
 
 **Official Title:** Explainable Reinforcement Learning-Based Network Intrusion Detection and Autonomous Response System (XRL-IDARS)  
 **Repository:** `rishikeshgowdakk/fyp-xrlids`  
-**Git Branch / Commit:** `main` @ `5450b2b`  
-**Test Suite Status:** **550 passed, 0 failed, 18 warnings in 60.85s**  
+**Git Branch / Commit:** `main` @ `4c7a8a9`  
+**Test Suite Status:** **560 passed, 0 failed, 18 warnings in 50.45s**  
 
 ---
 
@@ -15,16 +15,17 @@
 | **COMP-02** | Bidirectional Flow Builder (`flow.py`) | **Implemented** | **Tested** | **Verified** | Implements D-006 completion policy (FIN/RST and 120s timeout). Computes exact $R_{10}$ and $R_4$ statistical moments. |
 | **COMP-03** | Feature Contract Gate (`registry.py`) | **Implemented** | **Tested** | **Verified** | Enforces $R_{10}$ and $R_4$ schemas. Strictly rejects NaNs, infinities, and missing fields. |
 | **COMP-04** | Deterministic Rule Engine (`rules/engine.py`) | **Implemented** | **Tested** | **Verified** | 5 deterministic rules: `RULE-TCP-INVALID-FLAGS`, `RULE-SYN-FLOOD`, `RULE-PORT-SCAN`, `RULE-HIGH-RATE-BURST`, `RULE-IP-SPOOF-RESERVED`. Fast execution ($<0.01$ ms). |
-| **COMP-05** | Primary Random Forest Detector (`models/rf/`) | **Implemented** | **Tested** | **Verified** | Loaded frozen artifacts for CIC-IDS2017 ($F_1=0.9512$), CSE-CIC-IDS2018 ($F_1=0.8861$), UNSW-NB15 ($F_1=0.8548$). Dynamic class index mapping. |
+| **COMP-05** | Primary Random Forest Detector (`models/rf/`) | **Implemented** | **Tested** | **Verified** | Loaded frozen artifacts for CIC-IDS2017 ($F_1=0.9512$), CSE-CIC-IDS2018 ($F_1=0.8861$), UNSW-NB15 ($F_1=0.8548$). Dynamic class index mapping. Strictly binary ($P(\text{ATTACK})$). |
 | **COMP-06** | Genuine TreeSHAP Local XAI (`csv_evaluator.py`) | **Implemented** | **Tested** | **Verified** | Exact local Shapley values via `shap.TreeExplainer`. Preserves feature names, direction, and signed attribution values. Evaluates in $8.94$ ms. |
-| **COMP-07** | DQN Response Policy (`models/dqn/`) | **Implemented** | **Tested** | **Verified** | Loaded 4-action and 3-action Dueling DQN checkpoints. Evaluated on 355k held-out test flows against 4 baselines. |
+| **COMP-07** | DQN Response Policy (`models/dqn/`) | **Implemented** | **Tested** | **Verified** | Loaded 4-action and 3-action Dueling DQN checkpoints. Evaluated on 355k held-out test flows against 4 baselines. Threat-severity aware via continuous score $S_t$ in 6D causal state vector. |
 | **COMP-08** | Response Policy Explanation | **Implemented** | **Tested** | **Verified** | Explains DQN actions via actual Q-values, state vectors, and action semantics. Explicitly decoupled from TreeSHAP. |
 | **COMP-09** | Deterministic Safety Gate (`response/engine.py`) | **Implemented** | **Tested** | **Verified** | Enforces dry-run advisory mode. Zero kernel mutations (`iptables`/`nftables` calls strictly prevented). |
 | **COMP-10** | Offline Supervised LSTM Baseline (`models/lstm/`) | **Implemented** | **Tested** | **Verified** | Causal temporal sequence model ($T=5$). Retained strictly as an offline comparator. Isolated from live inference. |
 | **COMP-11** | Offline Score Fusion Baseline (`models/fusion/`) | **Implemented** | **Tested** | **Verified** | Score blending ($RF + LSTM$) using saved weights. Retained strictly as an offline comparator. |
 | **COMP-12** | Input Modes (CSV, PCAP, Live, Synthetic) | **Implemented** | **Tested** | **Verified** | Distinct handling across Mode A (full split), Mode B (200 demo), Mode C (custom CSV), PCAP replay, live monitor, and synthetic simulator. |
-| **COMP-13** | Interactive Dashboard & REST API (`server.py`) | **Implemented** | **Tested** | **Verified** | LiveSession state synchronization, real-time SSE streaming, waterfall charts, and rule/RF badge visualization. |
-| **COMP-14** | Automated Test Suite | **Implemented** | **Tested** | **Verified** | 550 tests passing across unit, integration, and regression suites. Zero regressions. |
+| **COMP-13** | Interactive Dashboard & REST API (`server.py`) | **Implemented** | **Tested** | **Verified** | LiveSession state synchronization, real-time SSE streaming, waterfall charts, rule/RF badge visualization, and semantic contract declarations. |
+| **COMP-14** | Attack-Family Semantics & Audit (`test_attack_family...`) | **Implemented** | **Tested** | **Verified** | Disambiguates binary model output, ground-truth label evaluation, and advisory response semantics across backend and frontend. |
+| **COMP-15** | Automated Test Suite | **Implemented** | **Tested** | **Verified** | 560 tests passing across unit, integration, and regression suites. Zero regressions. |
 
 ---
 
