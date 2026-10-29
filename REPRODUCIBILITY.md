@@ -33,7 +33,7 @@ Verify runtime environment:
 
 ---
 
-## 2. Test Suite Execution (466 Tests)
+## 2. Test Suite Execution (493 Tests)
 
 ```bash
 ./run.sh test
@@ -41,7 +41,7 @@ Verify runtime environment:
 .venv/bin/pytest -q
 ```
 
-All **466 tests** across `tests/unit/` (372), `tests/data/` (45), `tests/integration/` (31), and `tests/model/` (18) pass with zero failures.
+All **493 tests** across `tests/unit/` (399), `tests/data/` (45), `tests/integration/` (31), and `tests/model/` (18) pass with zero failures.
 
 To run only the response policy and safety subsystem verification suite (43 tests):
 ```bash
@@ -123,7 +123,7 @@ Scientific rigor requires reporting negative outcomes and empirical bounds rathe
 | Evaluation Task | Executable Command | Required Datasets / Artifacts | Reproduction Status | Output Artifact |
 |:---|:---|:---|:---:|:---|
 | **Response Unit Tests** | `pytest tests/unit/test_response* -v` | Repository code only | **REPRODUCIBLE** | 43 passed (0.60s) |
-| **Full Verification Suite** | `pytest -q` | Repository code only | **REPRODUCIBLE** | 466 passed (42.5s) |
+| **Full Verification Suite** | `pytest -q` | Repository code only | **REPRODUCIBLE** | 493 passed (~45s) |
 | **Phase 2B Readiness Audit** | `python scripts/phase2/run_phase2b_readiness_audit.py` | Committed models & registries | **REPRODUCIBLE** | `results/phase2/EXP-P2B-READINESS-AUDIT-001/` |
 | **Phase 2A Cost-Optimal Benchmark** | `python scripts/phase2/run_phase2a_cost_optimal_comparison.py` | `d_pol_test_flows.joblib`, DQN models | **REPRODUCIBLE** | `results/phase2/EXP-P2A-COST-OPTIMAL-001/` |
 | **PCAP Offline Replay Demo** | `python scripts/demo/run_replay_demo.py` | Bundled sample PCAP & RF model | **REPRODUCIBLE** | `results/demo/replay_summary.json` |

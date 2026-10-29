@@ -2,7 +2,7 @@
 
 **Project**: Explainable Reinforcement Learning Intrusion Detection System (`fyp-xrlids`)  
 **Date**: October 2026  
-**Status**: Production-Hardened & Audited (All 417+ Test Suite Passed)  
+**Status**: Production-Hardened & Audited (All 493 Test Suite Passed)  
 **Target Environment**: Academic Defense (Viva Voce) & Hugging Face Production Spaces  
 
 ---

@@ -57,9 +57,11 @@ reports/generated/*.png
 reports/generated/*.pdf
 reports/figures/*
 !reports/figures/.gitkeep
+!reports/figures/*.png
 
 # Live capture artifacts
 *.pcap
+!data/demo/sample_traffic.pcap
 *.pcapng
 
 # Logs

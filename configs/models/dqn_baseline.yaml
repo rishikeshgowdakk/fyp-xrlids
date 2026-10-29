@@ -44,7 +44,10 @@ reward:
       ALERT: -5
       BLOCK: 10
   sensitivity_study:
-    configurations: [A, B, C]   # TODO: define B and C
+    configurations:
+      A: standard_enterprise      # Balanced baseline regime (Benign Isolate: 60.0, Attack Allow: 100.0)
+      B: high_availability        # Availability prioritized (Benign Isolate: 120.0, Attack Allow: 50.0)
+      C: high_security_enclave    # Breach prevention prioritized (Benign Isolate: 25.0, Attack Allow: 500.0)
     compare:
       - attack_protection
       - false_blocking

@@ -24,7 +24,7 @@
 | **Official Release Notes** | Full v1.0.0 notes with scope, findings, limitations | `docs/final/V1.0.0_RELEASE_NOTES.md` complete | **PASS** |
 | **Phase 3 Documentation Status** | Phase 3K complete; final report linked | `docs/phase3/README.md` fully reconciled | **PASS** |
 | **Project Status Table** | Phase 1 & 2 frozen, Phase 3 complete | `PROJECT_STATUS.md` fully reconciled | **PASS** |
-| **Full Test Suite Execution** | All repository tests pass (0 failures) | `.venv/bin/pytest -q` (394 passed, 0 failed) | **PASS** |
+| **Full Test Suite Execution** | All repository tests pass (0 failures) | `.venv/bin/pytest -q` (493 passed, 0 failed) | **PASS** |
 | **Host Network Integrity** | Zero host network mutations | SHA-256 baseline `pre == post` verified | **PASS** |
 | **Working Tree Cleanliness** | No untracked junk, secrets, or temp namespaces | Clean working tree verified | **PASS** |
 
@@ -67,7 +67,7 @@
 | **Release Identifier** | `XRL-IDARS v1.0.0` |
 | **Research Baseline Commit** | `31c47308703ec22727078e3a62f518ab33b3173d` |
 | **Git Release Tag** | `v1.0.0` |
-| **Test Suite Verification** | 408 passed, 0 failed (100% pass) |
+| **Test Suite Verification** | 493 passed, 0 failed (100% pass) |
 | **Working Tree Status** | Clean (0 untracked files, 0 residual namespaces) |
 | **Final Release Declaration** | **XRL-IDARS v1.0.0 RELEASE CANDIDATE VERIFIED** |
 

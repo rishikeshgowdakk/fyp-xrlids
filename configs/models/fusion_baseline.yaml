@@ -15,20 +15,20 @@ formula:
     so its contribution is measurable.
 
 alignment:
-  population: null            # TODO: exactly which rows are being compared
-  join_key: null
+  population: aligned_intersection  # held-out test rows where both RF and LSTM make valid predictions
+  join_key: flow_index
   handling: inner_join        # rows present in only one model are excluded and counted
   expected_agreement: null
   actual_agreement: null
 
 score_comparability:
   rf_score_is_probability: true
-  lstm_score_is_probability: null   # TODO after sigmoid/loss analysis
-  calibration_required: true
+  lstm_score_is_probability: true   # output of sigmoid activation over BCEWithLogitsLoss logits on [0, 1]
+  calibration_required: false       # scores are bounded continuous risk metrics; uncalibrated per D-003
   calibration_ref: results/calibration/
 
 threshold:
-  default: null               # selected on validation per D-003
+  default: 0.50               # selected on validation per D-003
   selected_on: validation
   # Never select the fusion threshold on the test set.
 

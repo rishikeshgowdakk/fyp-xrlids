@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software or research findings in your work, please cite it as below."
+title: "XRL-IDARS: Explainable Reinforcement Learning Intrusion Detection and Autonomous Response System"
+version: 1.0.0
+date-released: 2026-10-05
+license: MIT
+repository-code: "https://github.com/rishikeshgowdakk/fyp-xrlids"
+authors:
+  - family-names: "Gowda K K"
+    given-names: "Rishikesh"
+abstract: >-
+  XRL-IDARS is an open-source research framework for network-flow intrusion detection and
+  controlled autonomous response. It couples tabular and temporal machine learning detection
+  (Random Forest and LSTM score fusion) with TreeSHAP feature attributions, context-aware
+  reinforcement learning response policies (Dueling DQN), and deterministic safety constraints
+  with atomic transaction rollback to prevent self-inflicted denial-of-service and unauthorized
+  network mutations.
+keywords:
+  - intrusion-detection
+  - network-security
+  - reinforcement-learning
+  - dueling-dqn
+  - explainable-ai
+  - shap
+  - cybersecurity

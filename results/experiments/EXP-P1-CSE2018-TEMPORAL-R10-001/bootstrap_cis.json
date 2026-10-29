@@ -13,7 +13,7 @@
   },
   "seeds": {
     "42": {
-      "path": "/home/rishikesh/Desktop/fyp-xrlids/results/experiments/EXP-P1-CSE2018-TEMPORAL-R10-001/predictions_test.csv",
+      "path": "results/experiments/EXP-P1-CSE2018-TEMPORAL-R10-001/predictions_test.csv",
       "n_rows": 1631630,
       "models": {
         "random_forest": {

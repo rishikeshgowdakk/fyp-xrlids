@@ -36,12 +36,12 @@ modes:
       - rollback_verified
 
 block_gate:
-  minimum_confidence: null            # TODO — depends on D-003 calibration outcome
-  require_calibrated_score: true      # do not treat an uncalibrated score as confidence
-  minimum_repeated_observations: null # TODO
-  repeat_window_seconds: null
-  maximum_block_duration_seconds: null
-  cooldown_seconds: null
+  minimum_confidence: 0.50            # canonical attack decision threshold under Decision D-003
+  require_calibrated_score: false     # scores are bounded continuous risk metrics; uncalibrated per D-003
+  minimum_repeated_observations: 2    # require repeated confirmation before disruptive block/isolation
+  repeat_window_seconds: 30.0
+  maximum_block_duration_seconds: 300.0
+  cooldown_seconds: 30.0
   protected_source_check: required
   existing_block_check: required
   manual_override: required

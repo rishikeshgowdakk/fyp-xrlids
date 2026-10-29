@@ -13,7 +13,7 @@
   },
   "seeds": {
     "42": {
-      "path": "/home/rishikesh/Desktop/fyp-xrlids/results/experiments/EXP-P1-CIC2017-R10-001/seed_42/predictions_test.csv",
+      "path": "results/experiments/EXP-P1-CIC2017-R10-001/seed_42/predictions_test.csv",
       "n_rows": 355833,
       "models": {
         "random_forest": {
@@ -172,7 +172,7 @@
       }
     },
     "123": {
-      "path": "/home/rishikesh/Desktop/fyp-xrlids/results/experiments/EXP-P1-CIC2017-R10-001/seed_123/predictions_test.csv",
+      "path": "results/experiments/EXP-P1-CIC2017-R10-001/seed_123/predictions_test.csv",
       "n_rows": 355833,
       "models": {
         "random_forest": {
@@ -331,7 +331,7 @@
       }
     },
     "456": {
-      "path": "/home/rishikesh/Desktop/fyp-xrlids/results/experiments/EXP-P1-CIC2017-R10-001/seed_456/predictions_test.csv",
+      "path": "results/experiments/EXP-P1-CIC2017-R10-001/seed_456/predictions_test.csv",
       "n_rows": 355833,
       "models": {
         "random_forest": {

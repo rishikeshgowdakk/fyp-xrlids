@@ -54,11 +54,11 @@ To verify physical file integrity:
 
 ## 3. Test Suite Verification
 
-To execute the complete 408-test verification suite:
+To execute the complete 493-test verification suite:
 ```bash
 .venv/bin/pytest -q
 ```
-*Expected Result:* `408 passed` (0 failures, 100% pass rate).
+*Expected Result:* `493 passed` (0 failures, 100% pass rate).
 
 ---
 

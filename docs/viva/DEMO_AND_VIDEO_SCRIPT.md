@@ -213,13 +213,13 @@ capture, eBPF/XDP for line rate, CI/CD + containers, and distributed coordinatio
 observability logic is complete; the operational envelope is not.
 
 **Q13. What is the "Policy Suggestion (NOT enforced)" column?**
-A display-only mapping of the DQN response-policy bands (BLOCK ≥ 0.50, THROTTLE ≥ 0.40, MONITOR
+A display-only mapping of fixed risk-score threshold bands (BLOCK ≥ 0.50, THROTTLE ≥ 0.40, MONITOR
 ≥ 0.20, ALLOW otherwise), labeled `(suggested)`. The dashboard never actuates and states "No traffic
-is blocked"; enforcement lives in the audited transaction/safety-gate path, tested only inside
-isolated network namespaces.
+is blocked"; autonomous response policies (including Dueling DQN and Cost-Optimal baselines) are
+evaluated under the Autonomous Response tab and enforced/tested only inside isolated network namespaces.
 
 **Q14. How many tests are in the suite, and what do they cover?**
-The test suite contains **452 automated tests** across 66 modules covering: Phase 1 data/model contracts, leakage/dedup guarantees, parity, and replay (408 → 417); Phase 2A Cost-Optimal baseline policies (423); Research Evaluation Workbench APIs and population reconciliations (435); and Phase D CSV dataset evaluation, target-leakage prevention, strict label parsing, non-finite row reconciliation, and schema enforcement (452). `pytest -q` is the single gate; expected result: 452 passed with 0 failures.
+The test suite contains **493 automated tests** across the test suite covering: Phase 1 data/model contracts, leakage/dedup guarantees, parity, and replay; Phase 2A Cost-Optimal baseline policies; Research Evaluation Workbench APIs and population reconciliations; and Phase D CSV dataset evaluation, target-leakage prevention, strict label parsing, non-finite row reconciliation, and schema enforcement. `pytest -q` is the single gate; expected result: 493 passed with 0 failures.
 
 **Q15. How exactly is the score calculated?**
 `score = random_forest.predict_proba(preprocessor.transform(R10_features))[0]` — the frozen RF's

@@ -17,7 +17,7 @@
 ### Commit Details
 - **HEAD SHA:** `7d6bcd446b7d99bf5625173870bd0a7325eac467`
 - **Commit Message:** `fix(ci): align Python support to 3.12+, fix package installation in workflow, and add test arithmetic reconciliation addendum`
-- **Author:** `rishikeshgowdakk <rishikeshgowdakk@gmail.com>`
+- **Author:** `Rishikesh Gowda K K`
 - **Date:** `Wed Oct 28 21:28:15 2026 +0530`
 
 ### Recent Commits (Top 5 on `main`)

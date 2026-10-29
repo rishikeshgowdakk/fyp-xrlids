@@ -18,7 +18,9 @@ hyperparameters:
 # Class imbalance handling is recorded explicitly (§33).
 class_imbalance:
   strategy: class_weight
-  observed_distribution: null   # TODO after audit
+  observed_distribution:
+    benign: 0.8030              # Audited post-cleaning baseline proportion (CIC-IDS2017)
+    attack: 0.1970              # Audited post-cleaning baseline proportion (CIC-IDS2017)
 
 outputs_required:
   - metrics.json

@@ -16,12 +16,14 @@ and generates figures in reports/figures/:
 
 import os
 import json
+from pathlib import Path
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-OUTPUT_DIR = "/home/rishikesh/Desktop/fyp-xrlids/reports/figures"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+OUTPUT_DIR = str(REPO_ROOT / "reports" / "figures")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Set global clean style
@@ -38,7 +40,7 @@ plt.rcParams.update({
 
 def plot_confusion_matrices():
     """Figure 1: Confusion matrices for CIC-IDS2017 models."""
-    metrics_path = "/home/rishikesh/Desktop/fyp-xrlids/results/experiments/EXP-P1-CIC2017-R10-001/test_metrics.json"
+    metrics_path = str(REPO_ROOT / "results/experiments/EXP-P1-CIC2017-R10-001/test_metrics.json")
     if not os.path.exists(metrics_path):
         print(f"Skipping confusion matrices: {metrics_path} not found")
         return
@@ -97,9 +99,9 @@ def plot_confusion_matrices():
 def plot_baseline_ladder():
     """Figure 2: Baseline ladder comparison across datasets."""
     datasets = {
-        'CIC-IDS2017': '/home/rishikesh/Desktop/fyp-xrlids/results/experiments/EXP-P1-CIC2017-R10-001/test_metrics.json',
-        'CSE-CIC-IDS2018': '/home/rishikesh/Desktop/fyp-xrlids/results/experiments/EXP-P1-CSE2018-R10-MULTI-001/test_metrics.json',
-        'UNSW-NB15': '/home/rishikesh/Desktop/fyp-xrlids/results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/test_metrics.json'
+        'CIC-IDS2017': str(REPO_ROOT / "results/experiments/EXP-P1-CIC2017-R10-001/test_metrics.json"),
+        'CSE-CIC-IDS2018': str(REPO_ROOT / "results/experiments/EXP-P1-CSE2018-R10-MULTI-001/test_metrics.json"),
+        'UNSW-NB15': str(REPO_ROOT / "results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/test_metrics.json")
     }
 
     model_names = ['majority', 'logistic_regression', 'decision_tree', 'random_forest', 'lstm']
@@ -288,7 +290,7 @@ def plot_transfer_degradation_bars():
 
 def plot_shap_feature_importance():
     """Figure 5: TreeSHAP global feature importance ranking."""
-    shap_path = "/home/rishikesh/Desktop/fyp-xrlids/results/experiments/EXP-P1-CIC2017-R10-001/shap_summary.json"
+    shap_path = str(REPO_ROOT / "results/experiments/EXP-P1-CIC2017-R10-001/shap_summary.json")
     if not os.path.exists(shap_path):
         print(f"Skipping SHAP: {shap_path} not found")
         return
@@ -330,7 +332,7 @@ def plot_shap_feature_importance():
 
 def plot_phase2_dqn_learning():
     """Figure 6: DQN training loss and validation cost trajectories."""
-    hist_path = "/home/rishikesh/Desktop/fyp-xrlids/results/phase2/EXP-P2B-DQN-001/training_history.json"
+    hist_path = str(REPO_ROOT / "results/phase2/EXP-P2B-DQN-001/training_history.json")
     if not os.path.exists(hist_path):
         print(f"Skipping DQN curves: {hist_path} not found")
         return
@@ -378,7 +380,7 @@ def plot_phase2_dqn_learning():
 
 def plot_phase2_policy_comparison():
     """Figure 7: Policy comparison between DQN and static baselines."""
-    metrics_path = "/home/rishikesh/Desktop/fyp-xrlids/results/phase2/EXP-P2-FINAL-TEST-001/final_test_metrics.json"
+    metrics_path = str(REPO_ROOT / "results/phase2/EXP-P2-FINAL-TEST-001/final_test_metrics.json")
     if not os.path.exists(metrics_path):
         print(f"Skipping policy comparison: {metrics_path} not found")
         return

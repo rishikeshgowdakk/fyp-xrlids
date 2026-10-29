@@ -9,12 +9,12 @@ status: historical_starter
 
 sequence:
   T: 5                    # sequence length: number of consecutive flow vectors
-  construction: null      # TODO: how sequences are built (consecutive in time? per group?)
-  ordering_key: null      # what defines consecutive (timestamp? row order? shuffled?)
-  grouping_key: null      # must not span different flows/sources if that would be meaningless
-  label_rule: null        # label of the sequence (last element? majority? any-attack?)
+  construction: sliding_window  # consecutive file-order flow sequence (stride 1)
+  ordering_key: file_arrival_order
+  grouping_key: split_isolated  # sequences strictly isolated within train/val/test splits
+  label_rule: last              # label of the sequence is the target label of the last flow
   boundary_handling: no_cross_split   # MANDATORY: no sequence may cross train/val/test
-  padding: null
+  padding: none
 
 hyperparameters:
   hidden_size: 32
@@ -23,10 +23,10 @@ hyperparameters:
   optimizer: Adam
   learning_rate: 0.001
   loss: BCEWithLogitsLoss
-  batch_size: null        # TODO
-  epochs: null            # TODO
-  early_stopping: null
-  best_checkpoint_criterion: null
+  batch_size: 256
+  epochs: 15
+  early_stopping: patience_3
+  best_checkpoint_criterion: val_loss
 
 training:
   seeds: []               # record all seeds used

@@ -323,7 +323,7 @@ The dashboard is engineered as a zero-dependency **Research Evaluation Workbench
 #### Visual Dashboard Tour & Live Console Gallery
 
 ##### 1. Live Monitor — Real-Time Detection & Empirical Validation
-Streams authentic benchmark or live network flows with a real-time confusion matrix (True Positives, False Positives, False Negatives, True Negatives), threat score spectrum, in-memory attack simulator, detected attacker IP summary, and autonomous Dueling DQN mitigation policies (`BLOCK`, `THROTTLE`, `MONITOR`, `ALLOW`):
+Streams authentic benchmark or live network flows with a real-time confusion matrix (True Positives, False Positives, False Negatives, True Negatives), threat score spectrum, in-memory attack simulator, detected attacker IP summary, and suggested mitigation actions mapped from fixed risk-score thresholds (`BLOCK` ≥ 0.50, `THROTTLE` ≥ 0.40, `MONITOR` ≥ 0.20, `ALLOW` < 0.20):
 
 ![Live Monitor Console](docs/images/01_full_dashboard_live.png)
 
@@ -361,7 +361,7 @@ python dashboard/server.py
    - `Monday — Normal Enterprise Benign Only`
 4. Click **Start Capture**:
    - Streams authentic benchmark flows in real time with ground-truth labels displayed in the **Truth** column.
-   - Attack bursts automatically trigger the red **ATTACK DETECTED** banner, populate the **Detected Attack Sources** table, and recommend Dueling DQN mitigation policies (e.g. `BLOCK`).
+   - Attack bursts automatically trigger the red **ATTACK DETECTED** banner, populate the **Detected Attack Sources** table, and display suggested mitigation actions based on fixed risk-score thresholds (e.g. `BLOCK` ≥ 0.50). Full offline Dueling DQN response evaluation is benchmarked under the **Autonomous Response** tab.
    - Click **features** on any alert to view the exact 10 R10 features and TreeSHAP explainability modal.
 
 #### Option B: Sample PCAP Stream (no root needed)
@@ -477,6 +477,40 @@ Detailed methodology, experiments, limitations, reproducibility information, and
 ## Scope & Safety
 
 Autonomous response enforcement is validated strictly within a controlled, isolated laboratory environment (Linux network namespaces on `10.200.1.0/24`) with verified zero mutations to the host networking stack. The project does not claim or support production deployment on uncontrolled operational networks such as campus or enterprise Wi-Fi.
+
+---
+
+## Authors & Academic Supervision
+
+- **Author:** Rishikesh Gowda K K ([@rishikeshgowdakk](https://github.com/rishikeshgowdakk))  
+- **Academic Supervision:** Final Year Project Faculty Guide, Department of Computer Science & Engineering  
+- Full details and acknowledgements: [`AUTHORS.md`](AUTHORS.md)
+
+---
+
+## Acknowledgements
+
+- **Canadian Institute for Cybersecurity (CIC)** for the CIC-IDS2017 and CSE-CIC-IDS2018 datasets.
+- **Australian Centre for Cyber Security (ACCS)** for the UNSW-NB15 dataset.
+- Maintainers of PyTorch, Scikit-Learn, SHAP, NumPy, Pandas, and Matplotlib.
+
+---
+
+## Citation
+
+If you reference or build upon this research framework in academic work, please cite:
+
+```bibtex
+@software{gowda2026xrlids,
+  author = {Gowda K K, Rishikesh},
+  title = {{XRL-IDARS: Explainable Reinforcement Learning Intrusion Detection and Autonomous Response System}},
+  year = {2026},
+  url = {https://github.com/rishikeshgowdakk/fyp-xrlids},
+  version = {1.0.0}
+}
+```
+
+Machine-readable citation metadata is also provided in [`CITATION.cff`](CITATION.cff).
 
 ---
 
