@@ -27,6 +27,88 @@ function fmt(num, decimals = 4) {
   return Number(num).toFixed(decimals);
 }
 
+
+function renderDatasetVisuals(data) {
+  const chart = document.getElementById("ds-model-chart");
+  const comp = document.getElementById("ds-composition-chart");
+  const rows = Array.isArray(data.cross_dataset_summary) ? data.cross_dataset_summary : [];
+  const colors = ["#60a5fa", "#a78bfa", "#67e8f9"];
+  if (chart) {
+    if (!rows.length) {
+      chart.innerHTML = '<div class="chart-empty">No cross-dataset model metrics available.</div>';
+    } else {
+      chart.className = "bar-chart";
+      chart.innerHTML = rows.map(row => {
+        const name = row.benchmark_name || row.benchmark || "Dataset";
+        const values = [
+          ["RF", Number(row.rf_f1), colors[0]],
+          ["LSTM", Number(row.lstm_f1), colors[1]],
+          ["Fusion", Number(row.fusion_f1), colors[2]]
+        ];
+        return '<div style="padding-bottom:12px;border-bottom:1px solid var(--border)">' +
+          '<div style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:8px">' + escapeHtml(name) + '</div>' +
+          values.map(v => {
+            const valid = Number.isFinite(v[1]) && v[1] >= 0;
+            const pct = valid ? Math.max(0, Math.min(100, v[1] * 100)) : 0;
+            return '<div class="bar-row" style="grid-template-columns:54px minmax(0,1fr) 48px;margin:6px 0">' +
+              '<span class="bar-label">' + v[0] + '</span><div class="bar-track"><div class="bar-fill" style="width:' + pct.toFixed(2) + '%;background:' + v[2] + '"></div></div>' +
+              '<span class="bar-value">' + (valid ? v[1].toFixed(3) : '—') + '</span></div>';
+          }).join("") + '</div>';
+      }).join("");
+    }
+  }
+  if (comp) {
+    const prevalence = Number(data.attack_prevalence_pct);
+    if (!Number.isFinite(prevalence)) {
+      comp.innerHTML = '<div class="chart-empty">Prevalence unavailable.</div>';
+    } else {
+      const attack = Math.max(0, Math.min(100, prevalence));
+      comp.className = "";
+      comp.innerHTML =
+        '<div style="display:flex;align-items:flex-end;gap:10px;margin:22px 0 10px">' +
+          '<div style="font-size:38px;font-weight:800;letter-spacing:-1.5px;color:#fb7185">' + attack.toFixed(1) + '<span style="font-size:16px">%</span></div>' +
+          '<div style="font-size:12px;color:var(--text-muted);padding-bottom:7px">attack flows</div></div>' +
+        '<div style="height:16px;display:flex;border-radius:99px;overflow:hidden;background:#263241">' +
+          '<div title="Benign ' + (100-attack).toFixed(1) + '%" style="width:' + (100-attack) + '%;background:#34d399"></div>' +
+          '<div title="Attack ' + attack.toFixed(1) + '%" style="width:' + attack + '%;background:#fb7185"></div></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:8px;margin-top:12px;font-size:11px;color:var(--text-muted)">' +
+          '<span><i class="legend-dot" style="background:#34d399;display:inline-block;margin-right:6px"></i>Benign ' + Number(data.benign_count || 0).toLocaleString() + '</span>' +
+          '<span><i class="legend-dot" style="background:#fb7185;display:inline-block;margin-right:6px"></i>Attack ' + Number(data.attack_count || 0).toLocaleString() + '</span></div>';
+    }
+  }
+}
+
+function renderModelMetricsChart(data) {
+  const root = document.getElementById("cmp-metrics-chart");
+  if (!root) return;
+  const models = [
+    {key:"random_forest", label:"Random Forest", color:"#60a5fa"},
+    {key:"lstm", label:"LSTM", color:"#a78bfa"},
+    {key:"fusion", label:"RF + LSTM Fusion", color:"#67e8f9"}
+  ];
+  const metrics = [
+    {key:"f1", label:"F1"},
+    {key:"precision", label:"Precision"},
+    {key:"recall", label:"Recall"},
+    {key:"roc_auc", label:"ROC-AUC"}
+  ];
+  if (!data || !data.models) {
+    root.innerHTML = '<div class="chart-empty">Model metrics unavailable.</div>';
+    return;
+  }
+  root.className = "model-bars";
+  root.innerHTML = models.map(model => {
+    const m = data.models[model.key] || {};
+    return '<div class="model-bars-row"><div class="model-bars-name">' + model.label + '</div><div class="metric-bars">' +
+      metrics.map(metric => {
+        const value = Number(m[metric.key]);
+        const valid = Number.isFinite(value) && value >= 0;
+        const pct = valid ? Math.max(0, Math.min(100, value * 100)) : 0;
+        return '<div class="metric-bar-line"><span>' + metric.label + '</span><div class="bar-track"><div class="bar-fill" style="width:' + pct.toFixed(2) + '%;background:' + model.color + '"></div></div><span class="bar-value">' + (valid ? value.toFixed(3) : '—') + '</span></div>';
+      }).join("") + '</div></div>';
+  }).join("");
+}
+
 // ─── Top-Level Mode & Tab Switching ───
 let currentMainMode = "research"; // "research" or "live"
 let currentResearchTab = "dataset-explorer";
@@ -129,6 +211,8 @@ function onExplorerDatasetChange() {
 
 function renderDatasetExplorer(data) {
   if (!data) return;
+
+  renderDatasetVisuals(data);
 
   // Stat tiles
   const rawRowsEl = document.getElementById("ds-raw-rows");
@@ -235,6 +319,7 @@ function onCmpDatasetChange() {
 
 function renderModelComparison(data) {
   if (!data || !data.models) return;
+  renderModelMetricsChart(data);
 
   // Degenerate alert
   const alertEl = document.getElementById("cmp-degenerate-alert");
