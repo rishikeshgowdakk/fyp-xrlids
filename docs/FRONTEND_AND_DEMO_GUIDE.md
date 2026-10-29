@@ -66,7 +66,7 @@ The primary user experience is **Held-Out Dataset Evaluation**, not a synthetic 
 - *Click on `🛡️ Autonomous Response`:*
 - "In Phase 2, we evaluated whether Deep Q-Networks justify their complexity for autonomous response. We benchmarked our trained Dueling DQN against a zero-parameter `CostOptimalThresholdPolicy` across six operational regimes."
 - *Select High Availability (4-Action):*
-- "Look at the result: in High Availability 4-action, the analytic baseline achieves a **20.12% lower cost than the trained DQN** ($1,547,511$ vs $1,937,476$) while executing in **0.40 µs**—a **53x latency advantage** over neural inference."
+- "Look at the result: in High Availability 4-action, the analytic baseline achieves a **20.12% lower cost than the trained DQN** ($1,547,511$ vs $1,937,476$) while executing in **1.95 µs**—a **~51x latency advantage** over neural inference (1.95 µs vs 100.23 µs policy-only)."
 - "Furthermore, tracing the environment proves traffic arrivals are strictly exogenous replay. Response actions do not alter future packet arrivals. Therefore, non-zero discount factors ($\gamma = 0.95$) lack physical grounding."
 - "Our Deterministic Safety Gate remains 100% authoritative over all actions, and autonomous production enforcement is strictly **NO-GO**."
 

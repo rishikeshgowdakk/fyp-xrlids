@@ -57,7 +57,7 @@ flowchart TD
         D1 & D2 & D3 --> B1["Evaluation Mode: Mode A (Full Split) | Mode B (200 Exhibition Demo) | Mode C (Custom CSV)"]
         B1 --> B2["Feature Contract & Preprocessing Gate (R10 / R4 train-fitted preprocessor.joblib)"]
         B2 --> B3["Metadata Isolation (IP Endpoints, Ports, Protocol & Ground-Truth Labels Separated from X)"]
-        B3 --> B4["Multi-Model Inference Pipeline\n• Random Forest (predict_proba)\n• Supervised LSTM (T=5 causal sequences)\n• Calibrated Score Fusion (alpha-blend)"]
+        B3 --> B4["Multi-Model Inference Pipeline\n• Random Forest (predict_proba)\n• Supervised LSTM (T=5 causal sequences)\n• Score Fusion (alpha-blend)"]
         B4 --> B5["Independent Metrics & 3 Confusion Matrices (RF, LSTM, Fusion @ tau=0.50)"]
         B5 --> B6["On-Demand TreeSHAP (Local Feature Attribution on RF Classifier)"]
         B6 --> B7["Dueling DQN Autonomous Response Recommendation (Dry-Run Simulation)"]

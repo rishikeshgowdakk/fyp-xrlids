@@ -163,7 +163,7 @@ def get_overview_data() -> dict[str, Any]:
                 "component": "Deep Q-Network (DQN)",
                 "scope": "Offline Response Policy",
                 "status": "REQUIRES_REFORMULATION",
-                "finding": "CostOptimalThresholdPolicy beats DQN in 4 of 6 settings (up to 20.12% lower cost). DQN fails 15% target in all settings and is 53x slower.",
+                "finding": "CostOptimalThresholdPolicy beats DQN in 4 of 6 settings (up to 20.12% lower cost). DQN fails 15% target in all settings and is ~51x slower (100.23 µs vs 1.95 µs policy-only).",
             },
             {
                 "component": "Deterministic Safety Gate",
@@ -652,7 +652,7 @@ def get_response_benchmark_data(regime: str = "standard_enterprise", mode: str =
         "scientific_notices": [
             "DQN outputs are Q-values representing expected negative operational cost, NOT attack probabilities.",
             "Detector attack scores represent classification confidence from Phase 1, NOT RL state rewards.",
-            "Execution latency: Analytic CostOptimal baseline runs in 0.40 us (53x faster than DQN at 21.28 us).",
+            "Execution latency: Analytic CostOptimal baseline runs in 1.95 us (~51x faster than DQN at 100.23 us policy-only).",
             "DQN failed the 15% improvement requirement over the analytical baseline in all six evaluated configurations.",
         ],
     }
@@ -733,7 +733,7 @@ def get_limitations_data() -> dict[str, Any]:
                     "In controlled benchmarking on 355k held-out flows (EXP-P2A-COST-OPTIMAL-001), the zero-parameter "
                     "CostOptimalThresholdPolicy achieved lower operational cost than the trained DQN in 4 out of 6 settings "
                     "(up to 20.12% lower cost in 4-action High Availability). In the remaining 2 settings, DQN achieved only ~8.8% reduction, "
-                    "failing the pre-registered 15% target, while running 53x slower (21.28 us vs 0.40 us)."
+                    "failing the pre-registered 15% target, while running ~51x slower (100.23 us vs 1.95 us policy-only)."
                 ),
             },
             {

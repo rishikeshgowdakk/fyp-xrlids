@@ -25,7 +25,7 @@ The audit protocol enforces strict evidence-based auditing: claims are classifie
 | **Feature Contracts** | Semantic mapping: `R10` (10 features) vs `R4` (4 features) | Cross-dataset feature registry | **`VERIFIED_FOR_DEFINED_SCOPE`** | Rigid schemas enforced in `src/xrlids/features/definitions.py`. UNSW-NB15 correctly isolated to R4 because Argus flow exporter omitted TCP flags. |
 | **Flow Semantics & Parity** | `FlowBuilder` (D-006 completion, 120s timeout) | Streaming packets vs canonical offline mapping | **`PARTIALLY_VERIFIED`** | Live extractor matches offline feature specification ($\text{atol} \le 10^{-4}$). However, original CICFlowMeter/Argus batch quirks differ from live streaming heuristics. |
 | **Response Simulation (MDP)** | Offline flow replay with simulated consequence engine | Held-out CIC-IDS2017 ($355,865$ flows) | **`DEFECT_CONFIRMED`** | Traffic arrivals are strictly exogenous replay. Policy actions cannot alter future packet arrivals, inter-arrival times, or attack progression. Not a genuine sequential MDP. |
-| **Deep Q-Network (DQN)** | Dueling DQN (state 6, $\gamma=0.95$, target net) | 3-action & 4-action policies | **`REQUIRES_REFORMULATION`** | Analytic `CostOptimalThresholdPolicy` beats DQN in 4 of 6 settings (up to 20.12% lower cost). DQN fails the 15% improvement target in all settings and is 53x slower. |
+| **Deep Q-Network (DQN)** | Dueling DQN (state 6, $\gamma=0.95$, target net) | 3-action & 4-action policies | **`REQUIRES_REFORMULATION`** | Analytic `CostOptimalThresholdPolicy` beats DQN in 4 of 6 settings (up to 20.12% lower cost). DQN fails the 15% improvement target in all settings and is ~51x slower (100.23 µs vs 1.95 µs policy-only). |
 | **Deterministic Safety Gate** | Multi-tier rules (quarantine cap, cooldown, rate-limit fallback) | Pre-execution action validation | **`VERIFIED_FOR_DEFINED_SCOPE`** | 100% authoritative override on invalid actions. Tested across 6 adversarial invariant suites. Autonomous production enforcement remains `NO-GO`. |
 
 ---
@@ -170,5 +170,5 @@ In Phase 2A (`EXP-P2A-COST-OPTIMAL-001`), the trained DQN was evaluated alongsid
 ### 5.3 Key Takeaways for Viva & Review
 1. **Cost-Optimal Baseline Beats DQN in 4 of 6 Settings**: In the 4-action High Availability regime, the analytic baseline achieves a **20.12% cost reduction** over DQN ($1,547,511$ vs $1,937,476$).
 2. **DQN Fails Practical 15% Improvement Threshold**: In the 2 settings where DQN has lower cost, its advantage is only $8.82\%$ and $8.80\%$, failing the pre-registered 15% target.
-3. **Execution Latency**: The analytic baseline evaluates in **0.40 µs** (2.5 million decisions/s) vs **21.28 µs** (47,000 decisions/s) for DQN neural inference—a **53x latency advantage**.
+3. **Execution Latency**: The analytic baseline evaluates in **1.95 µs** (491,000 decisions/s) vs **100.23 µs** (9,063 decisions/s) for DQN neural inference—a **~51x latency advantage** (policy-only).
 4. **Final DQN Verdict**: **`REQUIRES_REFORMULATION`**. The reinforcement learning agent cannot be recommended for autonomous production enforcement over analytic cost-sensitive decision rules.

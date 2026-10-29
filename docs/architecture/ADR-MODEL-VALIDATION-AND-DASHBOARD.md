@@ -16,7 +16,7 @@ Forensic auditing revealed:
 1. **Model Calibration**: Tree-vote scores in Random Forest deviate significantly from true empirical posterior probabilities in the $[0.1, 0.8]$ range, yet are fed into thresholding and response logic as if calibrated.
 2. **LSTM Sequence Locality**: Shuffled-window ablation proves that LSTM performance is driven by spatial pooling across the 5-flow window rather than genuine chronological sequence dynamics ($\Delta \text{F1} = -0.0038$).
 3. **Fusion Degeneracy**: On CSE-CIC-IDS2018, validation grid search yielded $\alpha = 0.00$, making the fusion model identical to the standalone LSTM detector.
-4. **Reinforcement Learning Grounding**: Network flow arrivals are purely exogenous replay. Setting $\gamma = 0.95$ optimizes noise correlations across 20 steps of exogenous traffic. An analytic `CostOptimalThresholdPolicy` beats the DQN in 4 of 6 operational settings (up to 20.12% lower cost) and executes 53x faster.
+4. **Reinforcement Learning Grounding**: Network flow arrivals are purely exogenous replay. Setting $\gamma = 0.95$ optimizes noise correlations across 20 steps of exogenous traffic. An analytic `CostOptimalThresholdPolicy` beats the DQN in 4 of 6 operational settings (up to 20.12% lower cost) and executes ~51x faster (1.95 µs vs 100.23 µs policy-only).
 5. **Dashboard Workflow Misalignment**: The original dashboard defaulted to a live packet capture monitor and synthetic attack injection simulator rather than exposing genuine held-out benchmark evaluation evidence.
 
 ---

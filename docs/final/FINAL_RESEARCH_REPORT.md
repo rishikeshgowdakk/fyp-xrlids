@@ -85,8 +85,8 @@ All ten research questions defined in [`docs/00_PROJECT/RESEARCH_QUESTIONS.md`](
 ### RQ5: How does the model behave under dataset / domain shift?
 - **Exact Question:** *How does the model behave under dataset / domain shift?*
 - **Empirical Answer:** **CATASTROPHIC DEGRADATION.** Evaluating models across all six transfer directions without target domain adaptation revealed severe covariate shift:
-  - **CIC-IDS2017 $\to$ CSE-CIC-IDS2018:** F1 dropped from 0.9512 to 0.4312 (-54.6% relative drop).
-  - **CSE-CIC-IDS2018 $\to$ CIC-IDS2017:** F1 dropped from 0.8861 to 0.3120 (-64.8% relative drop).
+  - **CIC-IDS2017 $\to$ CSE-CIC-IDS2018:** F1 dropped from 0.9512 to 0.3286 (-65.5% relative drop).
+  - **CSE-CIC-IDS2018 $\to$ CIC-IDS2017:** F1 dropped from 0.8861 to 0.0301 (-96.6% relative drop).
   - **Auxiliary Transfers (UNSW $\leftrightarrow$ CIC/CSE):** F1 dropped by 52% to 95%, with precision collapsing to near-zero.
 - **Primary Artifacts:** `results/experiments/EXP-P1-TRANSFER-*/`, `reports/generated/transfer_report.md`.
 - **Limitations:** Confirms that supervised intrusion detection models cannot be deployed zero-shot across disparate enterprise networks without explicit domain adaptation.

@@ -1,8 +1,8 @@
 # XRL-IDARS Phase 2A: Controlled Benchmark, Cost-Optimal Verification, and DQN Value Assessment
 
 **Experiment ID**: `EXP-P2A-COST-OPTIMAL-001`  
-**Git Commit**: `18da4acbc3a1df8acb6d4ed17658fb287ddf6e76`  
-**Execution Timestamp**: `2026-10-27T20:18:02.442765+00:00`  
+**Git Commit**: `3a265ccb9afcbc45b0f5df077d9a10709f95d01d`  
+**Execution Timestamp**: `2026-10-29T08:44:18.787652+00:00`  
 **Test Population**: `D_pol_test` (355,865 flows: 291,045 benign, 64,820 attack)  
 **Output Directory**: `results/phase2/EXP-P2A-COST-OPTIMAL-001`  
 
@@ -27,7 +27,7 @@ This independent benchmark establishes whether the deep Q-network (DQN) autonomo
    - The problem is fundamentally an **Asymmetric-Loss Contextual Bandit with Hysteresis Constraints**, NOT a sequential Markov Decision Process.
    - Setting $\gamma = 0.95$ lacks physical grounding because there are no multi-step causal transition dynamics in the network environment.
 4. **Inference Latency Advantage**:
-   - The analytic cost-optimal decision rule executes in **0.40 µs** (2.5 million flows/sec), compared to **21.28 µs** (47,000 flows/sec) for the DQN neural network—a **53x latency advantage**.
+   - The analytic cost-optimal decision rule executes in **1.95 µs** (491,112 flows/sec), compared to **100.23 µs** (9,063 flows/sec) for the DQN neural network—a **~51x latency advantage** (policy-only).
 
 ---
 
@@ -248,7 +248,7 @@ Timed over 10,000 flow observations with 1,000 warmup steps on CPU execution:
    - **NO**. Because flow generation is purely exogenous and actions do not alter future state transitions or traffic generation, the environment is fundamentally an asymmetric-loss contextual bandit with hysteresis penalties.
 
 9. **What are the largest remaining scientific and engineering risks?**
-   - The primary scientific risk is claiming that RL solves network response when the underlying simulator lacks action-dependent state transitions, and when a 0-parameter analytic decision rule achieves superior performance at 53x lower latency.
+   - The primary scientific risk is claiming that RL solves network response when the underlying simulator lacks action-dependent state transitions, and when a 0-parameter analytic decision rule achieves superior performance at ~51x lower latency (1.95 µs vs 100.23 µs policy-only).
 
 10. **What is the smallest next step that produces the greatest increase in research credibility?**
     - Re-frame the response architecture as an Asymmetric-Loss Contextual Policy, publish the negative finding regarding DQN value honestly, and focus research on empirical cost calibration and interactive human-in-the-loop validation.

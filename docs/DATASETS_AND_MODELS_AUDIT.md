@@ -160,7 +160,7 @@ To prevent shortcut learning and dataset identity memorization, the following fi
 ### 3.1 Split Ratios & Seed Architecture
 All datasets are partitioned into **60% Train**, **20% Validation**, and **20% Test** using deterministic pseudo-random seed `42` (with multi-seed robustness validated across seeds `42`, `123`, and `456`).
 - **Train (60%):** Parameter learning only.
-- **Validation (20%):** Hyperparameter tuning, Platt probability calibration, and fusion weight $\alpha$ selection.
+- **Validation (20%):** Hyperparameter tuning, calibration analysis, and fusion weight $\alpha$ selection.
 - **Test (20%):** Held-out final evaluation, touched exactly once.
 
 ---
@@ -237,7 +237,7 @@ The table below reconciles the exact row accounting from raw ingested records to
 | Dataset | Feature Contract | Model Architecture | Test Accuracy | Test F1 Score | Test PR-AUC | Test ROC-AUC | Aligned Test Population |
 |:---|:---:|:---|:---:|:---:|:---:|:---:|---:|
 | **CIC-IDS2017** | R10 | Majority Class Baseline | 0.8178 | 0.0000 | 0.1822 | 0.5000 | 355,833 |
-| **CIC-IDS2017** | R10 | Decision Tree | 0.9789 | 0.9423 | 0.9577 | 0.9678 | 355,833 |
+| **CIC-IDS2017** | R10 | Decision Tree | 0.9744 | 0.9335 | 0.9674 | 0.9945 | 355,833 |
 | **CIC-IDS2017** | R10 | Random Forest | 0.9815 | 0.9512 | 0.9824 | 0.9968 | 355,833 |
 | **CIC-IDS2017** | R10 | Supervised LSTM ($T=5$) | 0.9867 | 0.9633 | 0.9904 | 0.9974 | 355,833 |
 | **CIC-IDS2017** | R10 | **RF + LSTM Fusion ($\alpha=0.50$)** | **0.9906** | **0.9745** | **0.9947** | **0.9989** | **355,833** |
@@ -265,15 +265,13 @@ The table below reconciles the exact row accounting from raw ingested records to
 ### 5.1 Formulation
 Intrusion detection without response leaves networks defenseless. XRL-IDARS introduces a **Dueling Deep Q-Network (Dueling DQN)** agent with Prioritized Experience Replay (PER) that observes network threat states and selects optimal mitigation actions.
 
-- **State Representation (`response_state_v1` - 8 Dimensions):**
-  1. `threat_score` (continuous $P(\text{attack}) \in [0, 1]$)
-  2. `confidence_margin` ($|P - 0.50|$)
-  3. `rate_of_change` (first derivative of threat score)
-  4. `packet_rate_normalized`
-  5. `burst_factor`
-  6. `asset_criticality` (0.0 to 1.0)
-  7. `active_quarantine_flag` (binary)
-  8. `consecutive_alerts` (count)
+- **State Representation (`response_state_v1` - 6 Dimensions):**
+  1. $S_t$: Current Attack Risk Score ($P(\text{attack}) \in [0.0, 1.0]$)
+  2. $\Delta S_t$: Score Trajectory / Trend ($\Delta S_t = S_t - \text{mean}(S_{t-k:t-1}) \in [-1.0, 1.0]$)
+  3. $N_{\text{alert}}$: Recent Alert Density (fraction of past window flows $\ge 0.50$, $\in [0.0, 1.0]$)
+  4. $a_{t-1}$: Normalized Previous Action ($a/3.0 \in [0.0, 1.0]$: ALLOW=0.0, ALERT=0.333, RATE_LIMIT=0.667, ISOLATE=1.0)
+  5. $c_t$: Remaining Cooldown Fraction ($\in [0.0, 1.0]$)
+  6. $v_t$: Normalized Coarse Volumetric Scale ($\log_{10}(1 + \text{bytes\_per\_s}) / \text{scale\_max} \in [0.0, 1.0]$)
 - **Action Space:**
   - **3-Action Policy:** `ALLOW` (0), `ALERT` (1), `RATE_LIMIT` (2)
   - **4-Action Policy:** `ALLOW` (0), `ALERT` (1), `RATE_LIMIT` (2), `ISOLATE` (3)
@@ -291,7 +289,7 @@ Evaluated under the standard enterprise cost regime on held-out CIC-IDS2017 traf
 | Baseline: Always ALLOW | 18.2148 | 0.00% | 100.00% | 0.0000 | 0 / 64,820 |
 | Baseline: Static Threshold ($\tau=0.50$) | 1.6912 | 0.00% | 97.96% | 0.0357 | 64,180 / 64,820 |
 | **DQN Candidate (3-Action)** | **1.4208** | **0.00%** | **96.51%** | **0.0019** | **60,449 / 64,820** |
-| **DQN Candidate (4-Action)** | **5.3256** | **0.20%** | **96.52%** | **0.0214** | **64,302 / 64,820** |
+| **DQN Candidate (4-Action)** | **5.3256** | **0.20%** | **96.52%** | **0.0214** | **10,285 / 64,820** |
 
 - **Deterministic Safety Gate:** Actions selected by the DQN pass through a non-bypassable safety gate enforcing cooldown timers, blast-radius constraints, and atomic iptables rollbacks to prevent self-inflicted Denial of Service.
 
@@ -310,7 +308,7 @@ All canonical models are cryptographically tracked, version-controlled, and vali
 | `models/lstm/lstm_cse2018.pt` | Supervised LSTM ($T=5$) | CSE-CIC-IDS2018 | 60.95 KB | `ea5b8198c20faa15d5d45ae7d081b754a76dbae1342a93b8234e0e06cfe8a33a` |
 | `models/lstm/lstm_unswnb15.pt` | Supervised LSTM ($T=5$) | UNSW-NB15 | 57.81 KB | `4d9386ff44c99eed822f8ace5c64429fab571b4f8aad847d6cc78bae5f308fbd` |
 | `models/dqn/dqn_4action_best.pt` | Dueling DQN (4-Action) | CIC-IDS2017 | 43.19 KB | `6a5afc669b4e699ecd2b1c01df885cef9030c93b8888b487dd386533920ce954` |
-| `models/dqn/dqn_3action_best.pt` | Dueling DQN (3-Action) | CIC-IDS2017 | 43.00 KB | `eb26792ad69389e6ebdafeaa844788a44ecadce6a42250ea54e38bf3e7b1652f` |
+| `models/dqn/dqn_3action_best.pt` | Dueling DQN (3-Action) | CIC-IDS2017 | 43.00 KB | `c06a61fb7777511600efd6db776745c4539da30c710fed8993145ed1b926be31` |
 | `models/fusion/fusion_weights.json` | Score Fusion Weights | Cross-benchmark | 1.21 KB | Validation-tuned convex blend parameters ($\alpha \in \{0.50, 0.00, 0.60\}$); scores are not probability-calibrated |
 
 ---
@@ -348,12 +346,12 @@ probabilities = detector.predict_proba(seq_set)  # P(attack) per sequence
 ### 7.3 Loading the Dueling DQN Response Agent
 ```python
 import torch
-from xrlids.response.dqn import DuelingDQNNetwork
+from xrlids.response.dqn.network import DuelingQNetwork
 
-# Initialize architecture and load weights
-network = DuelingDQNNetwork(state_dim=8, action_dim=4)
-state_dict = torch.load("models/dqn/dqn_4action_best.pt", map_location="cpu")
-network.load_state_dict(state_dict)
+# Initialize architecture with true 6D state and load checkpoint
+network = DuelingQNetwork(input_dim=6, action_dim=4)
+checkpoint = torch.load("models/dqn/dqn_4action_best.pt", map_location="cpu", weights_only=False)
+network.load_state_dict(checkpoint["online_net_state_dict"])
 network.eval()
 
 # Predict Q-values from state tensor
@@ -373,7 +371,8 @@ To independently reproduce the entire audit and verification suite from terminal
 source .venv/bin/activate
 
 # 2. Run dataset schema validation and integrity checks
-python -m xrlids.cli validate-schemas
+python -m xrlids.cli compatibility
+python -m xrlids.cli verify-datasets
 
 # 3. Verify cryptographic artifact registry
 pytest tests/unit/test_demo_replay.py tests/unit/test_dashboard_server.py

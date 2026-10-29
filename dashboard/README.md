@@ -63,7 +63,7 @@ The workbench is organized into seven specialized pages:
 - Controlled benchmark comparing the trained Deep Q-Network against the zero-parameter `CostOptimalThresholdPolicy` on held-out 355k test flows.
 - Multi-regime selector: Standard Enterprise, High Availability, High Security Enclave across 3-action and 4-action modes.
 - Paired statistical comparison with 95% bootstrap CI and p-values.
-- Highlights that the analytic Cost-Optimal baseline beats DQN in 4 of 6 settings (up to 20.12% lower cost) and executes 53x faster (0.40 µs vs 21.28 µs).
+- Highlights that the analytic Cost-Optimal baseline beats DQN in 4 of 6 settings (up to 20.12% lower cost) and executes ~51x faster (1.95 µs vs 100.23 µs policy-only).
 - Deterministic Safety Gate status: 100% authoritative override on invalid actions. Production autonomous enforcement remains strictly `NO-GO`.
 
 ### 7. ⚠️ Research Limitations

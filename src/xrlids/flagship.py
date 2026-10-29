@@ -286,7 +286,7 @@ class FlagshipXRLIDS:
                 p_lstm = float(torch.sigmoid(out).item())
                 lstm_score_source = "lstm"
 
-        # Calibrated Score Fusion
+        # Score Fusion (convex combination)
         p_fusion = self.alpha * p_rf + (1.0 - self.alpha) * p_lstm
         is_attack = p_fusion >= self.threshold
 

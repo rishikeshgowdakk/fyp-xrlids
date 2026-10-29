@@ -663,7 +663,7 @@
                   </div>
                   <div class="card-body" style="padding: 12px 14px;">
                     <div style="font-size: 24px; font-weight: 800; color: var(--accent); margin-bottom: 4px;" id="csv-fusion-f1">—</div>
-                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">F1-Score (Optimal Calibrated Fusion)</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">F1-Score (Optimal Score Fusion)</div>
                     <table style="font-size: 12px;">
                       <tbody>
                         <tr><td>Accuracy:</td><td id="csv-fusion-acc" class="mono">—</td></tr>
@@ -1075,9 +1075,9 @@
             <h2>Execution Latency Advantage</h2>
           </div>
           <div class="card-body">
-            <p style="margin-bottom: 8px;"><strong>Analytic CostOptimal Baseline:</strong> <span class="mono">0.40 µs</span> (2.5M flows/sec)</p>
-            <p style="margin-bottom: 8px;"><strong>DQN Neural Policy:</strong> <span class="mono">21.28 µs</span> (47,000 flows/sec)</p>
-            <p style="margin-bottom: 12px;"><strong>Latency Speedup:</strong> <span class="badge badge-green">53x Faster</span></p>
+            <p style="margin-bottom: 8px;"><strong>Analytic CostOptimal Baseline:</strong> <span class="mono">1.95 µs</span> (491,000 flows/sec)</p>
+            <p style="margin-bottom: 8px;"><strong>DQN Neural Policy:</strong> <span class="mono">100.23 µs</span> (9,063 flows/sec)</p>
+            <p style="margin-bottom: 12px;"><strong>Latency Speedup:</strong> <span class="badge badge-green">~51x Faster</span></p>
             <div class="callout callout-blue" style="margin-bottom: 0;">
               Zero-parameter threshold policy requires zero GPU memory, executes in nanoseconds, and achieves lower cost in 4 of 6 operational regimes.
             </div>

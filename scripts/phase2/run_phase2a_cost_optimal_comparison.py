@@ -88,6 +88,11 @@ def parse_args() -> argparse.Namespace:
         default=42,
         help="Random seed for reproducibility.",
     )
+    parser.add_argument(
+        "--report-only",
+        action="store_true",
+        help="Regenerate FINAL_REPORT.md from existing JSON artifacts without rerunning benchmark.",
+    )
     return parser.parse_args()
 
 
@@ -218,6 +223,43 @@ def main() -> int:
 
     set_seed(args.seed)
     git_sha = git_commit()
+
+    if args.report_only:
+        print("\n[*] Running in --report-only mode: loading existing benchmark artifacts...")
+        with open(out_dir / "input_hashes.json") as f:
+            input_hashes = {k: v for k, v in json.load(f).items() if k != "metadata"}
+        with open(out_dir / "baseline_results.json") as f:
+            all_results = json.load(f)["runs"]
+        with open(out_dir / "paired_comparisons.json") as f:
+            paired_results = json.load(f)["comparisons"]
+        with open(out_dir / "action_distributions.json") as f:
+            action_dist_records = json.load(f)["distributions"]
+        with open(out_dir / "safety_gate_results.json") as f:
+            safety_gate_records = json.load(f)["safety_gate"]
+        with open(out_dir / "latency_results.json") as f:
+            latency_records = json.load(f)["latencies"]
+        with open(out_dir / "calibration_assessment.json") as f:
+            calibration_assessment = json.load(f)
+        with open(out_dir / "experiment_manifest.json") as f:
+            exp_manifest = json.load(f)
+
+        generate_final_report_md(
+            out_dir=out_dir,
+            config=config,
+            git_sha=git_sha,
+            input_hashes=input_hashes,
+            all_results=all_results,
+            paired_results=paired_results,
+            action_dist_records=action_dist_records,
+            safety_gate_records=safety_gate_records,
+            latency_records=latency_records,
+            calibration_assessment=calibration_assessment,
+            n_benign=exp_manifest["population"]["benign_flows"],
+            n_attack=exp_manifest["population"]["attack_flows"],
+            total_rows=exp_manifest["population"]["evaluated_flows"],
+        )
+        print(f"[+] Successfully regenerated FINAL_REPORT.md at {out_dir / 'FINAL_REPORT.md'}")
+        return 0
 
     # 2. Record Input Hashes & Integrity Manifest BEFORE Running
     print("\n[1/7] Recording SHA-256 hashes of critical input artifacts...")
@@ -671,7 +713,7 @@ def generate_final_report_md(
         "   - The problem is fundamentally an **Asymmetric-Loss Contextual Bandit with Hysteresis Constraints**, NOT a sequential Markov Decision Process.",
         "   - Setting $\\gamma = 0.95$ lacks physical grounding because there are no multi-step causal transition dynamics in the network environment.",
         "4. **Inference Latency Advantage**:",
-        "   - The analytic cost-optimal decision rule executes in **0.40 µs** (2.5 million flows/sec), compared to **21.28 µs** (47,000 flows/sec) for the DQN neural network—a **53x latency advantage**.",
+        "   - The analytic cost-optimal decision rule executes in **1.95 µs** (491,112 flows/sec), compared to **100.23 µs** (9,063 flows/sec) for the DQN neural network—a **~51x latency advantage** (policy-only).",
         "",
         "---",
         "",
@@ -810,7 +852,7 @@ def generate_final_report_md(
         "   - **NO**. Because flow generation is purely exogenous and actions do not alter future state transitions or traffic generation, the environment is fundamentally an asymmetric-loss contextual bandit with hysteresis penalties.",
         "",
         "9. **What are the largest remaining scientific and engineering risks?**",
-        "   - The primary scientific risk is claiming that RL solves network response when the underlying simulator lacks action-dependent state transitions, and when a 0-parameter analytic decision rule achieves superior performance at 53x lower latency.",
+        "   - The primary scientific risk is claiming that RL solves network response when the underlying simulator lacks action-dependent state transitions, and when a 0-parameter analytic decision rule achieves superior performance at ~51x lower latency (1.95 µs vs 100.23 µs policy-only).",
         "",
         "10. **What is the smallest next step that produces the greatest increase in research credibility?**",
         "    - Re-frame the response architecture as an Asymmetric-Loss Contextual Policy, publish the negative finding regarding DQN value honestly, and focus research on empirical cost calibration and interactive human-in-the-loop validation.",

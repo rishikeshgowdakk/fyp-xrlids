@@ -17,7 +17,7 @@ sequence:
   padding: null
 
 hyperparameters:
-  hidden_size: 64
+  hidden_size: 32
   num_layers: 2
   dropout: 0.2
   optimizer: Adam
