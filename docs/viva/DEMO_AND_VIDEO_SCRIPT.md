@@ -233,7 +233,14 @@ score, latest time). Live Flows/Alerts show full `src → dst` endpoints; simula
 marked `SIM` (`203.0.113.x`). **Nothing is blocked** — BLOCK/THROTTLE are `(suggested)` labels only;
 no firewall, routing, or packet-drop state is touched.
 
-**Q17. Where does the frontend alert me?**
+**Q17. Does high benchmark accuracy prove the models work accurately on live network traffic?**
+No. High benchmark accuracy (F1 > 0.95–0.97) proves internal validity on closed, historical, labeled
+datasets (CIC-IDS2017, CSE-CIC-IDS2018) under identical stationary distributions. Live physical
+traffic is open-world, non-stationary, and unlabelled. In fact, our cross-dataset transfer experiments
+demonstrate that moving models across network domains causes severe performance degradation (F1 drops
+of 52% to 95%). Therefore, benchmark accuracy must never be presented as proof of live operational accuracy.
+
+**Q18. Where does the frontend alert me?**
 A banner appears on new alerts (HIGH/MEDIUM hold for 15 s so sample noise cannot hide an injected
 detection), the **Alerts** table keeps history, the **Detected Attack Sources** panel summarizes
 attackers, and each alert has a **features** button. There is no email/SMS/pager integration.

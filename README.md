@@ -322,8 +322,12 @@ The dashboard is engineered as a zero-dependency **Research Evaluation Workbench
 
 #### Visual Dashboard Tour & Live Console Gallery
 
-##### 1. Live Monitor — Real-Time Detection & Empirical Validation
-Streams authentic benchmark or live network flows with a real-time confusion matrix (True Positives, False Positives, False Negatives, True Negatives), threat score spectrum, in-memory attack simulator, detected attacker IP summary, and suggested mitigation actions mapped from fixed risk-score thresholds (`BLOCK` ≥ 0.50, `THROTTLE` ≥ 0.40, `MONITOR` ≥ 0.20, `ALLOW` < 0.20):
+##### 1. Live Monitor & Traffic Modes — Observational Analysis & Mode Separation
+The Live Monitor supports four strictly distinguished operational modes to prevent conflating benchmark accuracy with live traffic behavior:
+- **Mode 2 (Benchmark Dataset Stream):** Replays authentic labeled benchmark flows with ground-truth verification and a real-time confusion matrix (True Positives, False Positives, False Negatives, True Negatives).
+- **Mode 3 (Synthetic PCAP Replay):** Replays bundled synthetic traffic (`sample_traffic.pcap`) at original pacing to verify flow building and R10 feature extraction mechanics without network transmission.
+- **Mode 4 (In-Memory Attack Simulation):** Exercises alert thresholds, score spectrums, and TreeSHAP explainability modals in-memory (`203.0.113.x`).
+- **Mode 5 (Physical Live Capture):** Passively monitors physical network interfaces (read-only, zero firewall mutations). **Crucial Scientific Distinction:** Live traffic has no ground truth; true accuracy cannot be calculated on live traffic. Benchmark accuracy on closed datasets does **not** prove or imply detection accuracy on live operational networks. Suggested mitigation actions are mapped from fixed risk-score thresholds (`BLOCK` ≥ 0.50, `THROTTLE` ≥ 0.40, `MONITOR` ≥ 0.20, `ALLOW` < 0.20), while full Dueling DQN policies are benchmarked offline.
 
 ![Live Monitor Console](docs/images/01_full_dashboard_live.png)
 
@@ -476,7 +480,8 @@ Detailed methodology, experiments, limitations, reproducibility information, and
 
 ## Scope & Safety
 
-Autonomous response enforcement is validated strictly within a controlled, isolated laboratory environment (Linux network namespaces on `10.200.1.0/24`) with verified zero mutations to the host networking stack. The project does not claim or support production deployment on uncontrolled operational networks such as campus or enterprise Wi-Fi.
+1. **Laboratory Response Scope**: Autonomous response enforcement is validated strictly within a controlled, isolated laboratory environment (Linux network namespaces on `10.200.1.0/24`) with verified zero mutations to the host networking stack. The project does not claim or support production deployment on uncontrolled operational networks such as campus or enterprise Wi-Fi.
+2. **Model Claims & Operational Mode Separation**: Offline benchmark evaluation (e.g. CIC-IDS2017 held-out test split), synthetic PCAP replay (`sample_traffic.pcap`), in-memory attack simulation (`attack_sim.py`), and physical live packet capture are distinct operational modes. In-domain benchmark metrics (e.g. F1 > 0.95) evaluate models under identical, stationary benchmark distributions with verified ground-truth labels; they do **not** prove, imply, or guarantee detection accuracy on unlabelled live physical network traffic where ground-truth is absent.
 
 ---
 

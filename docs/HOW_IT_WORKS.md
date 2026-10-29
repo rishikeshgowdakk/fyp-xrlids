@@ -53,6 +53,11 @@ The dashboard has **three different kinds of traffic**, and only one of them is 
 | **Live capture** (opt-in: `sudo … --live --iface <name>`) | **REAL packets** from this machine's NIC via an AF_PACKET raw socket | **Read-only.** Captures real traffic; never sends, drops, or modifies anything | Your real network — on this laptop: WiFi `wlo1 = 192.168.0.109/24`, gateway `192.168.0.1` |
 | **Devices Observed on WiFi** (live mode panel) | Passive ARP/DHCP/mDNS/SSDP metadata plus the local neighbour cache, from the same real frames | **Read-only.** No ARP scans, pings, probes, or router login | Real device IP/MAC/vendor/hostname where observable; **not** the access point's full association table |
 
+> [!IMPORTANT]
+> **Scientific Operational Boundary: Benchmark Accuracy vs. Live Traffic**
+> Offline benchmark metrics (e.g. F1 = 0.9512 RF on CIC-IDS2017) evaluate mathematical discrimination strictly on closed historical test splits with verified ground-truth labels.
+> In contrast, live capture is unlabelled and subject to open-world network drift and protocol noise. **Benchmark accuracy does NOT prove or imply detection accuracy on live physical traffic.** The live monitor is strictly observational (zero packet dropping or firewall mutations) and displays threat scores alongside fixed-threshold policy suggestions, not ground-truth verified metrics.
+
 Two independent proofs that the sample stream is synthetic, not captured:
 
 1. It contains a **5,880-byte packet**. The largest possible Ethernet/WiFi frame is 1,514 bytes,

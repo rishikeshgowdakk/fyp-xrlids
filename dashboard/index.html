@@ -1101,9 +1101,14 @@
 
     <!-- ═══════════════════ LIVE MONITOR & TRAFFIC MODES ═══════════════════ -->
     <div id="tab-live" class="tab-content">
-      <div class="callout callout-blue">
-        <strong>Traffic Mode Separation:</strong>
-        This monitor supports 5 strictly separated execution modes. It is observational only and never mutates network firewalls or routes.
+      <div class="callout callout-blue" style="border-left: 4px solid var(--accent); margin-bottom: 16px;">
+        <div style="font-weight: 700; margin-bottom: 6px; font-size: 14px;">⚠️ Scientific Disclaimer &amp; Strict Operational Mode Separation</div>
+        <div style="font-size: 13px; line-height: 1.5; color: var(--text-main);">
+          • <strong>Modes 1 &amp; 2 (Offline Benchmark Evaluation &amp; Dataset Replay):</strong> Evaluates authentic benchmark data with verified ground-truth labels for academic reproducibility.<br>
+          • <strong>Mode 3 (Synthetic PCAP Replay):</strong> Bundled synthetic sample (<code>sample_traffic.pcap</code>) validating end-to-end packet parsing, bidirectional flow assembly, and feature extraction mechanics.<br>
+          • <strong>Mode 4 (In-Memory Attack Simulation):</strong> In-memory synthetic injection (<code>203.0.113.x</code>) verifying alert thresholds, score spectrums, and explainability modals without transmitting packets.<br>
+          • <strong>Mode 5 (Physical Live Capture):</strong> Real observational packets (read-only; zero firewall mutations). <em>Crucial scientific distinction: Live operational network traffic lacks ground-truth labels. Benchmark accuracy on closed datasets does NOT prove or guarantee detection accuracy on live operational traffic.</em>
+        </div>
       </div>
 
       <!-- Capture Controls -->
@@ -1152,7 +1157,7 @@
             <span class="pipeline-arrow">→</span>
             <span class="pipeline-step">📊 Score (τ=0.50)</span>
             <span class="pipeline-arrow">→</span>
-            <span class="pipeline-step">🛡️ DQN Policy</span>
+            <span class="pipeline-step">🛡️ Policy Suggestion</span>
           </div>
         </div>
       </div>
