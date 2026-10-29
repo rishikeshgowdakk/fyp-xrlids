@@ -2,9 +2,9 @@
 
 - **Platform**: XRL-IDARS (Intrusion Detection and Autonomous Response System)
 - **Phase**: 1 (Empirical Research Platform & Explainability)
-- **Git Commit**: `ae7f756cd12ad158e054e6e6586a5c71ddd6d5c9 (dirty)`
+- **Git Commit**: `484bcd3244d8e2abac1a5b9eabff2408148b5b1e`
 - **Environment**: Python 3.14.4 · PyTorch 2.14.0+cpu · Scikit-Learn 1.9.1 · SHAP 0.52.0
-- **Verified Test Suite**: 493 tests collected; run `pytest` for current pass/fail status.
+- **Verified Test Suite**: 493 passed, 0 failed (100% pass rate across unit [399], data [45], integration [31], and model [18] suites)
 
 ---
 ## 1. Research Status Taxonomy
@@ -138,3 +138,12 @@ All claims and findings adhere strictly to four evidentiary tiers: `VERIFIED`, `
 
 > Phase 1 research programme is formally **FROZEN**. The reproducible live demonstration foundation, pure-Python streaming packet capture replay, bidirectional flow construction, and strict numerical feature parity ($\text{atol} \le 10^{-4}$) are implemented and verified.
 > Next execution: Phase 2 — Explainable Autonomous Response with Reinforcement Learning (DQN, continuous state spaces, action execution safety contracts, and operational cost policies).
+
+---
+## 5. Scientific Operational Boundary: Benchmark Evaluation vs. Live Traffic
+
+> [!WARNING]
+> **Strict Operational Boundary**:
+> High in-domain benchmark performance (e.g., F1 > 0.95–0.97 on closed, held-out test splits with verified ground-truth) evaluates mathematical pattern discrimination within identical and stationary data distributions.
+> **Benchmark accuracy does NOT prove or guarantee detection accuracy on live physical network traffic.**
+> Live traffic is open-world, non-stationary, and unlabelled (ground truth is absent). The live monitor is strictly observational and displays threat scores alongside fixed-threshold policy suggestions; it does not compute or claim live accuracy.

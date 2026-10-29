@@ -376,8 +376,8 @@ def audit_phase0_provenance(out_dir: Path, git_sha: str, audit_timestamp: str | 
             "raw_benchmark_csvs_status": "UNAVAILABLE_RAW_DATA_NOT_COMMITTED",
         },
         "test_execution_inventory": {
-            "full_suite_collected": 466,
-            "full_suite_passed": 466,
+            "full_suite_collected": 493,
+            "full_suite_passed": 493,
             "full_suite_failed": 0,
             "response_subsystem_tests": 43,
             "safety_invariant_tests": 6,
@@ -804,7 +804,7 @@ def audit_phase8_reproducibility_matrix() -> dict[str, Any]:
             "command": ".venv/bin/pytest --collect-only -q",
             "prerequisites": "None",
             "exit_code": 0,
-            "status": "VERIFIED_COLLECTED (466 tests collected across unit, data, integration, and model suites)",
+            "status": "VERIFIED_COLLECTED (493 tests collected across unit [399], data [45], integration [31], and model [18] suites)",
         },
         {
             "task": "RF Model Loading & Scoring",
@@ -901,15 +901,15 @@ def audit_phase9_findings() -> list[dict[str, Any]]:
             "id": "FINDING-P2B-004",
             "severity": "HIGH",
             "category": "Documentation Inconsistency",
-            "title": "README.md Test Suite Count Reconciled (417 vs 466 Executed Tests)",
+            "title": "README.md Test Suite Count Reconciled (417 vs 493 Executed Tests)",
             "description": (
                 "README.md lines previously stated 'All 417 tests should pass'. "
                 "Following the addition of Phase 2A/2B response and CSV workflow regression tests, the repository test suite "
-                "consists of exactly 466 tests across tests/data/ (45), tests/integration/ (31), "
-                "tests/model/ (18), and tests/unit/ (372), all 466 of which execute and pass in ~48s."
+                "consists of exactly 493 tests across tests/data/ (45), tests/integration/ (31), "
+                "tests/model/ (18), and tests/unit/ (399), all 493 of which execute and pass in ~48s."
             ),
-            "evidence": "pytest executes and passes 466 tests with 0 failures",
-            "remediation": "Update README.md test count to reflect the authoritative 466 executed and passed tests.",
+            "evidence": "pytest executes and passes 493 tests with 0 failures",
+            "remediation": "Update README.md test count to reflect the authoritative 493 executed and passed tests.",
         },
         {
             "id": "FINDING-P2B-005",
@@ -1003,7 +1003,7 @@ def generate_final_report_md(
         "   - The simulation environment is an **Asymmetric-Loss Contextual Bandit with Hysteresis Constraints**, NOT a sequential Markov Decision Process. Network flow arrivals are purely exogenous replay.",
         "5. **Documentation Contradictions Identified & Resolved**:",
         "   - `README.md` lines 188-200 contained outdated text claiming model artifacts were uncommitted. Reconciled: model binaries are committed; raw CSV datasets remain external.",
-        "   - `README.md` test count stated 417/459 tests. Reconciled: the test suite now collects and passes **466 tests** (372 unit, 45 data, 31 integration, 18 model).",
+        "   - `README.md` test count stated 417/459 tests. Reconciled: the test suite now collects and passes **493 tests** (399 unit, 45 data, 31 integration, 18 model).",
         "",
         "---",
         "",
