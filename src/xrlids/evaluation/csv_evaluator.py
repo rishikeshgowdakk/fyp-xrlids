@@ -451,7 +451,7 @@ def _get_dqn_action(
         )
         return {
             "recommended_action": rec_act,
-            "policy_type": "DQN_NEURAL_POLICY (trained DuelingQNetwork)",
+            "policy_type": "DQN_NEURAL_POLICY (DuelingQNetwork)",
             "checkpoint": str(dqn_path.relative_to(REPO_ROOT)),
             "safety_status": "OBSERVATIONAL_ONLY — recommendation is not executed",
             "execution_mode": "DRY_RUN (no firewall or network mutation)",
@@ -1050,6 +1050,21 @@ def evaluate_csv_dataset(
         "benchmark": bench_key,
         "contract": contract_key,
         "model_identifier": bench_info["name"],
+        "inference_provenance": {
+            "mode": "live per-request inference on frozen checkpoints",
+            "random_forest_checkpoint": str(bench_info["model"].relative_to(REPO_ROOT)),
+            "lstm_checkpoint": str(bench_info["lstm"].relative_to(REPO_ROOT)),
+            "preprocessor_checkpoint": str(bench_info["preprocessor"].relative_to(REPO_ROOT)),
+            "fusion": "computed per flow from current RF and causally aligned LSTM scores",
+            "fusion_alpha": alpha,
+            "dqn_checkpoint": "models/dqn/dqn_4action_best.pt",
+            "dqn_training_benchmark": "cicids2017",
+            "dqn_scope": (
+                "CIC-IDS2017 policy inference; applying the same policy to CSE-CIC-IDS2018 "
+                "or UNSW-NB15 is cross-dataset policy transfer, not dataset-specific DQN training"
+            ),
+            "response_execution": "recommendation only; no firewall or network mutation",
+        },
         "fusion_configuration": {
             "alpha": alpha,
             "formula": f"S_fusion = {alpha:.2f} * S_rf + {1.0 - alpha:.2f} * S_lstm",
