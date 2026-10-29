@@ -241,7 +241,7 @@ def _compute_sha256(path: Path) -> str:
 
 
 def _get_fusion_alpha(benchmark: str) -> float:
-    """Retrieve calibrated fusion alpha weight for a benchmark from fusion_weights.json."""
+    """Retrieve validation-tuned fusion alpha weight for a benchmark from fusion_weights.json."""
     fw_path = REPO_ROOT / "models" / "fusion" / "fusion_weights.json"
     if fw_path.exists():
         try:

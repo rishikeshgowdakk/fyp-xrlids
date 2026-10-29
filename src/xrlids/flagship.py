@@ -363,7 +363,7 @@ class FlagshipXRLIDS:
                 "total_test_population": 2018252,
                 "datasets_included": ["CIC-IDS2017", "CSE-CIC-IDS2018"],
                 "contract": "Canonical R10 (10 features)",
-                "architecture": "Calibrated Convex Score Fusion (RF + LSTM)",
+                "architecture": "Convex Score Fusion (RF + LSTM)",
             },
             "CIC-IDS2017": {
                 "test_accuracy": 0.9906,

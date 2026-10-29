@@ -28,7 +28,7 @@ All models were evaluated using the standardized **R10 feature rung** (10 canoni
 | Tree Baseline | **Decision Tree** | 0.9744 | 0.8870 | 0.9851 | 0.9335 | 0.9720 | 0.0280 | 0.9945 | 0.9674 |
 | Ensemble | **Random Forest (100 trees)** | 0.9815 | 0.9151 | 0.9901 | 0.9512 | 0.9796 | 0.0204 | 0.9968 | 0.9824 |
 | Recurrent | **Supervised LSTM (2-layer)** | 0.9867 | 0.9691 | 0.9576 | 0.9633 | 0.9932 | 0.0068 | 0.9974 | 0.9904 |
-| Hybrid Ensemble | **Score Fusion (α=0.50, Platt Calibrated)** | **0.9906** | **0.9669** | **0.9823** | **0.9745** | **0.9925** | **0.0075** | **0.9989** | **0.9947** |
+| Hybrid Ensemble | **Score Fusion (α=0.50)** | **0.9906** | **0.9669** | **0.9823** | **0.9745** | **0.9925** | **0.0075** | **0.9989** | **0.9947** |
 
 ![Baseline Ladder Comparison](../figures/baseline_ladder_comparison.png)
 

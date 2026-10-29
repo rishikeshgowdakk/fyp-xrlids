@@ -52,7 +52,7 @@ EXP-<PHASE>-<DATASET/DOMAIN>-<FEATURESET/SCOPE>-<NNN>
    - Verified on 3 benchmarks. The empirical ladder holds monotonically:
      $$\text{Majority (F1: 0.00)} < \text{Logistic Reg (F1: 0.76-0.89)} < \text{Decision Tree (F1: 0.85-0.93)} < \text{Random Forest (F1: 0.85-0.95)} < \text{LSTM (F1: 0.86-0.96)}$$
 2. **RQ2: Score-Level Ensemble Fusion**
-   - Fusion achieves peak F1 of **0.9745** (CICIDS2017) and **0.8970** (UNSW-NB15) with Platt probability calibration.
+   - Fusion achieves peak F1 of **0.9745** (CICIDS2017) and **0.8970** (UNSW-NB15) via validation-tuned convex weighting (note: blended scores are not calibrated probabilities).
 3. **RQ3: Cross-Dataset Domain Shift Collapse**
    - Detectors trained in one environment experience severe performance degradation when evaluated out-of-domain without re-training (F1 dropping by up to 0.95). Covariate shift and feature definition disparities between capture toolchains are the primary drivers.
 4. **RQ4: Reinforcement Learning Autonomous Response**

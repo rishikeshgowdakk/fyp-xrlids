@@ -367,7 +367,7 @@ The complete XRL-IDARS v1 engineering pipeline is structured into strictly segre
                                       ↓
 [3. EXTRACTION]         Frozen R10 Feature Contract (v1.0.0, Schema: 9d6c3826...)
                                       ↓
-[4. DETECTION]          Frozen Calibrated Detectors (Random Forest / Supervised LSTM / Score Fusion)
+[4. DETECTION]          Frozen Supervised Detectors (Random Forest / Supervised LSTM / Score Fusion)
                                       ↓
 [5. CAUSAL STATE]       6-Dimensional State Encoder: <Score, Family, Conf, Rate, Crit, Action>
                                       ↓
