@@ -388,6 +388,15 @@ def get_overview_data() -> dict[str, Any]:
             {"id": "EXP-P2A-COST-OPTIMAL-001", "name": "Phase 2A Cost-Optimal Benchmark Comparison", "status": "VERIFIED"},
             {"id": "EXP-P2B-READINESS-AUDIT-001", "name": "Phase 2B Forensic Readiness Audit", "status": "VERIFIED"},
         ],
+        "semantic_contract": {
+            "detection_model": "Binary classifier (BENIGN vs ATTACK). All RF, LSTM, and fusion models output P(ATTACK) ∈ [0,1].",
+            "attack_family_prediction": "NOT AVAILABLE. No trained multiclass attack-family model exists. Per-family metrics use ground-truth labels to stratify binary detection performance.",
+            "rule_based_findings": "Deterministic security rules (TCP Invalid Flags, SYN Flood, Port Scan, High Rate Burst, IP Spoofing) operate independently of ML models.",
+            "xai_explanation": "TreeSHAP attributions explain the RF's binary BENIGN/ATTACK decision, not an attack family assignment.",
+            "dqn_response": "DQN selects from {ALLOW, ALERT, RATE_LIMIT, ISOLATE} based on a 6D causal state derived from the binary fusion score. Response recommendations are advisory/dry-run — never executed as network interventions.",
+            "safety_decision": "Deterministic safety gate may override DQN recommendations. All actions are advisory in the current prototype.",
+            "evaluation_note": "Per-family detection metrics report how well the binary detector identifies attacks within each ground-truth family. They do NOT imply the model predicts the family name.",
+        },
     }
 
 
@@ -931,6 +940,13 @@ def get_response_benchmark_data(regime: str = "standard_enterprise", mode: str =
             "Execution latency: Analytic CostOptimal baseline runs in 1.95 us (~51x faster than DQN at 100.23 us policy-only).",
             "DQN failed the 15% improvement requirement over the analytical baseline in all six evaluated configurations.",
         ],
+        "response_semantics": {
+            "mode": "offline_replay_simulation",
+            "execution_status": "advisory_dry_run",
+            "note": "All response metrics are computed from offline replay simulation against held-out test flows. No network interventions were executed. DQN actions are recommendations evaluated against a cost model, not enforced firewall rules.",
+            "safety_gate": "Deterministic safety gate overrides are logged but operate within the same advisory simulation. In production, enforcement would require passing all safety preconditions (feature parity, replay pass, dry-run pass, rollback verification).",
+            "dqn_state_contract": "6D causal state vector: [S_t, ΔS_t, N_alert, a_(t-1), c_t, v_t]. No attack-family signal is present in the DQN state — responses are severity-aware, not type-aware.",
+        },
     }
 
 
@@ -1032,6 +1048,17 @@ def get_limitations_data() -> dict[str, Any]:
                 ),
             },
         ],
+        "autonomous_response_status": {
+            "current_capability": "Advisory/dry-run policy recommendations via offline replay simulation",
+            "not_implemented": [
+                "Live network intervention (firewall rules, traffic blocking, rate limiting)",
+                "Attack-family-aware response differentiation",
+                "Production enforcement mode (all safety preconditions unmet)",
+                "Real-time response latency guarantees"
+            ],
+            "evaluation_evidence": "DQN policy evaluated against 5 baselines (Always-ALLOW, Always-BLOCK, Fixed-threshold, RF policy, Fusion policy) across 3 cost regimes. CostOptimalThresholdPolicy outperforms DQN in 4 of 6 settings.",
+            "safety_assessment": "Autonomous production enforcement is strictly NO-GO. All response actions remain advisory.",
+        },
     }
 
 

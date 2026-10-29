@@ -79,12 +79,25 @@ class FlagshipDecision:
     # "lstm" when the real sequence model scored this flow; "rf_fallback" when the
     # 5-flow window was not yet full and lstm_score is a copy of rf_score.
     lstm_score_source: str = "lstm"
+    # Detection model type: 'binary' (BENIGN/ATTACK). No multiclass attack-family
+    # model is available.
+    detection_type: str = "binary"
+    # Attack family prediction — None when no verified multiclass model exists.
+    # Must not be populated with ground-truth labels.
+    attack_family_prediction: str | None = None
+    # Response execution mode: 'advisory' (dry-run recommendation), 'simulated',
+    # or 'enforced'. Default is advisory — actions are never executed unless
+    # explicitly enabled.
+    response_mode: str = "advisory"
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "threat_score": round(self.threat_score, 4),
             "is_attack": self.is_attack,
             "confidence": round(self.confidence, 4),
+            "detection_type": self.detection_type,
+            "attack_family_prediction": self.attack_family_prediction,
+            "response_mode": self.response_mode,
             "recommended_action": self.recommended_action.name,
             "enforced_action": self.enforced_action.name,
             "safety_override": self.safety_override,
@@ -236,7 +249,13 @@ class FlagshipXRLIDS:
         flow_bytes_per_s: float | None = None,
         explain: bool = False,
     ) -> FlagshipDecision:
-        """Process a single network flow through the complete perception-decision-safety pipeline."""
+        """Process a single network flow through the complete perception-decision-safety pipeline.
+
+        Detection is strictly binary (BENIGN/ATTACK) with continuous risk score P(ATTACK).
+        No multiclass attack-family model is deployed; attack family prediction is None.
+        Response recommendations are advisory/dry-run by default and never directly mutate
+        host or network configuration.
+        """
         self._step_counter += 1
 
         # Format input dataframe

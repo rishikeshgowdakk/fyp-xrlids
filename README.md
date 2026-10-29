@@ -12,17 +12,14 @@ Essential documentation, presentation scripts, and defense runbooks for final ye
 
 | Document | Purpose & Key Contents |
 |----------|------------------------|
-| [🚀 **Start Here — Exhibition & Viva Guide**](docs/EXHIBITION_GUIDE.md) | **Primary Exhibition Runbook**: Prerequisites, launch commands, 5-7 min viva demo sequence, expected outputs, and troubleshooting |
-| [📦 **Model & Artifact Registry**](docs/MODEL_AND_ARTIFACT_REGISTRY.md) | **Canonical Checkpoint Registry**: Exact file sizes, SHA-256 hashes, contracts, provenance, and loading code for all 9 models |
-| [📑 **Research Evidence Index**](docs/RESEARCH_EVIDENCE_INDEX.md) | **Master Evidence Directory**: Headline metrics linked to result files, reproduction commands, and strict evidentiary status tiers |
-| [📋 **End-to-End Dataset, Split & Model Audit**](docs/DATASETS_AND_MODELS_AUDIT.md) | **Exhaustive audit**: 19.3M raw rows, column inventories, NaN/Inf accounting, Policy A split proofs (60/20/20), model architectures, and cryptographic artifact hashes |
-| [📖 **Frontend Presentation & Viva Script**](docs/FRONTEND_AND_DEMO_GUIDE.md) | **Word-for-word viva presentation script**, UI layout breakdown, step-by-step click guide, and defense answers |
-| [🎓 **Final Viva Defense Guide**](docs/viva/FINAL_VIVA_GUIDE.md) | Comprehensive examiner Q&A, theoretical defense, metric rationale, and DQN safety principles |
-| [🎬 **Demo Runbook & Video Guide**](docs/viva/DEMO_AND_VIDEO_SCRIPT.md) | Step-by-step practical demo walkthrough, pre-demo checks, and contingency plans |
-| [⚙️ **System Architecture & Mechanics**](docs/HOW_IT_WORKS.md) | Full end-to-end explanation: D-006 flow policy, R10 feature contracts, and frozen model pipeline |
-| [🔄 **Reproducibility Map**](docs/final/REPRODUCIBILITY_MAP.md) | Exact commands and scripts to reproduce all experiments, models, and metric artifacts from scratch |
-| [📊 **Benchmark Datasets Guide**](docs/DATASETS.md) | Ingestion protocols, schema mapping, and preprocessing audits for CIC-IDS2017, CSE-CIC-IDS2018, UNSW-NB15 |
-| [⚠️ **Temporal Generalization Report**](reports/generated/temporal_split_report.md) | Empirical analysis of concept drift across temporal vs. random splits on CSE-CIC-IDS2018 |
+| [🏛️ **Authoritative Architecture**](docs/ARCHITECTURE.md) | **Core System Blueprint**: 12-section architecture, live RF + Rules vs. offline LSTM/fusion, data flows, and safety constraints |
+| [🔬 **Research Design & Rationale**](docs/RESEARCH_DESIGN.md) | **Academic Grounding**: RQs, design choices, DRL/XAI literature citations (2024-2026), and limitations |
+| [📊 **Implementation Status Scorecard**](docs/IMPLEMENTATION_STATUS.md) | **Verified Subsystem Matrix**: Implemented, tested, and verified components with empirical evidence |
+| [📦 **Model & Artifact Cryptographic Audit**](docs/MODEL_ARTIFACT_AUDIT.md) | **Checkpoints & Provenance**: Expected schemas, preprocessor matching, single-pass invariant, and UNSW-NB15 R4 resolution |
+| [📏 **Research Evaluation Protocol**](docs/EVALUATION_PROTOCOL.md) | **Scientific Rigor**: Policy A splits, metrics formulas, DQN cost matrix, latency protocol, and reproduction commands |
+| [✅ **Acceptance & Benchmark Audit**](docs/ACCEPTANCE_AUDIT.md) | **Verification Report**: PASS/FAIL/UNVERIFIED scorecard, empirical benchmark results, and runtime measurements |
+| [🚀 **Start Here — Exhibition & Viva Guide**](docs/EXHIBITION_GUIDE.md) | **Primary Exhibition Runbook**: Prerequisites, launch commands, 5-7 min viva demo sequence, and troubleshooting |
+| [⚙️ **System Mechanics & Flow Policies**](docs/HOW_IT_WORKS.md) | Full end-to-end explanation: D-006 flow policy, R10 feature contracts, and frozen model pipeline |
 
 ---
 
