@@ -606,6 +606,23 @@ class LiveSession:
                     "scope": device_data.get("scope", "passive-observed"),
                     "note": device_data.get("note", ""),
                 },
+                "detection_semantics": {
+                    "model_type": "binary",
+                    "model_output": "BENIGN (0) or ATTACK (1) with continuous P(ATTACK) probability",
+                    "attack_family_prediction": None,
+                    "attack_family_note": (
+                        "No multiclass attack-family model is deployed. Ground-truth family labels "
+                        "(when available from dataset replay) are evaluation metadata, not model predictions."
+                    ),
+                },
+                "response_semantics": {
+                    "mode": "advisory",
+                    "note": (
+                        "All detection outputs are observational. No network intervention (firewall, routing, "
+                        "traffic control) is ever executed by this system."
+                    ),
+                    "dqn_integration": "DQN response policy is evaluated via offline replay simulation and is not connected to the live monitoring pipeline.",
+                },
             }
 
     # ------------------------------------------------------------- internals
@@ -1015,6 +1032,8 @@ class LiveSession:
             else:
                 self.score_bands["benign"] += 1
 
+            # Ground-truth label from dataset/capture source — used for evaluation metrics only.
+            # This is NOT a model prediction. The detector outputs binary BENIGN/ATTACK only.
             gt = observation.ground_truth or "UNKNOWN"
             self.traffic_types[gt] = self.traffic_types.get(gt, 0) + 1
 

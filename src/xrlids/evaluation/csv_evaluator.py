@@ -369,8 +369,8 @@ def _load_benchmark_models(benchmark: str) -> dict[str, Any]:
 def _get_dqn_action(attack_score: float, flow_bytes: float = 1000.0) -> dict[str, Any]:
     """Evaluate response action recommendation using the trained Dueling DQN checkpoint.
 
-    Input state vector (6D):
-    [attack_score, flow_bytes_norm, host_criticality=0.5, current_quarantine=0.0, cooldown=0.0, hist_actions=0.0]
+    Uses canonical Phase 2 6D causal state vector from StateBuilder:
+    s_t = [S_t, ΔS_t, N_alert, a_(t-1), c_t, v_t] in R^6
     """
     actions = ["ALLOW", "ALERT", "RATE_LIMIT", "ISOLATE"]
     dqn_path = REPO_ROOT / "models" / "dqn" / "dqn_4action_best.pt"
@@ -408,8 +408,11 @@ def _get_dqn_action(attack_score: float, flow_bytes: float = 1000.0) -> dict[str
         else:
             net = _DQN_CACHE["net"]
 
-        bytes_norm = float(np.clip(np.log1p(flow_bytes) / 16.0, 0.0, 1.0))
-        state = torch.tensor([[float(attack_score), bytes_norm, 0.5, 0.0, 0.0, 0.0]], dtype=torch.float32)
+        from xrlids.response.state import StateBuilder
+
+        sb = StateBuilder()
+        state_vec = sb.build_state(attack_score=float(attack_score), flow_bytes_per_s=float(flow_bytes))
+        state = torch.tensor(np.array([state_vec]), dtype=torch.float32)
         with torch.no_grad():
             q_vals = net(state)
             action_idx = int(torch.argmax(q_vals, dim=1).item())

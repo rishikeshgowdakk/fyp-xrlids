@@ -354,6 +354,8 @@ def get_overview_data() -> dict[str, Any]:
                 "scope": "Offline Response Policy",
                 "status": "REQUIRES_REFORMULATION",
                 "finding": "CostOptimalThresholdPolicy beats DQN in 4 of 6 settings (up to 20.12% lower cost). DQN fails 15% target in all settings and is ~51x slower (100.23 µs vs 1.95 µs policy-only).",
+                "response_mode": "advisory_dry_run",
+                "response_note": "All DQN outputs are advisory recommendations. No network intervention (firewall, iptables, routing) is ever executed. The 'autonomous response' is a research policy recommendation, not an operational enforcement.",
             },
             {
                 "component": "Deterministic Safety Gate",
@@ -473,6 +475,11 @@ def get_evaluation_data(benchmark_id: str, slice_type: str = "aligned") -> dict[
         "thresholds": {
             "research": 0.50,
             "candidate_operational": 0.40,
+        },
+        "detection_semantics": {
+            "model_output": "Binary classification (BENIGN=0, ATTACK=1) with continuous P(ATTACK) score",
+            "per_family_note": "Per-family metrics stratify the binary detector's predictions by ground-truth attack category. The model does not predict attack family names.",
+            "threshold": 0.50,
         },
         "models": models_dict,
         "per_family": per_family,
@@ -846,6 +853,11 @@ def get_explainability_data(benchmark_id: str = "cicids2017") -> dict[str, Any]:
         "global_importance": shap_data.get("global_importance", []),
         "per_family": per_family,
         "blind_spots": blind_spots,
+        "explanation_semantics": {
+            "scope": "TreeSHAP explains the RF's binary BENIGN/ATTACK classification decision",
+            "output": "Per-feature attribution values (SHAP values) for the ATTACK class probability",
+            "limitation": "Attributions explain which features drove the binary attack score, not which attack family the flow belongs to",
+        },
         "scientific_notices": [
             "TreeSHAP attributions explain the tree decision splits of the Random Forest detector ONLY.",
             "TreeSHAP does NOT explain the LSTM, the Fusion model, or the Deep Q-Network Q-values.",

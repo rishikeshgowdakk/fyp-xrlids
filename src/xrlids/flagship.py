@@ -370,6 +370,9 @@ class FlagshipXRLIDS:
             state_vector=state_6d.tolist(),
             shap_attributions=shap_dict,
             lstm_score_source=lstm_score_source,
+            detection_type="binary",
+            attack_family_prediction=None,
+            response_mode="advisory",
         )
 
     @staticmethod

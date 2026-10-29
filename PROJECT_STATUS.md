@@ -16,6 +16,19 @@ Overall: **Phase 1 Research Frozen & Demonstration Foundation Verified (`EXP-P1-
 
 Legend: ✅ done / verified · 🟡 implemented / empirically observed on partial data · ⛔ blocked on research decision · ⬜ planned / not started
 
+## Attack-Family Capability & Autonomous Response Integrity (Addendum Verified 2026-10-30)
+
+| Area | Status | Scope / evidence |
+| --- | --- | --- |
+| Model Prediction Capability Audit | ✅ Verified | All 3 Random Forest artifacts (`CIC-IDS2017`, `CSE-CIC-IDS2018`, `UNSW-NB15`) are strictly binary (`classes_=[0, 1]`) predicting continuous $P(\text{ATTACK})$. No multiclass model exists in repo. |
+| Ground-Truth Label Accounting | ✅ Verified | Canonical attack taxonomy defines 17 families across 3 datasets (`configs/labels/label_mapping.yaml`). Evaluated as ground-truth metadata, not model outputs. |
+| Per-Family Evaluation Semantics | ✅ Verified | `xrlids.evaluation.error_analysis.compute_per_family_metrics()` computes binary recall/error rate stratified by ground truth family. Never falsely claims to predict family names. |
+| DQN Threat-Awareness Scope | ✅ Verified | DQN state vector is strictly 6D causal ($s_t = [S_t, \Delta S_t, N_{\text{alert}}, a_{t-1}, c_t, v_t]$). Threat-severity aware via continuous score $S_t$; no attack-family label in state. |
+| Autonomous Response Safety & Mode | ✅ Verified | Response actions are strictly advisory / dry-run (`response_mode="advisory"`). Deterministic safety gate enforces zero network mutations. Production enforcement remains NO-GO. |
+| Flagship Decision Semantics | ✅ Verified | `FlagshipDecision` carries `detection_type="binary"`, `attack_family_prediction=None`, and `response_mode="advisory"`. |
+| Dashboard Concept Separation | ✅ Verified | Dedicated semantic contracts in `/api/overview`, `/api/evaluation`, `/api/explainability`, `/api/response-benchmark`, and `/api/live`. Ground-truth families separated from model predictions. |
+| Proposed Multiclass Extension | Documented (Future Work) | Feasibility confirmed; frozen artifacts preserved without retraining; formal extension specification recorded in `docs/MODEL_ARTIFACT_AUDIT.md`. |
+
 ## Dashboard Flow Evaluation & Exhibition Demo Workflow (Upgraded 2026-10-28)
 
 | Area | Status | Scope / evidence |

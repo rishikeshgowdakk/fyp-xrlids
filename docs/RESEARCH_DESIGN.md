@@ -171,8 +171,8 @@ The rule engine is not a fallback or a surrogate for ML. It provides determinist
   4. `packet_length_mean`: Arithmetic mean of frame lengths.
 
 - **Response State Schema (`response_state_v1`):**
-  A normalized 6-dimensional vector representing operational context:
-  `[p_attack, threat_severity, host_criticality, active_connections, historical_fp_rate, alert_rate]`
+  Canonical 6-dimensional causal observation vector ($s_t \in \mathbb{R}^6$) per SPEC-P2 Section 4:
+  `[S_t, ΔS_t, N_alert, a_(t-1), c_t, v_t]` (superseded preliminary draft placeholder `[p_attack, threat_severity, host_criticality, active_connections, historical_fp_rate, alert_rate]`).
 
 ---
 
