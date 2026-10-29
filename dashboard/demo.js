@@ -10,6 +10,9 @@ let scenarioTimer = null;
 let scenarioSecondsLeft = 120;
 let selectedFlowId = null;
 let cachedFlows = [];
+let activeExplainingFlowId = null;
+const flowExplanationCache = new Map();
+let currentBenchmark = 'cicids2017';
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
@@ -49,6 +52,9 @@ async function pollLiveSession() {
 }
 
 function updateUIFromSession(session) {
+  if (session.benchmark) {
+    currentBenchmark = session.benchmark;
+  }
   const analysis = session.live_analysis || {};
   const counters = session.counters || {};
 
@@ -172,78 +178,186 @@ function onFlowRowClick(flowId) {
 
 // Populate "Why?" Card
 function inspectFlow(flow) {
+  if (!flow) return;
   selectedFlowId = flow.flow_id;
   const scorePct = Math.round((flow.attack_score || 0) * 100);
-  const isAttack = flow.prediction_label === 'ATTACK' || (flow.attack_score >= 0.50);
 
   // Headers & Meta
-  document.getElementById('why-flow-id').textContent = `#${flow.flow_id} (${flow.protocol || 'TCP'})`;
-  document.getElementById('why-confidence').textContent = `${scorePct}%`;
-  document.getElementById('why-endpoints').textContent = `${flow.src_endpoint || '172.16.0.1:49152'} → ${flow.dst_endpoint || '192.168.10.50:80'}`;
+  const flowIdEl = document.getElementById('why-flow-id');
+  const confEl = document.getElementById('why-confidence');
+  const endpointsEl = document.getElementById('why-endpoints');
+
+  if (flowIdEl) flowIdEl.textContent = `#${flow.flow_id} (${flow.protocol || 'TCP'})`;
+  if (confEl) confEl.textContent = `${scorePct}%`;
+  if (endpointsEl) endpointsEl.textContent = `${flow.src_endpoint || '172.16.0.1:49152'} → ${flow.dst_endpoint || '192.168.10.50:80'}`;
 
   // Action badge
   const badgeEl = document.getElementById('why-action-badge');
   const policyActionEl = document.getElementById('why-policy-action');
 
-  if (scorePct >= 85) {
-    badgeEl.className = 'badge-action-block';
-    badgeEl.textContent = 'BLOCK';
-    policyActionEl.textContent = 'Cost-Optimal Gate: BLOCK / ISOLATE';
-    policyActionEl.style.color = '#f87171';
-  } else if (scorePct >= 50) {
-    badgeEl.className = 'badge-action-alert';
-    badgeEl.textContent = 'ALERT';
-    policyActionEl.textContent = 'Cost-Optimal Gate: RATE_LIMIT / ALERT';
-    policyActionEl.style.color = '#fbbf24';
-  } else {
-    badgeEl.className = 'badge-action-allow';
-    badgeEl.textContent = 'ALLOW';
-    policyActionEl.textContent = 'Cost-Optimal Gate: ALLOW (Safe)';
-    policyActionEl.style.color = '#34d399';
-  }
-
-  // TreeSHAP Reasons in plain English
-  const gt = (flow.ground_truth || '').toLowerCase();
-  let reasons = [];
-
-  if (gt.includes('ddos') || (isAttack && scorePct > 80)) {
-    reasons = [
-      { title: '1. Packet Transmission Rate', shap: '+0.089', impact: true, desc: 'Abnormally high packet rate exceeding volumetric benchmark baselines (TreeSHAP rank 1).' },
-      { title: '2. Packet Length Deviation', shap: '+0.077', impact: true, desc: 'Payload variance differs sharply from standard enterprise HTTP/TLS transactions.' },
-      { title: '3. Asymmetric Incomplete Handshakes', shap: '+0.047', impact: false, desc: 'High SYN/ACK count with minimal bidirectional flow data exchanged.' },
-    ];
-  } else if (gt.includes('portscan') || gt.includes('sweep') || (flow.duration_ms < 50 && isAttack)) {
-    reasons = [
-      { title: '1. Rapid Sequential Probes', shap: '+0.091', impact: true, desc: 'Multiple ephemeral destination port queries within short temporal window.' },
-      { title: '2. Extremely Low Flow Duration', shap: '+0.065', impact: true, desc: 'Connection torn down or RST received in under 15 ms.' },
-      { title: '3. Zero Application Payload', shap: '+0.038', impact: false, desc: 'Flow contains only TCP control flags without HTTP/application payload.' },
-    ];
-  } else if (gt.includes('dos') || gt.includes('slowloris')) {
-    reasons = [
-      { title: '1. Extended Connection Duration', shap: '+0.082', impact: true, desc: 'Persistent open TCP socket designed to exhaust server worker threads.' },
-      { title: '2. Extremely Low Byte Rate', shap: '+0.071', impact: true, desc: 'Trickle payload rate with minimal bytes per packet.' },
-      { title: '3. Periodic Keep-Alive Probes', shap: '+0.041', impact: false, desc: 'Repeated small TCP PUSH fragments preventing socket timeout.' },
-    ];
-  } else {
-    reasons = [
-      { title: '1. Standard Bidirectional Handshake', shap: '-0.061', impact: false, desc: 'Normal 3-way handshake with expected ACK and FIN completion.' },
-      { title: '2. Typical Web Payload Distribution', shap: '-0.054', impact: false, desc: 'Packet size distribution matches legitimate enterprise web browsing.' },
-      { title: '3. Consistent Inter-Arrival Times', shap: '-0.034', impact: false, desc: 'Regular flow duration and pacing within normal statistical variance.' },
-    ];
+  if (badgeEl && policyActionEl) {
+    if (scorePct >= 85) {
+      badgeEl.className = 'badge-action-block';
+      badgeEl.textContent = 'BLOCK';
+      policyActionEl.textContent = 'Cost-Optimal Gate: BLOCK / ISOLATE';
+      policyActionEl.style.color = '#f87171';
+    } else if (scorePct >= 50) {
+      badgeEl.className = 'badge-action-alert';
+      badgeEl.textContent = 'ALERT';
+      policyActionEl.textContent = 'Cost-Optimal Gate: RATE_LIMIT / ALERT';
+      policyActionEl.style.color = '#fbbf24';
+    } else {
+      badgeEl.className = 'badge-action-allow';
+      badgeEl.textContent = 'ALLOW';
+      policyActionEl.textContent = 'Cost-Optimal Gate: ALLOW (Safe)';
+      policyActionEl.style.color = '#34d399';
+    }
   }
 
   const factorsContainer = document.getElementById('why-shap-factors');
-  if (factorsContainer) {
-    factorsContainer.innerHTML = reasons.map(r => `
-      <div class="shap-factor ${r.impact ? 'high-impact' : ''}">
-        <div class="shap-factor-title">
-          <span>${r.title}</span>
-          <span style="color: ${r.impact ? '#f87171' : '#6ee7b7'};">SHAP ${r.shap}</span>
-        </div>
-        <div class="shap-factor-desc">${r.desc}</div>
-      </div>
-    `).join('');
+  if (!factorsContainer) return;
+
+  const flowId = flow.flow_id;
+  activeExplainingFlowId = flowId;
+
+  // If the flow does not have complete preserved features, show honest unavailable state
+  if (!flow.features || typeof flow.features !== 'object' || Object.keys(flow.features).length === 0) {
+    renderShapUnavailable(factorsContainer, 'TreeSHAP explanation unavailable for this flow.');
+    return;
   }
+
+  // Check cache
+  if (flowExplanationCache.has(flowId)) {
+    renderShapExplanation(factorsContainer, flowExplanationCache.get(flowId));
+    return;
+  }
+
+  // Show loading indicator
+  renderShapLoading(factorsContainer, flowId);
+
+  // Request real TreeSHAP from /api/csv/explain
+  fetch('/api/csv/explain', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      flow_id: flow.flow_id,
+      features: flow.features,
+      benchmark: currentBenchmark,
+    }),
+  })
+    .then(async res => {
+      if (!res.ok) {
+        let msg = 'TreeSHAP computation failed';
+        try {
+          const errData = await res.json();
+          if (errData && errData.error) msg = errData.error;
+        } catch (_) {}
+        throw new Error(msg);
+      }
+      return await res.json();
+    })
+    .then(data => {
+      // Discard stale responses if user clicked another flow
+      if (activeExplainingFlowId !== flowId) return;
+
+      if (!data || !data.features || !Array.isArray(data.features) || data.features.length === 0) {
+        renderShapUnavailable(factorsContainer, 'TreeSHAP explanation unavailable for this flow.');
+        return;
+      }
+
+      flowExplanationCache.set(flowId, data);
+      renderShapExplanation(factorsContainer, data);
+    })
+    .catch(err => {
+      if (activeExplainingFlowId !== flowId) return;
+      console.warn(`TreeSHAP explanation failed for Flow #${flowId}:`, err);
+      renderShapUnavailable(factorsContainer, 'TreeSHAP explanation unavailable for this flow.');
+    });
+}
+
+function renderShapExplanation(container, data) {
+  const rawFeatures = data.features || [];
+  // Rank features strictly by absolute SHAP attribution
+  const sorted = [...rawFeatures].sort((a, b) => Math.abs(b.shap_attribution) - Math.abs(a.shap_attribution));
+
+  if (sorted.length === 0) {
+    renderShapUnavailable(container, 'TreeSHAP explanation unavailable for this flow.');
+    return;
+  }
+
+  let html = '';
+  sorted.forEach((feat, idx) => {
+    const isIncrease = feat.direction === 'INCREASES_THREAT' || feat.shap_attribution > 0;
+    const sign = feat.shap_attribution > 0 ? '+' : '';
+    const formattedShap = `${sign}${feat.shap_attribution.toFixed(4)}`;
+    const formattedVal = formatFeatureVal(feat.value);
+    const borderClass = isIncrease ? 'threat-increase' : 'threat-decrease';
+    const valColor = isIncrease ? '#f87171' : '#34d399';
+    const dirText = isIncrease
+      ? '▲ Increases RF Attack Score'
+      : '▼ Decreases RF Attack Score (Pushes Benign)';
+    const dirColor = isIncrease ? '#fca5a5' : '#86efac';
+
+    html += `
+      <div class="shap-factor ${borderClass}">
+        <div class="shap-factor-title">
+          <span style="font-family: monospace; font-size: 0.8rem; color: #f8fafc;">${idx + 1}. ${escapeHtml(feat.feature)}</span>
+          <span style="color: ${valColor}; font-family: monospace; font-weight: 700; font-size: 0.78rem;">
+            SHAP ${formattedShap}
+          </span>
+        </div>
+        <div class="shap-factor-desc">
+          Value: <strong style="color: #ffffff; font-family: monospace;">${formattedVal}</strong> · 
+          <span style="color: ${dirColor}; font-weight: 600;">${dirText}</span>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `
+    <div class="shap-scientific-notice">
+      <div style="font-weight: 700; color: #93c5fd; margin-bottom: 3px; font-size: 0.72rem;">
+        Random Forest TreeSHAP Explanation
+      </div>
+      <div style="font-size: 0.69rem; color: var(--text-dim); line-height: 1.35;">
+        Attributions indicate mathematical contribution to Random Forest tree decision splits, not proof of network-attack causality. TreeSHAP explains the Random Forest detector ONLY; it does not explain the LSTM or DQN.
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = html;
+}
+
+function renderShapLoading(container, flowId) {
+  container.innerHTML = `
+    <div style="text-align: center; color: var(--text-dim); padding: 32px 12px; font-size: 0.82rem;">
+      <div style="margin-bottom: 8px; font-weight: 600; color: #93c5fd;">⏳ Computing TreeSHAP...</div>
+      <div style="font-size: 0.73rem; color: var(--text-muted);">
+        Evaluating Random Forest tree decision attributions for Flow #${flowId}
+      </div>
+    </div>
+  `;
+}
+
+function renderShapUnavailable(container, message) {
+  container.innerHTML = `
+    <div style="text-align: center; color: var(--text-muted); padding: 32px 12px; font-size: 0.82rem;">
+      <div style="color: var(--accent-amber); margin-bottom: 6px; font-weight: 600;">⚠️ Notice</div>
+      <div>${escapeHtml(message || 'TreeSHAP explanation unavailable for this flow.')}</div>
+      <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 6px;">
+        Explanations require complete preserved inference features matching the model contract.
+      </div>
+    </div>
+  `;
+}
+
+function formatFeatureVal(val) {
+  if (val === null || val === undefined || isNaN(val)) return '0';
+  const num = Number(val);
+  if (Number.isInteger(num)) return num.toLocaleString();
+  if (Math.abs(num) >= 1000) return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  if (Math.abs(num) < 0.001 && num !== 0) return num.toExponential(2);
+  return num.toFixed(3);
 }
 
 // Flow Filter Buttons

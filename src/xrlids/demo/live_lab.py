@@ -22,6 +22,8 @@ from xrlids.demo.replay import FlowPredictionEvent, ReplayEngine
 logger = logging.getLogger(__name__)
 
 
+import time
+
 @dataclass
 class AlertEvent:
     """Security alert emitted on attack detection."""
@@ -37,6 +39,8 @@ class AlertEvent:
     duration_ms: float
     details: dict[str, float]
     ground_truth: str = "UNKNOWN"
+    mode: str = "live"  # "live", "pcap", "dataset", "sample"
+    deduplicated: bool = False
 
 
 @dataclass
@@ -55,6 +59,9 @@ class FlowObservation:
     prediction_label: str  # "BENIGN" or "ATTACK" at the research threshold
     is_alert: bool
     ground_truth: str = "UNKNOWN"
+    features: dict[str, float] | None = None
+    mode: str = "live"  # "live", "pcap", "dataset", "sample"
+    is_simulated: bool = False
 
 
 class LiveLabMonitor:
@@ -67,19 +74,24 @@ class LiveLabMonitor:
         on_alert_callback: Callable[[AlertEvent], None] | None = None,
         on_flow_callback: Callable[[FlowObservation], None] | None = None,
         max_observations: int = 10000,
+        dedup_window_s: float = 5.0,
     ) -> None:
         self.engine = engine
         self.alert_threshold = alert_threshold
         self.on_alert_callback = on_alert_callback
         self.on_flow_callback = on_flow_callback
+        self.max_observations = max_observations
+        self.dedup_window_s = dedup_window_s
         self.alerts: list[AlertEvent] = []
         self.observations: deque[FlowObservation] = deque(maxlen=max_observations)
+        self._last_alert_time: dict[str, float] = {}
         self._running = False
 
     def process_packet_stream(
         self,
         packet_generator: Generator[PacketInfo, None, None],
         ground_truth_resolver: Callable[[Flow], int | None] | None = None,
+        mode: str = "live",
     ) -> list[AlertEvent]:
         """Ingest streaming packets in userland/test mode, evaluate flows, and emit alerts.
 
@@ -89,25 +101,28 @@ class LiveLabMonitor:
         """
         builder = FlowBuilder(idle_timeout_s=self.engine.idle_timeout_s)
         self.alerts.clear()
+        self._last_alert_time.clear()
         flow_idx = 0
 
         for pkt in packet_generator:
             completed = builder.process_packet(pkt)
             for fl in completed:
                 flow_idx += 1
-                self._evaluate_and_alert(fl, flow_idx)
+                self._evaluate_and_alert(fl, flow_idx, mode=mode)
 
         for fl in builder.flush_all():
             flow_idx += 1
-            self._evaluate_and_alert(fl, flow_idx)
+            self._evaluate_and_alert(fl, flow_idx, mode=mode)
 
         return list(self.alerts)
 
-    def _evaluate_and_alert(self, flow: Flow, flow_idx: int) -> None:
+    def _evaluate_and_alert(self, flow: Flow, flow_idx: int, mode: str = "live") -> None:
         """Run model inference, record the observation, and emit an alert when threshold is crossed."""
-        pred, conf = self.engine._predict_flow(flow)
+        features = flow.to_features()
+        pred, conf = self.engine.predict_features(features)
         proto = "TCP" if flow.key.protocol == 6 else ("UDP" if flow.key.protocol == 17 else f"PROTO_{flow.key.protocol}")
         is_alert = pred == 1 and conf >= self.alert_threshold
+        is_simulated = (mode == "sample")
 
         observation = FlowObservation(
             timestamp=datetime.now(timezone.utc).isoformat(),
@@ -121,6 +136,9 @@ class LiveLabMonitor:
             prediction_class=pred,
             prediction_label="ATTACK" if pred == 1 else "BENIGN",
             is_alert=is_alert,
+            features=features,
+            mode=mode,
+            is_simulated=is_simulated,
         )
         self.observations.append(observation)
         if self.on_flow_callback is not None:
@@ -128,6 +146,16 @@ class LiveLabMonitor:
 
         if is_alert:
             level = "HIGH" if conf >= 0.85 else ("MEDIUM" if conf >= 0.65 else "LOW")
+            alert_key = f"{observation.src_endpoint}->{observation.dst_endpoint}:{proto}"
+            now_mono = time.monotonic()
+            is_dedup = False
+            if alert_key in self._last_alert_time:
+                if (now_mono - self._last_alert_time[alert_key]) < self.dedup_window_s:
+                    is_dedup = True
+
+            if not is_dedup:
+                self._last_alert_time[alert_key] = now_mono
+
             alert = AlertEvent(
                 timestamp=observation.timestamp,
                 flow_id=flow_idx,
@@ -138,7 +166,9 @@ class LiveLabMonitor:
                 protocol=proto,
                 packet_count=flow.packet_count,
                 duration_ms=round(flow.duration_ms, 2),
-                details={k: round(v, 4) for k, v in flow.to_features().items()},
+                details={k: round(v, 4) for k, v in features.items()},
+                mode=mode,
+                deduplicated=is_dedup,
             )
             self.alerts.append(alert)
             if self.on_alert_callback is not None:

@@ -519,8 +519,22 @@
       padding: 10px;
       margin-bottom: 8px;
     }
-    .shap-factor.high-impact {
+    .shap-factor.high-impact,
+    .shap-factor.threat-increase {
       border-left-color: var(--accent-red);
+      background: rgba(239, 68, 68, 0.08);
+    }
+    .shap-factor.threat-decrease {
+      border-left-color: var(--accent-green);
+      background: rgba(16, 185, 129, 0.08);
+    }
+    .shap-scientific-notice {
+      background: #0d1524;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      margin-top: 10px;
+      margin-bottom: 4px;
     }
     .shap-factor-title {
       font-size: 0.82rem;
@@ -725,7 +739,7 @@
     <div class="pitch-icon">💡</div>
     <div class="pitch-text">
       <strong>30-Second Viva Summary for Examiners</strong>
-      <p>"XRL-IDARS watches network flows and does three things: it detects attacks using Random Forest and LSTM, it explains each decision with SHAP, and a reinforcement-learning agent picks the response. We can't attack a shared network, so the demo replays held-out benchmark traffic through the same pipeline. The benchmark numbers come from the full test sets."</p>
+      <p>"XRL-IDARS watches network flows and does three things: it detects attacks using Random Forest (with LSTM benchmarked in evaluation), it explains each decision with real TreeSHAP, and a reinforcement-learning agent recommends the response. We can't attack a shared network, so the demo replays held-out benchmark traffic through the same pipeline. The benchmark numbers come from the full test sets."</p>
     </div>
   </div>
 
@@ -759,19 +773,20 @@
       <div class="pipe-arrow">→</div>
       <div class="pipe-node" id="node-detector">
         <div class="pipe-node-title">3. Detector</div>
-        <div class="pipe-node-sub">RF + LSTM Score Fusion</div>
+        <div class="pipe-node-sub">Random Forest (R10 Tabular)*</div>
       </div>
       <div class="pipe-arrow">→</div>
       <div class="pipe-node" id="node-shap">
         <div class="pipe-node-title">4. TreeSHAP</div>
-        <div class="pipe-node-sub">Real-Time Feature Attribution</div>
+        <div class="pipe-node-sub">RF Feature Attribution</div>
       </div>
       <div class="pipe-arrow">→</div>
       <div class="pipe-node" id="node-action">
         <div class="pipe-node-title">5. Response Gate</div>
-        <div class="pipe-node-sub">Cost-Optimal / DQN Policy</div>
+        <div class="pipe-node-sub">DQN Policy Recommendation</div>
       </div>
     </div>
+    <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 8px; text-align: right;">* Live & replay monitoring operates on Random Forest R10 tabular flows. Supervised LSTM and RF-LSTM Fusion are evaluated in the offline benchmark suite. Response actions are observational / dry-run recommendations.</div>
   </section>
 
   <!-- ZONE 2: Four Numbers Only -->
@@ -849,37 +864,13 @@
       </div>
 
       <div class="why-shap-title">
-        <span>Top 3 TreeSHAP Drivers</span>
-        <span style="font-size: 0.7rem; color: var(--text-dim); text-transform: none;">(Random Forest Local Explanation)</span>
+        <span>Random Forest TreeSHAP Explanation</span>
+        <span style="font-size: 0.7rem; color: var(--text-dim); text-transform: none;">(Local Feature Attributions)</span>
       </div>
 
       <div class="why-shap-container" id="why-shap-factors">
-        <div class="shap-factor high-impact">
-          <div class="shap-factor-title">
-            <span>1. Packet Transmission Rate</span>
-            <span style="color: #f87171;">SHAP +0.089</span>
-          </div>
-          <div class="shap-factor-desc">
-            Abnormally high packets per second exceeding normal baseline thresholds.
-          </div>
-        </div>
-        <div class="shap-factor high-impact">
-          <div class="shap-factor-title">
-            <span>2. Packet Length Deviation</span>
-            <span style="color: #f87171;">SHAP +0.077</span>
-          </div>
-          <div class="shap-factor-desc">
-            Volumetric payload variance deviates from standard HTTP/TLS application flows.
-          </div>
-        </div>
-        <div class="shap-factor">
-          <div class="shap-factor-title">
-            <span>3. TCP Flag Invariance</span>
-            <span style="color: #93c5fd;">SHAP +0.047</span>
-          </div>
-          <div class="shap-factor-desc">
-            Unusual SYN-ACK sequence without completed bidirectional tear-down.
-          </div>
+        <div style="text-align: center; color: var(--text-dim); padding: 32px 12px; font-size: 0.82rem;">
+          Select a flow from the stream to view genuine Random Forest TreeSHAP attributions.
         </div>
       </div>
 

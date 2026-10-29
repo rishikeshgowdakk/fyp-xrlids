@@ -64,6 +64,7 @@ from xrlids.evaluation.csv_evaluator import (  # noqa: E402
     get_cached_evaluation,
     get_demo_sample_csv,
 )
+from xrlids.features.definitions import R10_FEATURES, R4_FEATURES  # noqa: E402
 from xrlids.live.capture import CaptureConfig, PacketCaptureService  # noqa: E402
 from xrlids.live.devices import DeviceTracker  # noqa: E402
 from dashboard.workbench_data import (  # noqa: E402
@@ -397,11 +398,15 @@ class LiveSession:
                     return {
                         "error": (
                             "Live capture requires root / CAP_NET_RAW. Restart the dashboard with sudo, e.g. "
-                            "`sudo .venv/bin/python dashboard/server.py` — or use the Sample stream mode (no root)."
+                            "`sudo .venv/bin/python dashboard/server.py` — or use the PCAP / Sample stream mode (no root)."
                         )
                     }
+            elif mode == "pcap":
+                target_pcap = Path(pcap) if pcap else SAMPLE_PCAP
+                if not target_pcap.exists():
+                    return {"error": f"PCAP file not found: {target_pcap}"}
             elif mode not in ("sample", "dataset"):
-                return {"error": f"Unknown mode {mode!r} (expected 'dataset', 'sample', or 'live')."}
+                return {"error": f"Unknown mode {mode!r} (expected 'live', 'pcap', 'dataset', or 'sample')."}
 
             self._reset_locked()
             if self._engine is None and benchmark in BENCHMARK_CONFIGS:
@@ -428,8 +433,7 @@ class LiveSession:
             self.mode = mode
             self.dataset_category = dataset_category if mode == "dataset" else None
             self.interface = interface if mode == "live" else None
-            self.bpf_filter = bpf_filter or None
-            self.pcap = str(pcap) if pcap else (str(SAMPLE_PCAP) if mode == "sample" else None)
+            self.pcap = str(pcap) if pcap else (str(SAMPLE_PCAP) if mode in ("sample", "pcap") else None)
             self.started_at = datetime.now(timezone.utc).isoformat()
             self._t0 = time.time()
             self._stop_event.clear()
@@ -541,6 +545,7 @@ class LiveSession:
             return {
                 "status": self.status,
                 "mode": self.mode,
+                "is_simulated": (self.mode == "sample"),
                 "benchmark": getattr(self, "benchmark", "cicids2017"),
                 "benchmarks": [
                     {
@@ -690,7 +695,10 @@ class LiveSession:
 
             producer = threading.Thread(target=_produce, name="xrlids-capture-producer", daemon=True)
             producer.start()
-            monitor.process_packet_stream(self._count_packets(self._merge_packets(packet_queue)))
+            monitor.process_packet_stream(
+                self._count_packets(self._merge_packets(packet_queue)),
+                mode=mode,
+            )
         except Exception as exc:
             with self._lock:
                 if not self._stop_event.is_set():
@@ -740,7 +748,8 @@ class LiveSession:
                                     self.total_bytes += pkt.packet_length
                                 for inf_flow in injected_builder.process_packet(pkt):
                                     flow_idx += 1
-                                    pred, conf = engine._predict_flow(inf_flow)
+                                    inf_features = inf_flow.to_features()
+                                    pred, conf = engine.predict_features(inf_features)
                                     obs = FlowObservation(
                                         timestamp=datetime.now(timezone.utc).isoformat(),
                                         flow_id=flow_idx,
@@ -754,31 +763,42 @@ class LiveSession:
                                         prediction_label="ATTACK" if pred == 1 else "BENIGN",
                                         is_alert=pred == 1 and conf >= RESEARCH_THRESHOLD,
                                         ground_truth="SIMULATED ATTACK",
+                                        features=inf_features,
+                                        mode="sample",
+                                        is_simulated=True,
                                     )
                                     self._on_flow(obs)
                                     if obs.is_alert:
                                         self._on_alert(
-                                            AlertEvent(
-                                                timestamp=obs.timestamp,
-                                                flow_id=flow_idx,
-                                                alert_level="HIGH" if conf >= 0.85 else ("MEDIUM" if conf >= 0.65 else "LOW"),
-                                                confidence=round(conf, 4),
-                                                src_endpoint=obs.src_endpoint,
-                                                dst_endpoint=obs.dst_endpoint,
-                                                protocol="TCP",
-                                                packet_count=inf_flow.packet_count,
-                                                duration_ms=round(inf_flow.duration_ms, 2),
-                                                details={k: round(v, 4) for k, v in inf_flow.to_features().items()},
-                                                ground_truth="SIMULATED ATTACK",
-                                            )
-                                        )
+                                             AlertEvent(
+                                                 timestamp=obs.timestamp,
+                                                 flow_id=flow_idx,
+                                                 alert_level="HIGH" if conf >= 0.85 else ("MEDIUM" if conf >= 0.65 else "LOW"),
+                                                 confidence=round(conf, 4),
+                                                 src_endpoint=obs.src_endpoint,
+                                                 dst_endpoint=obs.dst_endpoint,
+                                                 protocol="TCP",
+                                                 packet_count=inf_flow.packet_count,
+                                                 duration_ms=round(inf_flow.duration_ms, 2),
+                                                 details={k: round(v, 4) for k, v in inf_features.items()},
+                                                 ground_truth="SIMULATED ATTACK",
+                                                 mode="sample",
+                                             )
+                                         )
                         except queue.Empty:
                             break
 
                     flow_idx += 1
-                    pred, score = engine.predict_features(item["features"])
+                    raw_features = item.get("features")
+                    pred, score = engine.predict_features(raw_features)
                     is_alert = pred == 1 and score >= RESEARCH_THRESHOLD
                     gt = item.get("ground_truth", "UNKNOWN")
+
+                    bench = getattr(self, "benchmark", "cicids2017")
+                    expected = R10_FEATURES if bench in ("cicids2017", "cse2018") else R4_FEATURES
+                    valid_features = None
+                    if isinstance(raw_features, dict) and all(f in raw_features and raw_features[f] is not None for f in expected):
+                        valid_features = {k: float(raw_features[k]) for k in expected}
 
                     obs = FlowObservation(
                         timestamp=datetime.now(timezone.utc).isoformat(),
@@ -793,6 +813,9 @@ class LiveSession:
                         prediction_label="ATTACK" if pred == 1 else "BENIGN",
                         is_alert=is_alert,
                         ground_truth=gt,
+                        features=valid_features,
+                        mode="dataset",
+                        is_simulated=False,
                     )
 
                     with self._lock:
@@ -818,6 +841,7 @@ class LiveSession:
                             duration_ms=obs.duration_ms,
                             details={k: round(v, 4) for k, v in item["features"].items()},
                             ground_truth=gt,
+                            mode="dataset",
                         )
                         self._on_alert(alert)
 
@@ -1229,12 +1253,29 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 self.send_json({"error": f"Evaluation failed: {str(e)}", "status": "error"}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
         elif parsed.path == "/api/csv/explain":
             body = self.read_json_body()
-            features = body.get("features", {})
+            features = body.get("features")
             benchmark = str(body.get("benchmark", "cicids2017"))
+            if not features:
+                flow_id = body.get("flow_id")
+                if flow_id is not None:
+                    with LIVE_SESSION._lock:
+                        for f in LIVE_SESSION.flows:
+                            if f.get("flow_id") == flow_id:
+                                features = f.get("features")
+                                break
+            if not features or not isinstance(features, dict):
+                self.send_json(
+                    {"error": "No valid features provided or preserved for TreeSHAP explanation.", "status": "error"},
+                    status=HTTPStatus.BAD_REQUEST,
+                )
+                return
             try:
                 from xrlids.evaluation.csv_evaluator import explain_flow_prediction
                 explanation = explain_flow_prediction(features, benchmark=benchmark)
                 self.send_json(explanation)
+            except ValueError as e:
+                logger.warning("SHAP validation error: %s", e)
+                self.send_json({"error": str(e), "status": "error"}, status=HTTPStatus.BAD_REQUEST)
             except Exception as e:
                 logger.exception("SHAP explain error: %s", e)
                 self.send_json({"error": str(e), "status": "error"}, status=HTTPStatus.INTERNAL_SERVER_ERROR)

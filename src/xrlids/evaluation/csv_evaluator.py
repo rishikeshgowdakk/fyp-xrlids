@@ -445,15 +445,34 @@ def explain_flow_prediction(
 ) -> dict[str, Any]:
     """Compute exact TreeSHAP feature attributions on Random Forest for a single flow."""
     bench_key = str(benchmark).lower().strip()
+    if bench_key not in SUPPORTED_BENCHMARK_CONTRACTS:
+        raise ValueError(
+            f"Unsupported benchmark '{benchmark}'. Supported benchmarks: {list(SUPPORTED_BENCHMARK_CONTRACTS.keys())}"
+        )
+
+    if not isinstance(features_dict, dict):
+        raise ValueError(f"features_dict must be a dictionary, got {type(features_dict).__name__}")
+
+    contract_name = SUPPORTED_BENCHMARK_CONTRACTS[bench_key]
+    expected_features = list(R10_FEATURES) if contract_name == "R10" else list(R4_FEATURES)
+
+    missing = [f for f in expected_features if f not in features_dict or features_dict[f] is None]
+    if missing:
+        raise ValueError(
+            f"Cannot explain flow: missing required features for contract {contract_name}: {missing}"
+        )
+
+    try:
+        row_data = {f: float(features_dict[f]) for f in expected_features}
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"Invalid non-numeric value in features: {exc}") from exc
+
     models = _load_benchmark_models(bench_key)
     preprocessor = models["preprocessor"]
     rf = models["rf"]
     sklearn_rf = rf.model if hasattr(rf, "model") else rf
 
-    expected_features = list(SUPPORTED_BENCHMARK_CONTRACTS.get(bench_key, "R10"))
-    expected_features = list(R10_FEATURES) if SUPPORTED_BENCHMARK_CONTRACTS.get(bench_key) == "R10" else list(R4_FEATURES)
-
-    row_df = pd.DataFrame([{f: float(features_dict.get(f, 0.0)) for f in expected_features}])
+    row_df = pd.DataFrame([row_data])
     scaled_df = preprocessor.transform(row_df)
 
     import shap
@@ -470,6 +489,16 @@ def explain_flow_prediction(
     else:
         attack_contribs = np.asarray(shap_vals).ravel()
 
+    base_val = 0.5
+    if hasattr(explainer, "expected_value"):
+        exp_val = explainer.expected_value
+        if hasattr(exp_val, "__len__") and len(exp_val) >= 2:
+            base_val = float(exp_val[1])
+        elif hasattr(exp_val, "__len__") and len(exp_val) == 1:
+            base_val = float(exp_val[0])
+        else:
+            base_val = float(exp_val)
+
     top_features = []
     for feat_name, contrib, raw_val in zip(expected_features, attack_contribs, row_df.iloc[0]):
         top_features.append({
@@ -480,9 +509,16 @@ def explain_flow_prediction(
         })
     top_features.sort(key=lambda x: abs(x["shap_attribution"]), reverse=True)
 
+    attributions = [
+        {"feature": f["feature"], "attribution": f["shap_attribution"], "value": f["value"]}
+        for f in top_features
+    ]
+
     return {
         "explainer_model": "Random Forest Detector (TreeExplainer)",
         "features": top_features,
+        "attributions": attributions,
+        "base_value": round(base_val, 4),
         "scientific_notices": [
             "TreeSHAP explains Random Forest tree decisions only; not the LSTM or DQN.",
             "Attributions reflect mathematical contribution to tree splits, not network causality.",

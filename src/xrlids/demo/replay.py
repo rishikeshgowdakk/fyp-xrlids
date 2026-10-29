@@ -132,14 +132,14 @@ class ReplayEngine:
             self.preprocessor = None
 
     def predict_features(self, features: dict[str, float]) -> tuple[int, float]:
-        """Predict class and attack probability from an explicit R10 feature dict."""
-        raw_df = pd.DataFrame([{f: features.get(f, 0.0) for f in R10_FEATURES}])
+        """Predict class and attack probability from an explicit feature dict.
 
-        if self.preprocessor is not None:
-            feature_df = self.preprocessor.transform(raw_df)
-        else:
-            feature_df = raw_df
-
+        Guarantees:
+        - Strict validation: rejects missing features, None, NaN, and +/-inf.
+        - Prohibits silent zero-filling.
+        - Respects model feature contract (R10 or R4).
+        - Maps probabilities dynamically using the estimator's classes_.
+        """
         if self.model is None:
             raise NoDetectorLoadedError(
                 "no detector is loaded, so no score can be produced. Refusing to emit a "
@@ -147,10 +147,53 @@ class ReplayEngine:
                 "ReplayEngine(model_path=...) or ReplayEngine(model=...) before scoring."
             )
 
+        if not isinstance(features, dict):
+            raise ValueError(f"Features must be a dictionary, got {type(features).__name__}")
+
+        # Determine expected feature contract from loaded model or default to R10
+        expected = getattr(self.model, "feature_names", None)
+        if not expected:
+            expected = R10_FEATURES
+        expected_features = list(expected)
+
+        missing = [f for f in expected_features if f not in features or features[f] is None]
+        if missing:
+            raise ValueError(
+                f"Cannot predict flow: missing required features {missing}. "
+                "Silent zero-filling is prohibited."
+            )
+
+        # Validate finite numeric values
+        cleaned_row: dict[str, float] = {}
+        for f in expected_features:
+            val = features[f]
+            try:
+                f_val = float(val)
+            except (ValueError, TypeError) as exc:
+                raise ValueError(f"Feature '{f}' must be numeric, got {val!r}: {exc}") from exc
+            if np.isnan(f_val) or np.isinf(f_val):
+                raise ValueError(f"Feature '{f}' contains non-finite value: {f_val}")
+            cleaned_row[f] = f_val
+
+        raw_df = pd.DataFrame([cleaned_row])
+
+        if self.preprocessor is not None:
+            feature_df = self.preprocessor.transform(raw_df)
+        else:
+            feature_df = raw_df
+
         if hasattr(self.model, "predict_proba"):
             probs = self.model.predict_proba(feature_df)
             if isinstance(probs, np.ndarray) and probs.ndim == 2:
-                prob = float(probs[0, 1])
+                # Dynamic class mapping
+                classes = getattr(self.model, "classes_", None)
+                if classes is None and hasattr(self.model, "model"):
+                    classes = getattr(self.model.model, "classes_", None)
+                if classes is not None and 1 in list(classes):
+                    attack_idx = list(classes).index(1)
+                else:
+                    attack_idx = 1 if probs.shape[1] > 1 else 0
+                prob = float(probs[0, attack_idx])
             elif isinstance(probs, np.ndarray) and probs.ndim == 1:
                 prob = float(probs[0])
             elif isinstance(probs, (list, tuple)):

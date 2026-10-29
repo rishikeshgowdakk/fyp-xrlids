@@ -10,11 +10,25 @@ from xrlids.models.lstm import (
     build_sequences,
 )
 from xrlids.models.random_forest import DEFAULT_RF_PARAMS, RandomForestDetector, RandomForestError
+from xrlids.models.registry import (
+    DEFAULT_MODEL_REGISTRY,
+    InferenceResult,
+    ModelMetadata,
+    ModelRegistry,
+    ModelRegistryError,
+    ValidationError,
+)
 
 __all__ = [
     "RandomForestDetector",
     "RandomForestError",
     "DEFAULT_RF_PARAMS",
+    "ModelRegistry",
+    "ModelMetadata",
+    "ModelRegistryError",
+    "ValidationError",
+    "InferenceResult",
+    "DEFAULT_MODEL_REGISTRY",
     "LSTMDetector",
     "SequenceSet",
     "SequenceError",

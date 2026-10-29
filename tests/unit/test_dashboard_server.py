@@ -10,6 +10,7 @@ import sys
 
 import numpy as np
 import pandas as pd
+import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
@@ -371,4 +372,81 @@ def test_live_session_dataset_stream_lifecycle():
     flows = snapshot["recent_flows"]
     assert any(f.get("ground_truth") and f.get("ground_truth") != "UNKNOWN" for f in flows)
     session.stop()
+
+
+def test_live_session_pcap_mode_lifecycle(tmp_path: Path):
+    """Verify that mode='pcap' processes packet stream and sets mode correctly."""
+    pcap = tmp_path / "custom_replay.pcap"
+    _write_attack_pcap(pcap)
+
+    engine = ReplayEngine(model=_AlwaysAttackModel(), threshold=0.50)
+    session = LiveSession(engine=engine)
+
+    result = session.start(mode="pcap", pcap=str(pcap), pace_speed=1000.0, loop=False)
+    assert not result.get("error")
+    assert result["status"] == "running"
+    assert result["mode"] == "pcap"
+    assert result["is_simulated"] is False
+
+    deadline = time.time() + 10.0
+    snapshot = session.snapshot()
+    while snapshot["status"] == "running" and time.time() < deadline:
+        time.sleep(0.05)
+        snapshot = session.snapshot()
+
+    assert snapshot["status"] == "stopped"
+    assert snapshot["is_simulated"] is False
+    assert snapshot["counters"]["flows"] >= 1
+    session.stop()
+
+
+def test_server_explain_endpoint_http():
+    """Verify POST /api/csv/explain over HTTP returns TreeSHAP or 400 on missing features."""
+    server = create_server(port=0)
+    port = server.server_port
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+
+    try:
+        sample_r10 = {
+            "flow_duration_ms": 1200.0,
+            "flow_packets_per_s": 50.0,
+            "flow_bytes_per_s": 10000.0,
+            "packet_length_mean": 200.0,
+            "packet_length_std": 90.0,
+            "syn_count": 2.0,
+            "ack_count": 3.0,
+            "rst_count": 0.0,
+            "fin_count": 1.0,
+            "syn_ack_ratio": 0.67,
+        }
+
+        # 1. Valid request
+        req = urllib.request.Request(
+            f"http://127.0.0.1:{port}/api/csv/explain",
+            data=json.dumps({"features": sample_r10, "benchmark": "cicids2017"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            assert resp.status == 200
+            data = json.loads(resp.read().decode("utf-8"))
+            assert "features" in data
+            assert len(data["features"]) == 10
+            assert "Random Forest" in data["explainer_model"]
+
+        # 2. Incomplete features -> 400 Bad Request
+        bad_req = urllib.request.Request(
+            f"http://127.0.0.1:{port}/api/csv/explain",
+            data=json.dumps({"features": {"flow_duration_ms": 100.0}, "benchmark": "cicids2017"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with pytest.raises(urllib.error.HTTPError) as exc_info:
+            urllib.request.urlopen(bad_req, timeout=5)
+        assert exc_info.value.code == 400
+    finally:
+        server.shutdown()
+        server.server_close()
+
 
