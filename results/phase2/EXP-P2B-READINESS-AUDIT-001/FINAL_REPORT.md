@@ -1,10 +1,15 @@
 # XRL-IDARS — Phase 2B Forensic Readiness Audit: Model Integrity, Reproducibility, Evaluation Correctness, and Production-Gap Assessment
 
-**Audit Identifier**: `EXP-P2B-READINESS-AUDIT-001`  
-**Git Commit**: `f4c881596e7a09e7ae7890e0a1cf066333f5025a` (Branch: `main`)  
-**Audit Execution Timestamp**: `2026-10-27T22:03:16.357219+00:00`  
-**Auditor Role**: Senior ML Systems Engineer, Model Validation Engineer, & Independent Research Auditor  
-**Working Tree Status**: Verified Clean (0 uncommitted user changes)  
+- **Audit Identifier**: `EXP-P2B-READINESS-AUDIT-001`
+- **Git Commit (HEAD)**: `943182cc41191e39c964be30d95a93517109f445` (Branch: `main`)
+- **Code Revision Tested**: `943182cc41191e39c964be30d95a93517109f445`
+- **Audit Execution Timestamp**: `2026-10-29T10:20:15.973821+00:00`
+- **Auditor Role**: Senior ML Systems Engineer, Model Validation Engineer, & Independent Research Auditor
+- **Working Tree Status**: Verified Clean (0 uncommitted changes: 0 staged, 0 unstaged, 0 untracked; snapshot: pre_artifact_generation)
+- **Total Tracked Modifications (Repository-Wide)**: 0 files
+- **Scoped External Modifications (Outside Audit Dir)**: 0 files
+- **Scoped Audit Output Modifications (Within Audit Dir)**: 0 files
+- **Total Untracked Files**: 0 files
 
 ---
 
@@ -29,7 +34,7 @@ This forensic readiness audit independently investigated the entire XRL-IDARS re
    - The simulation environment is an **Asymmetric-Loss Contextual Bandit with Hysteresis Constraints**, NOT a sequential Markov Decision Process. Network flow arrivals are purely exogenous replay.
 5. **Documentation Contradictions Identified & Resolved**:
    - `README.md` lines 188-200 contained outdated text claiming model artifacts were uncommitted. Reconciled: model binaries are committed; raw CSV datasets remain external.
-   - `README.md` test count stated 417 tests. Reconciled: the test suite now collects **711 tests**.
+   - `README.md` test count stated 417/459 tests. Reconciled: the test suite now collects and passes **466 tests** (372 unit, 45 data, 31 integration, 18 model).
 
 ---
 
@@ -37,15 +42,15 @@ This forensic readiness audit independently investigated the entire XRL-IDARS re
 
 | Model ID | Type | Dataset | Contract | Size (Bytes) | SHA-256 Hash | Registry Status | Inference Status |
 |:---|:---:|:---:|:---:|---:|:---|:---:|:---:|
-| `random_forest_cicids2017.joblib` | `rf` | `cicids2017` | `R10` | 26,363,055 | `7c6ad493b773b687...` | `VERIFIED_MATCH` | `PASS` |
-| `random_forest_cse2018.joblib` | `rf` | `cse_cic_ids2018` | `R10` | 68,240,031 | `b7d2dc7bacca1a46...` | `VERIFIED_MATCH` | `PASS` |
-| `random_forest_unswnb15.joblib` | `rf` | `unsw_nb15` | `R4` | 22,639,151 | `c432eb067507ad5b...` | `VERIFIED_MATCH` | `PASS` |
-| `lstm_cicids2017.pt` | `lstm` | `cicids2017` | `R10` | 60,437 | `18b0bfb48d3b031c...` | `VERIFIED_MATCH` | `PASS` |
-| `lstm_cse2018.pt` | `lstm` | `cse_cic_ids2018` | `R10` | 60,949 | `ea5b8198c20faa15...` | `VERIFIED_MATCH` | `PASS` |
-| `lstm_unswnb15.pt` | `lstm` | `unsw_nb15` | `R4` | 57,813 | `4d9386ff44c99eed...` | `VERIFIED_MATCH` | `PASS` |
-| `dqn_4action_best.pt` | `dqn` | `cicids2017` | `response_state_v1` | 43,189 | `6a5afc669b4e699e...` | `VERIFIED_MATCH` | `PASS` |
-| `dqn_3action_best.pt` | `dqn` | `cicids2017` | `response_state_v1` | 42,997 | `c06a61fb77775116...` | `VERIFIED_MATCH` | `PASS` |
-| `fusion_weights.json` | `fusion` | `None` | `None` | 1,005 | `fd50a413119d3ec3...` | `VERIFIED_MATCH` | `PASS` |
+| `random_forest_cicids2017.joblib` | `rf` | `cicids2017` | `R10` | 26,363,055 | `7c6ad493b773b687da24a2a12dcb21bd03bd56b76809462b983454aeacf2b774` | `VERIFIED_MATCH` | `PASS` |
+| `random_forest_cse2018.joblib` | `rf` | `cse_cic_ids2018` | `R10` | 68,240,031 | `b7d2dc7bacca1a46f4da35aee2c19e1604020d429a5d29b72d742130215ba9b3` | `VERIFIED_MATCH` | `PASS` |
+| `random_forest_unswnb15.joblib` | `rf` | `unsw_nb15` | `R4` | 22,639,151 | `c432eb067507ad5b29a542b372ac6d35e609e783a9e6094c9764d0cfe654ec7c` | `VERIFIED_MATCH` | `PASS` |
+| `lstm_cicids2017.pt` | `lstm` | `cicids2017` | `R10` | 60,949 | `2cdbf88d2eda358619d66a5d001fa7dde8ab3a36d8e0548c8c529ae8e8870f5c` | `VERIFIED_MATCH` | `PASS` |
+| `lstm_cse2018.pt` | `lstm` | `cse_cic_ids2018` | `R10` | 60,949 | `ea5b8198c20faa15d5d45ae7d081b754a76dbae1342a93b8234e0e06cfe8a33a` | `VERIFIED_MATCH` | `PASS` |
+| `lstm_unswnb15.pt` | `lstm` | `unsw_nb15` | `R4` | 57,813 | `4d9386ff44c99eed822f8ace5c64429fab571b4f8aad847d6cc78bae5f308fbd` | `VERIFIED_MATCH` | `PASS` |
+| `dqn_4action_best.pt` | `dqn` | `cicids2017` | `response_state_v1` | 43,189 | `6a5afc669b4e699ecd2b1c01df885cef9030c93b8888b487dd386533920ce954` | `VERIFIED_MATCH` | `PASS` |
+| `dqn_3action_best.pt` | `dqn` | `cicids2017` | `response_state_v1` | 42,997 | `c06a61fb7777511600efd6db776745c4539da30c710fed8993145ed1b926be31` | `VERIFIED_MATCH` | `PASS` |
+| `fusion_weights.json` | `fusion` | `None` | `None` | 1,214 | `e35df25179a4574c83192bf35ebd0041772007c8b360151df489a5d9bd5450d0` | `VERIFIED_MATCH` | `PASS` |
 
 ---
 
@@ -123,11 +128,11 @@ This forensic readiness audit independently investigated the entire XRL-IDARS re
 - **Evidence**: `README.md:188-200 vs models/registry/model_manifest.json and clean worktree test`
 - **Required Remediation**: Update README.md to state that canonical models ARE committed, while raw CSV datasets remain external.
 
-### [HIGH] FINDING-P2B-004: README.md Test Suite Count Reconciled (417 vs 423 Executed Tests)
+### [HIGH] FINDING-P2B-004: README.md Test Suite Count Reconciled (417 vs 466 Executed Tests)
 - **Category**: `Documentation Inconsistency`
-- **Description**: README.md lines 210 and 325 previously stated 'All 417 tests should pass'. Following the addition of 11 response baseline tests in Phase 2A, the repository test suite consists of exactly 423 tests across tests/data/ (45), tests/integration/ (31), tests/model/ (18), and tests/unit/ (329), all 423 of which execute and pass in 40.5s.
-- **Evidence**: `pytest -q executes and passes 423 tests with 0 failures`
-- **Required Remediation**: Update README.md test count to reflect the authoritative 423 executed and passed tests.
+- **Description**: README.md lines previously stated 'All 417 tests should pass'. Following the addition of Phase 2A/2B response and CSV workflow regression tests, the repository test suite consists of exactly 466 tests across tests/data/ (45), tests/integration/ (31), tests/model/ (18), and tests/unit/ (372), all 466 of which execute and pass in ~48s.
+- **Evidence**: `pytest executes and passes 466 tests with 0 failures`
+- **Required Remediation**: Update README.md test count to reflect the authoritative 466 executed and passed tests.
 
 ### [HIGH] FINDING-P2B-005: Reporting of p_value = 0.0 in Bootstrap Output
 - **Category**: `Statistical Reporting`

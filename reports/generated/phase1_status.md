@@ -1,9 +1,6 @@
 # Phase 1 environment and status (generated)
 
-
-> **Freshness notice (2026-10-29):** This generated status snapshot has not been regenerated for the current repository HEAD. Treat the values below as historical until the generator is rerun.
-
-Generated at commit: `c030c15bb77bd7207b7fe77a5aa17b12b890437c`
+Generated at commit: `51cb469759be1b8b270d9602c934e8908d6c93f4`
 
 | item | value |
 | --- | --- |

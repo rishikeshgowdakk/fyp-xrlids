@@ -1,11 +1,8 @@
 # XRL-IDARS — Phase 1 Final Consolidated Research Report
 
-
-> **Freshness notice (2026-10-29):** This snapshot was not regenerated for the current repository HEAD. The commit/environment metadata below is historical, and the test count is not proof that the current HEAD passes.
-
 - **Platform**: XRL-IDARS (Intrusion Detection and Autonomous Response System)
 - **Phase**: 1 (Empirical Research Platform & Explainability)
-- **Git Commit**: `c030c15bb77bd7207b7fe77a5aa17b12b890437c (dirty)`
+- **Git Commit**: `51cb469759be1b8b270d9602c934e8908d6c93f4`
 - **Environment**: Python 3.14.4 · PyTorch 2.14.0+cpu · Scikit-Learn 1.9.1 · SHAP 0.52.0
 - **Verified Test Suite**: 493 tests collected; run `pytest` for current pass/fail status.
 

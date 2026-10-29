@@ -1,8 +1,8 @@
 # XRL-IDARS Phase 2A: Controlled Benchmark, Cost-Optimal Verification, and DQN Value Assessment
 
 **Experiment ID**: `EXP-P2A-COST-OPTIMAL-001`  
-**Git Commit**: `3a265ccb9afcbc45b0f5df077d9a10709f95d01d`  
-**Execution Timestamp**: `2026-10-29T08:44:18.787652+00:00`  
+**Git Commit**: `b741bf47afa786184476dea2caec04f39f161877`  
+**Execution Timestamp**: `2026-10-29T10:11:53.531545+00:00`  
 **Test Population**: `D_pol_test` (355,865 flows: 291,045 benign, 64,820 attack)  
 **Output Directory**: `results/phase2/EXP-P2A-COST-OPTIMAL-001`  
 
