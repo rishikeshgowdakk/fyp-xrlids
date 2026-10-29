@@ -488,7 +488,18 @@
       .model-bars-row { grid-template-columns:72px minmax(0,1fr); gap:8px; }
     }
 
-  </style>
+      /* Minimal student-demo controls */
+    .demo-flow { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin:12px 0 16px; }
+    .demo-flow-step { display:flex; align-items:center; gap:8px; padding:9px 12px; border:1px solid var(--border); border-radius:10px; background:var(--surface-2); color:var(--text); font-size:12px; }
+    .demo-flow-step strong { display:inline-grid; place-items:center; width:22px; height:22px; border-radius:50%; background:var(--accent); color:#082f49; }
+    .demo-flow-arrow { color:var(--accent); font-weight:800; }
+    .demo-controls { align-items:end; }
+    .advanced-settings { margin:10px 0 16px; border:1px solid var(--border); border-radius:10px; padding:10px 14px; background:var(--surface-2); }
+    .advanced-settings summary { cursor:pointer; color:var(--text-muted); font-size:12px; font-weight:700; }
+    .advanced-settings .controls-bar { margin-top:12px; }
+    @media (max-width:700px) { .demo-flow { align-items:stretch; } .demo-flow-step { flex:1 1 40%; } .demo-flow-arrow { display:none; } }
+
+</style>
 </head>
 <body>
 
@@ -540,7 +551,7 @@
         <!-- Dataset Selector Bar -->
         <div class="controls-bar">
           <div class="controls-group">
-            <span class="controls-label">Benchmark Dataset:</span>
+            <span class="controls-label">Test dataset</span>
             <select id="explorer-dataset-select" onchange="onExplorerDatasetChange()">
               <option value="cicids2017">CIC-IDS2017 (Flagship — 355k Test Flows, R10)</option>
               <option value="cse2018">CSE-CIC-IDS2018 (Enterprise Cloud — 1.66M Test Flows, R10)</option>
@@ -1160,7 +1171,7 @@
             </div>
           </div>
           <div class="card-body" style="padding-bottom: 0;">
-            <div class="controls-bar" style="margin-bottom: 12px; background: var(--surface-2);">
+            <div class="controls-bar demo-controls" style="margin-bottom: 12px; background: var(--surface-2);">
               <div class="controls-group">
                 <span class="controls-label">Status Filter:</span>
                 <select id="flow-filter-status" onchange="onFlowFilterChange()">
@@ -1222,7 +1233,9 @@
           Response actions are evaluated against recorded traffic flows in memory. Autonomous network enforcement (iptables, routing changes) is strictly <strong>NO-GO</strong> in production. Zero live firewall mutations are performed.
         </div>
 
-        <!-- Controls Bar -->
+        <details class="advanced-settings">
+          <summary>Advanced research settings (cost scenario and action space)</summary>
+          <!-- Advanced research controls; collapsed by default -->
         <div class="controls-bar">
           <div class="controls-group">
             <span class="controls-label">Cost Scenario:</span>
@@ -1243,6 +1256,7 @@
             <span class="badge badge-purple">Held-Out Test (355,865 Flows)</span>
           </div>
         </div>
+        </details>
 
         <!-- Head to Head Callout -->
         <div id="resp-winner-callout" class="callout callout-purple">
@@ -1408,16 +1422,14 @@
           <span class="badge badge-purple" id="csv-eval-badge">RF + LSTM (T=5) + Score Fusion</span>
         </div>
         <div class="card-body">
-          <div class="mode-pills">
-            <button class="mode-pill active" id="mode-pill-exhibition" onclick="onCsvModeSelect('exhibition')">
-              🎯 200 Exhibition Demo (Instant Test Flows)
-            </button>
-            <button class="mode-pill" id="mode-pill-full-test" onclick="onCsvModeSelect('full_test')">
-              📊 Full Held-Out Test Split
-            </button>
-            <button class="mode-pill" id="mode-pill-custom" onclick="onCsvModeSelect('custom')">
-              📂 Custom CSV Upload / Paste
-            </button>
+          <div class="demo-flow" aria-label="Evaluation pipeline">
+            <div class="demo-flow-step"><strong>1</strong><span>Held-out sample</span></div>
+            <span class="demo-flow-arrow">→</span>
+            <div class="demo-flow-step"><strong>2</strong><span>RF + LSTM</span></div>
+            <span class="demo-flow-arrow">→</span>
+            <div class="demo-flow-step"><strong>3</strong><span>Score fusion</span></div>
+            <span class="demo-flow-arrow">→</span>
+            <div class="demo-flow-step"><strong>4</strong><span>DQN recommendation</span></div>
           </div>
 
           <div class="callout callout-blue" id="csv-mode-description">
@@ -1435,37 +1447,12 @@
               </select>
             </div>
             <div class="controls-group">
-              <span class="controls-label">Feature Contract:</span>
-              <select id="csv-eval-contract" onchange="onCsvContractChange()">
-                <option value="R10">R10 (10 Features)</option>
-                <option value="R4">R4 (4 Features)</option>
-              </select>
-            </div>
-            <div class="controls-group" id="csv-max-rows-group" style="display: none;">
-              <span class="controls-label">Max Evaluation Rows:</span>
-              <select id="csv-eval-max-rows">
-                <option value="1000">1,000 flows (Fast Smoke Test)</option>
-                <option value="5000">5,000 flows</option>
-                <option value="20000">20,000 flows</option>
-                <option value="0">Full Test Split</option>
-              </select>
-            </div>
-            <div class="controls-group" id="csv-custom-upload-controls" style="display: none;">
-              <input type="file" id="csv-file-input" accept=".csv" onchange="onCsvFileSelected(event)" style="display:none;">
-              <button class="btn" onclick="document.getElementById('csv-file-input').click()">📁 Choose CSV File...</button>
-              <button class="btn" onclick="loadSampleCsvIntoTextarea()">📥 Load Sample CSV</button>
-            </div>
-            <div class="controls-group">
-              <button class="btn btn-primary" id="btn-run-csv-eval" onclick="runCsvEvaluation()">⚡ Run Evaluation</button>
+              <button class="btn btn-primary" id="btn-run-csv-eval" onclick="runCsvEvaluation()">⚡ Run Sample Evaluation</button>
             </div>
           </div>
 
           <div id="csv-file-status" style="font-size: 12px; color: var(--text-dim); margin-bottom: 8px;">
-            Ready to evaluate. Click 'Run Evaluation' to score records against frozen RF, LSTM, and Fusion models.
-          </div>
-
-          <div id="csv-custom-input-area" style="display: none; margin-bottom: 12px;">
-            <textarea id="csv-text-input" rows="4" placeholder="Or paste CSV rows here..." style="width: 100%; font-family: var(--mono); font-size: 12px; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px; resize: vertical;"></textarea>
+            Ready. Choose a benchmark and run its held-out sample through RF, LSTM and score fusion.
           </div>
 
           <!-- Evaluation Results -->
