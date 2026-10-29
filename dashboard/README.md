@@ -92,19 +92,29 @@ Dedicated to live packet inspection, pure-Python streaming replay, and in-memory
 
 ---
 
+### ⚡ 3-Minute Viva Demonstration Page (`/demo.html`)
+Designed specifically for examiners and 3-minute viva presentations to present a clean, unfussy explanation of the system without navigating complex statistical tables:
+1. **Interactive Pipeline Strip**: Packets → Features → Detector (RF+LSTM) → TreeSHAP → Action Gate with animated live stage transitions.
+2. **Four Clean Counters Only**: Replay sample counters for `Flows Analysed`, `Attacks Caught`, `Attacks Missed`, and `False Alarms`.
+3. **Flow Stream & "Why?" Card**: Real-time interactive timeline showing incoming flows. Clicking any flow reveals its confidence score, policy action (`ALLOW`, `ALERT`, `BLOCK`), and top 3 plain-English TreeSHAP factors.
+4. **Distinct Benchmark Strip**: Full held-out test set metrics (355,833 flows) clearly separated from the replay sample.
+5. **2-Minute Scripted Scenario & Scorecard**: One-click bounded demonstration passing through normal baseline, port scans, DDoS floods, and DoS attacks, terminating in a clean evaluation scorecard modal.
+
+---
+
 ## 🚀 Quick Start
 
 ```bash
 # Activate virtual environment
 source .venv/bin/activate
 
-# Launch the Research Evaluation Workbench (default port 8000)
+# Launch the Workbench & Viva Demo Server (default port 8000)
 python dashboard/server.py
 
-# Optional: Run on custom port
-python dashboard/server.py 8080
+# Or use the convenience script:
+./run.sh dashboard
 ```
 
-Open `http://127.0.0.1:8000/` in your browser.
-By default, the workbench opens in idle observational mode on **🔬 Research & Model Validation** (Section 1: Dataset Explorer), ready for interactive inspection of verified experimental results.
+- **3-Minute Viva Demonstration**: [http://127.0.0.1:8000/demo.html](http://127.0.0.1:8000/demo.html)
+- **Full Research Workbench**: [http://127.0.0.1:8000/index.html](http://127.0.0.1:8000/index.html)
 

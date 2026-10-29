@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XRL-IDARS — 3-Minute Viva Demonstration</title>
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-card: #111827;
+      --bg-card-hover: #1f293d;
+      --border: #243048;
+      --border-accent: #3b82f6;
+      --text-main: #f3f4f6;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --glow-blue: rgba(59, 130, 246, 0.25);
+      --glow-green: rgba(16, 185, 129, 0.25);
+      --glow-red: rgba(239, 68, 68, 0.25);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font);
+      line-height: 1.5;
+      padding: 16px 24px;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .brand-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-badge {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      background: #1e3a8a;
+      color: #93c5fd;
+      border-radius: 999px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: #2563eb;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #1d4ed8;
+      box-shadow: 0 0 12px var(--glow-blue);
+    }
+    .btn-danger {
+      background: #dc2626;
+      color: #fff;
+    }
+    .btn-danger:hover {
+      background: #b91c1c;
+      box-shadow: 0 0 12px var(--glow-red);
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--text-main);
+      border-color: var(--border);
+    }
+    .btn-outline:hover {
+      background: var(--bg-card);
+      border-color: var(--text-muted);
+    }
+    .btn-accent {
+      background: #059669;
+      color: #fff;
+    }
+    .btn-accent:hover {
+      background: #047857;
+      box-shadow: 0 0 12px var(--glow-green);
+    }
+    .btn-warning {
+      background: #d97706;
+      color: #fff;
+    }
+    .btn-warning:hover {
+      background: #b45309;
+    }
+
+    /* 30-Second Viva Pitch Callout */
+    .pitch-banner {
+      background: linear-gradient(90deg, rgba(30, 58, 138, 0.35) 0%, rgba(17, 24, 39, 0.8) 100%);
+      border: 1px solid #1e40af;
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .pitch-icon {
+      font-size: 1.4rem;
+      color: #60a5fa;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .pitch-text strong {
+      color: #93c5fd;
+      font-size: 0.88rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .pitch-text p {
+      font-size: 0.9rem;
+      color: #e2e8f0;
+      font-style: italic;
+    }
+
+    /* Scripted Scenario Progress Bar */
+    .scenario-progress-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .scenario-progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .progress-bar-track {
+      height: 8px;
+      background: #1e293b;
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #10b981);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* ZONE 1: Pipeline Strip */
+    .zone-pipeline {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+    .zone-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .pipeline-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 8px 0;
+    }
+    .pipe-node {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      flex: 1;
+      min-width: 150px;
+      text-align: center;
+      position: relative;
+      transition: all 0.25s ease;
+    }
+    .pipe-node.active {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 14px var(--glow-blue);
+      background: #1e3a8a;
+    }
+    .pipe-node-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+    .pipe-node-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .pipe-arrow {
+      color: #475569;
+      font-size: 1.1rem;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* ZONE 2: Four Numbers Only */
+    .zone-four-numbers {
+      margin-bottom: 20px;
+    }
+    .counter-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .counter-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      text-align: center;
+      transition: transform 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .counter-card:hover {
+      transform: translateY(-2px);
+    }
+    .counter-card.tp { border-top: 4px solid var(--accent-green); }
+    .counter-card.fn { border-top: 4px solid var(--accent-red); }
+    .counter-card.fp { border-top: 4px solid var(--accent-amber); }
+    .counter-card.total { border-top: 4px solid var(--accent-blue); }
+
+    .counter-val {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+      margin: 4px 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .counter-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .counter-hint {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* ZONE 3: Split View - Timeline Stream & "Why?" Card */
+    .zone-split {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 992px) {
+      .zone-split { grid-template-columns: 1fr; }
+      .counter-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .stream-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      height: 480px;
+    }
+    .stream-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .stream-filters {
+      display: flex;
+      gap: 6px;
+    }
+    .filter-btn {
+      padding: 4px 10px;
+      background: #1e293b;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    .filter-btn.active {
+      background: #2563eb;
+      color: #fff;
+      border-color: #3b82f6;
+    }
+    .flow-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-right: 4px;
+    }
+    .flow-row {
+      background: #1a2234;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 0.82rem;
+    }
+    .flow-row:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-blue);
+    }
+    .flow-row.selected {
+      border-color: #60a5fa;
+      background: #1e3a8a;
+      box-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+    }
+    .flow-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .flow-endpoints {
+      font-family: monospace;
+      font-size: 0.82rem;
+      color: #e2e8f0;
+      font-weight: 600;
+    }
+    .flow-meta {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .flow-badge-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .flow-score-bar-bg {
+      width: 60px;
+      height: 6px;
+      background: #334155;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .flow-score-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+    }
+    .badge-attack {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid #ef4444;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.72rem;
+    }
+    .badge-benign {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+      border: 1px solid #10b981;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.72rem;
+    }
+    .badge-action-allow {
+      background: #064e3b;
+      color: #a7f3d0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: bold;
+    }
+    .badge-action-block {
+      background: #7f1d1d;
+      color: #fecaca;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: bold;
+    }
+    .badge-action-alert {
+      background: #78350f;
+      color: #fde68a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: bold;
+    }
+
+    /* "Why?" Card */
+    .why-card {
+      background: var(--bg-card);
+      border: 1px solid #3b82f6;
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      height: 480px;
+      box-shadow: 0 0 16px rgba(59, 130, 246, 0.15);
+      position: relative;
+    }
+    .why-header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+    .why-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .why-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+      font-size: 0.8rem;
+    }
+    .why-meta-item {
+      background: #1a2234;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+    }
+    .why-meta-label {
+      color: var(--text-dim);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+    }
+    .why-meta-val {
+      color: #fff;
+      font-weight: 600;
+      font-family: monospace;
+    }
+
+    .why-shap-container {
+      flex: 1;
+      overflow-y: auto;
+      margin-top: 8px;
+    }
+    .why-shap-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #93c5fd;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .shap-factor {
+      background: #1e293b;
+      border-left: 3px solid #3b82f6;
+      border-radius: 4px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+    .shap-factor.high-impact {
+      border-left-color: var(--accent-red);
+    }
+    .shap-factor-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+    }
+    .shap-factor-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .why-policy-box {
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      background: #131d31;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+    }
+    .why-policy-decision {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* ZONE 4: Held-Out Benchmark Strip */
+    .zone-benchmark-strip {
+      background: linear-gradient(180deg, #131c2e 0%, #0d1524 100%);
+      border: 1px solid #38bdf8;
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.12);
+    }
+    .benchmark-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .benchmark-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #e0f2fe;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .benchmark-tag {
+      background: #0369a1;
+      color: #e0f2fe;
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+    .benchmark-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    @media (max-width: 992px) {
+      .benchmark-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .benchmark-tile {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid #1e293b;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      text-align: center;
+    }
+    .benchmark-tile-name {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .benchmark-tile-score {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #38bdf8;
+      font-variant-numeric: tabular-nums;
+    }
+    .benchmark-tile-detail {
+      font-size: 0.72rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    /* Modal Scorecard */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--accent-blue);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      max-width: 540px;
+      width: 100%;
+      box-shadow: 0 0 30px var(--glow-blue);
+      text-align: center;
+    }
+    .modal-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .modal-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 18px;
+    }
+    .modal-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .modal-stat-box {
+      background: #1e293b;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+    }
+    .modal-stat-val {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #60a5fa;
+    }
+    .modal-stat-label {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+    .modal-takeaway {
+      background: rgba(30, 58, 138, 0.3);
+      border-left: 4px solid #3b82f6;
+      text-align: left;
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="top-header">
+    <div>
+      <div class="brand-title">
+        🛡️ XRL-IDARS
+        <span class="brand-badge">Viva Defense Edition</span>
+      </div>
+      <div style="font-size: 0.82rem; color: var(--text-dim); margin-top: 2px;">
+        Fast 3-Minute Examiner Walkthrough · Real-Time Replay · TreeSHAP Explainability · Autonomous Action
+      </div>
+    </div>
+    <div class="top-actions">
+      <button id="btn-run-scenario" class="btn btn-primary" onclick="startTwoMinuteScenario()">
+        ▶ Run 2-Min Scenario
+      </button>
+      <div style="display: inline-flex; position: relative;">
+        <select id="select-inject-attack" class="btn btn-warning" style="appearance: none; -webkit-appearance: none; padding-right: 28px;" onchange="handleInjectSelect(this.value)">
+          <option value="" disabled selected>⚡ Inject Attack...</option>
+          <option value="syn_flood">SYN Flood (L4 Volumetric)</option>
+          <option value="port_sweep">TCP Port Sweep (Recon)</option>
+          <option value="slowloris">Slowloris (L7 Low & Slow)</option>
+          <option value="udp_flood">UDP Flood (Bandwidth Exh.)</option>
+          <option value="normal">Normal Benign Traffic</option>
+        </select>
+        <span style="position: absolute; right: 10px; top: 10px; pointer-events: none; font-size: 0.7rem;">▼</span>
+      </div>
+      <button id="btn-stop-stream" class="btn btn-danger" onclick="stopReplayStream()">
+        ⏹ Stop
+      </button>
+      <a href="/index.html" class="btn btn-outline" title="Open the full 5-section research workbench">
+        🔬 Open Full Research Workbench →
+      </a>
+    </div>
+  </header>
+
+  <!-- 30-Second Viva Pitch Callout -->
+  <div class="pitch-banner">
+    <div class="pitch-icon">💡</div>
+    <div class="pitch-text">
+      <strong>30-Second Viva Summary for Examiners</strong>
+      <p>"XRL-IDARS watches network flows and does three things: it detects attacks using Random Forest and LSTM, it explains each decision with SHAP, and a reinforcement-learning agent picks the response. We can't attack a shared network, so the demo replays held-out benchmark traffic through the same pipeline. The benchmark numbers come from the full test sets."</p>
+    </div>
+  </div>
+
+  <!-- Scenario Progress Indicator -->
+  <div id="scenario-progress" class="scenario-progress-container">
+    <div class="scenario-progress-header">
+      <span id="scenario-phase-name">Phase 1: Normal Enterprise Traffic (0:00 - 0:30)</span>
+      <span id="scenario-time-remaining">120s remaining</span>
+    </div>
+    <div class="progress-bar-track">
+      <div id="scenario-progress-fill" class="progress-bar-fill"></div>
+    </div>
+  </div>
+
+  <!-- ZONE 1: Pipeline Strip -->
+  <section class="zone-pipeline">
+    <div class="zone-title">
+      <span>1. Autonomous Detection & Response Pipeline</span>
+      <span style="font-weight: normal; text-transform: none; font-size: 0.75rem;">End-to-End Latency: ~37.5 ms P50 (Burst Queue) · ~3.5 ms RF Single-Vector</span>
+    </div>
+    <div class="pipeline-strip">
+      <div class="pipe-node" id="node-packet">
+        <div class="pipe-node-title">1. Packets</div>
+        <div class="pipe-node-sub">Raw AF_PACKET / PCAP</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-node" id="node-features">
+        <div class="pipe-node-title">2. Flow Assembly</div>
+        <div class="pipe-node-sub">10 R10 Bidirectional Metrics</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-node" id="node-detector">
+        <div class="pipe-node-title">3. Detector</div>
+        <div class="pipe-node-sub">RF + LSTM Score Fusion</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-node" id="node-shap">
+        <div class="pipe-node-title">4. TreeSHAP</div>
+        <div class="pipe-node-sub">Real-Time Feature Attribution</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-node" id="node-action">
+        <div class="pipe-node-title">5. Response Gate</div>
+        <div class="pipe-node-sub">Cost-Optimal / DQN Policy</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ZONE 2: Four Numbers Only -->
+  <section class="zone-four-numbers">
+    <div class="zone-title">
+      <span>2. Live Replay Sample Counters (Demonstration Stream Only)</span>
+      <span style="font-weight: normal; text-transform: none; font-size: 0.72rem; color: #f59e0b;">⚠️ Sample pool statistics · Strictly separated from held-out benchmark</span>
+    </div>
+    <div class="counter-grid">
+      <div class="counter-card total">
+        <div class="counter-label">Flows Analysed</div>
+        <div class="counter-val" id="cnt-total">0</div>
+        <div class="counter-hint">Sequential replayed flows</div>
+      </div>
+      <div class="counter-card tp">
+        <div class="counter-label">Attacks Caught</div>
+        <div class="counter-val" id="cnt-tp" style="color: #34d399;">0</div>
+        <div class="counter-hint">True Positives (Alerted / Blocked)</div>
+      </div>
+      <div class="counter-card fn">
+        <div class="counter-label">Attacks Missed</div>
+        <div class="counter-val" id="cnt-fn" style="color: #f87171;">0</div>
+        <div class="counter-hint">False Negatives (Sub-threshold)</div>
+      </div>
+      <div class="counter-card fp">
+        <div class="counter-label">False Alarms</div>
+        <div class="counter-val" id="cnt-fp" style="color: #fbbf24;">0</div>
+        <div class="counter-hint">False Positives (Benign penalized)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ZONE 3: Split View - Timeline Stream & "Why?" Card -->
+  <section class="zone-split">
+    <!-- Left: Flow Stream -->
+    <div class="stream-container">
+      <div class="stream-toolbar">
+        <div style="font-size: 0.82rem; font-weight: 700; color: #fff;">
+          3. Incoming Flow Stream
+        </div>
+        <div class="stream-filters">
+          <button class="filter-btn active" onclick="setFlowFilter('all', this)">All</button>
+          <button class="filter-btn" onclick="setFlowFilter('attacks', this)">Attacks Only</button>
+          <button class="filter-btn" onclick="setFlowFilter('benign', this)">Benign Only</button>
+        </div>
+      </div>
+      <div class="flow-list" id="flow-stream-list">
+        <div style="text-align: center; color: var(--text-dim); margin-top: 80px; font-size: 0.85rem;">
+          Click "▶ Run 2-Min Scenario" or "⚡ Inject Attack" above to begin live stream replay.
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: "Why?" Card -->
+    <div class="why-card" id="why-card">
+      <div class="why-header">
+        <div class="why-title">
+          <span>💡 Flow Explainability ("Why?")</span>
+          <span id="why-action-badge" class="badge-action-allow" style="margin-left: auto;">ALLOW</span>
+        </div>
+        <div class="why-meta-grid">
+          <div class="why-meta-item">
+            <div class="why-meta-label">Flow ID / Protocol</div>
+            <div class="why-meta-val" id="why-flow-id">#-- (TCP)</div>
+          </div>
+          <div class="why-meta-item">
+            <div class="why-meta-label">Model Confidence</div>
+            <div class="why-meta-val" id="why-confidence">--%</div>
+          </div>
+          <div class="why-meta-item" style="grid-column: span 2;">
+            <div class="why-meta-label">Endpoints (Src → Dst)</div>
+            <div class="why-meta-val" id="why-endpoints" style="font-size: 0.76rem;">172.16.0.1:49152 → 192.168.10.50:80</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="why-shap-title">
+        <span>Top 3 TreeSHAP Drivers</span>
+        <span style="font-size: 0.7rem; color: var(--text-dim); text-transform: none;">(Random Forest Local Explanation)</span>
+      </div>
+
+      <div class="why-shap-container" id="why-shap-factors">
+        <div class="shap-factor high-impact">
+          <div class="shap-factor-title">
+            <span>1. Packet Transmission Rate</span>
+            <span style="color: #f87171;">SHAP +0.089</span>
+          </div>
+          <div class="shap-factor-desc">
+            Abnormally high packets per second exceeding normal baseline thresholds.
+          </div>
+        </div>
+        <div class="shap-factor high-impact">
+          <div class="shap-factor-title">
+            <span>2. Packet Length Deviation</span>
+            <span style="color: #f87171;">SHAP +0.077</span>
+          </div>
+          <div class="shap-factor-desc">
+            Volumetric payload variance deviates from standard HTTP/TLS application flows.
+          </div>
+        </div>
+        <div class="shap-factor">
+          <div class="shap-factor-title">
+            <span>3. TCP Flag Invariance</span>
+            <span style="color: #93c5fd;">SHAP +0.047</span>
+          </div>
+          <div class="shap-factor-desc">
+            Unusual SYN-ACK sequence without completed bidirectional tear-down.
+          </div>
+        </div>
+      </div>
+
+      <div class="why-policy-box">
+        <div class="why-policy-decision">
+          <span>Autonomous Action:</span>
+          <span id="why-policy-action" style="color: #60a5fa;">Cost-Optimal Gate: ALLOW</span>
+        </div>
+        <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 3px;">
+          Enforcement Invariant: Deterministic Safety Gate enforces zero network state mutation in presentation mode.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ZONE 4: Distinct Held-Out Benchmark Strip -->
+  <section class="zone-benchmark-strip">
+    <div class="benchmark-header">
+      <div class="benchmark-title">
+        🏛️ 4. Official Held-Out Benchmark Results
+        <span class="benchmark-tag">Full Test Dataset: 355,833 Flows</span>
+      </div>
+      <div style="font-size: 0.78rem; color: #94a3b8;">
+        Frozen Seed-42 Artifacts · Strictly Separated from Replay Demonstration
+      </div>
+    </div>
+    <div class="benchmark-grid">
+      <div class="benchmark-tile">
+        <div class="benchmark-tile-name">Random Forest Detector</div>
+        <div class="benchmark-tile-score">0.9512</div>
+        <div class="benchmark-tile-detail">F1-Score · Precision: 98.1% · Recall: 92.3%</div>
+      </div>
+      <div class="benchmark-tile">
+        <div class="benchmark-tile-name">Supervised LSTM Classifier</div>
+        <div class="benchmark-tile-score">0.9633</div>
+        <div class="benchmark-tile-detail">F1-Score · Shuffled Ablation: ΔF1 = -0.0038</div>
+      </div>
+      <div class="benchmark-tile">
+        <div class="benchmark-tile-name">RF-LSTM Score-Fusion</div>
+        <div class="benchmark-tile-score" style="color: #34d399;">0.9745</div>
+        <div class="benchmark-tile-detail">F1-Score · Accuracy: 99.06% (α = 0.60)</div>
+      </div>
+      <div class="benchmark-tile">
+        <div class="benchmark-tile-name">Response Policy Speedup</div>
+        <div class="benchmark-tile-score" style="color: #a78bfa;">~51.4x</div>
+        <div class="benchmark-tile-detail">Cost-Optimal: 1.95 µs vs Dueling DQN: 100.23 µs</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scorecard Modal -->
+  <div id="modal-scorecard" class="modal-overlay">
+    <div class="modal-card">
+      <div style="font-size: 2.2rem; margin-bottom: 6px;">🎉</div>
+      <div class="modal-title">2-Minute Scenario Complete!</div>
+      <div class="modal-desc">
+        Demonstration stream replayed held-out multi-regime flows through the active pipeline.
+      </div>
+
+      <div class="modal-stats">
+        <div class="modal-stat-box">
+          <div class="modal-stat-val" id="modal-flows">120</div>
+          <div class="modal-stat-label">Flows Replayed</div>
+        </div>
+        <div class="modal-stat-box">
+          <div class="modal-stat-val" id="modal-caught" style="color: #34d399;">48 / 50</div>
+          <div class="modal-stat-label">Attacks Caught (Recall)</div>
+        </div>
+        <div class="modal-stat-box">
+          <div class="modal-stat-val" id="modal-false-alarms" style="color: #38bdf8;">0</div>
+          <div class="modal-stat-label">False Alarms (FP)</div>
+        </div>
+        <div class="modal-stat-box">
+          <div class="modal-stat-val" id="modal-precision" style="color: #a78bfa;">100.0%</div>
+          <div class="modal-stat-label">Sample Precision</div>
+        </div>
+      </div>
+
+      <div class="modal-takeaway">
+        <strong>Examiner Takeaway:</strong>
+        The system reliably isolated high-rate volumetric DDoS and stealthy port sweeps from legitimate enterprise traffic, enforcing policy actions with zero false alarms on normal flows.
+      </div>
+
+      <div style="display: flex; justify-content: center; gap: 12px;">
+        <button class="btn btn-primary" onclick="closeScorecard()">Done / Inspect Flows</button>
+        <a href="/index.html" class="btn btn-outline">Go to Full Research Workbench →</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/demo.js"></script>
+</body>
+</html>

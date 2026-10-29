@@ -224,11 +224,16 @@ def verify_dashboard_endpoints() -> bool:
     app_js_path = REPO_ROOT / "dashboard" / "app.js"
     server_path = REPO_ROOT / "dashboard" / "server.py"
 
+    demo_html_path = REPO_ROOT / "dashboard" / "demo.html"
+    demo_js_path = REPO_ROOT / "dashboard" / "demo.js"
+
     log_step("Frontend Assets", "index.html exists", index_path.exists(), f"{index_path.stat().st_size:,} bytes")
     log_step("Frontend Assets", "app.js exists", app_js_path.exists(), f"{app_js_path.stat().st_size:,} bytes")
+    log_step("Frontend Assets", "demo.html exists (Viva Mode)", demo_html_path.exists(), f"{demo_html_path.stat().st_size:,} bytes")
+    log_step("Frontend Assets", "demo.js exists (Viva Mode)", demo_js_path.exists(), f"{demo_js_path.stat().st_size:,} bytes")
     log_step("Server Script", "dashboard/server.py exists", server_path.exists())
 
-    all_ok &= index_path.exists() and app_js_path.exists() and server_path.exists()
+    all_ok &= index_path.exists() and app_js_path.exists() and demo_html_path.exists() and demo_js_path.exists() and server_path.exists()
 
     from dashboard.server import (
         get_comparison_data,

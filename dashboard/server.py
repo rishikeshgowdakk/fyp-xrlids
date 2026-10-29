@@ -988,6 +988,10 @@ class DashboardHandler(BaseHTTPRequestHandler):
 
         if path in ("/", "/index.html"):
             self.serve_file(DASHBOARD_DIR / "index.html", "text/html; charset=utf-8")
+        elif path in ("/demo", "/demo.html"):
+            self.serve_file(DASHBOARD_DIR / "demo.html", "text/html; charset=utf-8")
+        elif path == "/demo.js":
+            self.serve_file(DASHBOARD_DIR / "demo.js", "application/javascript; charset=utf-8")
         elif path == "/app.js":
             self.serve_file(DASHBOARD_DIR / "app.js", "application/javascript; charset=utf-8")
         elif path == "/api/data":

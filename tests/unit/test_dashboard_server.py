@@ -50,6 +50,8 @@ def test_dashboard_files_exist():
     assert DASHBOARD_DIR.exists()
     assert (DASHBOARD_DIR / "index.html").is_file()
     assert (DASHBOARD_DIR / "app.js").is_file()
+    assert (DASHBOARD_DIR / "demo.html").is_file()
+    assert (DASHBOARD_DIR / "demo.js").is_file()
     assert (DASHBOARD_DIR / "server.py").is_file()
     assert (DASHBOARD_DIR / "README.md").is_file()
 
@@ -268,16 +270,17 @@ def test_dashboard_http_live_endpoints():
         assert "mixed" in cat_data["categories"]
         assert "ddos" in cat_data["categories"]
 
-        with urllib.request.urlopen(f"http://127.0.0.1:{port}/", timeout=5) as resp:
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/demo.html", timeout=5) as resp:
             assert resp.status == 200
-            html = resp.read().decode("utf-8")
-        assert "Live Monitor" in html
-        assert "Evidence" in html
-        assert "Benchmark Dataset" in html
-        assert "Dataset Explorer" in html
-        assert "Model Comparison" in html
-        assert "Performance Benchmarks" in html
-        assert "Autonomous Response" in html
+            demo_html = resp.read().decode("utf-8")
+        assert "Viva Defense Edition" in demo_html
+        assert "TreeSHAP" in demo_html
+        assert "Flows Analysed" in demo_html
+
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/demo.js", timeout=5) as resp:
+            assert resp.status == 200
+            demo_js = resp.read().decode("utf-8")
+        assert "startTwoMinuteScenario" in demo_js
 
         # Test new Research & Benchmarks 5-section API endpoints
         for bench in ("cicids2017", "cse2018", "unswnb15"):

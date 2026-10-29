@@ -46,21 +46,47 @@ python scripts/demo/run_dashboard.py
 ```
 *(Alternative direct launch: `python dashboard/server.py --port 8000`)*
 
-### Access URL
+### Access URLs
 Open your web browser and navigate to:
-```
-http://localhost:8000
-```
-*(Or `http://127.0.0.1:8000`)*
+- **⚡ 3-Minute Viva Demonstration (Recommended First Screen)**:
+  ```
+  http://localhost:8000/demo.html
+  ```
+- **🔬 Full Research Evaluation Workbench (In-Depth Backup)**:
+  ```
+  http://localhost:8000/index.html
+  ```
 
 > [!NOTE]
 > The server binds strictly to `127.0.0.1` (loopback). It does not open external public ports or broadcast across local networks.
 
 ---
 
-## 3. High-Impact 5-to-7-Minute Demonstration Sequence
+## 3. Recommended 3-Minute Viva Defense Strategy (`/demo.html`)
 
-This chronological demonstration runbook is optimized for a 5-to-7-minute viva defense or exhibition evaluation. It guides the examiner step-by-step through empirical verification, multi-dataset benchmarking, performance scope reconciliation, explainability, autonomous response, live traffic observation, and candid scientific boundary disclosures.
+For an academic viva defense, thesis evaluation, or quick demonstration, **do not attempt to navigate all 8 detailed research tabs in real time**. Use the focused 4-zone presentation page:
+
+> [!TIP]
+> **The 30-Second Examiner Elevator Pitch**:  
+> *"XRL-IDARS watches network flows and does three things: it detects attacks using Random Forest and LSTM, it explains each decision with SHAP, and a reinforcement-learning agent picks the response. We can't attack a shared network, so the demo replays held-out benchmark traffic through the same pipeline. The benchmark numbers come from the full test sets."*
+
+### 3-Minute Viva Demo Walkthrough:
+1. **Open `http://localhost:8000/demo.html`** and deliver the 30-second elevator pitch above.
+2. **Click `▶ Run 2-Min Scenario`**:
+   - Point out **Zone 1 (Pipeline Strip)**: Real-time visual flow from packet capture $\to$ flow assembly $\to$ detector $\to$ TreeSHAP $\to$ action gate.
+   - Point out **Zone 2 (The 4 Numbers Only)**: Replay sample metrics for `Flows Analysed`, `Attacks Caught`, `Attacks Missed`, and `False Alarms`.
+   - In **Zone 3 (Timeline & "Why?" Card)**: Click an attack flow to show its confidence score, policy action (`ALLOW`, `ALERT`, `BLOCK`), and **top 3 plain-English TreeSHAP reasons** (e.g., "Very high packet rate", "Irregular packet length variance", "Abnormal TCP flags").
+   - In **Zone 4 (Held-Out Benchmark Strip)**: Point out that official test set metrics (355k flows) achieve **0.9745 F1** (99.06% accuracy) with **~51.4x faster** Cost-Optimal policy execution (1.95 µs vs 100.23 µs DQN).
+3. **Closing Scorecard**:
+   - The scenario finishes with a scorecard modal ("Replayed N flows, caught X of Y attacks with 0 false alarms").
+4. **Transition to Research Tabs Only If Asked**:
+   - If the examiners probe deeper on model calibration, the $\alpha=0.00$ degenerate fusion weight, sequence ablations ($\Delta\text{F1} = -0.0038$), or DQN policy latency, click **`🔬 Open Full Research Workbench →`** to show the full 5 research sections in `/index.html`.
+
+---
+
+## 4. Comprehensive 5-to-7-Minute Research Deep-Dive Sequence (Full Workbench)
+
+When examiners request a detailed technical walkthrough of the research findings, use this sequence on **`http://localhost:8000/index.html`**:
 
 ```mermaid
 flowchart LR
