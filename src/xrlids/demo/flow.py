@@ -65,6 +65,13 @@ class Flow:
     source_first_port: int = 0
     dest_first_ip: str = ""
     dest_first_port: int = 0
+    psh_count: int = 0
+    urg_count: int = 0
+    invalid_flags_count: int = 0
+    has_syn_fin: bool = False
+    has_syn_rst: bool = False
+    has_null_flags: bool = False
+    has_xmas_flags: bool = False
 
     def add_packet(self, pkt: PacketInfo, is_forward: bool) -> None:
         """Accumulate packet into flow statistics."""
@@ -90,6 +97,29 @@ class Flow:
             if pkt.fin:
                 self.fin_count += 1
                 self.is_closed = True
+            if getattr(pkt, "psh", False):
+                self.psh_count += 1
+            if getattr(pkt, "urg", False):
+                self.urg_count += 1
+
+            is_syn_fin = bool(pkt.syn and pkt.fin)
+            is_syn_rst = bool(pkt.syn and pkt.rst)
+            is_xmas = bool(pkt.fin and getattr(pkt, "psh", False) and getattr(pkt, "urg", False))
+            raw_flags = getattr(pkt, "raw_flags", 0)
+            is_null = bool(raw_flags == 0 and not (pkt.syn or pkt.ack or pkt.rst or pkt.fin or getattr(pkt, "psh", False) or getattr(pkt, "urg", False)))
+
+            if is_syn_fin:
+                self.has_syn_fin = True
+                self.invalid_flags_count += 1
+            if is_syn_rst:
+                self.has_syn_rst = True
+                self.invalid_flags_count += 1
+            if is_xmas:
+                self.has_xmas_flags = True
+                self.invalid_flags_count += 1
+            if is_null:
+                self.has_null_flags = True
+                self.invalid_flags_count += 1
 
     @property
     def duration_s(self) -> float:

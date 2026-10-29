@@ -57,6 +57,7 @@ from xrlids.demo.flow import FlowBuilder  # noqa: E402
 from xrlids.demo.live_lab import AlertEvent, FlowObservation, LiveLabMonitor  # noqa: E402
 from xrlids.demo.pcap import PacketInfo, PcapReader  # noqa: E402
 from xrlids.demo.replay import ReplayEngine  # noqa: E402
+from xrlids.rules.engine import RuleEngine  # noqa: E402
 from xrlids.evaluation.csv_evaluator import (  # noqa: E402
     CSVValidationError,
     evaluate_csv_dataset,
@@ -344,6 +345,7 @@ class LiveSession:
         self.flows: deque[dict[str, Any]] = deque(maxlen=1000)
         self.alerts: deque[dict[str, Any]] = deque(maxlen=200)
         self.injection: dict[str, Any] | None = None
+        self.rule_engine = RuleEngine()
 
     # ------------------------------------------------------------- engine
     def _get_engine(self) -> ReplayEngine:
@@ -598,6 +600,7 @@ class LiveSession:
                 "network": device_data.get("network"),
                 "devices": device_data.get("devices", []),
                 "device_counters": device_data.get("counters", {}),
+                "rules": self.rule_engine.list_rules(),
                 "device_discovery": {
                     "available": self.mode == "live",
                     "scope": device_data.get("scope", "passive-observed"),
@@ -655,6 +658,7 @@ class LiveSession:
                 alert_threshold=RESEARCH_THRESHOLD,
                 on_alert_callback=self._on_alert,
                 on_flow_callback=self._on_flow,
+                rule_engine=self.rule_engine,
             )
             if mode == "live":
                 with self._lock:
@@ -750,6 +754,13 @@ class LiveSession:
                                     flow_idx += 1
                                     inf_features = inf_flow.to_features()
                                     pred, conf = engine.predict_features(inf_features)
+                                    rule_matches = self.rule_engine.evaluate_flow(inf_flow)
+                                    rule_ids = [r.rule_id for r in rule_matches]
+                                    rule_alert = len(rule_matches) > 0
+                                    rf_alert = bool(pred == 1 and conf >= RESEARCH_THRESHOLD)
+                                    is_alert = rf_alert or rule_alert
+                                    detection_src = "HYBRID" if (rf_alert and rule_alert) else ("RULE" if rule_alert else ("RF" if rf_alert else "NONE"))
+
                                     obs = FlowObservation(
                                         timestamp=datetime.now(timezone.utc).isoformat(),
                                         flow_id=flow_idx,
@@ -761,19 +772,24 @@ class LiveSession:
                                         attack_score=round(conf, 4),
                                         prediction_class=pred,
                                         prediction_label="ATTACK" if pred == 1 else "BENIGN",
-                                        is_alert=pred == 1 and conf >= RESEARCH_THRESHOLD,
+                                        is_alert=is_alert,
                                         ground_truth="SIMULATED ATTACK",
                                         features=inf_features,
                                         mode="sample",
                                         is_simulated=True,
+                                        rule_triggered=rule_alert,
+                                        rule_matches=rule_ids,
+                                        detection_source=detection_src,
                                     )
                                     self._on_flow(obs)
                                     if obs.is_alert:
+                                        has_high = any(r.severity == "HIGH" for r in rule_matches)
+                                        lvl = "HIGH" if (conf >= 0.85 or has_high) else ("MEDIUM" if (conf >= 0.65 or any(r.severity == "MEDIUM" for r in rule_matches)) else "LOW")
                                         self._on_alert(
                                              AlertEvent(
                                                  timestamp=obs.timestamp,
                                                  flow_id=flow_idx,
-                                                 alert_level="HIGH" if conf >= 0.85 else ("MEDIUM" if conf >= 0.65 else "LOW"),
+                                                 alert_level=lvl,
                                                  confidence=round(conf, 4),
                                                  src_endpoint=obs.src_endpoint,
                                                  dst_endpoint=obs.dst_endpoint,
@@ -783,15 +799,28 @@ class LiveSession:
                                                  details={k: round(v, 4) for k, v in inf_features.items()},
                                                  ground_truth="SIMULATED ATTACK",
                                                  mode="sample",
+                                                 rule_triggered=rule_alert,
+                                                 rule_matches=rule_ids,
+                                                 detection_source=detection_src,
                                              )
                                          )
                         except queue.Empty:
                             break
 
                     flow_idx += 1
-                    raw_features = item.get("features")
+                    raw_features = item.get("features", {})
                     pred, score = engine.predict_features(raw_features)
-                    is_alert = pred == 1 and score >= RESEARCH_THRESHOLD
+                    src_ep = item.get("src_endpoint", "172.16.0.1:49152")
+                    dst_ep = item.get("dst_endpoint", "192.168.10.50:80")
+                    rule_matches = self.rule_engine.evaluate_features(
+                        raw_features,
+                        endpoints={"src_ip": src_ep.split(":")[0], "dst_ip": dst_ep.split(":")[0]},
+                    )
+                    rule_ids = [r.rule_id for r in rule_matches]
+                    rule_alert = len(rule_matches) > 0
+                    rf_alert = bool(pred == 1 and score >= RESEARCH_THRESHOLD)
+                    is_alert = rf_alert or rule_alert
+                    detection_src = "HYBRID" if (rf_alert and rule_alert) else ("RULE" if rule_alert else ("RF" if rf_alert else "NONE"))
                     gt = item.get("ground_truth", "UNKNOWN")
 
                     bench = getattr(self, "benchmark", "cicids2017")
@@ -803,8 +832,8 @@ class LiveSession:
                     obs = FlowObservation(
                         timestamp=datetime.now(timezone.utc).isoformat(),
                         flow_id=flow_idx,
-                        src_endpoint=item.get("src_endpoint", "172.16.0.1:49152"),
-                        dst_endpoint=item.get("dst_endpoint", "192.168.10.50:80"),
+                        src_endpoint=src_ep,
+                        dst_endpoint=dst_ep,
                         protocol=item.get("protocol", "TCP"),
                         packet_count=item.get("packet_count", 10),
                         duration_ms=round(float(item.get("duration_ms", 1000.0)), 2),
@@ -816,6 +845,9 @@ class LiveSession:
                         features=valid_features,
                         mode="dataset",
                         is_simulated=False,
+                        rule_triggered=rule_alert,
+                        rule_matches=rule_ids,
+                        detection_source=detection_src,
                     )
 
                     with self._lock:
@@ -828,11 +860,12 @@ class LiveSession:
                     self._on_flow(obs)
 
                     if is_alert:
-                        level = "HIGH" if score >= 0.85 else ("MEDIUM" if score >= 0.65 else "LOW")
+                        has_high = any(r.severity == "HIGH" for r in rule_matches)
+                        lvl = "HIGH" if (score >= 0.85 or has_high) else ("MEDIUM" if (score >= 0.65 or any(r.severity == "MEDIUM" for r in rule_matches)) else "LOW")
                         alert = AlertEvent(
                             timestamp=obs.timestamp,
                             flow_id=flow_idx,
-                            alert_level=level,
+                            alert_level=lvl,
                             confidence=round(score, 4),
                             src_endpoint=obs.src_endpoint,
                             dst_endpoint=obs.dst_endpoint,
@@ -842,6 +875,9 @@ class LiveSession:
                             details={k: round(v, 4) for k, v in item["features"].items()},
                             ground_truth=gt,
                             mode="dataset",
+                            rule_triggered=rule_alert,
+                            rule_matches=rule_ids,
+                            detection_source=detection_src,
                         )
                         self._on_alert(alert)
 

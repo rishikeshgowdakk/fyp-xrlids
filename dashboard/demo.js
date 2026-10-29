@@ -146,6 +146,11 @@ function renderFlowList(flows) {
 
     const barColor = isAttack ? '#ef4444' : '#10b981';
 
+    const isRuleTriggered = flow.rule_triggered && flow.rule_matches && flow.rule_matches.length > 0;
+    const ruleBadge = isRuleTriggered
+      ? `<span class="badge-rule" style="background:#4338ca;color:#fff;padding:2px 6px;border-radius:4px;font-size:0.68rem;font-weight:700;" title="Deterministic Rule: ${escapeHtml(flow.rule_matches.join(', '))}">RULE: ${escapeHtml(flow.rule_matches[0])}</span>`
+      : '';
+
     html += `
       <div class="flow-row ${isSelected ? 'selected' : ''}" onclick="onFlowRowClick(${flow.flow_id})">
         <div class="flow-main">
@@ -157,6 +162,7 @@ function renderFlowList(flows) {
             <div class="flow-score-bar-fill" style="width: ${scorePct}%; background: ${barColor};"></div>
           </div>
           <span style="font-size: 0.76rem; font-weight: 700; font-family: monospace; min-width: 34px;">${scorePct}%</span>
+          ${ruleBadge}
           ${typeBadge}
           ${actionBadge}
         </div>
@@ -190,6 +196,17 @@ function inspectFlow(flow) {
   if (flowIdEl) flowIdEl.textContent = `#${flow.flow_id} (${flow.protocol || 'TCP'})`;
   if (confEl) confEl.textContent = `${scorePct}%`;
   if (endpointsEl) endpointsEl.textContent = `${flow.src_endpoint || '172.16.0.1:49152'} → ${flow.dst_endpoint || '192.168.10.50:80'}`;
+
+  const ruleRowEl = document.getElementById('why-rule-row');
+  const ruleValEl = document.getElementById('why-rule-val');
+  if (ruleRowEl && ruleValEl) {
+    if (flow.rule_triggered && flow.rule_matches && flow.rule_matches.length > 0) {
+      ruleRowEl.style.display = 'block';
+      ruleValEl.textContent = flow.rule_matches.join(', ');
+    } else {
+      ruleRowEl.style.display = 'none';
+    }
+  }
 
   // Action badge
   const badgeEl = document.getElementById('why-action-badge');

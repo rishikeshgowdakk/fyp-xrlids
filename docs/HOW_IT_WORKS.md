@@ -11,34 +11,37 @@ The repository contains separate operational and evaluation paths. Do not draw t
 
 ```mermaid
 flowchart TD
-    subgraph LIVE_PIPE["Live / PCAP Operational Path"]
+    subgraph LIVE_PIPE["Live / PCAP Operational Path (Observational & Advisory)"]
         direction TB
-        P1["Raw Packets"] --> P2["Bidirectional Flows"]
-        P2 --> P3["Canonical Features (R10 / R4)"]
-        P3 --> P4["Frozen RF & LSTM Inference"]
-        P4 --> P5["Score Fusion & Threat Score"]
-        P4 -.-> P6["TreeSHAP Explanations (RF only)"]
-        P5 --> P7["DQN Response Suggestion"]
-        P7 --> P8["Deterministic Safety Gate"]
-        P8 --> P9["Controlled Lab Netns Response & Rollback"]
-        P5 --> P10["Live Monitor Dashboard"]
+        P1["Raw Packets"] --> P2["Bidirectional Flows (D-006 Policy)"]
+        P2 --> P3["Canonical Features (R10 / R4 Contract)"]
+        P3 --> P4["Deterministic Rule Engine (5 Fast Security Rules)"]
+        P3 --> P5["Primary ML Detector (Frozen Random Forest)"]
+        P4 --> P6["Evidence & Alert Record (Distinguishing RULE, RF, HYBRID)"]
+        P5 --> P6
+        P5 -.-> P7["TreeSHAP Explanations (RF Local Attributions Only)"]
+        P6 --> P8["DQN Autonomous Response Suggestion (Advisory)"]
+        P8 --> P9["Deterministic Safety Gate (Cooldown & Non-Mutation Default)"]
+        P9 --> P10["Live Monitor Dashboard & Audit Log"]
     end
 
-    subgraph OFFLINE_CSV["Offline CSV Evaluation Path"]
+    subgraph OFFLINE_CSV["Offline Research & Benchmark Path (Multi-Model Verification)"]
         direction TB
-        C1["User CSV Input"] --> C2["Schema & Benchmark-Contract Gate"]
+        C1["Held-Out Benchmark / CSV Input"] --> C2["Schema & Benchmark-Contract Gate"]
         C2 --> C3["Label Isolation & Strict Parsing"]
-        C3 --> C4["Numeric Coercion & Non-Finite Row Drop"]
-        C4 --> C5["Compatible Frozen Preprocessor & RF"]
-        C5 --> C6["Ad-Hoc Metrics, Row Accounting & CSV Export"]
-        C6 --> C7["Workbench Evaluation Dashboard"]
+        C3 --> C4["Numeric Coercion & Non-Finite Drop"]
+        C4 --> C5["Compatible Frozen Preprocessor & RF Classifier"]
+        C5 --> C6["Optional Experimental Baseline: Supervised LSTM"]
+        C5 --> C7["Optional Experimental Baseline: RF-LSTM Fusion"]
+        C5 & C6 & C7 --> C8["Metrics, Confusion Matrices, Bootstrapped CIs & TreeSHAP Verification"]
+        C8 --> C9["Workbench Evaluation Dashboard"]
     end
 
     style LIVE_PIPE fill:#f8fafc,stroke:#2563eb,stroke-width:1.5px
     style OFFLINE_CSV fill:#faf5ff,stroke:#9333ea,stroke-width:1.5px
 ```
 
-The CSV path does not retrain the models, feed its outputs back into live inference, or overwrite historical benchmark artifacts. Live capture remains observational outside the explicitly controlled laboratory validation environment. TreeSHAP explanations apply to the Random Forest, not automatically to the LSTM, fusion output, or DQN.
+The CSV path does not retrain the models, feed its outputs back into live inference, or overwrite historical benchmark artifacts. Live capture remains strictly observational (advisory/dry-run with zero firewall mutations). Random Forest serves as the primary live ML detector; LSTM and RF-LSTM fusion are optional offline experimental baselines. TreeSHAP explanations apply genuinely to Random Forest predictions only, not to the LSTM, fusion output, or DQN policy.
 
 ---
 

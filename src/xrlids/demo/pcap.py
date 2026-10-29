@@ -36,6 +36,9 @@ class PacketInfo:
     ack: bool = False
     rst: bool = False
     fin: bool = False
+    psh: bool = False
+    urg: bool = False
+    raw_flags: int = 0
 
 
 class PcapReader:
@@ -117,7 +120,8 @@ def parse_packet_bytes(raw_bytes: bytes, timestamp: float) -> PacketInfo | None:
     transport_bytes = ip_bytes[ihl:]
     src_port = 0
     dst_port = 0
-    syn = ack = rst = fin = False
+    syn = ack = rst = fin = psh = urg = False
+    raw_flags = 0
     is_tcp = False
 
     if protocol == 6:  # TCP
@@ -125,10 +129,13 @@ def parse_packet_bytes(raw_bytes: bytes, timestamp: float) -> PacketInfo | None:
         if len(transport_bytes) >= 14:
             src_port, dst_port = struct.unpack("!HH", transport_bytes[0:4])
             flags = transport_bytes[13]
+            raw_flags = flags
             fin = bool(flags & 0x01)
             syn = bool(flags & 0x02)
             rst = bool(flags & 0x04)
+            psh = bool(flags & 0x08)
             ack = bool(flags & 0x10)
+            urg = bool(flags & 0x20)
     elif protocol == 17:  # UDP
         if len(transport_bytes) >= 4:
             src_port, dst_port = struct.unpack("!HH", transport_bytes[0:4])
@@ -146,6 +153,9 @@ def parse_packet_bytes(raw_bytes: bytes, timestamp: float) -> PacketInfo | None:
         ack=ack,
         rst=rst,
         fin=fin,
+        psh=psh,
+        urg=urg,
+        raw_flags=raw_flags,
     )
 
 
@@ -174,8 +184,10 @@ def build_raw_packet(
     flags: dict[str, bool] | None = None,
     payload_len: int = 64,
 ) -> bytes:
-    """Construct an Ethernet + IPv4 + TCP/UDP binary packet."""
-    flags = flags or {}
+    if flags is None and protocol == 6:
+        flags = {"ack": True}
+    else:
+        flags = flags or {}
     eth_hdr = b"\x00\x11\x22\x33\x44\x55\x66\x77\x88\x99\xaa\xbb\x08\x00"
 
     src_bytes = socket.inet_aton(src_ip)
@@ -191,8 +203,14 @@ def build_raw_packet(
             flag_byte |= 0x02
         if flags.get("rst"):
             flag_byte |= 0x04
+        if flags.get("psh"):
+            flag_byte |= 0x08
         if flags.get("ack"):
             flag_byte |= 0x10
+        if flags.get("urg"):
+            flag_byte |= 0x20
+        if "raw_flags" in flags:
+            flag_byte = int(flags["raw_flags"])
 
         tcp_hdr = struct.pack(
             "!HHIIBBHHH",

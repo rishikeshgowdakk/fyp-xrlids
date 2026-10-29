@@ -34,22 +34,19 @@ XRL-IDARS consists of two decoupled execution paths:
 
 ```mermaid
 flowchart TD
-    subgraph LIVE["Path A: Live & PCAP Detection Pipeline (Observational & Lab Response)"]
+    subgraph LIVE["Path A: Live & PCAP Operational Detection Pipeline (Observational & Advisory)"]
         direction TB
-        A1["Network Interface or PCAP File"] --> A2["Packet Capture & Demux (Scapy / AF_PACKET)"]
-        A2 --> A3["Bidirectional Flow Construction (D-006 Policy)"]
-        A3 --> A4["Canonical Feature Extraction (R10 Contract)"]
-        A4 --> A5["Frozen Tabular Classifier (Random Forest)"]
-        A4 --> A6["Frozen Sequence Model (Supervised LSTM, T=5)"]
-        A5 --> A7["Score Fusion Engine (Linear Alpha-Blend)"]
+        A1["Network Interface or PCAP File"] --> A2["Packet Capture & Parser (AF_PACKET / Scapy)"]
+        A2 --> A3["Bidirectional Flow Construction (D-006 Completion Policy)"]
+        A3 --> A4["Validated Feature Contract (R10 / R4 Canonical Features)"]
+        A4 --> A5["Deterministic Rule Engine (5 Fast Security Policy Rules)"]
+        A4 --> A6["Primary ML Detector (Frozen Random Forest Classifier)"]
+        A5 --> A7["Evidence & Alert Record (Distinguishing RULE, RF, HYBRID)"]
         A6 --> A7
-        A7 --> A8["Threat Score Output (0.00 – 1.00)"]
-        A5 -.-> A9["TreeSHAP Explanations (RF Attributions Only)"]
-        A8 --> A10["Context-Aware Response Policy (Dueling DQN)"]
-        A10 --> A11["Deterministic Safety Gate (Cooldown, Blast Radius)"]
-        A11 --> A12["Isolated Lab Netns (10.200.1.0/24)"]
-        A12 --> A13["Atomic Transaction & Automatic Rollback"]
-        A8 --> A14["Live Monitor Dashboard (Real-Time Alerts & Flow Table)"]
+        A6 -.-> A8["TreeSHAP Explanations (RF Local Feature Attributions Only)"]
+        A7 --> A9["Response Policy (Dueling DQN Advisory Recommendation)"]
+        A9 --> A10["Deterministic Safety Gate (Cooldown, Blast Radius, Non-Mutation Default)"]
+        A10 --> A11["Advisory Decision Audit Log & Dashboard"]
     end
 
     subgraph CSV["Path B: Offline Benchmark Evaluation & Multi-Model Verification Engine"]

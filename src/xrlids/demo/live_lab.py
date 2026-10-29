@@ -11,13 +11,14 @@ from __future__ import annotations
 import logging
 import socket
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Callable, Generator
 
 from xrlids.demo.flow import Flow, FlowBuilder
 from xrlids.demo.pcap import PacketInfo, parse_packet_bytes
 from xrlids.demo.replay import FlowPredictionEvent, ReplayEngine
+from xrlids.rules.engine import RuleEngine
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,9 @@ class AlertEvent:
     ground_truth: str = "UNKNOWN"
     mode: str = "live"  # "live", "pcap", "dataset", "sample"
     deduplicated: bool = False
+    rule_triggered: bool = False
+    rule_matches: list[str] = field(default_factory=list)
+    detection_source: str = "RF"  # "RF", "RULE", "HYBRID"
 
 
 @dataclass
@@ -62,6 +66,9 @@ class FlowObservation:
     features: dict[str, float] | None = None
     mode: str = "live"  # "live", "pcap", "dataset", "sample"
     is_simulated: bool = False
+    rule_triggered: bool = False
+    rule_matches: list[str] = field(default_factory=list)
+    detection_source: str = "NONE"  # "RF", "RULE", "HYBRID", "NONE"
 
 
 class LiveLabMonitor:
@@ -75,6 +82,7 @@ class LiveLabMonitor:
         on_flow_callback: Callable[[FlowObservation], None] | None = None,
         max_observations: int = 10000,
         dedup_window_s: float = 5.0,
+        rule_engine: RuleEngine | None = None,
     ) -> None:
         self.engine = engine
         self.alert_threshold = alert_threshold
@@ -82,6 +90,7 @@ class LiveLabMonitor:
         self.on_flow_callback = on_flow_callback
         self.max_observations = max_observations
         self.dedup_window_s = dedup_window_s
+        self.rule_engine = rule_engine if rule_engine is not None else RuleEngine()
         self.alerts: list[AlertEvent] = []
         self.observations: deque[FlowObservation] = deque(maxlen=max_observations)
         self._last_alert_time: dict[str, float] = {}
@@ -121,7 +130,23 @@ class LiveLabMonitor:
         features = flow.to_features()
         pred, conf = self.engine.predict_features(features)
         proto = "TCP" if flow.key.protocol == 6 else ("UDP" if flow.key.protocol == 17 else f"PROTO_{flow.key.protocol}")
-        is_alert = pred == 1 and conf >= self.alert_threshold
+
+        # Deterministic rule checks (independent of ML model)
+        rule_matches = self.rule_engine.evaluate_flow(flow)
+        rule_ids = [r.rule_id for r in rule_matches]
+        rule_alert = len(rule_matches) > 0
+        rf_alert = bool(pred == 1 and conf >= self.alert_threshold)
+        is_alert = rf_alert or rule_alert
+
+        if rf_alert and rule_alert:
+            detection_source = "HYBRID"
+        elif rule_alert:
+            detection_source = "RULE"
+        elif rf_alert:
+            detection_source = "RF"
+        else:
+            detection_source = "NONE"
+
         is_simulated = (mode == "sample")
 
         observation = FlowObservation(
@@ -136,16 +161,27 @@ class LiveLabMonitor:
             prediction_class=pred,
             prediction_label="ATTACK" if pred == 1 else "BENIGN",
             is_alert=is_alert,
+            ground_truth="UNKNOWN",
             features=features,
             mode=mode,
             is_simulated=is_simulated,
+            rule_triggered=rule_alert,
+            rule_matches=rule_ids,
+            detection_source=detection_source,
         )
         self.observations.append(observation)
         if self.on_flow_callback is not None:
             self.on_flow_callback(observation)
 
         if is_alert:
-            level = "HIGH" if conf >= 0.85 else ("MEDIUM" if conf >= 0.65 else "LOW")
+            has_high_rule = any(r.severity == "HIGH" for r in rule_matches)
+            if conf >= 0.85 or has_high_rule:
+                level = "HIGH"
+            elif conf >= 0.65 or any(r.severity == "MEDIUM" for r in rule_matches):
+                level = "MEDIUM"
+            else:
+                level = "LOW"
+
             alert_key = f"{observation.src_endpoint}->{observation.dst_endpoint}:{proto}"
             now_mono = time.monotonic()
             is_dedup = False
@@ -169,6 +205,9 @@ class LiveLabMonitor:
                 details={k: round(v, 4) for k, v in features.items()},
                 mode=mode,
                 deduplicated=is_dedup,
+                rule_triggered=rule_alert,
+                rule_matches=rule_ids,
+                detection_source=detection_source,
             )
             self.alerts.append(alert)
             if self.on_alert_callback is not None:
