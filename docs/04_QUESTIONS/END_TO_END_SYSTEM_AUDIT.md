@@ -5,9 +5,9 @@
 > This document represents an earlier audit snapshot recorded on **2026-10-02 (commit `e91a016`)** during initial Phase 1 development, when Phase 2 (Dueling DQN autonomous response) and Phase 3 (live capture, safety enforcement, atomic rollback, and dashboard) were in early architectural specification and configuration stages.  
 > All components described in this historical snapshot as "config only" or "unimplemented" have since been fully implemented, trained, benchmarked, and cryptographically verified.  
 > For current authoritative evaluations, consult:
-> - [`docs/DATASETS_AND_MODELS_AUDIT.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/DATASETS_AND_MODELS_AUDIT.md)
-> - [`docs/audits/MODEL_AND_ARCHITECTURE_VALIDATION.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/audits/MODEL_AND_ARCHITECTURE_VALIDATION.md)
-> - [`reports/generated/results_summary.md`](file:///home/rishikesh/Desktop/fyp-xrlids/reports/generated/results_summary.md)
+> - [`docs/DATASETS_AND_MODELS_AUDIT.md`](../DATASETS_AND_MODELS_AUDIT.md)
+> - [`docs/audits/MODEL_AND_ARCHITECTURE_VALIDATION.md`](../audits/MODEL_AND_ARCHITECTURE_VALIDATION.md)
+> - [`reports/generated/results_summary.md`](../../reports/generated/results_summary.md)
 
 Audit date: 2026-10-02 · Audited commit: `e91a016` (HEAD at audit time; `0ebc39b` at audit start —
 a concurrent commit `e91a016` landed during the audit) · Working tree: clean at audit start.

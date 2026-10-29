@@ -20,7 +20,7 @@ Across **192 total response transactions**, **120 synthetic flows**, and **2,863
 
 ## 1. Experimental Setup
 
-The workload was generated deterministically using [`MultiFlowTrafficGenerator`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/enforcement/concurrency.py) and [`SoakWorkloadConfig`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/enforcement/concurrency.py):
+The workload was generated deterministically using [`MultiFlowTrafficGenerator`](../../src/xrlids/enforcement/concurrency.py) and [`SoakWorkloadConfig`](../../src/xrlids/enforcement/concurrency.py):
 
 * **Workload Parameters**:
   * Random Seed: `42` (PRNG fixed across flows and packet distributions)
@@ -53,7 +53,7 @@ To prevent shared-state corruption while maximizing concurrent throughput, XRL-I
                                           - Same-target serialization
 ```
 
-1. **Target-Scoped Striped Locking ([`TargetLockManager`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/response/transaction.py))**:
+1. **Target-Scoped Striped Locking ([`TargetLockManager`](../../src/xrlids/response/transaction.py))**:
    * Transactions targeting *different* victim IPs (e.g. `10.200.1.3` vs `10.200.1.4`) execute completely concurrently without lock contention.
    * Transactions targeting the *same* victim IP are safely serialized through `acquire_target(target_host, timeout=30.0)`.
    * Contention wait durations and contention event counts are measured with microsecond accuracy.
@@ -61,7 +61,7 @@ To prevent shared-state corruption while maximizing concurrent throughput, XRL-I
    * Atomically allocates monotonic transaction IDs (`TX-0001` ... `TX-0192`).
    * Protects the transaction record history and snapshot registry against concurrent modifications.
 3. **Target-Scoped State Snapshots & Rollback**:
-   * In [`NetnsActuatorBackend.rollback`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/enforcement/lab.py) and [`SimulatedActuatorBackend.rollback`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/response/transaction.py), state restoration is scoped strictly to `snapshot.target_host`.
+   * In [`NetnsActuatorBackend.rollback`](../../src/xrlids/enforcement/lab.py) and [`SimulatedActuatorBackend.rollback`](../../src/xrlids/response/transaction.py), state restoration is scoped strictly to `snapshot.target_host`.
    * Rolling back victim A restores victim A's baseline without wiping, resetting, or altering the active firewall rules or rate limits on concurrent victim B.
 
 ---
@@ -203,16 +203,16 @@ In adherence to strict scientific integrity, Phase 3J explicitly acknowledges th
 
 ## 10. Quantitative Artifacts Generated
 
-All artifacts and their cryptographic SHA256 metadata sidecars are permanently recorded under [`results/phase3/EXP-P3J-CONCURRENCY-001/`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3J-CONCURRENCY-001/):
+All artifacts and their cryptographic SHA256 metadata sidecars are permanently recorded under [`results/phase3/EXP-P3J-CONCURRENCY-001/`](../../results/phase3/EXP-P3J-CONCURRENCY-001/):
 
-1. [`experiment_config.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3J-CONCURRENCY-001/experiment_config.json) (`.meta.json`)
-2. [`environment.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3J-CONCURRENCY-001/environment.json) (`.meta.json`)
-3. [`concurrency_metrics.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3J-CONCURRENCY-001/concurrency_metrics.json) (`.meta.json`)
-4. [`transaction_metrics.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3J-CONCURRENCY-001/transaction_metrics.json) (`.meta.json`)
-5. [`rollback_metrics.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3J-CONCURRENCY-001/rollback_metrics.json) (`.meta.json`)
-6. [`queue_metrics.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3J-CONCURRENCY-001/queue_metrics.json) (`.meta.json`)
-7. [`failure_injection_results.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3J-CONCURRENCY-001/failure_injection_results.json) (`.meta.json`)
-8. [`safety_metrics.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3J-CONCURRENCY-001/safety_metrics.json) (`.meta.json`)
-9. [`resource_cleanup.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3J-CONCURRENCY-001/resource_cleanup.json) (`.meta.json`)
-10. [`run_summary.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3J-CONCURRENCY-001/run_summary.json) (`.meta.json`)
-11. [`README.md`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3J-CONCURRENCY-001/README.md)
+1. [`experiment_config.json`](../../results/phase3/EXP-P3J-CONCURRENCY-001/experiment_config.json) (`.meta.json`)
+2. [`environment.json`](../../results/phase3/EXP-P3J-CONCURRENCY-001/environment.json) (`.meta.json`)
+3. [`concurrency_metrics.json`](../../results/phase3/EXP-P3J-CONCURRENCY-001/concurrency_metrics.json) (`.meta.json`)
+4. [`transaction_metrics.json`](../../results/phase3/EXP-P3J-CONCURRENCY-001/transaction_metrics.json) (`.meta.json`)
+5. [`rollback_metrics.json`](../../results/phase3/EXP-P3J-CONCURRENCY-001/rollback_metrics.json) (`.meta.json`)
+6. [`queue_metrics.json`](../../results/phase3/EXP-P3J-CONCURRENCY-001/queue_metrics.json) (`.meta.json`)
+7. [`failure_injection_results.json`](../../results/phase3/EXP-P3J-CONCURRENCY-001/failure_injection_results.json) (`.meta.json`)
+8. [`safety_metrics.json`](../../results/phase3/EXP-P3J-CONCURRENCY-001/safety_metrics.json) (`.meta.json`)
+9. [`resource_cleanup.json`](../../results/phase3/EXP-P3J-CONCURRENCY-001/resource_cleanup.json) (`.meta.json`)
+10. [`run_summary.json`](../../results/phase3/EXP-P3J-CONCURRENCY-001/run_summary.json) (`.meta.json`)
+11. [`README.md`](../../results/phase3/EXP-P3J-CONCURRENCY-001/README.md)

@@ -158,15 +158,15 @@ The empirical data proves that the isolated lab response loop introduces **zero 
 
 All artifacts are persisted in `results/phase3/EXP-P3I-ISOLATED-LAB-001/` with cryptographic `.meta.json` sidecars:
 
-1. [`host_network_baseline_pre.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3I-ISOLATED-LAB-001/host_network_baseline_pre.json): Initial cryptographic host snapshot.
-2. [`host_network_baseline_post.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3I-ISOLATED-LAB-001/host_network_baseline_post.json): Final cryptographic host snapshot.
-3. [`host_network_mutation_accounting.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3I-ISOLATED-LAB-001/host_network_mutation_accounting.json): Authoritative proof of zero host network mutation.
-4. [`lab_topology_manifest.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3I-ISOLATED-LAB-001/lab_topology_manifest.json): Topology ownership and cleanup manifest.
-5. [`lab_traffic_execution.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3I-ISOLATED-LAB-001/lab_traffic_execution.json): Packet capture and flow execution telemetry.
-6. [`lab_response_transactions.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3I-ISOLATED-LAB-001/lab_response_transactions.json): Mitigation transaction, verification, and rollback records.
-7. [`failure_injection_matrix.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3I-ISOLATED-LAB-001/failure_injection_matrix.json): 16 evaluated failure injection scenarios.
-8. [`phase3i_metrics.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3I-ISOLATED-LAB-001/phase3i_metrics.json): Comprehensive summary metrics.
-9. [`README.md`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3I-ISOLATED-LAB-001/README.md): Human-readable directory index.
+1. [`host_network_baseline_pre.json`](../../results/phase3/EXP-P3I-ISOLATED-LAB-001/host_network_baseline_pre.json): Initial cryptographic host snapshot.
+2. [`host_network_baseline_post.json`](../../results/phase3/EXP-P3I-ISOLATED-LAB-001/host_network_baseline_post.json): Final cryptographic host snapshot.
+3. [`host_network_mutation_accounting.json`](../../results/phase3/EXP-P3I-ISOLATED-LAB-001/host_network_mutation_accounting.json): Authoritative proof of zero host network mutation.
+4. [`lab_topology_manifest.json`](../../results/phase3/EXP-P3I-ISOLATED-LAB-001/lab_topology_manifest.json): Topology ownership and cleanup manifest.
+5. [`lab_traffic_execution.json`](../../results/phase3/EXP-P3I-ISOLATED-LAB-001/lab_traffic_execution.json): Packet capture and flow execution telemetry.
+6. [`lab_response_transactions.json`](../../results/phase3/EXP-P3I-ISOLATED-LAB-001/lab_response_transactions.json): Mitigation transaction, verification, and rollback records.
+7. [`failure_injection_matrix.json`](../../results/phase3/EXP-P3I-ISOLATED-LAB-001/failure_injection_matrix.json): 16 evaluated failure injection scenarios.
+8. [`phase3i_metrics.json`](../../results/phase3/EXP-P3I-ISOLATED-LAB-001/phase3i_metrics.json): Comprehensive summary metrics.
+9. [`README.md`](../../results/phase3/EXP-P3I-ISOLATED-LAB-001/README.md): Human-readable directory index.
 
 ---
 

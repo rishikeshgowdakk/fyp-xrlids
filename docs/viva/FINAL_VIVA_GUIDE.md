@@ -124,7 +124,7 @@
 **A:** **NO. Exactly ZERO host network mutations occurred.** We captured cryptographic SHA-256 baselines of host routing tables, iptables, interfaces, and sockets before and after every test. In every run, `pre_hash == post_hash` was verified.
 
 ### Q: What happens if an automated mitigation fails or crashes mid-way?
-**A:** Every transaction executes within [`ControlledResponseTransactionManager`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/response/transaction.py):
+**A:** Every transaction executes within [`ControlledResponseTransactionManager`](../../src/xrlids/response/transaction.py):
 1. Pre-action state is captured in a SHA-256 snapshot.
 2. If the mutation fails, times out, or fails post-action verification, an **automatic compensation rollback** is triggered immediately to restore baseline state.
 3. If rollback itself fails, the system latches into a permanent `SAFETY_LOCKED` state, disabling all further autonomous mutations until manual administrative intervention.

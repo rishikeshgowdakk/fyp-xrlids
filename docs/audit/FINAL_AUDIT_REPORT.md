@@ -27,32 +27,32 @@ A comprehensive, end-to-end integration and architectural audit of **XRL-IDARS (
 
 ## 2. Comprehensive Audit Deliverable Index
 
-Every audit phase produced an evidence-backed deliverable located in [`docs/audit/`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/audit/):
+Every audit phase produced an evidence-backed deliverable located in [`docs/audit/`](./):
 
 | Phase | Audit Scope | Deliverable Document | Core Findings / Outcomes |
 |:---:|:---|:---|:---|
-| **Phase 1** | Baseline & CI Environment | [`docs/audit/BASELINE.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/audit/BASELINE.md) | Verified commit `7d6bcd4`; diagnosed `numpy 2.5.3` Python 3.12+ upstream requirements and fixed editable package installation in CI. |
-| **Phase 2** | Architecture & Boundaries | [`docs/audit/ARCHITECTURE_AUDIT.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/audit/ARCHITECTURE_AUDIT.md) | Traced all 13 system boundaries; generated verified implementation architecture diagram; audited data contracts. |
-| **Phase 3** | Live vs Dataset Feature Parity | [`docs/audit/FEATURE_CONTRACT.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/audit/FEATURE_CONTRACT.md) | Formally verified Decision D-006 flow accumulation, 120s timeout, TCP FIN/RST teardown, and $\text{atol} \le 10^{-4}$ numerical parity across 5 topologies. |
-| **Phase 4** | Machine Learning Pipeline | [`docs/audit/ML_VALIDATION.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/audit/ML_VALIDATION.md) | Verified 9 committed model artifacts, 99.11% population-weighted mean accuracy (not a single fleet model), multi-seed stability (seeds 42/123/456), CSE-2018 temporal collapse, and DQN vs Cost-Optimal findings. |
-| **Phase 5** | Live Packet Processing | [`docs/audit/LIVE_TRAFFIC_AUDIT.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/audit/LIVE_TRAFFIC_AUDIT.md) | Verified pure-Python raw socket/PCAP parser, zero payload retention, memory boundedness, and concurrency lock safety under 10k flows. |
-| **Phase 6** | Response Safety & Sandboxing | [`docs/audit/RESPONSE_SAFETY.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/audit/RESPONSE_SAFETY.md) | Audited Deterministic Safety Gate (anti-flap, critical asset protection), lab netns sandbox, and TreeSHAP scope limitation (RF only). |
-| **Phase 7** | Dashboard, API & Web Security | [`docs/audit/INTEGRATION_AUDIT.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/audit/INTEGRATION_AUDIT.md) | Audited REST endpoints, DNS rebinding & CSRF defenses (`_validate_origin`), PCAP path traversal defense, and transparent simulation labeling. |
-| **Phase 8** | Reproducibility & Hygiene | [`docs/audit/REPRODUCIBILITY_AND_SECURITY.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/audit/REPRODUCIBILITY_AND_SECURITY.md) | Verified zero hardcoded secrets/keys, clean `.gitignore` dataset exclusion, GitHub size compliance (<100MB), and exact dependency pinning. |
-| **Phase 10**| Final Synthesis | [`docs/audit/FINAL_AUDIT_REPORT.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/audit/FINAL_AUDIT_REPORT.md) | Comprehensive final closure deliverable and verification checklist. |
+| **Phase 1** | Baseline & CI Environment | [`docs/audit/BASELINE.md`](BASELINE.md) | Verified commit `7d6bcd4`; diagnosed `numpy 2.5.3` Python 3.12+ upstream requirements and fixed editable package installation in CI. |
+| **Phase 2** | Architecture & Boundaries | [`docs/audit/ARCHITECTURE_AUDIT.md`](ARCHITECTURE_AUDIT.md) | Traced all 13 system boundaries; generated verified implementation architecture diagram; audited data contracts. |
+| **Phase 3** | Live vs Dataset Feature Parity | [`docs/audit/FEATURE_CONTRACT.md`](FEATURE_CONTRACT.md) | Formally verified Decision D-006 flow accumulation, 120s timeout, TCP FIN/RST teardown, and $\text{atol} \le 10^{-4}$ numerical parity across 5 topologies. |
+| **Phase 4** | Machine Learning Pipeline | [`docs/audit/ML_VALIDATION.md`](ML_VALIDATION.md) | Verified 9 committed model artifacts, 99.11% population-weighted mean accuracy (not a single fleet model), multi-seed stability (seeds 42/123/456), CSE-2018 temporal collapse, and DQN vs Cost-Optimal findings. |
+| **Phase 5** | Live Packet Processing | [`docs/audit/LIVE_TRAFFIC_AUDIT.md`](LIVE_TRAFFIC_AUDIT.md) | Verified pure-Python raw socket/PCAP parser, zero payload retention, memory boundedness, and concurrency lock safety under 10k flows. |
+| **Phase 6** | Response Safety & Sandboxing | [`docs/audit/RESPONSE_SAFETY.md`](RESPONSE_SAFETY.md) | Audited Deterministic Safety Gate (anti-flap, critical asset protection), lab netns sandbox, and TreeSHAP scope limitation (RF only). |
+| **Phase 7** | Dashboard, API & Web Security | [`docs/audit/INTEGRATION_AUDIT.md`](INTEGRATION_AUDIT.md) | Audited REST endpoints, DNS rebinding & CSRF defenses (`_validate_origin`), PCAP path traversal defense, and transparent simulation labeling. |
+| **Phase 8** | Reproducibility & Hygiene | [`docs/audit/REPRODUCIBILITY_AND_SECURITY.md`](REPRODUCIBILITY_AND_SECURITY.md) | Verified zero hardcoded secrets/keys, clean `.gitignore` dataset exclusion, GitHub size compliance (<100MB), and exact dependency pinning. |
+| **Phase 10**| Final Synthesis | [`docs/audit/FINAL_AUDIT_REPORT.md`](FINAL_AUDIT_REPORT.md) | Comprehensive final closure deliverable and verification checklist. |
 
 ---
 
 ## 3. Verified Defects & Remediations Applied
 
 ### Defect 1: 802.1Q VLAN Tagging in PCAP Packet Parser
-- **File:** [`src/xrlids/demo/pcap.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/demo/pcap.py)
+- **File:** [`src/xrlids/demo/pcap.py`](../../src/xrlids/demo/pcap.py)
 - **Problem:** `parse_packet_bytes()` compared EtherType strictly to `0x0800` at fixed byte offset 12..14. Frames encapsulated with 802.1Q or 802.1ad VLAN tags (`0x8100`, `0x88A8`, `0x9100`) were dropped as non-IPv4, despite `src/xrlids/live/devices.py` already supporting VLAN headers.
 - **Fix:** Enhanced `parse_packet_bytes()` to parse and strip 802.1Q/802.1ad headers dynamically, advancing the offset to the inner EtherType.
-- **Regression Test:** Added `test_parse_vlan_tagged_packet()` in [`tests/unit/test_demo_pcap.py`](file:///home/rishikesh/Desktop/fyp-xrlids/tests/unit/test_demo_pcap.py). Verified passing.
+- **Regression Test:** Added `test_parse_vlan_tagged_packet()` in [`tests/unit/test_demo_pcap.py`](../../tests/unit/test_demo_pcap.py). Verified passing.
 
 ### Defect 2: Hardcoded Test Totals in Report Generation
-- **Files:** [`scripts/phase1/generate_reports.py`](file:///home/rishikesh/Desktop/fyp-xrlids/scripts/phase1/generate_reports.py), [`PROJECT_STATUS.md`](file:///home/rishikesh/Desktop/fyp-xrlids/PROJECT_STATUS.md), [`README.md`](file:///home/rishikesh/Desktop/fyp-xrlids/README.md).
+- **Files:** [`scripts/phase1/generate_reports.py`](../../scripts/phase1/generate_reports.py), [`PROJECT_STATUS.md`](../../PROJECT_STATUS.md), [`README.md`](../../README.md).
 - **Problem:** Template in `generate_reports.py` hardcoded `"466 passing tests"`, causing regenerated reports to contradict the expanded test suite.
 - **Fix:** Implemented dynamic test inventory inspection in `generate_reports.py`; it now sums pytest's per-file collection counts, uses a 60-second timeout, and reports "unavailable" instead of a stale number if collection fails. Current collection is **493 tests**; documentation references were reconciled.
 

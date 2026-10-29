@@ -46,7 +46,7 @@ The Phase 3K audit suite operates under strict containment guarantees. All netwo
 - **Authorized Attacker Namespace:** `xrlids_att_01` (IPv4 `10.200.1.2`, veth `veth_xrl_att`)
 - **Authorized Victim Namespace:** `xrlids_vic_01` (IPv4 pool `10.200.1.3`–`10.200.1.8`, veth `veth_xrl_vic`)
 - **Protected Network Elements:** Network Address (`10.200.1.0`), Gateway Address (`10.200.1.1`), Default Broadcast (`10.200.1.255`), Host Interfaces (`lo`, `eth0`, `wlan0`, `docker0`)
-- **Actuator Backend:** [`NetnsActuatorBackend`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/enforcement/lab.py) (`LAB-ACTUATOR-NETNS-01`)
+- **Actuator Backend:** [`NetnsActuatorBackend`](../../src/xrlids/enforcement/lab.py) (`LAB-ACTUATOR-NETNS-01`)
 - **Isolation Mode:** `VIRTUAL_ISOLATED_NETNS`
 - **Execution Platform:** Linux 7.0.0-38-generic x86_64, Python 3.14.4
 
@@ -114,7 +114,7 @@ During the workload execution, autonomous response transactions (`RATE_LIMIT` an
 
 ## 4. Resource Stability & Leak Analysis
 
-Continuous quantitative resource tracking was executed via [`ResourceMonitor`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/enforcement/stress.py) across 17 distinct sampling checkpoints during the audit.
+Continuous quantitative resource tracking was executed via [`ResourceMonitor`](../../src/xrlids/enforcement/stress.py) across 17 distinct sampling checkpoints during the audit.
 
 ### 4.1 Memory & Thread Metrics
 - **Initial Resident Set Size (RSS):** 163.69 MiB
@@ -147,7 +147,7 @@ Bounded RSS growth of 12.05 MiB was observed during the tested 10,000-flow workl
 
 ## 5. Multi-Tier Socket Ingestion Stress Results
 
-Ingestion capacity was tested across four distinct packet arrival tiers using [`SocketStressTester`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/enforcement/stress.py) to evaluate queueing dynamics, kernel-socket behavior, and application backpressure.
+Ingestion capacity was tested across four distinct packet arrival tiers using [`SocketStressTester`](../../src/xrlids/enforcement/stress.py) to evaluate queueing dynamics, kernel-socket behavior, and application backpressure.
 
 | Tier | Target PPS | Packets Submitted | Packets Received | Drops (Capture Path) | Drops (Backpressure) | Effective PPS | Processing Delay (ms) | Queue Status |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -202,7 +202,7 @@ An exhaustive 29-scenario adversarial attack surface suite was executed against 
 
 ## 7. Cryptographic Provenance Tamper Results
 
-The [`ProvenanceAuditor`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/enforcement/stress.py) executed eight adversarial tamper tests against the [`PreconditionGate`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/enforcement/gate.py) to verify that any modification of frozen evidence, timestamps, or authorization signatures immediately results in a hard lock (`EligibilityStatus.LOCKED`, `is_ready=False`).
+The [`ProvenanceAuditor`](../../src/xrlids/enforcement/stress.py) executed eight adversarial tamper tests against the [`PreconditionGate`](../../src/xrlids/enforcement/gate.py) to verify that any modification of frozen evidence, timestamps, or authorization signatures immediately results in a hard lock (`EligibilityStatus.LOCKED`, `is_ready=False`).
 
 | Test ID | Tamper Target | Injected Modification | Expected Reason Code | Gate Status | Is Ready | Verdict |
 |:---|:---|:---|:---|:---:|:---:|:---:|
@@ -219,7 +219,7 @@ The [`ProvenanceAuditor`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/e
 
 ## 8. Rollback Stress & Invariant Verification
 
-High-frequency transaction rollbacks were tested using [`RollbackStressHarness`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/enforcement/stress.py) across 100 rapid transactions across all action types.
+High-frequency transaction rollbacks were tested using [`RollbackStressHarness`](../../src/xrlids/enforcement/stress.py) across 100 rapid transactions across all action types.
 
 ### 8.1 Rollback Stress Metrics
 - **Total Transactions Executed:** 100
@@ -241,7 +241,7 @@ High-frequency transaction rollbacks were tested using [`RollbackStressHarness`]
 
 ## 9. Active Soak Failure Injection Matrix
 
-During the active 10,000-flow soak run, twelve failure scenarios were deliberately injected into the pipeline via [`SoakFailureInjector`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/enforcement/stress.py) to assess system fault tolerance.
+During the active 10,000-flow soak run, twelve failure scenarios were deliberately injected into the pipeline via [`SoakFailureInjector`](../../src/xrlids/enforcement/stress.py) to assess system fault tolerance.
 
 | Scenario ID | Scenario Name | Injected Fault Condition | Expected System Behavior | Observed System Behavior | Verdict |
 |:---|:---|:---|:---|:---|:---:|
@@ -279,7 +279,7 @@ A critical safety invariant of XRL-IDARS is that host network state (routing tab
 
 ## 11. Clean Resource Teardown Audit
 
-Following completion of all soak and stress workloads, [`IsolatedLabEnvironment`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/enforcement/lab.py) and [`ControlledResponseTransactionManager`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/response/transaction.py) executed full teardown procedures.
+Following completion of all soak and stress workloads, [`IsolatedLabEnvironment`](../../src/xrlids/enforcement/lab.py) and [`ControlledResponseTransactionManager`](../../src/xrlids/response/transaction.py) executed full teardown procedures.
 
 ### Teardown Inventory:
 - **Namespaces Deleted:** `xrlids_att_01`, `xrlids_vic_01` (2 deleted, 0 residual)
@@ -318,7 +318,7 @@ While Phase 3K conclusively proves that XRL-IDARS satisfies laboratory containme
 
 ## 14. Non-Bypassable Enforcement Gate Final Status
 
-The Precondition Enforcement Gate ([`PreconditionGate`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/enforcement/gate.py)) requires all pre-registered criteria to be satisfied before lab activation. Under Phase 3K audit validation:
+The Precondition Enforcement Gate ([`PreconditionGate`](../../src/xrlids/enforcement/gate.py)) requires all pre-registered criteria to be satisfied before lab activation. Under Phase 3K audit validation:
 
 - **P1 (Live Feature Parity):** `PASS` (Verified in Phase 3C)
 - **P2 (Deterministic PCAP Replay):** `PASS` (Verified in Phase 3D)

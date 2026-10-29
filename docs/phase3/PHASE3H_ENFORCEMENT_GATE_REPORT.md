@@ -155,7 +155,7 @@ The experiment evaluated 18 deterministic scenarios designed to test every nomin
 | `SCENARIO_17`| Config Bypass Attempt (`FORCE=1`) | **LOCKED** | `CONFIGURATION_BYPASS_ATTEMPT` | Bypass detected; zero actuator calls |
 | `SCENARIO_18`| Valid Activation Boundary Execution | **READY** | None | Transaction committed in simulator; **0 host mutations** |
 
-### Summary Statistics ([`run_summary.json`](file:///home/rishikesh/Desktop/fyp-xrlids/results/phase3/EXP-P3H-ENFORCEMENT-GATE-001/run_summary.json)):
+### Summary Statistics ([`run_summary.json`](../../results/phase3/EXP-P3H-ENFORCEMENT-GATE-001/run_summary.json)):
 - **Total Scenarios Evaluated**: 18
 - **Total Scenarios Passed**: 18 (100.0%)
 - **READY Scenarios**: 2 (Scenarios 1 and 18)

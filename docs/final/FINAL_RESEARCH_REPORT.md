@@ -38,7 +38,7 @@ The **Explainable Reinforcement Learning Based Intrusion Detection and Autonomou
 
 ## 2. Research Questions & Empirical Answers
 
-All ten research questions defined in [`docs/00_PROJECT/RESEARCH_QUESTIONS.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/00_PROJECT/RESEARCH_QUESTIONS.md) are answered below based solely on committed experimental artifacts.
+All ten research questions defined in [`docs/00_PROJECT/RESEARCH_QUESTIONS.md`](../00_PROJECT/RESEARCH_QUESTIONS.md) are answered below based solely on committed experimental artifacts.
 
 ### RQ1: Can flow-level ML distinguish benign and malicious traffic?
 - **Exact Question:** *Can flow-level ML distinguish benign and malicious traffic?*
@@ -77,7 +77,7 @@ All ten research questions defined in [`docs/00_PROJECT/RESEARCH_QUESTIONS.md`](
 - **Exact Question:** *Does adding more features consistently improve performance?*
 - **Empirical Answer:** **NO. The hypothesis that "more features always improve performance" was REJECTED.** 
   Systematic evaluation across R10, R15, and R20 candidate feature sets demonstrated diminishing returns, feature redundancy, and increased vulnerability to cross-dataset semantic misalignment. The compact 10-feature set (R10) captured the vast majority of discriminative variance while preserving strict cross-dataset semantic validity.
-- **Primary Artifacts:** [`docs/phase1/FEATURE_CONTRACT_AUDIT.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/phase1/FEATURE_CONTRACT_AUDIT.md), [`Decision D-002`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/03_DECISIONS/DECISION_LOG.md).
+- **Primary Artifacts:** [`docs/phase1/FEATURE_CONTRACT_AUDIT.md`](../phase1/FEATURE_CONTRACT_AUDIT.md), [`Decision D-002`](../03_DECISIONS/DECISION_LOG.md).
 - **Limitations:** UNSW-NB15 could not participate in R10 evaluation due to 6 fundamentally missing features in Argus flow summaries, necessitating a 4-feature auxiliary fallback (R4).
 
 ---
@@ -112,15 +112,15 @@ All ten research questions defined in [`docs/00_PROJECT/RESEARCH_QUESTIONS.md`](
   - **Aggressive Regime:** 14.10% cost reduction over best baseline ($p < 0.001$, paired bootstrap).
   - **Conservative Regime:** 2.05% cost reduction (statistically equivalent to Static-Alert baseline).
   - **Practical Criterion Status:** The pre-registered practical significance criterion ($\ge 15.0\%$ cost reduction) was **NOT MET**.
-- **Primary Artifacts:** `results/phase2/EXP-P2-FINAL-TEST-001/`, [`docs/phase2/PHASE2_FINAL_REPORT.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/phase2/PHASE2_FINAL_REPORT.md).
+- **Primary Artifacts:** `results/phase2/EXP-P2-FINAL-TEST-001/`, [`docs/phase2/PHASE2_FINAL_REPORT.md`](../phase2/PHASE2_FINAL_REPORT.md).
 - **Limitations:** The DQN policy relies heavily on accurate detector confidence scores; under severe detector score jitter or domain shift, policy efficiency degrades toward static thresholding.
 
 ---
 
 ### RQ8: Can the same feature contract be reproduced from live packets?
 - **Exact Question:** *Can the same feature contract be reproduced from live packets?*
-- **Empirical Answer:** **YES, verified within $\text{atol} \le 10^{-4}$.** Streaming bidirectional packet ingestion via Scapy and [`BidirectionalFlowBuilder`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/live/flow_builder.py) reproduces exact dataset feature vectors across both synthetic packet streams and deterministic PCAP replay with absolute numerical deviation bounded below $10^{-4}$.
-- **Primary Artifacts:** [`docs/phase3/LIVE_FEATURE_PARITY.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/phase3/LIVE_FEATURE_PARITY.md), `tests/integration/test_feature_parity.py`.
+- **Empirical Answer:** **YES, verified within $\text{atol} \le 10^{-4}$.** Streaming bidirectional packet ingestion via Scapy and [`BidirectionalFlowBuilder`](../../src/xrlids/live/flow_builder.py) reproduces exact dataset feature vectors across both synthetic packet streams and deterministic PCAP replay with absolute numerical deviation bounded below $10^{-4}$.
+- **Primary Artifacts:** [`docs/phase3/LIVE_FEATURE_PARITY.md`](../phase3/LIVE_FEATURE_PARITY.md), `tests/integration/test_feature_parity.py`.
 - **Limitations:** Numerical parity requires consistent byte-ordering, exact TCP flag parsing, and strict adherence to the hybrid flow completion policy (Decision D-006).
 
 ---
@@ -132,7 +132,7 @@ All ten research questions defined in [`docs/00_PROJECT/RESEARCH_QUESTIONS.md`](
   - Zero raw packet ingestion loss up to 10,000 pps.
   - Predictable queuing and graceful application backpressure shedding under extreme overload (50,000 pps).
   - Strict preservation of the Ground-Truth Rule (§64): Live predictions are reported strictly as flow counts, action distributions, and operational latencies, **never as accuracy or F1 claims without independent ground truth**.
-- **Primary Artifacts:** [`docs/phase3/PHASE3E_BURST_REPORT.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/phase3/PHASE3E_BURST_REPORT.md), [`docs/phase3/PHASE3K_SECURITY_STRESS_REPORT.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/phase3/PHASE3K_SECURITY_STRESS_REPORT.md).
+- **Primary Artifacts:** [`docs/phase3/PHASE3E_BURST_REPORT.md`](../phase3/PHASE3E_BURST_REPORT.md), [`docs/phase3/PHASE3K_SECURITY_STRESS_REPORT.md`](../phase3/PHASE3K_SECURITY_STRESS_REPORT.md).
 - **Limitations:** Real-world unseen traffic exhibits arbitrary application diversity, out-of-order packets, and asymmetric routing not present in single-tap lab environments.
 
 ---
@@ -140,12 +140,12 @@ All ten research questions defined in [`docs/00_PROJECT/RESEARCH_QUESTIONS.md`](
 ### RQ10: Can autonomous response be executed safely in a controlled network?
 - **Exact Question:** *Can autonomous response be executed safely in a controlled network?*
 - **Empirical Answer:** **YES, strictly within an isolated virtual lab environment.**
-  Combining [`DeterministicSafetyGate`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/response/safety.py), [`ControlledResponseTransactionManager`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/response/transaction.py), and [`NetnsActuatorBackend`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/enforcement/lab.py) within an isolated Linux network namespace (`10.200.1.0/24`) achieved:
+  Combining [`DeterministicSafetyGate`](../../src/xrlids/response/safety.py), [`ControlledResponseTransactionManager`](../../src/xrlids/response/transaction.py), and [`NetnsActuatorBackend`](../../src/xrlids/enforcement/lab.py) within an isolated Linux network namespace (`10.200.1.0/24`) achieved:
   - 100% rollback success across rapid transaction stress (100 rollbacks).
   - Zero residual iptables rules, routes, or namespaces post-teardown.
   - Zero host network mutations verified by cryptographic pre/post hash comparisons (`aaec733...` == `aaec733...`).
   - Automatic engage of the permanent `SAFETY_LOCKED` latch upon unrecoverable mutation or rollback failure.
-- **Primary Artifacts:** [`docs/phase3/PHASE3I_ISOLATED_LAB_REPORT.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/phase3/PHASE3I_ISOLATED_LAB_REPORT.md), [`docs/phase3/PHASE3K_SECURITY_STRESS_REPORT.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/phase3/PHASE3K_SECURITY_STRESS_REPORT.md).
+- **Primary Artifacts:** [`docs/phase3/PHASE3I_ISOLATED_LAB_REPORT.md`](../phase3/PHASE3I_ISOLATED_LAB_REPORT.md), [`docs/phase3/PHASE3K_SECURITY_STRESS_REPORT.md`](../phase3/PHASE3K_SECURITY_STRESS_REPORT.md).
 - **Limitations:** Validated strictly inside synthetic Linux namespaces; direct host-level or production campus enforcement remains unvalidated and unauthorized.
 
 ---
@@ -297,12 +297,12 @@ Phase 3 established a progressive, evidence-gated bridge from offline research m
 
 #### Phase 3A: Packet Capture Service
 - **Objective:** Pure-Python raw socket (`AF_PACKET`) and Scapy ingestion service.
-- **Evidence:** [`PacketCaptureService`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/live/capture.py) supporting promiscuous live capture, PCAP reading, and synthetic frame injection.
+- **Evidence:** [`PacketCaptureService`](../../src/xrlids/live/capture.py) supporting promiscuous live capture, PCAP reading, and synthetic frame injection.
 - **Outcome:** Zero external C-dependencies; structured frame extraction verified.
 
 #### Phase 3B: Streaming Flow Construction (Decision D-006)
 - **Objective:** Real-time bidirectional flow construction under Decision D-006.
-- **Evidence:** [`BidirectionalFlowBuilder`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/live/flow_builder.py) enforcing immediate TCP FIN/RST termination with a 120.0s idle timeout fallback.
+- **Evidence:** [`BidirectionalFlowBuilder`](../../src/xrlids/live/flow_builder.py) enforcing immediate TCP FIN/RST termination with a 120.0s idle timeout fallback.
 - **Outcome:** Clean temporal separation between packet timestamp replay and system clock live capture.
 
 #### Phase 3C: Live Feature Parity Verification Harness
@@ -312,7 +312,7 @@ Phase 3 established a progressive, evidence-gated bridge from offline research m
 
 #### Phase 3D: Deterministic PCAP Replay
 - **Objective:** Reproducible packet injection from recorded network traces.
-- **Evidence:** [`PcapReplayEngine`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/demo/replay.py) with nanosecond inter-packet timing control.
+- **Evidence:** [`PcapReplayEngine`](../../src/xrlids/demo/replay.py) with nanosecond inter-packet timing control.
 - **Outcome:** Identical flow tables generated across repeated replay runs.
 
 #### Phase 3E: Controlled 1,000-Packet Traffic Burst (`EXP-P3-BURST-1000-001`)

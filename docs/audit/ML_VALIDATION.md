@@ -9,7 +9,7 @@
 
 ## 1. Model Artifact Inventory & Cryptographic Checksums
 
-All 9 canonical model artifacts are committed and tracked directly in the repository. Their SHA-256 hashes reconcile perfectly with [`models/registry/model_manifest.json`](file:///home/rishikesh/Desktop/fyp-xrlids/models/registry/model_manifest.json):
+All 9 canonical model artifacts are committed and tracked directly in the repository. Their SHA-256 hashes reconcile perfectly with [`models/registry/model_manifest.json`](../../models/registry/model_manifest.json):
 
 | Artifact File | Model Type | Feature Contract | Checksum (SHA-256) | Training Population / Scope | Checkpoint Class |
 |:---|:---:|:---:|:---|---:|:---:|

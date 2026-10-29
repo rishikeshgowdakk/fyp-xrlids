@@ -2,7 +2,7 @@
 
 > **Scope:** Mapping of formal project decisions (D-001 through D-006) to evidence, status, and downstream impacts.  
 > **Status:** AUDITED & FROZEN  
-> **Source Document:** [`docs/03_DECISIONS/DECISION_LOG.md`](file:///home/rishikesh/Desktop/fyp-xrlids/docs/03_DECISIONS/DECISION_LOG.md)
+> **Source Document:** [`docs/03_DECISIONS/DECISION_LOG.md`](../03_DECISIONS/DECISION_LOG.md)
 
 ---
 

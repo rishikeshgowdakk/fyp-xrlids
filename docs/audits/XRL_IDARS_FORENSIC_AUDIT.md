@@ -83,23 +83,23 @@ Every core model and evaluation artifact was independently located, verified on 
 
 | Feature Name | Training Contract Definition | Live Flow Extraction Definition | Units | Training Preprocessing | Source Code Location | Parity Status |
 | :--- | :--- | :--- | :---: | :--- | :--- | :---: |
-| `flow_duration_ms` | `Flow Duration / 1000.0` (µs to ms) | `(t_last - t_first) * 1000.0` | ms | RobustScaler (Train-only) | [`features/compute.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/features/compute.py#L45-L65) / [`demo/extractor.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/demo/extractor.py#L50-L75) | **PASS** ($\text{atol} \le 10^{-4}$) |
-| `flow_packets_per_s` | `Total Fwd + Bwd Packets / (Duration_s)` | `Total Packets / max(duration_s, 1e-6)` | pkts/s | RobustScaler (Train-only) | [`features/compute.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/features/compute.py) / [`demo/extractor.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/demo/extractor.py) | **PASS** |
-| `flow_bytes_per_s` | `Total Bytes / (Duration_s)` | `Total IP Payload Bytes / max(duration_s, 1e-6)` | bytes/s | RobustScaler (Train-only) | [`features/compute.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/features/compute.py) / [`demo/extractor.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/demo/extractor.py) | **PASS** |
-| `packet_length_mean` | `Total IP length mean` across all packets | Mean packet length across flow packets | bytes | RobustScaler (Train-only) | [`features/compute.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/features/compute.py) / [`demo/extractor.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/demo/extractor.py) | **PASS** |
-| `packet_length_std` | Sample standard deviation (`ddof=0` in pipeline) | Population std (`np.std(ddof=0)`) | bytes | RobustScaler (Train-only) | [`features/compute.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/features/compute.py) / [`demo/extractor.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/demo/extractor.py) | **PASS** |
-| `syn_count` | Sum of forward + backward TCP SYN packets | Count of TCP packets with SYN=1 | count | RobustScaler (Train-only) | [`features/compute.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/features/compute.py) / [`demo/extractor.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/demo/extractor.py) | **PASS** |
-| `ack_count` | Sum of forward + backward TCP ACK packets | Count of TCP packets with ACK=1 | count | RobustScaler (Train-only) | [`features/compute.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/features/compute.py) / [`demo/extractor.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/demo/extractor.py) | **PASS** |
-| `rst_count` | Sum of forward + backward TCP RST packets | Count of TCP packets with RST=1 | count | RobustScaler (Train-only) | [`features/compute.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/features/compute.py) / [`demo/extractor.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/demo/extractor.py) | **PASS** |
-| `fin_count` | Sum of forward + backward TCP FIN packets | Count of TCP packets with FIN=1 | count | RobustScaler (Train-only) | [`features/compute.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/features/compute.py) / [`demo/extractor.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/demo/extractor.py) | **PASS** |
-| `syn_ack_ratio` | `syn_count / (ack_count + 1e-5)` | `syn_count / (ack_count + 1e-5)` | ratio | RobustScaler (Train-only) | [`features/compute.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/features/compute.py) / [`demo/extractor.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/demo/extractor.py) | **PASS** |
+| `flow_duration_ms` | `Flow Duration / 1000.0` (µs to ms) | `(t_last - t_first) * 1000.0` | ms | RobustScaler (Train-only) | [`features/compute.py`](../../src/xrlids/features/compute.py#L45-L65) / [`demo/extractor.py`](../../src/xrlids/demo/extractor.py#L50-L75) | **PASS** ($\text{atol} \le 10^{-4}$) |
+| `flow_packets_per_s` | `Total Fwd + Bwd Packets / (Duration_s)` | `Total Packets / max(duration_s, 1e-6)` | pkts/s | RobustScaler (Train-only) | [`features/compute.py`](../../src/xrlids/features/compute.py) / [`demo/extractor.py`](../../src/xrlids/demo/extractor.py) | **PASS** |
+| `flow_bytes_per_s` | `Total Bytes / (Duration_s)` | `Total IP Payload Bytes / max(duration_s, 1e-6)` | bytes/s | RobustScaler (Train-only) | [`features/compute.py`](../../src/xrlids/features/compute.py) / [`demo/extractor.py`](../../src/xrlids/demo/extractor.py) | **PASS** |
+| `packet_length_mean` | `Total IP length mean` across all packets | Mean packet length across flow packets | bytes | RobustScaler (Train-only) | [`features/compute.py`](../../src/xrlids/features/compute.py) / [`demo/extractor.py`](../../src/xrlids/demo/extractor.py) | **PASS** |
+| `packet_length_std` | Sample standard deviation (`ddof=0` in pipeline) | Population std (`np.std(ddof=0)`) | bytes | RobustScaler (Train-only) | [`features/compute.py`](../../src/xrlids/features/compute.py) / [`demo/extractor.py`](../../src/xrlids/demo/extractor.py) | **PASS** |
+| `syn_count` | Sum of forward + backward TCP SYN packets | Count of TCP packets with SYN=1 | count | RobustScaler (Train-only) | [`features/compute.py`](../../src/xrlids/features/compute.py) / [`demo/extractor.py`](../../src/xrlids/demo/extractor.py) | **PASS** |
+| `ack_count` | Sum of forward + backward TCP ACK packets | Count of TCP packets with ACK=1 | count | RobustScaler (Train-only) | [`features/compute.py`](../../src/xrlids/features/compute.py) / [`demo/extractor.py`](../../src/xrlids/demo/extractor.py) | **PASS** |
+| `rst_count` | Sum of forward + backward TCP RST packets | Count of TCP packets with RST=1 | count | RobustScaler (Train-only) | [`features/compute.py`](../../src/xrlids/features/compute.py) / [`demo/extractor.py`](../../src/xrlids/demo/extractor.py) | **PASS** |
+| `fin_count` | Sum of forward + backward TCP FIN packets | Count of TCP packets with FIN=1 | count | RobustScaler (Train-only) | [`features/compute.py`](../../src/xrlids/features/compute.py) / [`demo/extractor.py`](../../src/xrlids/demo/extractor.py) | **PASS** |
+| `syn_ack_ratio` | `syn_count / (ack_count + 1e-5)` | `syn_count / (ack_count + 1e-5)` | ratio | RobustScaler (Train-only) | [`features/compute.py`](../../src/xrlids/features/compute.py) / [`demo/extractor.py`](../../src/xrlids/demo/extractor.py) | **PASS** |
 
 ---
 
 ## 5. Random Forest Audit
 
 ### 5.1 Training Hyperparameters & Execution Path
-- **Entry Point**: `scripts/phase1/run_experiment.py` invoking `RandomForestDetector` ([`src/xrlids/models/random_forest.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/models/random_forest.py)).
+- **Entry Point**: `scripts/phase1/run_experiment.py` invoking `RandomForestDetector` ([`src/xrlids/models/random_forest.py`](../../src/xrlids/models/random_forest.py)).
 - **Hyperparameters**: `n_estimators=100`, `criterion="gini"`, `class_weight="balanced_subsample"`, `random_state=42`, `n_jobs=4`.
 - **Pre-Processing**: `RobustScaler` fit on $X_{\text{train}}$ only. Zero target leakage.
 - **Output Column Order**: Verified column 1 corresponds strictly to positive attack class ($P(y=1)$).
@@ -124,7 +124,7 @@ Every core model and evaluation artifact was independently located, verified on 
 - **Architecture**: 2-layer recurrent network with hidden dimension $h=32$, dropout $p=0.10$, sequence length $T=5$, followed by a linear classification head:
   $$\text{Input Tensor Shape}: (N, 5, 10) \to \text{LSTM} \to \text{Linear}(32 \to 1) \to \text{Sigmoid}$$
 - **Sequence Generation Mechanism**:
-  - Implemented in `build_sequences` ([`src/xrlids/models/lstm.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/models/lstm.py#L141-L215)).
+  - Implemented in `build_sequences` ([`src/xrlids/models/lstm.py`](../../src/xrlids/models/lstm.py#L141-L215)).
   - Sequences slide across adjacent rows in CSV file order within each split.
   - Rows from the beginning of each file ($T-1 = 4$ rows) are dropped to prevent boundary crossing ($8 \times 4 = 32$ rows dropped in CIC-IDS2017).
   - Sequences **never cross split boundaries** (L-06 enforced by construction).
@@ -143,7 +143,7 @@ Every core model and evaluation artifact was independently located, verified on 
 ## 7. Fusion Audit
 
 ### 7.1 Mathematical Formulation & In-Code Evidence
-- In `src/xrlids/models/fusion.py` ([lines 85-100](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/models/fusion.py#L85-L100)):
+- In `src/xrlids/models/fusion.py` ([lines 85-100](../../src/xrlids/models/fusion.py#L85-L100)):
   $$S_{\text{fusion}} = \alpha \cdot S_{\text{RF}} + (1 - \alpha) \cdot S_{\text{LSTM}}$$
 - **Probability vs. Score**: The inputs are uncalibrated continuous scores: $S_{\text{RF}} \in [0, 1]$ represents tree-vote proportions, while $S_{\text{LSTM}} \in [0, 1]$ represents sigmoid outputs trained on unweighted BCE. They are not formally calibrated probabilities.
 
@@ -197,7 +197,7 @@ Every core model and evaluation artifact was independently located, verified on 
 ## 9. Deep Q-Network (DQN) Audit
 
 ### 9.1 Network Topology & State Space
-- **Architecture**: Dueling DQN ([`src/xrlids/response/dqn/network.py`](file:///home/rishikesh/Desktop/fyp-xrlids/src/xrlids/response/dqn/network.py)):
+- **Architecture**: Dueling DQN ([`src/xrlids/response/dqn/network.py`](../../src/xrlids/response/dqn/network.py)):
   - Input: 6-dimensional state vector $s_t \in \mathbb{R}^6$
   - Backbone: `Linear(6 -> 64) -> LayerNorm -> LeakyReLU(0.01) -> Linear(64 -> 64) -> LayerNorm -> LeakyReLU(0.01)`
   - Value Stream: `Linear(64 -> 32) -> LeakyReLU -> Linear(32 -> 1)` $\to V(s)$

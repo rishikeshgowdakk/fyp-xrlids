@@ -4,7 +4,7 @@
 **Baseline Git Revision Tested:** `fbb375b07f2953c9ebfed14030d28b1013a17272`  
 **Target Git Ref / Branch:** `main`  
 **Repository:** `https://github.com/rishikeshgowdakk/fyp-xrlids`  
-**Predecessor Verification Bundle:** [`results/verification/FINAL-CLOSURE-20261028-205800/`](file:///home/rishikesh/Desktop/fyp-xrlids/results/verification/FINAL-CLOSURE-20261028-205800/)
+**Predecessor Verification Bundle:** [`results/verification/FINAL-CLOSURE-20261028-205800/`](../FINAL-CLOSURE-20261028-205800/)
 
 ---
 
@@ -68,14 +68,14 @@ The sum $434 + 18 + 14 = 466$ omitted Tier 1 (15 tests). Adding Tier 1 yields ex
 
 ## 3. Exact Code and Configuration Changes
 
-1. [`.github/workflows/ci.yml`](file:///home/rishikesh/Desktop/fyp-xrlids/.github/workflows/ci.yml):
+1. [`.github/workflows/ci.yml`](../../../.github/workflows/ci.yml):
    - Changed matrix to `python-version: ["3.12"]`.
    - Changed installation command to `pip install --extra-index-url https://download.pytorch.org/whl/cpu -e .[dev]`.
    - Added `import xrlids` to environment pre-test verification step.
-2. [`pyproject.toml`](file:///home/rishikesh/Desktop/fyp-xrlids/pyproject.toml):
+2. [`pyproject.toml`](../../../pyproject.toml):
    - Aligned `requires-python = ">=3.12"` to match upstream requirements of `numpy==2.5.3`, `scipy==1.18.1`, and `shap==0.52.0`.
-3. [`README.md`](file:///home/rishikesh/Desktop/fyp-xrlids/README.md):
+3. [`README.md`](../../../README.md):
    - Updated prerequisites to Python 3.12+ (tested on 3.14.4; verified on 3.12 in CI).
    - Updated installation instructions to `pip install -e .[dev]`.
-4. [`results/verification/ADDENDUM-CI-VERIFICATION-20261028/`](file:///home/rishikesh/Desktop/fyp-xrlids/results/verification/ADDENDUM-CI-VERIFICATION-20261028/):
+4. [`results/verification/ADDENDUM-CI-VERIFICATION-20261028/`](./):
    - Recorded addendum report and machine-readable manifest.
