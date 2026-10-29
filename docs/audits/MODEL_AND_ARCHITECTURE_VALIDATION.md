@@ -83,7 +83,7 @@ All 9 canonical models registered in `models/registry/model_manifest.json` are c
 
 ### 3.2 Supervised LSTM Sequence Classifier
 1. **Architecture & Memory Representation**:
-   - Checkpoint dimensions match `src/xrlids/models/lstm.py`: 2-layer LSTM, input size 10 (or 4 for R4), hidden size 64, dropout 0.2, linear head to single logit with Sigmoid.
+   - Shipped checkpoints are 2-layer LSTMs with input size 10 (or 4 for UNSW-NB15's R4 contract), **hidden size 32**, dropout 0.2, and a linear head to a single logit with Sigmoid. This was verified directly from the saved tensors (`weight_hh_l0` is `128 × 32`, `head.weight` is `1 × 32`) and from the `params` block stored in each checkpoint. Note that `src/xrlids/models/lstm.py` defaults to `hidden_size=64`; the canonical artifacts were trained with `hidden_size=32`, `epochs=15`, `patience=3`.
    - 3D sequence tensors $(N, T, F)$ are never fully materialized in RAM; `SequenceArray` creates mini-batch slices dynamically from a contiguous 2D float32 array.
 2. **Sequence Boundary Enforcement**:
    - Sequences are constructed strictly within individual capture files. Crossing capture boundaries is prohibited by `assert_no_boundary_crossing()`.

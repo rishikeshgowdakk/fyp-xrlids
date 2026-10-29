@@ -225,7 +225,7 @@ The table below reconciles the exact row accounting from raw ingested records to
 1. **Majority Class Classifier:** Establishes the empirical zero-rule performance floor under class imbalance.
 2. **Logistic Regression & Decision Tree:** Standard linear and single-tree baselines.
 3. **Random Forest Classifier (Primary Tabular Detector):** 100 estimators, balanced class weights, parallelized via scikit-learn. Fast sub-millisecond per-flow inference.
-4. **Supervised LSTM (Temporal Sequence Classifier):** 2-layer PyTorch network, hidden size 64, dropout 0.2, learning rate $10^{-3}$, Adam optimizer, binary cross-entropy loss. Evaluates temporal flow-to-flow dynamics over a sliding window ($T=5$). Memory-bounded on-the-fly mini-batching via `SequenceArray`.
+4. **Supervised LSTM (Temporal Sequence Classifier):** 2-layer PyTorch network, hidden size 32 (shipped checkpoints; the code default is 64), dropout 0.2, learning rate $10^{-3}$, Adam optimizer, binary cross-entropy loss. Evaluates temporal flow-to-flow dynamics over a sliding window ($T=5$). Memory-bounded on-the-fly mini-batching via `SequenceArray`.
 5. **RF + LSTM Score Fusion (Ensemble):** Linear convex combination of predictions:
    $$S_{\text{fusion}} = \alpha \cdot S_{\text{RF}} + (1 - \alpha) \cdot S_{\text{LSTM}}$$
    where $\alpha \in [0, 1]$ is tuned on validation data.
