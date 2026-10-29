@@ -959,15 +959,20 @@ function renderCsvEvaluationResults(data) {
   const acct = data.row_accounting || {};
   const lat = (data.evaluation_latency_ms || 0).toFixed(1);
   const thru = (data.throughput_flows_per_s || 0).toFixed(0);
+  const provenance = data.inference_provenance || {};
   accEl.innerHTML = `
-    <strong>Row Accounting &amp; Provenance:</strong> Mode: <strong>${escapeHtml(data.mode)}</strong> &middot;
+    <strong>Live Model Inference:</strong> <span class="badge badge-green">FROZEN CHECKPOINTS</span>
+    RF + LSTM score each selected sample; fusion is calculated from their current outputs. &middot;
     Dataset: <strong>${escapeHtml(data.benchmark)}</strong> (${escapeHtml(data.split_name || 'test')}) &middot;
     Received: <strong>${acct.total_rows_received}</strong> &middot;
     Evaluated: <strong>${acct.evaluated_rows}</strong> valid rows &middot;
     Dropped: <strong>${acct.invalid_rows_dropped}</strong> (${escapeHtml(acct.drop_reason || 'none')}) &middot;
     Inference Latency: <strong>${lat} ms</strong> &middot;
     Throughput: <strong>${thru} flows/s</strong><br>
-    <em>Artifacts: ${escapeHtml(data.model_identifier)} &middot; Feature Contract: ${escapeHtml(data.contract)}</em>
+    <em>RF: ${escapeHtml(provenance.random_forest_checkpoint || 'checkpoint provenance unavailable')} ·
+    LSTM: ${escapeHtml(provenance.lstm_checkpoint || 'checkpoint provenance unavailable')} ·
+    Fusion α=${fmt(provenance.fusion_alpha)} · DQN: ${escapeHtml(provenance.dqn_checkpoint || 'checkpoint provenance unavailable')}</em><br>
+    <small>DQN policy trained on ${escapeHtml(provenance.dqn_training_benchmark || 'unspecified dataset')}; cross-dataset use is policy transfer. Response is recommendation-only; no firewall action is executed.</small>
   `;
 
   // Multi-Model Metrics
