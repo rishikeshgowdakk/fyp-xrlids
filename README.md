@@ -12,6 +12,9 @@ Essential documentation, presentation scripts, and defense runbooks for final ye
 
 | Document | Purpose & Key Contents |
 |----------|------------------------|
+| [🚀 **Start Here — Exhibition & Viva Guide**](docs/EXHIBITION_GUIDE.md) | **Primary Exhibition Runbook**: Prerequisites, launch commands, 5-7 min viva demo sequence, expected outputs, and troubleshooting |
+| [📦 **Model & Artifact Registry**](docs/MODEL_AND_ARTIFACT_REGISTRY.md) | **Canonical Checkpoint Registry**: Exact file sizes, SHA-256 hashes, contracts, provenance, and loading code for all 9 models |
+| [📑 **Research Evidence Index**](docs/RESEARCH_EVIDENCE_INDEX.md) | **Master Evidence Directory**: Headline metrics linked to result files, reproduction commands, and strict evidentiary status tiers |
 | [📋 **End-to-End Dataset, Split & Model Audit**](docs/DATASETS_AND_MODELS_AUDIT.md) | **Exhaustive audit**: 19.3M raw rows, column inventories, NaN/Inf accounting, Policy A split proofs (60/20/20), model architectures, and cryptographic artifact hashes |
 | [📖 **Frontend Presentation & Viva Script**](docs/FRONTEND_AND_DEMO_GUIDE.md) | **Word-for-word viva presentation script**, UI layout breakdown, step-by-step click guide, and defense answers |
 | [🎓 **Final Viva Defense Guide**](docs/viva/FINAL_VIVA_GUIDE.md) | Comprehensive examiner Q&A, theoretical defense, metric rationale, and DQN safety principles |

@@ -1,0 +1,203 @@
+# XRL-IDARS — Start Here: Exhibition & Viva Presentation Guide
+
+> **Start Here — Exhibition & Viva Guide**  
+> *Target System: XRL-IDARS (Explainable Reinforcement Learning Intrusion Detection & Autonomous Response System)*  
+> *Audience: Academic Examiners, Evaluators, Project Demonstrators, and Exhibition Attendees*  
+> *Repository: `rishikeshgowdakk/fyp-xrlids`*  
+> *Core Invariant: Zero Production Network Mutation & Strict Separation Between Closed Benchmarks and Live Traffic*
+
+---
+
+## 1. Prerequisites & Environment Setup
+
+XRL-IDARS is engineered with a **zero-dependency, zero-build frontend** that runs entirely using Python's standard library `ThreadingHTTPServer` (`dashboard/server.py`). There is **no Node.js, npm, or webpack build pipeline**.
+
+### System Requirements
+| Component | Minimum Specification | Recommended / Tested |
+|:---|:---|:---|
+| **Operating System** | Linux (Ubuntu 20.04+, Debian 11+), macOS (12+), or WSL2 on Windows | Ubuntu Linux (kernel 6.x / 7.x, x86_64) |
+| **Python Version** | Python 3.10 to 3.14 | Python 3.14 (CPython) |
+| **Hardware** | 2 CPU Cores, 4 GB RAM (CPU inference only; no GPU required) | 4+ CPU Cores, 8 GB RAM |
+| **Network Privileges** | **Standard user account (non-root)** for all presentation modes | Non-root (root / `CAP_NET_RAW` is only needed if sniffing a physical Wi-Fi NIC) |
+| **Web Browser** | Any modern web browser | Chrome, Chromium, Firefox, or Safari |
+
+### Quick Setup (from a Fresh Clone)
+```bash
+# 1. Clone repository (or navigate to cloned workspace)
+cd fyp-xrlids
+
+# 2. Activate existing virtual environment (or create one)
+source .venv/bin/activate
+# If initializing fresh: python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+
+# 3. Verify test suite and exhibition package
+python scripts/verify_fresh_clone_exhibition.py
+```
+
+---
+
+## 2. Launch Commands & Dashboard Access
+
+Launch the interactive workbench with a single standard Python command:
+
+```bash
+# Launch dashboard server (default port 8000 on loopback 127.0.0.1)
+python scripts/demo/run_dashboard.py
+```
+*(Alternative direct launch: `python dashboard/server.py --port 8000`)*
+
+### Access URL
+Open your web browser and navigate to:
+```
+http://localhost:8000
+```
+*(Or `http://127.0.0.1:8000`)*
+
+> [!NOTE]
+> The server binds strictly to `127.0.0.1` (loopback). It does not open external public ports or broadcast across local networks.
+
+---
+
+## 3. High-Impact 5-to-7-Minute Demonstration Sequence
+
+This chronological demonstration runbook is optimized for a 5-to-7-minute viva defense or exhibition evaluation. It guides the examiner step-by-step through empirical verification, explainability, autonomous response, live traffic observation, and candid scientific boundary disclosures.
+
+```mermaid
+flowchart LR
+    M1["1. Overview\n(0:00 - 1:00)\nIntegrity & Status"] --> M2["2. Benchmarks\n(1:00 - 2:30)\nRF, LSTM, Fusion"]
+    M2 --> M3["3. Comparison\n(2:30 - 3:30)\nDegenerate Fusion & Ablation"]
+    M3 --> M4["4. Explainability\n(3:30 - 4:30)\nTreeSHAP Attributions"]
+    M4 --> M5["5. Autonomous Response\n(4:30 - 5:30)\nDQN vs Cost-Optimal"]
+    M5 --> M6["6. Live Observational Replay\n(5:30 - 6:30)\nPCAP & Synthetic Attacks"]
+    M6 --> M7["7. Limitations & Viva Defense\n(6:30 - 7:00)\nTemporal Drift & NO-GO"]
+```
+
+---
+
+### Step 1: System Overview & Component Integrity (Minute 0:00 – 1:00)
+- **UI Location**: Click **`📋 Overview`** tab (Page A).
+- **Examiner Talking Points**:
+  - *"Examiners, XRL-IDARS addresses two core questions in intrusion detection: first, whether deep sequence models and multi-model fusion actually provide measurable value over tuned decision-tree ensembles under real capture constraints; second, whether reinforcement learning provides an operational advantage over cost-sensitive decision rules for autonomous response."*
+  - *"We do not assume models are perfect or that high benchmark metrics equate to production readiness. We audit every claim against held-out ground truth."*
+- **What to Point Out on Screen**:
+  - Point to the **Git Commit Hash** and environment fingerprint (Python 3.14, PyTorch, Scikit-Learn, SHAP).
+  - Highlight the **Verified Test Suite**: `493 passed, 0 failed (100% pass rate)`.
+  - Point to the **Component Verification Matrix**: all 20 benchmark CSVs verified, Policy A feature deduplication enforced (0 cross-split duplicates).
+
+---
+
+### Step 2: Primary Benchmark Evaluation & Multi-Model Engine (Minute 1:00 – 2:30)
+- **UI Location**: Click **`📊 Dataset Evaluation`** tab (Page B — Default Landing View).
+- **Examiner Talking Points**:
+  - *"Here we evaluate our primary benchmark, CIC-IDS2017, across 355,833 held-out test flows under our frozen 10-feature contract (R10)."*
+  - *"Random Forest achieves F1 = 0.9512 with 98.15% accuracy. Supervised LSTM with length-5 causal sequences achieves F1 = 0.9633. Blending both via score fusion reaches F1 = 0.9745."*
+  - *"Notice the population derivation box: the 32-flow difference between tabular (355,865) and sequence (355,833) is mathematically proven by file-boundary isolation: for sequence length $T=5$, the first 4 context flows across each of the 8 capture files cannot form a sequence without crossing disjoint capture boundaries ($8 \times 4 = 32$ dropped benign flows)."*
+- **Action**:
+  - Scroll down to the **Multi-Model Inference Engine** card.
+  - Click **`Run Mode B (200 Exhibition Demo)`**.
+- **What to Point Out on Screen**:
+  - Watch the live execution of 200 real network flows (166 benign, 34 attacks) across all 3 models.
+  - Point to the side-by-side metric cards and 3 confusion matrices for Random Forest, Supervised LSTM, and Score Fusion.
+  - Click **`🔍 Inspect`** on any flagged attack flow to view its feature values and threat score.
+
+---
+
+### Step 3: Head-to-Head Comparison & Negative Results Disclosure (Minute 2:30 – 3:30)
+- **UI Location**: Click **`⚖️ Model Comparison`** tab (Page C).
+- **Examiner Talking Points**:
+  - *"Good science requires disclosing where models fail. On CIC-IDS2017, validation grid search gave fusion weight $\alpha = 0.50$. But now look at CSE-CIC-IDS2018:"*
+  - Switch benchmark dropdown to **CSE-CIC-IDS2018**.
+  - *"Validation grid search yielded $\alpha = 0.00$. The interface flags this with an amber warning: $\alpha = 0.00$ makes the fusion model mathematically identical to the standalone LSTM. We do not claim an ensemble improvement where none exists."*
+  - *"Next, look at our Shuffled-Window Ablation box: when we randomly permute flow arrival order within each length-5 sequence, the order gain is $\Delta \text{F1} = -0.0038$. This proves empirically that the LSTM acts as a spatial burst-smoothing filter rather than learning temporal sequence causality."*
+- **What to Point Out on Screen**:
+  - The amber **Degenerate Fusion Warning ($\alpha = 0.00$)**.
+  - The **Shuffled-Window Ablation Box** showing $\Delta \text{F1} = -0.0038$.
+  - The paired bootstrap confidence intervals (B=1000).
+
+---
+
+### Step 4: Explainable AI with TreeSHAP (Minute 3:30 – 4:30)
+- **UI Location**: Click **`💡 Explainability`** tab (Page E).
+- **Examiner Talking Points**:
+  - *"For explainability, we compute TreeSHAP feature attributions on our Random Forest detector."*
+  - *"Features like `packet_length_std`, `packet_length_mean`, and `flow_packets_per_s` dominate the decision attributions across attack families."*
+  - *"Crucially, we include a strict scientific disclaimer: TreeSHAP explains tree decisions for Random Forest ONLY. It does not explain the LSTM, the Fusion model, or the DQN Q-values, and feature importance reflects correlation within this dataset, not physical causality."*
+- **What to Point Out on Screen**:
+  - The horizontal bar chart of mean absolute SHAP values.
+  - The scientific disclaimer banner at the top of the page.
+
+---
+
+### Step 5: Autonomous Response — DQN vs Analytic Cost-Optimal Baseline (Minute 4:30 – 5:30)
+- **UI Location**: Click **`🛡️ Autonomous Response`** tab (Page F).
+- **Examiner Talking Points**:
+  - *"In Phase 2, we investigated whether Deep Q-Networks justify their complexity for autonomous response. We benchmarked our trained Dueling DQN against a zero-parameter `CostOptimalThresholdPolicy` across six operational cost regimes."*
+  - Select **High Availability (4-Action)** from the regime dropdown.
+  - *"Look at the result: in High Availability 4-action, the analytic baseline achieves a **20.12% lower cost than the trained DQN** ($1,547,511$ vs $1,937,476$) while executing in **1.95 µs**—a **~51x latency advantage** over neural inference (1.95 µs vs 100.23 µs)."*
+  - *"Furthermore, analyzing the environment proves traffic arrivals are purely exogenous replay. Response actions do not alter future packet arrivals. Therefore, non-zero discount factors ($\gamma = 0.95$) lack physical justification."*
+  - *"Our Deterministic Safety Gate remains 100% authoritative over all actions, and autonomous production enforcement is strictly **NO-GO**."*
+- **What to Point Out on Screen**:
+  - The cost comparison table showing Cost-Optimal winning by 20.12%.
+  - The latency comparison badge: 1.95 µs vs 100.23 µs.
+  - The Safety Gate status: deterministic cooldowns, blast radius caps, and production NO-GO policy.
+
+---
+
+### Step 6: Live Observational Replay & Attack Simulation (Minute 5:30 – 6:30)
+- **UI Location**: Click **`📡 Traffic & Live Modes`** tab (Header / Live Monitor).
+- **Examiner Talking Points**:
+  - *"To demonstrate real-time packet processing without endangering networks, we provide pure-Python streaming replay and in-memory attack simulation."*
+  - Point to the **⚠️ Scientific Disclaimer & Strict Operational Mode Separation** banner:
+    > *"Live operational network traffic lacks ground-truth labels. Benchmark accuracy on closed datasets does NOT prove or guarantee detection accuracy on live operational traffic."*
+  - *"Our live pipeline is strictly observational: no packets are dropped, no iptables rules are injected, and no host routes are modified."*
+- **Action**:
+  - Under **Mode 1 (Synthetic PCAP Replay)**: click **`Play Demo Stream`** (`data/demo/sample_traffic.pcap`, 42 packets).
+  - OR under **Mode 2 (Attack Simulation)**: click **`Inject Syn Flood Attack`**.
+- **What to Point Out on Screen**:
+  - Watch the real-time threat gauge swing from green (0.02) to red (0.95+).
+  - See the flow table populate with extracted R10 features.
+  - Observe the **Policy Suggestion** (`MONITOR`, `THROTTLE`, `BLOCK`) derived from fixed score thresholds, demonstrating advisory decision support.
+
+---
+
+### Step 7: Audited Research Limitations & Viva Wrap-Up (Minute 6:30 – 7:00)
+- **UI Location**: Click **`⚠️ Research Limitations`** tab (Page G).
+- **Examiner Talking Points**:
+  - *"Finally, Page G documents our nine audited research limitations in plain language."*
+  - *"For example, on CSE-CIC-IDS2018, when tested on genuine chronological future days, Random Forest F1 collapses from **0.8861 down to 0.0113** because attack patterns change."*
+  - *"Similarly, transferring between CIC and CSE causes a 52% to 95% F1 collapse due to covariate shift."*
+  - *"We conclude that transparent disclosure of failure modes, rigorous negative findings, and deterministic safety bounds are essential to transforming IDS from academic benchmark exercises into credible computer science research."*
+
+---
+
+## 4. Expected Outputs Reference Card
+
+Use this quick-reference table to confirm that the dashboard is displaying the exact audited values during your presentation:
+
+| Screen / Page | Metric / Element | Expected Audited Value | Note |
+|:---|:---|:---|:---|
+| **Page A (Overview)** | Test Suite Pass Rate | `493 passed, 0 failed (100%)` | Authoritative pytest suite |
+| **Page B (Evaluation)** | CIC-IDS2017 RF F1 | `0.9512` (98.15% accuracy) | Tabular test split (355,865 flows) |
+| **Page B (Evaluation)** | CIC-IDS2017 LSTM F1 | `0.9633` (98.67% accuracy) | Sequence test split (355,833 flows) |
+| **Page B (Evaluation)** | CIC-IDS2017 Fusion F1 | `0.9745` (99.06% accuracy) | Convex blend $\alpha = 0.50$ |
+| **Page B (Mode B Demo)** | 200 Exhibition Sample | 166 Benign, 34 Attack flows | Real held-out flows, RFC 5737 IPs |
+| **Page C (Comparison)** | CSE-2018 Fusion Weight | `α = 0.00` (Amber Alert) | Degenerate fusion; identical to LSTM |
+| **Page C (Comparison)** | Shuffled-Window Ablation | $\Delta \text{F1} = -0.0038$ | Proves spatial burst smoothing |
+| **Page E (Explain)** | Top Feature Drivers | `packet_length_std`, `flow_packets_per_s` | TreeSHAP on Random Forest only |
+| **Page F (Response)** | High Availability Cost | Cost-Optimal beats DQN by **20.12%** | $1,547,511.0$ vs $1,937,476.5$ |
+| **Page F (Response)** | Policy Latency Advantage | **~51x faster** (1.95 µs vs 100.23 µs) | Zero-parameter threshold rule |
+| **Page G (Limitations)** | Future-Day Holdout F1 | Collapses from `0.8861` to `0.0113` | Chronological concept drift |
+| **Live Monitor** | Network Enforcement | `DISABLED (Observational Only)` | Strictly read-only; no iptables |
+
+---
+
+## 5. Troubleshooting & Contingency Runbook
+
+| Problem | Root Cause | Immediate Fix |
+|:---|:---|:---|
+| **Port 8000 already in use** (`OSError: [Errno 98] Address already in use`) | Another server instance or background task is running on port 8000 | Kill existing process or specify an alternate port:<br>`fuser -k 8000/tcp`<br>Or run: `python scripts/demo/run_dashboard.py 8080` (open `http://localhost:8080`) |
+| **Browser displays stale styling or cached JavaScript** | Web browser cached previous version of `app.js` or `index.html` | Perform a hard reload in your browser:<br>**Linux/Windows**: `Ctrl + Shift + R`<br>**macOS**: `Cmd + Shift + R` |
+| **Live sniffing option disabled in UI** | Standard user accounts cannot open raw sockets (`AF_PACKET`) without root privileges | **Expected behavior for exhibition**: Use **Mode 1 (PCAP Replay)** or **Mode 2 (Attack Simulation)**. If live Wi-Fi sniffing is explicitly required: `sudo .venv/bin/python dashboard/server.py --port 8000` |
+| **Missing sample PCAP file error** | Git clone excluded `.pcap` files via stale `.gitignore` | `data/demo/sample_traffic.pcap` is tracked in git. Verify with `ls -lh data/demo/sample_traffic.pcap` (should be 63,924 bytes, 42 packets). |
+| **ModuleNotFoundError on imports** | Shell is executing standard system Python instead of repository `.venv` | Ensure virtual environment is active:<br>`source .venv/bin/activate`<br>Or invoke directly: `.venv/bin/python scripts/demo/run_dashboard.py` |
+| **Need to quickly prove model hashes match registry** | Examiner asks for cryptographic proof of checkpoint authenticity | Run: `.venv/bin/python scripts/verify_fresh_clone_exhibition.py` (checks all 9 canonical SHA-256 hashes in ~3 seconds) |
