@@ -499,6 +499,7 @@
     .advanced-settings .controls-bar { margin-top:12px; }
     @media (max-width:700px) { .demo-flow { align-items:stretch; } .demo-flow-step { flex:1 1 40%; } .demo-flow-arrow { display:none; } }
 
+    .demo-explainer { margin: 0 0 12px; color: var(--text-muted); font-size: 12px; line-height: 1.55; }
 </style>
 </head>
 <body>
@@ -1171,7 +1172,9 @@
             </div>
           </div>
           <div class="card-body" style="padding-bottom: 0;">
-            <div class="controls-bar demo-controls" style="margin-bottom: 12px; background: var(--surface-2);">
+            <p class="demo-explainer">Run the sample for each benchmark using the selector. Cross-dataset held-out metrics remain in <strong>Model comparison</strong>. TreeSHAP explains the Random Forest only; DQN produces a response recommendation in safe observational mode.</p>
+
+          <div class="controls-bar demo-controls" style="margin-bottom: 12px; background: var(--surface-2);">
               <div class="controls-group">
                 <span class="controls-label">Status Filter:</span>
                 <select id="flow-filter-status" onchange="onFlowFilterChange()">
