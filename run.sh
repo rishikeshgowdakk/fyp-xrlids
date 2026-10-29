@@ -20,6 +20,10 @@ case "${1:-dashboard}" in
         echo "Starting XRL-IDARS Dashboard at http://localhost:${2:-8000} ..."
         "$PYTHON" "$DIR/dashboard/server.py" "${2:-8000}"
         ;;
+    verify|check)
+        echo "Running fresh-clone exhibition verification..."
+        "$PYTHON" "$DIR/scripts/verify_fresh_clone_exhibition.py"
+        ;;
     demo|replay)
         echo "Running PCAP replay demo..."
         "$PYTHON" "$DIR/scripts/demo/run_replay_demo.py"
@@ -29,11 +33,11 @@ case "${1:-dashboard}" in
         "$PYTEST" -q
         ;;
     help|-h|--help)
-        echo "Usage: ./run.sh [dashboard|demo|test]"
+        echo "Usage: ./run.sh [dashboard|verify|demo|test]"
         exit 0
         ;;
     *)
-        echo "Usage: ./run.sh [dashboard|demo|test]"
+        echo "Usage: ./run.sh [dashboard|verify|demo|test]"
         exit 1
         ;;
 esac
