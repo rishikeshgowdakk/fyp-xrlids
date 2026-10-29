@@ -431,6 +431,33 @@ function renderModelComparison(data) {
   }
 }
 
+
+function renderPerformanceVisuals(data) {
+  const root = document.getElementById("perf-policy-chart");
+  if (!root) return;
+  const items = Array.isArray(data && data.policy_latency_benchmarks) ? data.policy_latency_benchmarks : [];
+  if (!items.length) {
+    root.innerHTML = '<div class="chart-empty">Policy latency measurements unavailable.</div>';
+    return;
+  }
+  const valid = items.filter(item => Number.isFinite(Number(item.median_latency_us)) && Number(item.median_latency_us) >= 0);
+  if (!valid.length) {
+    root.innerHTML = '<div class="chart-empty">No valid policy latency values were returned.</div>';
+    return;
+  }
+  const max = Math.max(...valid.map(item => Number(item.median_latency_us)), 0.000001);
+  root.className = "bar-chart";
+  root.innerHTML = valid.map(item => {
+    const value = Number(item.median_latency_us);
+    const width = Math.max(value > 0 ? 1 : 0, value / max * 100);
+    const winner = String(item.policy_name || "").toLowerCase().includes("cost-optimal");
+    return '<div class="bar-row" style="grid-template-columns:minmax(110px,150px) minmax(0,1fr) 78px">' +
+      '<span class="bar-label" title="' + escapeHtml(item.policy_name || "Policy") + '">' + escapeHtml(item.policy_name || "Policy") + '</span>' +
+      '<div class="bar-track"><div class="bar-fill" style="width:' + width.toFixed(2) + '%;background:' + (winner ? "#67e8f9" : "#a78bfa") + '"></div></div>' +
+      '<span class="bar-value">' + value.toFixed(2) + ' µs</span></div>';
+  }).join("");
+}
+
 // ─── SECTION 3: Performance Benchmarks ───
 async function loadPerformanceBenchmarks() {
   try {
@@ -445,6 +472,7 @@ async function loadPerformanceBenchmarks() {
 
 function renderPerformanceBenchmarks(data) {
   if (!data) return;
+  renderPerformanceVisuals(data);
 
   // Policy latency table
   const polTbody = document.getElementById("perf-policy-latency-tbody");
