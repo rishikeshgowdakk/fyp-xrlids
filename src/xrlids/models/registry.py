@@ -225,6 +225,40 @@ class ModelRegistry:
 
         return cleaned
 
+    def validate_model_preprocessor_compatibility(
+        self, benchmark: str, model_type: str = "rf"
+    ) -> dict[str, Any]:
+        """Verify that the model and matching preprocessor have compatible feature schemas.
+
+        Raises ModelRegistryError if schemas or contracts differ.
+        """
+        meta = self.get_metadata(benchmark, model_type=model_type)
+        model = self.load_model(meta)
+        preprocessor = self.load_preprocessor(meta)
+
+        model_features = getattr(model, "feature_names", None)
+        prep_features = getattr(preprocessor, "features", None)
+
+        if model_features and prep_features and list(model_features) != list(prep_features):
+            raise ModelRegistryError(
+                f"Schema mismatch for benchmark '{benchmark}': "
+                f"preprocessor features {list(prep_features)} do not match model features {list(model_features)}"
+            )
+
+        if model_features and list(model_features) != list(meta.expected_features):
+            raise ModelRegistryError(
+                f"Contract mismatch for benchmark '{benchmark}': "
+                f"model features {list(model_features)} do not match declared contract features {list(meta.expected_features)}"
+            )
+
+        return {
+            "benchmark": benchmark,
+            "contract": meta.feature_contract,
+            "feature_count": len(meta.expected_features),
+            "features": list(meta.expected_features),
+            "status": "COMPATIBLE",
+        }
+
     def infer(
         self,
         features: Mapping[str, Any],
@@ -257,6 +291,14 @@ class ModelRegistry:
 
         # Single-pass transformation
         scaled_df = preprocessor.transform(raw_df)
+
+        # Explicit model/preprocessor schema compatibility assertion
+        model_features = getattr(model, "feature_names", None)
+        if model_features and list(scaled_df.columns) != list(model_features):
+            raise ModelRegistryError(
+                f"Model/preprocessor schema mismatch for {meta.model_id}: "
+                f"preprocessor produced columns {list(scaled_df.columns)} but model expects {list(model_features)}"
+            )
 
         # Inference on underlying estimator
         inner_model = model.model if hasattr(model, "model") and model.model is not None else model

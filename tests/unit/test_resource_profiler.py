@@ -16,7 +16,7 @@ def test_get_rss_mib_conversion_linux():
     """Verify that on Linux ru_maxrss (reported in KiB) is converted to MiB by dividing by 1024."""
     mock_rusage = MagicMock()
     mock_rusage.ru_maxrss = 1048576  # 1,048,576 KiB = 1024 MiB
-    with patch("sys.platform", "linux"), patch("resource.getrusage", return_value=mock_rusage):
+    with patch("sys.platform", "linux"), patch("resource.getrusage", return_value=mock_rusage), patch("builtins.open", side_effect=OSError("mock")):
         mib = get_rss_mib()
         assert mib == pytest.approx(1024.0)
 
