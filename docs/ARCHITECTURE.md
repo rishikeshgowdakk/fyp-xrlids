@@ -237,8 +237,8 @@ stateDiagram-v2
 - **Action Spaces:**
   - **3-Action Regime:** `ALLOW` (0), `RATE_LIMIT` (1), `BLOCK` (2).
   - **4-Action Regime:** `ALLOW` (0), `RATE_LIMIT` (1), `ISOLATE` (2), `BLOCK` (3).
-- **State Vector:** Normalized 6-dimensional representation:
-  $[S_{threat}, \log_{10}(V_{bytes}), \log_{10}(V_{packets}), R_{syn\_ack}, C_{asset\_criticality}, A_{active\_mitigations}]$.
+- **State Vector:** Normalized 6-dimensional causal observation vector in $\mathbb{R}^6$:
+  $\mathbf{s}_t = [S_t, \Delta S_t, N_{\text{alert}}, a_{t-1}, c_t, v_t]$, where $S_t \in [0, 1]$ is the continuous attack confidence score, $\Delta S_t$ is the score trajectory (difference from rolling window mean), $N_{\text{alert}}$ is the local alert density fraction, $a_{t-1}$ is the previous executed action (normalized), $c_t$ is the cooldown timer fraction, and $v_t$ is the normalized flow volumetric rate. Zero attack-family labels or multiclass outputs exist in the DQN state.
 - **Cost Formulation:** Evaluated under five operational cost regimes (Standard Enterprise, Mission Critical, Public DMZ, Adversarial Asymmetric, High Availability) penalizing false positive blocks against service disruptions.
 
 ---
