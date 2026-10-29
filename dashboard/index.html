@@ -874,10 +874,17 @@
 
       <!-- ═══════════════════ SECTION 3: PERFORMANCE BENCHMARKS ═══════════════════ -->
       <div id="tab-performance-benchmarks" class="tab-content">
+        <section class="visual-card section-gap">
+          <h2>Runtime cost at a glance</h2>
+          <div class="visual-subtitle">Median policy decision latency · microseconds · lower is faster</div>
+          <div id="perf-policy-chart" class="chart-empty">Loading measured latency…</div>
+          <div class="chart-footnote">Values are taken from the benchmark response. Policy-only latency is not the same as end-to-end flow detection latency.</div>
+        </section>
+
         <!-- Empirical Notice Banner -->
         <div class="callout callout-blue">
           <strong>Empirical Benchmark Measurements Only:</strong>
-          Every figure in this section is dynamically loaded and validated from canonical experiment result artifacts on Python 3.14 (Linux x86_64 CPU). Zero hardcoded or unmeasured synthetic claims.
+          Reported measurements are loaded from saved experiment artifacts where available. See each measurement scope and provenance below; missing values should be treated as unavailable.
         </div>
 
         <!-- ═══════════════════ MEASUREMENT SCOPE RECONCILIATION ═══════════════════ -->
