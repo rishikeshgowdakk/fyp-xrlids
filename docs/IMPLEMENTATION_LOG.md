@@ -4,7 +4,7 @@
 **Date:** October 30, 2026  
 **Starting Commit:** `1519228`  
 **Current Commit:** `5f2b56b`  
-**Status:** Complete, Verified, 100% Passing Tests (560/560).
+**Status:** Complete, Verified, 100% Passing Tests (573/573).
 
 ---
 
@@ -81,6 +81,26 @@ The objective was to perform a definitive, forensic audit of the perception, dec
   - End-to-end packet to prediction: Median 43.156 ms
   - End-to-end packet to explanation: Median 101.013 ms
 
+### 2.7 Labelled CIC-IDS2017 / CSE-CIC-IDS2018 Replay Lab (10,000 Flows)
+- **Addendum Requirement:** Add an interactive Replay Lab supporting up to 10,000 genuine flow records from CIC-IDS2017, CSE-CIC-IDS2018, or both datasets with real-time controls, multi-model routing, sequential 6D causal state updating, Dueling DQN advisory response, on-demand TreeSHAP explanation, and CSV export.
+- **Data Discovery & Stratified Pool:**
+  - Audited all 8 raw CSVs in `data/raw/cicids2017/` and 10 raw CSVs in `data/raw/cse_cic_ids2018/`.
+  - Discovered and accounted for dataset asymmetries (e.g. `PortScan` has 158k rows in CIC-17 but 0 rows in CSE-18; `Heartbleed` has 11 in CIC-17 but 0 in CSE-18).
+  - Built canonical 149,108-record cache pool (`scripts/demo/build_replay_lab_cache.py` -> `data/demo/replay_lab_cache.joblib`, 3.2 MB) preserving source filename, row index, original label, binary ground truth, and verified $R_{10}$ features.
+- **Engine Implementation (`src/xrlids/demo/replay_lab.py`):**
+  - Implemented `ReplayLabEngine` singleton with batch-vectorized preprocessing across dataset partitions (0.038s for 10,000 flows).
+  - Preserved causal sequential execution: `StateBuilder` builds $\mathbf{s}_t \in \mathbb{R}^6$; `DuelingQNetwork` evaluates action recommendation; `DeterministicSafetyGate` enforces strict `response_mode="advisory"` (zero live firewall mutations).
+  - Implemented thread-safe Start, Pause, Resume, Restart, and Stop lifecycle controls.
+  - Implemented real-time confusion matrix, accuracy, precision, recall, F1, and per-family binary recall breakdown.
+  - Implemented on-demand TreeSHAP feature attributions (`explain_flow(flow_id)`).
+  - Implemented server-side CSV export with 27 metadata, provenance, audit, and feature columns.
+- **Dashboard & API Integration (`dashboard/server.py`, `dashboard/index.html`, `dashboard/app.js`):**
+  - Added REST endpoints: `GET /api/replay-lab/config`, `GET /api/replay-lab/status`, `POST /api/replay-lab/start`, `POST /api/replay-lab/pause`, `POST /api/replay-lab/resume`, `POST /api/replay-lab/restart`, `POST /api/replay-lab/stop`, `POST /api/replay-lab/explain`, and `GET /api/replay-lab/export`.
+  - Integrated dedicated `🔬 Replay Lab (10k)` view with dynamic control bar, progress indicators, metrics, confusion matrix, per-family breakdown, streaming flow table, and flow inspection modal hook.
+- **Unit Testing Suite (`tests/unit/test_replay_lab.py`):**
+  - 13 comprehensive unit tests verifying pool integrity, deterministic seed sampling, stratified mixed sampling, single family filtering, honest handling of unavailable families, dual-model routing, causal state & DQN advisory enforcement, lifecycle controls, 10,000-record batch throughput (>1,000 flows/s), TreeSHAP explanations, CSV export, and localhost HTTP server endpoints.
+- **Regression Verification:** Full repository regression suite executed (`pytest tests/ -ra --tb=short`) -> **573 passed, 0 failed, 0 skipped**.
+
 ---
 
 ## 3. Technology Evaluation Decisions
@@ -118,6 +138,7 @@ The objective was to perform a definitive, forensic audit of the perception, dec
 | DQN State Discrepancy | Formal Resolution | Form A ($[S_t, \Delta S_t, N_{\text{alert}}, a_{t-1}, c_t, v_t]$) Verified & Reconciled | ✅ PASS |
 | Binary Detection Semantics | Zero Multi-Class Claims | Explicit `detection_type="binary"` & `attack_family_prediction=None` | ✅ PASS |
 | Advisory Response Mode | Zero Firewall Mutations | `response_mode="advisory"` Default & Verified | ✅ PASS |
-| Unit & Integration Tests | Regression Suite | 560 Passed, 0 Failed, 0 Skipped | ✅ PASS |
+| Unit & Integration Tests | Regression Suite | 573 Passed, 0 Failed, 0 Skipped | ✅ PASS |
+| Replay Lab (10k Flows) | Multi-Dataset Pipeline | 13/13 Tests Passed, >1,000 flows/s throughput | ✅ PASS |
 | Fresh Clone Exhibition | Automated Script | `verify_fresh_clone_exhibition.py` Exit Code 0 | ✅ PASS |
 | PCAP Replay Pipeline | Demonstration Script | `run_replay_demo.py` Exit Code 0 | ✅ PASS |

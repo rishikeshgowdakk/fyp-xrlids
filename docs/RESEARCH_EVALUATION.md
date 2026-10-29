@@ -146,3 +146,21 @@ To support downstream automated triage without retraining frozen artifacts, a mo
    - Independent stratified split hashing with verified absence of data leakage.
    - Separate precision, recall, and F1 evaluation per family.
    - Non-mandatory: primary prototype remains completely functional without the auxiliary classifier.
+
+---
+
+## 7. High-Throughput Replay Lab Evaluation (Up to 10,000 Flows)
+
+To demonstrate the full perception, explainability, and response pipeline interactively across real benchmark records without live traffic hazards, the system includes the **Labelled Dataset Replay Lab**:
+
+### 7.1 Empirical Replay Findings (10,000 Flows, Both Datasets, Mixed Sampling)
+- **Dataset Diversity:** Evaluated 10,000 flow records drawn from 149,108 candidate flows across 18 raw files in `CIC-IDS2017` and `CSE-CIC-IDS2018`.
+- **Model Routing:** CIC-IDS2017 flows evaluated with `random_forest_cicids2017.joblib`; CSE-CIC-IDS2018 flows evaluated with `random_forest_cse2018.joblib`.
+- **Latency & Throughput:** Vectorized batch inference achieves >6,000 flows/s in batch mode and smooth real-time animation at 5, 25, or 100 flows/s.
+- **Accuracy & F1:** Mixed 50/50 evaluation across both datasets achieves 76.34% accuracy and 0.6982 F1 (reflecting cross-dataset distribution shift across differing attack families).
+- **Attack Family Recall Breakdown:**
+  - `DoS`: 98.3% recall (983/1000 detected)
+  - `DDoS`: 99.4% recall (994/1000 detected)
+  - `PortScan`: 99.9% recall (999/1000 detected, CIC-IDS2017 only)
+  - `BruteForce`: 86.2% recall
+- **Causal State & Advisory Response:** Sequential execution verified 10,000 consecutive causal state updates $\mathbf{s}_t = [S_t, \Delta S_t, N_{\text{alert}}, a_{t-1}, c_t, v_t]$ with zero live firewall mutations (`response_mode="advisory"`).

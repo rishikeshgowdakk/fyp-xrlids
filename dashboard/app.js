@@ -162,6 +162,8 @@ function showResearchTab(tabName) {
     loadExplainabilityAndAttacks();
   } else if (tabName === "autonomous-response") {
     loadAutonomousResponse();
+  } else if (tabName === "replay-lab") {
+    loadReplayLab();
   } else if (tabName === "overview") {
     loadOverview();
   } else if (tabName === "limitations") {
@@ -1436,3 +1438,348 @@ document.addEventListener("DOMContentLoaded", () => {
   showResearchTab("dataset-explorer");
   setInterval(pollLive, LIVE_POLL_MS);
 });
+
+
+// ═══════════════════ LABELLED REPLAY LAB CONTROLLER ═══════════════════
+let replayPollInterval = null;
+let replayLabConfigData = null;
+let lastReplayStatus = null;
+
+async function loadReplayLab() {
+  try {
+    const res = await fetch('/api/replay-lab/config');
+    if (!res.ok) return;
+    replayLabConfigData = await res.json();
+    updateReplayFamilyDropdown();
+    pollReplayStatus();
+  } catch (err) {
+    console.warn('Could not load Replay Lab config:', err);
+  }
+}
+
+function onReplayDatasetChange() {
+  updateReplayFamilyDropdown();
+}
+
+function updateReplayFamilyDropdown() {
+  if (!replayLabConfigData || !replayLabConfigData.families) return;
+  const dsSelect = document.getElementById('replay-dataset-select');
+  const famSelect = document.getElementById('replay-family-select');
+  if (!dsSelect || !famSelect) return;
+
+  const ds = dsSelect.value;
+  const currentVal = famSelect.value;
+  famSelect.innerHTML = '<option value="mixed">Mixed (Benign &amp; Attack Stratified)</option>';
+
+  replayLabConfigData.families.forEach(f => {
+    if (f.family === 'Benign') return;
+    const opt = document.createElement('option');
+    opt.value = f.family;
+    let available = true;
+    let label = `${f.family}`;
+
+    if (ds === 'cicids2017') {
+      available = f.in_cicids2017;
+      label += ` (${f.count_cicids2017} records)`;
+    } else if (ds === 'cse2018') {
+      available = f.in_cse2018;
+      label += available ? ` (${f.count_cse2018} records)` : ' (Unavailable in CSE-2018)';
+    } else {
+      label += ` (${f.total_count} records across both)`;
+    }
+
+    opt.textContent = label;
+    if (!available) {
+      opt.disabled = true;
+      opt.style.color = 'var(--text-dim)';
+    }
+    famSelect.appendChild(opt);
+  });
+
+  if ([...famSelect.options].some(o => o.value === currentVal && !o.disabled)) {
+    famSelect.value = currentVal;
+  } else {
+    famSelect.value = 'mixed';
+  }
+}
+
+function onReplayCountChange() {
+  const countSelect = document.getElementById('replay-count-select');
+  const customInput = document.getElementById('replay-custom-count');
+  if (!countSelect || !customInput) return;
+  customInput.style.display = (countSelect.value === 'custom') ? 'block' : 'none';
+}
+
+async function startReplayLab() {
+  const ds = document.getElementById('replay-dataset-select').value;
+  const countSel = document.getElementById('replay-count-select').value;
+  let count = parseInt(countSel, 10);
+  if (countSel === 'custom') {
+    count = parseInt(document.getElementById('replay-custom-count').value, 10) || 1000;
+  }
+  count = Math.max(1, Math.min(10000, count));
+
+  const sel = document.getElementById('replay-family-select').value;
+  const speed = document.getElementById('replay-speed-select').value;
+  const seed = parseInt(document.getElementById('replay-seed-input').value, 10) || 42;
+
+  document.getElementById('btn-replay-start').disabled = true;
+  document.getElementById('btn-replay-pause').disabled = false;
+  document.getElementById('btn-replay-pause').textContent = '⏸ Pause';
+  document.getElementById('btn-replay-restart').disabled = false;
+  document.getElementById('btn-replay-stop').disabled = false;
+
+  try {
+    const res = await fetch('/api/replay-lab/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        dataset: ds,
+        count: count,
+        selection: sel,
+        speed: speed,
+        seed: seed,
+      }),
+    });
+    if (!res.ok) throw new Error('Failed to start replay');
+    if (replayPollInterval) clearInterval(replayPollInterval);
+    replayPollInterval = setInterval(pollReplayStatus, 250);
+    pollReplayStatus();
+  } catch (err) {
+    alert('Replay Lab start failed: ' + err.message);
+    document.getElementById('btn-replay-start').disabled = false;
+  }
+}
+
+async function togglePauseReplayLab() {
+  const pauseBtn = document.getElementById('btn-replay-pause');
+  if (!lastReplayStatus) return;
+  const isPaused = lastReplayStatus.status === 'PAUSED';
+  const endpoint = isPaused ? '/api/replay-lab/resume' : '/api/replay-lab/pause';
+
+  try {
+    const res = await fetch(endpoint, { method: 'POST' });
+    if (res.ok) {
+      pauseBtn.textContent = isPaused ? '⏸ Pause' : '▶ Resume';
+      pollReplayStatus();
+    }
+  } catch (err) {
+    console.error('Pause toggle failed:', err);
+  }
+}
+
+async function restartReplayLab() {
+  startReplayLab();
+}
+
+async function stopReplayLab() {
+  try {
+    const res = await fetch('/api/replay-lab/stop', { method: 'POST' });
+    if (res.ok) {
+      pollReplayStatus();
+    }
+  } catch (err) {
+    console.error('Stop failed:', err);
+  }
+}
+
+function exportReplayLabCSV() {
+  window.location.href = '/api/replay-lab/export';
+}
+
+async function pollReplayStatus() {
+  try {
+    const res = await fetch('/api/replay-lab/status');
+    if (!res.ok) return;
+    const status = await res.json();
+    lastReplayStatus = status;
+    updateReplayLabUI(status);
+  } catch (err) {
+    console.debug('Replay status poll error:', err);
+  }
+}
+
+function updateReplayLabUI(st) {
+  const badgeEl = document.getElementById('replay-status-badge');
+  if (badgeEl) {
+    badgeEl.textContent = `Status: ${st.status}`;
+    badgeEl.className = 'badge ' + (
+      st.status === 'RUNNING' ? 'badge-blue' :
+      st.status === 'COMPLETED' ? 'badge-green' :
+      st.status === 'PAUSED' ? 'badge-orange' : 'badge-dim'
+    );
+  }
+
+  const pLabel = document.getElementById('replay-progress-label');
+  const rLabel = document.getElementById('replay-rate-label');
+  const pBar = document.getElementById('replay-progress-bar');
+
+  if (pLabel) pLabel.textContent = `Progress: ${st.progress_pct}% (${Number(st.processed_count).toLocaleString()} / ${Number(st.selected_count).toLocaleString()} flows)`;
+  if (rLabel) rLabel.textContent = `${st.throughput_flows_per_s} flows/sec · ${st.elapsed_seconds}s elapsed`;
+  if (pBar) pBar.style.width = `${st.progress_pct}%`;
+
+  const m = st.metrics || {};
+  const accEl = document.getElementById('replay-metric-acc');
+  const precEl = document.getElementById('replay-metric-prec');
+  const recEl = document.getElementById('replay-metric-rec');
+  const f1El = document.getElementById('replay-metric-f1');
+
+  if (accEl) accEl.textContent = m.accuracy !== undefined ? `${(m.accuracy * 100).toFixed(2)}%` : '—';
+  if (precEl) precEl.textContent = m.precision !== undefined ? `${(m.precision * 100).toFixed(2)}%` : '—';
+  if (recEl) recEl.textContent = m.recall !== undefined ? `${(m.recall * 100).toFixed(2)}%` : '—';
+  if (f1El) f1El.textContent = m.f1 !== undefined ? m.f1.toFixed(4) : '—';
+
+  const cm = m.confusion_matrix || { tp: 0, fp: 0, tn: 0, fn: 0 };
+  const cmTp = document.getElementById('replay-cm-tp');
+  const cmFp = document.getElementById('replay-cm-fp');
+  const cmTn = document.getElementById('replay-cm-tn');
+  const cmFn = document.getElementById('replay-cm-fn');
+
+  if (cmTp) cmTp.textContent = Number(cm.tp).toLocaleString();
+  if (cmFp) cmFp.textContent = Number(cm.fp).toLocaleString();
+  if (cmTn) cmTn.textContent = Number(cm.tn).toLocaleString();
+  if (cmFn) cmFn.textContent = Number(cm.fn).toLocaleString();
+
+  const pfTbody = document.getElementById('replay-per-family-tbody');
+  if (pfTbody) {
+    const list = m.per_family || [];
+    if (list.length === 0) {
+      pfTbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-dim); padding: 16px;">Waiting for flow records...</td></tr>';
+    } else {
+      pfTbody.innerHTML = list.map(item => `
+        <tr style="border-bottom: 1px solid var(--border);">
+          <td style="padding: 6px 8px;">
+            <span style="font-weight: 700; color: ${item.is_attack ? 'var(--status-red)' : 'var(--status-green)'};">
+              ${escapeHtml(item.family)}
+            </span>
+          </td>
+          <td style="padding: 6px 8px; text-align: right; font-family: var(--font-mono);">${Number(item.support).toLocaleString()}</td>
+          <td style="padding: 6px 8px; text-align: right; font-family: var(--font-mono);">${Number(item.detected).toLocaleString()}</td>
+          <td style="padding: 6px 8px; text-align: right; font-weight: 700; color: ${item.recall_pct >= 90 ? 'var(--status-green)' : item.recall_pct >= 50 ? 'var(--status-amber)' : 'var(--status-red)'}; font-family: var(--font-mono);">
+            ${item.recall_pct.toFixed(1)}%
+          </td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  const streamTbody = document.getElementById('replay-stream-tbody');
+  if (streamTbody) {
+    const flows = st.recent_flows || [];
+    if (flows.length === 0) {
+      if (st.status === 'RUNNING') {
+        streamTbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 20px; color: var(--text-dim);">Streaming replayed flows...</td></tr>';
+      }
+    } else {
+      streamTbody.innerHTML = flows.slice(-50).reverse().map(f => {
+        const isAtt = f.rf_binary_prediction === 'ATTACK';
+        const isCor = f.is_correct;
+        const scorePct = (f.rf_attack_probability * 100).toFixed(1);
+        const ruleMatches = (f.rule_matches || []).join(', ');
+
+        return `
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 7px 10px; font-family: var(--font-mono);">${f.flow_id}</td>
+            <td style="padding: 7px 10px;"><span class="badge badge-dim" style="font-size:10px;">${escapeHtml(f.dataset)}</span></td>
+            <td style="padding: 7px 10px; font-family: var(--font-mono); font-size: 11px;">
+              ${escapeHtml(f.source_file.split('.')[0])} <span style="color:var(--text-dim);">#${f.source_row_index}</span>
+            </td>
+            <td style="padding: 7px 10px;">
+              <strong style="color: ${f.is_attack ? 'var(--status-red)' : 'var(--status-green)'};">
+                ${escapeHtml(f.ground_truth_family)}
+              </strong>
+              <div style="font-size: 10px; color: var(--text-dim);">${escapeHtml(f.original_label)}</div>
+            </td>
+            <td style="padding: 7px 10px; font-family: var(--font-mono); font-weight: 700; color: ${scorePct >= 50 ? 'var(--status-red)' : 'var(--status-green)'};">
+              ${scorePct}%
+            </td>
+            <td style="padding: 7px 10px;">
+              <span class="badge ${isAtt ? 'badge-red' : 'badge-green'}" style="font-size:10px;">${f.rf_binary_prediction}</span>
+              ${isCor ? '<span style="color:var(--status-green); font-size:10px; margin-left:2px;">✓</span>' : '<span style="color:var(--status-red); font-size:10px; margin-left:2px;">✗</span>'}
+            </td>
+            <td style="padding: 7px 10px; font-size: 11px;">
+              ${f.rule_triggered ? `<span class="badge badge-orange" style="font-size:10px;" title="${escapeHtml(ruleMatches)}">RULE MATCH</span>` : '<span style="color:var(--text-dim);">Clean</span>'}
+            </td>
+            <td style="padding: 7px 10px;">
+              <span class="badge ${f.dqn_action === 'ISOLATE' ? 'badge-red' : f.dqn_action === 'RATE_LIMIT' ? 'badge-purple' : f.dqn_action === 'ALERT' ? 'badge-orange' : 'badge-green'}" style="font-size:10px;">
+                ${escapeHtml(f.dqn_action)}
+              </span>
+            </td>
+            <td style="padding: 7px 10px; font-size: 11px; color: var(--text-dim);">
+              ${escapeHtml(f.safety_status)}
+            </td>
+            <td style="padding: 7px 10px; text-align: center;">
+              <button class="btn btn-secondary" onclick="explainReplayFlow(${f.flow_id})" style="padding: 3px 8px; font-size: 10px;">Explain</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+
+  if (st.status === 'COMPLETED' || st.status === 'STOPPED' || st.status === 'ERROR') {
+    const startBtn = document.getElementById('btn-replay-start');
+    const pauseBtn = document.getElementById('btn-replay-pause');
+    const stopBtn = document.getElementById('btn-replay-stop');
+    if (startBtn) startBtn.disabled = false;
+    if (pauseBtn) pauseBtn.disabled = true;
+    if (stopBtn) stopBtn.disabled = true;
+    if (replayPollInterval) {
+      clearInterval(replayPollInterval);
+      replayPollInterval = null;
+    }
+  }
+}
+
+async function explainReplayFlow(flowId) {
+  try {
+    const res = await fetch('/api/replay-lab/explain', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ flow_id: flowId }),
+    });
+    if (!res.ok) throw new Error('Explanation request failed');
+    const data = await res.json();
+
+    const modal = document.getElementById('flow-inspect-modal');
+    if (!modal) return;
+    modal.classList.add('active');
+
+    document.getElementById('modal-flow-id').textContent = `Replay Flow #${data.flow_id}`;
+    document.getElementById('modal-endpoints').textContent = `Dataset: ${data.benchmark ? data.benchmark.toUpperCase() : 'N/A'} · Source Label: ${data.original_label}`;
+    document.getElementById('modal-gt').textContent = `${data.ground_truth_family} ("${data.original_label}")`;
+
+    document.getElementById('modal-rf-score').textContent = (data.rf_attack_probability * 100).toFixed(1) + '%';
+    document.getElementById('modal-lstm-score').textContent = 'N/A (Tabular RF Mode)';
+    document.getElementById('modal-fusion-score').textContent = (data.rf_attack_probability * 100).toFixed(1) + '%';
+
+    const decBadge = document.getElementById('modal-decision-badge');
+    decBadge.textContent = data.rf_binary_prediction;
+    decBadge.className = `badge ${data.rf_binary_prediction === 'ATTACK' ? 'badge-red' : 'badge-green'}`;
+
+    document.getElementById('modal-dqn-action').textContent = data.dqn_action;
+    document.getElementById('modal-dqn-desc').textContent = `Deterministic Safety Gate: ${data.safety_status} (Advisory Mode)`;
+
+    const shapContainer = document.getElementById('modal-shap-container');
+    if (shapContainer) {
+      const sorted = (data.features || []).sort((a, b) => Math.abs(b.shap_attribution) - Math.abs(a.shap_attribution));
+      shapContainer.innerHTML = sorted.map((feat, idx) => {
+        const isInc = feat.shap_attribution > 0;
+        return `
+          <div style="background: var(--surface-2); border-left: 3px solid ${isInc ? 'var(--red)' : 'var(--green)'}; border-radius: 4px; padding: 6px 10px; margin-bottom: 6px; display: flex; justify-content: space-between; font-size: 11px;">
+            <div>
+              <strong class="mono">${idx + 1}. ${escapeHtml(feat.feature)}</strong>
+              <div style="color: var(--text-dim); font-size: 10px;">Value: ${feat.value}</div>
+            </div>
+            <div style="text-align: right; font-family: var(--mono); font-weight: 700; color: ${isInc ? 'var(--red)' : 'var(--green)'};">
+              ${feat.shap_attribution > 0 ? '+' : ''}${feat.shap_attribution.toFixed(4)}
+              <div style="font-size: 9px; font-weight: normal; color: var(--text-dim);">${isInc ? '▲ Threat' : '▼ Benign'}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  } catch (err) {
+    alert('TreeSHAP explanation failed: ' + err.message);
+  }
+}

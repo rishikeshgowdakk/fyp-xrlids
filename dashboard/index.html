@@ -548,6 +548,7 @@
       <button data-tab="performance-benchmarks" onclick="showResearchTab('performance-benchmarks')">Performance</button>
       <button data-tab="explainability-attacks" onclick="showResearchTab('explainability-attacks')">Explainability</button>
       <button data-tab="autonomous-response" onclick="showResearchTab('autonomous-response')">Response</button>
+      <button data-tab="replay-lab" onclick="showResearchTab('replay-lab')">🔬 Replay Lab (10k)</button>
     </div>
 
     <div class="container">
@@ -1345,6 +1346,231 @@
                 Fault injection test confirmed that state restoration failures trigger a fail-safe <strong>SAFETY_LOCKED</strong> state.
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════ SECTION 6: LABELLED DATASET REPLAY LAB (10k) ═══════════════════ -->
+      <div id="tab-replay-lab" class="tab-content">
+        <h1 class="panel-title">🔬 Labelled Dataset Replay Lab (Up to 10,000 Records)</h1>
+
+        <!-- Scientific Mode Notice -->
+        <div class="callout callout-blue" style="border-left: 4px solid var(--accent); margin-bottom: 16px;">
+          <div style="font-weight: 700; margin-bottom: 4px;">⚡ Labelled Flow Replay Evaluation &amp; Scientific Invariants</div>
+          <div style="font-size: 12px; line-height: 1.5; color: var(--text);">
+            This lab streams authentic, verified flow records directly from <strong>CIC-IDS2017</strong> and <strong>CSE-CIC-IDS2018</strong>.
+            Records retain full provenance: source file, original row index, raw label, and verified $R_{10}$ features.
+            <br>
+            • <strong>Strict Separation:</strong> Ground-truth attack families originate from capture annotations and are clearly decoupled from model predictions.
+            <br>
+            • <strong>Binary Detection:</strong> The frozen Random Forest computes binary $P(\text{ATTACK})$ probabilities ($\tau = 0.50$). It does NOT make multiclass family predictions.
+            <br>
+            • <strong>Advisory Response:</strong> Dueling DQN recommendations use the verified 6D causal state vector $\mathbf{s}_t = [S_t, \Delta S_t, N_{\text{alert}}, a_{t-1}, c_t, v_t]$ and remain <strong>strictly advisory (zero live firewall mutations)</strong>.
+          </div>
+        </div>
+
+        <!-- Configuration Controls Card -->
+        <div class="card section-gap">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>🎛️ Replay Configuration &amp; Control Console</h2>
+            <span class="badge badge-purple" id="replay-status-badge">Status: IDLE</span>
+          </div>
+          <div class="card-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 16px;">
+              <!-- Dataset Selection -->
+              <div>
+                <label style="display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 6px;">1. Dataset Source</label>
+                <select id="replay-dataset-select" onchange="onReplayDatasetChange()" style="width: 100%; padding: 8px 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-size: 13px;">
+                  <option value="cicids2017" selected>CIC-IDS2017 (Flagship R10)</option>
+                  <option value="cse2018">CSE-CIC-IDS2018 (Enterprise Cloud R10)</option>
+                  <option value="both">Both Datasets (Dual Model Routing)</option>
+                </select>
+                <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;" id="replay-dataset-hint">Routes records to matching frozen RF detector and scaler.</div>
+              </div>
+
+              <!-- Record Count Selection -->
+              <div>
+                <label style="display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 6px;">2. Record Count</label>
+                <select id="replay-count-select" onchange="onReplayCountChange()" style="width: 100%; padding: 8px 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-size: 13px;">
+                  <option value="400">400 Records (Quick Demo)</option>
+                  <option value="1000" selected>1,000 Records (Standard Demo)</option>
+                  <option value="5000">5,000 Records (Extended Demo)</option>
+                  <option value="10000">10,000 Records (Full Run)</option>
+                  <option value="custom">Custom Count...</option>
+                </select>
+                <input type="number" id="replay-custom-count" min="1" max="10000" value="2500" style="display: none; width: 100%; margin-top: 6px; padding: 6px 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-size: 12px;" placeholder="Enter count (1 - 10000)">
+              </div>
+
+              <!-- Selection Filter (Attack Family or Mixed) -->
+              <div>
+                <label style="display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 6px;">3. Selection Filter</label>
+                <select id="replay-family-select" style="width: 100%; padding: 8px 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-size: 13px;">
+                  <option value="mixed" selected>Mixed (Benign &amp; Attack Stratified)</option>
+                  <option value="DoS">DoS (Denial of Service)</option>
+                  <option value="DDoS">DDoS (Distributed DoS)</option>
+                  <option value="PortScan">PortScan (Probes &amp; Sweeps)</option>
+                  <option value="BruteForce">BruteForce (FTP / SSH)</option>
+                  <option value="Bot">Botnet Traffic</option>
+                  <option value="Infiltration">Infiltration</option>
+                  <option value="Web">Web Attacks (XSS/SQLi)</option>
+                  <option value="Heartbleed">Heartbleed (OpenSSL Exploit)</option>
+                </select>
+                <div style="font-size: 11px; color: var(--status-amber); margin-top: 4px;" id="replay-family-warning" style="display: none;"></div>
+              </div>
+
+              <!-- Speed Selection -->
+              <div>
+                <label style="display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 6px;">4. Replay Speed</label>
+                <select id="replay-speed-select" style="width: 100%; padding: 8px 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-size: 13px;">
+                  <option value="batch" selected>⚡ Batch / Instant (Up to 10k in &lt;2s)</option>
+                  <option value="fast">Fast (100 flows/sec)</option>
+                  <option value="normal">Normal (25 flows/sec)</option>
+                  <option value="slow">Slow (5 flows/sec)</option>
+                </select>
+                <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Choose Batch for immediate evaluation metrics.</div>
+              </div>
+
+              <!-- Random Seed -->
+              <div>
+                <label style="display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 6px;">5. Random Seed</label>
+                <input type="number" id="replay-seed-input" value="42" style="width: 100%; padding: 8px 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-size: 13px;">
+                <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Guarantees deterministic record sampling.</div>
+              </div>
+            </div>
+
+            <!-- Action Controls Bar -->
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid var(--border);">
+              <button class="btn btn-primary" id="btn-replay-start" onclick="startReplayLab()">▶ Start Replay</button>
+              <button class="btn btn-secondary" id="btn-replay-pause" onclick="togglePauseReplayLab()" disabled>⏸ Pause</button>
+              <button class="btn btn-secondary" id="btn-replay-restart" onclick="restartReplayLab()" disabled>🔄 Restart</button>
+              <button class="btn btn-danger" id="btn-replay-stop" onclick="stopReplayLab()" disabled>⏹ Stop</button>
+              <button class="btn btn-secondary" id="btn-replay-export" onclick="exportReplayLabCSV()" style="margin-left: auto;">📥 Export Evaluation CSV</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar & Runtime KPIs -->
+        <div class="card section-gap" id="replay-progress-card" style="margin-bottom: 16px;">
+          <div class="card-body" style="padding: 14px 18px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px;">
+              <span style="font-weight: 700;" id="replay-progress-label">Progress: 0% (0 / 0 flows)</span>
+              <span style="font-family: var(--font-mono); color: var(--text-muted);" id="replay-rate-label">0.0 flows/sec · 0.00s elapsed</span>
+            </div>
+            <div style="width: 100%; height: 10px; background: var(--surface-2); border-radius: 5px; overflow: hidden; border: 1px solid var(--border);">
+              <div id="replay-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--accent), #38bdf8); transition: width 0.15s ease;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real-Time Metrics & Confusion Matrix Strip -->
+        <div class="grid-4 section-gap" style="margin-bottom: 16px;">
+          <div class="card" style="margin: 0; padding: 14px 18px;">
+            <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 4px;">Accuracy</div>
+            <div style="font-size: 26px; font-weight: 800; color: #fff;" id="replay-metric-acc">—</div>
+            <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Overall (TP + TN) / Total</div>
+          </div>
+          <div class="card" style="margin: 0; padding: 14px 18px;">
+            <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 4px;">Precision</div>
+            <div style="font-size: 26px; font-weight: 800; color: #fff;" id="replay-metric-prec">—</div>
+            <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Positive Class: Attack</div>
+          </div>
+          <div class="card" style="margin: 0; padding: 14px 18px;">
+            <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 4px;">Recall (Detection Rate)</div>
+            <div style="font-size: 26px; font-weight: 800; color: #fff;" id="replay-metric-rec">—</div>
+            <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Attacks Detected / Total Attacks</div>
+          </div>
+          <div class="card" style="margin: 0; padding: 14px 18px;">
+            <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 4px;">F1-Score</div>
+            <div style="font-size: 26px; font-weight: 800; color: #fff;" id="replay-metric-f1">—</div>
+            <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Harmonic Mean of Prec &amp; Rec</div>
+          </div>
+        </div>
+
+        <div class="grid-2 section-gap" style="margin-bottom: 16px;">
+          <!-- Confusion Matrix -->
+          <div class="card" style="margin: 0;">
+            <div class="card-header" style="padding: 10px 14px;">
+              <h3>📊 Empirical Confusion Matrix</h3>
+              <span class="badge badge-purple">&tau; = 0.50</span>
+            </div>
+            <div class="card-body" style="padding: 14px;">
+              <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 12px;">
+                <thead>
+                  <tr>
+                    <th style="border: none;"></th>
+                    <th style="background: var(--surface-2); padding: 6px; border: 1px solid var(--border);">Pred ATTACK</th>
+                    <th style="background: var(--surface-2); padding: 6px; border: 1px solid var(--border);">Pred BENIGN</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th style="background: var(--surface-2); padding: 6px; border: 1px solid var(--border); text-align: right;">True ATTACK</th>
+                    <td id="replay-cm-tp" style="background: rgba(34, 197, 94, 0.12); color: var(--status-green); font-weight: 800; font-size: 15px; border: 1px solid var(--border); padding: 10px;">0</td>
+                    <td id="replay-cm-fn" style="background: rgba(239, 68, 68, 0.12); color: var(--status-red); font-weight: 800; font-size: 15px; border: 1px solid var(--border); padding: 10px;">0</td>
+                  </tr>
+                  <tr>
+                    <th style="background: var(--surface-2); padding: 6px; border: 1px solid var(--border); text-align: right;">True BENIGN</th>
+                    <td id="replay-cm-fp" style="background: rgba(245, 158, 11, 0.12); color: var(--status-amber); font-weight: 800; font-size: 15px; border: 1px solid var(--border); padding: 10px;">0</td>
+                    <td id="replay-cm-tn" style="background: rgba(34, 197, 94, 0.12); color: var(--status-green); font-weight: 800; font-size: 15px; border: 1px solid var(--border); padding: 10px;">0</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style="margin-top: 8px; font-size: 11px; color: var(--text-dim); text-align: center;">
+                TP = Correct Attack · FP = False Alarm · TN = Correct Benign · FN = Missed Attack
+              </div>
+            </div>
+          </div>
+
+          <!-- Per-Family Breakdown Table -->
+          <div class="card" style="margin: 0;">
+            <div class="card-header" style="padding: 10px 14px;">
+              <h3>🛡️ Per-Family Binary Detection Recall</h3>
+              <span class="badge badge-purple">Stratified Ground Truth</span>
+            </div>
+            <div class="card-body" style="padding: 10px; max-height: 200px; overflow-y: auto;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                <thead>
+                  <tr style="border-bottom: 1px solid var(--border); text-align: left;">
+                    <th style="padding: 6px;">Ground-Truth Family</th>
+                    <th style="padding: 6px; text-align: right;">Support</th>
+                    <th style="padding: 6px; text-align: right;">Detected</th>
+                    <th style="padding: 6px; text-align: right;">Recall</th>
+                  </tr>
+                </thead>
+                <tbody id="replay-per-family-tbody">
+                  <tr><td colspan="4" style="text-align: center; color: var(--text-dim); padding: 20px;">No replay run executed yet.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Streaming Flow Table -->
+        <div class="card section-gap">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>📋 Replayed Flow Stream &amp; Decision Audit Log</h2>
+            <span style="font-size: 11px; color: var(--text-dim);">Showing recent processed flows with full provenance</span>
+          </div>
+          <div class="card-body" style="padding: 0; overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px;" id="replay-stream-table">
+              <thead>
+                <tr style="background: var(--surface-2); border-bottom: 1px solid var(--border); text-align: left;">
+                  <th style="padding: 8px 10px;">#</th>
+                  <th style="padding: 8px 10px;">Dataset</th>
+                  <th style="padding: 8px 10px;">Source File &amp; Row</th>
+                  <th style="padding: 8px 10px;">Ground Truth</th>
+                  <th style="padding: 8px 10px;">RF Probability</th>
+                  <th style="padding: 8px 10px;">RF Prediction</th>
+                  <th style="padding: 8px 10px;">Rule Check</th>
+                  <th style="padding: 8px 10px;">DQN Action</th>
+                  <th style="padding: 8px 10px;">Safety Status</th>
+                  <th style="padding: 8px 10px; text-align: center;">TreeSHAP</th>
+                </tr>
+              </thead>
+              <tbody id="replay-stream-tbody">
+                <tr><td colspan="10" style="text-align: center; color: var(--text-dim); padding: 30px;">Replay lab is idle. Click 'Start Replay' to begin processing genuine flow records.</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

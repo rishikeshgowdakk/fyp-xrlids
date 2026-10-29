@@ -27,6 +27,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Autonomous Response Safety & Mode | ✅ Verified | Response actions are strictly advisory / dry-run (`response_mode="advisory"`). Deterministic safety gate enforces zero network mutations. Production enforcement remains NO-GO. |
 | Flagship Decision Semantics | ✅ Verified | `FlagshipDecision` carries `detection_type="binary"`, `attack_family_prediction=None`, and `response_mode="advisory"`. |
 | Dashboard Concept Separation | ✅ Verified | Dedicated semantic contracts in `/api/overview`, `/api/evaluation`, `/api/explainability`, `/api/response-benchmark`, and `/api/live`. Ground-truth families separated from model predictions. |
+| Labelled Dataset Replay Lab (10k) | ✅ Implemented & Tested | Interactive replay lab supporting 400, 1,000, 5,000, or 10,000 genuine flow records from CIC-IDS2017, CSE-CIC-IDS2018, or both. Full multi-model routing, 6D causal state updating, Dueling DQN advisory response, on-demand TreeSHAP explanations, and server-side CSV export. |
 | Proposed Multiclass Extension | Documented (Future Work) | Feasibility confirmed; frozen artifacts preserved without retraining; formal extension specification recorded in `docs/MODEL_ARTIFACT_AUDIT.md`. |
 
 ## Dashboard Flow Evaluation & Exhibition Demo Workflow (Upgraded 2026-10-28)
@@ -82,7 +83,7 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Dataset audit module | ✅ | `src/xrlids/datasets/audit.py` + tests |
 | CLI | ✅ | `src/xrlids/cli.py` |
 | Report generation from artifacts | ✅ | `scripts/phase1/generate_reports.py` (dynamic git hashes, live manifests) |
-| Test suite | ✅ | 560 unit, data, integration, and model tests passing (0 failures); full Phase 1, Phase 2, and Phase 3 verification suite |
+| Test suite | ✅ | 573 unit, data, integration, and model tests passing (0 failures); full Phase 1, Phase 2, Phase 3, and Replay Lab verification suite |
 | SHAP explainability module | ✅ | `src/xrlids/explainability/shap_analysis.py` + tests |
 | Cross-dataset transfer module | ✅ | `src/xrlids/experiments/transfer.py` + `scripts/phase1/run_transfer.py` + configs (6 directions executed) |
 | Pure-Python PCAP reader / writer | ✅ | `src/xrlids/demo/pcap.py` (zero external C-dependencies) + tests |

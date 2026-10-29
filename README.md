@@ -13,7 +13,7 @@ Essential documentation, presentation scripts, and defense runbooks for final ye
 | Document | Purpose & Key Contents |
 |----------|------------------------|
 | [🛡️ **Attack-Family & Response Audit**](docs/ATTACK_FAMILY_AND_RESPONSE_AUDIT.md) | **Audit Addendum**: Forensic audit of binary vs. family detection, 6D DQN causal state, and advisory mode |
-| [🧪 **Comprehensive Test Report**](docs/TEST_REPORT.md) | **560 Passing Tests**: Test suite breakdown, microsecond latencies, SHA-256 model verification, 100% pass |
+| [🧪 **Comprehensive Test Report**](docs/TEST_REPORT.md) | **573 Passing Tests**: Test suite breakdown, microsecond latencies, SHA-256 model verification, 100% pass |
 | [📈 **Research Evaluation Report**](docs/RESEARCH_EVALUATION.md) | **Empirical Findings**: Multi-model metrics, per-family error stratification, and CostOptimal vs. DQN baseline |
 | [📝 **Implementation & Continuation Log**](docs/IMPLEMENTATION_LOG.md) | **Forensic Audit Log**: Chronological actions, commit history, technology evaluations, and decisions |
 | [🏛️ **Authoritative Architecture**](docs/ARCHITECTURE.md) | **Core System Blueprint**: 12-section architecture, live RF + Rules vs. offline LSTM/fusion, data flows, and safety constraints |
@@ -284,7 +284,7 @@ pip install -e .[dev]
 
 ### 2. Verify Installation (Test Suite)
 
-Run the full 560-test verification suite to confirm everything is working:
+Run the full 573-test verification suite to confirm everything is working:
 
 ```bash
 ./run.sh test
@@ -292,7 +292,7 @@ Run the full 560-test verification suite to confirm everything is working:
 .venv/bin/pytest -q
 ```
 
-All 560 tests across unit, data, integration, semantic contract, and model test suites pass with 0 failures (100% pass rate).
+All 573 tests across unit, data, integration, semantic contract, and model test suites pass with 0 failures (100% pass rate).
 
 ### 3. Quick Demo — PCAP Replay
 
@@ -308,11 +308,12 @@ This runs entirely offline using the bundled sample PCAP and trained model — n
 
 > 📖 **Comprehensive Walkthrough & Viva Script:** See [`docs/FRONTEND_AND_DEMO_GUIDE.md`](docs/FRONTEND_AND_DEMO_GUIDE.md) for the complete presentation script (word-for-word guide for professors), component architecture, and FAQ defenses.
 
-The dashboard is engineered as a zero-dependency **Research Evaluation Workbench** centered on genuine held-out dataset evaluation across 7 research views:
+The dashboard is engineered as a zero-dependency **Research Evaluation Workbench** centered on genuine held-out dataset evaluation across 8 research views:
 
 | Page | Research Function |
 |:-----|:------------------|
 | **📊 Dataset Evaluation** | **Primary Default View:** Held-out benchmark metrics, confusion matrices (TN, FP, FN, TP), slice toggle (355k tabular vs 355k aligned), per-family attack breakdowns, and **Ad-Hoc Custom CSV Dataset Evaluation & Verification** |
+| **🔬 Replay Lab (10k)** | **Full Evaluation Replay Lab:** Deterministic streaming of up to 10,000 genuine flow records from CIC-IDS2017, CSE-CIC-IDS2018, or both with multi-model routing, sequential 6D causal state updating, Dueling DQN advisory response, on-demand TreeSHAP explanation, and CSV export |
 | **📋 Overview** | Platform architecture, formal component verification matrix (RF, LSTM, Fusion, DQN, Safety Gate), and benchmark inventory |
 | **⚖️ Model Comparison** | Comparative benchmark (RF vs LSTM vs Fusion) with 95% bootstrap CIs, fusion weights (&alpha;), degenerate weight flags, and shuffled-window temporal ablation |
 | **🔍 Flow Explorer** | Paginated inspection of held-out flows with ground-truth strictly isolated from model inputs, plus reproducible CSV export |

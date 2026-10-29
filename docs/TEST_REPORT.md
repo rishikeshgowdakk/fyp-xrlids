@@ -3,7 +3,7 @@
 **Project:** Explainable Reinforcement Learning-Based Network Intrusion Detection and Autonomous Response System (XRL-IDARS)  
 **Date:** October 30, 2026  
 **Environment:** Linux 7.0.0-42-generic (x86_64) | Python 3.14.4 | PyTorch 2.14.0+cpu | scikit-learn 1.9.1 | SHAP 0.52.0 | Scapy 2.6.1  
-**Authoritative Status:** 560 passed tests, 0 failed, 0 skipped, 100% pass rate.
+**Authoritative Status:** 573 passed tests, 0 failed, 0 skipped, 100% pass rate.
 
 ---
 
@@ -15,12 +15,12 @@ All regression suites, targeted semantic invariant tests, safety gate constraint
 
 ```text
 ================================================================================
-TOTAL TESTS:      560
-PASSED:           560
+TOTAL TESTS:      573
+PASSED:           573
 FAILED:             0
 SKIPPED:            0
 WARNINGS:          18 (Deprecation/UserWarnings from third-party scientific libs)
-EXECUTION TIME:   54.98 seconds
+EXECUTION TIME:   39.86 seconds
 EXIT CODE:          0 (CLEAN PASS)
 ================================================================================
 ```
@@ -69,10 +69,26 @@ EXIT CODE:          0 (CLEAN PASS)
   - Verification of `CostOptimalThresholdPolicy`, `StaticAllowPolicy`, `StaticBlockPolicy`, and `ProportionalPolicy`.
   - Exact cost matrix computation across 6 enterprise cost regimes.
 
-### 2.5 Full Repository Regression Suite
+### 2.5 Replay Lab & Multi-Dataset Evaluation Suite (10k Records)
+- **Command:** `pytest tests/unit/test_replay_lab.py -v`
+- **Results:** 13 passed in 9.71s (Exit Code 0)
+- **Verified Capabilities:**
+  - Cache pool integrity and multi-dataset R10 schema across 149,108 candidate flows.
+  - Deterministic sampling and exact reproducibility across runs with identical random seeds.
+  - Stratified mixed sampling (50% benign, 50% attack across diverse families).
+  - Single attack-family selection and honest reporting of unavailable families (PortScan/Heartbleed on CSE-2018).
+  - Dual-model routing (CIC-IDS2017 to RF17, CSE-CIC-IDS2018 to RF18).
+  - Sequential causal StateBuilder $\mathbf{s}_t \in \mathbb{R}^6$ and Dueling DQN advisory evaluation (`response_mode="advisory"`).
+  - Background thread lifecycle controls (Start, Pause, Resume, Restart, Stop).
+  - 10,000-record batch execution achieving >1,000 flows/s throughput and valid metric calculations.
+  - On-demand TreeSHAP explanation generation.
+  - Full CSV export with all 27 audit and feature columns.
+  - Dashboard HTTP server endpoints (`/api/replay-lab/*`).
+
+### 2.6 Full Repository Regression Suite
 - **Command:** `pytest tests/ -ra --tb=short`
-- **Results:** 560 passed, 0 failed, 0 skipped in 54.98s (Exit Code 0)
-- **Coverage:** Complete test coverage across `src/xrlids/` (preprocessing, feature extraction, models, explainability, reinforcement learning, live capture, rules, evaluation).
+- **Results:** 573 passed, 0 failed, 0 skipped in 39.86s (Exit Code 0)
+- **Coverage:** Complete test coverage across `src/xrlids/` (preprocessing, feature extraction, models, explainability, reinforcement learning, live capture, rules, evaluation, replay lab).
 
 ---
 

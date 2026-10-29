@@ -1145,6 +1145,25 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     ]
                 }
             )
+        elif path == "/api/replay-lab/config":
+            from xrlids.demo.replay_lab import ReplayLabEngine
+            engine = ReplayLabEngine.get_instance()
+            self.send_json(engine.get_available_config())
+        elif path == "/api/replay-lab/status":
+            from xrlids.demo.replay_lab import ReplayLabEngine
+            engine = ReplayLabEngine.get_instance()
+            self.send_json(engine.get_status())
+        elif path == "/api/replay-lab/export":
+            from xrlids.demo.replay_lab import ReplayLabEngine
+            engine = ReplayLabEngine.get_instance()
+            csv_content = engine.export_csv_string()
+            payload = csv_content.encode("utf-8")
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "text/csv; charset=utf-8")
+            self.send_header("Content-Disposition", 'attachment; filename="xrlids_replay_lab_evaluation.csv"')
+            self.send_header("Content-Length", str(len(payload)))
+            self.end_headers()
+            self.wfile.write(payload)
         elif path == "/api/live":
             self.send_json(LIVE_SESSION.snapshot())
         elif path == "/api/live/dataset-categories":
@@ -1243,6 +1262,46 @@ class DashboardHandler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         if parsed.path == "/api/run-replay":
             self._handle_run_replay()
+        elif parsed.path == "/api/replay-lab/start":
+            body = self.read_json_body()
+            from xrlids.demo.replay_lab import ReplayLabEngine, ReplayLabConfig
+            engine = ReplayLabEngine.get_instance()
+            cfg = ReplayLabConfig(
+                dataset=str(body.get("dataset", "cicids2017")),
+                count=int(body.get("count", 1000)),
+                selection=str(body.get("selection", "mixed")),
+                speed=str(body.get("speed", "fast")),
+                seed=int(body.get("seed", 42)),
+                compute_shap_per_record=bool(body.get("compute_shap_per_record", False)),
+            )
+            result = engine.start(cfg)
+            self.send_json(result)
+        elif parsed.path == "/api/replay-lab/pause":
+            from xrlids.demo.replay_lab import ReplayLabEngine
+            engine = ReplayLabEngine.get_instance()
+            self.send_json(engine.pause())
+        elif parsed.path == "/api/replay-lab/resume":
+            from xrlids.demo.replay_lab import ReplayLabEngine
+            engine = ReplayLabEngine.get_instance()
+            self.send_json(engine.resume())
+        elif parsed.path == "/api/replay-lab/restart":
+            from xrlids.demo.replay_lab import ReplayLabEngine
+            engine = ReplayLabEngine.get_instance()
+            self.send_json(engine.restart())
+        elif parsed.path == "/api/replay-lab/stop":
+            from xrlids.demo.replay_lab import ReplayLabEngine
+            engine = ReplayLabEngine.get_instance()
+            self.send_json(engine.stop())
+        elif parsed.path == "/api/replay-lab/explain":
+            body = self.read_json_body()
+            flow_id = int(body.get("flow_id", 1))
+            from xrlids.demo.replay_lab import ReplayLabEngine
+            engine = ReplayLabEngine.get_instance()
+            try:
+                result = engine.explain_flow(flow_id)
+                self.send_json(result)
+            except Exception as exc:
+                self.send_json({"error": str(exc), "status": "error"}, status=HTTPStatus.BAD_REQUEST)
         elif parsed.path == "/api/live/start":
             body = self.read_json_body()
             pcap_path = body.get("pcap") or None
