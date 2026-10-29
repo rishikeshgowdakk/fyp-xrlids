@@ -861,23 +861,9 @@ function updateModeBDescription() {
 }
 
 function onCsvModelChange() {
-  const model = document.getElementById("csv-eval-model").value;
-  const contractSelect = document.getElementById("csv-eval-contract");
-  if (!contractSelect) return;
-  if (model === "unswnb15") {
-    contractSelect.value = "R4";
-    for (let opt of contractSelect.options) {
-      opt.disabled = (opt.value !== "R4");
-    }
-  } else {
-    contractSelect.value = "R10";
-    for (let opt of contractSelect.options) {
-      opt.disabled = (opt.value !== "R10");
-    }
-  }
-  if (currentCsvMode === "exhibition") {
-    updateModeBDescription();
-  }
+  // The selected benchmark determines its feature contract automatically.
+  // Keep the exhibition path simple: no manual contract selector is exposed.
+  if (currentCsvMode === "exhibition") updateModeBDescription();
 }
 
 async function loadSampleCsvIntoTextarea() {
@@ -931,61 +917,35 @@ function onCsvFileSelected(event) {
 
 async function runCsvEvaluation() {
   const statusEl = document.getElementById("csv-file-status");
-  const textarea = document.getElementById("csv-text-input");
-  const contract = document.getElementById("csv-eval-contract").value;
-  const benchmark = document.getElementById("csv-eval-model").value;
+  const benchmarkSelect = document.getElementById("csv-eval-model");
   const btn = document.getElementById("btn-run-csv-eval");
-
-  const expectedContract = BENCHMARK_CONTRACT_MAP[benchmark];
-  if (expectedContract && contract !== expectedContract) {
-    alert(`Configuration mismatch: Benchmark '${benchmark}' requires feature contract '${expectedContract}', but '${contract}' was selected.`);
-    return;
-  }
-
-  const payload = {
-    mode: currentCsvMode,
-    benchmark: benchmark,
-    contract: contract,
-  };
-
-  if (currentCsvMode === "custom") {
-    const csvText = textarea ? textarea.value.trim() : "";
-    if (!csvText) {
-      alert("Please choose a CSV file or paste CSV rows into the text area for Mode C.");
-      return;
-    }
-    payload.csv_text = csvText;
-  } else if (currentCsvMode === "full_test") {
-    const maxRowsSelect = document.getElementById("csv-eval-max-rows");
-    const maxRows = parseInt(maxRowsSelect ? maxRowsSelect.value : "1000", 10);
-    payload.max_rows = maxRows;
-  }
+  const benchmark = benchmarkSelect ? benchmarkSelect.value : "cicids2017";
+  const contract = BENCHMARK_CONTRACT_MAP[benchmark] || "R10";
+  const payload = { mode: "exhibition", benchmark, contract };
 
   try {
-    btn.disabled = true;
-    btn.textContent = "⏳ Evaluating...";
-    statusEl.textContent = `Evaluating flows in ${currentCsvMode} mode against RF + LSTM (T=5) + Fusion...`;
+    if (btn) { btn.disabled = true; btn.textContent = "⏳ Running sample..."; }
+    if (statusEl) statusEl.textContent = `Running the held-out ${benchmark} sample through RF, LSTM and score fusion...`;
 
     const res = await fetch("/api/csv/evaluate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-
     const data = await res.json();
-    if (!res.ok || data.error) {
-      throw new Error(data.error || "Evaluation failed");
-    }
+    if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
 
     lastCsvEvalResult = data;
     renderCsvEvaluationResults(data);
-    statusEl.textContent = `✓ Evaluation complete. Mode: ${data.mode} · Evaluated: ${data.row_accounting.evaluated_rows} flows · Latency: ${(data.evaluation_latency_ms || 0).toFixed(1)} ms · Throughput: ${(data.throughput_flows_per_s || 0).toFixed(0)} flows/s.`;
+    if (statusEl) {
+      const rows = data.row_accounting || {};
+      statusEl.textContent = `Evaluation complete · ${data.benchmark} · ${(rows.evaluated_rows || 0).toLocaleString()} flows · ${Number(data.evaluation_latency_ms || 0).toFixed(1)} ms · ${Number(data.throughput_flows_per_s || 0).toFixed(0)} flows/s`;
+    }
   } catch (err) {
-    alert("Evaluation Error: " + err.message);
-    statusEl.textContent = "Evaluation failed: " + err.message;
+    console.error("Sample evaluation failed:", err);
+    if (statusEl) statusEl.textContent = `Evaluation failed: ${err.message}. Check that the backend is running, then retry.`;
   } finally {
-    btn.disabled = false;
-    btn.textContent = "⚡ Run Evaluation";
+    if (btn) { btn.disabled = false; btn.textContent = "⚡ Run Sample Evaluation"; }
   }
 }
 
