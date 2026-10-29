@@ -274,7 +274,7 @@ def test_dashboard_http_live_endpoints():
         with urllib.request.urlopen(f"http://127.0.0.1:{port}/demo.html", timeout=5) as resp:
             assert resp.status == 200
             demo_html = resp.read().decode("utf-8")
-        assert "Viva Defense Edition" in demo_html
+        assert ("Research Exhibition" in demo_html) or ("Viva Defense Edition" in demo_html)
         assert "TreeSHAP" in demo_html
         assert "Flows Analysed" in demo_html
 

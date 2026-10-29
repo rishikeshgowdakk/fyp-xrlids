@@ -1,6 +1,6 @@
 /**
- * XRL-IDARS — 3-Minute Viva Demonstration Logic (demo.js)
- * Clean, lightweight orchestrator for the 4-zone viva interface.
+ * XRL-IDARS — Live Demonstration Logic (demo.js)
+ * Clean, lightweight orchestrator for the 4-zone exhibition interface.
  */
 
 let pollInterval = null;
@@ -144,11 +144,11 @@ function renderFlowList(flows) {
       ? '<span class="badge-attack">ATTACK</span>' 
       : '<span class="badge-benign">BENIGN</span>';
 
-    const barColor = isAttack ? '#ef4444' : '#10b981';
+    const barColor = isAttack ? 'var(--status-red)' : 'var(--status-green)';
 
     const isRuleTriggered = flow.rule_triggered && flow.rule_matches && flow.rule_matches.length > 0;
     const ruleBadge = isRuleTriggered
-      ? `<span class="badge-rule" style="background:#4338ca;color:#fff;padding:2px 6px;border-radius:4px;font-size:0.68rem;font-weight:700;" title="Deterministic Rule: ${escapeHtml(flow.rule_matches.join(', '))}">RULE: ${escapeHtml(flow.rule_matches[0])}</span>`
+      ? `<span class="badge-rule" title="Deterministic Rule: ${escapeHtml(flow.rule_matches.join(', '))}">RULE: ${escapeHtml(flow.rule_matches[0])}</span>`
       : '';
 
     html += `
@@ -216,18 +216,18 @@ function inspectFlow(flow) {
     if (scorePct >= 85) {
       badgeEl.className = 'badge-action-block';
       badgeEl.textContent = 'BLOCK';
-      policyActionEl.textContent = 'Cost-Optimal Gate: BLOCK / ISOLATE';
-      policyActionEl.style.color = '#f87171';
+      policyActionEl.textContent = 'Cost-Optimal Gate: BLOCK / ISOLATE (Advisory)';
+      policyActionEl.style.color = 'var(--status-red)';
     } else if (scorePct >= 50) {
       badgeEl.className = 'badge-action-alert';
       badgeEl.textContent = 'ALERT';
-      policyActionEl.textContent = 'Cost-Optimal Gate: RATE_LIMIT / ALERT';
-      policyActionEl.style.color = '#fbbf24';
+      policyActionEl.textContent = 'Cost-Optimal Gate: RATE_LIMIT / ALERT (Advisory)';
+      policyActionEl.style.color = 'var(--status-amber)';
     } else {
       badgeEl.className = 'badge-action-allow';
       badgeEl.textContent = 'ALLOW';
       policyActionEl.textContent = 'Cost-Optimal Gate: ALLOW (Safe)';
-      policyActionEl.style.color = '#34d399';
+      policyActionEl.style.color = 'var(--status-green)';
     }
   }
 
@@ -309,22 +309,22 @@ function renderShapExplanation(container, data) {
     const formattedShap = `${sign}${feat.shap_attribution.toFixed(4)}`;
     const formattedVal = formatFeatureVal(feat.value);
     const borderClass = isIncrease ? 'threat-increase' : 'threat-decrease';
-    const valColor = isIncrease ? '#f87171' : '#34d399';
+    const valColor = isIncrease ? 'var(--status-red)' : 'var(--status-green)';
     const dirText = isIncrease
       ? '▲ Increases RF Attack Score'
       : '▼ Decreases RF Attack Score (Pushes Benign)';
-    const dirColor = isIncrease ? '#fca5a5' : '#86efac';
+    const dirColor = isIncrease ? 'var(--status-red)' : 'var(--status-green)';
 
     html += `
       <div class="shap-factor ${borderClass}">
         <div class="shap-factor-title">
-          <span style="font-family: monospace; font-size: 0.8rem; color: #f8fafc;">${idx + 1}. ${escapeHtml(feat.feature)}</span>
-          <span style="color: ${valColor}; font-family: monospace; font-weight: 700; font-size: 0.78rem;">
+          <span style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-main);">${idx + 1}. ${escapeHtml(feat.feature)}</span>
+          <span style="color: ${valColor}; font-family: var(--font-mono); font-weight: 700; font-size: 0.76rem;">
             SHAP ${formattedShap}
           </span>
         </div>
         <div class="shap-factor-desc">
-          Value: <strong style="color: #ffffff; font-family: monospace;">${formattedVal}</strong> · 
+          Value: <strong style="color: var(--text-main); font-family: var(--font-mono);">${formattedVal}</strong> · 
           <span style="color: ${dirColor}; font-weight: 600;">${dirText}</span>
         </div>
       </div>
@@ -333,7 +333,7 @@ function renderShapExplanation(container, data) {
 
   html += `
     <div class="shap-scientific-notice">
-      <div style="font-weight: 700; color: #93c5fd; margin-bottom: 3px; font-size: 0.72rem;">
+      <div style="font-weight: 700; color: var(--text-main); margin-bottom: 2px; font-size: 0.72rem;">
         Random Forest TreeSHAP Explanation
       </div>
       <div style="font-size: 0.69rem; color: var(--text-dim); line-height: 1.35;">
@@ -348,9 +348,9 @@ function renderShapExplanation(container, data) {
 function renderShapLoading(container, flowId) {
   container.innerHTML = `
     <div style="text-align: center; color: var(--text-dim); padding: 32px 12px; font-size: 0.82rem;">
-      <div style="margin-bottom: 8px; font-weight: 600; color: #93c5fd;">⏳ Computing TreeSHAP...</div>
-      <div style="font-size: 0.73rem; color: var(--text-muted);">
-        Evaluating Random Forest tree decision attributions for Flow #${flowId}
+      <div style="margin-bottom: 6px; font-weight: 600; color: var(--text-main);">Computing TreeSHAP Attributions...</div>
+      <div style="font-size: 0.72rem; color: var(--text-muted);">
+        Evaluating Random Forest tree decision splits for Flow #${flowId}
       </div>
     </div>
   `;
@@ -465,7 +465,7 @@ async function startTwoMinuteScenario() {
 
     // Phase management
     if (elapsed < 25) {
-      phaseLabel.textContent = 'Phase 1: Normal Enterprise Traffic (0:00 - 0:25)';
+      phaseLabel.textContent = 'Phase 1: Normal Baseline Traffic (0:00 - 0:25)';
     } else if (elapsed === 25) {
       phaseLabel.textContent = 'Phase 2: PortScan Reconnaissance (0:25 - 0:55)';
       await fetch('/api/live/inject-attack', {
@@ -488,7 +488,7 @@ async function startTwoMinuteScenario() {
         body: JSON.stringify({ scenario: 'slowloris' }),
       });
     } else if (elapsed === 105) {
-      phaseLabel.textContent = 'Phase 5: Return to Normal Baseline (1:45 - 2:00)';
+      phaseLabel.textContent = 'Phase 5: Baseline Recovery (1:45 - 2:00)';
     } else if (scenarioSecondsLeft <= 0) {
       // Completed!
       clearInterval(scenarioTimer);

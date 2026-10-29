@@ -3,29 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>XRL-IDARS — 3-Minute Viva Demonstration</title>
+  <title>XRL-IDARS — Live Demonstration &amp; Research Evaluation</title>
   <style>
     :root {
-      --bg-primary: #0a0e17;
-      --bg-card: #111827;
-      --bg-card-hover: #1f293d;
-      --border: #243048;
-      --border-accent: #3b82f6;
-      --text-main: #f3f4f6;
-      --text-muted: #94a3b8;
-      --text-dim: #64748b;
-      --accent-blue: #3b82f6;
-      --accent-purple: #8b5cf6;
-      --accent-green: #10b981;
-      --accent-amber: #f59e0b;
-      --accent-red: #ef4444;
-      --glow-blue: rgba(59, 130, 246, 0.25);
-      --glow-green: rgba(16, 185, 129, 0.25);
-      --glow-red: rgba(239, 68, 68, 0.25);
-      --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 14px;
-      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      --bg-primary: #0d1117;
+      --bg-surface: #161b22;
+      --bg-surface-hover: #1c2128;
+      --bg-subtle: #21262d;
+      --border: #30363d;
+      --border-accent: #2563eb;
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --text-dim: #6e7681;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-subtle: rgba(37, 99, 235, 0.12);
+      --status-green: #22c55e;
+      --status-green-bg: rgba(34, 197, 94, 0.12);
+      --status-green-border: rgba(34, 197, 94, 0.35);
+      --status-amber: #f59e0b;
+      --status-amber-bg: rgba(245, 158, 11, 0.12);
+      --status-amber-border: rgba(245, 158, 11, 0.35);
+      --status-red: #ef4444;
+      --status-red-bg: rgba(239, 68, 68, 0.12);
+      --status-red-border: rgba(239, 68, 68, 0.35);
+      --radius: 6px;
+      --radius-sm: 4px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,180 +39,203 @@
       background: var(--bg-primary);
       color: var(--text-main);
       font-family: var(--font);
+      font-size: 13px;
       line-height: 1.5;
       padding: 16px 24px;
       min-height: 100vh;
     }
 
-    /* Header */
+    /* Top Navigation Header */
     .top-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 16px;
+      padding-bottom: 14px;
       border-bottom: 1px solid var(--border);
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       flex-wrap: wrap;
       gap: 12px;
     }
     .brand-title {
-      font-size: 1.4rem;
+      font-size: 1.25rem;
       font-weight: 700;
       color: #fff;
       display: flex;
       align-items: center;
       gap: 10px;
+      letter-spacing: -0.01em;
     }
     .brand-badge {
-      font-size: 0.72rem;
-      padding: 3px 8px;
-      background: #1e3a8a;
-      color: #93c5fd;
-      border-radius: 999px;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.04em;
+    }
+    .brand-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
     }
     .top-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
-    /* Buttons */
+    /* Standard Buttons */
     .btn {
-      padding: 8px 16px;
-      border-radius: var(--radius-sm);
+      padding: 7px 14px;
+      border-radius: var(--radius);
       font-weight: 600;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: all 0.2s ease;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
       border: 1px solid transparent;
       text-decoration: none;
+      line-height: 1.2;
     }
     .btn-primary {
-      background: #2563eb;
+      background: var(--accent);
       color: #fff;
+      border-color: var(--accent);
     }
     .btn-primary:hover {
-      background: #1d4ed8;
-      box-shadow: 0 0 12px var(--glow-blue);
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
     }
-    .btn-danger {
-      background: #dc2626;
-      color: #fff;
-    }
-    .btn-danger:hover {
-      background: #b91c1c;
-      box-shadow: 0 0 12px var(--glow-red);
-    }
-    .btn-outline {
-      background: transparent;
+    .btn-secondary {
+      background: var(--bg-surface);
       color: var(--text-main);
       border-color: var(--border);
     }
-    .btn-outline:hover {
-      background: var(--bg-card);
+    .btn-secondary:hover {
+      background: var(--bg-subtle);
       border-color: var(--text-muted);
     }
-    .btn-accent {
-      background: #059669;
-      color: #fff;
+    .btn-danger {
+      background: transparent;
+      color: var(--status-red);
+      border-color: var(--status-red-border);
     }
-    .btn-accent:hover {
-      background: #047857;
-      box-shadow: 0 0 12px var(--glow-green);
-    }
-    .btn-warning {
-      background: #d97706;
-      color: #fff;
-    }
-    .btn-warning:hover {
-      background: #b45309;
+    .btn-danger:hover {
+      background: var(--status-red-bg);
+      border-color: var(--status-red);
     }
 
-    /* 30-Second Viva Pitch Callout */
-    .pitch-banner {
-      background: linear-gradient(90deg, rgba(30, 58, 138, 0.35) 0%, rgba(17, 24, 39, 0.8) 100%);
-      border: 1px solid #1e40af;
-      border-radius: var(--radius-md);
-      padding: 12px 18px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
+    /* Select Control */
+    .select-wrapper {
+      position: relative;
+      display: inline-flex;
     }
-    .pitch-icon {
-      font-size: 1.4rem;
-      color: #60a5fa;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-    .pitch-text strong {
-      color: #93c5fd;
-      font-size: 0.88rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: block;
-      margin-bottom: 2px;
-    }
-    .pitch-text p {
-      font-size: 0.9rem;
-      color: #e2e8f0;
-      font-style: italic;
-    }
-
-    /* Scripted Scenario Progress Bar */
-    .scenario-progress-container {
-      background: var(--bg-card);
+    .select-control {
+      padding: 7px 26px 7px 12px;
+      background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 12px 18px;
-      margin-bottom: 20px;
+      border-radius: var(--radius);
+      color: var(--text-main);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .select-control:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .select-arrow {
+      position: absolute;
+      right: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+
+    /* System Overview Banner (Minimal & Informative) */
+    .overview-banner {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+    }
+    .overview-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+    .overview-text {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Demonstration Scenario Progress Bar */
+    .scenario-progress-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 16px;
       display: none;
     }
     .scenario-progress-header {
       display: flex;
       justify-content: space-between;
       margin-bottom: 8px;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
+      color: var(--text-main);
     }
     .progress-bar-track {
-      height: 8px;
-      background: #1e293b;
-      border-radius: 999px;
+      height: 6px;
+      background: var(--bg-subtle);
+      border-radius: 3px;
       overflow: hidden;
       position: relative;
     }
     .progress-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, #3b82f6, #10b981);
+      background: var(--accent);
       width: 0%;
       transition: width 0.3s ease;
     }
 
-    /* ZONE 1: Pipeline Strip */
+    /* SECTION 1: Detection & Response Pipeline */
     .zone-pipeline {
-      background: var(--bg-card);
+      background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 16px 20px;
-      margin-bottom: 20px;
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 16px;
     }
     .zone-title {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.06em;
       color: var(--text-muted);
       margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
     }
     .pipeline-strip {
       display: flex;
@@ -215,106 +243,108 @@
       justify-content: space-between;
       gap: 8px;
       overflow-x: auto;
-      padding: 8px 0;
+      padding: 4px 0;
     }
     .pipe-node {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: var(--radius-md);
-      padding: 10px 14px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 9px 12px;
       flex: 1;
-      min-width: 150px;
+      min-width: 130px;
       text-align: center;
       position: relative;
-      transition: all 0.25s ease;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
     }
     .pipe-node.active {
-      border-color: var(--accent-blue);
-      box-shadow: 0 0 14px var(--glow-blue);
-      background: #1e3a8a;
+      border-color: var(--accent);
+      background: #182234;
     }
     .pipe-node-title {
-      font-size: 0.88rem;
+      font-size: 0.84rem;
       font-weight: 700;
       color: #fff;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
     }
     .pipe-node-sub {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--text-muted);
     }
     .pipe-arrow {
-      color: #475569;
-      font-size: 1.1rem;
+      color: var(--text-dim);
+      font-size: 1rem;
       font-weight: bold;
       flex-shrink: 0;
     }
+    .pipeline-footnote {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-top: 8px;
+      text-align: right;
+    }
 
-    /* ZONE 2: Four Numbers Only */
+    /* SECTION 2: Demonstration Stream Counters */
     .zone-four-numbers {
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     .counter-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
+      gap: 12px;
     }
     .counter-card {
-      background: var(--bg-card);
+      background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 16px;
-      text-align: center;
-      transition: transform 0.2s ease;
-      position: relative;
-      overflow: hidden;
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      text-align: left;
     }
-    .counter-card:hover {
-      transform: translateY(-2px);
-    }
-    .counter-card.tp { border-top: 4px solid var(--accent-green); }
-    .counter-card.fn { border-top: 4px solid var(--accent-red); }
-    .counter-card.fp { border-top: 4px solid var(--accent-amber); }
-    .counter-card.total { border-top: 4px solid var(--accent-blue); }
+    .counter-card.total { border-top: 2px solid var(--border); }
+    .counter-card.tp { border-top: 2px solid var(--status-green); }
+    .counter-card.fn { border-top: 2px solid var(--status-red); }
+    .counter-card.fp { border-top: 2px solid var(--status-amber); }
 
-    .counter-val {
-      font-size: 2.2rem;
-      font-weight: 800;
-      color: #fff;
-      line-height: 1.1;
-      margin: 4px 0;
-      font-variant-numeric: tabular-nums;
-    }
     .counter-label {
-      font-size: 0.82rem;
+      font-size: 0.75rem;
       font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.04em;
+    }
+    .counter-val {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.15;
+      margin: 4px 0 2px;
+      font-variant-numeric: tabular-nums;
+      font-family: var(--font-mono);
     }
     .counter-hint {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--text-dim);
-      margin-top: 4px;
     }
 
-    /* ZONE 3: Split View - Timeline Stream & "Why?" Card */
+    /* SECTION 3: Traffic & Explainability Split View */
     .zone-split {
       display: grid;
-      grid-template-columns: 1.3fr 1fr;
-      gap: 16px;
-      margin-bottom: 20px;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
     }
     @media (max-width: 992px) {
       .zone-split { grid-template-columns: 1fr; }
       .counter-grid { grid-template-columns: repeat(2, 1fr); }
     }
+    @media (max-width: 540px) {
+      .counter-grid { grid-template-columns: 1fr; }
+    }
 
     .stream-container {
-      background: var(--bg-card);
+      background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 16px;
+      border-radius: var(--radius);
+      padding: 14px;
       display: flex;
       flex-direction: column;
       height: 480px;
@@ -323,150 +353,165 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
-      gap: 10px;
+      margin-bottom: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
     .stream-filters {
       display: flex;
-      gap: 6px;
+      gap: 4px;
     }
     .filter-btn {
-      padding: 4px 10px;
-      background: #1e293b;
+      padding: 3px 8px;
+      background: var(--bg-subtle);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       color: var(--text-muted);
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       cursor: pointer;
+      font-weight: 500;
     }
     .filter-btn.active {
-      background: #2563eb;
+      background: var(--accent);
       color: #fff;
-      border-color: #3b82f6;
+      border-color: var(--accent);
     }
     .flow-list {
       flex: 1;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       padding-right: 4px;
     }
     .flow-row {
-      background: #1a2234;
+      background: var(--bg-subtle);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 10px 12px;
+      padding: 8px 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
-      transition: all 0.15s ease;
-      font-size: 0.82rem;
+      transition: background-color 0.12s ease, border-color 0.12s ease;
+      font-size: 0.8rem;
     }
     .flow-row:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--accent-blue);
+      background: var(--bg-surface-hover);
+      border-color: var(--text-dim);
     }
     .flow-row.selected {
-      border-color: #60a5fa;
-      background: #1e3a8a;
-      box-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+      border-color: var(--accent);
+      background: #182234;
     }
     .flow-main {
       display: flex;
       flex-direction: column;
       gap: 2px;
+      min-width: 0;
     }
     .flow-endpoints {
-      font-family: monospace;
-      font-size: 0.82rem;
-      color: #e2e8f0;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-main);
       font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .flow-meta {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--text-dim);
     }
     .flow-badge-group {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      flex-shrink: 0;
     }
     .flow-score-bar-bg {
-      width: 60px;
-      height: 6px;
-      background: #334155;
-      border-radius: 999px;
+      width: 50px;
+      height: 4px;
+      background: var(--bg-primary);
+      border-radius: 2px;
       overflow: hidden;
     }
     .flow-score-bar-fill {
       height: 100%;
-      border-radius: 999px;
+      border-radius: 2px;
     }
     .badge-attack {
-      background: rgba(239, 68, 68, 0.2);
-      color: #fca5a5;
-      border: 1px solid #ef4444;
-      padding: 2px 7px;
-      border-radius: 4px;
+      background: var(--status-red-bg);
+      color: var(--status-red);
+      border: 1px solid var(--status-red-border);
+      padding: 1px 6px;
+      border-radius: var(--radius-sm);
       font-weight: 700;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
     }
     .badge-benign {
-      background: rgba(16, 185, 129, 0.2);
-      color: #6ee7b7;
-      border: 1px solid #10b981;
-      padding: 2px 7px;
-      border-radius: 4px;
+      background: var(--status-green-bg);
+      color: var(--status-green);
+      border: 1px solid var(--status-green-border);
+      padding: 1px 6px;
+      border-radius: var(--radius-sm);
       font-weight: 700;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
+    }
+    .badge-rule {
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 1px 6px;
+      border-radius: var(--radius-sm);
+      font-size: 0.68rem;
+      font-weight: 600;
     }
     .badge-action-allow {
-      background: #064e3b;
-      color: #a7f3d0;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.7rem;
-      font-weight: bold;
+      background: var(--status-green-bg);
+      color: var(--status-green);
+      border: 1px solid var(--status-green-border);
+      padding: 1px 6px;
+      border-radius: var(--radius-sm);
+      font-size: 0.68rem;
+      font-weight: 700;
     }
     .badge-action-block {
-      background: #7f1d1d;
-      color: #fecaca;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.7rem;
-      font-weight: bold;
+      background: var(--status-red-bg);
+      color: var(--status-red);
+      border: 1px solid var(--status-red-border);
+      padding: 1px 6px;
+      border-radius: var(--radius-sm);
+      font-size: 0.68rem;
+      font-weight: 700;
     }
     .badge-action-alert {
-      background: #78350f;
-      color: #fde68a;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.7rem;
-      font-weight: bold;
+      background: var(--status-amber-bg);
+      color: var(--status-amber);
+      border: 1px solid var(--status-amber-border);
+      padding: 1px 6px;
+      border-radius: var(--radius-sm);
+      font-size: 0.68rem;
+      font-weight: 700;
     }
 
-    /* "Why?" Card */
+    /* "Why?" Card (TreeSHAP & Advisory Action) */
     .why-card {
-      background: var(--bg-card);
-      border: 1px solid #3b82f6;
-      border-radius: var(--radius-lg);
-      padding: 18px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
       display: flex;
       flex-direction: column;
       height: 480px;
-      box-shadow: 0 0 16px rgba(59, 130, 246, 0.15);
-      position: relative;
     }
     .why-header {
       border-bottom: 1px solid var(--border);
-      padding-bottom: 12px;
-      margin-bottom: 14px;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
     }
     .why-title {
-      font-size: 1.1rem;
+      font-size: 0.96rem;
       font-weight: 700;
       color: #fff;
       display: flex;
@@ -476,158 +521,167 @@
     .why-meta-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 8px;
       margin-top: 10px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
     }
     .why-meta-item {
-      background: #1a2234;
-      padding: 8px 10px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      padding: 6px 8px;
       border-radius: var(--radius-sm);
     }
     .why-meta-label {
       color: var(--text-dim);
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
     .why-meta-val {
-      color: #fff;
+      color: var(--text-main);
       font-weight: 600;
-      font-family: monospace;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
     }
 
     .why-shap-container {
       flex: 1;
       overflow-y: auto;
-      margin-top: 8px;
+      margin-top: 6px;
     }
     .why-shap-title {
-      font-size: 0.82rem;
+      font-size: 0.76rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #93c5fd;
-      margin-bottom: 10px;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
       gap: 6px;
     }
     .shap-factor {
-      background: #1e293b;
-      border-left: 3px solid #3b82f6;
-      border-radius: 4px;
-      padding: 10px;
-      margin-bottom: 8px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      margin-bottom: 6px;
     }
-    .shap-factor.high-impact,
     .shap-factor.threat-increase {
-      border-left-color: var(--accent-red);
-      background: rgba(239, 68, 68, 0.08);
+      border-left-color: var(--status-red);
+      background: rgba(239, 68, 68, 0.04);
     }
     .shap-factor.threat-decrease {
-      border-left-color: var(--accent-green);
-      background: rgba(16, 185, 129, 0.08);
+      border-left-color: var(--status-green);
+      background: rgba(34, 197, 94, 0.04);
     }
     .shap-scientific-notice {
-      background: #0d1524;
+      background: var(--bg-subtle);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 8px 10px;
-      margin-top: 10px;
+      margin-top: 8px;
       margin-bottom: 4px;
     }
     .shap-factor-title {
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-main);
       display: flex;
       justify-content: space-between;
     }
     .shap-factor-desc {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
-      margin-top: 3px;
+      margin-top: 2px;
     }
 
     .why-policy-box {
       margin-top: auto;
-      padding-top: 12px;
+      padding-top: 10px;
       border-top: 1px solid var(--border);
-      font-size: 0.8rem;
-      background: #131d31;
-      padding: 10px;
+      font-size: 0.78rem;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      padding: 8px 10px;
       border-radius: var(--radius-sm);
     }
     .why-policy-decision {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-weight: 700;
-      color: #fff;
+      font-weight: 600;
+      color: var(--text-main);
     }
 
-    /* ZONE 4: Held-Out Benchmark Strip */
+    /* SECTION 4: Research Benchmark Strip */
     .zone-benchmark-strip {
-      background: linear-gradient(180deg, #131c2e 0%, #0d1524 100%);
-      border: 1px solid #38bdf8;
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.12);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
     }
     .benchmark-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 8px;
     }
     .benchmark-title {
-      font-size: 1.05rem;
+      font-size: 0.95rem;
       font-weight: 700;
-      color: #e0f2fe;
+      color: var(--text-main);
       display: flex;
       align-items: center;
       gap: 8px;
     }
     .benchmark-tag {
-      background: #0369a1;
-      color: #e0f2fe;
-      font-size: 0.72rem;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-weight: 700;
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
     }
     .benchmark-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
+      gap: 12px;
     }
     @media (max-width: 992px) {
       .benchmark-grid { grid-template-columns: repeat(2, 1fr); }
     }
+    @media (max-width: 540px) {
+      .benchmark-grid { grid-template-columns: 1fr; }
+    }
     .benchmark-tile {
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid #1e293b;
-      border-radius: var(--radius-md);
-      padding: 14px;
-      text-align: center;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      text-align: left;
     }
     .benchmark-tile-name {
-      font-size: 0.8rem;
-      color: #94a3b8;
+      font-size: 0.75rem;
+      color: var(--text-muted);
       font-weight: 600;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
     .benchmark-tile-score {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: #38bdf8;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-main);
       font-variant-numeric: tabular-nums;
+      font-family: var(--font-mono);
+      line-height: 1.15;
     }
     .benchmark-tile-detail {
-      font-size: 0.72rem;
-      color: #64748b;
+      font-size: 0.7rem;
+      color: var(--text-dim);
       margin-top: 4px;
     }
 
@@ -635,8 +689,7 @@
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, 0.7);
       display: none;
       align-items: center;
       justify-content: center;
@@ -644,109 +697,123 @@
       padding: 20px;
     }
     .modal-card {
-      background: var(--bg-card);
-      border: 1px solid var(--accent-blue);
-      border-radius: var(--radius-lg);
-      padding: 26px;
-      max-width: 540px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 500px;
       width: 100%;
-      box-shadow: 0 0 30px var(--glow-blue);
-      text-align: center;
+      text-align: left;
     }
     .modal-title {
-      font-size: 1.35rem;
-      font-weight: 800;
+      font-size: 1.15rem;
+      font-weight: 700;
       color: #fff;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .modal-desc {
       color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-bottom: 18px;
+      font-size: 0.82rem;
+      margin-bottom: 16px;
+      line-height: 1.4;
     }
     .modal-stats {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 20px;
+      gap: 10px;
+      margin-bottom: 16px;
     }
     .modal-stat-box {
-      background: #1e293b;
-      padding: 12px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      padding: 10px 12px;
       border-radius: var(--radius-sm);
     }
     .modal-stat-val {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: #60a5fa;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+      font-family: var(--font-mono);
     }
     .modal-stat-label {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: var(--text-dim);
       text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
     .modal-takeaway {
-      background: rgba(30, 58, 138, 0.3);
-      border-left: 4px solid #3b82f6;
-      text-align: left;
-      padding: 12px;
-      border-radius: 4px;
-      font-size: 0.85rem;
-      color: #e2e8f0;
-      margin-bottom: 20px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.45;
+    }
+    .modal-takeaway strong {
+      color: var(--text-main);
+      display: block;
+      margin-bottom: 2px;
+      font-size: 0.82rem;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Header -->
+  <!-- Top Header Navigation -->
   <header class="top-header">
-    <div>
+    <div class="brand-group">
       <div class="brand-title">
-        🛡️ XRL-IDARS
-        <span class="brand-badge">Viva Defense Edition</span>
+        <span>XRL-IDARS</span>
+        <span class="brand-badge">Research Exhibition</span>
       </div>
-      <div style="font-size: 0.82rem; color: var(--text-dim); margin-top: 2px;">
-        Fast 3-Minute Examiner Walkthrough · Real-Time Replay · TreeSHAP Explainability · Autonomous Action
+      <div class="brand-subtitle">
+        Explainable Reinforcement Learning Intrusion Detection &amp; Autonomous Response System
       </div>
     </div>
     <div class="top-actions">
       <button id="btn-run-scenario" class="btn btn-primary" onclick="startTwoMinuteScenario()">
-        ▶ Run 2-Min Scenario
+        ▶ Run Demonstration Scenario
       </button>
-      <div style="display: inline-flex; position: relative;">
-        <select id="select-inject-attack" class="btn btn-warning" style="appearance: none; -webkit-appearance: none; padding-right: 28px;" onchange="handleInjectSelect(this.value)">
-          <option value="" disabled selected>⚡ Inject Attack...</option>
+      <div class="select-wrapper">
+        <select id="select-inject-attack" class="select-control" onchange="handleInjectSelect(this.value)">
+          <option value="" disabled selected>Inject Attack Pattern...</option>
           <option value="syn_flood">SYN Flood (L4 Volumetric)</option>
-          <option value="port_sweep">TCP Port Sweep (Recon)</option>
-          <option value="slowloris">Slowloris (L7 Low & Slow)</option>
-          <option value="udp_flood">UDP Flood (Bandwidth Exh.)</option>
+          <option value="port_sweep">TCP Port Sweep (Reconnaissance)</option>
+          <option value="slowloris">Slowloris (L7 Low &amp; Slow)</option>
+          <option value="udp_flood">UDP Flood (Bandwidth Exhaustion)</option>
           <option value="normal">Normal Benign Traffic</option>
         </select>
-        <span style="position: absolute; right: 10px; top: 10px; pointer-events: none; font-size: 0.7rem;">▼</span>
+        <span class="select-arrow">▼</span>
       </div>
       <button id="btn-stop-stream" class="btn btn-danger" onclick="stopReplayStream()">
         ⏹ Stop
       </button>
-      <a href="/index.html" class="btn btn-outline" title="Open the full 5-section research workbench">
-        🔬 Open Full Research Workbench →
+      <a href="/index.html" class="btn btn-secondary" title="Open the full 5-section research workbench">
+        Research Workbench →
       </a>
     </div>
   </header>
 
-  <!-- 30-Second Viva Pitch Callout -->
-  <div class="pitch-banner">
-    <div class="pitch-icon">💡</div>
-    <div class="pitch-text">
-      <strong>30-Second Viva Summary for Examiners</strong>
-      <p>"XRL-IDARS watches network flows and does three things: it detects attacks using Random Forest (with LSTM benchmarked in evaluation), it explains each decision with real TreeSHAP, and a reinforcement-learning agent recommends the response. We can't attack a shared network, so the demo replays held-out benchmark traffic through the same pipeline. The benchmark numbers come from the full test sets."</p>
+  <!-- System Overview Banner -->
+  <div class="overview-banner">
+    <div class="overview-title">System Overview</div>
+    <div class="overview-text">
+      XRL-IDARS inspects network traffic flows through an integrated multi-tier pipeline: deterministic rules catch protocol violations and volumetric bursts, a trained Random Forest classifier performs primary flow inference, TreeSHAP computes genuine local feature attributions for each prediction, and a Deep Q-Network recommends mitigation actions under a deterministic advisory safety gate. Replayed traffic streams held-out benchmark datasets through the live pipeline to demonstrate real-time response.
     </div>
   </div>
 
-  <!-- Scenario Progress Indicator -->
+  <!-- Demonstration Scenario Progress Indicator -->
   <div id="scenario-progress" class="scenario-progress-container">
     <div class="scenario-progress-header">
-      <span id="scenario-phase-name">Phase 1: Normal Enterprise Traffic (0:00 - 0:30)</span>
+      <span id="scenario-phase-name">Phase 1: Normal Baseline Traffic (0:00 - 0:25)</span>
       <span id="scenario-time-remaining">120s remaining</span>
     </div>
     <div class="progress-bar-track">
@@ -754,16 +821,18 @@
     </div>
   </div>
 
-  <!-- ZONE 1: Pipeline Strip -->
+  <!-- SECTION 1: Pipeline Strip -->
   <section class="zone-pipeline">
     <div class="zone-title">
-      <span>1. Autonomous Detection & Response Pipeline</span>
-      <span style="font-weight: normal; text-transform: none; font-size: 0.75rem;">End-to-End Latency: ~37.5 ms P50 (Burst Queue) · ~3.5 ms RF Single-Vector</span>
+      <span>1. Autonomous Detection &amp; Response Pipeline</span>
+      <span style="font-weight: normal; text-transform: none; font-size: 0.72rem; color: var(--text-dim);">
+        End-to-End Latency: ~37.5 ms P50 (Burst Queue) · ~3.5 ms RF Single-Vector
+      </span>
     </div>
     <div class="pipeline-strip">
       <div class="pipe-node" id="node-packet">
         <div class="pipe-node-title">1. Packets</div>
-        <div class="pipe-node-sub">Raw AF_PACKET / PCAP</div>
+        <div class="pipe-node-sub">AF_PACKET / PCAP Stream</div>
       </div>
       <div class="pipe-arrow">→</div>
       <div class="pipe-node" id="node-features">
@@ -772,8 +841,8 @@
       </div>
       <div class="pipe-arrow">→</div>
       <div class="pipe-node" id="node-detector">
-        <div class="pipe-node-title">3. Rules & ML</div>
-        <div class="pipe-node-sub">Rules + RF Classifier</div>
+        <div class="pipe-node-title">3. Rules &amp; ML</div>
+        <div class="pipe-node-sub">Deterministic Rules + RF</div>
       </div>
       <div class="pipe-arrow">→</div>
       <div class="pipe-node" id="node-shap">
@@ -783,17 +852,21 @@
       <div class="pipe-arrow">→</div>
       <div class="pipe-node" id="node-action">
         <div class="pipe-node-title">5. Response Gate</div>
-        <div class="pipe-node-sub">DQN Policy Recommendation</div>
+        <div class="pipe-node-sub">DQN Policy (Advisory Mode)</div>
       </div>
     </div>
-    <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 8px; text-align: right;">* Live & replay monitoring operates on Random Forest R10 tabular flows. Supervised LSTM and RF-LSTM Fusion are evaluated in the offline benchmark suite. Response actions are observational / dry-run recommendations.</div>
+    <div class="pipeline-footnote">
+      * Live and replay monitoring operates on Random Forest R10 tabular flows. Supervised LSTM and RF-LSTM fusion are evaluated in the offline benchmark suite. Mitigation actions remain strictly advisory in dry-run mode.
+    </div>
   </section>
 
-  <!-- ZONE 2: Four Numbers Only -->
+  <!-- SECTION 2: Demonstration Stream Counters -->
   <section class="zone-four-numbers">
     <div class="zone-title">
-      <span>2. Live Replay Sample Counters (Demonstration Stream Only)</span>
-      <span style="font-weight: normal; text-transform: none; font-size: 0.72rem; color: #f59e0b;">⚠️ Sample pool statistics · Strictly separated from held-out benchmark</span>
+      <span>2. Demonstration Stream Counters</span>
+      <span style="font-weight: normal; text-transform: none; font-size: 0.72rem; color: var(--text-muted);">
+        Replay sample statistics · Strictly separated from held-out benchmark evaluation
+      </span>
     </div>
     <div class="counter-grid">
       <div class="counter-card total">
@@ -802,24 +875,24 @@
         <div class="counter-hint">Sequential replayed flows</div>
       </div>
       <div class="counter-card tp">
-        <div class="counter-label">Attacks Caught</div>
-        <div class="counter-val" id="cnt-tp" style="color: #34d399;">0</div>
+        <div class="counter-label">Attacks Detected</div>
+        <div class="counter-val" id="cnt-tp" style="color: var(--status-green);">0</div>
         <div class="counter-hint">True Positives (Alerted / Blocked)</div>
       </div>
       <div class="counter-card fn">
         <div class="counter-label">Attacks Missed</div>
-        <div class="counter-val" id="cnt-fn" style="color: #f87171;">0</div>
+        <div class="counter-val" id="cnt-fn" style="color: var(--status-red);">0</div>
         <div class="counter-hint">False Negatives (Sub-threshold)</div>
       </div>
       <div class="counter-card fp">
         <div class="counter-label">False Alarms</div>
-        <div class="counter-val" id="cnt-fp" style="color: #fbbf24;">0</div>
+        <div class="counter-val" id="cnt-fp" style="color: var(--status-amber);">0</div>
         <div class="counter-hint">False Positives (Benign penalized)</div>
       </div>
     </div>
   </section>
 
-  <!-- ZONE 3: Split View - Timeline Stream & "Why?" Card -->
+  <!-- SECTION 3: Traffic & Explainability Split View -->
   <section class="zone-split">
     <!-- Left: Flow Stream -->
     <div class="stream-container">
@@ -835,16 +908,16 @@
       </div>
       <div class="flow-list" id="flow-stream-list">
         <div style="text-align: center; color: var(--text-dim); margin-top: 80px; font-size: 0.85rem;">
-          Click "▶ Run 2-Min Scenario" or "⚡ Inject Attack" above to begin live stream replay.
+          Click "▶ Run Demonstration Scenario" or "Inject Attack Pattern" above to begin live stream replay.
         </div>
       </div>
     </div>
 
-    <!-- Right: "Why?" Card -->
+    <!-- Right: "Why?" Explainability Card -->
     <div class="why-card" id="why-card">
       <div class="why-header">
         <div class="why-title">
-          <span>💡 Flow Explainability ("Why?")</span>
+          <span>Flow Explainability &amp; Advisory Response</span>
           <span id="why-action-badge" class="badge-action-allow" style="margin-left: auto;">ALLOW</span>
         </div>
         <div class="why-meta-grid">
@@ -858,18 +931,18 @@
           </div>
           <div class="why-meta-item" style="grid-column: span 2;">
             <div class="why-meta-label">Endpoints (Src → Dst)</div>
-            <div class="why-meta-val" id="why-endpoints" style="font-size: 0.76rem;">172.16.0.1:49152 → 192.168.10.50:80</div>
+            <div class="why-meta-val" id="why-endpoints" style="font-size: 0.74rem;">172.16.0.1:49152 → 192.168.10.50:80</div>
           </div>
           <div class="why-meta-item" id="why-rule-row" style="grid-column: span 2; display: none;">
-            <div class="why-meta-label" style="color: #818cf8;">Deterministic Rule Match</div>
-            <div class="why-meta-val" id="why-rule-val" style="font-size: 0.76rem; color: #a5b4fc; font-weight: 600;">--</div>
+            <div class="why-meta-label">Deterministic Rule Match</div>
+            <div class="why-meta-val" id="why-rule-val" style="font-size: 0.74rem;">--</div>
           </div>
         </div>
       </div>
 
       <div class="why-shap-title">
-        <span>Random Forest TreeSHAP Explanation</span>
-        <span style="font-size: 0.7rem; color: var(--text-dim); text-transform: none;">(Local Feature Attributions)</span>
+        <span>Random Forest TreeSHAP Attribution</span>
+        <span style="font-size: 0.68rem; color: var(--text-dim); text-transform: none; font-weight: normal;">(Local Feature Weights)</span>
       </div>
 
       <div class="why-shap-container" id="why-shap-factors">
@@ -881,23 +954,23 @@
       <div class="why-policy-box">
         <div class="why-policy-decision">
           <span>Action Recommendation:</span>
-          <span id="why-policy-action" style="color: #60a5fa;">Cost-Optimal Gate: ALLOW (Advisory)</span>
+          <span id="why-policy-action" style="color: var(--text-main);">Cost-Optimal Gate: ALLOW (Safe)</span>
         </div>
-        <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 3px;">
-          Enforcement Invariant: Advisory dry-run mode. Deterministic Safety Gate prevents network mutations.
+        <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 3px;">
+          Enforcement Invariant: Advisory dry-run mode. Network mutations and firewall changes are disabled.
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ZONE 4: Distinct Held-Out Benchmark Strip -->
+  <!-- SECTION 4: Held-Out Research Benchmark Strip -->
   <section class="zone-benchmark-strip">
     <div class="benchmark-header">
       <div class="benchmark-title">
-        🏛️ 4. Official Held-Out Benchmark Results
-        <span class="benchmark-tag">Full Test Dataset: 355,833 Flows</span>
+        <span>4. Research Benchmark Evaluation (Offline Test Sets)</span>
+        <span class="benchmark-tag">355,833 Held-Out Flows</span>
       </div>
-      <div style="font-size: 0.78rem; color: #94a3b8;">
+      <div style="font-size: 0.74rem; color: var(--text-muted);">
         Frozen Seed-42 Artifacts · Strictly Separated from Replay Demonstration
       </div>
     </div>
@@ -914,12 +987,12 @@
       </div>
       <div class="benchmark-tile">
         <div class="benchmark-tile-name">RF-LSTM Score-Fusion</div>
-        <div class="benchmark-tile-score" style="color: #34d399;">0.9745</div>
+        <div class="benchmark-tile-score">0.9745</div>
         <div class="benchmark-tile-detail">F1-Score · Accuracy: 99.06% (α = 0.60)</div>
       </div>
       <div class="benchmark-tile">
         <div class="benchmark-tile-name">Response Policy Speedup</div>
-        <div class="benchmark-tile-score" style="color: #a78bfa;">~51.4x</div>
+        <div class="benchmark-tile-score">~51.4x</div>
         <div class="benchmark-tile-detail">Cost-Optimal: 1.95 µs vs Dueling DQN: 100.23 µs</div>
       </div>
     </div>
@@ -928,8 +1001,7 @@
   <!-- Scorecard Modal -->
   <div id="modal-scorecard" class="modal-overlay">
     <div class="modal-card">
-      <div style="font-size: 2.2rem; margin-bottom: 6px;">🎉</div>
-      <div class="modal-title">2-Minute Scenario Complete!</div>
+      <div class="modal-title">Demonstration Scenario Complete</div>
       <div class="modal-desc">
         Demonstration stream replayed held-out multi-regime flows through the active pipeline.
       </div>
@@ -940,27 +1012,27 @@
           <div class="modal-stat-label">Flows Replayed</div>
         </div>
         <div class="modal-stat-box">
-          <div class="modal-stat-val" id="modal-caught" style="color: #34d399;">48 / 50</div>
+          <div class="modal-stat-val" id="modal-caught">48 / 50</div>
           <div class="modal-stat-label">Attacks Caught (Recall)</div>
         </div>
         <div class="modal-stat-box">
-          <div class="modal-stat-val" id="modal-false-alarms" style="color: #38bdf8;">0</div>
+          <div class="modal-stat-val" id="modal-false-alarms">0</div>
           <div class="modal-stat-label">False Alarms (FP)</div>
         </div>
         <div class="modal-stat-box">
-          <div class="modal-stat-val" id="modal-precision" style="color: #a78bfa;">100.0%</div>
+          <div class="modal-stat-val" id="modal-precision">100.0%</div>
           <div class="modal-stat-label">Sample Precision</div>
         </div>
       </div>
 
       <div class="modal-takeaway">
-        <strong>Examiner Takeaway:</strong>
-        The system reliably isolated high-rate volumetric DDoS and stealthy port sweeps from legitimate enterprise traffic, enforcing policy actions with zero false alarms on normal flows.
+        <strong>Summary of Results</strong>
+        The detection pipeline isolated high-rate volumetric attacks and stealthy port sweeps from legitimate traffic, recommending appropriate mitigation actions with zero false alarms on normal flows.
       </div>
 
-      <div style="display: flex; justify-content: center; gap: 12px;">
-        <button class="btn btn-primary" onclick="closeScorecard()">Done / Inspect Flows</button>
-        <a href="/index.html" class="btn btn-outline">Go to Full Research Workbench →</a>
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="closeScorecard()">Close / Inspect Flows</button>
+        <a href="/index.html" class="btn btn-secondary">Go to Research Workbench →</a>
       </div>
     </div>
   </div>
