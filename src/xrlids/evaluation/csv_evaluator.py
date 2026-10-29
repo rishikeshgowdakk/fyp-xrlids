@@ -49,6 +49,8 @@ from xrlids.evaluation.metrics import (
 )
 from xrlids.features.definitions import R4_FEATURES, R10_FEATURES
 from xrlids.models.lstm import LSTMDetector, SequenceSet, build_sequences
+from xrlids.response.state import StateBuilder
+from xrlids.response.types import Action
 
 logger = logging.getLogger("xrlids.evaluation.csv_evaluator")
 
@@ -366,77 +368,91 @@ def _load_benchmark_models(benchmark: str) -> dict[str, Any]:
     return models_bundle
 
 
-def _get_dqn_action(attack_score: float, flow_bytes: float = 1000.0) -> dict[str, Any]:
-    """Evaluate response action recommendation using the trained Dueling DQN checkpoint.
+def _get_dqn_action(
+    attack_score: float,
+    flow_bytes: float = 0.0,
+    *,
+    state_builder: StateBuilder | None = None,
+    cooldown_remaining: int = 0,
+) -> dict[str, Any]:
+    """Run the frozen Dueling DQN on the project's causal six-dimensional state.
 
-    Input state vector (6D):
-    [attack_score, flow_bytes_norm, host_criticality=0.5, current_quarantine=0.0, cooldown=0.0, hist_actions=0.0]
+    State order is [score, score_delta, recent_alert_density, previous_action,
+    cooldown_fraction, log_volume]. Ground truth is never an input. The caller
+    supplies cooldown state from prior recommendations; the builder maintains
+    score/alert/action history across sample flows in chronological row order.
+    Recommendations are observational only and never mutate firewall/network state.
     """
     actions = ["ALLOW", "ALERT", "RATE_LIMIT", "ISOLATE"]
     dqn_path = REPO_ROOT / "models" / "dqn" / "dqn_4action_best.pt"
+    builder = state_builder if state_builder is not None else StateBuilder()
+    state_np = builder.build_state(
+        attack_score=float(attack_score),
+        flow_bytes_per_s=max(0.0, float(flow_bytes)),
+        cooldown_remaining=max(0, int(cooldown_remaining)),
+    )
+    state_payload = [round(float(value), 6) for value in state_np]
+    state_schema = ["attack_score", "score_delta", "recent_alert_density", "previous_action", "cooldown_fraction", "log_volume"]
 
-    # Fallback analytic recommendation if DQN weights absent
-    if not dqn_path.exists():
-        if attack_score >= 0.85:
-            rec_act = "ISOLATE"
-        elif attack_score >= 0.50:
-            rec_act = "RATE_LIMIT"
-        else:
-            rec_act = "ALLOW"
+    def disclosed_fallback(reason: str) -> dict[str, Any]:
+        # Never label a rule-based recommendation as DQN inference.
+        rec_act = "ISOLATE" if attack_score >= 0.85 else (
+            "RATE_LIMIT" if attack_score >= 0.50 else (
+                "ALERT" if attack_score >= 0.20 else "ALLOW"
+            )
+        )
+        builder.update_history(float(attack_score), Action[rec_act], cooldown_remaining=max(0, int(cooldown_remaining)))
         return {
             "recommended_action": rec_act,
-            "policy_type": "RULE_DRY_RUN (CostOptimalThresholdPolicy)",
-            "checkpoint": "none (analytic baseline)",
-            "safety_status": "PASSED (Rule-based analytic baseline)",
-            "execution_mode": "DRY_RUN (Observational only; zero firewall mutation)",
+            "policy_type": "RULE_DRY_RUN (explicit fallback baseline; not DQN)",
+            "checkpoint": str(dqn_path.relative_to(REPO_ROOT)) if dqn_path.exists() else "missing",
+            "safety_status": "OBSERVATIONAL_ONLY",
+            "execution_mode": "DRY_RUN (no firewall or network mutation)",
             "q_values": None,
+            "state_vector": state_payload,
+            "state_schema": state_schema,
             "is_fallback": True,
-            "fallback_reason": f"DQN checkpoint absent at {dqn_path}",
+            "fallback_reason": reason,
         }
+
+    if not dqn_path.exists():
+        return disclosed_fallback(f"DQN checkpoint absent at {dqn_path}")
 
     try:
         from xrlids.response.dqn.network import DuelingQNetwork
-        if "net" not in _DQN_CACHE:
+        cache_key = str(dqn_path.resolve())
+        if cache_key not in _DQN_CACHE:
             checkpoint = torch.load(dqn_path, map_location="cpu", weights_only=False)
             net = DuelingQNetwork(input_dim=6, action_dim=4)
-            if "online_net_state_dict" in checkpoint:
-                net.load_state_dict(checkpoint["online_net_state_dict"])
-            elif "state_dict" in checkpoint:
-                net.load_state_dict(checkpoint["state_dict"])
+            state_dict = checkpoint.get("online_net_state_dict", checkpoint.get("state_dict"))
+            if state_dict is None:
+                raise ValueError("Checkpoint contains neither online_net_state_dict nor state_dict")
+            net.load_state_dict(state_dict, strict=True)
             net.eval()
-            _DQN_CACHE["net"] = net
-        else:
-            net = _DQN_CACHE["net"]
+            _DQN_CACHE[cache_key] = net
+        net = _DQN_CACHE[cache_key]
 
-        bytes_norm = float(np.clip(np.log1p(flow_bytes) / 16.0, 0.0, 1.0))
-        state = torch.tensor([[float(attack_score), bytes_norm, 0.5, 0.0, 0.0, 0.0]], dtype=torch.float32)
+        state = torch.as_tensor(state_np, dtype=torch.float32).unsqueeze(0)
         with torch.no_grad():
             q_vals = net(state)
             action_idx = int(torch.argmax(q_vals, dim=1).item())
 
         rec_act = actions[action_idx]
+        builder.update_history(float(attack_score), Action[rec_act], cooldown_remaining=max(0, int(cooldown_remaining)))
         return {
             "recommended_action": rec_act,
             "policy_type": "DQN_NEURAL_POLICY (DuelingQNetwork)",
-            "checkpoint": "models/dqn/dqn_4action_best.pt",
-            "safety_status": "PASSED (Within 20% quarantine budget and cooldown invariants)",
-            "execution_mode": "DRY_RUN (Observational only; zero firewall mutation)",
-            "q_values": {act: round(float(q_vals[0, i].item()), 4) for i, act in enumerate(actions)},
+            "checkpoint": str(dqn_path.relative_to(REPO_ROOT)),
+            "safety_status": "OBSERVATIONAL_ONLY — recommendation is not executed",
+            "execution_mode": "DRY_RUN (no firewall or network mutation)",
+            "q_values": {act: round(float(q_vals[0, i].item()), 6) for i, act in enumerate(actions)},
+            "state_vector": state_payload,
+            "state_schema": state_schema,
             "is_fallback": False,
         }
     except Exception as exc:
-        logger.warning("DQN inference failed, falling back to rule baseline: %s", exc)
-        rec_act = "ISOLATE" if attack_score >= 0.85 else ("RATE_LIMIT" if attack_score >= 0.50 else "ALLOW")
-        return {
-            "recommended_action": rec_act,
-            "policy_type": "RULE_DRY_RUN (CostOptimalFallback)",
-            "checkpoint": "fallback",
-            "safety_status": "FALLBACK_TRIGGERED (DQN load/inference error)",
-            "execution_mode": "DRY_RUN (Observational only; zero firewall mutation)",
-            "q_values": None,
-            "is_fallback": True,
-            "fallback_reason": f"DQN error: {exc}",
-        }
+        logger.exception("DQN checkpoint inference failed")
+        return disclosed_fallback(f"DQN checkpoint load/inference failed: {exc}")
 
 
 def explain_flow_prediction(
@@ -895,6 +911,8 @@ def evaluate_csv_dataset(
     flows: list[dict[str, Any]] = []
     display_limit = min(evaluated_count, max_display_flows)
     valid_indices = X_valid.index[:display_limit]
+    dqn_state_builder = StateBuilder()
+    dqn_cooldown_remaining = 0
 
     for i, idx in enumerate(valid_indices):
         s_rf = round(float(rf_scores[i]), 4)
@@ -921,9 +939,17 @@ def evaluate_csv_dataset(
         dst_ep = meta_row.get("dst_endpoint") or "Not available in source data"
         proto = meta_row.get("protocol") or "TCP"
 
-        # Action recommendation from DQN
-        flow_bytes = float(row_vals.get("flow_bytes_per_s", 1000.0))
-        dqn_resp = _get_dqn_action(s_fusion, flow_bytes=flow_bytes)
+        # Run DQN sequentially on causal state. Missing volume features stay 0 rather than fabricated.
+        flow_bytes = float(row_vals.get("flow_bytes_per_s", 0.0))
+        dqn_resp = _get_dqn_action(
+            s_fusion,
+            flow_bytes=flow_bytes,
+            state_builder=dqn_state_builder,
+            cooldown_remaining=dqn_cooldown_remaining,
+        )
+        dqn_cooldown_remaining = max(0, dqn_cooldown_remaining - 1)
+        if dqn_resp["recommended_action"] == "ISOLATE":
+            dqn_cooldown_remaining = dqn_state_builder.cooldown_max_steps
 
         flows.append({
             "flow_id": int(meta_row.get("flow_id", idx)),
@@ -1014,6 +1040,21 @@ def evaluate_csv_dataset(
         "benchmark": bench_key,
         "contract": contract_key,
         "model_identifier": bench_info["name"],
+        "inference_provenance": {
+            "mode": "live per-request inference on frozen checkpoints",
+            "random_forest_checkpoint": str(bench_info["model"].relative_to(REPO_ROOT)),
+            "lstm_checkpoint": str(bench_info["lstm"].relative_to(REPO_ROOT)),
+            "preprocessor_checkpoint": str(bench_info["preprocessor"].relative_to(REPO_ROOT)),
+            "fusion": "computed per flow from current RF and causally aligned LSTM scores",
+            "fusion_alpha": alpha,
+            "dqn_checkpoint": "models/dqn/dqn_4action_best.pt",
+            "dqn_training_benchmark": "cicids2017",
+            "dqn_scope": (
+                "CIC-IDS2017 policy inference; applying the same policy to CSE-CIC-IDS2018 "
+                "or UNSW-NB15 is cross-dataset policy transfer, not dataset-specific DQN training"
+            ),
+            "response_execution": "recommendation only; no firewall or network mutation",
+        },
         "fusion_configuration": {
             "alpha": alpha,
             "formula": f"S_fusion = {alpha:.2f} * S_rf + {1.0 - alpha:.2f} * S_lstm",

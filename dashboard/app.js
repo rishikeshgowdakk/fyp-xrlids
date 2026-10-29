@@ -959,15 +959,20 @@ function renderCsvEvaluationResults(data) {
   const acct = data.row_accounting || {};
   const lat = (data.evaluation_latency_ms || 0).toFixed(1);
   const thru = (data.throughput_flows_per_s || 0).toFixed(0);
+  const provenance = data.inference_provenance || {};
   accEl.innerHTML = `
-    <strong>Row Accounting &amp; Provenance:</strong> Mode: <strong>${escapeHtml(data.mode)}</strong> &middot;
+    <strong>Live Model Inference:</strong> <span class="badge badge-green">FROZEN CHECKPOINTS</span>
+    RF + LSTM score each selected sample; fusion is calculated from their current outputs. &middot;
     Dataset: <strong>${escapeHtml(data.benchmark)}</strong> (${escapeHtml(data.split_name || 'test')}) &middot;
     Received: <strong>${acct.total_rows_received}</strong> &middot;
     Evaluated: <strong>${acct.evaluated_rows}</strong> valid rows &middot;
     Dropped: <strong>${acct.invalid_rows_dropped}</strong> (${escapeHtml(acct.drop_reason || 'none')}) &middot;
     Inference Latency: <strong>${lat} ms</strong> &middot;
     Throughput: <strong>${thru} flows/s</strong><br>
-    <em>Artifacts: ${escapeHtml(data.model_identifier)} &middot; Feature Contract: ${escapeHtml(data.contract)}</em>
+    <em>RF: ${escapeHtml(provenance.random_forest_checkpoint || 'checkpoint provenance unavailable')} ·
+    LSTM: ${escapeHtml(provenance.lstm_checkpoint || 'checkpoint provenance unavailable')} ·
+    Fusion α=${fmt(provenance.fusion_alpha)} · DQN: ${escapeHtml(provenance.dqn_checkpoint || 'checkpoint provenance unavailable')}</em><br>
+    <small>DQN policy trained on ${escapeHtml(provenance.dqn_training_benchmark || 'unspecified dataset')}; cross-dataset use is policy transfer. Response is recommendation-only; no firewall action is executed.</small>
   `;
 
   // Multi-Model Metrics
@@ -1043,16 +1048,22 @@ function renderCsvEvaluationResults(data) {
       lstmDisplay = `<span class="mono">${fmt(f.lstm_score)}</span>`;
     }
 
-    let endpointDisplay = `<span style="color:var(--text-dim); font-size:11px;">Not available in source</span>`;
-    if (f.src_endpoint && f.dst_endpoint) {
-      endpointDisplay = `<span class="mono" style="font-size:11px;">${escapeHtml(f.src_endpoint)} &rarr; ${escapeHtml(f.dst_endpoint)} [${escapeHtml(f.protocol || 'TCP')}]</span>`;
+    const meta = f.metadata || {};
+    const srcEndpoint = f.src_endpoint || meta.src_endpoint;
+    const dstEndpoint = f.dst_endpoint || meta.dst_endpoint;
+    const protocol = f.protocol || meta.protocol || "N/A";
+    let endpointDisplay = `<span style="color:var(--text-dim); font-size:11px;">Endpoint metadata unavailable in benchmark</span>`;
+    if (srcEndpoint && dstEndpoint) {
+      endpointDisplay = `<span class="mono" style="font-size:11px;">${escapeHtml(srcEndpoint)} &rarr; ${escapeHtml(dstEndpoint)} [${escapeHtml(protocol)}]</span>`;
     }
 
-    const action = f.response_action || "ALLOW";
-    let actionBadge = `<span class="badge badge-green">${escapeHtml(action)}</span>`;
+    const action = f.response_action || (f.response && f.response.recommended_action) || "UNAVAILABLE";
+    let actionBadge = `<span class="badge badge-dim">${escapeHtml(action)}</span>`;
+    if (action === "ALLOW") actionBadge = `<span class="badge badge-green">${escapeHtml(action)}</span>`;
     if (action === "ALERT") actionBadge = `<span class="badge badge-orange">${escapeHtml(action)}</span>`;
     if (action === "RATE_LIMIT") actionBadge = `<span class="badge badge-purple">${escapeHtml(action)}</span>`;
     if (action === "ISOLATE") actionBadge = `<span class="badge badge-red">${escapeHtml(action)}</span>`;
+    if (f.response && f.response.is_fallback) actionBadge += ` <span class="badge badge-orange" title="Rule baseline used; DQN inference unavailable">FALLBACK</span>`;
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -1080,8 +1091,12 @@ async function inspectFlow(flowId) {
   modal.classList.add("active");
 
   document.getElementById("modal-flow-id").textContent = `Flow #${flow.flow_id}`;
-  if (flow.src_endpoint && flow.dst_endpoint) {
-    document.getElementById("modal-endpoints").textContent = `${flow.src_endpoint} → ${flow.dst_endpoint} [${flow.protocol || 'TCP'}]`;
+  const meta = flow.metadata || {};
+  const srcEndpoint = flow.src_endpoint || meta.src_endpoint;
+  const dstEndpoint = flow.dst_endpoint || meta.dst_endpoint;
+  const protocol = flow.protocol || meta.protocol || "N/A";
+  if (srcEndpoint && dstEndpoint) {
+    document.getElementById("modal-endpoints").textContent = `${srcEndpoint} → ${dstEndpoint} [${protocol}]`;
   } else {
     document.getElementById("modal-endpoints").textContent = "Endpoint metadata not available in benchmark split";
   }
@@ -1097,24 +1112,29 @@ async function inspectFlow(flowId) {
   decBadge.className = `badge ${isAttack ? 'badge-red' : 'badge-green'}`;
 
   // DQN response recommendation
-  const action = flow.response_action || "ALLOW";
+  const response = flow.response || {};
+  const action = flow.response_action || response.recommended_action || "UNAVAILABLE";
   const actionEl = document.getElementById("modal-dqn-action");
-  actionEl.textContent = action;
-  actionEl.style.color = action === "ISOLATE" ? "var(--red)" : action === "RATE_LIMIT" ? "var(--purple)" : action === "ALERT" ? "var(--orange)" : "var(--green)";
+  actionEl.textContent = action + (response.is_fallback ? " (fallback baseline)" : "");
+  actionEl.style.color = action === "ISOLATE" ? "var(--red)" : action === "RATE_LIMIT" ? "var(--purple)" : action === "ALERT" ? "var(--orange)" : action === "ALLOW" ? "var(--green)" : "var(--text-dim)";
 
   const descMap = {
-    ALLOW: "Normal flow behavior; allow uninterrupted network transmission.",
-    ALERT: "Anomalous flow characteristics observed; logged for SOC security analyst review.",
-    RATE_LIMIT: "High throughput or suspicious burst detected; flow rate-limited to throttle abuse.",
-    ISOLATE: "Confirmed malicious threat; dynamic IP/port quarantine recommended."
+    ALLOW: "DQN recommends allowing this flow; no network action is executed.",
+    ALERT: "DQN recommends analyst review; this is a dry-run recommendation only.",
+    RATE_LIMIT: "DQN recommends rate limiting; no traffic shaping is applied.",
+    ISOLATE: "DQN recommends isolation; no host or network quarantine is performed."
   };
-  document.getElementById("modal-dqn-desc").textContent = descMap[action] || "Policy action recommended.";
+  const fallbackNote = response.is_fallback ? " A disclosed rule-based fallback was used because trained DQN inference was unavailable." : "";
+  const qValuesText = response.q_values
+    ? " | Q-values: " + Object.entries(response.q_values).map(([name, value]) => `${name}=${Number(value).toFixed(4)}`).join(", ")
+    : " | Q-values unavailable";
+  document.getElementById("modal-dqn-desc").textContent = (descMap[action] || "No response recommendation available.") + fallbackNote;
 
-  const feats = flow.features || {};
-  const bytes = feats.flow_bytes_per_s || 0;
-  const bytesNorm = Math.min(1.0, (bytes / 100000.0)).toFixed(3);
-  document.getElementById("modal-dqn-state").textContent =
-    `[S=${fmt(flow.attack_score)}, BytesNorm=${bytesNorm}, HostCrit=0.50, CurrQ=0.00, Cooldown=0.00, Hist=0.00]`;
+  const stateVector = Array.isArray(response.state_vector) ? response.state_vector : null;
+  const stateSchema = Array.isArray(response.state_schema) ? response.state_schema : [];
+  document.getElementById("modal-dqn-state").textContent = stateVector
+    ? stateSchema.map((name, i) => `${name}=${Number(stateVector[i]).toFixed(4)}`).join(" · ") + qValuesText
+    : "DQN state vector unavailable for this record.";
 
   // Fetch TreeSHAP explanation on demand
   const shapContainer = document.getElementById("modal-shap-container");
