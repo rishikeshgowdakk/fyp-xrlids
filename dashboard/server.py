@@ -69,12 +69,14 @@ from xrlids.live.devices import DeviceTracker  # noqa: E402
 from dashboard.workbench_data import (  # noqa: E402
     BENCHMARK_REGISTRY,
     get_comparison_data,
+    get_dataset_explorer_data,
     get_evaluation_data,
     get_explainability_data,
     get_flow_explorer_data,
     get_flow_export_csv,
     get_limitations_data,
     get_overview_data,
+    get_performance_benchmarks_data,
     get_response_benchmark_data,
 )
 
@@ -1028,6 +1030,12 @@ class DashboardHandler(BaseHTTPRequestHandler):
             query = parse_qs(parsed.query)
             bench = query.get("benchmark", ["cicids2017"])[0]
             self.send_json(get_explainability_data(bench))
+        elif path == "/api/dataset-explorer":
+            query = parse_qs(parsed.query)
+            bench = query.get("benchmark", ["cicids2017"])[0]
+            self.send_json(get_dataset_explorer_data(benchmark_id=bench))
+        elif path == "/api/performance-benchmarks":
+            self.send_json(get_performance_benchmarks_data())
         elif path == "/api/response-benchmark":
             query = parse_qs(parsed.query)
             regime = query.get("regime", ["standard_enterprise"])[0]

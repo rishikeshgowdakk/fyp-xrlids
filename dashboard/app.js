@@ -27,441 +27,574 @@ function fmt(num, decimals = 4) {
   return Number(num).toFixed(decimals);
 }
 
-// ─── Tab Switching ───
-function showTab(name) {
-  if (name === "evidence") {
-    name = "evaluation"; // Backward-compatibility
+// ─── Top-Level Mode & Tab Switching ───
+let currentMainMode = "research"; // "research" or "live"
+let currentResearchTab = "dataset-explorer";
+let currentExplorerBenchmark = "cicids2017";
+let currentCmpBenchmark = "cicids2017";
+
+function switchMainMode(mode) {
+  currentMainMode = mode;
+  const btnResearch = document.getElementById("btn-mode-research");
+  const btnLive = document.getElementById("btn-mode-live");
+  const viewResearch = document.getElementById("view-research");
+  const viewLive = document.getElementById("view-live");
+  const hintEl = document.getElementById("mode-hint-text");
+
+  if (mode === "research") {
+    if (btnResearch) btnResearch.classList.add("active");
+    if (btnLive) btnLive.classList.remove("active");
+    if (viewResearch) viewResearch.style.display = "block";
+    if (viewLive) viewLive.style.display = "none";
+    if (hintEl) {
+      hintEl.innerHTML = `Mode: <strong>Research &amp; Benchmarks</strong> — complete held-out evaluation on CIC-IDS2017, CSE-CIC-IDS2018, UNSW-NB15.`;
+    }
+    showResearchTab(currentResearchTab || "dataset-explorer");
+  } else {
+    if (btnResearch) btnResearch.classList.remove("active");
+    if (btnLive) btnLive.classList.add("active");
+    if (viewResearch) viewResearch.style.display = "none";
+    if (viewLive) viewLive.style.display = "block";
+    if (hintEl) {
+      hintEl.innerHTML = `Mode: <strong>Live Exhibition Demo</strong> — fast interactive 200-flow sample, streaming PCAP replay, in-memory attack simulation.`;
+    }
   }
-  document.querySelectorAll(".tab-content").forEach(el => {
-    el.classList.toggle("active", el.id === "tab-" + name);
+}
+
+function showResearchTab(tabName) {
+  currentResearchTab = tabName;
+  document.querySelectorAll(".research-subnav button").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.tab === tabName);
   });
-  document.querySelectorAll(".topbar-tabs button").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.tab === name || (name === "evaluation" && btn.dataset.tab === "evidence"));
+  document.querySelectorAll("#view-research .tab-content").forEach(el => {
+    el.classList.toggle("active", el.id === "tab-" + tabName);
   });
 
-  // Lazy-load data when switching tabs
-  if (name === "evaluation") {
-    loadEvaluation();
-  } else if (name === "overview") {
+  if (tabName === "dataset-explorer") {
+    loadDatasetExplorer();
+  } else if (tabName === "model-comparison") {
+    loadModelComparison();
+  } else if (tabName === "performance-benchmarks") {
+    loadPerformanceBenchmarks();
+  } else if (tabName === "explainability-attacks") {
+    loadExplainabilityAndAttacks();
+  } else if (tabName === "autonomous-response") {
+    loadAutonomousResponse();
+  } else if (tabName === "overview") {
     loadOverview();
-  } else if (name === "comparison") {
-    loadComparison();
-  } else if (name === "flows") {
-    loadFlows();
-  } else if (name === "explainability") {
-    loadExplainability();
-  } else if (name === "response") {
-    loadResponseBenchmark();
-  } else if (name === "limitations") {
+  } else if (tabName === "limitations") {
     loadLimitations();
   }
 }
 
-// ─── PAGE B: Dataset Evaluation ───
-async function loadEvaluation() {
-  const benchSelect = document.getElementById("eval-benchmark-select");
-  const sliceSelect = document.getElementById("eval-slice-select");
-  if (benchSelect) currentEvalBenchmark = benchSelect.value;
-  if (sliceSelect) currentEvalSlice = sliceSelect.value;
-
-  try {
-    const res = await fetch(`/api/evaluation?benchmark=${currentEvalBenchmark}&slice=${currentEvalSlice}`);
-    if (!res.ok) throw new Error("Server returned " + res.status);
-    const data = await res.json();
-    evalDataCache = data;
-    renderEvaluation(data);
-  } catch (err) {
-    console.error("Failed to load evaluation data:", err);
-  }
-}
-
-function onEvalBenchmarkChange() {
-  currentEvalBenchmark = document.getElementById("eval-benchmark-select").value;
-  loadEvaluation();
-}
-
-function onEvalSliceChange() {
-  currentEvalSlice = document.getElementById("eval-slice-select").value;
-  loadEvaluation();
-}
-
-function onEvalModelSelect() {
-  currentEvalModel = document.getElementById("eval-model-select").value;
-  if (evalDataCache) {
-    renderEvaluation(evalDataCache);
-  }
-}
-
-function renderEvaluation(data) {
-  if (!data || !data.models) return;
-
-  // Derivation notice
-  const derivEl = document.getElementById("pop-derivation-text");
-  if (derivEl) {
-    derivEl.textContent = `${data.population.toLocaleString()} test flows. ${data.dropped_derivation || ""}`;
-  }
-
-  // Model selection
-  const modelKey = currentEvalModel in data.models ? currentEvalModel : (data.models.fusion ? "fusion" : Object.keys(data.models)[0]);
-  const model = data.models[modelKey] || {};
-
-  // High-level tiles
-  document.getElementById("eval-accuracy").textContent = model.accuracy != null ? (model.accuracy * 100).toFixed(2) + "%" : "—";
-  document.getElementById("eval-precision").textContent = fmt(model.precision);
-  document.getElementById("eval-recall").textContent = fmt(model.recall);
-  document.getElementById("eval-f1").textContent = fmt(model.f1);
-
-  // Model details
-  document.getElementById("m-arch").textContent = model.family ? `${model.family} (${modelKey})` : modelKey;
-  document.getElementById("m-contract").textContent = data.benchmark.contract || "R10";
-  document.getElementById("m-thresh").textContent = `τ = ${fmt(model.threshold || 0.50, 2)} (Positive: Class 1)`;
-  document.getElementById("m-auc").textContent = `ROC: ${fmt(model.roc_auc)} | PR: ${fmt(model.pr_auc)}`;
-
-  // Confusion matrix
-  const conf = model.confusion || { tn: 0, fp: 0, fn: 0, tp: 0 };
-  const total = (conf.tn + conf.fp + conf.fn + conf.tp) || 1;
-  document.getElementById("cm-tn").textContent = conf.tn.toLocaleString();
-  document.getElementById("cm-tn-pct").textContent = ((conf.tn / total) * 100).toFixed(2) + "% of total";
-  document.getElementById("cm-fp").textContent = conf.fp.toLocaleString();
-  document.getElementById("cm-fp-pct").textContent = ((conf.fp / total) * 100).toFixed(2) + "% false alarms";
-  document.getElementById("cm-fn").textContent = conf.fn.toLocaleString();
-  document.getElementById("cm-fn-pct").textContent = ((conf.fn / total) * 100).toFixed(2) + "% missed attacks";
-  document.getElementById("cm-tp").textContent = conf.tp.toLocaleString();
-  document.getElementById("cm-tp-pct").textContent = ((conf.tp / total) * 100).toFixed(2) + "% detected";
-
-  // Per-class & family table
-  const tbody = document.getElementById("per-class-tbody");
-  tbody.innerHTML = "";
-
-  const perClass = model.per_class || {};
-  ["benign", "attack"].forEach(cls => {
-    if (perClass[cls]) {
-      const row = perClass[cls];
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><strong>Class: ${cls.toUpperCase()}</strong></td>
-        <td class="mono">${fmt(row.precision)}</td>
-        <td class="mono">${fmt(row.recall)}</td>
-        <td class="mono">${fmt(row.f1)}</td>
-        <td class="mono">${(row.support || 0).toLocaleString()}</td>
-      `;
-      tbody.appendChild(tr);
+// Backward-compatibility router for existing calls
+function showTab(name) {
+  if (name === "live" || name === "live-monitor") {
+    switchMainMode("live");
+  } else {
+    switchMainMode("research");
+    if (name === "evidence" || name === "evaluation") {
+      showResearchTab("dataset-explorer");
+    } else if (name === "comparison") {
+      showResearchTab("model-comparison");
+    } else if (name === "flows" || name === "explainability") {
+      showResearchTab("explainability-attacks");
+    } else if (name === "response") {
+      showResearchTab("autonomous-response");
+    } else {
+      showResearchTab(name);
     }
-  });
+  }
+}
 
-  // Add per_family rows if present
-  if (data.per_family && data.per_family.length > 0) {
-    data.per_family.forEach(fam => {
+// ─── SECTION 1: Dataset Explorer ───
+async function loadDatasetExplorer() {
+  const select = document.getElementById("explorer-dataset-select");
+  if (select) currentExplorerBenchmark = select.value;
+  try {
+    const res = await fetch(`/api/dataset-explorer?benchmark=${currentExplorerBenchmark}`);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    renderDatasetExplorer(data);
+  } catch (err) {
+    console.error("Failed to load dataset explorer:", err);
+  }
+}
+
+function onExplorerDatasetChange() {
+  const select = document.getElementById("explorer-dataset-select");
+  if (select) currentExplorerBenchmark = select.value;
+  loadDatasetExplorer();
+}
+
+function renderDatasetExplorer(data) {
+  if (!data) return;
+
+  // Stat tiles
+  const rawRowsEl = document.getElementById("ds-raw-rows");
+  if (rawRowsEl) rawRowsEl.textContent = (data.raw_rows || 0).toLocaleString();
+  const rawFilesEl = document.getElementById("ds-raw-files");
+  if (rawFilesEl) rawFilesEl.textContent = `${data.raw_capture_files} capture files`;
+
+  const dedupRowsEl = document.getElementById("ds-dedup-rows");
+  if (dedupRowsEl) dedupRowsEl.textContent = (data.dedup_rows || 0).toLocaleString();
+  const dedupRemovedEl = document.getElementById("ds-dedup-removed");
+  if (dedupRemovedEl) dedupRemovedEl.textContent = `${(data.duplicate_rows_removed || 0).toLocaleString()} duplicate rows removed`;
+
+  const splitEl = document.getElementById("ds-split-summary");
+  if (splitEl) splitEl.textContent = `${data.train_split_pct}% / ${data.val_split_pct}% / ${data.test_split_pct}%`;
+  const testPopEl = document.getElementById("ds-test-population");
+  if (testPopEl) testPopEl.textContent = `${(data.test_population || 0).toLocaleString()} held-out test flows`;
+
+  const prevEl = document.getElementById("ds-attack-prev");
+  if (prevEl) prevEl.textContent = `${(data.attack_prevalence_pct || 0).toFixed(2)}%`;
+  const barBenign = document.getElementById("ds-bar-benign");
+  if (barBenign) barBenign.style.width = `${(100 - (data.attack_prevalence_pct || 0)).toFixed(1)}%`;
+  const barAttack = document.getElementById("ds-bar-attack");
+  if (barAttack) barAttack.style.width = `${(data.attack_prevalence_pct || 0).toFixed(1)}%`;
+  const countsEl = document.getElementById("ds-benign-attack-counts");
+  if (countsEl) countsEl.textContent = `${(data.benign_count || 0).toLocaleString()} Benign / ${(data.attack_count || 0).toLocaleString()} Attack`;
+
+  // Preprocessing & environment
+  const envEl = document.getElementById("ds-env");
+  if (envEl) envEl.textContent = data.environment || "—";
+  const datesEl = document.getElementById("ds-dates");
+  if (datesEl) datesEl.textContent = data.capture_dates || "—";
+  const contractNameEl = document.getElementById("ds-contract-name");
+  if (contractNameEl) contractNameEl.textContent = `${data.contract} (${data.feature_count} features)`;
+  const dropsEl = document.getElementById("ds-boundary-drops");
+  if (dropsEl) dropsEl.textContent = data.boundary_drops_text || "—";
+  const badgeEl = document.getElementById("ds-contract-badge");
+  if (badgeEl) badgeEl.textContent = `${data.contract} Contract`;
+
+  // Feature list badges
+  const featEl = document.getElementById("ds-features-list");
+  if (featEl && data.features) {
+    featEl.innerHTML = data.features.map(f => `<span class="badge badge-dim">${escapeHtml(f)}</span>`).join(" ");
+  }
+
+  // Attack Classes table
+  const tbody = document.getElementById("ds-attack-classes-tbody");
+  if (tbody && data.attack_classes) {
+    tbody.innerHTML = "";
+    data.attack_classes.forEach(ac => {
       const tr = document.createElement("tr");
+      const detColor = ac.detection_rate >= 0.8 ? 'var(--green)' : (ac.detection_rate >= 0.3 ? 'var(--orange)' : 'var(--red)');
       tr.innerHTML = `
-        <td><span style="color:var(--text-dim)">Family:</span> ${escapeHtml(fam.attack_family || fam.family || "Attack")}</td>
-        <td class="mono">—</td>
-        <td class="mono">${fmt(fam.recall || fam.detection_rate)}</td>
-        <td class="mono">—</td>
-        <td class="mono">${(fam.support || fam.test_flows || 0).toLocaleString()}</td>
+        <td><strong>${escapeHtml(ac.class_name)}</strong></td>
+        <td><span class="badge badge-dim">${escapeHtml(ac.category)}</span></td>
+        <td class="mono">${(ac.support || 0).toLocaleString()}</td>
+        <td class="mono"><strong style="color:${detColor}">${(ac.detection_rate * 100).toFixed(2)}%</strong></td>
       `;
       tbody.appendChild(tr);
     });
   }
-}
 
-// ─── PAGE A: Overview ───
-async function loadOverview() {
-  try {
-    const res = await fetch("/api/overview");
-    if (!res.ok) return;
-    const data = await res.json();
-
-    document.getElementById("ov-commit").textContent = `Commit: ${data.git_commit.slice(0, 7)}`;
-
-    // Component verification statuses
-    const compTbody = document.getElementById("ov-components-tbody");
-    compTbody.innerHTML = "";
-    (data.component_statuses || []).forEach(cs => {
-      const badgeCls = cs.status === "VERIFIED_FOR_DEFINED_SCOPE" ? "badge-green"
-        : (cs.status === "PARTIALLY_VERIFIED" ? "badge-orange" : "badge-red");
+  // Cross Dataset comparison table
+  const crossTbody = document.getElementById("cross-dataset-tbody");
+  if (crossTbody && data.cross_dataset_summary) {
+    crossTbody.innerHTML = "";
+    data.cross_dataset_summary.forEach(row => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td><strong>${escapeHtml(cs.component)}</strong></td>
-        <td class="mono">${escapeHtml(cs.scope)}</td>
-        <td><span class="badge ${badgeCls}">${escapeHtml(cs.status)}</span></td>
-        <td style="font-size:12px; color:var(--text-muted);">${escapeHtml(cs.finding)}</td>
+        <td><strong>${escapeHtml(row.benchmark_name)}</strong></td>
+        <td class="mono">${escapeHtml(row.contract)}</td>
+        <td class="mono">${(row.raw_rows || 0).toLocaleString()}</td>
+        <td class="mono">${(row.dedup_rows || 0).toLocaleString()}</td>
+        <td class="mono">${(row.test_population || 0).toLocaleString()}</td>
+        <td class="mono">${(row.attack_prevalence_pct || 0).toFixed(1)}%</td>
+        <td class="mono">${fmt(row.rf_f1)}</td>
+        <td class="mono">${fmt(row.lstm_f1)}</td>
+        <td class="mono"><strong style="color:var(--accent)">${fmt(row.fusion_f1)}</strong></td>
+        <td style="font-size:12px; color:var(--text-muted);">${escapeHtml(row.primary_research_finding)}</td>
       `;
-      compTbody.appendChild(tr);
+      crossTbody.appendChild(tr);
     });
-
-    // Datasets table
-    const dsTbody = document.getElementById("ov-datasets-tbody");
-    dsTbody.innerHTML = "";
-    (data.datasets || []).forEach(ds => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><strong>${escapeHtml(ds.name)}</strong></td>
-        <td class="mono">${escapeHtml(ds.contract)}</td>
-        <td class="mono">${(ds.test_flows || 0).toLocaleString()}</td>
-        <td class="mono">${escapeHtml(ds.accuracy)}</td>
-        <td class="mono">${escapeHtml(ds.f1)}</td>
-        <td style="font-size:12px; color:var(--text-muted);">${escapeHtml(ds.role)}</td>
-      `;
-      dsTbody.appendChild(tr);
-    });
-  } catch (err) {
-    console.error("Failed to load overview:", err);
   }
 }
 
-// ─── PAGE C: Model Comparison ───
-async function loadComparison() {
-  const benchSelect = document.getElementById("cmp-benchmark-select");
-  const bench = benchSelect ? benchSelect.value : "cicids2017";
-
+// ─── SECTION 2: Model Comparison ───
+async function loadModelComparison() {
+  const select = document.getElementById("cmp-dataset-select");
+  if (select) currentCmpBenchmark = select.value;
   try {
-    const res = await fetch(`/api/comparison?benchmark=${bench}`);
-    if (!res.ok) return;
+    const res = await fetch(`/api/comparison?benchmark=${currentCmpBenchmark}`);
+    if (!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
-    renderComparison(data);
+    renderModelComparison(data);
   } catch (err) {
-    console.error("Failed to load comparison:", err);
+    console.error("Failed to load model comparison:", err);
   }
 }
 
-function onCmpBenchmarkChange() {
-  loadComparison();
+function onCmpDatasetChange() {
+  const select = document.getElementById("cmp-dataset-select");
+  if (select) currentCmpBenchmark = select.value;
+  loadModelComparison();
 }
 
-function renderComparison(data) {
+function renderModelComparison(data) {
   if (!data || !data.models) return;
 
   // Degenerate alert
   const alertEl = document.getElementById("cmp-degenerate-alert");
   const alertText = document.getElementById("cmp-degenerate-text");
   if (data.fusion && data.fusion.is_degenerate) {
-    alertEl.style.display = "block";
-    alertText.textContent = data.fusion.warning;
+    if (alertEl) alertEl.style.display = "block";
+    if (alertText) alertText.textContent = data.fusion.warning;
   } else {
-    alertEl.style.display = "none";
+    if (alertEl) alertEl.style.display = "none";
   }
 
-  // Fusion info
-  document.getElementById("cmp-formula").textContent = data.fusion.formula;
-  document.getElementById("cmp-alpha").textContent = fmt(data.fusion.alpha, 2);
-  document.getElementById("cmp-beta").textContent = fmt(1.0 - data.fusion.alpha, 2);
-
-  // Shuffled-window ablation
-  const ab = data.shuffled_window_ablation;
-  if (ab) {
-    document.getElementById("ab-ordered").textContent = fmt(ab.lstm_ordered_condition_a ? ab.lstm_ordered_condition_a.f1 : 0.9314);
-    document.getElementById("ab-shuffled").textContent = fmt(ab.lstm_shuffled_condition_b ? ab.lstm_shuffled_condition_b.f1 : 0.9353);
-    document.getElementById("ab-delta").textContent = `${fmt(ab.delta ? ab.delta.f1_order_gain : -0.0038)} (No temporal order gain)`;
+  // RF Card
+  const rf = data.models.random_forest || {};
+  const rfF1El = document.getElementById("cmp-rf-f1");
+  if (rfF1El) rfF1El.textContent = fmt(rf.f1);
+  const rfAccEl = document.getElementById("cmp-rf-acc");
+  if (rfAccEl) rfAccEl.textContent = rf.accuracy != null ? (rf.accuracy * 100).toFixed(2) + "%" : "—";
+  const rfPrecEl = document.getElementById("cmp-rf-prec");
+  if (rfPrecEl) rfPrecEl.textContent = fmt(rf.precision);
+  const rfRecEl = document.getElementById("cmp-rf-rec");
+  if (rfRecEl) rfRecEl.textContent = fmt(rf.recall);
+  const rfAucEl = document.getElementById("cmp-rf-auc");
+  if (rfAucEl) rfAucEl.textContent = fmt(rf.roc_auc);
+  const rfPrAucEl = document.getElementById("cmp-rf-prauc");
+  if (rfPrAucEl) rfPrAucEl.textContent = fmt(rf.pr_auc);
+  const rfCiEl = document.getElementById("cmp-rf-ci");
+  if (rfCiEl) {
+    const ci = data.bootstrap_cis && data.bootstrap_cis.random_forest ? data.bootstrap_cis.random_forest.threshold_metrics : null;
+    rfCiEl.textContent = ci && ci.f1 ? `[${fmt(ci.f1.ci_lower)}, ${fmt(ci.f1.ci_upper)}]` : "—";
   }
 
-  // Models table
-  const tbody = document.getElementById("cmp-models-tbody");
-  tbody.innerHTML = "";
+  // LSTM Card
+  const lstm = data.models.lstm || {};
+  const lstmF1El = document.getElementById("cmp-lstm-f1");
+  if (lstmF1El) lstmF1El.textContent = fmt(lstm.f1);
+  const lstmAccEl = document.getElementById("cmp-lstm-acc");
+  if (lstmAccEl) lstmAccEl.textContent = lstm.accuracy != null ? (lstm.accuracy * 100).toFixed(2) + "%" : "—";
+  const lstmPrecEl = document.getElementById("cmp-lstm-prec");
+  if (lstmPrecEl) lstmPrecEl.textContent = fmt(lstm.precision);
+  const lstmRecEl = document.getElementById("cmp-lstm-rec");
+  if (lstmRecEl) lstmRecEl.textContent = fmt(lstm.recall);
+  const lstmAucEl = document.getElementById("cmp-lstm-auc");
+  if (lstmAucEl) lstmAucEl.textContent = fmt(lstm.roc_auc);
+  const lstmPrAucEl = document.getElementById("cmp-lstm-prauc");
+  if (lstmPrAucEl) lstmPrAucEl.textContent = fmt(lstm.pr_auc);
+  const lstmCiEl = document.getElementById("cmp-lstm-ci");
+  if (lstmCiEl) {
+    const ci = data.bootstrap_cis && data.bootstrap_cis.lstm ? data.bootstrap_cis.lstm.threshold_metrics : null;
+    lstmCiEl.textContent = ci && ci.f1 ? `[${fmt(ci.f1.ci_lower)}, ${fmt(ci.f1.ci_upper)}]` : "—";
+  }
 
-  const roles = {
-    majority: "Prior Baseline (Predict All Benign)",
-    logistic_regression: "Linear Feature Baseline",
-    decision_tree: "Single Tree Baseline",
-    random_forest: "Primary Live Monitor (Frozen R10)",
-    lstm: "Supervised Sequence Model (T=5)",
-    fusion: "Score-Level Linear Combination",
+  // Fusion Card
+  const fusion = data.models.fusion || {};
+  const fusionF1El = document.getElementById("cmp-fusion-f1");
+  if (fusionF1El) fusionF1El.textContent = fmt(fusion.f1);
+  const fusionAccEl = document.getElementById("cmp-fusion-acc");
+  if (fusionAccEl) fusionAccEl.textContent = fusion.accuracy != null ? (fusion.accuracy * 100).toFixed(2) + "%" : "—";
+  const fusionPrecEl = document.getElementById("cmp-fusion-prec");
+  if (fusionPrecEl) fusionPrecEl.textContent = fmt(fusion.precision);
+  const fusionRecEl = document.getElementById("cmp-fusion-rec");
+  if (fusionRecEl) fusionRecEl.textContent = fmt(fusion.recall);
+  const fusionAucEl = document.getElementById("cmp-fusion-auc");
+  if (fusionAucEl) fusionAucEl.textContent = fmt(fusion.roc_auc);
+  const fusionPrAucEl = document.getElementById("cmp-fusion-prauc");
+  if (fusionPrAucEl) fusionPrAucEl.textContent = fmt(fusion.pr_auc);
+  const fusionFormulaEl = document.getElementById("cmp-fusion-formula");
+  if (fusionFormulaEl) fusionFormulaEl.textContent = data.fusion.formula || "—";
+  const fusionAlphaBadge = document.getElementById("cmp-fusion-alpha-badge");
+  if (fusionAlphaBadge) fusionAlphaBadge.textContent = `α = ${fmt(data.fusion.alpha, 2)}`;
+
+  // 3 Side-by-Side Confusion Matrices
+  const cms = data.confusion_matrices || {};
+  const rfCm = cms.random_forest || { tn: 0, fp: 0, fn: 0, tp: 0 };
+  const lstmCm = cms.lstm || { tn: 0, fp: 0, fn: 0, tp: 0 };
+  const fusionCm = cms.fusion || { tn: 0, fp: 0, fn: 0, tp: 0 };
+
+  const setCm = (prefix, cm) => {
+    const tn = document.getElementById(`${prefix}-tn`);
+    const fp = document.getElementById(`${prefix}-fp`);
+    const fn = document.getElementById(`${prefix}-fn`);
+    const tp = document.getElementById(`${prefix}-tp`);
+    if (tn) tn.textContent = (cm.tn || 0).toLocaleString();
+    if (fp) fp.textContent = (cm.fp || 0).toLocaleString();
+    if (fn) fn.textContent = (cm.fn || 0).toLocaleString();
+    if (tp) tp.textContent = (cm.tp || 0).toLocaleString();
   };
+  setCm("cmp-cm-rf", rfCm);
+  setCm("cmp-cm-lstm", lstmCm);
+  setCm("cmp-cm-fusion", fusionCm);
 
-  ["majority", "logistic_regression", "decision_tree", "random_forest", "lstm", "fusion"].forEach(name => {
-    const m = data.models[name];
-    if (!m) return;
-
-    let accStr = fmt(m.accuracy);
-    let f1Str = fmt(m.f1);
-
-    // Bootstrap CI if available
-    const ci = data.bootstrap_cis && data.bootstrap_cis[name] ? data.bootstrap_cis[name].threshold_metrics : null;
-    if (ci && ci.accuracy && ci.f1) {
-      accStr += ` <span style="font-size:10px; color:var(--text-dim)">[${fmt(ci.accuracy.ci_lower)}, ${fmt(ci.accuracy.ci_upper)}]</span>`;
-      f1Str += ` <span style="font-size:10px; color:var(--text-dim)">[${fmt(ci.f1.ci_lower)}, ${fmt(ci.f1.ci_upper)}]</span>`;
-    }
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td><strong>${name.replace("_", " ").toUpperCase()}</strong></td>
-      <td class="mono">${accStr}</td>
-      <td class="mono">${f1Str}</td>
-      <td class="mono">${fmt(m.roc_auc)}</td>
-      <td style="color:var(--text-muted); font-size:12px;">${roles[name] || ""}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-// ─── PAGE D: Flow Explorer ───
-async function loadFlows() {
-  const bench = currentEvalBenchmark || "cicids2017";
-  try {
-    const res = await fetch(`/api/flows?benchmark=${bench}&page=${currentFlowPage}&limit=25&status=${currentFlowFilterStatus}&label=${currentFlowFilterLabel}`);
-    if (!res.ok) return;
-    const data = await res.json();
-    renderFlows(data);
-  } catch (err) {
-    console.error("Failed to load flows:", err);
+  // Per-family performance
+  const famTbody = document.getElementById("cmp-per-family-tbody");
+  if (famTbody && data.per_family) {
+    famTbody.innerHTML = "";
+    data.per_family.forEach(fam => {
+      const tr = document.createElement("tr");
+      const detRate = fam.detection_rate != null ? fam.detection_rate : (fam.recall != null ? fam.recall : 0);
+      const errRate = 1.0 - detRate;
+      const detColor = detRate >= 0.8 ? 'var(--green)' : (detRate >= 0.3 ? 'var(--orange)' : 'var(--red)');
+      tr.innerHTML = `
+        <td><strong>${escapeHtml(fam.attack_family || fam.family || "Attack")}</strong></td>
+        <td class="mono">${(fam.support || fam.test_flows || 0).toLocaleString()}</td>
+        <td class="mono">${(fam.correct_detections || Math.round(detRate * (fam.support || fam.test_flows || 0))).toLocaleString()}</td>
+        <td class="mono"><strong style="color:${detColor}">${(detRate * 100).toFixed(2)}%</strong></td>
+        <td class="mono">${(errRate * 100).toFixed(2)}%</td>
+      `;
+      famTbody.appendChild(tr);
+    });
   }
 }
 
-function onFlowFilterChange() {
-  currentFlowFilterStatus = document.getElementById("flow-filter-status").value;
-  currentFlowFilterLabel = document.getElementById("flow-filter-label").value;
-  currentFlowPage = 1;
-  loadFlows();
+// ─── SECTION 3: Performance Benchmarks ───
+async function loadPerformanceBenchmarks() {
+  try {
+    const res = await fetch("/api/performance-benchmarks");
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    renderPerformanceBenchmarks(data);
+  } catch (err) {
+    console.error("Failed to load performance benchmarks:", err);
+  }
 }
 
-function changeFlowPage(delta) {
-  currentFlowPage = Math.max(1, currentFlowPage + delta);
-  loadFlows();
+function renderPerformanceBenchmarks(data) {
+  if (!data) return;
+
+  // Policy latency table
+  const polTbody = document.getElementById("perf-policy-latency-tbody");
+  if (polTbody && data.policy_latency_benchmarks) {
+    polTbody.innerHTML = "";
+    data.policy_latency_benchmarks.forEach(item => {
+      const isWinner = item.policy_name.includes("Cost-Optimal");
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><strong>${isWinner ? `<span class="badge badge-green">${escapeHtml(item.policy_name)}</span>` : escapeHtml(item.policy_name)}</strong></td>
+        <td class="mono">${item.median_latency_us.toFixed(2)} µs</td>
+        <td class="mono">${(item.throughput_decisions_per_s || 0).toLocaleString()} dec/s</td>
+        <td style="font-size:12px; color:var(--text-muted);">${escapeHtml(item.notes || "")}</td>
+      `;
+      polTbody.appendChild(tr);
+    });
+  }
+
+  const speedupEl = document.getElementById("perf-speedup-text");
+  if (speedupEl && data.speedup_comparison) {
+    speedupEl.innerHTML = `<strong>Cost-Optimal Speedup:</strong> ${escapeHtml(data.speedup_comparison.speedup_statement)} (${escapeHtml(data.speedup_comparison.conclusion)})`;
+  }
+
+  // Detector latency table
+  const detTbody = document.getElementById("perf-detector-latency-tbody");
+  if (detTbody && data.detector_latency_benchmarks) {
+    detTbody.innerHTML = "";
+    data.detector_latency_benchmarks.forEach(item => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><strong>${escapeHtml(item.path)}</strong></td>
+        <td class="mono">${item.latency_per_flow_us.toFixed(2)} µs</td>
+        <td class="mono">${(item.throughput_flows_per_s || 0).toLocaleString()} flows/s</td>
+      `;
+      detTbody.appendChild(tr);
+    });
+  }
+
+  // Burst benchmark
+  if (data.burst_traffic_benchmark) {
+    const b = data.burst_traffic_benchmark;
+    const pktsEl = document.getElementById("perf-burst-packets");
+    if (pktsEl) pktsEl.textContent = `${(b.packets_processed || 0).toLocaleString()} / ${(b.target_packets || 0).toLocaleString()}`;
+    const rateEl = document.getElementById("perf-burst-rate");
+    if (rateEl) rateEl.textContent = `${(b.peak_packet_rate || 0).toLocaleString()} pkts/s`;
+    const flowsEl = document.getElementById("perf-burst-flows");
+    if (flowsEl) flowsEl.textContent = `${b.flows_reconstructed} flows (${b.flows_completed} completed via FIN/RST)`;
+  }
+
+  // Resource profile
+  if (data.resource_profile) {
+    const r = data.resource_profile;
+    const memEl = document.getElementById("perf-mem-total");
+    if (memEl) memEl.textContent = r.total_process_ram || "—";
+    const cpuEl = document.getElementById("perf-cpu-burst");
+    if (cpuEl) cpuEl.textContent = r.burst_cpu_utilization || "—";
+  }
+
+  // Repeated runs CI
+  const ciTbody = document.getElementById("perf-ci-tbody");
+  if (ciTbody && data.repeated_runs_ci) {
+    ciTbody.innerHTML = "";
+    data.repeated_runs_ci.forEach(row => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><strong>${escapeHtml(row.benchmark)}</strong></td>
+        <td class="mono">${escapeHtml(row.contract)}</td>
+        <td class="mono">${escapeHtml(row.rf_f1_ci)}</td>
+        <td class="mono">${escapeHtml(row.lstm_f1_ci)}</td>
+        <td class="mono"><strong style="color:var(--accent)">${escapeHtml(row.fusion_f1_ci)}</strong></td>
+      `;
+      ciTbody.appendChild(tr);
+    });
+  }
 }
 
-function exportFlowsCsv() {
-  const bench = currentEvalBenchmark || "cicids2017";
-  const url = `/api/flows/export?benchmark=${bench}&status=${currentFlowFilterStatus}&label=${currentFlowFilterLabel}`;
-  window.open(url, "_blank");
-}
-
-function renderFlows(data) {
-  if (!data || !data.flows) return;
-
-  document.getElementById("flow-count-badge").textContent = `${data.filtered_rows.toLocaleString()} matching flows (${data.total_rows_cached.toLocaleString()} cached)`;
-  document.getElementById("flow-current-page").textContent = data.page;
-  document.getElementById("flow-total-pages").textContent = data.total_pages;
-
-  const tbody = document.getElementById("flows-tbody");
-  tbody.innerHTML = "";
-
-  data.flows.forEach(f => {
-    const gt = f.ground_truth;
-    const mp = f.model_prediction;
-    const gtBadge = gt.label === 1 ? `<span class="badge badge-red">[ATTACK]</span>` : `<span class="badge badge-green">[BENIGN]</span>`;
-    const predBadge = mp.prediction_class === 1 ? `<span class="badge badge-red">ATTACK</span>` : `<span class="badge badge-green">BENIGN</span>`;
-
-    let outcomeBadge = `<span class="badge badge-green">CORRECT</span>`;
-    if (mp.outcome_status === "FALSE_POSITIVE") {
-      outcomeBadge = `<span class="badge badge-orange">FALSE ALARM (FP)</span>`;
-    } else if (mp.outcome_status === "FALSE_NEGATIVE") {
-      outcomeBadge = `<span class="badge badge-red">MISSED ATTACK (FN)</span>`;
-    }
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td class="mono">#${f.flow_id}</td>
-      <td><div class="gt-box">${gtBadge}</div></td>
-      <td class="mono">${fmt(mp.rf_score)}</td>
-      <td class="mono">${fmt(mp.lstm_score)}</td>
-      <td class="mono">${fmt(mp.fusion_score)}</td>
-      <td>${predBadge}</td>
-      <td>${outcomeBadge}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-// ─── PAGE E: Explainability ───
-async function loadExplainability() {
-  const bench = currentEvalBenchmark || "cicids2017";
+// ─── SECTION 4: Explainability & Attack Analysis ───
+async function loadExplainabilityAndAttacks() {
+  const bench = currentExplorerBenchmark || "cicids2017";
   try {
     const res = await fetch(`/api/explainability?benchmark=${bench}`);
     if (!res.ok) return;
     const data = await res.json();
-    renderExplainability(data);
+    renderExplainabilityAndAttacks(data);
   } catch (err) {
     console.error("Failed to load explainability:", err);
   }
+  loadFlows();
 }
 
-function renderExplainability(data) {
-  if (!data || !data.global_importance) return;
+function renderExplainabilityAndAttacks(data) {
+  if (!data) return;
 
-  const tbody = document.getElementById("shap-tbody");
-  tbody.innerHTML = "";
+  // Blind spots
+  const blindContainer = document.getElementById("blind-spots-container");
+  if (blindContainer && data.critical_blind_spots) {
+    blindContainer.innerHTML = "";
+    data.critical_blind_spots.forEach(bs => {
+      const card = document.createElement("div");
+      card.className = "blindspot-card";
+      card.innerHTML = `
+        <div class="blindspot-title">
+          <span>⚠️ ${escapeHtml(bs.attack_class)}</span>
+          <span class="mono">${(bs.recall_rate * 100).toFixed(2)}% Recall (${(bs.missed_rate * 100).toFixed(2)}% Missed)</span>
+        </div>
+        <div class="blindspot-desc">
+          <strong>Support:</strong> ${bs.test_support} test flows. <strong>Empirical Finding:</strong> ${escapeHtml(bs.finding)}
+        </div>
+      `;
+      blindContainer.appendChild(card);
+    });
+  }
 
-  const descriptions = {
-    packet_length_std: "Variance of packet sizes — distinguishes automated floods from interactive sessions",
-    packet_length_mean: "Mean byte length of packets in bidirectional flow",
-    flow_packets_per_s: "Rate of packet transmission — extreme rates indicate DoS/DDoS bursts",
-    flow_bytes_per_s: "Throughput volume across flow lifetime",
-    flow_duration_ms: "Total connection duration in milliseconds",
-    ack_count: "Cumulative TCP ACK flags observed",
-    fin_count: "Graceful teardown TCP FIN flags",
-    syn_count: "Connection handshake initiation TCP SYN flags",
-    syn_ack_ratio: "Ratio of SYN to ACK flags — high ratio indicates scanning/SYN flood",
-    rst_count: "Abrupt termination TCP RST flags",
-  };
+  // TreeSHAP Global Importance table with visual bar
+  const tbody = document.getElementById("shap-global-tbody");
+  if (tbody && data.global_importance) {
+    tbody.innerHTML = "";
+    const descriptions = {
+      packet_length_std: "Variance of packet sizes — distinguishes automated floods from interactive sessions",
+      packet_length_mean: "Mean byte length of packets in bidirectional flow",
+      flow_packets_per_s: "Rate of packet transmission — extreme rates indicate DoS/DDoS bursts",
+      flow_bytes_per_s: "Throughput volume across flow lifetime",
+      flow_duration_ms: "Total connection duration in milliseconds",
+      ack_count: "Cumulative TCP ACK flags observed",
+      fin_count: "Graceful teardown TCP FIN flags",
+      syn_count: "Connection handshake initiation TCP SYN flags",
+      syn_ack_ratio: "Ratio of SYN to ACK flags — high ratio indicates scanning/SYN flood",
+      rst_count: "Abrupt termination TCP RST flags",
+    };
 
-  data.global_importance.forEach((item, idx) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td class="mono">#${idx + 1}</td>
-      <td><strong>${escapeHtml(item.feature)}</strong></td>
-      <td class="mono">${data.contract}</td>
-      <td class="mono">${fmt(item.mean_abs_shap || item.importance)}</td>
-      <td style="color:var(--text-muted); font-size:12px;">${descriptions[item.feature] || "Traffic flow moment metric"}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+    const maxVal = Math.max(...data.global_importance.map(x => Number(x.mean_abs_shap || x.importance || 0.001)));
+
+    data.global_importance.forEach((item, idx) => {
+      const val = Number(item.mean_abs_shap || item.importance || 0);
+      const pct = maxVal > 0 ? Math.min(100, Math.round((val / maxVal) * 100)) : 10;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="mono">#${idx + 1}</td>
+        <td><strong>${escapeHtml(item.feature)}</strong></td>
+        <td class="mono">${escapeHtml(data.contract || "R10")}</td>
+        <td class="mono">${fmt(val)}</td>
+        <td>
+          <div class="shap-bar-track" style="height:12px; width:140px;">
+            <div class="shap-bar-fill pos" style="width:${pct}%;"></div>
+          </div>
+        </td>
+        <td style="color:var(--text-muted); font-size:12px;">${descriptions[item.feature] || "Traffic flow moment metric"}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
 }
 
-// ─── PAGE F: Autonomous Response ───
-async function loadResponseBenchmark() {
-  const regime = document.getElementById("resp-regime-select").value;
-  const mode = document.getElementById("resp-mode-select").value;
+// ─── SECTION 5: Autonomous Response Evaluation ───
+async function loadAutonomousResponse() {
+  const regimeSelect = document.getElementById("resp-regime-select");
+  const modeSelect = document.getElementById("resp-mode-select");
+  const regime = regimeSelect ? regimeSelect.value : "standard_enterprise";
+  const mode = modeSelect ? modeSelect.value : "4-action";
 
   try {
     const res = await fetch(`/api/response-benchmark?regime=${regime}&mode=${mode}`);
     if (!res.ok) return;
     const data = await res.json();
-    renderResponseBenchmark(data);
+    renderAutonomousResponse(data);
   } catch (err) {
     console.error("Failed to load response benchmark:", err);
   }
 }
 
 function onResponseParamsChange() {
-  loadResponseBenchmark();
+  loadAutonomousResponse();
 }
 
-function renderResponseBenchmark(data) {
+function renderAutonomousResponse(data) {
   if (!data || !data.policies) return;
 
   // Head to head winner callout
   const winnerEl = document.getElementById("resp-winner-text");
-  if (data.head_to_head) {
+  if (winnerEl && data.head_to_head) {
     const h2h = data.head_to_head;
     const isBaseline = h2h.superior_policy.includes("Cost_Optimal");
     const diffPct = Math.abs(h2h.relative_cost_reduction_pct).toFixed(2);
     winnerEl.innerHTML = isBaseline
-      ? `<span class="badge badge-green">Cost-Optimal Baseline WON</span> Achieving <strong>${diffPct}% lower cost</strong> than the trained DQN.`
+      ? `<span class="badge badge-green">Cost-Optimal Baseline WON</span> Achieving <strong>${diffPct}% lower operational cost</strong> than the trained DQN.`
       : `<span class="badge badge-purple">DQN Achieved Lower Cost</span> with ${diffPct}% cost reduction (Failed the 15% practical improvement target).`;
   }
 
   // Policies table
   const tbody = document.getElementById("resp-policies-tbody");
-  tbody.innerHTML = "";
+  if (tbody) {
+    tbody.innerHTML = "";
+    data.policies.forEach(p => {
+      const isDqn = p.policy_name.includes("DQN");
+      const isCostOpt = p.policy_name.includes("Cost_Optimal");
+      const nameBadge = isCostOpt ? `<span class="badge badge-green">${escapeHtml(p.policy_name)}</span>`
+        : (isDqn ? `<span class="badge badge-purple">${escapeHtml(p.policy_name)}</span>` : escapeHtml(p.policy_name));
 
-  data.policies.forEach(p => {
-    const isDqn = p.policy_name.includes("DQN");
-    const isCostOpt = p.policy_name.includes("Cost_Optimal");
-    const nameBadge = isCostOpt ? `<span class="badge badge-green">${escapeHtml(p.policy_name)}</span>`
-      : (isDqn ? `<span class="badge badge-purple">${escapeHtml(p.policy_name)}</span>` : escapeHtml(p.policy_name));
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><strong>${nameBadge}</strong></td>
+        <td class="mono">${(p.evaluation_a_total_operational_cost || 0).toLocaleString()}</td>
+        <td class="mono">${fmt(p.evaluation_a_mean_cost_per_flow)}</td>
+        <td class="mono">${(p.business_availability_score_pct || 0).toFixed(2)}%</td>
+        <td class="mono">${((p.false_quarantine_rate || 0) * 100).toFixed(2)}%</td>
+        <td class="mono">${fmt(p.action_chattering_index)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td><strong>${nameBadge}</strong></td>
-      <td class="mono">${(p.evaluation_a_total_operational_cost || 0).toLocaleString()}</td>
-      <td class="mono">${fmt(p.evaluation_a_mean_cost_per_flow)}</td>
-      <td class="mono">${(p.business_availability_score_pct || 0).toFixed(2)}%</td>
-      <td class="mono">${((p.false_quarantine_rate || 0) * 100).toFixed(2)}%</td>
-      <td class="mono">${fmt(p.action_chattering_index)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+  // Rollback evidence ledger
+  const rbTbody = document.getElementById("resp-rollback-tbody");
+  if (rbTbody && data.rollback_evidence) {
+    rbTbody.innerHTML = "";
+    data.rollback_evidence.forEach(rb => {
+      const tr = document.createElement("tr");
+      const isOk = rb.status === "RESTORED" || rb.status === "IDEMPOTENT_NOOP";
+      const badgeCls = isOk ? "badge-green" : "badge-red";
+      tr.innerHTML = `
+        <td class="mono">${escapeHtml(rb.tx_id)}</td>
+        <td>${escapeHtml(rb.action)}</td>
+        <td><span class="badge ${badgeCls}">${escapeHtml(rb.status)}</span></td>
+        <td class="mono" style="font-size:11px;">${escapeHtml(rb.safety_state)}</td>
+      `;
+      rbTbody.appendChild(tr);
+    });
+  }
 }
+
+// Backward compatibility aliases
+const loadEvaluation = loadDatasetExplorer;
+const loadComparison = loadModelComparison;
+const loadExplainability = loadExplainabilityAndAttacks;
+const loadResponseBenchmark = loadAutonomousResponse;
 
 // ─── PAGE G: Research Limitations ───
 async function loadLimitations() {
@@ -1188,6 +1321,7 @@ document.addEventListener("DOMContentLoaded", () => {
   onCsvModelChange();
   renderAttackSources([]);
   renderDevices({ mode: null });
-  loadEvaluation(); // Default active tab is Page B (Dataset Evaluation)
+  switchMainMode("research");
+  showResearchTab("dataset-explorer");
   setInterval(pollLive, LIVE_POLL_MS);
 });

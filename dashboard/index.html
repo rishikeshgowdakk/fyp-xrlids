@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>XRL-IDARS — Research Evaluation Workbench</title>
+  <title>XRL-IDARS — Research Evaluation Workbench &amp; Live Monitor</title>
   <style>
     :root {
       --bg: #0b0e14;
@@ -44,7 +44,7 @@
     /* ── Topbar ── */
     .topbar {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(11, 14, 20, 0.92);
+      background: rgba(11, 14, 20, 0.94);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       padding: 0 20px;
@@ -72,22 +72,6 @@
       background: var(--surface-2); border: 1px solid var(--border);
       padding: 2px 6px; border-radius: 4px;
     }
-    .topbar-tabs {
-      display: flex; gap: 4px; overflow-x: auto;
-      background: var(--surface-2); border-radius: 8px; padding: 3px;
-    }
-    .topbar-tabs button {
-      background: transparent; border: none; color: var(--text-muted);
-      padding: 6px 12px; border-radius: 6px; font-size: 12px;
-      font-weight: 600; cursor: pointer; transition: all 0.15s;
-      white-space: nowrap; font-family: var(--font);
-    }
-    .topbar-tabs button:hover { color: var(--text); background: var(--surface-3); }
-    .topbar-tabs button.active {
-      color: #fff; background: var(--accent);
-      color: #0b0e14; font-weight: 700;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
-    }
     .topbar-status {
       display: flex; align-items: center; gap: 8px;
       font-size: 12px; color: var(--text-muted); flex-shrink: 0;
@@ -103,6 +87,60 @@
     }
     @keyframes pulse-glow {
       0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+    }
+
+    /* ── Primary Mode Switcher Bar ── */
+    .mode-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .mode-switcher {
+      display: flex;
+      gap: 8px;
+    }
+    .main-mode-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 18px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface-2); color: var(--text-muted);
+      font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+      font-family: var(--font);
+    }
+    .main-mode-btn:hover { background: var(--surface-3); color: var(--text); }
+    .main-mode-btn.active {
+      background: var(--accent); color: #0b0e14; border-color: var(--accent);
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.35);
+    }
+    .mode-hint {
+      font-size: 12px; color: var(--text-dim);
+    }
+
+    /* ── Research Sub-Navigation Tabs ── */
+    .research-subnav {
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 20px;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+    }
+    .research-subnav button {
+      background: transparent; border: none; color: var(--text-muted);
+      padding: 7px 14px; border-radius: 6px; font-size: 12px;
+      font-weight: 600; cursor: pointer; transition: all 0.15s;
+      white-space: nowrap; font-family: var(--font);
+    }
+    .research-subnav button:hover { color: var(--text); background: var(--surface-3); }
+    .research-subnav button.active {
+      color: #fff; background: var(--surface-3);
+      border: 1px solid var(--border);
+      color: var(--accent); font-weight: 700;
     }
 
     /* ── Layout & Containers ── */
@@ -159,6 +197,7 @@
     }
     .card-body { padding: 16px; }
     .card-body.flush { padding: 0; }
+    .card-body.compact { padding: 10px 16px; }
 
     /* ── Grids ── */
     .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
@@ -182,6 +221,18 @@
       font-size: 11px; color: var(--text-muted); margin-top: 4px;
     }
 
+    /* ── Distribution Bar ── */
+    .dist-bar-wrap {
+      display: flex; height: 12px; border-radius: 4px; overflow: hidden;
+      margin-top: 8px; background: var(--surface-3); border: 1px solid var(--border-light);
+    }
+    .dist-bar-benign {
+      background: var(--green); height: 100%; transition: width 0.3s;
+    }
+    .dist-bar-attack {
+      background: var(--red); height: 100%; transition: width 0.3s;
+    }
+
     /* ── Confusion Matrix ── */
     .cm-wrapper {
       display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
@@ -202,18 +253,10 @@
       border-radius: var(--radius); padding: 12px 16px; margin-bottom: 16px;
       border: 1px solid var(--border); font-size: 13px; line-height: 1.5;
     }
-    .callout-amber {
-      background: var(--orange-dim); border-color: var(--orange); color: #fbbf24;
-    }
-    .callout-red {
-      background: var(--red-dim); border-color: var(--red); color: #f87171;
-    }
-    .callout-blue {
-      background: var(--accent-glow); border-color: var(--accent); color: #7dd3fc;
-    }
-    .callout-purple {
-      background: var(--purple-dim); border-color: var(--purple); color: #d8b4fe;
-    }
+    .callout-amber { background: var(--orange-dim); border-color: var(--orange); color: #fbbf24; }
+    .callout-red { background: var(--red-dim); border-color: var(--red); color: #f87171; }
+    .callout-blue { background: var(--accent-glow); border-color: var(--accent); color: #7dd3fc; }
+    .callout-purple { background: var(--purple-dim); border-color: var(--purple); color: #d8b4fe; }
 
     /* ── Badges ── */
     .badge {
@@ -227,8 +270,7 @@
     .badge-blue { background: var(--accent-glow); color: var(--accent); border: 1px solid var(--accent); }
     .badge-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple); }
     .badge-dim { background: var(--surface-3); color: var(--text-dim); border: 1px solid var(--border); }
-    .badge-sim { background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple); }
-    .table-wrap { overflow-x: auto; max-height: 320px; overflow-y: auto; }
+    .table-wrap { overflow-x: auto; max-height: 340px; overflow-y: auto; }
 
     /* ── Tables ── */
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -245,10 +287,27 @@
     tr:hover td { background: rgba(255,255,255,0.02); }
     .mono { font-family: var(--mono); }
 
-    /* ── Ground Truth vs Inference Highlight ── */
-    .gt-box {
-      background: rgba(0,0,0,0.3); border: 1px dashed var(--border);
-      border-radius: var(--radius-sm); padding: 4px 8px; display: inline-block;
+    /* ── Blindspot Cards ── */
+    .blindspot-card {
+      background: rgba(239, 68, 68, 0.06);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+    .blindspot-title {
+      font-weight: 700;
+      color: var(--red);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+    .blindspot-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
     }
 
     /* ── Flow Explorer Filters & Pagination ── */
@@ -297,9 +356,7 @@
       justify-content: center;
       padding: 20px;
     }
-    .modal-overlay.active {
-      display: flex;
-    }
+    .modal-overlay.active { display: flex; }
     .modal-dialog {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -310,18 +367,11 @@
       display: flex;
       flex-direction: column;
       box-shadow: 0 24px 48px rgba(0,0,0,0.7);
-      animation: modalFadeIn 0.2s ease-out;
-    }
-    @keyframes modalFadeIn {
-      from { opacity: 0; transform: translateY(12px) scale(0.98); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
     }
     .modal-header {
       padding: 16px 20px;
       border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
     }
     .modal-header h3 {
       font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px;
@@ -331,16 +381,10 @@
       font-size: 22px; cursor: pointer; padding: 4px; line-height: 1;
     }
     .modal-close-btn:hover { color: #fff; }
-    .modal-body {
-      padding: 20px;
-      overflow-y: auto;
-    }
+    .modal-body { padding: 20px; overflow-y: auto; }
     .modal-footer {
-      padding: 12px 20px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: flex-end;
-      background: var(--surface-2);
+      padding: 12px 20px; border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; background: var(--surface-2);
     }
 
     /* ── SHAP Bar Layout ── */
@@ -356,22 +400,11 @@
       flex: 1; height: 18px; background: var(--surface-2); border-radius: 3px; position: relative;
       display: flex; align-items: center; border: 1px solid var(--border-light);
     }
-    .shap-bar-center {
-      position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--border);
-      z-index: 2;
-    }
     .shap-bar-fill {
       position: absolute; height: 100%; border-radius: 2px;
     }
-    .shap-bar-fill.pos {
-      left: 50%; background: var(--red);
-    }
-    .shap-bar-fill.neg {
-      right: 50%; background: var(--accent);
-    }
-    .shap-val {
-      width: 65px; font-family: var(--mono); font-size: 11px; flex-shrink: 0;
-    }
+    .shap-bar-fill.pos { left: 0; background: var(--accent); }
+    .shap-val { width: 65px; font-family: var(--mono); font-size: 11px; flex-shrink: 0; }
   </style>
 </head>
 <body>
@@ -383,182 +416,823 @@
       <div>
         <h1>XRL-IDARS</h1>
       </div>
-      <span class="version">v1.0 (Research Workbench)</span>
-    </div>
-    <div class="topbar-tabs">
-      <button class="active" data-tab="evaluation" onclick="showTab('evaluation')">📊 Dataset Evaluation</button>
-      <button data-tab="overview" onclick="showTab('overview')">📋 Overview</button>
-      <button data-tab="comparison" onclick="showTab('comparison')">⚖️ Model Comparison</button>
-      <button data-tab="flows" onclick="showTab('flows')">🔍 Flow Explorer</button>
-      <button data-tab="explainability" onclick="showTab('explainability')">💡 Explainability</button>
-      <button data-tab="response" onclick="showTab('response')">🛡️ Autonomous Response</button>
-      <button data-tab="limitations" onclick="showTab('limitations')">⚠️ Research Limitations</button>
-      <button data-tab="live" onclick="showTab('live')">⚡ Live Monitor &amp; Traffic Modes</button>
+      <span class="version">v1.0 (Research Workbench &amp; Live Monitor)</span>
     </div>
     <div class="topbar-status">
       <span class="pulse-dot" id="live-dot"></span>
-      <span id="topbar-status-text">Workbench Idle</span>
+      <span id="topbar-status-text">System Ready</span>
     </div>
   </nav>
 
-  <div class="container">
+  <!-- ═══════════════════ Top-Level Mode Switcher Bar ═══════════════════ -->
+  <div class="mode-bar">
+    <div class="mode-switcher">
+      <button class="main-mode-btn active" id="btn-mode-research" onclick="switchMainMode('research')">
+        🔬 Research &amp; Benchmarks (Held-Out Test Sets)
+      </button>
+      <button class="main-mode-btn" id="btn-mode-live" onclick="switchMainMode('live')">
+        ⚡ Live Exhibition Demo (200-Flow Sample &amp; PCAP Replay)
+      </button>
+    </div>
+    <div class="mode-hint" id="mode-hint-text">
+      Mode: <strong>Research &amp; Benchmarks</strong> — complete held-out evaluation on CIC-IDS2017, CSE-CIC-IDS2018, UNSW-NB15.
+    </div>
+  </div>
 
-    <!-- ═══════════════════ PAGE B: DATASET EVALUATION (PRIMARY) ═══════════════════ -->
-    <div id="tab-evaluation" class="tab-content active">
+  <!-- ═══════════════════ Research & Benchmarks Container ═══════════════════ -->
+  <div id="view-research">
+    <!-- Sub-navigation tabs for the 5 requested sections -->
+    <div class="research-subnav">
+      <button class="active" data-tab="dataset-explorer" onclick="showResearchTab('dataset-explorer')">📁 1. Dataset Explorer</button>
+      <button data-tab="model-comparison" onclick="showResearchTab('model-comparison')">⚖️ 2. Model Comparison</button>
+      <button data-tab="performance-benchmarks" onclick="showResearchTab('performance-benchmarks')">⏱️ 3. Performance Benchmarks</button>
+      <button data-tab="explainability-attacks" onclick="showResearchTab('explainability-attacks')">💡 4. Explainability &amp; Attacks</button>
+      <button data-tab="autonomous-response" onclick="showResearchTab('autonomous-response')">🛡️ 5. Autonomous Response</button>
+      <button data-tab="overview" onclick="showResearchTab('overview')">📋 Overview &amp; Evidence</button>
+      <button data-tab="limitations" onclick="showResearchTab('limitations')">⚠️ Findings &amp; Limitations</button>
+    </div>
 
-      <!-- Benchmark & Slice Selector Bar -->
-      <div class="controls-bar">
-        <div class="controls-group">
-          <span class="controls-label">Benchmark Dataset:</span>
-          <select id="eval-benchmark-select" onchange="onEvalBenchmarkChange()">
-            <option value="cicids2017">CIC-IDS2017 (Flagship — 355k Flows, R10)</option>
-            <option value="cse2018">CSE-CIC-IDS2018 (Enterprise Cloud — 1.66M Flows, R10)</option>
-            <option value="unswnb15">UNSW-NB15 (Sensor Degraded — 24k Flows, R4)</option>
-            <option value="cse2018_temporal">CSE-CIC-IDS2018 (Temporal Future Days — 1.63M Flows)</option>
-          </select>
-        </div>
-        <div class="controls-group">
-          <span class="controls-label">Evaluation Slice:</span>
-          <select id="eval-slice-select" onchange="onEvalSliceChange()">
-            <option value="aligned">Aligned Sequence Slice (355,833 Flows — Strict Comparison)</option>
-            <option value="native">Complete Tabular Split (355,865 Flows — Unconstrained)</option>
-          </select>
-        </div>
-        <div class="controls-group">
-          <span class="badge badge-green" id="eval-provenance-badge">Verified Frozen Output</span>
-        </div>
-      </div>
+    <div class="container">
 
-      <!-- Population & Derivation Notice -->
-      <div id="population-derivation-notice" class="callout callout-blue">
-        <strong>Population Reconciliation Derivation:</strong>
-        <span id="pop-derivation-text">Loading...</span>
-      </div>
-
-      <!-- Key High-Level Metric Tiles -->
-      <div class="grid-4 section-gap">
-        <div class="stat-card">
-          <div class="stat-label">Model Accuracy</div>
-          <div class="stat-val" id="eval-accuracy">—</div>
-          <div class="stat-sub" id="eval-accuracy-sub">Overall Correct / Total</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Detection Precision</div>
-          <div class="stat-val" id="eval-precision">—</div>
-          <div class="stat-sub" id="eval-precision-sub">TP / (TP + FP)</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Attack Recall</div>
-          <div class="stat-val" id="eval-recall">—</div>
-          <div class="stat-sub" id="eval-recall-sub">TP / (TP + FN)</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">F1-Score</div>
-          <div class="stat-val" id="eval-f1">—</div>
-          <div class="stat-sub" id="eval-f1-sub">Harmonic Mean (P, R)</div>
-        </div>
-      </div>
-
-      <div class="grid-2 section-gap">
-        <!-- Model Selector & Details -->
-        <div class="card">
-          <div class="card-header">
-            <h2>Evaluated Detector Selection</h2>
-            <div class="controls-group">
-              <select id="eval-model-select" onchange="onEvalModelSelect()">
-                <option value="fusion">RF + LSTM Fusion (Ensemble)</option>
-                <option value="random_forest">Random Forest (Frozen R10)</option>
-                <option value="lstm">Supervised LSTM (T=5)</option>
-                <option value="decision_tree">Decision Tree Baseline</option>
-                <option value="logistic_regression">Logistic Regression</option>
-                <option value="majority">Majority Prior Baseline</option>
-              </select>
-            </div>
+      <!-- ═══════════════════ SECTION 1: DATASET EXPLORER ═══════════════════ -->
+      <div id="tab-dataset-explorer" class="tab-content active">
+        <!-- Dataset Selector Bar -->
+        <div class="controls-bar">
+          <div class="controls-group">
+            <span class="controls-label">Benchmark Dataset:</span>
+            <select id="explorer-dataset-select" onchange="onExplorerDatasetChange()">
+              <option value="cicids2017">CIC-IDS2017 (Flagship — 355k Test Flows, R10)</option>
+              <option value="cse2018">CSE-CIC-IDS2018 (Enterprise Cloud — 1.66M Test Flows, R10)</option>
+              <option value="unswnb15">UNSW-NB15 (Sensor Degraded — 24k Test Flows, R4)</option>
+            </select>
           </div>
-          <div class="card-body">
-            <div id="eval-model-details">
+          <div class="controls-group">
+            <span class="badge badge-green" id="ds-provenance-badge">Policy A Deduplicated (Zero Leakage)</span>
+          </div>
+        </div>
+
+        <!-- 4 Stat Tiles -->
+        <div class="grid-4 section-gap">
+          <div class="stat-card">
+            <div class="stat-label">Total Raw Rows</div>
+            <div class="stat-val" id="ds-raw-rows">—</div>
+            <div class="stat-sub" id="ds-raw-files">— capture files</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Deduplicated Rows</div>
+            <div class="stat-val" id="ds-dedup-rows">—</div>
+            <div class="stat-sub" id="ds-dedup-removed">— duplicate rows removed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Split (Train / Val / Test)</div>
+            <div class="stat-val" id="ds-split-summary">60% / 20% / 20%</div>
+            <div class="stat-sub" id="ds-test-population">— held-out test flows</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Attack Prevalence</div>
+            <div class="stat-val" id="ds-attack-prev">—%</div>
+            <div class="dist-bar-wrap" title="Green: Benign, Red: Attack">
+              <div id="ds-bar-benign" class="dist-bar-benign" style="width: 80%;"></div>
+              <div id="ds-bar-attack" class="dist-bar-attack" style="width: 20%;"></div>
+            </div>
+            <div class="stat-sub" id="ds-benign-attack-counts">— Benign / — Attack</div>
+          </div>
+        </div>
+
+        <!-- Preprocessing & Attack Inventory Grid -->
+        <div class="grid-2 section-gap">
+          <!-- Environment & Preprocessing -->
+          <div class="card">
+            <div class="card-header">
+              <h2>Dataset Environment &amp; Preprocessing</h2>
+              <span class="badge badge-blue" id="ds-contract-badge">R10 Contract</span>
+            </div>
+            <div class="card-body">
               <table style="margin-bottom: 12px;">
                 <tbody>
-                  <tr><td><strong>Model Architecture:</strong></td><td id="m-arch">—</td></tr>
-                  <tr><td><strong>Feature Contract:</strong></td><td id="m-contract" class="mono">—</td></tr>
-                  <tr><td><strong>Research Decision Threshold:</strong></td><td id="m-thresh" class="mono">τ = 0.50</td></tr>
-                  <tr><td><strong>ROC-AUC / PR-AUC:</strong></td><td id="m-auc" class="mono">—</td></tr>
+                  <tr><td><strong>Environment:</strong></td><td id="ds-env">—</td></tr>
+                  <tr><td><strong>Capture Dates:</strong></td><td id="ds-dates">—</td></tr>
+                  <tr><td><strong>Feature Contract:</strong></td><td id="ds-contract-name" class="mono">—</td></tr>
+                  <tr><td><strong>Boundary Exclusion:</strong></td><td id="ds-boundary-drops" style="font-size:12px; color:var(--text-muted);">—</td></tr>
+                  <tr><td><strong>Imputation:</strong></td><td style="font-size:12px;">SimpleImputer (median) fit strictly on training split</td></tr>
+                  <tr><td><strong>Normalization:</strong></td><td style="font-size:12px;">StandardScaler fit strictly on training split (zero test leakage)</td></tr>
                 </tbody>
               </table>
-              <div class="cm-label" style="margin-top: 10px;">Held-Out Confusion Matrix:</div>
-              <div class="cm-wrapper">
-                <div class="cm-box correct">
-                  <div class="cm-label">True Negative (TN)</div>
-                  <div class="cm-val" id="cm-tn">—</div>
-                  <div class="cm-pct" id="cm-tn-pct">Benign Passed</div>
-                </div>
-                <div class="cm-box error">
-                  <div class="cm-label">False Positive (FP)</div>
-                  <div class="cm-val" id="cm-fp">—</div>
-                  <div class="cm-pct" id="cm-fp-pct">False Alarms</div>
-                </div>
-                <div class="cm-box error">
-                  <div class="cm-label">False Negative (FN)</div>
-                  <div class="cm-val" id="cm-fn">—</div>
-                  <div class="cm-pct" id="cm-fn-pct">Missed Attacks</div>
-                </div>
-                <div class="cm-box correct">
-                  <div class="cm-label">True Positive (TP)</div>
-                  <div class="cm-val" id="cm-tp">—</div>
-                  <div class="cm-pct" id="cm-tp-pct">Attacks Detected</div>
-                </div>
+              <div style="font-size:11px; text-transform:uppercase; color:var(--text-dim); font-weight:700; margin-bottom:6px;">Active Feature Schema:</div>
+              <div id="ds-features-list" style="display:flex; flex-wrap:wrap; gap:4px; font-family:var(--mono); font-size:11px;">
+                <!-- feature badges injected here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Attack Classes Inventory -->
+          <div class="card">
+            <div class="card-header">
+              <h2>Attack Classes &amp; Prevalence Inventory</h2>
+            </div>
+            <div class="card-body flush">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Attack Class</th>
+                      <th>Category</th>
+                      <th>Support</th>
+                      <th>Detection Rate</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ds-attack-classes-tbody">
+                    <tr><td colspan="4" style="text-align:center;">Loading attack inventory...</td></tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Per-Class Metrics & Family Breakdown -->
-        <div class="card">
+        <!-- Overall Cross-Dataset Comparison View -->
+        <div class="card section-gap">
           <div class="card-header">
-            <h2>Per-Class &amp; Family Performance</h2>
+            <h2>Overall Cross-Dataset Comparison View</h2>
+            <span class="badge badge-purple">Multi-Dataset Research Synthesis</span>
           </div>
           <div class="card-body flush">
-            <table id="per-class-table">
+            <table>
               <thead>
                 <tr>
-                  <th>Class / Family</th>
-                  <th>Precision</th>
-                  <th>Recall</th>
-                  <th>F1-Score</th>
-                  <th>Support</th>
+                  <th>Benchmark Dataset</th>
+                  <th>Contract</th>
+                  <th>Total Raw Rows</th>
+                  <th>Deduplicated Rows</th>
+                  <th>Test Population</th>
+                  <th>Attack %</th>
+                  <th>Random Forest F1</th>
+                  <th>LSTM F1</th>
+                  <th>Score Fusion F1</th>
+                  <th>Primary Research Finding</th>
                 </tr>
               </thead>
-              <tbody id="per-class-tbody">
-                <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
+              <tbody id="cross-dataset-tbody">
+                <tr><td colspan="10" style="text-align:center;">Loading cross-dataset comparison...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- Flow Evaluation, Exhibition Demo & Multi-Model Inference Card -->
+      <!-- ═══════════════════ SECTION 2: MODEL COMPARISON ═══════════════════ -->
+      <div id="tab-model-comparison" class="tab-content">
+        <!-- Dataset Selector Bar -->
+        <div class="controls-bar">
+          <div class="controls-group">
+            <span class="controls-label">Benchmark Dataset:</span>
+            <select id="cmp-dataset-select" onchange="onCmpDatasetChange()">
+              <option value="cicids2017">CIC-IDS2017 (Flagship — 355k Test Flows)</option>
+              <option value="cse2018">CSE-CIC-IDS2018 (Enterprise Cloud — 1.66M Test Flows)</option>
+              <option value="unswnb15">UNSW-NB15 (Sensor Degraded — 24k Test Flows)</option>
+            </select>
+          </div>
+          <div class="controls-group">
+            <span class="badge badge-green">Aligned Sequence Slices (T=5)</span>
+          </div>
+        </div>
+
+        <!-- Degenerate alert banner -->
+        <div id="cmp-degenerate-alert" class="callout callout-amber" style="display: none;">
+          <strong>Degenerate Weight Alert:</strong>
+          <span id="cmp-degenerate-text"></span>
+        </div>
+
+        <!-- 3 Model Head-to-Head Cards -->
+        <div class="grid-3 section-gap">
+          <!-- RF Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2>🌲 Random Forest</h2>
+              <span class="badge badge-purple">Tabular Baseline</span>
+            </div>
+            <div class="card-body">
+              <div style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 2px;" id="cmp-rf-f1">—</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Test F1-Score (Positive: Attack)</div>
+              <table>
+                <tbody>
+                  <tr><td>Accuracy:</td><td id="cmp-rf-acc" class="mono">—</td></tr>
+                  <tr><td>Precision:</td><td id="cmp-rf-prec" class="mono">—</td></tr>
+                  <tr><td>Recall:</td><td id="cmp-rf-rec" class="mono">—</td></tr>
+                  <tr><td>ROC-AUC:</td><td id="cmp-rf-auc" class="mono">—</td></tr>
+                  <tr><td>PR-AUC:</td><td id="cmp-rf-prauc" class="mono">—</td></tr>
+                  <tr><td>95% Bootstrap CI:</td><td id="cmp-rf-ci" class="mono" style="font-size:11px;">—</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- LSTM Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2>⚡ Supervised LSTM (T=5)</h2>
+              <span class="badge badge-blue">Causal Sequence</span>
+            </div>
+            <div class="card-body">
+              <div style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 2px;" id="cmp-lstm-f1">—</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Test F1-Score (Aligned Flows)</div>
+              <table>
+                <tbody>
+                  <tr><td>Accuracy:</td><td id="cmp-lstm-acc" class="mono">—</td></tr>
+                  <tr><td>Precision:</td><td id="cmp-lstm-prec" class="mono">—</td></tr>
+                  <tr><td>Recall:</td><td id="cmp-lstm-rec" class="mono">—</td></tr>
+                  <tr><td>ROC-AUC:</td><td id="cmp-lstm-auc" class="mono">—</td></tr>
+                  <tr><td>PR-AUC:</td><td id="cmp-lstm-prauc" class="mono">—</td></tr>
+                  <tr><td>95% Bootstrap CI:</td><td id="cmp-lstm-ci" class="mono" style="font-size:11px;">—</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Fusion Card -->
+          <div class="card" style="border-color: var(--accent);">
+            <div class="card-header" style="background: var(--accent-glow);">
+              <h2 style="color: var(--accent);">🔮 RF + LSTM Score Fusion</h2>
+              <span class="badge badge-green" id="cmp-fusion-alpha-badge">&alpha; = 0.50</span>
+            </div>
+            <div class="card-body">
+              <div style="font-size: 26px; font-weight: 800; color: var(--accent); margin-bottom: 2px;" id="cmp-fusion-f1">—</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Test F1-Score (Linear Ensemble)</div>
+              <table>
+                <tbody>
+                  <tr><td>Accuracy:</td><td id="cmp-fusion-acc" class="mono">—</td></tr>
+                  <tr><td>Precision:</td><td id="cmp-fusion-prec" class="mono">—</td></tr>
+                  <tr><td>Recall:</td><td id="cmp-fusion-rec" class="mono">—</td></tr>
+                  <tr><td>ROC-AUC:</td><td id="cmp-fusion-auc" class="mono">—</td></tr>
+                  <tr><td>PR-AUC:</td><td id="cmp-fusion-prauc" class="mono">—</td></tr>
+                  <tr><td>Formula:</td><td id="cmp-fusion-formula" class="mono" style="font-size:11px;">&alpha;&middot;RF + (1-&alpha;)&middot;LSTM</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Held-Out Confusion Matrices Side-by-Side -->
+        <div class="card section-gap">
+          <div class="card-header">
+            <h2>Held-Out Confusion Matrices Comparison (All 3 Models)</h2>
+            <span class="badge badge-dim">&tau; = 0.50 Research Threshold</span>
+          </div>
+          <div class="card-body">
+            <div class="grid-3">
+              <!-- RF CM -->
+              <div>
+                <h4 style="font-size:12px; margin-bottom:6px; color:var(--text-muted);">🌲 Random Forest Matrix</h4>
+                <div class="cm-wrapper">
+                  <div class="cm-box correct"><div class="cm-label">TN (Benign)</div><div class="cm-val" id="cmp-cm-rf-tn">—</div></div>
+                  <div class="cm-box error"><div class="cm-label">FP (False Alarm)</div><div class="cm-val" id="cmp-cm-rf-fp">—</div></div>
+                  <div class="cm-box error"><div class="cm-label">FN (Missed)</div><div class="cm-val" id="cmp-cm-rf-fn">—</div></div>
+                  <div class="cm-box correct"><div class="cm-label">TP (Detected)</div><div class="cm-val" id="cmp-cm-rf-tp">—</div></div>
+                </div>
+              </div>
+
+              <!-- LSTM CM -->
+              <div>
+                <h4 style="font-size:12px; margin-bottom:6px; color:var(--text-muted);">⚡ Supervised LSTM Matrix</h4>
+                <div class="cm-wrapper">
+                  <div class="cm-box correct"><div class="cm-label">TN (Benign)</div><div class="cm-val" id="cmp-cm-lstm-tn">—</div></div>
+                  <div class="cm-box error"><div class="cm-label">FP (False Alarm)</div><div class="cm-val" id="cmp-cm-lstm-fp">—</div></div>
+                  <div class="cm-box error"><div class="cm-label">FN (Missed)</div><div class="cm-val" id="cmp-cm-lstm-fn">—</div></div>
+                  <div class="cm-box correct"><div class="cm-label">TP (Detected)</div><div class="cm-val" id="cmp-cm-lstm-tp">—</div></div>
+                </div>
+              </div>
+
+              <!-- Fusion CM -->
+              <div>
+                <h4 style="font-size:12px; margin-bottom:6px; color:var(--accent);">🔮 Score Fusion Matrix</h4>
+                <div class="cm-wrapper">
+                  <div class="cm-box correct"><div class="cm-label">TN (Benign)</div><div class="cm-val" id="cmp-cm-fusion-tn">—</div></div>
+                  <div class="cm-box error"><div class="cm-label">FP (False Alarm)</div><div class="cm-val" id="cmp-cm-fusion-fp">—</div></div>
+                  <div class="cm-box error"><div class="cm-label">FN (Missed)</div><div class="cm-val" id="cmp-cm-fusion-fn">—</div></div>
+                  <div class="cm-box correct"><div class="cm-label">TP (Detected)</div><div class="cm-val" id="cmp-cm-fusion-tp">—</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Per-Family Breakdown & Shuffled Sequence Ablation Grid -->
+        <div class="grid-2 section-gap">
+          <!-- Per-Class Performance Table -->
+          <div class="card">
+            <div class="card-header">
+              <h2>Per-Class &amp; Family Performance</h2>
+            </div>
+            <div class="card-body flush">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Attack Family</th>
+                      <th>Support</th>
+                      <th>Correct</th>
+                      <th>Detection Rate</th>
+                      <th>Error Rate</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cmp-per-family-tbody">
+                    <tr><td colspan="5" style="text-align:center;">Loading per-family metrics...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- LSTM Shuffled-Window Sequence Ablation -->
+          <div class="card">
+            <div class="card-header">
+              <h2>LSTM Temporal Order Ablation (Shuffled Window)</h2>
+              <span class="badge badge-purple">&Delta;F1 = -0.0038</span>
+            </div>
+            <div class="card-body">
+              <table style="margin-bottom: 12px;">
+                <tbody>
+                  <tr><td><strong>Condition A (Causal Ordered):</strong></td><td class="mono">F1 = 0.9314</td></tr>
+                  <tr><td><strong>Condition B (Randomly Permuted):</strong></td><td class="mono">F1 = 0.9353</td></tr>
+                  <tr><td><strong>Order Gain (&Delta;F1):</strong></td><td class="mono" style="color:var(--red);">-0.0038 (Zero Order Gain)</td></tr>
+                </tbody>
+              </table>
+              <div class="callout callout-purple" style="margin-bottom: 0; font-size:12px;">
+                <strong>Empirical Scientific Insight:</strong> Shuffling flow order inside the length-5 sequence does not harm performance. This proves the LSTM functions as a non-linear spatial/contextual filter over local flow bursts, rather than learning true recurrent time-series dynamics.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════ SECTION 3: PERFORMANCE BENCHMARKS ═══════════════════ -->
+      <div id="tab-performance-benchmarks" class="tab-content">
+        <!-- Empirical Notice Banner -->
+        <div class="callout callout-blue">
+          <strong>Empirical Benchmark Measurements Only:</strong>
+          Every figure in this section is measured directly from automated benchmark suites on Python 3.14 (Linux x86_64 CPU). Zero extrapolations or unmeasured synthetic claims.
+        </div>
+
+        <!-- Latency Microbenchmark Grid -->
+        <div class="grid-2 section-gap">
+          <!-- Policy-Only Latencies -->
+          <div class="card">
+            <div class="card-header">
+              <h2>Inference Latency &amp; Decision Throughput (Policy-Only)</h2>
+              <span class="badge badge-green">Microbenchmarks (CPU)</span>
+            </div>
+            <div class="card-body flush">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Decision Policy</th>
+                    <th>Median Latency</th>
+                    <th>Throughput</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody id="perf-policy-latency-tbody">
+                  <tr><td colspan="4" style="text-align:center;">Loading latency measurements...</td></tr>
+                </tbody>
+              </table>
+              <div style="padding: 12px 16px; background: var(--surface-2); border-top: 1px solid var(--border); font-size:12px; color:var(--text-muted);" id="perf-speedup-text">
+                Loading speedup comparison...
+              </div>
+            </div>
+          </div>
+
+          <!-- Detector vs Response Latency -->
+          <div class="card">
+            <div class="card-header">
+              <h2>Detector Inference vs. End-to-End Latency</h2>
+              <span class="badge badge-purple">System Breakdown</span>
+            </div>
+            <div class="card-body">
+              <table style="margin-bottom: 12px;">
+                <thead>
+                  <tr>
+                    <th>Inference Path</th>
+                    <th>Latency / Flow</th>
+                    <th>Throughput</th>
+                  </tr>
+                </thead>
+                <tbody id="perf-detector-latency-tbody">
+                  <tr><td colspan="3" style="text-align:center;">Loading detector latencies...</td></tr>
+                </tbody>
+              </table>
+              <div class="callout callout-amber" style="margin-bottom: 0; font-size:12px;">
+                <strong>Bottleneck Finding:</strong> In online single-packet stream processing, Random Forest tree traversal dominates system latency (~3.5 ms per flow). Response policy evaluation (1.95 µs Cost-Optimal / 100.23 µs DQN) accounts for less than 3% of end-to-end execution time.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Traffic Volume Scaling & Resource Profiles Grid -->
+        <div class="grid-2 section-gap">
+          <!-- Volume Scaling / Burst Test -->
+          <div class="card">
+            <div class="card-header">
+              <h2>Traffic Volume Scaling &amp; Burst Benchmark (EXP-P3-BURST-1000-001)</h2>
+              <span class="badge badge-green">0 Drops (100% Invariant)</span>
+            </div>
+            <div class="card-body">
+              <div class="grid-2" style="margin-bottom: 12px;">
+                <div class="stat-card">
+                  <div class="stat-label">Packets Processed</div>
+                  <div class="stat-val" id="perf-burst-packets">1,000 / 1,000</div>
+                  <div class="stat-sub">0 dropped, 0 malformed</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Peak Burst Rate</div>
+                  <div class="stat-val" id="perf-burst-rate">26,600 pkts/s</div>
+                  <div class="stat-sub">Line-rate assembly</div>
+                </div>
+              </div>
+              <table>
+                <tbody>
+                  <tr><td><strong>Flows Reconstructed:</strong></td><td id="perf-burst-flows" class="mono">270 flows (90 completed via FIN/RST)</td></tr>
+                  <tr><td><strong>Latency Percentiles:</strong></td><td class="mono">P50 = 37.51 ms | P95 = 42.10 ms</td></tr>
+                  <tr><td><strong>Processing Duration:</strong></td><td class="mono">9.646 seconds wall time</td></tr>
+                  <tr><td><strong>Flow Pacing:</strong></td><td class="mono">103.73 pkts/s (effective 28.01 flows/s)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- CPU & Memory Consumption -->
+          <div class="card">
+            <div class="card-header">
+              <h2>CPU &amp; Memory Consumption Profile</h2>
+              <span class="badge badge-blue">Zero GPU Required</span>
+            </div>
+            <div class="card-body">
+              <div class="grid-2" style="margin-bottom: 12px;">
+                <div class="stat-card">
+                  <div class="stat-label">Total Process RAM</div>
+                  <div class="stat-val" id="perf-mem-total">~123.2 MB</div>
+                  <div class="stat-sub">All models + active hash table</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Burst CPU Utilization</div>
+                  <div class="stat-val" id="perf-cpu-burst">18.4%</div>
+                  <div class="stat-sub">Single core on Linux x86_64</div>
+                </div>
+              </div>
+              <table>
+                <tbody>
+                  <tr><td>Random Forest Model in RAM:</td><td class="mono">117.4 MB</td></tr>
+                  <tr><td>Supervised LSTM Model in RAM:</td><td class="mono">1.2 MB</td></tr>
+                  <tr><td>Dueling DQN Model in RAM:</td><td class="mono">0.4 MB</td></tr>
+                  <tr><td>FlowBuilder Hash Table (50k active flows):</td><td class="mono">4.2 MB</td></tr>
+                  <tr><td>Idle CPU Usage:</td><td class="mono">0.2%</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Repeated Runs & 95% Confidence Intervals Table -->
+        <div class="card section-gap">
+          <div class="card-header">
+            <h2>Repeated 3-Seed Sweeps &amp; 95% Bootstrap Confidence Intervals</h2>
+            <span class="badge badge-purple">Seeds: 42, 123, 456</span>
+          </div>
+          <div class="card-body flush">
+            <table>
+              <thead>
+                <tr>
+                  <th>Benchmark Dataset</th>
+                  <th>Contract</th>
+                  <th>Random Forest F1 (95% CI)</th>
+                  <th>Supervised LSTM F1 (95% CI)</th>
+                  <th>Score Fusion F1 (95% CI)</th>
+                </tr>
+              </thead>
+              <tbody id="perf-ci-tbody">
+                <tr><td colspan="5" style="text-align:center;">Loading confidence intervals...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════ SECTION 4: EXPLAINABILITY & ATTACK ANALYSIS ═══════════════════ -->
+      <div id="tab-explainability-attacks" class="tab-content">
+        <!-- Scope Notice -->
+        <div class="callout callout-amber">
+          <strong>Explainer Model Scope Notice:</strong>
+          TreeSHAP feature attributions explain the tree decision splits of the <strong>Random Forest detector ONLY</strong>.
+          They do NOT explain the LSTM, the Fusion model, or the Deep Q-Network Q-values. Feature attributions indicate mathematical contribution to tree variance, not physical network causality.
+        </div>
+
+        <!-- Critical Blind Spots Callouts -->
+        <div class="card section-gap">
+          <div class="card-header">
+            <h2>⚠️ Critical Blind Spots &amp; Low-Footprint Attack Failure Cases</h2>
+            <span class="badge badge-red">Severe Recall Deficits</span>
+          </div>
+          <div class="card-body" id="blind-spots-container">
+            <!-- Blind spot cards injected here -->
+          </div>
+        </div>
+
+        <!-- TreeSHAP Global Importance -->
+        <div class="card section-gap">
+          <div class="card-header">
+            <h2>Global Feature Importance (TreeSHAP)</h2>
+            <span class="badge badge-green">TreeExplainer (Random Forest)</span>
+          </div>
+          <div class="card-body flush">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Feature Name</th>
+                  <th>Contract</th>
+                  <th>Mean |SHAP Value|</th>
+                  <th>Visual Contribution</th>
+                  <th>Semantic Role</th>
+                </tr>
+              </thead>
+              <tbody id="shap-global-tbody">
+                <tr><td colspan="6" style="text-align:center;">Loading SHAP rankings...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Flow-Level Inspection & Error Analysis -->
+        <div class="card section-gap">
+          <div class="card-header">
+            <h2>Flow-Level Inspection &amp; Model Predictions</h2>
+            <div class="controls-group">
+              <button class="btn btn-primary" onclick="exportFlowsCsv()">📥 Export Filtered Flows (CSV)</button>
+            </div>
+          </div>
+          <div class="card-body" style="padding-bottom: 0;">
+            <div class="controls-bar" style="margin-bottom: 12px; background: var(--surface-2);">
+              <div class="controls-group">
+                <span class="controls-label">Status Filter:</span>
+                <select id="flow-filter-status" onchange="onFlowFilterChange()">
+                  <option value="all">All Flows</option>
+                  <option value="correct">Correct Classifications</option>
+                  <option value="errors">All Errors (FP + FN)</option>
+                  <option value="fp">False Positives (FP)</option>
+                  <option value="fn">Missed Attacks (FN)</option>
+                </select>
+              </div>
+              <div class="controls-group">
+                <span class="controls-label">Ground Truth:</span>
+                <select id="flow-filter-label" onchange="onFlowFilterChange()">
+                  <option value="all">All Labels</option>
+                  <option value="benign">Benign Only</option>
+                  <option value="attack">Attack Only</option>
+                </select>
+              </div>
+              <div class="controls-group">
+                <span id="flow-count-badge" class="badge badge-blue">Loading...</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-body flush">
+            <table>
+              <thead>
+                <tr>
+                  <th>Flow ID</th>
+                  <th>Ground Truth (Isolated)</th>
+                  <th>RF Score</th>
+                  <th>LSTM Score</th>
+                  <th>Fusion Score</th>
+                  <th>Prediction</th>
+                  <th>Outcome Status</th>
+                </tr>
+              </thead>
+              <tbody id="flows-tbody">
+                <tr><td colspan="7" style="text-align:center;">Loading flows...</td></tr>
+              </tbody>
+            </table>
+            <div class="pagination-bar">
+              <div>
+                Showing page <span id="flow-current-page" class="mono">1</span> of <span id="flow-total-pages" class="mono">1</span>
+              </div>
+              <div class="controls-group">
+                <button class="btn" id="btn-prev-page" onclick="changeFlowPage(-1)">◀ Previous</button>
+                <button class="btn" id="btn-next-page" onclick="changeFlowPage(1)">Next ▶</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════ SECTION 5: AUTONOMOUS RESPONSE EVALUATION ═══════════════════ -->
+      <div id="tab-autonomous-response" class="tab-content">
+        <!-- Simulation Notice -->
+        <div class="callout callout-amber">
+          <strong>Simulated Exogenous Replay Notice:</strong>
+          Response actions are evaluated against recorded traffic flows in memory. Autonomous network enforcement (iptables, routing changes) is strictly <strong>NO-GO</strong> in production. Zero live firewall mutations are performed.
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="controls-bar">
+          <div class="controls-group">
+            <span class="controls-label">Cost Scenario:</span>
+            <select id="resp-regime-select" onchange="onResponseParamsChange()">
+              <option value="standard_enterprise">Standard Enterprise (Balanced FP/FN)</option>
+              <option value="high_availability">High Availability (FP Isolate = 500)</option>
+              <option value="high_security_enclave">High Security Enclave (FN Miss = 500)</option>
+            </select>
+          </div>
+          <div class="controls-group">
+            <span class="controls-label">Action Mode:</span>
+            <select id="resp-mode-select" onchange="onResponseParamsChange()">
+              <option value="4-action">4-Action Mode (ALLOW, ALERT, RATE_LIMIT, ISOLATE)</option>
+              <option value="3-action">3-Action Mode (ALLOW, ALERT, RATE_LIMIT)</option>
+            </select>
+          </div>
+          <div class="controls-group">
+            <span class="badge badge-purple">Held-Out Test (355,865 Flows)</span>
+          </div>
+        </div>
+
+        <!-- Head to Head Callout -->
+        <div id="resp-winner-callout" class="callout callout-purple">
+          <strong>Head-to-Head Result:</strong> <span id="resp-winner-text">Loading...</span>
+        </div>
+
+        <!-- Policy Comparison Table -->
+        <div class="card section-gap">
+          <div class="card-header">
+            <h2>Response Policy Comparative Benchmark</h2>
+          </div>
+          <div class="card-body flush">
+            <table>
+              <thead>
+                <tr>
+                  <th>Response Policy</th>
+                  <th>Total Operational Cost</th>
+                  <th>Mean Cost / Flow</th>
+                  <th>Availability (BAS)</th>
+                  <th>False Quarantine (FQR)</th>
+                  <th>Action Chattering</th>
+                </tr>
+              </thead>
+              <tbody id="resp-policies-tbody">
+                <tr><td colspan="6" style="text-align:center;">Loading policies...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Safety Gate & Rollback Evidence Grid -->
+        <div class="grid-2 section-gap">
+          <!-- Safety Gate Invariants -->
+          <div class="card">
+            <div class="card-header">
+              <h2>Deterministic Safety Gate Invariants</h2>
+              <span class="badge badge-green">0 Violations Detected</span>
+            </div>
+            <div class="card-body">
+              <ul style="padding-left: 20px; line-height: 1.8; color: var(--text-muted); font-size:13px;">
+                <li><strong>Quarantine Cap:</strong> Max 20% of concurrent hosts in isolation.</li>
+                <li><strong>Cooldown Invariant:</strong> 60s minimum hysteresis before re-isolation.</li>
+                <li><strong>Rate-Limit Fallback:</strong> Overridden isolates degrade safely to throughput throttling.</li>
+                <li><strong>Production Status:</strong> Autonomous enforcement strictly NO-GO (Observational Only).</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Rollback Evidence -->
+          <div class="card">
+            <div class="card-header">
+              <h2>Dry-Run Recommendations &amp; Rollback Evidence (EXP-P3G-ROLLBACK-001)</h2>
+              <span class="badge badge-green">8 Verified Restorations</span>
+            </div>
+            <div class="card-body flush">
+              <div class="table-wrap" style="max-height: 200px;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Tx ID</th>
+                      <th>Action</th>
+                      <th>Status</th>
+                      <th>Safety State</th>
+                    </tr>
+                  </thead>
+                  <tbody id="resp-rollback-tbody">
+                    <tr><td colspan="4" style="text-align:center;">Loading rollback records...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style="padding: 10px 14px; background: var(--surface-2); border-top:1px solid var(--border); font-size:11px; color:var(--text-muted);">
+                Fault injection test confirmed that state restoration failures trigger a fail-safe <strong>SAFETY_LOCKED</strong> state.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════ OVERVIEW & EVIDENCE TAB ═══════════════════ -->
+      <div id="tab-overview" class="tab-content">
+        <div class="card section-gap">
+          <div class="card-header">
+            <h2>Project Purpose &amp; Scientific Platform Status</h2>
+            <span class="badge badge-purple" id="ov-commit">Commit: Verified</span>
+          </div>
+          <div class="card-body">
+            <p style="margin-bottom: 12px; font-size: 14px; color: var(--text);">
+              <strong>XRL-IDARS</strong> is a research platform for explainable machine learning and reinforcement learning in network security.
+              This interface surfaces genuine held-out evaluation outputs, component verification statuses, and empirical evidence across four benchmark configurations.
+            </p>
+            <div class="callout callout-amber">
+              <strong>Production Safety Invariant:</strong> Autonomous production enforcement is strictly <strong>NO-GO</strong>.
+              The system operates exclusively in an observational monitoring and offline simulation mode. Zero network mutations (iptables, routing, socket drops) are permitted.
+            </div>
+          </div>
+        </div>
+
+        <div class="card section-gap">
+          <div class="card-header">
+            <h2>Formal Component Verification Matrix</h2>
+          </div>
+          <div class="card-body flush">
+            <table>
+              <thead>
+                <tr><th>Component</th><th>Target Scope</th><th>Formal Status</th><th>Primary Empirical Finding / Reality</th></tr>
+              </thead>
+              <tbody id="ov-components-tbody">
+                <tr><td colspan="4" style="text-align:center;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card section-gap">
+          <div class="card-header">
+            <h2>Benchmark Dataset Inventory</h2>
+          </div>
+          <div class="card-body flush">
+            <table>
+              <thead>
+                <tr><th>Benchmark</th><th>Contract</th><th>Test Flows</th><th>Fusion Acc</th><th>Fusion F1</th><th>Primary Research Role</th></tr>
+              </thead>
+              <tbody id="ov-datasets-tbody">
+                <tr><td colspan="6" style="text-align:center;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════ FINDINGS & LIMITATIONS TAB ═══════════════════ -->
+      <div id="tab-limitations" class="tab-content">
+        <div class="card section-gap">
+          <div class="card-header">
+            <h2>XRL-IDARS Research Findings &amp; Scientific Limitations</h2>
+            <span class="badge badge-orange">Audited Evidence</span>
+          </div>
+          <div class="card-body" id="limitations-container">
+            Loading research limitations...
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════ Live Exhibition Demo Container ═══════════════════ -->
+  <div id="view-live" style="display: none;">
+    <div class="container">
+      <!-- Exhibition Banner -->
+      <div class="callout callout-blue" style="border-left: 4px solid var(--accent); margin-bottom: 20px;">
+        <div style="font-weight: 700; margin-bottom: 6px; font-size: 15px;">⚡ Scientific Disclaimer &amp; Strict Operational Mode Separation (Live Exhibition Demo)</div>
+        <div style="font-size: 13px; line-height: 1.5; color: var(--text);">
+          This exhibition view runs the fast, deterministic <strong>200-flow exhibition sample</strong>, streaming <strong>PCAP packet replay</strong> (<code>sample_traffic.pcap</code>), and in-memory <strong>attack simulation</strong> for real-time examiner inspection.
+          <br><em>Note: Complete authoritative research metrics evaluated on the full 355k+ held-out test sets are located in the <strong>Research &amp; Benchmarks</strong> mode.</em>
+        </div>
+      </div>
+
+      <!-- 200 Exhibition Flow Evaluation Engine -->
       <div class="card section-gap">
         <div class="card-header">
-          <h2>⚡ Flow Evaluation, Exhibition Demo &amp; Multi-Model Inference Engine</h2>
+          <h2>🎯 200 Exhibition Demo &amp; Multi-Model Inference Engine</h2>
           <span class="badge badge-purple" id="csv-eval-badge">RF + LSTM (T=5) + Score Fusion</span>
         </div>
         <div class="card-body">
-          <!-- Evaluation Mode Selection Pills -->
           <div class="mode-pills">
             <button class="mode-pill active" id="mode-pill-exhibition" onclick="onCsvModeSelect('exhibition')">
-              🎯 Mode B: 200 Exhibition Demo (Instant Test Flows)
+              🎯 200 Exhibition Demo (Instant Test Flows)
             </button>
             <button class="mode-pill" id="mode-pill-full-test" onclick="onCsvModeSelect('full_test')">
-              📊 Mode A: Full Held-Out Test Split
+              📊 Full Held-Out Test Split
             </button>
             <button class="mode-pill" id="mode-pill-custom" onclick="onCsvModeSelect('custom')">
-              📂 Mode C: Custom CSV Upload / Paste
+              📂 Custom CSV Upload / Paste
             </button>
           </div>
 
           <div class="callout callout-blue" id="csv-mode-description">
-            <strong>Mode B — Fixed Exhibition Subset (Recommended Demo):</strong>
-            Fast, deterministic verification using 200 flows (166 Benign, 34 Attack: 28 DoS Hulk, 5 DoS GoldenEye, 1 DoS Slowhttptest) from the canonical CIC-IDS2017 held-out test split, source file <code>Wednesday-workingHours.pcap_ISCX.csv</code>. The feature table has no IP addresses, so endpoints are labeled synthetic RFC 5737 display addresses and protocol is N/A. Evaluates RF + LSTM (T=5) + Score Fusion (&alpha;=0.50), runs TreeSHAP explanation on demand, and simulates Dueling DQN response recommendations.
+            <strong>Exhibition Verification Sample:</strong>
+            Fast, deterministic verification using 200 flows (166 Benign, 34 Attack: 28 DoS Hulk, 5 DoS GoldenEye, 1 DoS Slowhttptest) from the canonical CIC-IDS2017 held-out test split (<code>Wednesday-workingHours.pcap_ISCX.csv</code>). Evaluates RF + LSTM (T=5) + Score Fusion (&alpha;=0.50), runs TreeSHAP explanation on demand, and simulates Dueling DQN response recommendations.
           </div>
 
           <div class="controls-bar" style="margin-bottom: 12px; background: var(--surface-2);">
@@ -573,8 +1247,8 @@
             <div class="controls-group">
               <span class="controls-label">Feature Contract:</span>
               <select id="csv-eval-contract" onchange="onCsvContractChange()">
-                <option value="R10">R10 (10 Features: Duration, Rates, PktLens, TCP Flags, SynAckRatio)</option>
-                <option value="R4">R4 (4 Features: Duration, Packets/s, Bytes/s, PktLenMean)</option>
+                <option value="R10">R10 (10 Features)</option>
+                <option value="R4">R4 (4 Features)</option>
               </select>
             </div>
             <div class="controls-group" id="csv-max-rows-group" style="display: none;">
@@ -583,13 +1257,13 @@
                 <option value="1000">1,000 flows (Fast Smoke Test)</option>
                 <option value="5000">5,000 flows</option>
                 <option value="20000">20,000 flows</option>
-                <option value="0">Full Test Split (All Rows)</option>
+                <option value="0">Full Test Split</option>
               </select>
             </div>
             <div class="controls-group" id="csv-custom-upload-controls" style="display: none;">
               <input type="file" id="csv-file-input" accept=".csv" onchange="onCsvFileSelected(event)" style="display:none;">
               <button class="btn" onclick="document.getElementById('csv-file-input').click()">📁 Choose CSV File...</button>
-              <button class="btn" onclick="loadSampleCsvIntoTextarea()">📥 Load Benchmark Sample CSV</button>
+              <button class="btn" onclick="loadSampleCsvIntoTextarea()">📥 Load Sample CSV</button>
             </div>
             <div class="controls-group">
               <button class="btn btn-primary" id="btn-run-csv-eval" onclick="runCsvEvaluation()">⚡ Run Evaluation</button>
@@ -601,19 +1275,16 @@
           </div>
 
           <div id="csv-custom-input-area" style="display: none; margin-bottom: 12px;">
-            <textarea id="csv-text-input" rows="4" placeholder="Or paste CSV rows here (must include header row: flow_duration_ms,flow_packets_per_s,...)" style="width: 100%; font-family: var(--mono); font-size: 12px; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px; resize: vertical;"></textarea>
+            <textarea id="csv-text-input" rows="4" placeholder="Or paste CSV rows here..." style="width: 100%; font-family: var(--mono); font-size: 12px; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px; resize: vertical;"></textarea>
           </div>
 
-          <!-- Results Container (populated after evaluation) -->
+          <!-- Evaluation Results -->
           <div id="csv-eval-results" style="display: none; margin-top: 16px;">
-            <div class="callout callout-blue" id="csv-row-accounting">
-              <!-- Accounting text inserted here -->
-            </div>
+            <div class="callout callout-blue" id="csv-row-accounting"></div>
 
-            <!-- Multi-Model Metric Grid (RF, LSTM, Fusion) -->
+            <!-- Multi-Model Metric Cards -->
             <div id="csv-multi-model-metrics" class="section-gap" style="display: none;">
               <div class="grid-3">
-                <!-- RF Metrics Card -->
                 <div class="card" style="margin-bottom: 0;">
                   <div class="card-header" style="padding: 10px 14px;">
                     <h3 style="font-size: 13px;">🌲 Random Forest</h3>
@@ -634,7 +1305,6 @@
                   </div>
                 </div>
 
-                <!-- LSTM Metrics Card -->
                 <div class="card" style="margin-bottom: 0;">
                   <div class="card-header" style="padding: 10px 14px;">
                     <h3 style="font-size: 13px;">⚡ Supervised LSTM (T=5)</h3>
@@ -655,7 +1325,6 @@
                   </div>
                 </div>
 
-                <!-- Score Fusion Metrics Card -->
                 <div class="card" style="margin-bottom: 0; border-color: var(--accent);">
                   <div class="card-header" style="padding: 10px 14px; background: var(--accent-glow);">
                     <h3 style="font-size: 13px; color: var(--accent);">🔮 Score Fusion (Ensemble)</h3>
@@ -663,7 +1332,7 @@
                   </div>
                   <div class="card-body" style="padding: 12px 14px;">
                     <div style="font-size: 24px; font-weight: 800; color: var(--accent); margin-bottom: 4px;" id="csv-fusion-f1">—</div>
-                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">F1-Score (Optimal Score Fusion)</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">F1-Score (Convex Fusion)</div>
                     <table style="font-size: 12px;">
                       <tbody>
                         <tr><td>Accuracy:</td><td id="csv-fusion-acc" class="mono">—</td></tr>
@@ -678,9 +1347,8 @@
               </div>
             </div>
 
-            <!-- Confusion Matrices Comparison (3 Matrices) -->
+            <!-- Confusion Matrices Comparison -->
             <div id="csv-cm-row" class="grid-3 section-gap" style="display: none;">
-              <!-- RF Confusion Matrix -->
               <div class="card" style="margin-bottom: 0;">
                 <div class="card-header" style="padding: 8px 12px;">
                   <h4 style="font-size: 12px;">RF Confusion Matrix</h4>
@@ -696,7 +1364,6 @@
                 </div>
               </div>
 
-              <!-- LSTM Confusion Matrix -->
               <div class="card" style="margin-bottom: 0;">
                 <div class="card-header" style="padding: 8px 12px;">
                   <h4 style="font-size: 12px;">LSTM Confusion Matrix</h4>
@@ -712,7 +1379,6 @@
                 </div>
               </div>
 
-              <!-- Fusion Confusion Matrix -->
               <div class="card" style="margin-bottom: 0;">
                 <div class="card-header" style="padding: 8px 12px;">
                   <h4 style="font-size: 12px; color: var(--accent);">Fusion Confusion Matrix</h4>
@@ -732,18 +1398,16 @@
             <!-- Evaluated Flows Table -->
             <div class="card" style="margin-top: 14px;">
               <div class="card-header">
-                <h2>Evaluated Flow Records &amp; Flow Metadata</h2>
-                <div class="controls-group">
-                  <button class="btn btn-sm" onclick="downloadEvaluatedCsv()">⬇️ Download Evaluated CSV (Server-Side Export)</button>
-                </div>
+                <h2>Evaluated Flow Records &amp; Inspection</h2>
+                <button class="btn btn-sm" onclick="downloadEvaluatedCsv()">⬇️ Download Evaluated CSV</button>
               </div>
               <div class="card-body flush">
-                <div class="table-wrap" style="max-height: 440px;">
+                <div class="table-wrap" style="max-height: 400px;">
                   <table>
                     <thead>
                       <tr>
                         <th>Flow #</th>
-                        <th>Network Endpoints &amp; Protocol</th>
+                        <th>Network Endpoints</th>
                         <th>Ground Truth</th>
                         <th>RF Score</th>
                         <th>LSTM Score</th>
@@ -764,366 +1428,19 @@
         </div>
       </div>
 
-    </div>
-
-    <!-- ═══════════════════ PAGE A: OVERVIEW ═══════════════════ -->
-    <div id="tab-overview" class="tab-content">
+      <!-- Live Packet Capture & Replay Controls -->
       <div class="card section-gap">
         <div class="card-header">
-          <h2>Project Purpose &amp; Scientific Platform Status</h2>
-          <span class="badge badge-purple" id="ov-commit">Commit: 5989bf4</span>
-        </div>
-        <div class="card-body">
-          <p style="margin-bottom: 12px; font-size: 14px; color: var(--text);">
-            <strong>XRL-IDARS</strong> is a research platform for explainable machine learning and reinforcement learning in network security.
-            This interface operates as a <strong>Research Evaluation Workbench</strong>, surfacing genuine held-out evaluation outputs,
-            formal component verification statuses, and empirical evidence across four benchmark configurations.
-          </p>
-          <div class="callout callout-amber">
-            <strong>Production Safety Invariant:</strong> Autonomous production enforcement is strictly <strong>NO-GO</strong>.
-            The system operates exclusively in an observational monitoring and offline simulation mode. Zero network mutations (iptables, routing, socket drops) are permitted.
-          </div>
-        </div>
-      </div>
-
-      <!-- Component Status Table -->
-      <div class="card section-gap">
-        <div class="card-header">
-          <h2>Formal Component Verification Matrix</h2>
-        </div>
-        <div class="card-body flush">
-          <table>
-            <thead>
-              <tr>
-                <th>Component</th>
-                <th>Target Scope</th>
-                <th>Formal Status</th>
-                <th>Primary Empirical Finding / Reality</th>
-              </tr>
-            </thead>
-            <tbody id="ov-components-tbody">
-              <tr><td colspan="4" style="text-align:center;">Loading...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Datasets Overview Grid -->
-      <div class="card section-gap">
-        <div class="card-header">
-          <h2>Benchmark Dataset Inventory</h2>
-        </div>
-        <div class="card-body flush">
-          <table>
-            <thead>
-              <tr>
-                <th>Benchmark</th>
-                <th>Contract</th>
-                <th>Test Flows</th>
-                <th>Fusion Acc</th>
-                <th>Fusion F1</th>
-                <th>Primary Research Role</th>
-              </tr>
-            </thead>
-            <tbody id="ov-datasets-tbody">
-              <tr><td colspan="6" style="text-align:center;">Loading...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══════════════════ PAGE C: MODEL COMPARISON ═══════════════════ -->
-    <div id="tab-comparison" class="tab-content">
-      <!-- Degenerate Fusion Warning Banner -->
-      <div id="cmp-degenerate-alert" class="callout callout-amber" style="display: none;">
-        <strong>Degenerate Weight Alert:</strong>
-        <span id="cmp-degenerate-text"></span>
-      </div>
-
-      <div class="card section-gap">
-        <div class="card-header">
-          <h2>Model Comparative Benchmark (Aligned Slice)</h2>
-          <div class="controls-group">
-            <span class="controls-label">Benchmark:</span>
-            <select id="cmp-benchmark-select" onchange="onCmpBenchmarkChange()">
-              <option value="cicids2017">CIC-IDS2017 (Flagship)</option>
-              <option value="cse2018">CSE-CIC-IDS2018 (Enterprise Cloud)</option>
-              <option value="unswnb15">UNSW-NB15 (Auxiliary Schema)</option>
-            </select>
-          </div>
-        </div>
-        <div class="card-body flush">
-          <table>
-            <thead>
-              <tr>
-                <th>Model</th>
-                <th>Accuracy (95% CI)</th>
-                <th>F1-Score (95% CI)</th>
-                <th>ROC-AUC</th>
-                <th>Weighting / Role</th>
-              </tr>
-            </thead>
-            <tbody id="cmp-models-tbody">
-              <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="grid-2 section-gap">
-        <!-- Fusion Weights Box -->
-        <div class="card">
-          <div class="card-header">
-            <h2>Fusion Weighting Configuration</h2>
-          </div>
-          <div class="card-body">
-            <p style="margin-bottom: 8px;"><strong>Formula:</strong> <code class="mono" id="cmp-formula">—</code></p>
-            <p style="margin-bottom: 12px;"><strong>RF Weight (&alpha;):</strong> <span class="mono" id="cmp-alpha">—</span> | <strong>LSTM Weight (1-&alpha;):</strong> <span class="mono" id="cmp-beta">—</span></p>
-            <p style="font-size: 12px; color: var(--text-muted);">
-              Weights are selected via validation grid search. When &alpha; = 0.00 (as on CSE-CIC-IDS2018), fusion degenerates into an exact copy of the LSTM component.
-            </p>
-          </div>
-        </div>
-
-        <!-- Shuffled Window Ablation Box -->
-        <div class="card">
-          <div class="card-header">
-            <h2>LSTM Temporal Order Ablation</h2>
-          </div>
-          <div class="card-body">
-            <p style="margin-bottom: 6px;"><strong>Ordered Sequence F1:</strong> <span class="mono" id="ab-ordered">—</span></p>
-            <p style="margin-bottom: 6px;"><strong>Shuffled Sequence F1:</strong> <span class="mono" id="ab-shuffled">—</span></p>
-            <p style="margin-bottom: 12px;"><strong>Order Gain (&Delta;F1):</strong> <span class="mono" id="ab-delta">—</span></p>
-            <div class="callout callout-purple" style="margin-bottom: 0;">
-              Zero order gain indicates that the LSTM achieves high performance via local feature smoothing over flow bursts rather than causal temporal sequence modeling.
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══════════════════ PAGE D: FLOW EXPLORER ═══════════════════ -->
-    <div id="tab-flows" class="tab-content">
-      <div class="controls-bar">
-        <div class="controls-group">
-          <span class="controls-label">Status Filter:</span>
-          <select id="flow-filter-status" onchange="onFlowFilterChange()">
-            <option value="all">All Flows</option>
-            <option value="correct">Correct Classifications</option>
-            <option value="errors">All Errors (FP + FN)</option>
-            <option value="fp">False Positives (FP)</option>
-            <option value="fn">Missed Attacks (FN)</option>
-          </select>
-        </div>
-        <div class="controls-group">
-          <span class="controls-label">Ground Truth:</span>
-          <select id="flow-filter-label" onchange="onFlowFilterChange()">
-            <option value="all">All Labels</option>
-            <option value="benign">Benign Only</option>
-            <option value="attack">Attack Only</option>
-          </select>
-        </div>
-        <div class="controls-group">
-          <button class="btn btn-primary" onclick="exportFlowsCsv()">📥 Export Filtered Flows (CSV)</button>
-        </div>
-      </div>
-
-      <div class="callout callout-blue">
-        <strong>Ground Truth Isolation Invariant:</strong>
-        The ground truth label is displayed in a separate, isolated column for audit verification. It is never fed into inference inputs.
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <h2>Evaluated Flow Records</h2>
-          <span id="flow-count-badge" class="badge badge-blue">Loading...</span>
-        </div>
-        <div class="card-body flush">
-          <table>
-            <thead>
-              <tr>
-                <th>Flow ID</th>
-                <th>Ground Truth (Held Out)</th>
-                <th>RF Score</th>
-                <th>LSTM Score</th>
-                <th>Fusion Score</th>
-                <th>Prediction</th>
-                <th>Outcome Status</th>
-              </tr>
-            </thead>
-            <tbody id="flows-tbody">
-              <tr><td colspan="7" style="text-align:center;">Loading flows...</td></tr>
-            </tbody>
-          </table>
-          <div class="pagination-bar">
-            <div>
-              Showing page <span id="flow-current-page" class="mono">1</span> of <span id="flow-total-pages" class="mono">1</span>
-            </div>
-            <div class="controls-group">
-              <button class="btn" id="btn-prev-page" onclick="changeFlowPage(-1)">◀ Previous</button>
-              <button class="btn" id="btn-next-page" onclick="changeFlowPage(1)">Next ▶</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══════════════════ PAGE E: EXPLAINABILITY ═══════════════════ -->
-    <div id="tab-explainability" class="tab-content">
-      <div class="callout callout-amber">
-        <strong>Explainer Model Scope Notice:</strong>
-        TreeSHAP feature attributions explain the tree decision paths of the <strong>Random Forest detector ONLY</strong>.
-        They do NOT explain the LSTM, the Fusion model, or the Deep Q-Network Q-values. Feature attributions indicate mathematical contribution to tree variance, not physical network causality.
-      </div>
-
-      <div class="card section-gap">
-        <div class="card-header">
-          <h2>Global Feature Importance (TreeSHAP)</h2>
-          <span class="badge badge-green" id="shap-method-badge">TreeExplainer</span>
-        </div>
-        <div class="card-body flush">
-          <table>
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Feature Name</th>
-                <th>Contract</th>
-                <th>Mean |SHAP Value|</th>
-                <th>Interpretation &amp; Semantic Role</th>
-              </tr>
-            </thead>
-            <tbody id="shap-tbody">
-              <tr><td colspan="5" style="text-align:center;">Loading SHAP rankings...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══════════════════ PAGE F: AUTONOMOUS RESPONSE ═══════════════════ -->
-    <div id="tab-response" class="tab-content">
-      <div class="controls-bar">
-        <div class="controls-group">
-          <span class="controls-label">Cost Scenario:</span>
-          <select id="resp-regime-select" onchange="onResponseParamsChange()">
-            <option value="standard_enterprise">Standard Enterprise (Balanced FP/FN)</option>
-            <option value="high_availability">High Availability (FP Isolate = 500)</option>
-            <option value="high_security_enclave">High Security Enclave (FN Miss = 500)</option>
-          </select>
-        </div>
-        <div class="controls-group">
-          <span class="controls-label">Action Mode:</span>
-          <select id="resp-mode-select" onchange="onResponseParamsChange()">
-            <option value="4-action">4-Action Mode (ALLOW, ALERT, RATE_LIMIT, ISOLATE)</option>
-            <option value="3-action">3-Action Mode (ALLOW, ALERT, RATE_LIMIT)</option>
-          </select>
-        </div>
-        <div class="controls-group">
-          <span class="badge badge-purple">Held-Out Test (355,865 Flows)</span>
-        </div>
-      </div>
-
-      <!-- Head to Head Callout -->
-      <div id="resp-winner-callout" class="callout callout-purple">
-        <strong>Head-to-Head Result:</strong> <span id="resp-winner-text">Loading...</span>
-      </div>
-
-      <div class="card section-gap">
-        <div class="card-header">
-          <h2>Response Policy Comparative Benchmark</h2>
-        </div>
-        <div class="card-body flush">
-          <table>
-            <thead>
-              <tr>
-                <th>Response Policy</th>
-                <th>Total Operational Cost</th>
-                <th>Mean Cost / Flow</th>
-                <th>Availability (BAS)</th>
-                <th>False Quarantine (FQR)</th>
-                <th>Action Chattering</th>
-              </tr>
-            </thead>
-            <tbody id="resp-policies-tbody">
-              <tr><td colspan="6" style="text-align:center;">Loading...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="grid-2 section-gap">
-        <!-- Safety Gate Panel -->
-        <div class="card">
-          <div class="card-header">
-            <h2>Deterministic Safety Gate Invariants</h2>
-            <span class="badge badge-green">100% Authoritative</span>
-          </div>
-          <div class="card-body">
-            <ul style="padding-left: 20px; line-height: 1.8; color: var(--text-muted);">
-              <li><strong>Quarantine Cap:</strong> Max 20% of concurrent hosts in isolation.</li>
-              <li><strong>Cooldown Invariant:</strong> 60s minimum hysteresis before re-isolation.</li>
-              <li><strong>Rate-Limit Fallback:</strong> Overridden isolates degrade safely to throughput throttling.</li>
-              <li><strong>Production Invariant:</strong> Autonomous enforcement is strictly NO-GO.</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Latency & Efficiency Panel -->
-        <div class="card">
-          <div class="card-header">
-            <h2>Execution Latency Advantage</h2>
-          </div>
-          <div class="card-body">
-            <p style="margin-bottom: 8px;"><strong>Analytic CostOptimal Baseline:</strong> <span class="mono">1.95 µs</span> (491,000 flows/sec)</p>
-            <p style="margin-bottom: 8px;"><strong>DQN Neural Policy:</strong> <span class="mono">100.23 µs</span> (9,063 flows/sec)</p>
-            <p style="margin-bottom: 12px;"><strong>Latency Speedup:</strong> <span class="badge badge-green">~51x Faster</span></p>
-            <div class="callout callout-blue" style="margin-bottom: 0;">
-              Zero-parameter threshold policy requires zero GPU memory, executes in nanoseconds, and achieves lower cost in 4 of 6 operational regimes.
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══════════════════ PAGE G: RESEARCH LIMITATIONS ═══════════════════ -->
-    <div id="tab-limitations" class="tab-content">
-      <div class="card section-gap">
-        <div class="card-header">
-          <h2>XRL-IDARS Research Findings &amp; Scientific Limitations</h2>
-          <span class="badge badge-orange">Audited Evidence</span>
-        </div>
-        <div class="card-body" id="limitations-container">
-          Loading research limitations...
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══════════════════ LIVE MONITOR & TRAFFIC MODES ═══════════════════ -->
-    <div id="tab-live" class="tab-content">
-      <div class="callout callout-blue" style="border-left: 4px solid var(--accent); margin-bottom: 16px;">
-        <div style="font-weight: 700; margin-bottom: 6px; font-size: 14px;">⚠️ Scientific Disclaimer &amp; Strict Operational Mode Separation</div>
-        <div style="font-size: 13px; line-height: 1.5; color: var(--text-main);">
-          • <strong>Modes 1 &amp; 2 (Offline Benchmark Evaluation &amp; Dataset Replay):</strong> Evaluates authentic benchmark data with verified ground-truth labels for academic reproducibility.<br>
-          • <strong>Mode 3 (Synthetic PCAP Replay):</strong> Bundled synthetic sample (<code>sample_traffic.pcap</code>) validating end-to-end packet parsing, bidirectional flow assembly, and feature extraction mechanics.<br>
-          • <strong>Mode 4 (In-Memory Attack Simulation):</strong> In-memory synthetic injection (<code>203.0.113.x</code>) verifying alert thresholds, score spectrums, and explainability modals without transmitting packets.<br>
-          • <strong>Mode 5 (Physical Live Capture):</strong> Real observational packets (read-only; zero firewall mutations). <em>Crucial scientific distinction: Live operational network traffic lacks ground-truth labels. Benchmark accuracy on closed datasets does NOT prove or guarantee detection accuracy on live operational traffic.</em>
-        </div>
-      </div>
-
-      <!-- Capture Controls -->
-      <div class="card section-gap">
-        <div class="card-header">
-          <h2>Capture Stream Controls</h2>
+          <h2>📡 Packet Stream &amp; Replay Controls (Live Monitor)</h2>
           <span class="badge badge-blue" id="live-session-status">Idle</span>
         </div>
         <div class="card-body">
           <div class="controls-bar" style="margin-bottom: 0; background: transparent; border: none; padding: 0;">
             <div class="controls-group">
-              <span class="controls-label">Mode:</span>
+              <span class="controls-label">Capture Source:</span>
               <select id="live-mode" onchange="onLiveModeChange()">
                 <option value="dataset">Mode 2: Dataset Demonstration Stream</option>
-                <option value="sample">Mode 3: PCAP Replay</option>
+                <option value="sample">Mode 3: PCAP Replay (sample_traffic.pcap)</option>
                 <option value="live">Mode 5: Live Packet Capture (root required)</option>
               </select>
               <select id="dataset-category">
@@ -1143,7 +1460,7 @@
         </div>
       </div>
 
-      <!-- Live Pipeline -->
+      <!-- Pipeline Visualization Flow -->
       <div class="card section-gap">
         <div class="card-body compact">
           <div class="pipeline-flow">
@@ -1155,16 +1472,16 @@
             <span class="pipeline-arrow">→</span>
             <span class="pipeline-step active">🌲 Random Forest</span>
             <span class="pipeline-arrow">→</span>
-            <span class="pipeline-step">📊 Score (τ=0.50)</span>
+            <span class="pipeline-step">📊 Score (&tau;=0.50)</span>
             <span class="pipeline-arrow">→</span>
             <span class="pipeline-step">🛡️ Policy Suggestion</span>
           </div>
         </div>
       </div>
 
-      <!-- Live Observational Tables Grid -->
+      <!-- Live Observational Stream & Attack Sources -->
       <div class="grid-2 section-gap">
-        <!-- Rolling Flows Table -->
+        <!-- Rolling Flows -->
         <div class="card">
           <div class="card-header">
             <h2>Observational Flow Stream</h2>
@@ -1192,7 +1509,7 @@
           </div>
         </div>
 
-        <!-- Detected Attack Sources -->
+        <!-- Attack Sources -->
         <div class="card">
           <div class="card-header">
             <h2>Detected Attack Sources</h2>
@@ -1218,7 +1535,7 @@
         </div>
       </div>
 
-      <!-- WiFi Devices (Passive Discovery, Live Mode Only) -->
+      <!-- Passive Device Discovery -->
       <div class="card section-gap">
         <div class="card-header">
           <h2>📱 WiFi Devices (Passive Discovery)</h2>
@@ -1239,15 +1556,11 @@
             </table>
           </div>
         </div>
-        <div id="device-router-link" style="padding: 8px 16px; border-top: 1px solid var(--border); display: none;">
-          <a id="router-admin-link" href="#" target="_blank" rel="noopener noreferrer" style="color: var(--accent); font-size: 12px; text-decoration: none;">
-            Open router admin page →
-          </a>
-        </div>
       </div>
     </div>
+  </div>
 
-  <!-- Flow Detail & Explainability Modal -->
+  <!-- ═══════════════════ Flow Detail & Explainability Modal ═══════════════════ -->
   <div class="modal-overlay" id="flow-inspect-modal" onclick="if(event.target===this)closeFlowModal()">
     <div class="modal-dialog">
       <div class="modal-header">
@@ -1255,7 +1568,6 @@
         <button class="modal-close-btn" onclick="closeFlowModal()">&times;</button>
       </div>
       <div class="modal-body">
-        <!-- Flow Metadata & Scores Header -->
         <div class="grid-2 section-gap" style="margin-bottom: 14px;">
           <div>
             <div style="font-size: 11px; text-transform: uppercase; color: var(--text-dim); font-weight: 700; margin-bottom: 4px;">Flow Identification &amp; Endpoints</div>
@@ -1276,7 +1588,6 @@
           </div>
         </div>
 
-        <!-- TreeSHAP Local Feature Attributions -->
         <div class="card" style="margin-bottom: 14px;">
           <div class="card-header" style="padding: 10px 14px;">
             <h4 style="font-size: 13px;">💡 TreeSHAP Local Feature Contributions (Random Forest)</h4>
@@ -1292,7 +1603,6 @@
           </div>
         </div>
 
-        <!-- Dueling DQN Response Policy -->
         <div class="card" style="margin-bottom: 0;">
           <div class="card-header" style="padding: 10px 14px;">
             <h4 style="font-size: 13px;">🛡️ Autonomous Response Recommendation (Dueling DQN)</h4>

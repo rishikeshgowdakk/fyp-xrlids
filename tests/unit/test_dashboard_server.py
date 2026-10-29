@@ -274,6 +274,39 @@ def test_dashboard_http_live_endpoints():
         assert "Live Monitor" in html
         assert "Evidence" in html
         assert "Benchmark Dataset" in html
+        assert "Dataset Explorer" in html
+        assert "Model Comparison" in html
+        assert "Performance Benchmarks" in html
+        assert "Autonomous Response" in html
+
+        # Test new Research & Benchmarks 5-section API endpoints
+        for bench in ("cicids2017", "cse2018", "unswnb15"):
+            with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/dataset-explorer?benchmark={bench}", timeout=5) as resp:
+                assert resp.status == 200
+                ds_exp = json.loads(resp.read().decode("utf-8"))
+                assert ds_exp["benchmark_id"] == bench
+                assert "raw_rows" in ds_exp
+                assert "attack_classes" in ds_exp
+                assert "cross_dataset_summary" in ds_exp
+                assert len(ds_exp["cross_dataset_summary"]) == 3
+
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/performance-benchmarks", timeout=5) as resp:
+            assert resp.status == 200
+            pb = json.loads(resp.read().decode("utf-8"))
+            assert "policy_latency_benchmarks" in pb
+            assert "detector_latency_benchmarks" in pb
+            assert "burst_traffic_benchmark" in pb
+            assert "speedup_comparison" in pb
+            assert "resource_profile" in pb
+
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/comparison?benchmark=cicids2017", timeout=5) as resp:
+            assert resp.status == 200
+            cmp_data = json.loads(resp.read().decode("utf-8"))
+            assert "confusion_matrices" in cmp_data
+            assert "random_forest" in cmp_data["confusion_matrices"]
+            assert "lstm" in cmp_data["confusion_matrices"]
+            assert "fusion" in cmp_data["confusion_matrices"]
+            assert "per_family" in cmp_data
 
         # Security check: cross-origin POST rejected with 403 Forbidden
         evil_req = urllib.request.Request(
