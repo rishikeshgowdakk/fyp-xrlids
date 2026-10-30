@@ -1,0 +1,4 @@
+model,true_negative,false_positive,false_negative,true_positive
+random_forest,4894,106,1352,3648
+lstm_flowseq,4956,40,2176,2797
+rf_lstm_fusion,4988,8,1708,3265

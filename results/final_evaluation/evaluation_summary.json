@@ -1,0 +1,154 @@
+{
+  "timestamp": "2026-10-30T21:04:50.911480+00:00",
+  "total_records": 10000,
+  "evaluation_duration_s": 1.744,
+  "benchmark": "cicids2017",
+  "contract": "R10",
+  "models": {
+    "random_forest": {
+      "model": "Random Forest Detector",
+      "threshold": 0.5,
+      "population": 10000,
+      "accuracy": 0.8542,
+      "precision": 0.9717634523175279,
+      "recall": 0.7296,
+      "f1": 0.8334475668265936,
+      "macro_f1": 0.851900735218383,
+      "weighted_f1": 0.8519007352183832,
+      "balanced_accuracy": 0.8542000000000001,
+      "confusion": {
+        "tn": 4894,
+        "fp": 106,
+        "fn": 1352,
+        "tp": 3648
+      },
+      "roc_auc": 0.98339564,
+      "pr_auc": 0.9845411619907323
+    },
+    "lstm_flowseq": {
+      "model": "Supervised LSTM (T=5)",
+      "threshold": 0.5,
+      "population": 9969,
+      "accuracy": 0.7777109038017855,
+      "precision": 0.985900599224533,
+      "recall": 0.5624371606676051,
+      "f1": 0.7162612035851472,
+      "macro_f1": 0.7667717627424417,
+      "weighted_f1": 0.7668882982886969,
+      "balanced_accuracy": 0.777215377771753,
+      "confusion": {
+        "tn": 4956,
+        "fp": 40,
+        "fn": 2176,
+        "tp": 2797
+      },
+      "roc_auc": 0.967147576899243,
+      "pr_auc": 0.9669338096770891
+    },
+    "rf_lstm_fusion": {
+      "model": "RF-LSTM Fusion (Final Decision)",
+      "alpha": 0.5,
+      "threshold": 0.5,
+      "population": 9969,
+      "accuracy": 0.8278663857959675,
+      "precision": 0.9975557592422853,
+      "recall": 0.6565453448622561,
+      "f1": 0.7918991025951977,
+      "macro_f1": 0.822566041205228,
+      "weighted_f1": 0.8226367944992425,
+      "balanced_accuracy": 0.8274720319187181,
+      "confusion": {
+        "tn": 4988,
+        "fp": 8,
+        "fn": 1708,
+        "tp": 3265
+      },
+      "roc_auc": 0.9813919102303762,
+      "pr_auc": 0.982643966267419
+    }
+  },
+  "row_accounting": {
+    "total_rows_received": 10000,
+    "evaluated_rows": 10000,
+    "invalid_rows_dropped": 0,
+    "inf_rows_dropped": 0,
+    "nan_rows_dropped": 0,
+    "drop_reason": "None",
+    "aligned_sequence_rows": 9969,
+    "warmup_rows": 31,
+    "boundary_column": "source_file",
+    "boundary_isolation_applied": true,
+    "boundary_segments_count": 8,
+    "boundary_isolation_note": "Sequence boundary isolation applied across 8 independent capture/session segments using column 'source_file'.",
+    "segments": [
+      {
+        "segment_id": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+        "total_flows": 1168,
+        "aligned_flows": 1164,
+        "warmup_flows": 4
+      },
+      {
+        "segment_id": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+        "total_flows": 1168,
+        "aligned_flows": 1164,
+        "warmup_flows": 4
+      },
+      {
+        "segment_id": "Friday-WorkingHours-Morning.pcap_ISCX.csv",
+        "total_flows": 193,
+        "aligned_flows": 189,
+        "warmup_flows": 4
+      },
+      {
+        "segment_id": "Monday-WorkingHours.pcap_ISCX.csv",
+        "total_flows": 5000,
+        "aligned_flows": 4996,
+        "warmup_flows": 4
+      },
+      {
+        "segment_id": "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+        "total_flows": 3,
+        "aligned_flows": 0,
+        "warmup_flows": 3
+      },
+      {
+        "segment_id": "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+        "total_flows": 224,
+        "aligned_flows": 220,
+        "warmup_flows": 4
+      },
+      {
+        "segment_id": "Tuesday-WorkingHours.pcap_ISCX.csv",
+        "total_flows": 1150,
+        "aligned_flows": 1146,
+        "warmup_flows": 4
+      },
+      {
+        "segment_id": "Wednesday-workingHours.pcap_ISCX.csv",
+        "total_flows": 1094,
+        "aligned_flows": 1090,
+        "warmup_flows": 4
+      }
+    ]
+  },
+  "confusion_matrices": {
+    "random_forest": {
+      "tn": 4894,
+      "fp": 106,
+      "fn": 1352,
+      "tp": 3648
+    },
+    "lstm_flowseq": {
+      "tn": 4956,
+      "fp": 40,
+      "fn": 2176,
+      "tp": 2797
+    },
+    "rf_lstm_fusion": {
+      "tn": 4988,
+      "fp": 8,
+      "fn": 1708,
+      "tp": 3265
+    }
+  }
+}
