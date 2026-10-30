@@ -43,6 +43,17 @@ from xrlids.demo.replay_lab import (
 )
 from xrlids.features.definitions import R10_FEATURES
 
+# Replay Lab's 10k-record corpus is generated from large raw CIC/CSE CSVs,
+# intentionally excluded from Git. Do not manufacture an empty cache in CI.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+RAW_DATA_AVAILABLE = any((REPO_ROOT / "data" / "raw" / "cicids2017").glob("*.csv")) and any(
+    (REPO_ROOT / "data" / "raw" / "cse_cic_ids2018").glob("*.csv")
+)
+pytestmark = pytest.mark.skipif(
+    not RAW_DATA_AVAILABLE,
+    reason="Replay Lab integration corpus requires externally provisioned raw CIC-IDS2017 and CSE-CIC-IDS2018 CSVs.",
+)
+
 
 @pytest.fixture(scope="module")
 def replay_engine():
