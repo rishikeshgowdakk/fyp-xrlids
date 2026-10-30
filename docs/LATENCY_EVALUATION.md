@@ -1,3 +1,7 @@
+> **Measurement integrity addendum (2026-10-30):** This document's historical latency figures are not yet reconciled with `docs/RF_VS_XGBOOST.md`. That comparison reports XGBoost medians of 0.6909/0.2995/0.2925 ms and RF medians around 37 ms, while this report lists XGBoost 0.2428 ms and RF 47.2357 ms; prose elsewhere also cites 0.12–0.15 ms. Until the same hardware, model/preprocessor artifacts, batch size, warm-up, repetitions, thread count, and timing harness are recorded and rerun for both models, **do not quote a definitive XGBoost speedup (including 194x) as verified**. Treat the values below as historical measurements whose comparability is unverified. The current canonical live registry uses RF, not XGBoost.
+
+---
+
 # XRL-IDARS Latency and Throughput Evaluation
 
 ## 1. Executive Summary
