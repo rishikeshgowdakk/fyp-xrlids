@@ -12,9 +12,9 @@
       --bg-hover: #f3f4f6;
       --border: #d1d5db;
       --border-light: #e5e7eb;
-      --text-main: #111827;
-      --text-muted: #4b5563;
-      --text-dim: #6b7280;
+      --text-main: #0a0a0a;
+      --text-muted: #1f2937;
+      --text-dim: #374151;
       --accent: #0969da;
       --accent-subtle: #f0f7ff;
       --status-green: #1a7f37;
@@ -269,7 +269,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: var(--text-muted);
+      color: var(--text-main);
       margin-bottom: 10px;
       display: flex;
       justify-content: space-between;
@@ -317,6 +317,7 @@
     }
     .pipe-node-sub {
       font-size: 0.7rem;
+      font-weight: 600;
       color: var(--text-dim);
     }
     .pipe-arrow {
@@ -355,14 +356,14 @@
 
     .counter-label {
       font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--text-muted);
+      font-weight: 700;
+      color: var(--text-main);
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
     .counter-val {
       font-size: 1.6rem;
-      font-weight: 700;
+      font-weight: 800;
       color: var(--text-main);
       line-height: 1.15;
       margin: 3px 0 1px;
@@ -371,6 +372,7 @@
     }
     .counter-hint {
       font-size: 0.68rem;
+      font-weight: 600;
       color: var(--text-dim);
     }
 
@@ -760,7 +762,7 @@
     .data-table th {
       background: var(--bg-subtle);
       color: var(--text-main);
-      font-weight: 600;
+      font-weight: 700;
       padding: 6px 10px;
       border-bottom: 1px solid var(--border);
       white-space: nowrap;
@@ -769,6 +771,7 @@
       padding: 6px 10px;
       border-bottom: 1px solid var(--border-light);
       color: var(--text-main);
+      font-weight: 500;
     }
     .data-table tr:hover td {
       background: var(--bg-subtle);
@@ -888,6 +891,9 @@
       <button id="btn-stop-stream" class="btn btn-danger" onclick="stopReplayStream()">
         ⏹ Stop
       </button>
+      <a href="/index.html#replay-lab" class="btn btn-secondary" style="font-weight: 700;" title="Open the Labelled 10K Replay Lab">
+        🔬 10K Replay Lab →
+      </a>
       <a href="/index.html" class="btn btn-secondary" title="Open the full research workbench">
         Research Workbench →
       </a>
