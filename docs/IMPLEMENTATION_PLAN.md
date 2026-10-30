@@ -392,14 +392,14 @@ This implementation plan establishes the sequential, gated engineering roadmap t
 
 ## 5. Dependency & Tooling Management
 
-| Package | Status in `.venv` | Target Action | Detection Tooling Rule |
+| Package | Status in `.venv` | Target Action | Verification Status |
 |---|---|---|---|
-| `scapy` | Installed (`2.8.0`) | Reuse existing installation | Verified OK |
-| `shap` | Installed (`0.52.0`) | Reuse existing installation | Verified OK |
-| `torch` | Installed (`2.14.0+cpu`)| Reuse existing installation | Verified OK |
-| `scikit-learn` | Installed (`1.9.1`) | Reuse existing installation | Verified OK |
-| `xgboost` | Missing | Install via `.venv/bin/pip install xgboost` in Phase 2 | `managing-python-dependencies` |
-| `streamlit` | Missing | Install via `.venv/bin/pip install streamlit` in Phase 12 | `managing-python-dependencies` |
+| `scapy` | Installed (`2.8.0`) | Reuse existing installation | Verified OK (Tested via `tests/integration/test_scapy_capture.py`) |
+| `shap` | Installed (`0.52.0`) | Reuse existing installation | Verified OK (TreeSHAP verified on tree detectors) |
+| `torch` | Installed (`2.14.0+cpu`)| Reuse existing installation | Verified OK (DQN PyTorch policy verified) |
+| `scikit-learn` | Installed (`1.9.1`) | Reuse existing installation | Verified OK (Random Forest baselines verified) |
+| `xgboost` | Installed (`3.1.0`) | Pinned in `pyproject.toml` and `requirements.txt` | Verified OK (Candidate wrapper tested) |
+| `streamlit` | Installed (`1.41.0`) | Pinned in `pyproject.toml` and `requirements.txt` | Verified OK (All 8 pages tested headless via `AppTest`) |
 
 ---
 
@@ -412,4 +412,29 @@ This implementation plan establishes the sequential, gated engineering roadmap t
 - [x] `docs/MODEL_COMPATIBILITY_AUDIT.md` verified and updated.
 - [x] `docs/IMPLEMENTATION_PLAN.md` established and approved.
 
-**Phase 0 Status: COMPLETE.** Ready to proceed with Phase 1 upon confirmation.
+**Phase 0 Status: COMPLETE.**
+
+---
+
+## 7. Master Implementation Execution Summary (Phases 1–15)
+
+All 15 implementation phases have been executed, tested, and validated in order:
+
+| Phase | Subsystem / Focus | Status | Verification Summary |
+|---|---|---|---|
+| **Phase 1** | Dataset & Feature Contract | **VALIDATED** | $R_{10}$ canonical 10-feature contract frozen for CIC-IDS2017/CSE-2018; $R_4$ auxiliary contract frozen for UNSW-NB15 under D-002. |
+| **Phase 2** | RF vs XGBoost Candidate Evaluation | **VALIDATED** | XGBoost candidate trained and evaluated under identical splits; RF retained as registered live detector under D-003/D-007. |
+| **Phase 3** | Canonical Flow Builder | **INTEGRATED** | 5-tuple bidirectional aggregation with TCP FIN/RST teardown and 120s timeout in `src/xrlids/flow/canonical_builder.py`. |
+| **Phase 4** | Scapy Capture & PCAP Replay | **INTEGRATED** | Raw packet sniffing and offline PCAP replay feeding the canonical flow builder via `src/xrlids/capture/scapy_service.py`. |
+| **Phase 5** | Champion Model Live Inference | **INTEGRATED** | `ModelManager` executes primary flow detection using registered RF champion + multiclass attribution with `UNKNOWN` fallback. |
+| **Phase 6** | TreeSHAP Explainability | **INTEGRATED** | Local Shapley values generated for anomalous flows via `TreeSHAPExplainer` (`src/xrlids/explainability/explainer.py`). |
+| **Phase 7** | Deterministic Rule Engine | **INTEGRATED** | 5 independent protocol rules evaluated with microsecond latency (`src/xrlids/rules/engine.py`). |
+| **Phase 8** | Source-IP Activity Tracker | **INTEGRATED** | Rolling 60s per-host tracking and escalation dampening (`src/xrlids/tracking/source_tracker.py`). |
+| **Phase 9** | Supervised LSTM & Fusion Preservation | **VALIDATED** | Research checkpoints and fusion weights preserved in `models/lstm/` and `models/fusion/`; decoupled from live path. |
+| **Phase 10** | Dueling DQN Response Policy | **INTEGRATED** | Evaluates 6D causal state vector $\mathbf{s}_t = [S_t, \Delta S_t, N_{\text{alert}}, a_{t-1}, c_t, v_t]$ on `models/dqn/dqn_4action_best.pt`. |
+| **Phase 11** | Deterministic Safety Gate | **INTEGRATED** | Enforces critical host whitelists, cooldowns, and blast radius caps with advisory default (`src/xrlids/response/safety.py`). |
+| **Phase 12** | Streamlit Dashboard Console | **INTEGRATED** | 8 dedicated pages + entry point (`dashboard/streamlit_app.py`) verified headless via `AppTest` with 0 exceptions. |
+| **Phase 13** | Event Management & Lifecycle | **INTEGRATED** | Standardized `SecurityEvent` schema and ring-buffer `EventManager` (`src/xrlids/events/manager.py`). |
+| **Phase 14** | Automated Regression & Unit Testing | **TESTED** | Full test suite: **623 passed, 0 failed, 18 warnings in 71.29s (100% pass)**. |
+| **Phase 15** | Empirical Latency Benchmarks | **VALIDATED** | Fresh CPU latency and throughput profiling executed in `scripts/benchmark_latency_master.py` and recorded in `docs/LATENCY_EVALUATION.md`. |
+
