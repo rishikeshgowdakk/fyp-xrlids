@@ -35,7 +35,7 @@ jobs:
 
       - name: Verify Environment and Model Checkpoints
         run: |
-          python -c "import xrlids, torch, sklearn, shap; print('xrlids and dependencies loaded successfully.')"
+          python -c "import xrlids, torch, sklearn, shap, xgboost; from xrlids.models.xgboost_detector import XGBoostDetector; print(f'xrlids and dependencies loaded; XGBoost {xgboost.__version__}; detector import OK.')"
           python -c "from scripts.phase2.run_phase2b_readiness_audit import check_working_tree_clean; print('Working-tree audit script callable.')"
 
       - name: Run Core Test Suite (Tiers 1, 2, 3)
