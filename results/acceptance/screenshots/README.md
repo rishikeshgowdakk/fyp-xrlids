@@ -3,8 +3,8 @@
 Automated, high-fidelity browser screenshots captured from the running Streamlit operational dashboard (`dashboard/streamlit_app.py`) via Chrome DevTools Protocol (CDP) on headless Google Chrome 156 at a standard desktop viewport (1440 × 960).
 
 **Repository:** `https://github.com/rishikeshgowdakk/fyp-xrlids`  
-**Integration Branch:** `feature/final-acceptance-integration`  
-**Timestamp:** `2026-10-30T17:54:42Z` (2026-10-30 23:24:42 IST)  
+**Integration Branch:** `feature/final-live-demonstration-fixes`  
+**Timestamp:** `2026-10-30T19:05:00Z` (2026-10-31 00:35:00 IST)  
 **Host Environment:** Ubuntu Linux, Python 3.14.4, Scapy 2.7.0, PyTorch 2.10.0, Streamlit 1.54.0
 
 ---

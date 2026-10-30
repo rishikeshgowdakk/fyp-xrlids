@@ -44,6 +44,7 @@ class PipelineResult:
     """Comprehensive outcome of end-to-end flow evaluation."""
 
     flow_id: str
+    source_mode: str
     source_ip: str
     dest_ip: str
     source_port: int
@@ -74,6 +75,7 @@ class PipelineResult:
     def to_dict(self) -> dict[str, Any]:
         return {
             "flow_id": self.flow_id,
+            "source_mode": self.source_mode,
             "source_ip": self.source_ip,
             "dest_ip": self.dest_ip,
             "source_port": self.source_port,
@@ -135,6 +137,7 @@ class ActiveInferencePipeline:
         flow_id: str | None = None,
         timestamp: float | None = None,
         explain: bool | None = None,
+        source_mode: str = "LIVE",
     ) -> PipelineResult:
         """Process a completed flow end-to-end through all tiers."""
         t0 = time.perf_counter()
@@ -224,6 +227,7 @@ class ActiveInferencePipeline:
         # 9. Formulate SecurityEvent
         sec_event = SecurityEvent(
             flow_id=fid,
+            source_mode=source_mode,
             source_ip=source_ip,
             dest_ip=dest_ip,
             source_port=source_port,
@@ -268,6 +272,7 @@ class ActiveInferencePipeline:
 
         return PipelineResult(
             flow_id=fid,
+            source_mode=source_mode,
             source_ip=source_ip,
             dest_ip=dest_ip,
             source_port=source_port,

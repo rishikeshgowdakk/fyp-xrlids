@@ -191,7 +191,7 @@ class LiveCaptureManager:
                     newly_completed = self.flow_builder.process_packet(pkt)
                     for flow in newly_completed:
                         self.completed_flows.append(flow)
-                        res = self.pipeline.process_flow(flow)
+                        res = self.pipeline.process_flow(flow, source_mode="LIVE")
                         if res.hybrid.is_attack or res.inference.attack_score >= 0.50:
                             self.threats_detected += 1
                 except Exception as exc:

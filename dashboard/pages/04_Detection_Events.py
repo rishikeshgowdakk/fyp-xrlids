@@ -28,17 +28,22 @@ st.markdown("Detailed inspection of security events produced by Random Forest in
 st.divider()
 
 # Filter Controls
-col_f1, col_f2, col_f3 = st.columns(3)
+col_f1, col_f2, col_f3, col_f4 = st.columns(4)
 with col_f1:
-    verdict_filter = st.selectbox("Filter by Verdict", ["ALL", "BENIGN", "ATTACK"])
+    mode_filter = st.selectbox("Filter by Source Mode", ["ALL", "LIVE", "PCAP", "SAMPLE"])
 with col_f2:
-    severity_filter = st.selectbox("Filter by Severity", ["ALL", "INFORMATIONAL", "LOW", "MEDIUM", "HIGH", "CRITICAL"])
+    verdict_filter = st.selectbox("Filter by Verdict", ["ALL", "BENIGN", "ATTACK"])
 with col_f3:
+    severity_filter = st.selectbox("Filter by Severity", ["ALL", "INFORMATIONAL", "LOW", "MEDIUM", "HIGH", "CRITICAL"])
+with col_f4:
     action_filter = st.selectbox("Filter by Enforced Action", ["ALL", "ALLOW", "ALERT", "RATE_LIMIT", "ISOLATE"])
 
 # Filter events
 filtered_events = []
 for ev in reversed(events):
+    ev_mode = getattr(ev, "source_mode", "LIVE")
+    if mode_filter != "ALL" and ev_mode != mode_filter:
+        continue
     if verdict_filter != "ALL" and ev.hybrid_verdict != verdict_filter:
         continue
     if severity_filter != "ALL" and ev.severity != severity_filter:
@@ -55,6 +60,7 @@ if filtered_events:
     for ev in filtered_events:
         table_rows.append({
             "Event ID": ev.event_id[:12],
+            "Source Mode": getattr(ev, "source_mode", "LIVE"),
             "Timestamp": ev.timestamp[:19].replace("T", " "),
             "Flow ID": ev.flow_id,
             "Source IP": ev.source_ip,
@@ -75,7 +81,7 @@ if filtered_events:
     selected_idx = st.selectbox(
         "Select Event to Inspect",
         range(len(filtered_events)),
-        format_func=lambda i: f"[{filtered_events[i].timestamp[:19]}] {filtered_events[i].source_ip} -> {filtered_events[i].dest_ip} ({filtered_events[i].hybrid_verdict}, {filtered_events[i].severity})",
+        format_func=lambda i: f"[{filtered_events[i].timestamp[:19]}] [{getattr(filtered_events[i], 'source_mode', 'LIVE')}] {filtered_events[i].source_ip} -> {filtered_events[i].dest_ip} ({filtered_events[i].hybrid_verdict}, {filtered_events[i].severity})",
     )
     ev = filtered_events[selected_idx]
 

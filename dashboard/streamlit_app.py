@@ -132,6 +132,7 @@ with st.sidebar:
             source_ip="10.200.1.88",
             dest_ip="192.168.10.50",
             flow_id=f"flow-sample-{int(time.time()*1000)}",
+            source_mode="SAMPLE",
         )
         st.success(f"Sample evaluated: {res.hybrid.verdict} ({res.hybrid.severity})")
 

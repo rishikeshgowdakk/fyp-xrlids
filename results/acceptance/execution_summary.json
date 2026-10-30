@@ -1,18 +1,18 @@
 {
   "project": "XRL-IDARS — Explainable Reinforcement Learning-Based Intrusion Detection and Autonomous Response System",
   "repository": "https://github.com/rishikeshgowdakk/fyp-xrlids",
-  "branch": "feature/final-acceptance-integration",
-  "timestamp": "2026-10-30T17:55:00Z",
+  "branch": "feature/final-live-demonstration-fixes",
+  "timestamp": "2026-10-30T19:05:00Z",
   "status": "ACCEPTED",
   "test_suite": {
     "framework": "pytest-9.1.1",
     "python_version": "3.14.4",
-    "total_collected": 663,
-    "passed": 663,
+    "total_collected": 671,
+    "passed": 671,
     "failed": 0,
     "skipped": 0,
     "warnings": 19,
-    "execution_time_seconds": 77.80,
+    "execution_time_seconds": 61.08,
     "pass_rate_pct": 100.0
   },
   "operational_pipeline": {
@@ -40,7 +40,7 @@
       "artifact": "models/dqn/dqn_4action_best.pt",
       "sha256": "6a5afc669b4e699ecd2b1c01df885cef9030c93b8888b487dd386533920ce954",
       "state_space_dim": 6,
-      "state_features": ["current_threat_score", "score_velocity", "local_alert_density", "last_enforced_action", "asset_criticality", "source_volumetric_rate"],
+      "state_features": ["current_attack_score", "score_trajectory", "rolling_alert_density", "previous_enforced_action", "remaining_cooldown_fraction", "normalized_volumetric_traffic_scale"],
       "action_tiers": ["ALLOW", "ALERT", "RATE_LIMIT", "ISOLATE"],
       "role": "Response Optimization Policy (NOT an intrusion classifier)",
       "output_semantics": "Expected cumulative return Q(s, a)",
@@ -96,6 +96,38 @@
       "role": "Offline Research Benchmark Only (Never invoked live)",
       "f1_score": 0.9530,
       "status": "PASS"
+    }
+  },
+  "verified_event_record": {
+    "event_id": "evt-64363f5f1d01",
+    "flow_id": "flow-1793386851184-3",
+    "source_mode": "PCAP",
+    "timestamp": "2026-10-30T19:00:51.307028+00:00",
+    "endpoints": "10.0.0.99:45123 -> 192.168.1.10:80 (Proto: 6)",
+    "rf_score": 0.5080,
+    "rule_matches": ["RULE-TCP-INVALID-FLAGS"],
+    "treeshap_output": {
+      "base_value": 0.5000,
+      "top_attributions": {
+        "packet_length_std": 0.2294,
+        "flow_packets_per_s": -0.0978,
+        "flow_bytes_per_s": -0.0563
+      }
+    },
+    "dqn_state_6d": [0.85, 0.0, 1.0, 0.0, 0.0, 0.8667],
+    "dqn_q_values": {
+      "ALLOW": -103.4347,
+      "ALERT": -18.8499,
+      "RATE_LIMIT": -23.3905,
+      "ISOLATE": -11.3341
+    },
+    "proposed_action": "ISOLATE",
+    "safety_enforced_action": "ISOLATE",
+    "override_reason": "OK",
+    "executor_lifecycle_state": "VERIFIED",
+    "advisory_status": {
+      "is_advisory": true,
+      "kernel_mutations": 0
     }
   },
   "screenshots_captured": {

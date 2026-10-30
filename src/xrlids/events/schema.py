@@ -20,6 +20,7 @@ class SecurityEvent:
     event_id: str = field(default_factory=lambda: f"evt-{uuid.uuid4().hex[:12]}")
     timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     flow_id: str = ""
+    source_mode: str = "LIVE"  # "LIVE", "PCAP", "SAMPLE"
     source_ip: str = ""
     dest_ip: str = ""
     source_port: int = 0

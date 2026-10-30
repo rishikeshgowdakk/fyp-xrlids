@@ -2,10 +2,10 @@
 
 **Project:** Explainable Reinforcement Learning-Based Intrusion Detection and Autonomous Response System (XRL-IDARS)  
 **Repository:** `https://github.com/rishikeshgowdakk/fyp-xrlids`  
-**Integration Branch:** `feature/final-acceptance-integration`  
+**Integration Branch:** `feature/final-live-demonstration-fixes`  
 **Engineering Role:** Principal Network Security Architect, Senior ML Systems Engineer, and QA Lead  
 **Evaluation Standard:** Production Network Security Engineering Discipline  
-**Date:** October 30, 2026  
+**Date:** October 30, 2026 (Post-Publication Correctness Verification)  
 **Status:** **ACCEPTED & FORMALLY VERIFIED**
 
 ---
@@ -34,12 +34,12 @@ The complete automated test suite was executed in the project's dedicated virtua
 ```
 
 ### Execution Metrics:
-- **Total Tests Collected:** 663
-- **Passed:** 663 (100.0%)
+- **Total Tests Collected:** 671
+- **Passed:** 671 (100.0%)
 - **Failed:** 0 (0.0%)
 - **Skipped:** 0 (0.0%)
 - **Warnings:** 19 (benign deprecation/mark warnings)
-- **Execution Time:** 77.80 seconds
+- **Execution Time:** 61.08 seconds
 
 Full per-test logs are archived at [results/acceptance/test_results.txt](file:///home/rishikesh/Desktop/fyp-xrlids/results/acceptance/test_results.txt).
 
@@ -55,12 +55,13 @@ The full operational pipeline was executed via:
 ### Verified Subsystem Pipeline Flow:
 $$\text{Wire Packets (Scapy / PCAP)} \longrightarrow \text{Canonical FlowEngine} \longrightarrow R_{10} \text{ Feature Extraction} \longrightarrow \text{StandardScaler} \longrightarrow \text{Random Forest} \longrightarrow \text{SecurityEvent} \longrightarrow \text{TreeSHAP} \longrightarrow \text{Dueling DQN} \longrightarrow \text{Safety Gate} \longrightarrow \text{Advisory Actuator} \longrightarrow \text{Streamlit Buffer}$$
 
-### Sample Verified Security Event:
+### Sample Verified Security Event (13 Complete Attributes):
 ```json
 {
-  "event_id": "evt-bdb69e492c2b",
-  "flow_id": "flow-1793382127092-3",
-  "timestamp": "2026-10-30T17:42:07.250857+00:00",
+  "event_id": "evt-64363f5f1d01",
+  "flow_id": "flow-1793386851184-3",
+  "source_mode": "PCAP",
+  "timestamp": "2026-10-30T19:00:51.307028+00:00",
   "endpoints": "10.0.0.99:45123 -> 192.168.1.10:80 (TCP)",
   "features": {
     "flow_duration_ms": 2.14,
@@ -91,16 +92,18 @@ $$\text{Wire Packets (Scapy / PCAP)} \longrightarrow \text{Canonical FlowEngine}
     ]
   },
   "response": {
+    "dqn_state_6d": [0.85, 0.0, 1.0, 0.0, 0.0, 0.8667],
     "proposed_action": "ISOLATE",
     "q_values": {
-      "ALLOW": -103.4346,
-      "ALERT": -18.8498,
+      "ALLOW": -103.4347,
+      "ALERT": -18.8499,
       "RATE_LIMIT": -23.3905,
-      "ISOLATE": -11.3340
+      "ISOLATE": -11.3341
     },
-    "safety_enforced": "ISOLATE",
-    "safety_override": false,
-    "actuator_mode": "ADVISORY_DRY_RUN",
+    "safety_enforced_action": "ISOLATE",
+    "override_reason": "OK",
+    "executor_lifecycle_state": "VERIFIED",
+    "is_advisory": true,
     "kernel_mutations": 0
   }
 }

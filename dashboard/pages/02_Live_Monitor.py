@@ -52,11 +52,12 @@ st.divider()
 col_stream, col_dist = st.columns([2, 1])
 
 with col_stream:
-    st.subheader("Live Security Event Stream")
-    events = event_mgr.get_recent_events(limit=15)
-    if events:
+    st.subheader("Live Security Event Stream (Wire Traffic Only)")
+    all_events = event_mgr.get_recent_events(limit=50)
+    live_events = [ev for ev in all_events if getattr(ev, "source_mode", "LIVE") == "LIVE"]
+    if live_events:
         rows = []
-        for ev in reversed(events):
+        for ev in reversed(live_events[:15]):
             rows.append({
                 "Timestamp": ev.timestamp[:19].replace("T", " "),
                 "Flow ID": ev.flow_id,
@@ -69,13 +70,12 @@ with col_stream:
             })
         st.dataframe(pd.DataFrame(rows), use_container_width=True)
     else:
-        st.markdown("_No events recorded yet. Start live capture or run a replay from Packet & Flow Ingestion._")
+        st.markdown("_No live wire capture events recorded yet. Start live capture from 'Packet & Flow Ingestion'._")
 
 with col_dist:
-    st.subheader("Verdict Distribution")
-    stats = event_mgr.get_stats()
-    total = stats["total_events"]
-    threats = stats["threat_events"]
+    st.subheader("Live Verdict Distribution")
+    total = len(live_events)
+    threats = sum(1 for ev in live_events if ev.hybrid_verdict != "BENIGN" or ev.detection.get("attack_score", 0.0) >= 0.50)
     benign = max(0, total - threats)
 
     if total > 0:

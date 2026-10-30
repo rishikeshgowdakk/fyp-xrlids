@@ -32,8 +32,8 @@ st.divider()
 # High-Level Safety Invariant Cards
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Critical Hosts Protected", len(safety_gate.critical_hosts))
-c2.metric("Action Cooldown Window", f"{int(safety_gate.cooldown_period_steps)} steps")
-c3.metric("Blast-Radius Threshold", f"{safety_gate.max_isolated_fraction*100:.0f}%")
+c2.metric("Action Cooldown Window", f"{int(safety_gate.cooldown_steps)} steps")
+c3.metric("Blast-Radius Threshold", f"{safety_gate.blast_radius_threshold*100:.0f}%")
 c4.metric("Active Mitigations", len(pipeline.executor.active_mitigations))
 
 st.divider()

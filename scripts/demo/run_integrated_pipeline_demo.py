@@ -97,9 +97,11 @@ def run_integrated_demonstration() -> bool:
     results: list[PipelineResult] = []
 
     for i, flow in enumerate(completed_flows, start=1):
-        res = pipeline.process_flow(flow, explain=True)
+        # Flows 1..len(pcap_packets) were from PCAP; remainder from SAMPLE
+        mode = "PCAP" if i <= len(pcap_packets) and i <= 6 else "SAMPLE"
+        res = pipeline.process_flow(flow, explain=True, source_mode=mode)
         results.append(res)
-        print(f"  - Flow #{i} [{res.flow_id}]: {res.source_ip}:{res.source_port} -> {res.dest_ip}:{res.dest_port} | Verdict: {res.hybrid.verdict} | Enforced: {res.enforced_action.name}")
+        print(f"  - Flow #{i} [{res.flow_id}] ({res.source_mode}): {res.source_ip}:{res.source_port} -> {res.dest_ip}:{res.dest_port} | Verdict: {res.hybrid.verdict} | Enforced: {res.enforced_action.name}")
 
     # 5. Rigorous Integration Assertions on Security Event Association
     print("\n[Stage 5] Verifying Unified Security Event Association & Streamlit Visibility...")
@@ -157,25 +159,30 @@ def run_integrated_demonstration() -> bool:
     print("    [5] Advisory Dry-Run Response Execution Record")
     print("    All 5 components are linked to the identical SecurityEvent ID and stored in EventManager.")
 
-    # 6. Detailed Inspection of an Attack Event
+    # 6. Detailed Inspection of an Attack Event (Single Unified Record Verification)
     attack_event = next((r.security_event for r in results if r.hybrid.is_attack), results[0].security_event)
     print("\n" + "=" * 76)
-    print(f"  Sample Integrated Security Event Payload (Event ID: {attack_event.event_id})")
+    print(f"  Verified Autonomous Response Security Event Record (Event ID: {attack_event.event_id})")
     print("=" * 76)
+    print(f"Event ID:         {attack_event.event_id}")
     print(f"Flow ID:          {attack_event.flow_id}")
+    print(f"Source Mode:      {getattr(attack_event, 'source_mode', 'UNKNOWN')}")
     print(f"Timestamp:        {attack_event.timestamp}")
     print(f"Endpoints:        {attack_event.source_ip}:{attack_event.source_port} -> {attack_event.dest_ip}:{attack_event.dest_port} (Proto: {attack_event.protocol})")
     print(f"RF Score:         {attack_event.detection['attack_score']:.4f} ({attack_event.detection['model_name']})")
-    print(f"Rule Violations:  {[r['rule_id'] for r in attack_event.rule_matches]}")
+    print(f"Rule Matches:     {[r['rule_id'] for r in attack_event.rule_matches]}")
     print(f"Hybrid Verdict:   {attack_event.hybrid_verdict} (Severity: {attack_event.severity})")
     print(f"TreeSHAP Base:    {attack_event.explanation['base_value']:.4f}")
-    print("Top Attributions:")
+    print("TreeSHAP Top Attributions:")
     for attr in attack_event.explanation['attributions'][:3]:
         print(f"  • {attr['feature']:<20}: {attr['shap_attribution']:+.4f} ({attr['direction']})")
-    print(f"DQN Proposed:     {attack_event.response['proposed_action']}")
+    print(f"DQN 6D State:     {attack_event.response['state_vector']}")
     print(f"DQN Q-Values:     {attack_event.response['q_values']}")
-    print(f"Safety Enforced:  {attack_event.response['enforced_action']} (Override: {attack_event.response['safety_override']})")
-    print(f"Advisory Record:  Dry-Run Mode (0 kernel mutations, lifecycle: {attack_event.response['execution_report']['final_lifecycle_state']}, is_advisory: {attack_event.response['execution_report']['is_advisory']})")
+    print(f"Proposed Action:  {attack_event.response['proposed_action']}")
+    print(f"Safety Enforced:  {attack_event.response['enforced_action']}")
+    print(f"Override Reason:  {attack_event.response['override_reason'] or 'None (Approved without override)'}")
+    print(f"Executor State:   {attack_event.response['execution_report']['final_lifecycle_state']}")
+    print(f"Advisory Status:  is_advisory={attack_event.response['execution_report']['is_advisory']} (0 kernel mutations, dry-run only)")
     print("=" * 76)
 
     # 7. Verify Streamlit Statistics

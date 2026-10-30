@@ -70,12 +70,12 @@ with tab_real:
             state_vec = resp.get("state_vector", [])
             if len(state_vec) >= 6:
                 state_labels = [
-                    ("S_t (Current Attack Score)", state_vec[0], "Continuous Random Forest / hybrid threat probability [0, 1]"),
-                    ("ΔS_t (Score Trajectory)", state_vec[1], "First-difference change in threat score from previous step [-1, 1]"),
-                    ("N_alert (Rolling Alert Density)", state_vec[2], "Normalized count of recent suspicious alerts from this source [0, 1]"),
-                    ("a_{t-1} (Previous Action Taken)", state_vec[3], "Discrete index of last applied action (0=ALLOW, 1=ALERT, 2=RATE_LIMIT, 3=ISOLATE)"),
-                    ("c_t (Critical Host Invariant)", state_vec[4], "Binary flag (1.0 = asset matches critical allowlist, 0.0 = standard)"),
-                    ("v_t (Vulnerability Exposure)", state_vec[5], "Target host service exposure and vulnerability rating [0, 1]"),
+                    ("S_t (Current Attack Score)", state_vec[0], "Continuous Random Forest / hybrid threat probability [0.0, 1.0] from operational detector"),
+                    ("ΔS_t (Score Trajectory)", state_vec[1], "First-difference score velocity relative to recent score history [-1.0, 1.0]"),
+                    ("N_alert (Rolling Alert Density)", state_vec[2], "Fraction of past 20 flows exceeding alert threshold (0.50) [0.0, 1.0]"),
+                    ("a_{t-1} (Previous Action Taken)", state_vec[3], "Normalized index of previous action (ALLOW=0.0, ALERT=0.333, RATE_LIMIT=0.667, ISOLATE=1.0)"),
+                    ("c_t (Remaining Cooldown Fraction)", state_vec[4], "Fraction of 30-step mandatory cooldown timer remaining [0.0, 1.0] before re-trigger"),
+                    ("v_t (Normalized Volumetric Scale)", state_vec[5], "Log-scaled flow byte rate: log10(1 + bytes_per_s) / 8.0 [0.0, 1.0] (max 100 MB/s)"),
                 ]
                 s_df = pd.DataFrame([{"State Dimension": l[0], "Value": round(l[1], 4), "Description": l[2]} for l in state_labels])
                 st.dataframe(s_df, use_container_width=True)
@@ -84,42 +84,80 @@ with tab_real:
 
 with tab_offline:
     st.subheader("2. Offline Policy Explorer [SIMULATION ONLY]")
-    st.caption("Interactive forward pass through the trained DQN model weights. Modifying these sliders simulates policy response curves and does NOT execute any network actions.")
+    st.caption("Interactive forward pass through the trained DQN model weights using the verified 6D causal state contract. Modifying these sliders simulates policy response curves and does NOT execute any network actions.")
 
     col_sl1, col_sl2 = st.columns(2)
     with col_sl1:
-        s_score = st.slider("Attack Score (S_t)", 0.0, 1.0, 0.85, 0.05)
-        s_delta = st.slider("Score Trend (ΔS_t)", -1.0, 1.0, 0.30, 0.05)
-        s_alerts = st.slider("Alert Density (N_alert)", 0.0, 1.0, 0.60, 0.05)
+        s_score = st.slider("Attack Score (S_t)", 0.0, 1.0, 0.85, 0.05, help="Continuous threat score from ML detector in [0.0, 1.0]")
+        s_delta = st.slider("Score Trajectory (ΔS_t)", -1.0, 1.0, 0.20, 0.05, help="Score velocity relative to historical average in [-1.0, 1.0]")
+        s_alerts = st.slider("Rolling Alert Density (N_alert)", 0.0, 1.0, 0.50, 0.05, help="Fraction of recent flows exceeding alert threshold in [0.0, 1.0]")
 
     with col_sl2:
-        s_prev_act = st.selectbox("Previous Action (a_{t-1})", [0, 1, 2, 3], format_func=lambda a: ["0: ALLOW", "1: ALERT", "2: RATE_LIMIT", "3: ISOLATE"][a])
-        s_crit = st.checkbox("Critical Host (c_t = 1.0)", value=False)
-        s_vuln = st.slider("Vulnerability Rating (v_t)", 0.0, 1.0, 0.50, 0.05)
+        actions_list = [Action.ALLOW, Action.ALERT, Action.RATE_LIMIT, Action.ISOLATE]
+        s_prev_act = st.selectbox(
+            "Previous Enforced Action (a_{t-1})",
+            actions_list,
+            index=0,
+            format_func=lambda a: f"{a.value}: {a.name} (normalized: {a.value/3.0:.3f})",
+            help="Previous action normalized by / 3.0",
+        )
+        s_cool_steps = st.slider("Cooldown Steps Remaining (c_t)", 0, 30, 0, 1, help="Fraction of 30-step window: steps / 30.0")
+        s_bytes_sec = st.number_input(
+            "Flow Byte Rate (bytes/s)",
+            min_value=0.0,
+            max_value=100000000.0,
+            value=1250000.0,
+            step=50000.0,
+            help="Raw byte rate, normalized via log10(1 + bps) / 8.0 into [0.0, 1.0]",
+        )
 
-    sim_state = np.array([s_score, s_delta, s_alerts, float(s_prev_act), 1.0 if s_crit else 0.0, s_vuln], dtype=np.float32)
+    # Transform parameters strictly following StateBuilder contract
+    s0 = float(np.clip(s_score, 0.0, 1.0))
+    s1 = float(np.clip(s_delta, -1.0, 1.0))
+    s2 = float(np.clip(s_alerts, 0.0, 1.0))
+    s3 = float(s_prev_act.value / 3.0)
+    s4 = float(np.clip(s_cool_steps / 30.0, 0.0, 1.0))
+    s5 = float(np.clip(np.log10(1.0 + max(0.0, s_bytes_sec)) / 8.0, 0.0, 1.0))
+
+    sim_state = np.array([s0, s1, s2, s3, s4, s5], dtype=np.float32)
 
     # Compute DQN forward pass
     dqn_service = pipeline.response_service
     q_vals = dqn_service.get_q_values(sim_state)
     best_act_idx = int(np.argmax(q_vals))
-    actions_map = [Action.ALLOW, Action.ALERT, Action.RATE_LIMIT, Action.ISOLATE]
-    rec_action = actions_map[best_act_idx]
+    rec_action = actions_list[best_act_idx]
 
     st.markdown("#### Offline Evaluation Outcome")
     c_res1, c_res2 = st.columns(2)
 
     with c_res1:
-        sim_q_df = pd.DataFrame([{"Action": actions_map[i].name, "Q-Value": round(float(q_vals[i]), 4)} for i in range(len(actions_map))])
+        st.markdown("**Action Q-Values (Expected Returns)**")
+        sim_q_df = pd.DataFrame([{"Action": actions_list[i].name, "Q-Value": round(float(q_vals[i]), 4)} for i in range(len(actions_list))])
         st.bar_chart(sim_q_df.set_index("Action")["Q-Value"])
+        st.dataframe(sim_q_df, use_container_width=True)
 
     with c_res2:
+        st.markdown("**Policy Recommendation & Deterministic Safety Gate**")
         st.metric("DQN Proposed Action", rec_action.name)
-        # Apply safety check
-        dummy_ip = "192.168.10.1" if s_crit else "10.200.1.55"
-        safety_chk = pipeline.safety_gate.check(action=rec_action, target_host=dummy_ip)
+        
+        # Asset criticality is tested by the safety gate, NOT injected into DQN state
+        is_crit_target = st.checkbox("Target is Protected Critical Host (Gateway/DNS)", value=False, help="Informs the Safety Gate check (192.168.1.1 or 8.8.8.8)")
+        target_ip = "192.168.1.1" if is_crit_target else "10.200.1.55"
+        
+        safety_chk = pipeline.safety_gate.check(action=rec_action, target_host=target_ip)
         st.metric("Safety Enforced Action", safety_chk.action.name)
         if safety_chk.is_overridden:
-            st.warning(f"Safety Override: {safety_chk.reason}")
+            st.warning(f"**Safety Override:** {safety_chk.reason}")
         else:
-            st.success("Safety Invariants: Passed.")
+            st.success("**Safety Invariants:** Passed without override.")
+
+        # Show constructed 6D state table
+        sim_state_labels = [
+            ("S_t (Current Attack Score)", s0, "Direct RF risk score [0, 1]"),
+            ("ΔS_t (Score Trajectory)", s1, "Trajectory delta [-1, 1]"),
+            ("N_alert (Rolling Alert Density)", s2, "Recent alert density [0, 1]"),
+            ("a_{t-1} (Previous Action Taken)", s3, f"{s_prev_act.name} -> {s3:.3f}"),
+            ("c_t (Remaining Cooldown Fraction)", s4, f"{s_cool_steps}/30 -> {s4:.3f}"),
+            ("v_t (Normalized Volumetric Scale)", s5, f"{s_bytes_sec:,.0f} B/s -> {s5:.4f}"),
+        ]
+        st.dataframe(pd.DataFrame([{"Dim": l[0], "Normalized Input": round(l[1], 4), "Raw Transformation": l[2]} for l in sim_state_labels]), use_container_width=True)

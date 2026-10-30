@@ -115,7 +115,7 @@ with col_cfg:
                     def on_flow_done(f: CanonicalFlow) -> None:
                         completed_flows.append(f)
                         if auto_evaluate:
-                            pipeline.process_flow(f)
+                            pipeline.process_flow(f, source_mode="PCAP")
 
                     pkt_count = 0
                     limit = int(max_packets) if max_packets > 0 else 100000
@@ -145,20 +145,25 @@ with col_cfg:
 
     else:
         st.info("🧪 **Mode: SAMPLE TRAFFIC GENERATOR** — Synthesizes controlled calibrated packets in-memory for testing and demonstration. [EXPLICITLY MARKED AS SAMPLE TRAFFIC].")
-        from xrlids.demo.scapy_simulator import SCENARIOS, generate_scenario_packets
+        from xrlids.demo.scapy_simulator import SCENARIO_SPECS, ScapyAttackSimulator
+        from xrlids.capture.scapy_service import scapy_packet_to_packet_info
 
         scenario_choice = st.selectbox(
             "Select Calibrated Scenario",
-            list(SCENARIOS.keys()),
-            format_func=lambda k: f"{SCENARIOS[k]['title']} ({SCENARIOS[k]['category']})",
+            list(SCENARIO_SPECS.keys()),
+            format_func=lambda k: f"{SCENARIO_SPECS[k].title} ({SCENARIO_SPECS[k].category})",
         )
-        st.caption(SCENARIOS[scenario_choice]["description"])
+        st.caption(SCENARIO_SPECS[scenario_choice].description)
         auto_eval_sample = st.checkbox("Auto-Evaluate via Active Pipeline", value=True, key="eval_sample")
 
         if st.button("🚀 Generate & Process Sample Packets", type="primary", use_container_width=True):
             with st.spinner("Generating Scapy packets and assembling flows..."):
                 t0 = time.perf_counter()
-                pkts = generate_scenario_packets(scenario_choice)
+                sim = ScapyAttackSimulator()
+                raw_pkts = sim.build_packets_for_scenario(scenario_choice)
+                pkts = [scapy_packet_to_packet_info(p) for p in raw_pkts]
+                pkts = [p for p in pkts if p is not None]
+
                 flow_builder = CanonicalFlowBuilder(idle_timeout_s=120.0)
                 completed_flows: list[CanonicalFlow] = []
 
@@ -167,13 +172,13 @@ with col_cfg:
                     for f in newly_completed:
                         completed_flows.append(f)
                         if auto_eval_sample:
-                            pipeline.process_flow(f)
+                            pipeline.process_flow(f, source_mode="SAMPLE")
 
                 flushed = flow_builder.flush_all()
                 for f in flushed:
                     completed_flows.append(f)
                     if auto_eval_sample:
-                        pipeline.process_flow(f)
+                        pipeline.process_flow(f, source_mode="SAMPLE")
 
                 elapsed = time.perf_counter() - t0
                 st.session_state.replayed_flows = completed_flows

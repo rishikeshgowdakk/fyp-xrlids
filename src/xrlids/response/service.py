@@ -77,6 +77,16 @@ class DQNResponseService:
 
         self._host_builders: dict[str, StateBuilder] = {}
 
+    def get_q_values(self, state: np.ndarray) -> np.ndarray:
+        """Compute Q-values for a 6D causal state vector."""
+        state_arr = np.asarray(state, dtype=np.float32)
+        if state_arr.shape != (6,):
+            raise ValueError(f"Expected 6D state vector, got shape {state_arr.shape}")
+        state_tensor = torch.from_numpy(state_arr).unsqueeze(0).to(self.device)
+        with torch.no_grad():
+            q_out = self.network(state_tensor).squeeze(0).cpu().numpy()
+        return q_out
+
     def _load_checkpoint(self) -> None:
         """Load weights from PyTorch checkpoint."""
         if not self.checkpoint_path.exists():
@@ -122,9 +132,7 @@ class DQNResponseService:
         )
 
         # 2. Run DQN forward pass
-        state_tensor = torch.from_numpy(state_vec).unsqueeze(0).to(self.device)
-        with torch.no_grad():
-            q_out = self.network(state_tensor).squeeze(0).cpu().numpy()
+        q_out = self.get_q_values(state_vec)
 
         # 3. Map Q-values
         actions_list = [Action.ALLOW, Action.ALERT, Action.RATE_LIMIT, Action.ISOLATE][:self.action_dim]

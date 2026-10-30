@@ -52,6 +52,7 @@ if not explained_events:
             dest_ip="192.168.10.80",
             flow_id="sample-shap-eval",
             explain=True,
+            source_mode="SAMPLE",
         )
         st.rerun()
 else:

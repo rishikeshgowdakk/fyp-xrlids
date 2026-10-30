@@ -338,3 +338,24 @@ Command: .venv/bin/python scripts/experiments/evaluate_dqn_validation.py
 ================================================================================
   Validation execution completed successfully.
 ================================================================================
+
+
+=== POST-PUBLICATION CORRECTNESS VERIFICATION & TEST SUITE ===
+Command: .venv/bin/pytest -v --tb=short
+Exit Code: 0
+Result: 671 passed, 19 warnings in 61.08s (100% pass rate)
+
+=== INTEGRATED PIPELINE DEMONSTRATION WITH PROVENANCE & VERIFIED EVENT ===
+Command: .venv/bin/python scripts/demo/run_integrated_pipeline_demo.py
+Exit Code: 0
+Verified Event ID: evt-64363f5f1d01 (flow-1793386851184-3)
+Source Mode: PCAP
+Endpoints: 10.0.0.99:45123 -> 192.168.1.10:80 (Proto: 6)
+RF Score: 0.5080 (Sole Operational Detector)
+Rule Matches: ['RULE-TCP-INVALID-FLAGS']
+TreeSHAP Attributions: packet_length_std (+0.2294), flow_packets_per_s (-0.0978), flow_bytes_per_s (-0.0563)
+DQN 6D State: [0.85, 0.0, 1.0, 0.0, 0.0, 0.8667]
+Q-Values: {'ALLOW': -103.4347, 'ALERT': -18.8499, 'RATE_LIMIT': -23.3905, 'ISOLATE': -11.3341}
+Proposed Action: ISOLATE | Enforced Action: ISOLATE (Safety Overridden: False)
+Executor State: VERIFIED | Advisory Status: is_advisory=True (0 kernel mutations)
+Total Events Evaluated: 8 | Threats Flagged: 5 | Rule Violations: 5 | Source Escalations: 0
