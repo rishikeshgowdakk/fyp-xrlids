@@ -2,7 +2,7 @@
 
 **Explainable Reinforcement Learning-Based Intrusion Detection and Autonomous Response System**
 
-[![Tests](https://img.shields.io/badge/Tests-691%20Passed-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-704%20Passed-brightgreen)](tests/)
 [![Python](https://img.shields.io/badge/Python-3.12%20%7C%203.14-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-Academic-lightgrey)](LICENSE)
 [![Architecture](https://img.shields.io/badge/Architecture-RF%20Operational%20%2B%20TreeSHAP%20%2B%20DQN%20Advisory-orange)](docs/architecture/SYSTEM_ARCHITECTURE.md)

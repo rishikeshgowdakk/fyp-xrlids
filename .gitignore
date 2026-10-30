@@ -16,6 +16,7 @@ env/
 # Environment / secrets - never commit credentials or environment-specific values
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 

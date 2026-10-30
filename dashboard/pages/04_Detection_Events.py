@@ -20,27 +20,60 @@ from xrlids.pipeline.active_pipeline import ActiveInferencePipeline
 st.set_page_config(page_title="Detection & Events - XRL-IDARS", page_icon="🚨", layout="wide")
 
 event_mgr, pipeline, live_mgr = ensure_session_state()
-events = event_mgr.get_recent_events(limit=50)
 
 st.title("🚨 Detection & Security Events")
 st.markdown("Detailed inspection of security events produced by Random Forest inference, deterministic protocol rules, and autonomous response decisions.")
 
+stats = event_mgr.get_stats()
+if stats.get("postgres_active"):
+    st.success(f"🟢 **Storage Backend: PostgreSQL Active** — {stats.get('postgres_persisted_events', 0)} events persisted to database (queue size: {stats.get('postgres_queue_size', 0)}).")
+else:
+    st.info("⚪ **Storage Backend: In-Memory Ring Buffer + JSONL Audit File** — Standard offline audit logging active.")
+
 st.divider()
 
+# Storage Source Selection
+use_db = False
+if stats.get("postgres_active"):
+    c_src, _ = st.columns([2, 1])
+    with c_src:
+        source_sel = st.radio(
+            "Event Retrieval Source",
+            ["Live In-Memory Ring Buffer", "Persistent PostgreSQL Database (Historical)"],
+            horizontal=True,
+            index=0,
+            key="events_data_source",
+        )
+        use_db = (source_sel == "Persistent PostgreSQL Database (Historical)")
+
 # Filter Controls
-col_f1, col_f2, col_f3, col_f4 = st.columns(4)
+col_f1, col_f2, col_f3, col_f4, col_f5 = st.columns([1, 1, 1, 1, 1.2])
 with col_f1:
-    mode_filter = st.selectbox("Filter by Source Mode", ["ALL", "LIVE", "PCAP", "SAMPLE"])
+    mode_filter = st.selectbox("Source Mode", ["ALL", "LIVE", "PCAP", "SAMPLE"])
 with col_f2:
-    verdict_filter = st.selectbox("Filter by Verdict", ["ALL", "BENIGN", "ATTACK"])
+    verdict_filter = st.selectbox("Verdict", ["ALL", "BENIGN", "ATTACK"])
 with col_f3:
-    severity_filter = st.selectbox("Filter by Severity", ["ALL", "INFORMATIONAL", "LOW", "MEDIUM", "HIGH", "CRITICAL"])
+    severity_filter = st.selectbox("Severity", ["ALL", "INFORMATIONAL", "LOW", "MEDIUM", "HIGH", "CRITICAL"])
 with col_f4:
-    action_filter = st.selectbox("Filter by Enforced Action", ["ALL", "ALLOW", "ALERT", "RATE_LIMIT", "ISOLATE"])
+    action_filter = st.selectbox("Enforced Action", ["ALL", "ALLOW", "ALERT", "RATE_LIMIT", "ISOLATE"])
+with col_f5:
+    source_ip_filter = st.text_input("Source IP", value="").strip()
+
+if use_db:
+    events = event_mgr.get_historical_events(
+        limit=100,
+        source_ip=source_ip_filter or None,
+        severity=severity_filter if severity_filter != "ALL" else None,
+        verdict=verdict_filter if verdict_filter != "ALL" else None,
+        source_mode=mode_filter if mode_filter != "ALL" else None,
+    )
+else:
+    events = event_mgr.get_recent_events(limit=100, source_ip=source_ip_filter or None)
 
 # Filter events
 filtered_events = []
-for ev in reversed(events):
+event_list_ordered = events if use_db else list(reversed(events))
+for ev in event_list_ordered:
     ev_mode = getattr(ev, "source_mode", "LIVE")
     if mode_filter != "ALL" and ev_mode != mode_filter:
         continue
@@ -50,6 +83,8 @@ for ev in reversed(events):
         continue
     act = ev.response.get("enforced_action", "ALLOW")
     if action_filter != "ALL" and act != action_filter:
+        continue
+    if source_ip_filter and ev.source_ip != source_ip_filter:
         continue
     filtered_events.append(ev)
 

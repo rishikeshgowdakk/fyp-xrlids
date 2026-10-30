@@ -13,3 +13,5 @@ xgboost==3.1.0
 scapy==2.6.1
 matplotlib==3.11.2
 pytest==9.1.1
+psycopg==3.3.6
+psycopg-binary==3.3.6

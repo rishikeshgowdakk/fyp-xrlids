@@ -8,12 +8,12 @@
   "test_suite": {
     "framework": "pytest-9.1.1",
     "python_version": "3.14.4",
-    "total_collected": 691,
-    "passed": 691,
+    "total_collected": 704,
+    "passed": 704,
     "failed": 0,
     "skipped": 0,
     "warnings": 19,
-    "execution_time_seconds": 50.03,
+    "execution_time_seconds": 81.74,
     "pass_rate_pct": 100.0
   },
   "operational_pipeline": {
