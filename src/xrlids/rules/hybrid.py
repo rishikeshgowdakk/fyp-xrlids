@@ -46,8 +46,10 @@ class HybridDecision:
         """Convert decision to a serializable dictionary."""
         return {
             "verdict": self.verdict,
+            "hybrid_verdict": self.verdict,
             "is_attack": self.is_attack,
             "threat_score": round(self.threat_score, 4),
+            "hybrid_risk_score": round(self.threat_score, 4),
             "severity": self.severity,
             "detection_source": self.detection_source,
             "rf_probability": round(self.rf_probability, 4),
@@ -58,6 +60,16 @@ class HybridDecision:
             "unavailable_rules": list(self.unavailable_rules),
             "details": self.details,
         }
+
+    @property
+    def hybrid_verdict(self) -> str:
+        """Alias for verdict."""
+        return self.verdict
+
+    @property
+    def hybrid_risk_score(self) -> float:
+        """Alias for threat_score."""
+        return self.threat_score
 
 
 class HybridDecisionEngine:

@@ -34,6 +34,7 @@ class SecurityEvent:
     # Behavioural & Rule Tier
     rule_matches: list[dict[str, Any]] = field(default_factory=list)
     hybrid_verdict: str = "BENIGN"  # "BENIGN", "RF", "RULE", "HYBRID"
+    hybrid_risk_score: float = 0.0
     severity: str = "NONE"  # "NONE", "LOW", "MEDIUM", "HIGH", "CRITICAL"
     source_escalated: bool = False
     source_status: dict[str, Any] = field(default_factory=dict)

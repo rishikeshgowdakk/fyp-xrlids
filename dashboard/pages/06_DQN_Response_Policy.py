@@ -141,8 +141,8 @@ with tab_offline:
         st.metric("DQN Proposed Action", rec_action.name)
         
         # Asset criticality is tested by the safety gate, NOT injected into DQN state
-        is_crit_target = st.checkbox("Target is Protected Critical Host (Gateway/DNS)", value=False, help="Informs the Safety Gate check (192.168.1.1 or 8.8.8.8)")
-        target_ip = "192.168.1.1" if is_crit_target else "10.200.1.55"
+        is_crit_target = st.checkbox("Target is Protected Critical Host (Gateway/DNS)", value=False, help="Informs the Safety Gate check (192.168.10.1 Core Gateway or 192.168.10.2 DNS)")
+        target_ip = "192.168.10.1" if is_crit_target else "10.200.1.55"
         
         safety_chk = pipeline.safety_gate.check(action=rec_action, target_host=target_ip)
         st.metric("Safety Enforced Action", safety_chk.action.name)

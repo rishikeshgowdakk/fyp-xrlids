@@ -66,6 +66,7 @@ if filtered_events:
             "Source IP": ev.source_ip,
             "Dest IP": ev.dest_ip,
             "RF Score": round(ev.detection.get("attack_score", 0.0), 4),
+            "Hybrid Risk": round(getattr(ev, "hybrid_risk_score", ev.detection.get("attack_score", 0.0)), 4),
             "Verdict": ev.hybrid_verdict,
             "Severity": ev.severity,
             "Proposed": ev.response.get("proposed_action", "ALLOW"),
@@ -99,7 +100,8 @@ if filtered_events:
 
     with c_det2:
         st.markdown("#### 2. Detection & Response Decision")
-        st.markdown(f"**Random Forest Attack Score:** `{ev.detection.get('attack_score', 0.0):.4f}`")
+        st.markdown(f"**Random Forest Probability:** `{ev.detection.get('attack_score', 0.0):.4f}`")
+        st.markdown(f"**Hybrid Risk Score (Rules Floor):** `{getattr(ev, 'hybrid_risk_score', ev.detection.get('attack_score', 0.0)):.4f}`")
         st.markdown(f"**Classification Family:** `{ev.detection.get('attack_family', 'BENIGN')}`")
         st.markdown(f"**Hybrid Verdict:** `{ev.hybrid_verdict}` (Severity: `{ev.severity}`)")
 

@@ -31,11 +31,13 @@ st.divider()
 # Mode Indicator Banner
 live_stats = live_mgr.get_stats()
 status = live_stats["status"]
+has_perm, perm_msg = live_mgr.check_permissions()
 
 if status == "RUNNING":
     st.success(f"🟢 **MODE: LIVE WIRE CAPTURE ACTIVE** — Sniffing on interface `{live_stats['interface']}` with filter `{live_stats['bpf_filter']}`.")
-elif status == "BLOCKED":
-    st.warning(f"🟠 **MODE: LIVE SNIFFING BLOCKED** — {live_stats['last_error'] or 'Insufficient OS privileges (CAP_NET_RAW / root required).'}")
+elif status == "BLOCKED" or not has_perm:
+    err_detail = live_stats['last_error'] or f"Permission Denied: {perm_msg}"
+    st.warning(f"🟠 **MODE: LIVE SNIFFING BLOCKED** — {err_detail}")
 else:
     st.info("⚪ **MODE: CAPTURE IDLE** — Live capture daemon is not running. Use 'Packet & Flow Ingestion' to start sniffing or replay PCAP.")
 

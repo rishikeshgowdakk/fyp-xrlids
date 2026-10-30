@@ -35,16 +35,23 @@ col_cfg, col_stats = st.columns([1, 1])
 with col_cfg:
     st.subheader("Ingestion Source Configuration")
     query_mode = st.query_params.get("mode", "")
-    default_idx = 0
-    if query_mode == "pcap":
-        default_idx = 1
-    elif query_mode == "sample":
-        default_idx = 2
+    mode_options = ["Live Interface Sniffing (Scapy)", "PCAP File Replay", "Sample Traffic Generator (Demo)"]
+
+    if query_mode == "sample":
+        st.session_state["ingestion_source_type"] = "Sample Traffic Generator (Demo)"
+    elif query_mode == "pcap":
+        st.session_state["ingestion_source_type"] = "PCAP File Replay"
+    elif query_mode == "live":
+        st.session_state["ingestion_source_type"] = "Live Interface Sniffing (Scapy)"
+
+    curr_val = st.session_state.get("ingestion_source_type", "PCAP File Replay")
+    default_idx = mode_options.index(curr_val) if curr_val in mode_options else 1
 
     source_type = st.radio(
         "Select Ingestion Mode",
-        ["Live Interface Sniffing (Scapy)", "PCAP File Replay", "Sample Traffic Generator (Demo)"],
+        mode_options,
         index=default_idx,
+        key="ingestion_source_type",
         horizontal=True,
     )
 
@@ -151,7 +158,7 @@ with col_cfg:
         scenario_choice = st.selectbox(
             "Select Calibrated Scenario",
             list(SCENARIO_SPECS.keys()),
-            format_func=lambda k: f"{SCENARIO_SPECS[k].title} ({SCENARIO_SPECS[k].category})",
+            format_func=lambda k: f"{SCENARIO_SPECS[k].name} ({SCENARIO_SPECS[k].category})",
         )
         st.caption(SCENARIO_SPECS[scenario_choice].description)
         auto_eval_sample = st.checkbox("Auto-Evaluate via Active Pipeline", value=True, key="eval_sample")

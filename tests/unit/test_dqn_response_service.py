@@ -47,6 +47,7 @@ def test_dqn_service_recommendation_attack_traffic():
             attack_score=0.99,
             flow_bytes_per_s=10000000.0,
             host_id="10.0.0.99",
+            auto_update_history=True,
         )
 
     assert rec is not None

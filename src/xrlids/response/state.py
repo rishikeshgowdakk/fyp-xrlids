@@ -107,7 +107,7 @@ class StateBuilder:
         # 5. Dimension 4: Remaining Cooldown Timer Fraction c_t in [0.0, 1.0]
         # Fraction of mandatory cooldown window remaining before de-escalation/re-trigger.
         rem_cool = cooldown_remaining if cooldown_remaining is not None else self._cooldown_remaining
-        s4 = float(np.clip(rem_cool / max(1, self.cooldown_max_steps), 0.0, 1.0))
+        s4 = float(np.clip(float(rem_cool) / max(1e-6, float(self.cooldown_max_steps)), 0.0, 1.0))
 
         # 6. Dimension 5: Normalized Coarse Volumetric Scale v_t in [0.0, 1.0]
         # v_t = min(1.0, max(0.0, log10(1.0 + bytes_per_s) / volumetric_scale_log_max))
@@ -125,7 +125,7 @@ class StateBuilder:
         self,
         attack_score: float,
         enforced_action: Action,
-        cooldown_remaining: int,
+        cooldown_remaining: float | int = 0,
     ) -> None:
         """Advance causal history buffers after an action has been selected and enforced.
 
@@ -135,14 +135,14 @@ class StateBuilder:
             Current score S_t to append to past score buffer.
         enforced_action: Action
             Action that was actually enforced by the safety gate at step t.
-        cooldown_remaining: int
-            Updated remaining cooldown steps.
+        cooldown_remaining: float | int
+            Updated remaining cooldown duration or steps.
         """
         s0 = float(np.clip(attack_score, 0.0, 1.0))
         self._score_history.append(s0)
         self._alert_history.append(1 if s0 >= self.alert_threshold else 0)
         self._last_action = enforced_action
-        self._cooldown_remaining = max(0, int(cooldown_remaining))
+        self._cooldown_remaining = float(max(0.0, cooldown_remaining))
 
 
 FAMILY_SEVERITY_WEIGHTS: dict[str, float] = {

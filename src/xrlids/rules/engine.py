@@ -8,7 +8,11 @@ testable, and have zero dependencies on model weights or heuristics.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import ipaddress
+import time
 from typing import TYPE_CHECKING, Any, Callable, Sequence
+
+from xrlids.rules.correlation import MultiFlowPortScanCorrelator, PortScanCorrelationResult
 
 if TYPE_CHECKING:
     from xrlids.demo.flow import Flow
@@ -121,8 +125,8 @@ def _eval_syn_flood(flow: Flow) -> RuleMatch | None:
     return None
 
 
-def _eval_port_scan(flow: Flow) -> RuleMatch | None:
-    """RULE-PORT-SCAN: Check for single-flow port scan probe signatures."""
+def _eval_port_scan_single_flow(flow: Flow) -> RuleMatch | None:
+    """RULE-PORT-SCAN: Check for single-flow rapid probe signatures."""
     if flow.key.protocol != 6:
         return None
 
@@ -134,7 +138,7 @@ def _eval_port_scan(flow: Flow) -> RuleMatch | None:
     if syn >= 5 and total_bytes <= 250:
         return RuleMatch(
             rule_id="RULE-PORT-SCAN",
-            name="TCP Port Scan Probe",
+            name="TCP Single-Flow Port Probe",
             severity="MEDIUM",
             description=f"Rapid port probe signature: {syn} SYNs with only {total_bytes} total bytes.",
             matched_value=f"syn_count={syn}, total_bytes={total_bytes}",
@@ -154,7 +158,7 @@ def _eval_port_scan(flow: Flow) -> RuleMatch | None:
 
 def _eval_high_rate_burst(flow: Flow) -> RuleMatch | None:
     """RULE-HIGH-RATE-BURST: Check for extreme volumetric packet or byte bursts."""
-    if flow.packet_count < 10 or flow.duration_s <= 0.0:
+    if flow.packet_count < 10:
         return None
 
     dur_s = max(flow.duration_s, 1e-6)
@@ -183,7 +187,14 @@ def _eval_high_rate_burst(flow: Flow) -> RuleMatch | None:
 
 
 def _eval_ip_spoof_reserved(flow: Flow) -> RuleMatch | None:
-    """RULE-IP-SPOOF-RESERVED: Check for illegal or reserved source IP addresses."""
+    """RULE-IP-SPOOF-RESERVED: Check for illegal or reserved source IP addresses.
+    
+    RFC 1122 / RFC 6890:
+    - 0.0.0.0 or 255.255.255.255 initiating TCP connections.
+    - Loopback address (127.0.0.0/8) transmitted externally across non-loopback destinations.
+    - Note: Private addresses (RFC 1918 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) are standard
+      LAN addresses and are NOT classified as spoofed.
+    """
     src_ip = flow.source_first_ip.strip()
     dst_ip = flow.dest_first_ip.strip()
 
@@ -243,14 +254,31 @@ def _eval_icmp_flood(flow: Flow) -> RuleMatch | None:
 class RuleEngine:
     """Deterministic, policy-based detection engine executing deterministic network rules."""
 
-    def __init__(self, rules: Sequence[SecurityRule] | None = None) -> None:
+    # Explicit mapping of rules to their required feature keys
+    RULE_REQUIRED_FEATURES: dict[str, tuple[str, ...]] = {
+        "RULE-SYN-FLOOD": ("syn_count", "ack_count"),
+        "RULE-PORT-SCAN": ("syn_count", "packet_length_mean"),
+        "RULE-HIGH-RATE-BURST": ("flow_packets_per_s", "flow_bytes_per_s"),
+        "RULE-PORT-SCAN-MULTI-FLOW": ("src_ip", "dst_ip", "dst_port"),
+        "RULE-IP-SPOOF-RESERVED": ("src_ip", "dst_ip"),
+        "RULE-TCP-INVALID-FLAGS": ("packet_tcp_flags",),
+        "RULE-ICMP-FLOOD": ("protocol", "packet_count"),
+    }
+
+    def __init__(
+        self,
+        rules: Sequence[SecurityRule] | None = None,
+        port_scan_correlator: MultiFlowPortScanCorrelator | None = None,
+    ) -> None:
+        self.port_scan_correlator = port_scan_correlator or MultiFlowPortScanCorrelator()
         if rules is None:
             self.rules = self.get_default_rules()
         else:
             self.rules = list(rules)
+        self.last_unavailable_features: list[str] = []
+        self.last_unavailable_rules: list[str] = []
 
-    @classmethod
-    def get_default_rules(cls) -> list[SecurityRule]:
+    def get_default_rules(self) -> list[SecurityRule]:
         """Return the standard suite of deterministic security rules."""
         return [
             SecurityRule(
@@ -269,10 +297,17 @@ class RuleEngine:
             ),
             SecurityRule(
                 rule_id="RULE-PORT-SCAN",
-                name="Port Scan Probe Detection",
+                name="Single-Flow Port Scan Probe",
                 severity="MEDIUM",
-                description="Checks for rapid probe flows characterized by low byte count and repeated SYNs.",
-                evaluator=_eval_port_scan,
+                description="Checks for single-flow probe signatures characterized by low byte count and repeated SYNs.",
+                evaluator=_eval_port_scan_single_flow,
+            ),
+            SecurityRule(
+                rule_id="RULE-PORT-SCAN-MULTI-FLOW",
+                name="Multi-Flow Port Scan Correlation",
+                severity="HIGH",
+                description="Tracks cross-flow activity to detect horizontal and vertical port scanning across distinct ports.",
+                evaluator=lambda flow: self._eval_port_scan_multi_flow(flow),
             ),
             SecurityRule(
                 rule_id="RULE-HIGH-RATE-BURST",
@@ -297,6 +332,34 @@ class RuleEngine:
             ),
         ]
 
+    def _eval_port_scan_multi_flow(self, flow: Flow) -> RuleMatch | None:
+        """Internal evaluator executing multi-flow port scan correlation on completed flow."""
+        if flow.key.protocol != 6:
+            return None
+
+        src_ip = flow.source_first_ip or flow.key.endpoint_a
+        dst_ip = flow.dest_first_ip or flow.key.endpoint_b
+        dst_port = flow.dest_first_port or flow.key.port_b
+        ts = getattr(flow, "last_time", getattr(flow, "end_time", getattr(flow, "start_time", time.monotonic())))
+
+        corr_res = self.port_scan_correlator.record_probe(
+            source_ip=src_ip,
+            dest_ip=dst_ip,
+            dest_port=dst_port,
+            timestamp=ts,
+            is_syn=flow.syn_count > 0,
+            is_ack=flow.ack_count > 0,
+        )
+        if corr_res and corr_res.is_port_scan:
+            return RuleMatch(
+                rule_id=corr_res.rule_id,
+                name="Multi-Flow Port Scan Correlation",
+                severity=corr_res.severity,
+                description=corr_res.description,
+                matched_value=f"unique_ports={corr_res.unique_ports_count}, target={corr_res.target_ip}",
+            )
+        return None
+
     def evaluate_flow(self, flow: Flow) -> list[RuleMatch]:
         """Evaluate all registered rules against a completed Flow object."""
         matches: list[RuleMatch] = []
@@ -306,84 +369,111 @@ class RuleEngine:
                 matches.append(match)
         return matches
 
-    def evaluate_features(
+    def evaluate_features_detailed(
         self,
         features: dict[str, float],
-        endpoints: dict[str, str] | None = None,
-    ) -> list[RuleMatch]:
-        """Evaluate deterministic rules against a feature dictionary where raw Flow is unavailable.
+        endpoints: dict[str, Any] | None = None,
+    ) -> tuple[list[RuleMatch], list[str], list[str]]:
+        """Evaluate deterministic rules against a feature dictionary, explicitly recording missing features.
 
-        Used for offline CSV datasets and feature vectors.
+        Returns
+        -------
+        tuple[list[RuleMatch], list[str], list[str]]
+            (matched_rules, unavailable_features, unavailable_rules)
         """
         matches: list[RuleMatch] = []
+        unavail_features: set[str] = set()
+        unavail_rules: set[str] = set()
 
-        # RULE-SYN-FLOOD from features
-        syn = float(features.get("syn_count", 0.0))
-        ack = float(features.get("ack_count", 0.0))
-        syn_ack = float(features.get("syn_ack_ratio", 0.0))
+        # 1. Check RULE-SYN-FLOOD requirements
+        if "syn_count" not in features or "ack_count" not in features:
+            unavail_rules.add("RULE-SYN-FLOOD")
+            if "syn_count" not in features:
+                unavail_features.add("syn_count")
+            if "ack_count" not in features:
+                unavail_features.add("ack_count")
+        else:
+            syn = float(features["syn_count"])
+            ack = float(features["ack_count"])
+            syn_ack = float(features.get("syn_ack_ratio", syn / max(ack, 1.0)))
+            if syn >= 20.0 and ack == 0.0:
+                matches.append(
+                    RuleMatch(
+                        rule_id="RULE-SYN-FLOOD",
+                        name="TCP SYN Flood (Zero ACK)",
+                        severity="HIGH",
+                        description=f"Unidirectional SYN flood: {int(syn)} SYNs with 0 ACKs.",
+                        matched_value=f"syn_count={int(syn)}, ack_count={int(ack)}",
+                    )
+                )
+            elif syn >= 10.0 and (syn_ack >= 10.0 or (ack > 0 and syn / ack >= 10.0)):
+                matches.append(
+                    RuleMatch(
+                        rule_id="RULE-SYN-FLOOD",
+                        name="TCP SYN Flood (High SYN/ACK Ratio)",
+                        severity="HIGH",
+                        description=f"Disproportionate SYN-to-ACK ratio: {int(syn)} SYNs to {int(ack)} ACKs.",
+                        matched_value=f"syn_count={int(syn)}, ack_count={int(ack)}, ratio={syn_ack:.2f}",
+                    )
+                )
 
-        if syn >= 20.0 and ack == 0.0:
-            matches.append(
-                RuleMatch(
-                    rule_id="RULE-SYN-FLOOD",
-                    name="TCP SYN Flood (Zero ACK)",
-                    severity="HIGH",
-                    description=f"Unidirectional SYN flood: {int(syn)} SYNs with 0 ACKs.",
-                    matched_value=f"syn_count={int(syn)}, ack_count={int(ack)}",
+        # 2. Check RULE-PORT-SCAN requirements
+        if "syn_count" not in features or "packet_length_mean" not in features:
+            unavail_rules.add("RULE-PORT-SCAN")
+            if "syn_count" not in features:
+                unavail_features.add("syn_count")
+            if "packet_length_mean" not in features:
+                unavail_features.add("packet_length_mean")
+        else:
+            syn = float(features["syn_count"])
+            mean_len = float(features["packet_length_mean"])
+            ack = float(features.get("ack_count", 0.0))
+            if syn >= 5.0 and mean_len <= 60.0 and ack == 0.0:
+                matches.append(
+                    RuleMatch(
+                        rule_id="RULE-PORT-SCAN",
+                        name="Single-Flow Port Scan Probe",
+                        severity="MEDIUM",
+                        description=f"Port scan probe signature: {int(syn)} SYNs with small packet mean {mean_len:.1f} bytes.",
+                        matched_value=f"syn_count={int(syn)}, packet_length_mean={mean_len:.1f}",
+                    )
                 )
-            )
-        elif syn >= 10.0 and (syn_ack >= 10.0 or (ack > 0 and syn / ack >= 10.0)):
-            matches.append(
-                RuleMatch(
-                    rule_id="RULE-SYN-FLOOD",
-                    name="TCP SYN Flood (High SYN/ACK Ratio)",
-                    severity="HIGH",
-                    description=f"Disproportionate SYN-to-ACK ratio: {int(syn)} SYNs to {int(ack)} ACKs.",
-                    matched_value=f"syn_count={int(syn)}, ack_count={int(ack)}, ratio={syn_ack:.2f}",
-                )
-            )
 
-        # RULE-PORT-SCAN from features
-        mean_len = float(features.get("packet_length_mean", 100.0))
-        if syn >= 5.0 and mean_len <= 60.0 and ack == 0.0:
-            matches.append(
-                RuleMatch(
-                    rule_id="RULE-PORT-SCAN",
-                    name="TCP Port Scan Probe",
-                    severity="MEDIUM",
-                    description=f"Port scan probe signature: {int(syn)} SYNs with small packet mean {mean_len:.1f} bytes.",
-                    matched_value=f"syn_count={int(syn)}, packet_length_mean={mean_len:.1f}",
+        # 3. Check RULE-HIGH-RATE-BURST requirements
+        if "flow_packets_per_s" not in features or "flow_bytes_per_s" not in features:
+            unavail_rules.add("RULE-HIGH-RATE-BURST")
+            if "flow_packets_per_s" not in features:
+                unavail_features.add("flow_packets_per_s")
+            if "flow_bytes_per_s" not in features:
+                unavail_features.add("flow_bytes_per_s")
+        else:
+            pps = float(features["flow_packets_per_s"])
+            bps = float(features["flow_bytes_per_s"])
+            if pps >= 50000.0:
+                matches.append(
+                    RuleMatch(
+                        rule_id="RULE-HIGH-RATE-BURST",
+                        name="High Volumetric Packet Rate Burst",
+                        severity="HIGH",
+                        description=f"Extreme packet rate burst: {pps:.1f} pkts/s (threshold: 50,000 pkts/s).",
+                        matched_value=f"flow_packets_per_s={pps:.1f}",
+                    )
                 )
-            )
+            elif bps >= 50000000.0:
+                matches.append(
+                    RuleMatch(
+                        rule_id="RULE-HIGH-RATE-BURST",
+                        name="High Volumetric Byte Rate Burst",
+                        severity="HIGH",
+                        description=f"Extreme byte rate burst: {bps / 1e6:.1f} MB/s (threshold: 50 MB/s).",
+                        matched_value=f"flow_bytes_per_s={bps:.1f}",
+                    )
+                )
 
-        # RULE-HIGH-RATE-BURST from features
-        pps = float(features.get("flow_packets_per_s", 0.0))
-        bps = float(features.get("flow_bytes_per_s", 0.0))
-        if pps >= 50000.0:
-            matches.append(
-                RuleMatch(
-                    rule_id="RULE-HIGH-RATE-BURST",
-                    name="High Volumetric Packet Rate Burst",
-                    severity="HIGH",
-                    description=f"Extreme packet rate burst: {pps:.1f} pkts/s (threshold: 50,000 pkts/s).",
-                    matched_value=f"flow_packets_per_s={pps:.1f}",
-                )
-            )
-        elif bps >= 50000000.0:
-            matches.append(
-                RuleMatch(
-                    rule_id="RULE-HIGH-RATE-BURST",
-                    name="High Volumetric Byte Rate Burst",
-                    severity="HIGH",
-                    description=f"Extreme byte rate burst: {bps / 1e6:.1f} MB/s (threshold: 50 MB/s).",
-                    matched_value=f"flow_bytes_per_s={bps:.1f}",
-                )
-            )
-
-        # RULE-IP-SPOOF-RESERVED if endpoints dict provided
-        if endpoints:
-            src_ip = endpoints.get("src_ip", "").strip()
-            dst_ip = endpoints.get("dst_ip", "").strip()
+        # 4. Check RULE-IP-SPOOF-RESERVED requirements
+        if endpoints and "src_ip" in endpoints and "dst_ip" in endpoints:
+            src_ip = str(endpoints["src_ip"]).strip()
+            dst_ip = str(endpoints["dst_ip"]).strip()
             if src_ip in ("0.0.0.0", "255.255.255.255"):
                 matches.append(
                     RuleMatch(
@@ -404,7 +494,131 @@ class RuleEngine:
                         matched_value=f"src_ip={src_ip}, dst_ip={dst_ip}",
                     )
                 )
+        else:
+            unavail_rules.add("RULE-IP-SPOOF-RESERVED")
+            unavail_features.add("src_ip/dst_ip")
 
+        # 5. Check RULE-PORT-SCAN-MULTI-FLOW requirements
+        if endpoints and "src_ip" in endpoints and "dst_ip" in endpoints and "dst_port" in endpoints:
+            src_ip = str(endpoints["src_ip"]).strip()
+            dst_ip = str(endpoints["dst_ip"]).strip()
+            dst_port = int(endpoints["dst_port"])
+            ts = float(endpoints.get("timestamp", time.monotonic()))
+            syn_c = float(features.get("syn_count", 1.0))
+            ack_c = float(features.get("ack_count", 0.0))
+            corr_res = self.port_scan_correlator.record_probe(
+                source_ip=src_ip,
+                dest_ip=dst_ip,
+                dest_port=dst_port,
+                timestamp=ts,
+                is_syn=syn_c > 0,
+                is_ack=ack_c > 0,
+            )
+            if corr_res and corr_res.is_port_scan:
+                matches.append(
+                    RuleMatch(
+                        rule_id=corr_res.rule_id,
+                        name="Multi-Flow Port Scan Correlation",
+                        severity=corr_res.severity,
+                        description=corr_res.description,
+                        matched_value=f"unique_ports={corr_res.unique_ports_count}, target={corr_res.target_ip}",
+                    )
+                )
+        else:
+            unavail_rules.add("RULE-PORT-SCAN-MULTI-FLOW")
+            unavail_features.add("dst_port")
+
+        # 6. Check RULE-TCP-INVALID-FLAGS requirements (requires packet-level flags)
+        has_syn_fin = bool(features.get("has_syn_fin", False))
+        has_syn_rst = bool(features.get("has_syn_rst", False))
+        has_xmas = bool(features.get("has_xmas_flags", False))
+        has_null = bool(features.get("has_null_flags", False))
+        invalid_flags_count = int(features.get("invalid_flags_count", 0))
+
+        if has_syn_fin:
+            matches.append(
+                RuleMatch(
+                    rule_id="RULE-TCP-INVALID-FLAGS",
+                    name="TCP Invalid Flags (SYN+FIN)",
+                    severity="HIGH",
+                    description="Simultaneous SYN and FIN flags set in packet.",
+                    matched_value="SYN+FIN",
+                )
+            )
+        elif has_syn_rst:
+            matches.append(
+                RuleMatch(
+                    rule_id="RULE-TCP-INVALID-FLAGS",
+                    name="TCP Invalid Flags (SYN+RST)",
+                    severity="HIGH",
+                    description="Simultaneous SYN and RST flags set in packet.",
+                    matched_value="SYN+RST",
+                )
+            )
+        elif has_xmas:
+            matches.append(
+                RuleMatch(
+                    rule_id="RULE-TCP-INVALID-FLAGS",
+                    name="TCP Xmas Scan Flags",
+                    severity="HIGH",
+                    description="Xmas scan flags (FIN+PSH+URG) set in packet.",
+                    matched_value="FIN+PSH+URG",
+                )
+            )
+        elif has_null:
+            matches.append(
+                RuleMatch(
+                    rule_id="RULE-TCP-INVALID-FLAGS",
+                    name="TCP NULL Scan Flags",
+                    severity="HIGH",
+                    description="NULL scan flags (zero control flags) in packet.",
+                    matched_value="NULL",
+                )
+            )
+        elif invalid_flags_count > 0:
+            matches.append(
+                RuleMatch(
+                    rule_id="RULE-TCP-INVALID-FLAGS",
+                    name="TCP Invalid Flag Anomaly",
+                    severity="HIGH",
+                    description=f"Illegal TCP flag combination ({invalid_flags_count} packet(s)).",
+                    matched_value=f"invalid_flags_count={invalid_flags_count}",
+                )
+            )
+        elif not any(k in features for k in ("has_syn_fin", "has_syn_rst", "has_xmas_flags", "has_null_flags", "invalid_flags_count")):
+            # R10 summary features cannot determine per-packet simultaneous flag violations
+            unavail_rules.add("RULE-TCP-INVALID-FLAGS")
+            unavail_features.add("packet_tcp_flags")
+
+        # 7. Check RULE-ICMP-FLOOD requirements
+        proto = int(features.get("protocol", endpoints.get("protocol", 6) if endpoints else 6))
+        if proto == 1:
+            pkt_cnt = int(features.get("packet_count", features.get("flow_packets_per_s", 0.0)))
+            if pkt_cnt >= 20:
+                matches.append(
+                    RuleMatch(
+                        rule_id="RULE-ICMP-FLOOD",
+                        name="ICMP Burst / Flood",
+                        severity="MEDIUM",
+                        description=f"High-volume ICMP traffic burst: {pkt_cnt} packets in single flow.",
+                        matched_value=f"packet_count={pkt_cnt}, protocol=ICMP",
+                    )
+                )
+        else:
+            unavail_rules.add("RULE-ICMP-FLOOD")
+
+        self.last_unavailable_features = sorted(list(unavail_features))
+        self.last_unavailable_rules = sorted(list(unavail_rules))
+
+        return matches, self.last_unavailable_features, self.last_unavailable_rules
+
+    def evaluate_features(
+        self,
+        features: dict[str, float],
+        endpoints: dict[str, Any] | None = None,
+    ) -> list[RuleMatch]:
+        """Evaluate deterministic rules against a feature dictionary, returning matched rules."""
+        matches, _, _ = self.evaluate_features_detailed(features, endpoints=endpoints)
         return matches
 
     def list_rules(self) -> list[dict[str, Any]]:

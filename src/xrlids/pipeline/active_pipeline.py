@@ -224,6 +224,15 @@ class ActiveInferencePipeline:
         is_override = exec_report.safety_check.is_overridden
         override_reason = exec_report.safety_check.reason
 
+        # 8b. Causal State Feedback: Update DQN state history strictly with actual ENFORCED action
+        updated_cooldown = self.safety_gate.get_remaining_cooldown(source_ip, current_step)
+        self.response_service.record_enforced_action(
+            host_id=source_ip,
+            attack_score=hybrid_dec.threat_score,
+            enforced_action=enforced_act,
+            cooldown_remaining=updated_cooldown,
+        )
+
         # 9. Formulate SecurityEvent
         sec_event = SecurityEvent(
             flow_id=fid,
@@ -246,6 +255,7 @@ class ActiveInferencePipeline:
             },
             rule_matches=[asdict(r) for r in rule_matches],
             hybrid_verdict=hybrid_dec.detection_source if hybrid_dec.is_attack else "BENIGN",
+            hybrid_risk_score=float(hybrid_dec.hybrid_risk_score),
             severity=hybrid_dec.severity,
             source_escalated=source_dec.escalate,
             source_status=self.source_tracker.get_host_status(source_ip, timestamp=ts),

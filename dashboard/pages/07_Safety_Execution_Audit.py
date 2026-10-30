@@ -14,6 +14,7 @@ if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from dashboard.session_init import ensure_session_state
+from xrlids.config.protected_assets import AUTHORITATIVE_PROTECTED_REGISTRY
 from xrlids.events.manager import EventManager
 from xrlids.pipeline.active_pipeline import ActiveInferencePipeline
 from xrlids.response.safety import DEFAULT_CRITICAL_HOSTS, Action
@@ -32,7 +33,7 @@ st.divider()
 # High-Level Safety Invariant Cards
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Critical Hosts Protected", len(safety_gate.critical_hosts))
-c2.metric("Action Cooldown Window", f"{int(safety_gate.cooldown_steps)} steps")
+c2.metric("Action Cooldown Window", f"{safety_gate.cooldown_seconds:.0f}s (Time-Based)")
 c3.metric("Blast-Radius Threshold", f"{safety_gate.blast_radius_threshold*100:.0f}%")
 c4.metric("Active Mitigations", len(pipeline.executor.active_mitigations))
 
@@ -49,8 +50,13 @@ with col_invariants:
     4. **Zero Kernel Mutation Invariant:** All autonomous actions operate in advisory dry-run mode. Zero modifications are made to `iptables`, `nftables`, or kernel routing tables.
     """)
 
-    st.markdown("#### Allowlisted Critical Infrastructure")
-    crit_df = pd.DataFrame([{"IP Address / CIDR": h, "Role": "Production Core Asset"} for h in safety_gate.critical_hosts])
+    st.markdown("#### Authoritative Protected Critical Infrastructure")
+    manifest = AUTHORITATIVE_PROTECTED_REGISTRY.get_manifest()
+    crit_df = pd.DataFrame(manifest).rename(columns={
+        "identifier": "Host Identifier",
+        "role": "Infrastructure Role",
+        "description": "Protection Scope",
+    })
     st.dataframe(crit_df, use_container_width=True)
 
 with col_test:

@@ -2,7 +2,7 @@
 
 **Explainable Reinforcement Learning-Based Intrusion Detection and Autonomous Response System**
 
-[![Tests](https://img.shields.io/badge/Tests-658%20Passed-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-691%20Passed-brightgreen)](tests/)
 [![Python](https://img.shields.io/badge/Python-3.12%20%7C%203.14-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-Academic-lightgrey)](LICENSE)
 [![Architecture](https://img.shields.io/badge/Architecture-RF%20Operational%20%2B%20TreeSHAP%20%2B%20DQN%20Advisory-orange)](docs/architecture/SYSTEM_ARCHITECTURE.md)
@@ -25,6 +25,7 @@
 | [Feature Engineering Study](docs/FEATURE_ENGINEERING_STUDY.md) | Empirical evaluation across five feature rungs ($R_4 \to R_{30}$) and 3 datasets |
 | [XGBoost vs Random Forest](docs/RF_VS_XGBOOST.md) | Reconciled empirical cross-dataset comparison and latency analysis |
 | [Autonomous Response Validation](docs/AUTONOMOUS_RESPONSE_VALIDATION.md) | DQN audit, 6D causal state vector, and closed-loop transition verification |
+| [Final Engineering Acceptance](docs/FINAL_ENGINEERING_ACCEPTANCE.md) | Definitive technical acceptance audit, safety rules, and execution evidence |
 | [Exhibition & Viva Guide](docs/academic/VIVA_PREPARATION.md) | 15 detailed questions and answers for academic project defense |
 
 ---
