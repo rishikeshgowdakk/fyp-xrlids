@@ -21,6 +21,12 @@ from xrlids.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
 
+
+def _mark_classifier_estimator(model: xgb.XGBClassifier) -> xgb.XGBClassifier:
+    """Keep sklearn classifier metadata explicit across sklearn tag API changes."""
+    model._estimator_type = "classifier"
+    return model
+
 DEFAULT_XGB_PARAMS: dict[str, Any] = {
     "n_estimators": 100,
     "max_depth": 6,
@@ -91,7 +97,7 @@ class XGBoostDetector:
         if early_stopping_rounds is not None and early_stopping_rounds > 0:
             fit_params["early_stopping_rounds"] = early_stopping_rounds
 
-        self.model = xgb.XGBClassifier(**fit_params)
+        self.model = _mark_classifier_estimator(xgb.XGBClassifier(**fit_params))
 
         formatted_eval_set = None
         if eval_set:
@@ -228,7 +234,7 @@ class XGBoostDetector:
             except Exception as e:
                 logger.warning("Could not read XGBoost metadata from %s: %s", meta_file, e)
 
-        model = xgb.XGBClassifier(**params)
+        model = _mark_classifier_estimator(xgb.XGBClassifier(**params))
         model.load_model(str(model_file))
 
         detector = cls(
