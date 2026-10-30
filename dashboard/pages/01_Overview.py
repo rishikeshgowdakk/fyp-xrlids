@@ -52,7 +52,7 @@ animated_architecture_html = """
   .svg-container {
     width: 100%;
     min-width: 980px;
-    height: 420px;
+    height: 470px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -123,7 +123,7 @@ animated_architecture_html = """
 </head>
 <body>
 <div class="svg-container">
-<svg viewBox="0 0 1000 420" width="100%" height="420" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 1000 470" width="100%" height="470" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="gradIngest" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#1e293b"/>
@@ -160,32 +160,32 @@ animated_architecture_html = """
   <path d="M 280 75 L 320 75" class="flow-line" marker-end="url(#arrow)"/>
   <!-- 3. Feature Extractor to RF and Rules -->
   <path d="M 440 75 L 480 75" class="flow-line" marker-end="url(#arrow)"/>
-  <path d="M 380 105 L 380 155 L 480 155" class="flow-line-rules" marker-end="url(#arrow)"/>
+  <path d="M 380 105 L 380 152 L 480 152" class="flow-line-rules" marker-end="url(#arrow)"/>
   <!-- 4. RF & Rules to Hybrid Arbitration -->
   <path d="M 600 75 L 640 75" class="flow-line" marker-end="url(#arrow)"/>
-  <path d="M 600 155 L 620 155 L 620 90 L 640 90" class="flow-line-rules" marker-end="url(#arrow)"/>
+  <path d="M 600 152 L 620 152 L 620 90 L 640 90" class="flow-line-rules" marker-end="url(#arrow)"/>
   <!-- 5. Hybrid to TreeSHAP -->
   <path d="M 760 75 L 800 75" class="flow-line" marker-end="url(#arrow)"/>
   
   <!-- Row 2 Flow Paths -->
   <!-- TreeSHAP down to StateBuilder -->
-  <path d="M 860 105 L 860 215 L 820 215" class="flow-line" marker-end="url(#arrow)"/>
+  <path d="M 860 105 L 860 255 L 820 255" class="flow-line" marker-end="url(#arrow)"/>
   <!-- StateBuilder to Dueling DQN -->
-  <path d="M 700 215 L 660 215" class="flow-line" marker-end="url(#arrow)"/>
+  <path d="M 700 255 L 660 255" class="flow-line" marker-end="url(#arrow)"/>
   <!-- Dueling DQN to Safety Gate -->
-  <path d="M 540 215 L 500 215" class="flow-line" marker-end="url(#arrow)"/>
+  <path d="M 540 255 L 500 255" class="flow-line" marker-end="url(#arrow)"/>
   <!-- Safety Gate to Advisory Actuator -->
-  <path d="M 380 215 L 340 215" class="flow-line" marker-end="url(#arrow)"/>
+  <path d="M 380 255 L 340 255" class="flow-line" marker-end="url(#arrow)"/>
   <!-- Advisory Actuator to Event Manager -->
-  <path d="M 220 215 L 180 215" class="flow-line" marker-end="url(#arrow)"/>
+  <path d="M 220 255 L 180 255" class="flow-line" marker-end="url(#arrow)"/>
 
   <!-- Row 3: Dispatch & Persistence -->
   <!-- Event Manager to Streamlit Dashboard -->
-  <path d="M 120 245 L 120 315 L 160 315" class="flow-line" marker-end="url(#arrow)"/>
+  <path d="M 120 285 L 120 355 L 160 355" class="flow-line" marker-end="url(#arrow)"/>
   <!-- Event Manager to Asynchronous Worker & PostgreSQL (Dashed Branch) -->
-  <path d="M 120 245 L 120 375 L 380 375" class="flow-line-async" marker-end="url(#arrowGreen)"/>
-  <path d="M 540 375 L 640 375" class="flow-line-async" marker-end="url(#arrowGreen)"/>
-  <path d="M 800 375 L 860 375" class="flow-line-async" marker-end="url(#arrowGreen)"/>
+  <path d="M 120 285 L 120 420 L 380 420" class="flow-line-async" marker-end="url(#arrowGreen)"/>
+  <path d="M 540 420 L 640 420" class="flow-line-async" marker-end="url(#arrowGreen)"/>
+  <path d="M 800 420 L 860 420" class="flow-line-async" marker-end="url(#arrowGreen)"/>
 
   <!-- NODES ROW 1 (Perception & Attribution) -->
   <!-- 1. Input Sources -->
@@ -222,10 +222,10 @@ animated_architecture_html = """
 
   <!-- 4b. Deterministic Rules -->
   <g transform="translate(480, 125)">
-    <rect class="node-box" width="120" height="60" fill="url(#gradIngest)" stroke="#f59e0b" style="animation: pulseGlowAmber 3s infinite;"/>
-    <text class="node-title" x="60" y="24" fill="#fbbf24">RULE ENGINE</text>
-    <text class="node-sub" x="60" y="40">RFC 793/1122</text>
-    <text class="node-sub" x="60" y="52">SYN / ICMP / Scan</text>
+    <rect class="node-box" width="120" height="54" fill="url(#gradIngest)" stroke="#f59e0b" style="animation: pulseGlowAmber 3s infinite;"/>
+    <text class="node-title" x="60" y="21" fill="#fbbf24">RULE ENGINE</text>
+    <text class="node-sub" x="60" y="36">RFC 793/1122</text>
+    <text class="node-sub" x="60" y="48">SYN / ICMP / Scan</text>
   </g>
 
   <!-- 5. Hybrid Arbitration -->
@@ -246,7 +246,7 @@ animated_architecture_html = """
 
   <!-- NODES ROW 2 (Autonomous Response & Safety Gate) -->
   <!-- 7. Causal 6D StateBuilder -->
-  <g transform="translate(700, 185)">
+  <g transform="translate(700, 225)">
     <rect class="node-box" width="120" height="60" fill="url(#gradIngest)" stroke="#818cf8"/>
     <text class="node-title" x="60" y="24" fill="#a5b4fc">6D StateBuilder</text>
     <text class="node-sub" x="60" y="40">[St, ΔSt, N_alert,</text>
@@ -254,7 +254,7 @@ animated_architecture_html = """
   </g>
 
   <!-- 8. Dueling DQN -->
-  <g transform="translate(540, 185)">
+  <g transform="translate(540, 225)">
     <rect class="node-box" width="120" height="60" fill="url(#gradDQN)" stroke="#818cf8" style="animation: pulseGlow 2.5s infinite;"/>
     <text class="node-title" x="60" y="24" fill="#ffffff">DUELING DQN</text>
     <text class="node-sub" x="60" y="40" fill="#e0e7ff">Response Policy</text>
@@ -262,7 +262,7 @@ animated_architecture_html = """
   </g>
 
   <!-- 9. Deterministic Safety Gate -->
-  <g transform="translate(380, 185)">
+  <g transform="translate(380, 225)">
     <rect class="node-box" width="120" height="60" fill="url(#gradSafety)" stroke="#f59e0b" style="animation: pulseGlowAmber 2.5s infinite;"/>
     <text class="node-title" x="60" y="24" fill="#ffffff">SAFETY GATE</text>
     <text class="node-sub" x="60" y="40" fill="#fef3c7">Inviolable Shield</text>
@@ -270,7 +270,7 @@ animated_architecture_html = """
   </g>
 
   <!-- 10. Advisory Actuator -->
-  <g transform="translate(220, 185)">
+  <g transform="translate(220, 225)">
     <rect class="node-box" width="120" height="60" fill="url(#gradIngest)" stroke="#94a3b8"/>
     <text class="node-title" x="60" y="24" fill="#f8fafc">ACTUATOR</text>
     <text class="node-sub" x="60" y="40">Advisory / Dry-Run</text>
@@ -278,7 +278,7 @@ animated_architecture_html = """
   </g>
 
   <!-- 11. Security Event Manager -->
-  <g transform="translate(60, 185)">
+  <g transform="translate(60, 225)">
     <rect class="node-box" width="120" height="60" fill="url(#gradIngest)" stroke="#38bdf8"/>
     <text class="node-title" x="60" y="24" fill="#38bdf8">EVENT MANAGER</text>
     <text class="node-sub" x="60" y="40">Ring Buffer (5k)</text>
@@ -287,36 +287,36 @@ animated_architecture_html = """
 
   <!-- NODES ROW 3 (UI & Persistent Storage Subsystems) -->
   <!-- 12. Streamlit Dashboard -->
-  <g transform="translate(160, 290)">
+  <g transform="translate(160, 330)">
     <rect class="node-box" width="180" height="50" fill="url(#gradIngest)" stroke="#38bdf8"/>
     <text class="node-title" x="90" y="22" fill="#38bdf8">STREAMLIT SOC DASHBOARD</text>
     <text class="node-sub" x="90" y="38">Overview · Live Demo · Benchmarks</text>
   </g>
 
   <!-- 13. Asynchronous Worker (Dashed Non-Blocking Branch) -->
-  <g transform="translate(380, 350)">
+  <g transform="translate(380, 395)">
     <rect class="node-box" width="160" height="50" fill="url(#gradIngest)" stroke="#10b981"/>
     <text class="node-title" x="80" y="20" fill="#34d399">ASYNC QUEUE WORKER</text>
     <text class="node-sub" x="80" y="36">Bounded Queue (10k) · Batch</text>
   </g>
 
   <!-- 14. PostgreSQL Database -->
-  <g transform="translate(640, 350)">
+  <g transform="translate(640, 395)">
     <rect class="node-box" width="160" height="50" fill="url(#gradPG)" stroke="#10b981" style="animation: pulseGlowGreen 3s infinite;"/>
     <text class="node-title" x="80" y="20" fill="#ffffff">POSTGRESQL DATABASE</text>
     <text class="node-sub" x="80" y="36" fill="#a7f3d0">Table: security_events (21 Cols)</text>
   </g>
 
   <!-- 15. Secondary JSONL -->
-  <g transform="translate(860, 350)">
+  <g transform="translate(860, 395)">
     <rect class="node-box" width="120" height="50" fill="url(#gradIngest)" stroke="#64748b"/>
     <text class="node-title" x="60" y="20" fill="#94a3b8">JSONL AUDIT</text>
     <text class="node-sub" x="60" y="36">Independent Log</text>
   </g>
 
   <!-- Clarification Banner in SVG -->
-  <rect x="420" y="325" width="460" height="18" rx="4" fill="#0f172a" stroke="#10b981" stroke-width="0.8"/>
-  <text x="650" y="338" font-size="9" fill="#10b981" font-weight="600" text-anchor="middle">
+  <rect x="420" y="365" width="460" height="18" rx="4" fill="#0f172a" stroke="#10b981" stroke-width="0.8"/>
+  <text x="650" y="378" font-size="9" fill="#10b981" font-weight="600" text-anchor="middle">
     Asynchronous Persistence Branch (O(1) Enqueue) — Non-Blocking &amp; Decoupled from Detection Path
   </text>
 </svg>
@@ -324,7 +324,7 @@ animated_architecture_html = """
 </body>
 </html>
 """
-components.html(animated_architecture_html, height=430)
+components.html(animated_architecture_html, height=480)
 
 st.divider()
 
