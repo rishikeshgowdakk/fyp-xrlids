@@ -52,6 +52,7 @@ class PostgresAsyncPersistenceWorker:
         self.total_db_write_errors: int = 0
         self.last_error: str | None = None
         self.last_error_time: float = 0.0
+        self.last_persisted_time: float = 0.0
         self._last_warn_time: float = 0.0
 
         if auto_start:
@@ -173,6 +174,7 @@ class PostgresAsyncPersistenceWorker:
         inserted, errors = self.event_store.insert_events_batch(batch)
         if errors == 0:
             self.total_persisted += inserted
+            self.last_persisted_time = time.time()
             return True, 0
         else:
             self.total_db_write_errors += errors
@@ -204,4 +206,5 @@ class PostgresAsyncPersistenceWorker:
             "total_db_write_errors": self.total_db_write_errors,
             "last_error": self.last_error,
             "last_error_time": self.last_error_time,
+            "last_persisted_time": self.last_persisted_time,
         }

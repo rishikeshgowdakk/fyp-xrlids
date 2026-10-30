@@ -19,9 +19,9 @@ import threading
 import time
 from typing import Any, Callable
 
-from xrlids.config.database import DatabaseConfig, load_database_config_from_env
+from xrlids.events.database import DatabaseConfig, load_database_config_from_env
+from xrlids.events.postgres import PostgresEventStore
 from xrlids.events.schema import SecurityEvent
-from xrlids.storage.postgres import PostgresEventStore
 from xrlids.storage.worker import PostgresAsyncPersistenceWorker
 from xrlids.utils.logging_utils import get_logger
 
@@ -63,7 +63,7 @@ class EventManager:
         self.db_config = db_config or load_database_config_from_env()
         self.postgres_store: PostgresEventStore | None = postgres_store
         self.async_worker: PostgresAsyncPersistenceWorker | None = None
-        self.storage_mode: str = "memory_jsonl"
+        self.storage_mode: str = "memory"
         self._db_initialized: bool = False
 
         self._initialize_storage(enable_async_worker=enable_async_worker)
@@ -71,7 +71,7 @@ class EventManager:
     def _initialize_storage(self, enable_async_worker: bool = True) -> None:
         """Establish PostgreSQL connection and persistence worker if configured."""
         if not self.db_config.is_postgres_enabled and self.postgres_store is None:
-            self.storage_mode = "memory_jsonl" if self.persist_to_disk else "disabled"
+            self.storage_mode = "memory"
             return
 
         try:
@@ -95,13 +95,13 @@ class EventManager:
             else:
                 if self.db_config.is_postgres_strictly_required:
                     raise ConnectionError(f"PostgreSQL strictly required by configuration but unreachable: {msg}")
-                self.storage_mode = "memory_jsonl"
-                logger.info("PostgreSQL unreachable (%s); EventManager running in memory_jsonl mode.", msg)
+                self.storage_mode = "memory"
+                logger.info("PostgreSQL unreachable (%s); EventManager running in memory mode.", msg)
         except Exception as exc:
             if self.db_config.is_postgres_strictly_required:
                 raise
-            self.storage_mode = "memory_jsonl"
-            logger.warning("PostgreSQL initialization bypassed: %s. Using memory_jsonl fallback.", exc)
+            self.storage_mode = "memory"
+            logger.warning("PostgreSQL initialization bypassed: %s. Using memory fallback.", exc)
 
     def subscribe(self, callback: Callable[[SecurityEvent], None]) -> None:
         """Register a subscriber callback for real-time event notifications."""
@@ -276,6 +276,7 @@ class EventManager:
                 "postgres_queue_size": 0,
                 "postgres_dropped_events": 0,
                 "postgres_errors": 0,
+                "postgres_last_persisted_time": 0.0,
             }
 
             if self.async_worker is not None:
@@ -284,6 +285,7 @@ class EventManager:
                 stats["postgres_queue_size"] = worker_metrics["current_queue_size"]
                 stats["postgres_dropped_events"] = worker_metrics["total_dropped_queue_full"]
                 stats["postgres_errors"] = worker_metrics["total_db_write_errors"]
+                stats["postgres_last_persisted_time"] = worker_metrics["last_persisted_time"]
             elif self.postgres_store is not None and self.storage_mode == "postgres":
                 stats["postgres_persisted_events"] = self.total_events
 

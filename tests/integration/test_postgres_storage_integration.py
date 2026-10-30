@@ -310,9 +310,9 @@ def test_postgres_database_outage_resilience():
     ok = bad_store.insert_event(ev)
     assert ok is False
 
-    # 3. EventManager with auto mode falls back to memory_jsonl
+    # 3. EventManager with auto mode falls back to memory mode
     mgr = EventManager(db_config=bad_cfg, persist_to_disk=False)
-    assert mgr.storage_mode == "memory_jsonl"
+    assert mgr.storage_mode == "memory"
     # Pipeline publish still succeeds into ring buffer
     mgr.publish(ev)
     assert len(mgr._buffer) == 1

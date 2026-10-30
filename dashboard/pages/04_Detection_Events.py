@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from pathlib import Path
 import sys
 import pandas as pd
@@ -25,10 +26,30 @@ st.title("🚨 Detection & Security Events")
 st.markdown("Detailed inspection of security events produced by Random Forest inference, deterministic protocol rules, and autonomous response decisions.")
 
 stats = event_mgr.get_stats()
-if stats.get("postgres_active"):
-    st.success(f"🟢 **Storage Backend: PostgreSQL Active** — {stats.get('postgres_persisted_events', 0)} events persisted to database (queue size: {stats.get('postgres_queue_size', 0)}).")
+is_pg = bool(stats.get("postgres_active", False))
+mode = str(stats.get("storage_mode", "memory"))
+persisted = int(stats.get("postgres_persisted_events", 0))
+queue_sz = int(stats.get("postgres_queue_size", 0))
+errors = int(stats.get("postgres_errors", 0))
+last_time_val = float(stats.get("postgres_last_persisted_time", 0.0))
+last_persisted_str = (
+    datetime.fromtimestamp(last_time_val, tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    if last_time_val > 0
+    else "N/A"
+)
+
+if is_pg:
+    st.success(
+        f"🟢 **Storage Backend: PostgreSQL Connected** | Mode: `{mode}` | "
+        f"Persisted: **{persisted}** | Pending Queue: **{queue_sz}** | Failed Writes: **{errors}** | "
+        f"Last Persistence: `{last_persisted_str}`"
+    )
 else:
-    st.info("⚪ **Storage Backend: In-Memory Ring Buffer + JSONL Audit File** — Standard offline audit logging active.")
+    st.info(
+        f"⚪ **Storage Backend: In-Memory Ring Buffer + JSONL Audit File** | "
+        f"PostgreSQL: `Disconnected` | Mode: `{mode}` | "
+        f"Local Buffer: **{stats.get('buffer_size', 0)} events**"
+    )
 
 st.divider()
 

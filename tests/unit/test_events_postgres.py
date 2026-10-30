@@ -131,7 +131,7 @@ def test_event_manager_offline_memory_and_jsonl_default(tmp_path):
         db_config=cfg,
         enable_async_worker=False,
     )
-    assert mgr.storage_mode == "memory_jsonl"
+    assert mgr.storage_mode == "memory"
     assert mgr.postgres_store is None
 
     # Publish events

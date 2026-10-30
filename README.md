@@ -100,9 +100,27 @@ pip install -e ".[dev]"
 ```bash
 .venv/bin/pytest tests/ -v -ra --tb=short
 ```
-*Expected Result:* **658 passed, 0 failed, 100% pass rate**.
+*Expected Result:* **704 passed, 0 failed, 100% pass rate**.
 
-### 3. Launch Operational Dashboards
+### 3. Optional: PostgreSQL Persistent Event Storage
+By default, XRL-IDARS operates fully offline with an in-memory ring buffer and append-only JSONL audit logging (`XRLIDS_STORAGE_MODE=memory` or `auto`).
+To enable persistent PostgreSQL event storage across application restarts:
+```bash
+# Launch PostgreSQL via Docker Compose:
+docker compose up -d postgres
+
+# Or configure environment variables for an existing PostgreSQL instance:
+export POSTGRES_HOST=localhost
+export POSTGRES_PORT=5432
+export POSTGRES_DB=xrlids
+export POSTGRES_USER=xrlids_user
+export POSTGRES_PASSWORD=your_password
+export XRLIDS_STORAGE_MODE=auto
+
+# See detailed documentation in docs/database/POSTGRES_SETUP.md
+```
+
+### 4. Launch Operational Dashboards
 ```bash
 # Primary Operational Command Center (Streamlit across 8 dedicated modules):
 .venv/bin/streamlit run dashboard/streamlit_app.py --server.port 8501
