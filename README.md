@@ -13,7 +13,7 @@ Essential documentation, presentation scripts, and defense runbooks for final ye
 | Document | Purpose & Key Contents |
 |----------|------------------------|
 | [🛡️ **Attack-Family & Response Audit**](docs/ATTACK_FAMILY_AND_RESPONSE_AUDIT.md) | **Audit Addendum**: Forensic audit of binary vs. family detection, 6D DQN causal state, and advisory mode |
-| [🧪 **Comprehensive Test Report**](docs/TEST_REPORT.md) | **573 Passing Tests**: Test suite breakdown, microsecond latencies, SHA-256 model verification, 100% pass |
+| [🧪 **Comprehensive Test Report**](docs/TEST_REPORT.md) | **584 Passing Tests**: Complete test suite breakdown, microsecond latencies, SHA-256 model verification, 100% pass |
 | [📈 **Research Evaluation Report**](docs/RESEARCH_EVALUATION.md) | **Empirical Findings**: Multi-model metrics, per-family error stratification, and CostOptimal vs. DQN baseline |
 | [📝 **Implementation & Continuation Log**](docs/IMPLEMENTATION_LOG.md) | **Forensic Audit Log**: Chronological actions, commit history, technology evaluations, and decisions |
 | [🏛️ **Authoritative Architecture**](docs/ARCHITECTURE.md) | **Core System Blueprint**: 12-section architecture, live RF + Rules vs. offline LSTM/fusion, data flows, and safety constraints |
@@ -284,7 +284,7 @@ pip install -e .[dev]
 
 ### 2. Verify Installation (Test Suite)
 
-Run the full 573-test verification suite to confirm everything is working:
+Run the full 584-test verification suite to confirm everything is working:
 
 ```bash
 ./run.sh test
@@ -292,7 +292,7 @@ Run the full 573-test verification suite to confirm everything is working:
 .venv/bin/pytest -q
 ```
 
-All 573 tests across unit, data, integration, semantic contract, and model test suites pass with 0 failures (100% pass rate).
+All 584 tests across unit, data, integration, semantic contract, capture, inference, and model test suites pass with 0 failures (100% pass rate).
 
 ### 3. Quick Demo — PCAP Replay
 

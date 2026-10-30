@@ -4,14 +4,14 @@
 - **Repository:** `/home/rishikesh/Desktop/fyp-xrlids` (`rishikeshgowdakk/fyp-xrlids`)  
 - **Audit Date:** 2026-10-30  
 - **Lead Systems Engineer:** Senior ML & Network Security Systems Engineer  
-- **Audited Commit:** `5450b2b` (branch `main`, up to date with `origin/main`)  
-- **Environment:** Linux 7.0.0-42-generic (x86_64) · Python 3.14.4 · PyTorch 2.14.0+cpu · Scikit-Learn 1.9.1 · SHAP 0.52.0  
+- **Audited Commit:** `5250629` (branch `engineering/theme-ui`)  
+- **Environment:** Linux 7.0.0-42-generic (x86_64) · Python 3.14.4 · PyTorch 2.14.0+cpu · Scikit-Learn 1.9.1 · SHAP 0.52.0 · Scapy 2.8.0  
 
 ---
 
 ## Executive Summary
 
-This acceptance audit evaluates the architecture alignment, model integrity, preprocessor compatibility, live feature semantics, deterministic rule enforcement, explainability truthfulness, and reinforcement-learning response policy of XRL-IDARS.
+This acceptance audit evaluates the architecture alignment, model integrity, preprocessor compatibility, live feature semantics, deterministic rule enforcement, explainability truthfulness, reinforcement-learning response policy, and the 10K Replay Lab of XRL-IDARS.
 
 Every metric, latency figure, and evaluation finding in this document links directly to reproducible code or disk artifacts in `/home/rishikesh/Desktop/fyp-xrlids`. Zero synthetic values or unverified performance claims are accepted.
 
@@ -22,15 +22,16 @@ Every metric, latency figure, and evaluation finding in this document links dire
 | **1. Model & Preprocessor Integrity** | **PASS** | Exact 64-character SHA-256 matches for all 9 canonical models. Preprocessor parameter hashes (`dict_hash`) match training metadata across all 3 datasets. |
 | **2. UNSW-NB15 R4 Provenance** | **PASS** | `EXP-P1-UNSWNB15-R10-MULTI-001/preprocessor.joblib` contains exactly 4 features matching `R4_FEATURES`. Evaluator correctly applies R4 contract ($N=4$); directory naming is a historical milestone label. |
 | **3. Contract Enforcement (R10 / R4)** | **PASS** | Strict schema validation enforced. Missing features, non-numeric values, NaN, and $\pm\infty$ fail closed with validation errors. No silent zero-filling. |
-| **4. Live Feature Semantics** | **PASS** | Bidirectional flow builder matches D-006 policy (FIN/RST termination or 120s timeout). Features strictly match R10 mathematical definitions. Completed-flow timing limitations are documented. |
+| **4. Live Feature Semantics** | **PASS** | Bidirectional flow builder matches D-006 policy (FIN/RST termination or 120s timeout). Features strictly match R10 mathematical definitions within $\text{atol} \le 10^{-4}$. Completed-flow timing limitations are documented. |
 | **5. Deterministic Rule Detection** | **PASS** | 5 deterministic rules implemented in `src/xrlids/rules/engine.py`. Rule alerts are decoupled from RF confidence; detection source explicitly identifies `RULE`, `RF`, `HYBRID`, or `NONE`. |
 | **6. TreeSHAP Explainability** | **PASS** | Genuine TreeSHAP attributions computed via `shap.TreeExplainer` on loaded Random Forest models. All mock explanations eliminated. Missing features fail closed with HTTP 400. |
-| **7. DQN Response Policy Evaluation** | **PASS** | Empirical evaluation on 355,865 held-out test flows of CIC-IDS2017 demonstrates statistically significant ($p < 0.001$) cost reduction vs Baselines 0, 1, 2, and 3. |
-| **8. Response Safety & Non-Mutation** | **PASS** | Operational pipeline executes in advisory/dry-run mode by default. Zero host netfilter (`iptables`/`nftables`) or routing mutations occur. |
-| **9. Offline Role of LSTM & Fusion** | **PASS** | Live path routes exclusively through RF. Supervised LSTM and RF-LSTM fusion are retained and evaluated strictly in the offline benchmark suite. |
+| **7. DQN Response Policy Evaluation** | **PASS** | Evaluated on 355,865 held-out test flows. Statistically significant ($p < 0.001$) cost reduction vs heuristic baselines. **Negative Finding Recorded:** Pre-registered practical significance criterion ($\ge 15.0\%$) was **NOT MET** (+11.29% Balanced, +14.10% Aggressive), and zero-parameter `CostOptimalThresholdPolicy` outperformed DQN in 4/6 regimes. |
+| **8. Response Safety & Non-Mutation** | **PASS** | Operational pipeline executes in advisory/dry-run mode by default. Zero host netfilter (`iptables`/`nftables`) or routing mutations occur. Controlled enforcement permitted strictly within isolated lab network namespace (`LAB-ISOLATED-NETNS-01`). |
+| **9. Dual Role of LSTM & Fusion** | **PASS** | Evaluated on held-out test splits (CIC F1=0.9633 LSTM, 0.9745 Fusion). Integrated into streaming inference via `UnifiedInferenceService` with sliding-window $T=5$ history; falls back to RF during initial 4-flow warm-up and activates fusion upon complete 5-flow sequence. |
 | **10. Runtime Mode Distinguishability** | **PASS** | `LIVE`, `PCAP`, `DATASET`, and `SAMPLE` streams carry explicit mode tags, simulated flags, and device discovery isolation. |
-| **11. Test Suite Pass Rate** | **PASS** | 550 passed, 0 failed across all unit, data, model, and integration test suites in `.venv` (100% pass rate). |
+| **11. Test Suite Pass Rate** | **PASS** | **584 passed**, 0 failed, 0 skipped across all unit, data, model, capture, inference, and integration test suites in `.venv` (100% pass rate). |
 | **12. Remote CI Pipeline** | **PASS** | GitHub Actions workflow concluded with `success` on commit `90d16e0` (Run ID `40946354098`, Job `123702632177`). |
+| **13. Labelled 10K Replay Lab** | **PASS** | Replays 400, 1k, 5k, 10k flows from CIC-IDS2017 & CSE-CIC-IDS2018 at 6,716 flows/s with full confusion matrix, DQN action distributions, safety gate overrides, and 27-column audit CSV export. |
 
 ---
 

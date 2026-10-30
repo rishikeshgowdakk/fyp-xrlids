@@ -83,7 +83,10 @@ Legend: ✅ done / verified · 🟡 implemented / empirically observed on partia
 | Dataset audit module | ✅ | `src/xrlids/datasets/audit.py` + tests |
 | CLI | ✅ | `src/xrlids/cli.py` |
 | Report generation from artifacts | ✅ | `scripts/phase1/generate_reports.py` (dynamic git hashes, live manifests) |
-| Test suite | ✅ | 573 unit, data, integration, and model tests passing (0 failures); full Phase 1, Phase 2, Phase 3, and Replay Lab verification suite |
+| Test suite | ✅ | 584 unit, data, integration, model, capture, and pipeline tests passing (0 failures); complete Phase 1, Phase 2, Phase 3, Replay Lab, and Scapy capture & unified inference verification suite |
+| Scapy Capture & PCAP Ingestion Service | ✅ Implemented & Tested | `src/xrlids/capture/scapy_service.py` (thread-safe, non-blocking queue, BPF filtering, error accounting, throughput counters) + `tests/unit/test_scapy_capture.py` (5 tests passing) |
+| Unified Inference & Sequence Buffer Service | ✅ Implemented & Tested | `src/xrlids/models/inference_service.py` (thread-safe session sliding-window $T=5$ buffer, dynamic model loading, RF/LSTM/Fusion dispatch, latency instrumentation) + `tests/unit/test_unified_inference_service.py` (4 tests passing) |
+| End-to-End Pipeline Integration Test | ✅ Implemented & Tested | `tests/integration/test_end_to_end_scapy_pipeline.py` (2 tests passing: full Scapy PCAP → LiveFlowBuilder → UnifiedInference → TreeSHAP → StateBuilder → DuelingQNetwork → DeterministicSafetyGate causal loop, plus 5-flow LSTM sequence fusion activation) |
 | SHAP explainability module | ✅ | `src/xrlids/explainability/shap_analysis.py` + tests |
 | Cross-dataset transfer module | ✅ | `src/xrlids/experiments/transfer.py` + `scripts/phase1/run_transfer.py` + configs (6 directions executed) |
 | Pure-Python PCAP reader / writer | ✅ | `src/xrlids/demo/pcap.py` (zero external C-dependencies) + tests |

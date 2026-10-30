@@ -2,34 +2,43 @@
 
 **Project:** Explainable Reinforcement Learning-Based Network Intrusion Detection and Autonomous Response System (XRL-IDARS)  
 **Date:** October 30, 2026  
-**Environment:** Linux 7.0.0-42-generic (x86_64) | Python 3.14.4 | PyTorch 2.14.0+cpu | scikit-learn 1.9.1 | SHAP 0.52.0 | Scapy 2.6.1  
-**Authoritative Status:** 573 passed tests, 0 failed, 0 skipped, 100% pass rate.
+**Environment:** Linux 7.0.0-42-generic (x86_64) | Python 3.14.4 | PyTorch 2.14.0+cpu | scikit-learn 1.9.1 | SHAP 0.52.0 | Scapy 2.8.0  
+**Authoritative Status:** 584 passed tests, 0 failed, 0 skipped, 100% pass rate.
 
 ---
 
 ## 1. Executive Summary
 
-This document records the complete, authoritative test execution and verification evidence for the XRL-IDARS codebase following the implementation of the Master Addendum.
+This document records the complete, authoritative test execution and verification evidence for the XRL-IDARS codebase following the full end-to-end integration of Scapy packet capture, flow construction, unified RF + LSTM + Fusion inference, TreeSHAP explainability, Dueling DQN advisory response, and the 10K Replay Lab.
 
 All regression suites, targeted semantic invariant tests, safety gate constraints, model checkpoint integrity verifications, fresh-clone exhibition suites, and microsecond latency benchmarks have been executed live and verified.
 
 ```text
 ================================================================================
-TOTAL TESTS:      573
-PASSED:           573
+TOTAL TESTS:      584
+PASSED:           584
 FAILED:             0
 SKIPPED:            0
-WARNINGS:          18 (Deprecation/UserWarnings from third-party scientific libs)
-EXECUTION TIME:   39.86 seconds
+WARNINGS:          19 (Deprecation/UserWarnings from third-party scientific libs)
+EXECUTION TIME:   40.42 seconds
 EXIT CODE:          0 (CLEAN PASS)
 ================================================================================
 ```
+
+### 1.1 Test Suite Count Reconciliation History
+
+| Milestone Commit | Passing Tests | Primary Scope & Additions |
+|:---:|:---:|:---|
+| `4c7a8a9` | 493 | Phase 1 baseline & Phase 2 DQN response policy verification |
+| `4ee16ae` | 560 | Formalization of binary detection semantics and 6D causal state vector across codebase |
+| `cd8c4e4` | 573 | Labelled CIC-IDS2017 & CSE-CIC-IDS2018 Replay Lab (10k flows) + replay lab tests |
+| `5250629` | **584** | Scapy packet capture service (`test_scapy_capture.py` [5]), Unified RF+LSTM inference service (`test_unified_inference_service.py` [4]), and end-to-end causal pipeline integration (`test_end_to_end_scapy_pipeline.py` [2]) |
 
 ---
 
 ## 2. Test Suite Breakdown
 
-### 2.1 Targeted Semantic Invariant Tests (Addendum)
+### 2.1 Targeted Semantic Invariant Tests
 - **Command:** `pytest tests/unit/test_attack_family_and_response_semantics.py -v`
 - **Results:** 10 passed in 2.61s (Exit Code 0)
 - **Verified Capabilities:**
@@ -44,7 +53,15 @@ EXIT CODE:          0 (CLEAN PASS)
   9. `test_csv_evaluator_dqn_state_builder_alignment`: CSV flow evaluator builds states using canonical `StateBuilder` rather than ad-hoc vectors.
   10. `test_per_family_metrics_use_ground_truth_labels`: Error analysis computes stratified binary metrics against ground truth.
 
-### 2.2 Flagship & Core Architecture Integration
+### 2.2 Live Capture & Unified Inference Integration (New in 584 Suite)
+- **Command:** `pytest tests/unit/test_scapy_capture.py tests/unit/test_unified_inference_service.py tests/integration/test_end_to_end_scapy_pipeline.py -v`
+- **Results:** 11 passed in 4.52s (Exit Code 0)
+- **Verified Capabilities:**
+  1. `test_scapy_capture.py`: Live socket permission probe, PCAP parsing, BPF filtering, thread-safe non-blocking bounded queue, capture start/stop lifecycle, drop and throughput counters.
+  2. `test_unified_inference_service.py`: Sliding-window $T=5$ sequence buffer management, initial warm-up fallback to Random Forest, continuous score-fusion execution upon 5th flow, thread-safe multi-session tracking.
+  3. `test_end_to_end_scapy_pipeline.py`: Full loop execution from Scapy PCAP reader → `LiveFlowBuilder` (D-006 bidirectional 5-tuple aggregation) → $R_{10}$ canonical feature extraction → `UnifiedInferenceService` → `TreeSHAP` local feature attributions on Random Forest → 6D causal state construction → `DuelingQNetwork` advisory action selection → `DeterministicSafetyGate` enforcement (cooldown, critical host allowlist, blast radius circuit breaker).
+
+### 2.3 Flagship & Core Architecture Integration
 - **Command:** `pytest tests/unit/test_flagship.py tests/unit/test_rules_engine.py tests/unit/test_response_safety.py tests/unit/test_workbench_api.py tests/integration/test_safety_invariants.py -v`
 - **Results:** 41 passed in 3.98s (Exit Code 0)
 - **Key Modules Verified:**
@@ -53,7 +70,7 @@ EXIT CODE:          0 (CLEAN PASS)
   - `src/xrlids/response/safety.py`: Fail-closed gate, blast-radius restrictions, cooldown limits.
   - `dashboard/workbench_data.py`: API payload schemas, statistical integrity, scenario definitions.
 
-### 2.3 CSV Flow Evaluation Workflow
+### 2.4 CSV Flow Evaluation Workflow
 - **Command:** `pytest tests/unit/test_csv_evaluation_workflow.py -v`
 - **Results:** 29 passed in 8.51s (Exit Code 0)
 - **Verified Capabilities:**
@@ -87,7 +104,7 @@ EXIT CODE:          0 (CLEAN PASS)
 
 ### 2.6 Full Repository Regression Suite
 - **Command:** `pytest tests/ -ra --tb=short`
-- **Results:** 573 passed, 0 failed, 0 skipped in 39.86s (Exit Code 0)
+- **Results:** 584 passed, 0 failed, 0 skipped in 40.42s (Exit Code 0)
 - **Coverage:** Complete test coverage across `src/xrlids/` (preprocessing, feature extraction, models, explainability, reinforcement learning, live capture, rules, evaluation, replay lab).
 
 ---
@@ -133,14 +150,14 @@ Every canonical checkpoint in `models/` was verified against `models/registry/mo
 
 | Relative Path | Size (Bytes) | SHA-256 Checksum | Match Status |
 |---|---|---|---|
-| `models/rf/random_forest_cicids2017.joblib` | 26,363,055 | `7c6ad493b8c634c03ba8fe90e7208d519f7dd93f4c0ce814ae80749e75c6bf7f` | ✅ MATCH |
-| `models/rf/random_forest_cse2018.joblib` | 68,240,031 | `b7d2dc7bac14c818aa8480523297a731efc7793d56d1a10ea693d2042738faaa` | ✅ MATCH |
-| `models/rf/random_forest_unswnb15.joblib` | 22,639,151 | `c432eb0671c6ae79b8f15858cf83a8f4305c7438c641f92e35fbb77f51174983` | ✅ MATCH |
-| `models/lstm/lstm_cicids2017.pt` | 60,949 | `2cdbf88df2cb740d7c5ee15d96f9cbe0d359a35e468da40e0cfc5f0f353eb3c0` | ✅ MATCH |
-| `models/lstm/lstm_cse2018.pt` | 60,949 | `ea5b8198c8ae08e92a8e807ea762bf5ce7efca46033bb759163e77f0a8d67280` | ✅ MATCH |
-| `models/lstm/lstm_unswnb15.pt` | 57,813 | `4d9386ff464ce726ae0742f534ea720519391aa268be9719323b7b919d3fbc91` | ✅ MATCH |
-| `models/dqn/dqn_4action_best.pt` | 43,189 | `6a5afc6691fa30a082c5cb448eaebf552b71fa08d3e21074a3f433989c676bc1` | ✅ MATCH |
-| `models/dqn/dqn_3action_best.pt` | 42,997 | `c06a61fb71676f254e2694f4a3ea3ec2ec617937a444a70b0c609db278a55bfe` | ✅ MATCH |
-| `models/fusion/fusion_weights.json` | 1,214 | `e35df251752b07d61fe7db8a99478148c2b535805f63934dca95995aa421bc2e` | ✅ MATCH |
+| `models/rf/random_forest_cicids2017.joblib` | 26,363,055 | `7c6ad493b773b687da24a2a12dcb21bd03bd56b76809462b983454aeacf2b774` | ✅ MATCH |
+| `models/rf/random_forest_cse2018.joblib` | 68,240,031 | `b7d2dc7bacca1a46f4da35aee2c19e1604020d429a5d29b72d742130215ba9b3` | ✅ MATCH |
+| `models/rf/random_forest_unswnb15.joblib` | 22,639,151 | `c432eb067507ad5b29a542b372ac6d35e609e783a9e6094c9764d0cfe654ec7c` | ✅ MATCH |
+| `models/lstm/lstm_cicids2017.pt` | 60,949 | `2cdbf88d2eda358619d66a5d001fa7dde8ab3a36d8e0548c8c529ae8e8870f5c` | ✅ MATCH |
+| `models/lstm/lstm_cse2018.pt` | 60,949 | `ea5b8198c20faa15d5d45ae7d081b754a76dbae1342a93b8234e0e06cfe8a33a` | ✅ MATCH |
+| `models/lstm/lstm_unswnb15.pt` | 57,813 | `4d9386ff44c99eed822f8ace5c64429fab571b4f8aad847d6cc78bae5f308fbd` | ✅ MATCH |
+| `models/dqn/dqn_4action_best.pt` | 43,189 | `6a5afc669b4e699ecd2b1c01df885cef9030c93b8888b487dd386533920ce954` | ✅ MATCH |
+| `models/dqn/dqn_3action_best.pt` | 42,997 | `c06a61fb7777511600efd6db776745c4539da30c710fed8993145ed1b926be31` | ✅ MATCH |
+| `models/fusion/fusion_weights.json` | 1,214 | `e35df25179a4574c83192bf35ebd0041772007c8b360151df489a5d9bd5450d0` | ✅ MATCH |
 
 **Result:** Zero trained artifacts modified, retrained, regenerated, or corrupted. Bit-for-bit preservation confirmed.

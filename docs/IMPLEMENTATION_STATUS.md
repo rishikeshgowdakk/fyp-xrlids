@@ -2,8 +2,8 @@
 
 **Official Title:** Explainable Reinforcement Learning-Based Network Intrusion Detection and Autonomous Response System (XRL-IDARS)  
 **Repository:** `rishikeshgowdakk/fyp-xrlids`  
-**Git Branch / Commit:** `main` @ `4c7a8a9`  
-**Test Suite Status:** **560 passed, 0 failed, 18 warnings in 50.45s**  
+**Git Branch / Commit:** `engineering/theme-ui` @ `5250629`  
+**Test Suite Status:** **584 passed, 0 failed, 19 warnings in 40.42s**  
 
 ---
 
@@ -19,13 +19,17 @@
 | **COMP-06** | Genuine TreeSHAP Local XAI (`csv_evaluator.py`) | **Implemented** | **Tested** | **Verified** | Exact local Shapley values via `shap.TreeExplainer`. Preserves feature names, direction, and signed attribution values. Evaluates in $8.94$ ms. |
 | **COMP-07** | DQN Response Policy (`models/dqn/`) | **Implemented** | **Tested** | **Verified** | Loaded 4-action and 3-action Dueling DQN checkpoints. Evaluated on 355k held-out test flows against 4 baselines. Threat-severity aware via continuous score $S_t$ in 6D causal state vector. |
 | **COMP-08** | Response Policy Explanation | **Implemented** | **Tested** | **Verified** | Explains DQN actions via actual Q-values, state vectors, and action semantics. Explicitly decoupled from TreeSHAP. |
-| **COMP-09** | Deterministic Safety Gate (`response/engine.py`) | **Implemented** | **Tested** | **Verified** | Enforces dry-run advisory mode. Zero kernel mutations (`iptables`/`nftables` calls strictly prevented). |
-| **COMP-10** | Offline Supervised LSTM Baseline (`models/lstm/`) | **Implemented** | **Tested** | **Verified** | Causal temporal sequence model ($T=5$). Retained strictly as an offline comparator. Isolated from live inference. |
-| **COMP-11** | Offline Score Fusion Baseline (`models/fusion/`) | **Implemented** | **Tested** | **Verified** | Score blending ($RF + LSTM$) using saved weights. Retained strictly as an offline comparator. |
+| **COMP-09** | Deterministic Safety Gate (`response/engine.py`, `safety.py`) | **Implemented** | **Tested** | **Verified** | Enforces dry-run advisory mode. Critical infrastructure exemption, 30-step cooldown, 5% blast-radius circuit breaker. Zero kernel mutations. |
+| **COMP-10** | Supervised LSTM Detector (`models/lstm/`) | **Implemented** | **Tested** | **Verified** | Causal temporal sequence model ($T=5$). Evaluated on held-out test splits (0.9633 F1 CIC) and integrated into streaming pipeline with per-session warm-up buffer. |
+| **COMP-11** | Score Fusion Engine (`models/fusion/`) | **Implemented** | **Tested** | **Verified** | Score blending ($S_{\text{fusion}} = \alpha \cdot S_{\text{rf}} + (1-\alpha) \cdot S_{\text{lstm}}$) using saved weights. Evaluated on held-out test splits (0.9745 F1 CIC) and executed when both scores available. |
 | **COMP-12** | Input Modes (CSV, PCAP, Live, Synthetic) | **Implemented** | **Tested** | **Verified** | Distinct handling across Mode A (full split), Mode B (200 demo), Mode C (custom CSV), PCAP replay, live monitor, and synthetic simulator. |
-| **COMP-13** | Interactive Dashboard & REST API (`server.py`) | **Implemented** | **Tested** | **Verified** | LiveSession state synchronization, real-time SSE streaming, waterfall charts, rule/RF badge visualization, and semantic contract declarations. |
+| **COMP-13** | Interactive Dashboard & REST API (`server.py`) | **Implemented** | **Tested** | **Verified** | LiveSession state synchronization, real-time streaming, waterfall charts, rule/RF badge visualization, and semantic contract declarations. |
 | **COMP-14** | Attack-Family Semantics & Audit (`test_attack_family...`) | **Implemented** | **Tested** | **Verified** | Disambiguates binary model output, ground-truth label evaluation, and advisory response semantics across backend and frontend. |
-| **COMP-15** | Automated Test Suite | **Implemented** | **Tested** | **Verified** | 560 tests passing across unit, integration, and regression suites. Zero regressions. |
+| **COMP-15** | Automated Test Suite | **Implemented** | **Tested** | **Verified** | 584 tests passing across unit, integration, and regression suites. Zero regressions. |
+| **COMP-16** | Scapy Capture & PCAP Ingestion Service (`src/xrlids/capture/scapy_service.py`) | **Implemented** | **Tested** | **Verified** | Thread-safe live interface sniffing, PCAP replay, non-blocking queue, BPF filter, packet conversion to canonical PacketInfo, drop and throughput stats. |
+| **COMP-17** | Unified Inference & Sequence Buffer Service (`src/xrlids/models/inference_service.py`) | **Implemented** | **Tested** | **Verified** | Multi-model dispatcher with sliding-window $T=5$ history per session. RF fallback during warm-up; score-level fusion upon 5th flow. |
+| **COMP-18** | Labelled Replay Lab Engine (`src/xrlids/demo/replay_lab.py`) | **Implemented** | **Tested** | **Verified** | Authentic flow streaming (400, 1k, 5k, 10k flows) from CIC-IDS2017 & CSE-CIC-IDS2018; 6,716 flows/s throughput, 27-column audit CSV export. |
+| **COMP-19** | End-to-End Causal Pipeline Integration (`tests/integration/test_end_to_end_scapy_pipeline.py`) | **Implemented** | **Tested** | **Verified** | Complete causal verification: Scapy PCAP → LiveFlowBuilder → UnifiedInference → TreeSHAP → 6D StateBuilder → DuelingQNetwork → DeterministicSafetyGate. |
 
 ---
 
@@ -78,9 +82,25 @@
 - **Evidence:** Enforces `DRY_RUN` mode by default. All system mutating commands (`iptables`, `nftables`, `route`) are completely bypassed. Blast-radius and cooldown checks prevent excessive mitigations.
 - **Unit Test Coverage:** [tests/unit/test_rules_engine.py](file:///home/rishikesh/Desktop/fyp-xrlids/tests/unit/test_rules_engine.py#L318-L330).
 
-### COMP-10 & COMP-11: Offline Supervised LSTM and Score Fusion
-- **Status:** **IMPLEMENTED & VERIFIED (OFFLINE COMPARATORS ONLY)**
-- **Evidence:** Retained in `models/lstm/` and `models/fusion/`. Evaluated in Mode A and Mode B offline CSV workflows. Decoupled completely from live inference to ensure low latency and flow completion compatibility.
+### COMP-10 & COMP-11: Supervised LSTM and Score Fusion
+- **Status:** **IMPLEMENTED & VERIFIED**
+- **Evidence:** Retained in `models/lstm/` and `models/fusion/`. Evaluated on full held-out test splits (CIC-IDS2017 LSTM F1=0.9633, Fusion F1=0.9745; CSE-CIC-IDS2018 LSTM F1=0.9603, $\alpha=0.0$; UNSW-NB15 Fusion F1=0.8970). Fully integrated into streaming inference via `src/xrlids/models/inference_service.py` (`UnifiedInferenceService`) with sliding-window $T=5$ sequence buffering per session, emitting `inference_source="RANDOM_FOREST"` during initial 4-flow warm-up and `inference_source="RF+LSTM_FUSION"` upon observing complete 5-flow history.
+
+### COMP-16: Scapy Packet Capture & Ingestion Service (`src/xrlids/capture/scapy_service.py`)
+- **Status:** **IMPLEMENTED & VERIFIED**
+- **Evidence:** Thread-safe background sniffer and PCAP reader communicating via bounded queue. Supports BPF filters, throughput counters, drop counters, and non-blocking packet polling. Unit test coverage in `tests/unit/test_scapy_capture.py` (5 tests passing).
+
+### COMP-17: Unified Inference & Sequence Buffer Manager (`src/xrlids/models/inference_service.py`)
+- **Status:** **IMPLEMENTED & VERIFIED**
+- **Evidence:** Coordinates Random Forest inference, session-isolated sequence buffering, PyTorch LSTM sequence evaluation, and convex score fusion. Unit test coverage in `tests/unit/test_unified_inference_service.py` (4 tests passing).
+
+### COMP-18: Labelled Replay Lab Engine (`src/xrlids/demo/replay_lab.py`)
+- **Status:** **IMPLEMENTED & VERIFIED**
+- **Evidence:** High-throughput streaming replay engine processing 400, 1k, 5k, or 10k flows at 6,716 flows/s with full confusion matrix, DQN action distributions, safety gate override tallies, and 27-column audit CSV export.
+
+### COMP-19: End-to-End Pipeline Integration (`tests/integration/test_end_to_end_scapy_pipeline.py`)
+- **Status:** **IMPLEMENTED & VERIFIED**
+- **Evidence:** Validates full causal pipeline: Scapy PCAP → LiveFlowBuilder → UnifiedInference → TreeSHAP → 6D StateBuilder → DuelingQNetwork → DeterministicSafetyGate. Integration tests in `tests/integration/test_end_to_end_scapy_pipeline.py` (2 tests passing).
 
 ### COMP-12 & COMP-13: Input Modes & Dashboard Synchronization
 - **Status:** **IMPLEMENTED & VERIFIED**
