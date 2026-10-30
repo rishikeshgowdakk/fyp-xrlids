@@ -1,0 +1,381 @@
+{
+  "status": "VALIDATED",
+  "primary_benchmark": "cicids2017",
+  "evaluated_at": "2026-10-30 01:28:44 UTC",
+  "benchmarks": {
+    "cicids2017": {
+      "benchmark": "cicids2017",
+      "dataset_key": "cicids2017",
+      "contract": "R10",
+      "features": [
+        "flow_duration_ms",
+        "flow_packets_per_s",
+        "flow_bytes_per_s",
+        "packet_length_mean",
+        "packet_length_std",
+        "syn_count",
+        "ack_count",
+        "rst_count",
+        "fin_count",
+        "syn_ack_ratio"
+      ],
+      "champion": "Random Forest",
+      "rf_metrics": {
+        "threshold": 0.5,
+        "positive_class": 1,
+        "score_definition": "P(class=1) or a comparable continuous detector score",
+        "confusion": {
+          "tn": 285094,
+          "fp": 5951,
+          "fn": 640,
+          "tp": 64180
+        },
+        "population": 355865,
+        "positive_support": 64820,
+        "negative_support": 291045,
+        "accuracy": 0.9814789316173268,
+        "precision": 0.9151445152642911,
+        "recall": 0.9901265041653811,
+        "f1": 0.9511600506850635,
+        "macro_f1": 0.9698663984594449,
+        "weighted_f1": 0.9817581088700201,
+        "balanced_accuracy": 0.9848397471264123,
+        "specificity": 0.9795529900874436,
+        "fpr": 0.020447009912556477,
+        "fnr": 0.009873495834618945,
+        "per_class": {
+          "benign": {
+            "precision": 0.9977601545493361,
+            "recall": 0.9795529900874436,
+            "f1": 0.9885727462338262,
+            "support": 291045
+          },
+          "attack": {
+            "precision": 0.9151445152642911,
+            "recall": 0.9901265041653811,
+            "f1": 0.9511600506850635,
+            "support": 64820
+          }
+        },
+        "roc_auc": 0.996776776970498,
+        "pr_auc": 0.9824110785700803,
+        "reason": null
+      },
+      "xgb_metrics": {
+        "threshold": 0.5,
+        "positive_class": 1,
+        "score_definition": "P(class=1) or a comparable continuous detector score",
+        "confusion": {
+          "tn": 287881,
+          "fp": 3164,
+          "fn": 2251,
+          "tp": 62569
+        },
+        "population": 355865,
+        "positive_support": 64820,
+        "negative_support": 291045,
+        "accuracy": 0.9847835555618001,
+        "precision": 0.9518658816728279,
+        "recall": 0.9652730638691762,
+        "f1": 0.958522592357127,
+        "macro_f1": 0.9746026465761188,
+        "weighted_f1": 0.9848248102215781,
+        "balanced_accuracy": 0.977200946372218,
+        "specificity": 0.9891288288752599,
+        "fpr": 0.01087117112474016,
+        "fnr": 0.03472693613082382,
+        "per_class": {
+          "benign": {
+            "precision": 0.9922414625067211,
+            "recall": 0.9891288288752599,
+            "f1": 0.9906827007951106,
+            "support": 291045
+          },
+          "attack": {
+            "precision": 0.9518658816728279,
+            "recall": 0.9652730638691762,
+            "f1": 0.958522592357127,
+            "support": 64820
+          }
+        },
+        "roc_auc": 0.9964620178130207,
+        "pr_auc": 0.9811799757660522,
+        "reason": null
+      },
+      "rf_latency": {
+        "mean_ms": 37.1634921289442,
+        "median_ms": 37.00556750118267,
+        "std_ms": 2.765100224923879,
+        "p95_ms": 40.211154895223444,
+        "p99_ms": 48.06201553808933,
+        "min_ms": 23.913620003440883,
+        "max_ms": 60.85645099665271
+      },
+      "xgb_latency": {
+        "mean_ms": 0.6989705618252628,
+        "median_ms": 0.6908795003255364,
+        "std_ms": 0.03845198963225313,
+        "p95_ms": 0.7698049023019848,
+        "p99_ms": 0.8406645611103156,
+        "min_ms": 0.6543080016854219,
+        "max_ms": 1.0279799971613102
+      },
+      "rf_size_mb": 25.14176845550537,
+      "xgb_size_mb": 0.5976400375366211,
+      "xgb_model_path": "models/xgboost/xgboost_cicids2017.json",
+      "rf_model_path": "models/rf/random_forest_cicids2017.joblib",
+      "preprocessor_path": "results/experiments/EXP-P1-CIC2017-R10-001/preprocessor.joblib",
+      "xgb_train_time_s": 7.2132720947265625
+    },
+    "cse2018": {
+      "benchmark": "cse2018",
+      "dataset_key": "cse_cic_ids2018",
+      "contract": "R10",
+      "features": [
+        "flow_duration_ms",
+        "flow_packets_per_s",
+        "flow_bytes_per_s",
+        "packet_length_mean",
+        "packet_length_std",
+        "syn_count",
+        "ack_count",
+        "rst_count",
+        "fin_count",
+        "syn_ack_ratio"
+      ],
+      "champion": "XGBoost",
+      "rf_metrics": {
+        "threshold": 0.5,
+        "positive_class": 1,
+        "score_definition": "P(class=1) or a comparable continuous detector score",
+        "confusion": {
+          "tn": 31339,
+          "fp": 403,
+          "fn": 8535,
+          "tp": 968
+        },
+        "population": 41245,
+        "positive_support": 9503,
+        "negative_support": 31742,
+        "accuracy": 0.783294944841799,
+        "precision": 0.7060539752005836,
+        "recall": 0.10186256971482689,
+        "f1": 0.178039359941144,
+        "macro_f1": 0.5266174234915729,
+        "weighted_f1": 0.714568146131844,
+        "balanced_accuracy": 0.5445832286542757,
+        "specificity": 0.9873038875937244,
+        "fpr": 0.012696112406275597,
+        "fnr": 0.8981374302851731,
+        "per_class": {
+          "benign": {
+            "precision": 0.7859507448462657,
+            "recall": 0.9873038875937244,
+            "f1": 0.8751954870420018,
+            "support": 31742
+          },
+          "attack": {
+            "precision": 0.7060539752005836,
+            "recall": 0.10186256971482689,
+            "f1": 0.178039359941144,
+            "support": 9503
+          }
+        },
+        "roc_auc": 0.6060948569259204,
+        "pr_auc": 0.3563920168711798,
+        "reason": null
+      },
+      "xgb_metrics": {
+        "threshold": 0.5,
+        "positive_class": 1,
+        "score_definition": "P(class=1) or a comparable continuous detector score",
+        "confusion": {
+          "tn": 31590,
+          "fp": 152,
+          "fn": 8540,
+          "tp": 963
+        },
+        "population": 41245,
+        "positive_support": 9503,
+        "negative_support": 31742,
+        "accuracy": 0.7892593041580798,
+        "precision": 0.863677130044843,
+        "recall": 0.10133642007787015,
+        "f1": 0.18139009229610095,
+        "macro_f1": 0.5302264352842927,
+        "weighted_f1": 0.7183164202937338,
+        "balanced_accuracy": 0.5482739059623174,
+        "specificity": 0.9952113918467645,
+        "fpr": 0.0047886081532354605,
+        "fnr": 0.8986635799221299,
+        "per_class": {
+          "benign": {
+            "precision": 0.7871916272115624,
+            "recall": 0.9952113918467645,
+            "f1": 0.8790627782724845,
+            "support": 31742
+          },
+          "attack": {
+            "precision": 0.863677130044843,
+            "recall": 0.10133642007787015,
+            "f1": 0.18139009229610095,
+            "support": 9503
+          }
+        },
+        "roc_auc": 0.644526436252753,
+        "pr_auc": 0.4111169644948569,
+        "reason": null
+      },
+      "rf_latency": {
+        "mean_ms": 38.07921387691022,
+        "median_ms": 37.1275580037036,
+        "std_ms": 4.960057955079572,
+        "p95_ms": 47.284597200632554,
+        "p99_ms": 60.920291778165826,
+        "min_ms": 24.231658004282508,
+        "max_ms": 84.19079400482588
+      },
+      "xgb_latency": {
+        "mean_ms": 0.3301394649606664,
+        "median_ms": 0.29950249881949276,
+        "std_ms": 0.131370678271722,
+        "p95_ms": 0.4852047033637062,
+        "p99_ms": 1.1286151490639895,
+        "min_ms": 0.2646040011313744,
+        "max_ms": 1.395052000589203
+      },
+      "rf_size_mb": 65.07876491546631,
+      "xgb_size_mb": 0.5831842422485352,
+      "xgb_model_path": "models/xgboost/xgboost_cse2018.json",
+      "rf_model_path": "models/rf/random_forest_cse2018.joblib",
+      "preprocessor_path": "results/experiments/EXP-P1-CSE2018-R10-MULTI-001/preprocessor.joblib",
+      "xgb_train_time_s": 0.9600048065185547
+    },
+    "unswnb15": {
+      "benchmark": "unswnb15",
+      "dataset_key": "unsw_nb15",
+      "contract": "R4",
+      "features": [
+        "flow_duration_ms",
+        "flow_packets_per_s",
+        "flow_bytes_per_s",
+        "packet_length_mean"
+      ],
+      "champion": "Random Forest",
+      "rf_metrics": {
+        "threshold": 0.5,
+        "positive_class": 1,
+        "score_definition": "P(class=1) or a comparable continuous detector score",
+        "confusion": {
+          "tn": 10873,
+          "fp": 2603,
+          "fn": 857,
+          "tp": 10171
+        },
+        "population": 24504,
+        "positive_support": 11028,
+        "negative_support": 13476,
+        "accuracy": 0.8587985634998367,
+        "precision": 0.7962267105057147,
+        "recall": 0.9222887196227784,
+        "f1": 0.8546340643643391,
+        "macro_f1": 0.8586825800675937,
+        "weighted_f1": 0.8590870351133643,
+        "balanced_accuracy": 0.864565256219819,
+        "specificity": 0.8068417928168596,
+        "fpr": 0.1931582071831404,
+        "fnr": 0.07771128037722162,
+        "per_class": {
+          "benign": {
+            "precision": 0.9269394714407502,
+            "recall": 0.8068417928168596,
+            "f1": 0.8627310957708482,
+            "support": 13476
+          },
+          "attack": {
+            "precision": 0.7962267105057147,
+            "recall": 0.9222887196227784,
+            "f1": 0.8546340643643391,
+            "support": 11028
+          }
+        },
+        "roc_auc": 0.9485332668144003,
+        "pr_auc": 0.9321128448718915,
+        "reason": null
+      },
+      "xgb_metrics": {
+        "threshold": 0.5,
+        "positive_class": 1,
+        "score_definition": "P(class=1) or a comparable continuous detector score",
+        "confusion": {
+          "tn": 11220,
+          "fp": 2256,
+          "fn": 1267,
+          "tp": 9761
+        },
+        "population": 24504,
+        "positive_support": 11028,
+        "negative_support": 13476,
+        "accuracy": 0.8562275546849494,
+        "precision": 0.8122659565615378,
+        "recall": 0.8851106274936525,
+        "f1": 0.8471251898459535,
+        "macro_f1": 0.8557160440621363,
+        "weighted_f1": 0.8565742880680626,
+        "balanced_accuracy": 0.8588509504342706,
+        "specificity": 0.8325912733748887,
+        "fpr": 0.1674087266251113,
+        "fnr": 0.11488937250634748,
+        "per_class": {
+          "benign": {
+            "precision": 0.8985344758548891,
+            "recall": 0.8325912733748887,
+            "f1": 0.8643068982783192,
+            "support": 13476
+          },
+          "attack": {
+            "precision": 0.8122659565615378,
+            "recall": 0.8851106274936525,
+            "f1": 0.8471251898459535,
+            "support": 11028
+          }
+        },
+        "roc_auc": 0.9414330927304179,
+        "pr_auc": 0.9214017924944047,
+        "reason": null
+      },
+      "rf_latency": {
+        "mean_ms": 38.02115274609969,
+        "median_ms": 37.162313998123864,
+        "std_ms": 4.769538275369498,
+        "p95_ms": 47.378394203042255,
+        "p99_ms": 55.228014219537705,
+        "min_ms": 23.603974004799966,
+        "max_ms": 82.06498099752935
+      },
+      "xgb_latency": {
+        "mean_ms": 0.3046910940174712,
+        "median_ms": 0.2925469998444896,
+        "std_ms": 0.05537086382007696,
+        "p95_ms": 0.3951962040446232,
+        "p99_ms": 0.6311597168678418,
+        "min_ms": 0.25977299810620025,
+        "max_ms": 0.7743539972580038
+      },
+      "rf_size_mb": 21.59037685394287,
+      "xgb_size_mb": 0.5833749771118164,
+      "xgb_model_path": "models/xgboost/xgboost_unswnb15.json",
+      "rf_model_path": "models/rf/random_forest_unswnb15.joblib",
+      "preprocessor_path": "results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/preprocessor.joblib",
+      "xgb_train_time_s": 0.47951364517211914
+    }
+  },
+  "champion": {
+    "model_name": "Random Forest",
+    "benchmark": "cicids2017",
+    "model_type": "rf",
+    "model_path": "models/rf/random_forest_cicids2017.joblib",
+    "preprocessor_path": "results/experiments/EXP-P1-CIC2017-R10-001/preprocessor.joblib",
+    "decision_threshold": 0.5
+  }
+}
