@@ -74,3 +74,34 @@ Status values: `OPEN` (awaiting user) · `DECIDED` · `SUPERSEDED`
 - **Evidence gathered:** Task 5 demonstration foundation design; CICFlowMeter 120s bidirectional flow specification.
 - **Decision:** Option D (Hybrid flow completion policy): TCP FIN/RST packets terminate active flow tracking; 120.0s idle timeout acts as expiration fallback for inactive/UDP flows. This matches the flow construction semantics of the training dataset extractors.
 - **Artifacts:** `src/xrlids/demo/flow.py`, `src/xrlids/demo/pcap.py`.
+
+---
+
+## D-007 — Decoupled Multiclass Attack Family Attribution with Calibrated UNKNOWN Fallback
+
+- **Status:** **DECIDED**
+- **Date decided:** 2026-10-30
+- **Evidence gathered:** Priority 4 empirical evaluation across CICIDS2017 multiclass holdout partition (`models/multiclass/multiclass_rf_champion.joblib`). Evaluated 6 canonical attack families (Benign, BruteForce, DoS, DDoS, PortScan, Web) achieving 95.52% weighted F1.
+- **Decision:** Decouple binary intrusion detection from multiclass attack attribution:
+  1. **Binary Detection Fast-Path**: Real-time traffic is evaluated first by the low-latency binary classifier ($<0.5$ ms). Benign flows bypass downstream attribution.
+  2. **Attack Attribution Path**: Flows classified as attacks are routed to the multiclass attribution model to identify the specific attack family.
+  3. **Calibrated UNKNOWN Fallback**: If $\max_k P(\text{family}_k) < 0.40$, the model outputs `UNKNOWN` rather than forcing incorrect attribution on stealth or novel vectors.
+- **Artifacts:** `src/xrlids/models/multiclass_detector.py`, `models/multiclass/multiclass_rf_champion.joblib`, `docs/MULTICLASS_ATTACK_CLASSIFICATION.md`, `docs/ATTACK_TAXONOMY.md`.
+
+---
+
+## D-008 — 5-Stage Autonomous Response Lifecycle, Verification, and Closed-Loop Feedback
+
+- **Status:** **DECIDED**
+- **Date decided:** 2026-10-30
+- **Evidence gathered:** Priority 5 audit of autonomous mitigation and safety requirements; evaluation of DQN state transition logging and rollback mechanics under advisory mode.
+- **Decision:** Enforce a deterministic 5-stage action execution lifecycle coordinated by `ResponseExecutor`:
+  1. `PROPOSED`: Action proposed by RL policy (DQN) or rule engine.
+  2. `AUTHORIZED`: Action validated against deterministic safety gate (critical host exemptions, blast radius cap, cooldowns).
+  3. `EXECUTED`: Action enacted via actuator backend (`SimulatedActuatorBackend` in advisory mode).
+  4. `VERIFIED`: Post-action state validated by `ResponseVerifier` to confirm expected operational impact and infrastructure immunity.
+  5. `EXPIRED` / `ROLLED_BACK`: Actions exceeding TTL are automatically rolled back, restoring initial network state.
+  6. **Causal RL Feedback Loop**: Transitions $(\mathbf{s}_t, a_t, r_t, \mathbf{s}_{t+1}, d_t)$ are logged to `ResponseOutcomeFeedbackLoop` with multi-objective rewards to support offline RL learning.
+  7. **Advisory Mode Invariant**: `advisory_mode=True` remains strictly the default to eliminate unauthorized kernel mutations.
+- **Artifacts:** `src/xrlids/response/executor.py`, `src/xrlids/response/verification.py`, `src/xrlids/response/feedback.py`, `docs/AUTONOMOUS_RESPONSE.md`, `docs/DQN_COMPATIBILITY.md`.
+

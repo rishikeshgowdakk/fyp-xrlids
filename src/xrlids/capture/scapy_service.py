@@ -166,6 +166,10 @@ class ScapyCaptureService:
         except Exception as err:
             return False, f"Raw socket check failed: {err}"
 
+    def verify_permissions(self) -> tuple[bool, str]:
+        """Check raw socket permissions on the host."""
+        return self.check_raw_capture_permission()
+
     def replay_pcap(
         self,
         pcap_path: str | Path,

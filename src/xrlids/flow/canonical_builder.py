@@ -55,6 +55,26 @@ class CanonicalFlowKey:
             pkt.src_ip, pkt.dst_ip, pkt.src_port, pkt.dst_port, pkt.protocol
         )
 
+    @property
+    def flow_id(self) -> str:
+        return f"{self.endpoint_a}:{self.port_a}<->{self.endpoint_b}:{self.port_b}/{self.protocol}"
+
+    @property
+    def src_ip(self) -> str:
+        return self.endpoint_a
+
+    @property
+    def dst_ip(self) -> str:
+        return self.endpoint_b
+
+    @property
+    def src_port(self) -> int:
+        return self.port_a
+
+    @property
+    def dst_port(self) -> int:
+        return self.port_b
+
 
 @dataclass
 class CanonicalFlow:
@@ -205,6 +225,11 @@ class CanonicalFlow:
             FeatureSchemaValidator("R10").validate(features)
 
         return features
+
+    @property
+    def features(self) -> dict[str, float]:
+        """Convenience property returning extracted R10 features."""
+        return self.to_features(validate=False)
 
     def to_feature_vector(self) -> np.ndarray:
         """Return canonical 1D float32 numpy array ordered strictly by R10_FEATURES."""

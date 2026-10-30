@@ -86,7 +86,8 @@ all_events = event_mgr.get_all_events()
 if all_events:
     col_f1, col_f2 = st.columns(2)
     with col_f1:
-        severity_filter = st.multiselect("Filter by Severity", ["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"], default=["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"])
+        severity_options = ["NONE", "INFORMATIONAL", "INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"]
+        severity_filter = st.multiselect("Filter by Severity", severity_options, default=severity_options)
     with col_f2:
         search_ip = st.text_input("Filter by Source IP Address", value="")
 
@@ -108,7 +109,7 @@ if all_events:
             "Verdict": ev.hybrid_verdict,
             "Severity": ev.severity,
             "Rule Hits": len(ev.rule_matches),
-            "Escalated?": "YES" if ev.source_activity.get("is_escalated") else "NO",
+            "Escalated?": "YES" if (getattr(ev, "source_escalated", False) or (getattr(ev, "source_status", {}) or {}).get("is_escalated")) else "NO",
             "Action": ev.response.get("enforced_action", "ALLOW"),
         })
     

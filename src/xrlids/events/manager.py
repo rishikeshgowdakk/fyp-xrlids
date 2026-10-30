@@ -109,6 +109,11 @@ class EventManager:
 
         return events[-limit:]
 
+    def get_all_events(self) -> list[SecurityEvent]:
+        """Retrieve all events currently buffered in the ring buffer."""
+        with self._lock:
+            return list(self._buffer)
+
     def get_stats(self) -> dict[str, int]:
         """Return operational counters."""
         with self._lock:

@@ -2,8 +2,8 @@
 
 **Official Title:** Explainable Reinforcement Learning-Based Network Intrusion Detection and Autonomous Response System (XRL-IDARS)  
 **Repository:** `rishikeshgowdakk/fyp-xrlids`  
-**Git Branch / Commit:** `main` @ `4c7a8a9`  
-**Test Suite Status:** **616 passed, 0 failed, 18 warnings in 66.02s (100% PASS)**  
+**Git Branch / Commit:** `main`  
+**Test Suite Status:** **622 passed, 0 failed, 21 warnings in 71.2s (100% PASS)**  
 **Verification Date:** October 30, 2026  
 
 ---
@@ -23,10 +23,12 @@
 | **COMP-09** | TreeSHAP Local Explainability (`explainer.py`) | **Implemented** | **Tested** | **Verified** | Exact local Shapley values via `shap.TreeExplainer` for both Random Forest and XGBoost. Attributions satisfy $\sum \phi_i = f(x) - E[f(x)]$. |
 | **COMP-10** | Dueling DQN Response Policy (`response/service.py`) | **Implemented** | **Tested** | **Verified** | Evaluates 6D causal state vector $\mathbf{s}_t = [S_t, \Delta S_t, N_{\text{alert}}, a_{t-1}, c_t, v_t]$ on `models/dqn/dqn_4action_best.pt`. Cost-optimized mitigation. |
 | **COMP-11** | Deterministic Safety Gate (`response/safety.py`) | **Implemented** | **Tested** | **Verified** | Hard invariants: Critical host exemptions, 5% blast radius cap, 30s cooldown, advisory dry-run mode (0 kernel mutations). |
-| **COMP-12** | Event Management & Active Pipeline (`active_pipeline.py`) | **Implemented** | **Tested** | **Verified** | Integrates Perception $\to$ Rules $\to$ Hybrid Arbitration $\to$ Source Tracker $\to$ TreeSHAP $\to$ DQN $\to$ Safety Gate $\to$ EventManager. |
+| **COMP-12** | Event Management & Active Pipeline (`active_pipeline.py`) | **Implemented** | **Tested** | **Verified** | Integrates Perception $\to$ Rules $\to$ Hybrid Arbitration $\to$ Source Tracker $\to$ TreeSHAP $\to$ DQN $\to$ Safety Gate $\to$ Response Executor $\to$ EventManager. |
 | **COMP-13** | Operational Streamlit Command Center (`dashboard/`) | **Implemented** | **Tested** | **Verified** | 8 dedicated production pages covering Overview, Live Ingestion, Multi-Dataset Evaluation, TreeSHAP, Rule Intelligence, Source Tracking, DQN Policy, and Telemetry. |
 | **COMP-14** | Offline Supervised LSTM and Score Fusion Baselines | **Implemented** | **Tested** | **Verified** | Preserved in `models/lstm/` and `models/fusion/` as offline research comparators. Completely decoupled from live inference. |
-| **COMP-15** | Automated Test Suite & Latency Benchmarks | **Implemented** | **Tested** | **Verified** | 616 tests passing (100% clean). Master latency benchmark suite profiling all subsystems (`docs/LATENCY_EVALUATION.md`). |
+| **COMP-15** | Automated Test Suite & Latency Benchmarks | **Implemented** | **Tested** | **Verified** | 622 tests passing (100% clean). Master latency benchmark suite profiling all subsystems (`docs/LATENCY_EVALUATION.md`). |
+| **COMP-16** | Multiclass Attack Attribution (`multiclass_detector.py`) | **Implemented** | **Tested** | **Verified** | 6-family attribution (Benign, BruteForce, DoS, DDoS, PortScan, Web) with calibrated UNKNOWN fallback ($p < 0.40$). Weighted F1: 95.52%. Saved in `models/multiclass/multiclass_rf_champion.joblib`. |
+| **COMP-17** | Autonomous Response Executor & Feedback (`response/`) | **Implemented** | **Tested** | **Verified** | 5-stage lifecycle (`PROPOSED` $\to$ `AUTHORIZED` $\to$ `EXECUTED` $\to$ `VERIFIED` $\to$ `EXPIRED`/`ROLLED_BACK`), post-action host state verifier, and closed-loop transition logging $(\mathbf{s}_t, a_t, r_t, \mathbf{s}_{t+1}, d_t)$. |
 
 ---
 

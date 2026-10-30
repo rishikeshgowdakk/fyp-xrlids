@@ -59,11 +59,7 @@ with col_cfg:
     - **Multi-flow Escalation:** Forces causal state elevation in DQN response policy
     """)
     if st.button("🧹 Reset All Host Tracking States"):
-        st.session_state.tracker = SourceActivityTracker(
-            window_seconds=60.0,
-            escalation_threshold=5,
-            cooldown_seconds=30.0,
-        )
+        tracker.reset()
         st.success("Tracker reset to initial clean state.")
 
 with col_sim:
@@ -76,7 +72,7 @@ with col_sim:
         escalated_any = False
         for i in range(num_flows):
             esc = tracker.record_flow(source_ip=test_ip, is_suspicious=True, timestamp=now + i * 0.1)
-            if esc:
+            if esc.escalate:
                 escalated_any = True
         
         if escalated_any:
@@ -88,18 +84,17 @@ st.divider()
 
 st.subheader("📋 Active Tracked Hosts & Sliding Window States")
 
-active_ips = list(tracker._windows.keys())
+active_ips = list(tracker._records.keys())
 if active_ips:
     table_rows = []
     now = time.time()
     for ip in active_ips:
-        window = tracker._windows[ip]
-        # Clean expired
-        valid_flows = [ts for ts in window if (now - ts) <= tracker.window_seconds]
-        count = len(valid_flows)
+        rec = tracker._records[ip]
+        rec.purge_expired(now, tracker.time_window_seconds)
+        count = len(rec.suspicious_timestamps)
         in_cd = tracker.is_in_cooldown(ip, current_time=now)
-        cd_until = tracker._cooldowns.get(ip, 0.0)
-        remaining = max(0.0, cd_until - now)
+        cd_elapsed = now - rec.last_escalation_timestamp if rec.last_escalation_timestamp > 0 else 999.0
+        remaining = max(0.0, tracker.cooldown_seconds - cd_elapsed) if in_cd else 0.0
         
         table_rows.append({
             "Source IP": ip,
@@ -109,6 +104,6 @@ if active_ips:
             "Cooldown Remaining (s)": f"{remaining:.1f}s" if in_cd else "0.0s",
         })
     
-    st.dataframe(pd.DataFrame(table_rows), use_container_width=True)
+    st.dataframe(pd.DataFrame(table_rows), width="stretch")
 else:
     st.info("No source IPs currently tracked in the active sliding window buffer. Use the simulator above to inject flows.")

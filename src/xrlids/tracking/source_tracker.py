@@ -90,6 +90,8 @@ class SourceActivityTracker:
         required_lstm_sequence_length: int = 5,
         max_tracked_ips: int = 10000,
         stale_cleanup_interval_seconds: float = 300.0,
+        window_seconds: float | None = None,
+        escalation_threshold: int | None = None,
     ) -> None:
         """Initialize the tracker.
 
@@ -101,6 +103,10 @@ class SourceActivityTracker:
             max_tracked_ips: Upper bound on tracked IP records to prevent memory exhaustion.
             stale_cleanup_interval_seconds: Pruning threshold for inactive IP records.
         """
+        if window_seconds is not None:
+            time_window_seconds = window_seconds
+        if escalation_threshold is not None:
+            suspicious_flow_threshold = escalation_threshold
         self.suspicious_flow_threshold = max(1, int(suspicious_flow_threshold))
         self.time_window_seconds = max(1.0, float(time_window_seconds))
         self.cooldown_seconds = max(0.0, float(cooldown_seconds))
@@ -111,6 +117,29 @@ class SourceActivityTracker:
         self._records: dict[str, HostActivityRecord] = {}
         self._lock = threading.Lock()
         self._last_prune_time = time.time()
+
+    @property
+    def window_seconds(self) -> float:
+        return self.time_window_seconds
+
+    @property
+    def escalation_threshold(self) -> int:
+        return self.suspicious_flow_threshold
+
+    def reset(self) -> None:
+        """Clear all host activity records."""
+        with self._lock:
+            self._records.clear()
+
+    def is_in_cooldown(self, source_ip: str, current_time: float | None = None) -> bool:
+        """Check if a source IP is currently in escalation cooldown."""
+        now = time.time() if current_time is None else float(current_time)
+        clean_ip = str(source_ip).strip() or "0.0.0.0"
+        with self._lock:
+            rec = self._records.get(clean_ip)
+            if rec is None or rec.last_escalation_timestamp <= 0.0:
+                return False
+            return (now - rec.last_escalation_timestamp) < self.cooldown_seconds
 
     def record_flow(
         self,

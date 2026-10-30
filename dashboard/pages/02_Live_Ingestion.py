@@ -24,7 +24,7 @@ if str(REPO_ROOT / "src") not in sys.path:
 
 from xrlids.capture.scapy_service import ScapyCaptureService
 from xrlids.events.manager import EventManager
-from xrlids.flow.canonical_builder import CanonicalFlowBuilder
+from xrlids.flow.canonical_builder import CanonicalFlow, CanonicalFlowBuilder
 from xrlids.pipeline.active_pipeline import ActiveInferencePipeline
 
 st.set_page_config(page_title="Live Ingestion - XRL-IDARS", page_icon="📡", layout="wide")
@@ -69,46 +69,34 @@ with col_cfg:
             if not target_file.exists():
                 st.error(f"PCAP file not found: {target_file}")
             else:
-                flow_builder = CanonicalFlowBuilder(flow_timeout_seconds=120.0)
-                service = ScapyCaptureService(flow_builder=flow_builder)
+                flow_builder = CanonicalFlowBuilder(idle_timeout_s=120.0)
+                service = ScapyCaptureService()
                 
                 with st.spinner("Replaying packets through canonical flow assembler..."):
                     t0 = time.perf_counter()
                     completed_flows = []
                     
-                    def on_flow_done(f):
+                    def on_flow_done(f: CanonicalFlow) -> None:
                         completed_flows.append(f)
                         if auto_evaluate:
-                            pipeline.process_flow(
-                                features=f.features,
-                                source_ip=f.key.src_ip,
-                                dest_ip=f.key.dst_ip,
-                                flow_id=f.key.flow_id,
-                                timestamp=f.start_time,
-                            )
+                            pipeline.process_flow(f)
 
-                    stats = service.replay_pcap(
-                        target_file,
-                        on_flow_complete=on_flow_done,
-                        max_packets=int(max_packets) if max_packets > 0 else None,
-                    )
+                    pkt_count = 0
+                    limit = int(max_packets) if max_packets > 0 else None
+                    for pkt in service.replay_pcap(target_file, max_packets=limit):
+                        pkt_count += 1
+                        newly_completed = flow_builder.process_packet(pkt)
+                        for f in newly_completed:
+                            on_flow_done(f)
                     
                     # Flush remaining active flows
                     flushed = flow_builder.flush_all()
                     for f in flushed:
-                        completed_flows.append(f)
-                        if auto_evaluate:
-                            pipeline.process_flow(
-                                features=f.features,
-                                source_ip=f.key.src_ip,
-                                dest_ip=f.key.dst_ip,
-                                flow_id=f.key.flow_id,
-                                timestamp=f.start_time,
-                            )
+                        on_flow_done(f)
                     
                     elapsed = time.perf_counter() - t0
                     st.session_state.replayed_flows = completed_flows
-                    st.success(f"Successfully processed {stats['packets_processed']} packets into {len(completed_flows)} completed flows in {elapsed*1000:.1f} ms!")
+                    st.success(f"Successfully processed {pkt_count} packets into {len(completed_flows)} completed flows in {elapsed*1000:.1f} ms!")
 
     else:
         st.info("Live capture uses Scapy socket sniffing. Administrative privileges (`CAP_NET_RAW` / `sudo`) are required to open raw promiscuous sockets on physical interfaces.")

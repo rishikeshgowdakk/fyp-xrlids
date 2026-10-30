@@ -27,6 +27,7 @@ from xrlids.events.schema import SecurityEvent
 from xrlids.explainability.explainer import ExplanationResult, TreeSHAPExplainer
 from xrlids.flow.canonical_builder import CanonicalFlow
 from xrlids.models.manager import FlowInferenceResult, ModelManager
+from xrlids.response.executor import ExecutionReport, ResponseExecutor
 from xrlids.response.safety import DeterministicSafetyGate
 from xrlids.response.service import DQNResponseService, ResponseRecommendation
 from xrlids.response.types import Action
@@ -68,6 +69,7 @@ class PipelineResult:
     # Telemetry
     total_pipeline_time_ms: float
     security_event: SecurityEvent
+    execution_report: ExecutionReport | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -112,6 +114,7 @@ class ActiveInferencePipeline:
         self.source_tracker = SourceActivityTracker()
         self.response_service = DQNResponseService()
         self.safety_gate = DeterministicSafetyGate()
+        self.executor = ResponseExecutor(safety_gate=self.safety_gate, advisory_mode=True)
 
         # Initialize TreeSHAP explainer with champion model
         self.explainer = TreeSHAPExplainer(
@@ -206,12 +209,19 @@ class ActiveInferencePipeline:
             cooldown_remaining=rem_cooldown,
         )
 
-        # 8. Safety Tier: Deterministic Safety Gate Enforcement
+        # 8. Safety Tier & Controlled Response Execution
         enforced_act, is_override, override_reason = self.safety_gate.enforce_safety(
             step=current_step,
             flow_id=fid,
             host_id=source_ip,
             proposed_action=response_rec.action,
+        )
+
+        exec_report = self.executor.execute_action(
+            proposed_action=response_rec.action,
+            target_host=source_ip,
+            state_before=response_rec.state_vector,
+            metadata={"flow_id": fid, "severity": hybrid_dec.severity},
         )
 
         # 9. Formulate SecurityEvent
@@ -229,6 +239,9 @@ class ActiveInferencePipeline:
                 "attack_score": infer_result.attack_score,
                 "prediction_label": infer_result.prediction_label,
                 "inference_time_ms": infer_result.inference_time_ms,
+                "attack_family": infer_result.attack_family,
+                "attack_family_confidence": infer_result.attack_family_confidence,
+                "family_probabilities": infer_result.family_probabilities,
             },
             rule_matches=[asdict(r) for r in rule_matches],
             hybrid_verdict=hybrid_dec.detection_source if hybrid_dec.is_attack else "BENIGN",
@@ -246,6 +259,7 @@ class ActiveInferencePipeline:
                 "q_advantage": response_rec.q_advantage_over_next,
                 "state_vector": response_rec.state_vector,
                 "justification": response_rec.justification,
+                "execution_report": exec_report.to_dict(),
             },
         )
 
@@ -272,6 +286,7 @@ class ActiveInferencePipeline:
             enforced_action=enforced_act,
             safety_override=is_override,
             override_reason=override_reason,
+            execution_report=exec_report,
             total_pipeline_time_ms=total_time_ms,
             security_event=sec_event,
         )

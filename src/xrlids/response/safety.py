@@ -37,6 +37,26 @@ DEFAULT_CRITICAL_HOSTS = frozenset([
 ])
 
 
+@dataclass(frozen=True)
+class SafetyCheckResult:
+    """Outcome of evaluating action safety invariants."""
+
+    action: Action
+    allowed: bool
+    is_overridden: bool
+    reason: str
+    target_host: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "action": self.action.value if hasattr(self.action, "value") else str(self.action),
+            "allowed": self.allowed,
+            "is_overridden": self.is_overridden,
+            "reason": self.reason,
+            "target_host": self.target_host,
+        }
+
+
 @dataclass
 class DeterministicSafetyGate:
     """Non-bypassable deterministic safety architecture governing autonomous actions."""
@@ -47,6 +67,7 @@ class DeterministicSafetyGate:
     step_duration_s: float = 1.0  # Nominal decision step duration (30 steps = 30.0s cooldown)
     blast_radius_threshold: float = 0.05  # 5% maximum simultaneous endpoint isolation
     min_hosts_for_circuit_breaker: int = 20  # Minimum host population before fraction triggers
+    advisory_mode: bool = True
 
     @property
     def cooldown_seconds(self) -> float:
@@ -76,6 +97,23 @@ class DeterministicSafetyGate:
         """Return remaining cooldown steps for the given host."""
         expiry = self._host_cooldown_expiry.get(host_id, 0)
         return max(0, expiry - current_step)
+
+    def check(
+        self,
+        action: Action,
+        target_host: str,
+        current_time: float | None = None,
+    ) -> SafetyCheckResult:
+        """Evaluate whether an action is safe against target_host."""
+        step = int(current_time or 0)
+        enforced, is_ov, reason = self.enforce_safety(step=step, flow_id=0, host_id=target_host, proposed_action=action)
+        return SafetyCheckResult(
+            action=enforced,
+            allowed=(enforced == action or not is_ov),
+            is_overridden=is_ov,
+            reason=reason or "OK",
+            target_host=target_host,
+        )
 
     def enforce_safety(
         self,

@@ -6,7 +6,7 @@ preprocessors, validates feature schemas, and executes high-performance flow inf
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 import json
 from pathlib import Path
 import time
@@ -17,6 +17,7 @@ import pandas as pd
 
 from xrlids.features.definitions import R10_FEATURES
 from xrlids.features.validator import FeatureSchemaValidator, FeatureValidationError
+from xrlids.models.multiclass_detector import MulticlassAttackClassifier
 from xrlids.models.random_forest import RandomForestDetector
 from xrlids.models.xgboost_detector import XGBoostDetector
 from xrlids.preprocessing.pipeline import Preprocessor
@@ -43,6 +44,9 @@ class FlowInferenceResult:
     features_validated: dict[str, float]
     inference_time_ms: float
     decision_threshold: float = 0.50
+    attack_family: str | None = None
+    attack_family_confidence: float = 0.0
+    family_probabilities: dict[str, float] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -118,6 +122,16 @@ class ModelManager:
             self.model_name = "Random Forest Champion"
             self.model_type = "rf"
 
+        # 3. Load Multiclass Attack Classifier if available
+        self.multiclass_classifier: MulticlassAttackClassifier | None = None
+        mc_path = self.repo_root / "models" / "multiclass" / "multiclass_rf_champion.joblib"
+        if mc_path.is_file():
+            try:
+                self.multiclass_classifier = MulticlassAttackClassifier.load(mc_path)
+                logger.info("Loaded MulticlassAttackClassifier from %s", mc_path)
+            except Exception as e:
+                logger.warning("Could not load multiclass classifier from %s: %s", mc_path, e)
+
         logger.info("ModelManager initialized with model '%s' (%s)", self.model_name, self.model_type)
 
     @property
@@ -150,6 +164,21 @@ class ModelManager:
         pred_label = 1 if attack_score >= self.decision_threshold else 0
         label_str = "ATTACK" if pred_label == 1 else "BENIGN"
 
+        # 5. Multiclass Attack Family Attribution
+        attack_family: str | None = None
+        attack_family_confidence = 0.0
+        family_probabilities: dict[str, float] = {}
+
+        if self.multiclass_classifier is not None:
+            mc_res = self.multiclass_classifier.predict_family(feat_dict)
+            family_probabilities = mc_res.family_probabilities
+            if pred_label == 1 or attack_score >= self.decision_threshold:
+                attack_family = mc_res.predicted_family
+                attack_family_confidence = mc_res.confidence
+            else:
+                attack_family = "BENIGN"
+                attack_family_confidence = family_probabilities.get("BENIGN", 1.0 - attack_score)
+
         t1 = time.perf_counter()
         infer_time_ms = (t1 - t0) * 1000.0
 
@@ -168,6 +197,9 @@ class ModelManager:
             features_validated=feat_dict,
             inference_time_ms=infer_time_ms,
             decision_threshold=self.decision_threshold,
+            attack_family=attack_family,
+            attack_family_confidence=attack_family_confidence,
+            family_probabilities=family_probabilities,
         )
 
     def predict_batch(self, features_df: pd.DataFrame) -> np.ndarray:
