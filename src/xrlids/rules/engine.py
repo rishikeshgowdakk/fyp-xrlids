@@ -154,6 +154,9 @@ def _eval_port_scan(flow: Flow) -> RuleMatch | None:
 
 def _eval_high_rate_burst(flow: Flow) -> RuleMatch | None:
     """RULE-HIGH-RATE-BURST: Check for extreme volumetric packet or byte bursts."""
+    if flow.packet_count < 10 or flow.duration_s <= 0.0:
+        return None
+
     dur_s = max(flow.duration_s, 1e-6)
     pps = flow.packet_count / dur_s
     bps = flow.total_bytes / dur_s
@@ -209,6 +212,34 @@ def _eval_ip_spoof_reserved(flow: Flow) -> RuleMatch | None:
     return None
 
 
+def _eval_icmp_flood(flow: Flow) -> RuleMatch | None:
+    """RULE-ICMP-FLOOD: Check for ICMP echo burst or high-rate ICMP volume."""
+    if flow.key.protocol != 1:
+        return None
+
+    if flow.packet_count >= 20:
+        return RuleMatch(
+            rule_id="RULE-ICMP-FLOOD",
+            name="ICMP Burst / Flood",
+            severity="MEDIUM",
+            description=f"High-volume ICMP traffic burst: {flow.packet_count} packets in single flow.",
+            matched_value=f"packet_count={flow.packet_count}, protocol=ICMP",
+        )
+
+    dur_s = max(flow.duration_s, 1e-6)
+    pps = flow.packet_count / dur_s
+    if flow.packet_count >= 10 and pps >= 20.0:
+        return RuleMatch(
+            rule_id="RULE-ICMP-FLOOD",
+            name="ICMP High-Rate Echo Burst",
+            severity="MEDIUM",
+            description=f"High-rate ICMP echo burst: {pps:.1f} pkts/s (threshold: 20 pkts/s).",
+            matched_value=f"flow_packets_per_s={pps:.1f}, protocol=ICMP",
+        )
+
+    return None
+
+
 class RuleEngine:
     """Deterministic, policy-based detection engine executing deterministic network rules."""
 
@@ -220,7 +251,7 @@ class RuleEngine:
 
     @classmethod
     def get_default_rules(cls) -> list[SecurityRule]:
-        """Return the standard suite of 5 deterministic security rules."""
+        """Return the standard suite of deterministic security rules."""
         return [
             SecurityRule(
                 rule_id="RULE-TCP-INVALID-FLAGS",
@@ -256,6 +287,13 @@ class RuleEngine:
                 severity="HIGH",
                 description="Checks for invalid source addresses including 0.0.0.0 on TCP or cross-interface loopback.",
                 evaluator=_eval_ip_spoof_reserved,
+            ),
+            SecurityRule(
+                rule_id="RULE-ICMP-FLOOD",
+                name="ICMP Echo Burst / Flood",
+                severity="MEDIUM",
+                description="Checks for volumetric ICMP echo floods exceeding 20 packets or 20 pkts/s.",
+                evaluator=_eval_icmp_flood,
             ),
         ]
 

@@ -49,6 +49,11 @@ if str(REPO_ROOT / "src") not in sys.path:
 logger = logging.getLogger("dashboard.server")
 
 from xrlids.demo.attack_sim import build_scenario_packets, get_scenario, list_scenarios  # noqa: E402
+from xrlids.demo.scapy_simulator import (  # noqa: E402
+    ScapyAttackSimulator,
+    SCENARIO_SPECS,
+    SimulatorRunRecord,
+)
 from xrlids.demo.dataset_stream import (  # noqa: E402
     CATEGORIES as DATASET_CATEGORIES,
     load_dataset_samples,
@@ -68,6 +73,11 @@ from xrlids.evaluation.csv_evaluator import (  # noqa: E402
 from xrlids.features.definitions import R10_FEATURES, R4_FEATURES  # noqa: E402
 from xrlids.live.capture import CaptureConfig, PacketCaptureService  # noqa: E402
 from xrlids.live.devices import DeviceTracker  # noqa: E402
+from xrlids.models.inference_service import DEFAULT_INFERENCE_SERVICE, UnifiedInferenceService  # noqa: E402
+from xrlids.response.dqn.network import DuelingQNetwork  # noqa: E402
+from xrlids.response.safety import DEFAULT_CRITICAL_HOSTS, DeterministicSafetyGate  # noqa: E402
+from xrlids.response.state import StateBuilder  # noqa: E402
+from xrlids.response.types import Action, ActionSpaceMode  # noqa: E402
 from dashboard.workbench_data import (  # noqa: E402
     BENCHMARK_REGISTRY,
     get_comparison_data,
@@ -344,8 +354,45 @@ class LiveSession:
 
         self.flows: deque[dict[str, Any]] = deque(maxlen=1000)
         self.alerts: deque[dict[str, Any]] = deque(maxlen=200)
+        self.events: deque[dict[str, Any]] = deque(maxlen=200)
+        self.experiment_runs: list[SimulatorRunRecord] = []
+        self.simulator = ScapyAttackSimulator()
+        self._sim_thread: threading.Thread | None = None
+        self._sim_stop_event = threading.Event()
+        self.simulation: dict[str, Any] | None = None
+        self.latency_samples: dict[str, deque[float]] = {
+            "features_ms": deque(maxlen=500),
+            "inference_ms": deque(maxlen=500),
+            "rules_ms": deque(maxlen=500),
+            "response_ms": deque(maxlen=500),
+            "total_ms": deque(maxlen=500),
+        }
         self.injection: dict[str, Any] | None = None
         self.rule_engine = RuleEngine()
+
+        self.inference_service = None if engine is not None else DEFAULT_INFERENCE_SERVICE
+        self.safety_gate = DeterministicSafetyGate(action_mode=ActionSpaceMode.FOUR_ACTION)
+        self.state_builder = StateBuilder(alert_threshold=RESEARCH_THRESHOLD)
+        self.policy: Any | None = None
+        self.rf_evaluations = 0
+        self.fusion_evaluations = 0
+        self.dqn_evaluations = 0
+        self.safety_overrides = 0
+        self._init_dqn_policy()
+
+    def _init_dqn_policy(self) -> None:
+        dqn_path = REPO_ROOT / "models" / "dqn" / "dqn_4action_best.pt"
+        if dqn_path.exists():
+            try:
+                import torch
+                dqn = DuelingQNetwork(input_dim=6, action_dim=4)
+                ckpt = torch.load(dqn_path, map_location="cpu", weights_only=False)
+                state_dict = ckpt.get("online_net_state_dict", ckpt.get("model_state_dict", ckpt))
+                dqn.load_state_dict(state_dict)
+                dqn.eval()
+                self.policy = dqn
+            except Exception as exc:
+                logger.warning("Could not load DQN policy in LiveSession: %s", exc)
 
     # ------------------------------------------------------------- engine
     def _get_engine(self) -> ReplayEngine:
@@ -403,12 +450,16 @@ class LiveSession:
                             "`sudo .venv/bin/python dashboard/server.py` — or use the PCAP / Sample stream mode (no root)."
                         )
                     }
+            elif mode == "isolated_lab":
+                # Isolated lab mode: uses kernel veth if root/CAP_NET_ADMIN available,
+                # otherwise runs safely in VIRTUAL_ISOLATED_NETNS mode without needing root.
+                pass
             elif mode == "pcap":
                 target_pcap = Path(pcap) if pcap else SAMPLE_PCAP
                 if not target_pcap.exists():
                     return {"error": f"PCAP file not found: {target_pcap}"}
-            elif mode not in ("sample", "dataset"):
-                return {"error": f"Unknown mode {mode!r} (expected 'live', 'pcap', 'dataset', or 'sample')."}
+            elif mode not in ("sample", "dataset", "isolated_lab"):
+                return {"error": f"Unknown mode {mode!r} (expected 'live', 'isolated_lab', 'pcap', 'dataset', or 'sample')."}
 
             self._reset_locked()
             if self._engine is None and benchmark in BENCHMARK_CONFIGS:
@@ -439,6 +490,12 @@ class LiveSession:
             self.started_at = datetime.now(timezone.utc).isoformat()
             self._t0 = time.time()
             self._stop_event.clear()
+            self.events.append({
+                "timestamp": self.started_at,
+                "type": "CAPTURE_STARTED",
+                "message": f"Packet monitoring started (Mode: {self.mode.upper() if self.mode else 'UNKNOWN'})",
+                "source": "CAPTURE",
+            })
 
             # The merge queue exists for the whole session so injections can start immediately.
             packet_queue: "queue.Queue[Any]" = queue.Queue()
@@ -460,6 +517,12 @@ class LiveSession:
                 self._stop_event.set()
                 if self._capture is not None:
                     self._capture.stop()
+                self.events.append({
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "type": "CAPTURE_STOPPED",
+                    "message": f"Packet monitoring stopped. Processed {self.flow_count} flows, {self.alert_count} alerts.",
+                    "source": "CAPTURE",
+                })
         if thread is not None and thread.is_alive():
             thread.join(timeout=5.0)
         return self.snapshot()
@@ -510,6 +573,329 @@ class LiveSession:
             self._injection_thread = thread
             thread.start()
             return {"status": "injecting", "injection": dict(self.injection)}
+
+    # ------------------------------------------------------ scapy live simulator
+    def simulate_scenario(self, scenario_id: str, packet_count: int | None = None, speed: float = 1.0) -> dict[str, Any]:
+        """Launch an isolated lab attack simulator scenario via Scapy.
+
+        Genuine Scapy packets are generated and pushed into the live capture pipeline.
+        """
+        with self._lock:
+            if self.status != "running" or self._packet_queue is None:
+                return {"error": "Monitoring session is not running. Start monitoring before launching a simulation."}
+            if self.simulation is not None and self.simulation.get("active"):
+                active = self.simulation.get("scenario")
+                return {"error": f"Simulation {active!r} is already active. Wait for it to finish or press Stop Simulation."}
+
+            spec = SCENARIO_SPECS.get(scenario_id)
+            if spec is None:
+                return {"error": f"Unknown scenario {scenario_id!r}. Supported: {list(SCENARIO_SPECS.keys())}"}
+
+            self.simulation = {
+                "active": True,
+                "scenario": spec.scenario_id,
+                "name": spec.name,
+                "category": spec.category,
+                "family": spec.attack_family,
+                "target_ports": spec.target_ports,
+                "packets_total": packet_count or spec.default_packet_count,
+                "packets_sent": 0,
+                "started_at": datetime.now(timezone.utc).isoformat(),
+                "finished_at": None,
+                "status": "RUNNING",
+            }
+            self._sim_stop_event.clear()
+
+            self.events.append({
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "type": "SIMULATION_STARTED",
+                "message": f"Simulator launched {spec.name} (Category: {spec.category}, Family: {spec.attack_family})",
+                "source": "SIMULATOR",
+            })
+
+            def _sim_worker() -> None:
+                try:
+                    def _on_pkt(pinfo: PacketInfo) -> None:
+                        with self._lock:
+                            if self.simulation is not None and self.simulation.get("active"):
+                                self.simulation["packets_sent"] += 1
+                        if self._packet_queue is not None:
+                            self._packet_queue.put(pinfo)
+
+                    record = self.simulator.run_simulation(
+                        scenario_id=scenario_id,
+                        packet_count=packet_count,
+                        pace_multiplier=speed,
+                        stop_event=self._sim_stop_event,
+                        on_packet_emitted=_on_pkt,
+                    )
+                    # Flush any half-open / active flows from simulator
+                    time.sleep(0.05)
+                    with self._lock:
+                        mon = self._monitor
+                    if mon is not None:
+                        mon.flush_flows(mode=self.mode or "live")
+                    with self._lock:
+                        if self.simulation is not None:
+                            self.simulation["active"] = False
+                            self.simulation["finished_at"] = record.end_time
+                            self.simulation["status"] = record.status
+                        self.experiment_runs.append(record)
+                        self.events.append({
+                            "timestamp": record.end_time or datetime.now(timezone.utc).isoformat(),
+                            "type": "SIMULATION_FINISHED",
+                            "message": f"Simulator finished {spec.name}: {record.generated_packets} pkts generated in {record.duration_s:.3f}s",
+                            "source": "SIMULATOR",
+                        })
+                except Exception as exc:
+                    logger.error("Simulation worker failed: %s", exc)
+                    with self._lock:
+                        if self.simulation is not None:
+                            self.simulation["active"] = False
+                            self.simulation["status"] = "FAILED"
+                            self.simulation["error"] = str(exc)
+
+            thread = threading.Thread(target=_sim_worker, name="xrlids-scapy-simulation", daemon=True)
+            self._sim_thread = thread
+            thread.start()
+            return {"status": "simulating", "simulation": dict(self.simulation)}
+
+    def stop_simulation(self) -> dict[str, Any]:
+        """Signal running simulation to stop cleanly."""
+        self._sim_stop_event.set()
+        with self._lock:
+            if self.simulation is not None:
+                self.simulation["active"] = False
+                self.simulation["status"] = "STOPPED"
+                self.simulation["finished_at"] = datetime.now(timezone.utc).isoformat()
+            return {"status": "stopped", "simulation": self.simulation}
+
+    def reset_demo(self) -> dict[str, Any]:
+        """Reset demo session counters, buffers, and event timeline."""
+        with self._lock:
+            self.packets = 0
+            self.total_bytes = 0
+            self.flow_count = 0
+            self.alert_count = 0
+            self.tp = 0
+            self.fp = 0
+            self.tn = 0
+            self.fn = 0
+            self.rf_evaluations = 0
+            self.fusion_evaluations = 0
+            self.dqn_evaluations = 0
+            self.safety_overrides = 0
+            self.flows.clear()
+            self.alerts.clear()
+            self.events.clear()
+            self.score_bands = {"benign": 0, "low": 0, "medium": 0, "high": 0}
+            for k in self.latency_samples:
+                self.latency_samples[k].clear()
+            if hasattr(self, "safety_gate"):
+                self.safety_gate.reset()
+            if hasattr(self, "state_builder"):
+                self.state_builder.reset()
+            return self.demo_snapshot()
+
+    def explain_flow(self, flow_id: int) -> dict[str, Any]:
+        """Compute TreeSHAP attribution for a specific flow."""
+        with self._lock:
+            target_flow = next((f for f in self.flows if f.get("flow_id") == flow_id), None)
+            if target_flow is None:
+                return {
+                    "status": "error",
+                    "error": f"Flow #{flow_id} not found in current session buffer.",
+                    "explanation_available": False,
+                }
+            features = target_flow.get("features")
+            if not features:
+                return {
+                    "status": "error",
+                    "error": "Features unavailable for flow.",
+                    "explanation_available": False,
+                }
+
+        from xrlids.evaluation.csv_evaluator import explain_flow_prediction
+        try:
+            explanation = explain_flow_prediction(features, benchmark=getattr(self, "benchmark", "cicids2017"))
+            return {
+                "status": "ok",
+                "explanation_available": True,
+                "flow_id": flow_id,
+                "attack_score": target_flow.get("attack_score"),
+                "prediction_label": target_flow.get("prediction_label"),
+                "detection_source": target_flow.get("detection_source"),
+                "dqn_action": target_flow.get("dqn_action"),
+                "enforced_action": target_flow.get("enforced_action"),
+                "base_value": explanation.get("base_value", 0.5),
+                "top_features": explanation.get("features", []),
+                "attributions": explanation.get("attributions", []),
+            }
+        except Exception as exc:
+            return {
+                "status": "error",
+                "error": f"Explanation unavailable: {exc}",
+                "explanation_available": False,
+            }
+
+    def demo_snapshot(self) -> dict[str, Any]:
+        """Return the consolidated snapshot for the viva demo interface."""
+        with self._lock:
+            import numpy as np
+            latency_summary = {}
+            for k, samples in self.latency_samples.items():
+                if samples:
+                    arr = np.array(samples)
+                    latency_summary[k] = {
+                        "p50": round(float(np.percentile(arr, 50)), 2),
+                        "p95": round(float(np.percentile(arr, 95)), 2),
+                        "p99": round(float(np.percentile(arr, 99)), 2),
+                    }
+                else:
+                    latency_summary[k] = {"p50": 0.0, "p95": 0.0, "p99": 0.0}
+
+            threat_count = sum(1 for f in self.flows if f.get("prediction_class") == 1 or f.get("rule_triggered"))
+            recent_flows = list(self.flows)[-40:]
+            recent_flows.reverse()
+
+            latest_flow = self.flows[-1] if self.flows else None
+            response_info = {
+                "dqn_action": latest_flow.get("dqn_action") if latest_flow else "ALLOW",
+                "enforced_action": latest_flow.get("enforced_action") if latest_flow else "ALLOW",
+                "safety_override": latest_flow.get("safety_override") if latest_flow else False,
+                "override_reason": latest_flow.get("override_reason") if latest_flow else None,
+                "mode": "ADVISORY / DRY_RUN (Zero network mutations)",
+            }
+
+            mode_display = "ISOLATED LAB" if self.mode in ("isolated_lab", "live") else ("PCAP REPLAY" if self.mode == "pcap" else "DATASET STREAM")
+            capture_status = "RUNNING" if self.status == "running" else ("ERROR" if self.status == "error" else "STOPPED")
+            model_status = "LOADED" if (self.inference_service is not None or self._engine is not None) else "ERROR"
+
+            now = time.time()
+            elapsed_s = max(0.001, (now - self._t0)) if (self._t0 and self.status == "running") else 0.001
+            pps = round(self.packets / elapsed_s, 1) if elapsed_s > 0 else 0.0
+            fps = round(self.flow_count / elapsed_s, 1) if elapsed_s > 0 else 0.0
+
+            return {
+                "capture_status": capture_status,
+                "mode": mode_display,
+                "model_status": model_status,
+                "metrics": {
+                    "packets_captured": self.packets,
+                    "flows_processed": self.flow_count,
+                    "threats_detected": threat_count,
+                    "active_alerts": self.alert_count,
+                    "rf_inferences": self.rf_evaluations,
+                    "fusion_inferences": self.fusion_evaluations,
+                },
+                "traffic": [
+                    {
+                        "timestamp": f.get("timestamp", ""),
+                        "src_endpoint": f.get("src_endpoint", ""),
+                        "dst_endpoint": f.get("dst_endpoint", ""),
+                        "protocol": f.get("protocol", ""),
+                        "flow_id": f.get("flow_id", 0),
+                        "packet_count": f.get("packet_count", 0),
+                        "duration_ms": f.get("duration_ms", 0.0),
+                    }
+                    for f in recent_flows
+                ],
+                "detections": [
+                    {
+                        "flow_id": f.get("flow_id", 0),
+                        "result": (
+                            "ATTACK"
+                            if (
+                                f.get("prediction_class") == 1
+                                or f.get("rule_triggered")
+                                or f.get("is_alert")
+                                or f.get("prediction_label") == "ATTACK"
+                            )
+                            else "BENIGN"
+                        ),
+                        "detection_source": (
+                            f.get("detection_source")
+                            if f.get("detection_source") not in ("NONE", None)
+                            else ("RF+LSTM_FUSION" if f.get("fusion_score") is not None else "RF")
+                        ),
+                        "rf_score": f.get("rf_score"),
+                        "lstm_score": f.get("lstm_score"),
+                        "fusion_score": f.get("fusion_score"),
+                        "attack_score": f.get("attack_score", 0.0),
+                        "rule_matches": f.get("rule_matches", []),
+                        "model_used": "RandomForest_CICIDS2017",
+                        "timestamp": f.get("timestamp", ""),
+                    }
+                    for f in recent_flows
+                ],
+                "response": response_info,
+                "events": list(reversed(list(self.events)))[:50],
+                "simulation": self.simulation,
+                "latency": latency_summary,
+                "throughput": {
+                    "packets_per_second": pps,
+                    "flows_per_second": fps,
+                    "queue_drops": 0,
+                    "capture_errors": 0,
+                },
+                "latest_alert": dict(self.alerts[-1]) if self.alerts else None,
+            }
+
+    def export_demo_report(self) -> dict[str, Any]:
+        """Export session experiment records and flow audit trail as JSON."""
+        with self._lock:
+            return {
+                "export_timestamp": datetime.now(timezone.utc).isoformat(),
+                "session_summary": {
+                    "mode": self.mode,
+                    "started_at": self.started_at,
+                    "total_packets": self.packets,
+                    "total_flows": self.flow_count,
+                    "total_alerts": self.alert_count,
+                    "rf_evaluations": self.rf_evaluations,
+                    "fusion_evaluations": self.fusion_evaluations,
+                    "dqn_evaluations": self.dqn_evaluations,
+                    "safety_overrides": self.safety_overrides,
+                },
+                "experiment_runs": [r.to_dict() for r in self.experiment_runs],
+                "flows": list(self.flows),
+                "alerts": list(self.alerts),
+                "events": list(self.events),
+            }
+
+    def export_demo_csv(self) -> str:
+        """Export current session flows as CSV string."""
+        import csv
+        import io
+        with self._lock:
+            out = io.StringIO()
+            fieldnames = [
+                "flow_id",
+                "timestamp",
+                "src_endpoint",
+                "dst_endpoint",
+                "protocol",
+                "packet_count",
+                "duration_ms",
+                "attack_score",
+                "prediction_label",
+                "detection_source",
+                "rule_matches",
+                "rf_score",
+                "lstm_score",
+                "fusion_score",
+                "dqn_action",
+                "enforced_action",
+                "safety_override",
+            ]
+            writer = csv.DictWriter(out, fieldnames=fieldnames, extrasaction="ignore")
+            writer.writeheader()
+            for fl in self.flows:
+                row = dict(fl)
+                if isinstance(row.get("rule_matches"), list):
+                    row["rule_matches"] = ";".join(row["rule_matches"])
+                writer.writerow(row)
+            return out.getvalue()
 
     def device_snapshot(self) -> dict[str, Any]:
         """Return the passive device-discovery view (empty outside live mode)."""
@@ -579,6 +965,10 @@ class LiveSession:
                     "alerts": self.alert_count,
                     "elapsed_s": round(elapsed, 2),
                     "packets_per_s": round(pps, 2),
+                    "rf_inferences": self.rf_evaluations,
+                    "fusion_inferences": self.fusion_evaluations,
+                    "dqn_evaluations": self.dqn_evaluations,
+                    "safety_overrides": self.safety_overrides,
                 },
                 "live_analysis": {
                     "has_ground_truth": total_eval > 0,
@@ -621,7 +1011,15 @@ class LiveSession:
                         "All detection outputs are observational. No network intervention (firewall, routing, "
                         "traffic control) is ever executed by this system."
                     ),
-                    "dqn_integration": "DQN response policy is evaluated via offline replay simulation and is not connected to the live monitoring pipeline.",
+                    "dqn_integration": "Dueling DQN response policy (models/dqn/dqn_4action_best.pt) actively evaluated in advisory mode via 6D state vectors; governed by DeterministicSafetyGate.",
+                    "policy_model": "dqn_4action_best.pt",
+                    "inference_engine": "UnifiedInferenceService (Random Forest + session-buffered LSTM + Fusion)",
+                    "safety_gate": {
+                        "cooldown_steps": 30,
+                        "blast_radius_threshold": 0.05,
+                        "critical_hosts": list(DEFAULT_CRITICAL_HOSTS),
+                        "total_overrides": self.safety_overrides,
+                    },
                 },
             }
 
@@ -639,10 +1037,22 @@ class LiveSession:
         self.fn = 0
         self.score_bands = {"benign": 0, "low": 0, "medium": 0, "high": 0}
         self.traffic_types.clear()
+        self.rf_evaluations = 0
+        self.fusion_evaluations = 0
+        self.dqn_evaluations = 0
+        self.safety_overrides = 0
+        if hasattr(self, "safety_gate"):
+            self.safety_gate.reset()
+        if hasattr(self, "state_builder"):
+            self.state_builder.reset()
         self._t0 = None
         self._t_end = None
         self.flows.clear()
         self.alerts.clear()
+        self.events.clear()
+        self.simulation = None
+        for k in self.latency_samples:
+            self.latency_samples[k].clear()
         self.injection = None
         self._device_tracker = None
 
@@ -672,11 +1082,18 @@ class LiveSession:
 
             monitor = LiveLabMonitor(
                 engine=engine,
+                inference_service=self.inference_service,
                 alert_threshold=RESEARCH_THRESHOLD,
                 on_alert_callback=self._on_alert,
                 on_flow_callback=self._on_flow,
                 rule_engine=self.rule_engine,
+                policy=self.policy,
+                safety_gate=self.safety_gate,
+                state_builder=self.state_builder,
+                benchmark=getattr(self, "benchmark", "cicids2017"),
             )
+            with self._lock:
+                self._monitor = monitor
             if mode == "live":
                 with self._lock:
                     tracker = self._device_tracker
@@ -684,6 +1101,13 @@ class LiveSession:
                     CaptureConfig(interface=interface, bpf_filter=bpf_filter, max_packets=max_packets),
                     raw_packet_callback=tracker.observe_frame if tracker is not None else None,
                 )
+            elif mode == "isolated_lab":
+                if PacketCaptureService.check_permissions() and interface:
+                    capture = PacketCaptureService(
+                        CaptureConfig(interface=interface, bpf_filter=bpf_filter, max_packets=max_packets)
+                    )
+                else:
+                    capture = None
             else:
                 pcap_path = _ensure_sample_pcap(Path(pcap) if pcap else SAMPLE_PCAP)
                 capture = PacketCaptureService(
@@ -695,6 +1119,11 @@ class LiveSession:
 
             def _produce() -> None:
                 """Feed captured packets into the merge queue (single consumer: the monitor)."""
+                if capture is None:
+                    self._stop_event.wait()
+                    packet_queue.put(_CAPTURE_DONE)
+                    return
+
                 try:
                     for pkt in capture.stream_packets():
                         if self._stop_event.is_set():
@@ -826,25 +1255,80 @@ class LiveSession:
 
                     flow_idx += 1
                     raw_features = item.get("features", {})
-                    pred, score = engine.predict_features(raw_features)
                     src_ep = item.get("src_endpoint", "172.16.0.1:49152")
                     dst_ep = item.get("dst_endpoint", "192.168.10.50:80")
+                    bench = getattr(self, "benchmark", "cicids2017")
+                    expected = R10_FEATURES if bench in ("cicids2017", "cse2018") else R4_FEATURES
+                    valid_features = None
+                    if isinstance(raw_features, dict) and all(f in raw_features and raw_features[f] is not None for f in expected):
+                        valid_features = {k: float(raw_features[k]) for k in expected}
+
+                    session_key = f"{src_ep}->{dst_ep}"
+                    rf_score = 0.0
+                    lstm_score = None
+                    fusion_score = None
+                    inf_source = "RF"
+
+                    if self.inference_service is not None and valid_features is not None:
+                        inf_res = self.inference_service.infer(
+                            features=valid_features,
+                            session_key=session_key,
+                            benchmark=bench,
+                            threshold=RESEARCH_THRESHOLD,
+                        )
+                        pred = inf_res.prediction
+                        score = float(inf_res.attack_score)
+                        rf_score = float(inf_res.rf_score)
+                        lstm_score = float(inf_res.lstm_score) if inf_res.lstm_score is not None else None
+                        fusion_score = float(inf_res.fusion_score) if inf_res.fusion_score is not None else None
+                        inf_source = "RF+LSTM_FUSION" if inf_res.inference_source == "RF+LSTM_FUSION" else "RF"
+                    else:
+                        pred, score = engine.predict_features(raw_features)
+                        rf_score = score
+
                     rule_matches = self.rule_engine.evaluate_features(
                         raw_features,
                         endpoints={"src_ip": src_ep.split(":")[0], "dst_ip": dst_ep.split(":")[0]},
                     )
                     rule_ids = [r.rule_id for r in rule_matches]
                     rule_alert = len(rule_matches) > 0
-                    rf_alert = bool(pred == 1 and score >= RESEARCH_THRESHOLD)
-                    is_alert = rf_alert or rule_alert
-                    detection_src = "HYBRID" if (rf_alert and rule_alert) else ("RULE" if rule_alert else ("RF" if rf_alert else "NONE"))
+                    model_alert = bool(pred == 1 and score >= RESEARCH_THRESHOLD)
+                    is_alert = model_alert or rule_alert
+                    detection_src = "HYBRID" if (model_alert and rule_alert) else ("RULE" if rule_alert else (inf_source if model_alert else "NONE"))
                     gt = item.get("ground_truth", "UNKNOWN")
 
-                    bench = getattr(self, "benchmark", "cicids2017")
-                    expected = R10_FEATURES if bench in ("cicids2017", "cse2018") else R4_FEATURES
-                    valid_features = None
-                    if isinstance(raw_features, dict) and all(f in raw_features and raw_features[f] is not None for f in expected):
-                        valid_features = {k: float(raw_features[k]) for k in expected}
+                    # Advisory DQN response policy and deterministic safety gate evaluation
+                    dqn_action_str: str | None = None
+                    enforced_action_str: str | None = None
+                    override_applied = False
+                    override_reason: str | None = None
+
+                    if self.policy is not None and self.safety_gate is not None and self.state_builder is not None:
+                        try:
+                            import torch
+                            bytes_per_s = float(raw_features.get("flow_bytes_per_s", 0.0))
+                            state_vec = self.state_builder.build_state(attack_score=score, flow_bytes_per_s=bytes_per_s)
+                            with torch.no_grad():
+                                q_vals = self.policy(torch.from_numpy(state_vec).float().unsqueeze(0))
+                                proposed_idx = int(torch.argmax(q_vals, dim=-1).item())
+                                proposed_action = Action(proposed_idx)
+                            dqn_action_str = proposed_action.name
+
+                            enforced_action, override_applied, override_reason = self.safety_gate.enforce_safety(
+                                step=flow_idx,
+                                flow_id=f"flow_{flow_idx}",
+                                host_id=src_ep.split(":")[0],
+                                proposed_action=proposed_action,
+                            )
+                            enforced_action_str = enforced_action.name
+                            rem_cool = self.safety_gate.get_remaining_cooldown(src_ep.split(":")[0], flow_idx)
+                            self.state_builder.update_history(
+                                attack_score=score,
+                                enforced_action=enforced_action,
+                                cooldown_remaining=rem_cool,
+                            )
+                        except Exception as exc:
+                            logger.debug("DQN evaluation bypassed in dataset stream: %s", exc)
 
                     obs = FlowObservation(
                         timestamp=datetime.now(timezone.utc).isoformat(),
@@ -865,6 +1349,13 @@ class LiveSession:
                         rule_triggered=rule_alert,
                         rule_matches=rule_ids,
                         detection_source=detection_src,
+                        rf_score=round(rf_score, 4) if rf_score is not None else None,
+                        lstm_score=round(lstm_score, 4) if lstm_score is not None else None,
+                        fusion_score=round(fusion_score, 4) if fusion_score is not None else None,
+                        dqn_action=dqn_action_str,
+                        enforced_action=enforced_action_str,
+                        safety_override=override_applied,
+                        override_reason=override_reason,
                     )
 
                     with self._lock:
@@ -895,6 +1386,13 @@ class LiveSession:
                             rule_triggered=rule_alert,
                             rule_matches=rule_ids,
                             detection_source=detection_src,
+                            rf_score=obs.rf_score,
+                            lstm_score=obs.lstm_score,
+                            fusion_score=obs.fusion_score,
+                            dqn_action=dqn_action_str,
+                            enforced_action=enforced_action_str,
+                            safety_override=override_applied,
+                            override_reason=override_reason,
                         )
                         self._on_alert(alert)
 
@@ -1021,6 +1519,14 @@ class LiveSession:
         with self._lock:
             self.flow_count += 1
             self.flows.append(asdict(observation))
+            if observation.fusion_score is not None or observation.detection_source == "RF+LSTM_FUSION":
+                self.fusion_evaluations += 1
+            else:
+                self.rf_evaluations += 1
+            if observation.dqn_action is not None:
+                self.dqn_evaluations += 1
+            if observation.safety_override:
+                self.safety_overrides += 1
 
             score = observation.attack_score
             if score >= 0.85:
@@ -1049,10 +1555,58 @@ class LiveSession:
                 elif is_gt_attack and not is_pred_attack:
                     self.fn += 1
 
+            # Latency profiling
+            if hasattr(observation, "stage_latencies_ms") and observation.stage_latencies_ms:
+                for k, v in observation.stage_latencies_ms.items():
+                    if k in self.latency_samples:
+                        self.latency_samples[k].append(v)
+
+            # Record event in timeline
+            event_type = "FUSION_EVALUATED" if observation.fusion_score is not None else ("ALERT_GENERATED" if observation.is_alert else "FLOW_COMPLETED")
+            eval_src = "RF+LSTM_FUSION" if observation.fusion_score is not None else "RF"
+            msg = (
+                f"Flow #{observation.flow_id} [{observation.protocol}] {observation.src_endpoint}->{observation.dst_endpoint}: "
+                f"{observation.prediction_label} ({observation.attack_score:.3f}) via {observation.detection_source if observation.detection_source != 'NONE' else eval_src}"
+            )
+            if observation.fusion_score is not None:
+                msg += f" [Fusion α=0.5: RF={observation.rf_score:.3f}, LSTM={observation.lstm_score:.3f}, Fusion={observation.fusion_score:.3f}]"
+            if observation.rule_triggered:
+                msg += f" [Rules: {', '.join(observation.rule_matches)}]"
+            self.events.append({
+                "timestamp": observation.timestamp,
+                "type": event_type,
+                "message": msg,
+                "source": "RF+LSTM_FUSION" if observation.fusion_score is not None else (observation.detection_source or "PIPELINE"),
+                "flow_id": observation.flow_id,
+                "is_alert": observation.is_alert,
+                "attack_score": observation.attack_score,
+                "rf_score": observation.rf_score,
+                "lstm_score": observation.lstm_score,
+                "fusion_score": observation.fusion_score,
+            })
+            if observation.dqn_action:
+                self.events.append({
+                    "timestamp": observation.timestamp,
+                    "type": "DQN_RECOMMENDED",
+                    "message": (
+                        f"DQN proposed {observation.dqn_action} -> Safety gate enforced {observation.enforced_action}"
+                        + (f" ({observation.override_reason})" if observation.safety_override else " (Approved)")
+                    ),
+                    "source": "RESPONSE_POLICY",
+                    "flow_id": observation.flow_id,
+                })
+
     def _on_alert(self, alert: AlertEvent) -> None:
         with self._lock:
             self.alert_count += 1
             self.alerts.append(asdict(alert))
+            self.events.append({
+                "timestamp": alert.timestamp,
+                "type": "ALERT_GENERATED",
+                "message": f"Alert {alert.alert_level} on Flow #{alert.flow_id}: {alert.src_endpoint} -> {alert.dst_endpoint} (Confidence: {alert.confidence:.3f})",
+                "source": alert.detection_source or "ALERT_MANAGER",
+                "flow_id": alert.flow_id,
+            })
 
 
 LIVE_SESSION = LiveSession()
@@ -1166,6 +1720,28 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self.wfile.write(payload)
         elif path == "/api/live":
             self.send_json(LIVE_SESSION.snapshot())
+        elif path == "/api/demo/status":
+            self.send_json(LIVE_SESSION.demo_snapshot())
+        elif path == "/api/demo/scenarios":
+            self.send_json({"scenarios": ScapyAttackSimulator.get_scenarios()})
+        elif path == "/api/demo/explain":
+            query = parse_qs(parsed.query)
+            flow_id = int(query.get("flow_id", [1])[0])
+            self.send_json(LIVE_SESSION.explain_flow(flow_id))
+        elif path == "/api/demo/export":
+            query = parse_qs(parsed.query)
+            fmt = query.get("format", ["json"])[0].lower()
+            if fmt == "csv":
+                csv_content = LIVE_SESSION.export_demo_csv()
+                payload = csv_content.encode("utf-8")
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "text/csv; charset=utf-8")
+                self.send_header("Content-Disposition", 'attachment; filename="xrlids_demo_report.csv"')
+                self.send_header("Content-Length", str(len(payload)))
+                self.end_headers()
+                self.wfile.write(payload)
+            else:
+                self.send_json(LIVE_SESSION.export_demo_report())
         elif path == "/api/live/dataset-categories":
             self.send_json({"categories": DATASET_CATEGORIES})
         elif path == "/api/live/devices":
@@ -1327,12 +1903,50 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self.send_json(LIVE_SESSION.stop())
         elif parsed.path == "/api/live/inject-attack":
             body = self.read_json_body()
-            scenario_id = str(body.get("scenario", "")).strip()
+            scenario_id = str(body.get("scenario") or body.get("scenario_id", "")).strip()
             if not scenario_id:
                 self.send_json({"error": "Missing 'scenario' in request body."}, status=HTTPStatus.BAD_REQUEST)
                 return
             result = LIVE_SESSION.inject_scenario(scenario_id)
             self.send_json(result, status=HTTPStatus.BAD_REQUEST if result.get("error") else HTTPStatus.OK)
+        elif parsed.path == "/api/demo/start":
+            body = self.read_json_body()
+            mode = str(body.get("mode", "isolated_lab"))
+            pcap_path = body.get("pcap") or None
+            if pcap_path and not self._is_safe_pcap_path(str(pcap_path)):
+                self.send_json(
+                    {"error": f"Invalid or disallowed PCAP path: '{pcap_path}'.", "status": "error"},
+                    status=HTTPStatus.BAD_REQUEST,
+                )
+                return
+            result = LIVE_SESSION.start(
+                mode=mode,
+                benchmark=str(body.get("benchmark", "cicids2017")),
+                interface=body.get("interface") or None,
+                bpf_filter=body.get("bpf_filter") or None,
+                pcap=pcap_path,
+            )
+            self.send_json(result, status=HTTPStatus.BAD_REQUEST if result.get("error") else HTTPStatus.OK)
+        elif parsed.path == "/api/demo/stop":
+            self.send_json(LIVE_SESSION.stop())
+        elif parsed.path == "/api/demo/reset":
+            self.send_json(LIVE_SESSION.reset_demo())
+        elif parsed.path == "/api/demo/simulate":
+            body = self.read_json_body()
+            scenario_id = str(body.get("scenario") or body.get("scenario_id", "")).strip()
+            if not scenario_id:
+                self.send_json({"error": "Missing 'scenario' in request body."}, status=HTTPStatus.BAD_REQUEST)
+                return
+            pkt_count = int(body["packet_count"]) if body.get("packet_count") else None
+            speed = float(body.get("speed", 1.0))
+            result = LIVE_SESSION.simulate_scenario(scenario_id, packet_count=pkt_count, speed=speed)
+            self.send_json(result, status=HTTPStatus.BAD_REQUEST if result.get("error") else HTTPStatus.OK)
+        elif parsed.path == "/api/demo/simulate/stop":
+            self.send_json(LIVE_SESSION.stop_simulation())
+        elif parsed.path == "/api/demo/explain":
+            body = self.read_json_body()
+            flow_id = int(body.get("flow_id", 1))
+            self.send_json(LIVE_SESSION.explain_flow(flow_id))
         elif parsed.path == "/api/csv/evaluate":
             body = self.read_json_body()
             mode = str(body.get("mode", "custom")).strip().lower()

@@ -47,14 +47,14 @@ with col_wfall:
     latency_breakdown = pd.DataFrame({
         "Pipeline Stage": [
             "1. Schema Validation (R10)",
-            "2. Perception ML (XGBoost)",
+            "2. Perception ML (Random Forest)",
             "3. Protocol Rule Engine",
             "4. Source Activity Tracking",
             "5. TreeSHAP Attribution (Conditional)",
             "6. DQN Policy Inference",
             "7. Safety Gate Verification",
         ],
-        "Median Latency (ms)": [0.045, 0.690, 0.008, 0.025, 8.200, 0.480, 0.006],
+        "Median Latency (ms)": [0.045, 0.120, 0.008, 0.025, 8.200, 0.480, 0.006],
     }).set_index("Pipeline Stage")
     st.bar_chart(latency_breakdown)
 

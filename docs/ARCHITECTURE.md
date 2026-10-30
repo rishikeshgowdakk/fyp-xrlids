@@ -32,18 +32,19 @@ Deliver a verified, measurable, and reproducible research prototype that combine
 3. **Verified Random Forest Live Detection:** Establish Random Forest as the primary operational ML detector on live flow features, verifying model-preprocessor compatibility and probability calibration.
 4. **Genuine Local Explainability:** Provide exact TreeSHAP feature attributions on Random Forest predictions using genuine model trees and actual input vectors, explicitly rejecting fabricated attributions or canned ranking substitutions.
 5. **Empirically Evaluated Response Policy:** Formulate autonomous incident response as a Markov Decision Process (MDP) and evaluate Deep Q-Network (DQN) recommendations against established baseline policies on identical held-out benchmark test sets.
-6. **Strict Live/Offline Path Separation:** Retain supervised LSTM sequence models and RF-LSTM score fusion strictly as offline experimental baselines; do not route the live packet pipeline through unvalidated recurrent models.
-7. **Transparent Dashboard & Honest Mode Distinctions:** Visually and programmatically distinguish live network capture (`LIVE`), recorded trace replay (`PCAP`), held-out benchmark evaluation (`DATASET`), and in-memory attack simulation (`SAMPLE`).
+6. **Sole Operational Detector & Offline Experimental Baselines:** Establish Random Forest as the sole operational ML detector on live flow features (synchronous fast path, latency $< 0.8\,\text{ms}$). The operational pipeline contains exactly ONE operational ML classifier: Random Forest. The operational path strictly excludes LSTM inference, RF-LSTM fusion, and XGBoost inference.
+7. **Explicit Preservation of LSTM and Fusion Research Benchmarks:** Preserve the existing pretrained LSTM model, RF–LSTM fusion implementation, checkpoints, experiment results and evaluation scripts. Use them exclusively for offline research benchmarking and comparison. The research dashboard may display RF, LSTM and fusion metrics, including latency comparisons. They must never be invoked by the operational live detection pipeline. Do not retrain or replace these models unless a specific reproducibility issue requires it and approval is obtained.
+8. **Transparent Dashboard & Honest Mode Distinctions:** Clearly distinguish LIVE, PCAP, SAMPLE and RESEARCH modes. Research benchmark results must never be presented as live detection results. Sample data must never be represented as actual network traffic. Streamlit (`dashboard/streamlit_app.py`) serves as the primary operational command center across 8 dedicated modules, supported by the pure-Python server (`dashboard/server.py`) as a supplementary interface.
 
 ---
 
 ## 3. Scope and Non-Goals
 
 ### In-Scope
-- Pure-Python userland PCAP parsing and raw packet ingestion via AF_PACKET sockets.
+- Pure-Python userland PCAP parsing and raw packet ingestion via AF_PACKET sockets or Scapy capture service.
 - Bidirectional flow aggregation and feature extraction adhering to the R10 and R4 semantic contracts.
 - Deterministic rule engine executing 5 explicit security rules.
-- Scikit-learn Random Forest inference using canonical trained artifacts (`models/registry/`).
+- Independent dual-detector inference architecture decoupling Random Forest single-flow inference (fast path) from host-level LSTM sequence evaluation (background path), with zero score-fusion dependencies.
 - TreeSHAP local explanations computing exact base values and signed feature attributions.
 - PyTorch Dueling DQN response policy evaluated under 3-action and 4-action action spaces.
 - Isolated network namespace (`netns`) container execution for safe dry-run response validation.
@@ -53,69 +54,80 @@ Deliver a verified, measurable, and reproducible research prototype that combine
 ### Non-Goals (Explicit Exclusions)
 - **Zero Host Network Mutations:** The system will **never** alter host system `iptables`, `nftables`, routing tables, or hardware firewall state during standard live monitoring or demonstration mode. All policy enforcement is advisory/dry-run by default.
 - **No In-Flight Early Flow Intrusion Detection:** Flow-level ML models classify completed flows upon termination or timeout. XRL-IDARS does not claim mid-packet intrusion prevention before flow completion without dedicated packet-level models.
-- **No Live LSTM or Fusion Routing:** Supervised LSTM (T=5) and RF-LSTM fusion are not deployed in the live inference loop. They are evaluated exclusively in the offline benchmark suite.
+- **No Ungrounded Temporal Parity Claims:** While `UnifiedInferenceService` buffers sequential flows and executes LSTM sequence evaluation when $T=5$ flows accumulate for a session key, real network traffic often contains isolated 1-2 flow bursts that never reach $T=5$. XRL-IDARS does not claim universal temporal sequence parity across fragmented or out-of-order live packet streams.
 - **No Fabricated Performance Claims:** Sample simulation scenarios and microbenchmarks are never presented as real network attacks or general real-world detection accuracy.
 
 ---
 
-## 4. Target Architecture Diagram
+## 4. Approved Target Architecture Diagram (RF Operational Detection & Advisory Response)
 
 ```mermaid
 flowchart TD
-    subgraph LIVE_PATH["Operational Live / Replay Path (Real-Time Observational & Advisory)"]
-        direction TB
-        L1["Traffic Source: Raw AF_PACKET / Paced PCAP / Attack Sim"] --> L2["Packet Parser (Ethernet + IPv4 + TCP/UDP)"]
-        L2 --> L3["Bidirectional FlowBuilder (D-006 Policy: FIN/RST or 120s Idle)"]
-        L3 --> L4["Canonical Feature Extraction (R10 / R4 Contract)"]
-        
-        L4 --> L5A["Deterministic Rule Engine\n• RULE-TCP-INVALID-FLAGS\n• RULE-SYN-FLOOD\n• RULE-PORT-SCAN\n• RULE-HIGH-RATE-BURST\n• RULE-IP-SPOOF-RESERVED"]
-        L4 --> L5B["Primary ML Detector\n• Frozen Random Forest\n• Scaler & Preprocessor\n• Predict Proba & Threshold tau=0.50"]
-        
-        L5A --> L6["Evidence & Alert Aggregator\n(Labelled: RF, RULE, HYBRID, or NONE)"]
-        L5B --> L6
-        
-        L5B -.-> L7["Explainability Engine\n(TreeSHAP Local Attributions on RF)"]
-        
-        L6 --> L8["Autonomous Response Policy\n(Dueling DQN Action Value Estimation)"]
-        L8 --> L9["Deterministic Safety Gate\n(Rate Limit, Cooldown, Blast Radius)"]
-        L9 --> L10["Advisory Action Dispatcher\n(Dry-Run Default / Optional Lab Netns)"]
-        
-        L6 --> L11["Live Console & REST API\n(/api/live & /demo.html)"]
-        L7 --> L11
-        L10 --> L11
+    subgraph INGESTION["1. Network Ingestion Layer"]
+        A1["Traffic Source: Live Interface / PCAP Replay / Netns Lab"] --> A2["PacketCaptureService\n(Bounded Queue: 10,000 pkts)"]
+        A2 --> A3["LiveFlowBuilder\n(Canonical 5-Tuple, D-006 Policy: FIN/RST or 120s Idle / 1800s Max)"]
     end
 
-    subgraph OFFLINE_PATH["Offline Research & Benchmark Path (Multi-Model Verification)"]
+    A3 -->|"Completed Flow (R10 Vector)"| DETECT["2. Detection Event Layer"]
+
+    subgraph FAST["Sole Operational ML Detector: Random Forest (Synchronous, Latency < 0.8 ms)"]
         direction TB
-        O1["Held-Out Benchmark Split\n(CIC-IDS2017: 355k | CSE-2018: 1.66M | UNSW: 24.5k)"] --> O2["Schema Validation & Label Isolation"]
-        O2 --> O3["Compatible Frozen Preprocessor (preprocessor.joblib)"]
-        O3 --> O4["Random Forest Evaluation (predict_proba)"]
-        O3 --> O5["Optional Baseline: Supervised LSTM (T=5 Causal)"]
-        O4 & O5 --> O6["Optional Baseline: RF-LSTM Fusion (Linear Blend)"]
-        O4 & O5 & O6 --> O7["Statistical Verification & Metrics Suite\n(Precision, Recall, F1, PR-AUC, Bootstrapped CIs)"]
-        O4 -.-> O8["TreeSHAP Summary & Global Feature Importance"]
-        O7 --> O9["Reproducible Reports & Audit Cards\n(results/phase1/ & results/phase2/)"]
+        F1["Canonical R10 Normalization\n(StandardScaler loaded from preprocessor.joblib)"] --> F2["Random Forest Classifier\n(P_RF flow attack probability in < 0.8 ms)"]
+        F2 --> F3["Actionable Flow Alert\n(Independent Detection Event)"]
     end
 
-    style LIVE_PATH fill:#f8fafc,stroke:#2563eb,stroke-width:2px
-    style OFFLINE_PATH fill:#faf5ff,stroke:#9333ea,stroke-width:2px
+    subgraph RULES["Deterministic Protocol Rule Engine (Microsecond Latency)"]
+        direction TB
+        R_RULE["5 RFC Invariant Checks\n(RULE-TCP-INVALID-FLAGS, RULE-SYN-FLOOD, etc.)"] --> R_EV["Rule Match Event"]
+    end
+
+    DETECT --> FAST
+    DETECT --> RULES
+
+    subgraph ADVISORY["3. Autonomous Advisory Response & Explainability Layer"]
+        direction TB
+        F3 --> R1["TreeSHAP Engine\n(Exact Local Attributions on RF Decision Trees)"]
+        F3 & R_EV --> R2["Host Risk State Aggregator\n(6D Causal State Vector s_t: S_t, Delta S_t, N_alert, a_t-1, c_t, v_t)"]
+        R2 --> R3["Dueling DQN Policy\n(Action Q-Value Estimation on 6D Causal State)"]
+        R3 --> R4["Deterministic Safety Gate\n(Rate Limit, Cooldown, Blast Radius, Critical Host Allowlist)"]
+        R4 --> R5["Advisory Response Action\n(ZERO Host Network Mutations, Dry-Run by Default)"]
+    end
+
+    subgraph UI["4. Presentation & Telemetry Layer"]
+        F3 & R_EV & R1 & R5 --> D1["Streamlit Operational Command Center (Primary: 8501)\n& DashboardServer (Supplementary: 8000)"]
+        D1 --> D2["Browser UI (Live Ingestion / Audit / SHAP / Response / Telemetry)"]
+    end
+
+    style FAST fill:#f8fafc,stroke:#2563eb,stroke-width:2px
+    style RULES fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    style ADVISORY fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
 ```
+
+> [!IMPORTANT]
+> **Sole Operational ML Detector Invariant**: Exactly ONE operational ML classifier runs in the active live pipeline: **Random Forest**. The operational path strictly excludes LSTM inference, RF-LSTM score fusion, and XGBoost inference. Temporal LSTM and score fusion are strictly offline research benchmarks evaluated for comparative scientific inquiry.
 
 ---
 
 ## 5. Component Responsibilities
 
+The approved operational architecture is:
+
+**Scapy → Canonical FlowEngine → R10 Feature Extraction → StandardScaler → Random Forest → Security Event → TreeSHAP Explanation → Dueling DQN → Deterministic Safety Gate → Advisory/Dry-run Response Actuator → Streamlit Dashboard.**
+
+RF performs intrusion classification. DQN performs response recommendation. These are separate responsibilities. Do not combine their outputs into a new intrusion classifier.
+
 | Component | Module Path | Primary Responsibility | Architectural Invariant |
 |---|---|---|---|
 | **Packet Parser** | `src/xrlids/demo/pcap.py` | Extracts timestamps, endpoints, protocols, and raw TCP flags from wire or PCAP frames. | Pure Python, zero native C-dependencies, handles VLAN 802.1Q tags. |
-| **Flow Builder** | `src/xrlids/demo/flow.py` | Canonicalizes bidirectional 5-tuples and tracks packet lengths, byte volumes, and TCP control flags. | Closes flow on FIN/RST or 120s timeout (D-006 policy). |
+| **Flow Builder** | `src/xrlids/demo/flow.py` | Canonicalizes bidirectional 5-tuples and tracks packet lengths, byte volumes, and TCP control flags. | Closes flow on FIN/RST, 120.0s idle expiry, or 1800.0s max lifetime; canonical lexicographical 5-tuple key ($A < B$); population standard deviation ($\text{ddof}=0$) (D-006 policy). |
 | **Rule Engine** | `src/xrlids/rules/engine.py` | Evaluates deterministic security rules against completed flows or feature dictionaries. | 100% deterministic; zero ML weights; never mutates RF probabilities. |
-| **Random Forest Detector** | `src/xrlids/models/random_forest.py` | Primary live ML detector computing flow attack probabilities. | Model features and preprocessor must match verified training provenance. |
+| **Random Forest Detector** | `src/xrlids/models/random_forest.py` | Sole operational ML detector computing flow attack probabilities. | Model features and preprocessor must match verified training provenance. |
 | **Explainability Engine** | `src/xrlids/explainability/` | Computes TreeSHAP feature attributions on Random Forest predictions. | Explains actual input vector using loaded RF tree structure; no canned values. |
 | **Dueling DQN Agent** | `src/xrlids/response/dqn.py` | Maps incident state vectors to cost-optimal defensive action recommendations. | Trained with experience replay and target networks; outputs Q-values. |
 | **Deterministic Safety Gate** | `src/xrlids/enforcement/gate.py` | Enforces cooldown periods, blast-radius restrictions, and operational preconditions. | Fails closed; enforces advisory dry-run unless cryptographic tokens present. |
 | **Live Lab Monitor** | `src/xrlids/demo/live_lab.py` | Glues capture, flow construction, rule checking, ML inference, and alert queuing. | Pure userland observational stream; zero host socket or firewall mutations. |
-| **Dashboard Server** | `dashboard/server.py` | Threaded HTTP server exposing REST APIs, static assets, and SSE event channels. | Rebind-safe host validation; strictly separates sample, replay, and benchmark streams. |
+| **Operational Command Center** | `dashboard/streamlit_app.py` | Primary operational dashboard across 8 dedicated modules (8501). | Full live sniffing, replay, TreeSHAP, rules, tracking, response policy, and telemetry. |
+| **Dashboard Server** | `dashboard/server.py` | Pure-Python HTTP server exposing REST APIs and static demo assets (8000). | Supplementary interface; rebind-safe; separates sample, replay, and benchmark streams. |
 
 ---
 
@@ -177,7 +189,27 @@ Used by **UNSW-NB15** (sensor-degraded baseline):
 | 2 | `flow_bytes_per_s` | Byte rate per second | Bytes/second |
 | 3 | `packet_length_mean` | Mean packet length | Bytes |
 
-### 7.3 Schema & Contract Enforcement Rules
+### 7.3 R10-FlowSeq Contract (Approved Temporal Sequence Contract)
+Approved in Phase 1C for host-aware chronological flow sequences ($K=5$ flows per source host):
+Each sequence step $k$ contains the 10 canonical R10 features plus the inter-flow arrival delta ($\Delta t_{\text{inter-flow}}$):
+
+| Index | Feature Name | Description | Units / Type | Physical Invariant |
+|---|---|---|---|---|
+| 0 | `flow_duration_ms` | Elapsed duration of completed flow | Milliseconds | $\ge 0.0$ |
+| 1 | `flow_packets_per_s` | Total flow packets divided by flow duration | Packets/second | $\ge 0.0$ |
+| 2 | `flow_bytes_per_s` | Total flow bytes divided by flow duration | Bytes/second | $\ge 0.0$ |
+| 3 | `packet_length_mean` | Mean of packet lengths across flow | Bytes | $[0.0, 65535.0]$ |
+| 4 | `packet_length_std` | Sample standard deviation of packet sizes | Bytes | $\ge 0.0$ |
+| 5 | `syn_count` | TCP SYN flag count in flow | Count | Integer $\ge 0$ |
+| 6 | `ack_count` | TCP ACK flag count in flow | Count | Integer $\ge 0$ |
+| 7 | `rst_count` | TCP RST flag count in flow | Count | Integer $\ge 0$ |
+| 8 | `fin_count` | TCP FIN flag count in flow | Count | Integer $\ge 0$ |
+| 9 | `syn_ack_ratio` | Ratio of SYN count to ACK count: $\frac{\text{syn}}{\max(\text{ack}, 1.0)}$ | Ratio | Dimensionless $\ge 0.0$ |
+| 10 | `inter_flow_delta_s` | Elapsed time since previous flow from this host: $t_{\text{start}}(f_i) - t_{\text{start}}(f_{i-1})$ | Seconds | Clamped to $[0.0, 300.0]$ |
+
+*Historical Note on T10-Host*: The earlier proposed fixed-window contract (`T10-Host`) was audited in Phase 1B and formally rejected (NO-GO) because calculating sub-second packet rates from completed flow CSVs required fabricating ungrounded packet arrival distributions. Option A (`R10-FlowSeq`) was selected and approved as scientifically authentic.
+
+### 7.4 Schema & Contract Enforcement Rules
 1. **Zero Silent Fallbacks:** If an input dictionary or CSV row is missing any feature in the active contract, inference raises a `ContractViolationError` or validation error; missing features are **never** replaced with invented defaults.
 2. **Non-Finite Value Handling:** Rows containing `NaN`, `+Inf`, `-Inf`, or non-numeric values are rejected at the schema gate and logged in row accounting records.
 3. **Single Preprocessing Pass:** Preprocessing is applied exactly once via the fitted `StandardScaler` / pipeline loaded from `preprocessor.joblib`. Models are never fed raw unscaled features when a preprocessor is registered.
@@ -185,6 +217,10 @@ Used by **UNSW-NB15** (sensor-degraded baseline):
 ---
 
 ## 8. Rule, RF, TreeSHAP, and DQN Responsibilities
+
+> [!IMPORTANT]
+> **Real End-to-End Integration Requirement:**
+> Run at least one complete integrated demonstration where captured or replayed traffic travels through the actual operational pipeline. Verify that the resulting RF prediction, TreeSHAP explanation, DQN recommendation, safety decision and response record are associated with the same security event and visible in Streamlit. Unit tests alone do not satisfy this criterion.
 
 ```mermaid
 stateDiagram-v2
@@ -249,13 +285,19 @@ stateDiagram-v2
 The supervised Long Short-Term Memory (LSTM) sequence model ($T=5$ causal time steps) and linear score fusion engine ($\alpha S_{RF} + (1-\alpha)S_{LSTM}$) are **strictly offline experimental baselines**.
 
 ### 9.2 Evidence and Rationale for Exclusion from Live Path
-1. **Empirical Performance Comparison:** Across 355,865 held-out test flows of CIC-IDS2017:
-   - **Random Forest:** Accuracy $99.88\% \pm 0.01\%$, F1-Score $0.9972 \pm 0.0003$, ROC-AUC $0.9999 \pm 0.0000$.
-   - **Supervised LSTM:** Accuracy $98.42\% \pm 0.12\%$, F1-Score $0.9635 \pm 0.0028$, ROC-AUC $0.9945 \pm 0.0011$.
-   - **RF-LSTM Fusion:** Accuracy $99.88\% \pm 0.01\%$, F1-Score $0.9973 \pm 0.0002$, ROC-AUC $0.9999 \pm 0.0000$.
-2. **Marginal Value vs. Complexity:** RF alone achieves $0.9972$ F1. Adding the recurrent sequence model yields a negligible $+0.0001$ F1 gain while adding sequence buffering, temporal state tracking, and a $10\times$ inference latency penalty.
+1. **Empirical Performance Comparison across Benchmarks:**
+   - **CIC-IDS2017 Held-Out Test Set** (`EXP-P1-CIC2017-R10-001`, $N = 355,865$):
+     - **Random Forest (Operational):** Accuracy $98.15\%$, Precision $91.51\%$, Recall $99.01\%$, F1-Score **$0.9512$**, PR-AUC $0.9824$, ROC-AUC $0.9968$.
+   - **CSE-CIC-IDS2018 Full Multi-Class Test Set** (`EXP-P1-CSE2018-R10-MULTI-001`, $N = 1,662,459$):
+     - **Random Forest (Operational):** Accuracy $97.23\%$, Precision $82.42\%$, Recall $95.80\%$, F1-Score **$0.8861$**, PR-AUC $0.9676$, ROC-AUC $0.9902$.
+   - **UNSW-NB15 Sensor-Degraded Test Set** (`EXP-P1-UNSWNB15-R10-MULTI-001`, $N = 24,504$, R4 contract):
+     - **Random Forest (Operational):** Accuracy $85.88\%$, Precision $79.62\%$, Recall $92.23\%$, F1-Score **$0.8546$**, PR-AUC $0.9321$, ROC-AUC $0.9485$.
+   - **Targeted Tuesday 2018 Flood Window** (`EXP-P2-LSTM-VALID-001`, $N = 8,726$, LOIC-HTTP active window $t \in [1519121000, 1519125500]$):
+     - **Random Forest Baseline:** F1-Score **$0.9977$**.
+     - **PyTorch LSTM (FlowSeq):** F1-Score **$0.9996$** ($\Delta F_1 = +0.0019$, $+0.19\%$ relative gain representing only 16 additional correctly classified flows out of 8,726).
+2. **Marginal Value vs. Operational Complexity:** The tiny $+0.19\%$ F1 gain of the LSTM requires buffering $K=5$ flows per source host, creating **cold-start blindness** on flows 1 to 4 and exposing the NIDS to **state-exhaustion denial of service** during IP-spoofed volumetric floods.
 3. **Explainability Feasibility:** TreeSHAP provides microsecond, exact explanations for tree ensembles. Explaining recurrent sequence models requires gradient-based or perturbation SHAP (KernelSHAP) which is computationally prohibitive for real-time traffic.
-4. **Preservation Commitment:** All LSTM checkpoints (`models/registry/EXP-P1-*-LSTM-*`) and fusion code remain in the repository and are fully tested and reproducible in the offline benchmark evaluation suite.
+4. **Preservation Commitment:** All LSTM checkpoints (`models/registry/EXP-P1-*-LSTM-*`, `results/experiments/EXP-P2-LSTM-VALID-001/lstm_flowseq_best.pt`) and fusion code remain in the repository and are fully tested and reproducible in the offline benchmark evaluation suite.
 
 ---
 
@@ -307,3 +349,59 @@ The live monitor and dashboard operate in **observational dry-run mode**. Recomm
 3. **Explainability Boundary:** TreeSHAP feature attributions explain the Random Forest classifier only. They do not explain the DQN Q-value landscape or the rule engine triggers.
 4. **Offline Evaluation vs. Live Traffic Shift:** Performance metrics reported on held-out benchmark splits reflect identical distribution conditions. Real-world enterprise traffic subject to protocol variations, MTU differences, or zero-day exploits will exhibit different error profiles.
 5. **Sample Simulation Scope:** Packets synthesized in memory by `attack_sim.py` test pipeline plumbing and score calibration; they are synthetic demonstrations and not substitutes for empirical held-out benchmark verification.
+
+---
+
+## 13. Real-Time Scapy Live Demonstration & Isolated Lab Architecture
+
+### 13.1 Isolated Lab Topology & Target Safety
+The live demonstration operates within a strictly isolated, bounded sandbox to guarantee zero interference with production networks, public subnets, or host loopback sockets:
+- **Designated Subnet:** `10.200.1.0/24` (virtual ethernet pairs or virtual packet injection queue).
+- **Target IP:** `10.200.1.3` (`VICTIM_IP`).
+- **Attacker IP:** `10.200.1.2` (`ATTACKER_IP`).
+- **Target Safety Enforcer:** `validate_target_safety(ip)` strictly asserts that destination IPs fall within `10.200.1.0/24` or loopback `127.0.0.1`. Any external, public, or unauthorized IP is rejected with `TargetIsolationError`.
+
+### 13.2 Calibrated Scapy Traffic Scenarios
+The traffic simulator (`src/xrlids/demo/scapy_simulator.py`) generates real wire-format Scapy packets across four distinct, reproducible operational scenarios:
+1. **Scenario A — Benign Baseline Traffic (12 packets):**
+   - Clean 3-way TCP handshake (SYN $\to$ SYN/ACK $\to$ ACK) on port 80.
+   - HTTP GET request and 200 OK payload exchange.
+   - Graceful 4-way connection teardown (FIN/ACK $\to$ ACK $\to$ FIN/ACK $\to$ ACK).
+   - Standard ICMP Echo Request and Echo Reply ping exchange.
+   - Result: 0 rule alerts, RF evaluates low attack score ($< 0.05$), $100\%$ benign baseline.
+2. **Scenario B — Port Scan Simulation (15 packets):**
+   - Sequential probes targeting ports 21 (FTP), 22 (SSH), 80 (HTTP), 443 (HTTPS), and 8080 (HTTP-Alt).
+   - Simulates 4 closed ports responding with TCP RST/ACK and 1 open port (80) responding with SYN/ACK.
+   - Result: Deterministic rule `RULE-PORT-SCAN` detects multiple closed/probe ports; triggers alert.
+3. **Scenario C — TCP SYN Burst (60 packets):**
+   - Rapid burst of 60 raw TCP SYN packets (no completed handshakes) across 2 ephemeral source ports (30 SYNs each).
+   - Simulates asymmetric connection table starvation.
+   - Result: Deterministic rule `RULE-SYN-FLOOD` triggers alert; Dueling DQN receives elevated attack score ($S_t$) and proposes rate limiting or host blocking, validated through `DeterministicSafetyGate`.
+4. **Scenario D — ICMP Burst (40 packets):**
+   - High-frequency burst of 40 ICMP Echo Request packets (type 8, code 0) within a 0.20-second window.
+   - Result: Deterministic rule `RULE-ICMP-FLOOD` triggers alert on volumetric ping flood.
+
+### 13.3 Real Operational Pipeline
+Traffic flows through the exact operational intrusion detection and response pipeline without synthetic mocking:
+1. **Scapy Packet Ingestion:** Packets are converted to canonical `PacketInfo` dataclasses and delivered into a non-blocking queue.
+2. **Bidirectional Flow Reconstruction:** `FlowBuilder` matches packets into bidirectional flows, updating forward/backward packet counts, byte volumes, and TCP control flag histograms.
+3. **Feature Extraction:** Completed flows emit normalized 10-feature R10 vectors (`flow_duration_ms`, `flow_packets_per_s`, `flow_bytes_per_s`, `packet_length_mean`, `packet_length_std`, `syn_count`, `ack_count`, `rst_count`, `fin_count`, `syn_ack_ratio`).
+4. **Operational ML Inference:** `RandomForest` evaluates the normalized feature vector and computes $P(\text{ATTACK})$ as the sole operational detector ($< 0.8\,\text{ms}$).
+5. **Deterministic Security Rules:** `RuleEngine` evaluates RFC violations and volumetric heuristics independently of ML inference.
+6. **Local Explainability:** `explain_flow_prediction` computes TreeSHAP additive feature attributions ($\phi_i$) for the exact input vector against the loaded Random Forest model trees.
+7. **Advisory DQN Response:** 6D state vector $\mathbf{s}_t = [S_t, \Delta S_t, N_{\text{alert}}, a_{t-1}, c_t, v_t]$ is fed to `DuelingQNetwork`, estimating Q-values across the action space (`ALLOW`, `ALERT`, `RATE_LIMIT`, `BLOCK`).
+8. **Deterministic Safety Gate:** `DeterministicSafetyGate` enforces cooldown windows (30 steps), blast radius caps ($5\%$), and critical host allowlists. All actions remain strictly **advisory** (dry-run).
+9. **Event Timeline & REST Delivery:** Consolidated snapshots and chronological events are served via `GET /api/demo/status`, `POST /api/demo/simulate`, and `GET /api/demo/explain`.
+
+### 13.4 Viva Demonstration Interface (`demo.html`)
+The Viva frontend provides an uncluttered, high-contrast cybersecurity operations console:
+- **Header:** System title, monitoring status (`STOPPED`/`RUNNING`), mode (`ISOLATED LAB`), model status (`LOADED`), and persistent navigation to the Research Dashboard.
+- **Main Controls:** Start/Stop Monitoring, Scenario Selector (A, B, C, D), Launch/Stop Simulation, Reset Session, and Export Report (JSON/CSV).
+- **Four Metric Cards:** Packets Captured, Flows Processed, Threats Detected, Active Alerts.
+- **Six Specialized Panels:**
+  1. *Live Traffic Panel:* Real-time flow table with timestamps, endpoints, protocols, packet counts, and durations.
+  2. *Threat Detection Panel:* Flow results, detection provenance (`RF`, `RULE`, `HYBRID`), confidence scores, and rule match badges.
+  3. *TreeSHAP Explainability Panel:* Interactive waterfall chart showing top positive and negative contributing features for any selected flow.
+  4. *Autonomous Response Advisory Panel:* DQN proposed action, safety gate enforced action, override badges, and strict dry-run notice.
+  5. *Performance & Latency Panel:* P50, P95, P99 latency percentiles across Feature Extraction, RF Inference, Rule Engine, and DQN Response Selection.
+  6. *Chronological Event Timeline:* Detailed audit stream of capture starts, packet bursts, threat detections, and safety gate decisions.

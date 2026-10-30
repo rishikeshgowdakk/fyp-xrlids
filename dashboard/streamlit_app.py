@@ -58,7 +58,7 @@ with st.sidebar:
     st.divider()
 
     st.subheader("⚙️ System Status")
-    st.markdown("**Perception Model:** `XGBoost Champion / RF`")
+    st.markdown("**Perception Model:** `Random Forest (Sole Operational Detector)`")
     st.markdown("**Feature Contract:** `R10 Canonical`")
     st.markdown("**Response Mode:** `Advisory (Dry-Run)`")
     st.markdown("**Kernel Mutations:** `DISABLED (Safe)`")
@@ -119,10 +119,11 @@ c1, c2, c3, c4 = st.columns(4)
 
 with c1:
     st.info("#### 1. Perception Tier\n"
-            "- **Models:** Random Forest & XGBoost\n"
-            "- **Contract:** R10 & R4 canonical features\n"
+            "- **Model:** Random Forest (Sole Operational Detector)\n"
+            "- **Research Candidate:** XGBoost Benchmark (Offline)\n"
+            "- **Contract:** R10 canonical features (10 flows)\n"
             "- **Output:** Continuous threat score $P(\\text{ATTACK})$\n"
-            "- **Inference:** Sub-millisecond CPU speed")
+            "- **Inference:** Sub-millisecond CPU speed (~0.12 ms)")
 
 with c2:
     st.warning("#### 2. Rule & Tracking Tier\n"

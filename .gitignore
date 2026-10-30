@@ -48,6 +48,8 @@ results/**/predictions_test.csv
 !results/experiments/EXP-P1-CSE2018-R10-MULTI-001/*.pt
 !results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/*.joblib
 !results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/*.pt
+!results/experiments/EXP-P2-LSTM-VALID-001/*.joblib
+!results/experiments/EXP-P2-LSTM-VALID-001/*.pt
 !results/phase2/EXP-P2B-DQN-001/checkpoints/**/best_model.pt
 results/phase2/**/checkpoint_step_*.pt
 results/phase2/**/ablation_checkpoints/**

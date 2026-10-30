@@ -26,7 +26,7 @@ with col1:
     The system processes incoming traffic through four coordinated stages:
 
     1. **Ingestion & Flow Construction:** Packets captured via Scapy or PCAP replay are mapped into bidirectional 5-tuple flows. Upon connection termination (TCP FIN/RST) or 120s timeout, canonical $R_{10}$ features are extracted and validated against strict schema contracts.
-    2. **Perception & Parallel Detection:** The primary machine learning champion detector (Random Forest or XGBoost) computes continuous threat posterior $P(\\text{ATTACK}) \\in [0, 1]$. In parallel, the deterministic Rule Engine evaluates protocol invariants (RFC 793/1122).
+    2. **Perception & Parallel Detection:** The primary operational machine learning detector (Random Forest) computes continuous threat posterior $P(\\text{ATTACK}) \\in [0, 1]$. In parallel, the deterministic Rule Engine evaluates protocol invariants (RFC 793/1122).
     3. **Hybrid Arbitration & Source Tracking:** The Hybrid Decision Engine reconciles statistical model predictions and protocol rule violations. The Source Activity Tracker aggregates threat history across a 60s sliding window.
     4. **Local Explainability & Autonomous Response:** TreeSHAP calculates local feature contributions for significant threats. The Dueling DQN policy maps a 6D causal state to optimal response actions, validated by the Deterministic Safety Gate.
     """)
@@ -34,14 +34,15 @@ with col1:
 with col2:
     st.subheader("Model Artifact Provenance")
     st.markdown("""
-    - **Random Forest Models:**
+    - **Random Forest (Operational Classifier):**
       - `cicids2017` ($F_1 = 0.9512$, $N = 355\\text{k}$)
       - `cse2018` ($F_1 = 0.8861$, $N = 1.66\\text{M}$)
-      - `unswnb15` ($F_1 = 0.8548$, $N = 24.5\\text{k}$)
-    - **XGBoost Candidate Models:**
-      - Native JSON serialization, 40-100x smaller disk footprint
-      - Sub-millisecond CPU latency (0.12 ms)
-    - **DQN Policy Networks:**
+      - `unswnb15` ($F_1 = 0.8546$, $N = 24.5\\text{k}$)
+      - `cse2018_tuesday_flood` ($F_1 = 0.9977$, $N = 8,726$)
+    - **Offline Research Sequence & Candidate Models:**
+      - XGBoost Candidate Benchmark (JSON serialization, 0.12 ms latency)
+      - PyTorch LSTM (`EXP-P2-LSTM-VALID-001`, $F_1 = 0.9996$, $N = 8,726$)
+    - **DQN Response Policy:**
       - Checkpoint: `models/dqn/dqn_4action_best.pt`
       - Backbone: 2-layer MLP (64, 64) with LayerNorm
     """)
@@ -49,8 +50,8 @@ with col2:
 st.divider()
 st.subheader("Subsystem Matrix")
 subsystems = [
-    {"Subsystem": "Perception Tier", "Technology": "Random Forest / XGBoost", "Latency": "< 0.2 ms", "Contract": "R10 / R4", "Status": "ONLINE"},
-    {"Subsystem": "Explainability Tier", "Technology": "TreeSHAP (Lundberg & Lee)", "Latency": "~ 8 ms", "Contract": "Exact Shapley", "Status": "ONLINE"},
+    {"Subsystem": "Perception Tier", "Technology": "Random Forest (Sole Operational Detector)", "Latency": "< 0.8 ms", "Contract": "R10 / R4", "Status": "ONLINE"},
+    {"Subsystem": "Explainability Tier", "Technology": "TreeSHAP (Lundberg & Lee)", "Latency": "~ 8-27 ms", "Contract": "Exact Shapley", "Status": "ONLINE"},
     {"Subsystem": "Rule Engine", "Technology": "Deterministic Protocol Rules", "Latency": "< 0.01 ms", "Contract": "RFC 793/1122", "Status": "ONLINE"},
     {"Subsystem": "Source Tracker", "Technology": "Sliding Window Buffer", "Latency": "< 0.05 ms", "Contract": "5 flows / 60s", "Status": "ONLINE"},
     {"Subsystem": "Response Policy", "Technology": "Dueling Deep Q-Network", "Latency": "~ 0.5 ms", "Contract": "6D Causal State", "Status": "ONLINE"},

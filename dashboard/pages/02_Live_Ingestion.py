@@ -52,9 +52,10 @@ col_cfg, col_stats = st.columns([1, 1])
 
 with col_cfg:
     st.subheader("🛠️ Ingestion Source Configuration")
-    source_type = st.radio("Select Ingestion Mode", ["PCAP File Replay", "Live Interface Sniffing (Scapy)"], horizontal=True)
+    source_type = st.radio("Select Ingestion Mode", ["Live Interface Sniffing (Scapy)", "PCAP File Replay", "Sample Traffic Generator (Demo)"], horizontal=True)
 
     if source_type == "PCAP File Replay":
+        st.info("📂 **Mode: PCAP FILE REPLAY** — Streams authentic pre-recorded packet traces through the flow assembler.")
         default_pcap = REPO_ROOT / "data" / "demo" / "sample_traffic.pcap"
         pcap_path = st.text_input("PCAP File Path", value=str(default_pcap))
         
@@ -69,8 +70,10 @@ with col_cfg:
             if not target_file.exists():
                 st.error(f"PCAP file not found: {target_file}")
             else:
+                from xrlids.capture.scapy_service import ScapyCaptureConfig
                 flow_builder = CanonicalFlowBuilder(idle_timeout_s=120.0)
-                service = ScapyCaptureService()
+                cfg = ScapyCaptureConfig(pcap_path=target_file, queue_size=5000)
+                service = ScapyCaptureService(cfg)
                 
                 with st.spinner("Replaying packets through canonical flow assembler..."):
                     t0 = time.perf_counter()
@@ -82,12 +85,21 @@ with col_cfg:
                             pipeline.process_flow(f)
 
                     pkt_count = 0
-                    limit = int(max_packets) if max_packets > 0 else None
-                    for pkt in service.replay_pcap(target_file, max_packets=limit):
-                        pkt_count += 1
-                        newly_completed = flow_builder.process_packet(pkt)
-                        for f in newly_completed:
-                            on_flow_done(f)
+                    limit = int(max_packets) if max_packets > 0 else 100000
+                    service.start()
+                    t_start = time.time()
+                    while service.is_running or not service._queue.empty():
+                        pkt = service.get_packet(timeout=0.1)
+                        if pkt is not None:
+                            pkt_count += 1
+                            newly_completed = flow_builder.process_packet(pkt)
+                            for f in newly_completed:
+                                on_flow_done(f)
+                            if pkt_count >= limit:
+                                break
+                        if time.time() - t_start > 15.0:
+                            break
+                    service.stop()
                     
                     # Flush remaining active flows
                     flushed = flow_builder.flush_all()
@@ -98,8 +110,44 @@ with col_cfg:
                     st.session_state.replayed_flows = completed_flows
                     st.success(f"Successfully processed {pkt_count} packets into {len(completed_flows)} completed flows in {elapsed*1000:.1f} ms!")
 
+    elif source_type == "Sample Traffic Generator (Demo)":
+        st.info("🧪 **Mode: SAMPLE TRAFFIC GENERATOR** — Synthesizes controlled calibrated packets in-memory for testing.")
+        from xrlids.demo.scapy_simulator import SCENARIOS
+        scenario_choice = st.selectbox(
+            "Select Calibrated Scenario",
+            list(SCENARIOS.keys()),
+            format_func=lambda k: f"{SCENARIOS[k]['title']} ({SCENARIOS[k]['category']})",
+        )
+        st.caption(SCENARIOS[scenario_choice]["description"])
+        auto_eval_sample = st.checkbox("Auto-Evaluate via Active Pipeline", value=True, key="eval_sample")
+
+        if st.button("🚀 Generate & Process Sample Packets", type="primary"):
+            from xrlids.demo.scapy_simulator import generate_scenario_packets
+            with st.spinner("Generating Scapy packets and assembling flows..."):
+                t0 = time.perf_counter()
+                pkts = generate_scenario_packets(scenario_choice)
+                flow_builder = CanonicalFlowBuilder(idle_timeout_s=120.0)
+                completed_flows = []
+
+                for pkt in pkts:
+                    newly_completed = flow_builder.process_packet(pkt)
+                    for f in newly_completed:
+                        completed_flows.append(f)
+                        if auto_eval_sample:
+                            pipeline.process_flow(f)
+
+                flushed = flow_builder.flush_all()
+                for f in flushed:
+                    completed_flows.append(f)
+                    if auto_eval_sample:
+                        pipeline.process_flow(f)
+
+                elapsed = time.perf_counter() - t0
+                st.session_state.replayed_flows = completed_flows
+                st.success(f"Generated {len(pkts)} Scapy packets and assembled {len(completed_flows)} completed flows in {elapsed*1000:.1f} ms!")
+
     else:
-        st.info("Live capture uses Scapy socket sniffing. Administrative privileges (`CAP_NET_RAW` / `sudo`) are required to open raw promiscuous sockets on physical interfaces.")
+        st.info("🌐 **Mode: LIVE INTERFACE SNIFFING** — Uses Scapy socket sniffing. Administrative privileges (`CAP_NET_RAW` / `sudo`) are required to open raw promiscuous sockets on physical interfaces.")
         cap_service = ScapyCaptureService()
         has_perm, perm_msg = cap_service.verify_permissions()
         

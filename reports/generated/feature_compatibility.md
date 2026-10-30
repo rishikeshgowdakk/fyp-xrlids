@@ -56,3 +56,4 @@ Column-map status: `verified_audited`.
 | `idle_mean_ms` | mean(idle_period) * 1000 | ms | No | informational |
 | `subflow_fwd_bytes` | subflow_fwd_bytes | bytes | No | informational |
 | `subflow_bwd_bytes` | subflow_bwd_bytes | bytes | No | informational |
+| `inter_flow_delta_s` | min(max(t_start(f_i) - t_start(f_{i-1}), 0.0), 300.0) | s | Yes | informational |

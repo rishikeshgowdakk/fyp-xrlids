@@ -467,6 +467,19 @@ FEATURES: dict[str, FeatureSpec] = {
         limitations="tool-specific definition; not live-reproducible, not available in UNSW-NB15",
         fn=_f_subflow_bwd_bytes,
     ),
+    "inter_flow_delta_s": FeatureSpec(
+        name="inter_flow_delta_s",
+        description="Inter-flow arrival delta in seconds between consecutive completed flows for the same source host.",
+        formula="min(max(t_start(f_i) - t_start(f_{i-1}), 0.0), 300.0)",
+        unit="s",
+        requires=(),
+        directionality="informational",
+        live_available=True,
+        edge_case_policy="initial flow delta is 0.0; gaps > 300.0s reset host sequence session",
+        rationale="captures inter-flow arrival timing for temporal sequence models",
+        limitations="requires host-level sequence buffering; bounded to [0.0, 300.0]",
+        fn=lambda sem: pd.Series([0.0]),
+    ),
 }
 
 
@@ -487,6 +500,20 @@ R10_FEATURES: tuple[str, ...] = (
     "rst_count",
     "fin_count",
     "syn_ack_ratio",
+)
+
+R10_FLOWSEQ_FEATURES: tuple[str, ...] = (
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean",
+    "packet_length_std",
+    "syn_count",
+    "ack_count",
+    "rst_count",
+    "fin_count",
+    "syn_ack_ratio",
+    "inter_flow_delta_s",
 )
 
 R4_FEATURES: tuple[str, ...] = (

@@ -1,8 +1,9 @@
-# XRL-IDARS Research Evaluation Workbench
+# XRL-IDARS Operational Dashboards & Research Workbench
 
-A zero-dependency web interface and forensic evaluation workbench for the **Explainable Reinforcement Learning-Based Intrusion Detection and Autonomous Response System (XRL-IDARS)**.
+XRL-IDARS provides two complementary dashboard interfaces:
 
-The interface is structured as an authoritative **Research Evaluation Workbench**, prioritizing genuine held-out evaluation outputs, statistical confidence bounds, and candid empirical findings over synthetic demonstrations.
+1. **🛡️ Primary Operational Command Center (Streamlit)**: High-level operational command center running on port 8501 (`dashboard/streamlit_app.py` with 8 dedicated sub-pages in `dashboard/pages/01_Overview.py` through `08_System_Telemetry.py`). Integrates real-time Scapy sniffing, PCAP replay, sample traffic generation, Random Forest detection, Lundberg TreeSHAP explanations, RFC protocol rules, multi-flow source tracking, and Dueling DQN response recommendations.
+2. **🔬 Supplementary Research Workbench & Demo Interface (Pure-Python)**: Zero-dependency web server running on port 8000 (`dashboard/server.py`, `dashboard/index.html`, `dashboard/demo.html`, `dashboard/app.js`). Prioritizes full held-out benchmark evaluations, multi-model comparisons, runtime microbenchmarks, and 2-minute live exhibition demonstration scenarios.
 
 ---
 
@@ -104,17 +105,21 @@ Designed for live exhibition visitors and demonstrations to present a clean, unf
 
 ## 🚀 Quick Start
 
+### 1. Launch Primary Operational Dashboard (Streamlit)
 ```bash
 # Activate virtual environment
 source .venv/bin/activate
 
-# Launch the Research Workbench & Demonstration Server (default port 8000)
-python dashboard/server.py
-
-# Or use the convenience script:
-./run.sh dashboard
+# Launch Streamlit Operational Command Center (default port 8501)
+streamlit run dashboard/streamlit_app.py --server.port 8501
 ```
+- **Primary Operational Dashboard**: [http://127.0.0.1:8501](http://127.0.0.1:8501)
 
+### 2. Launch Supplementary Research Workbench & Demo (Pure-Python)
+```bash
+# Launch the Pure-Python Research Workbench & Demonstration Server (default port 8000)
+python dashboard/server.py
+```
 - **Live Demonstration Page**: [http://127.0.0.1:8000/demo.html](http://127.0.0.1:8000/demo.html)
 - **Full Research Workbench**: [http://127.0.0.1:8000/index.html](http://127.0.0.1:8000/index.html)
 
