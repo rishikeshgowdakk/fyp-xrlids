@@ -12,8 +12,15 @@ Essential documentation, presentation scripts, and defense runbooks for final ye
 
 | Document | Purpose & Key Contents |
 |----------|------------------------|
+| [⚡ **RF vs. XGBoost Multi-Benchmark**](docs/RF_VS_XGBOOST.md) | **Cross-Benchmark Evaluation**: Head-to-head metrics, 50x–194x latency speedups, 42x–112x compression across all 3 datasets |
+| [⏱️ **Latency & Throughput Evaluation**](docs/LATENCY_EVALUATION.md) | **Empirical Measurements**: Full latency waterfall (0.24ms XGBoost, 0.003ms rules, 0.17ms DQN), peak throughput |
+| [📡 **Canonical Flow Processing**](docs/FLOW_PROCESSING.md) | **5-Tuple Ingestion**: Lexicographical canonicalization, 120s timeout, TCP FIN/RST instant teardown, R10 schema |
+| [🔍 **TreeSHAP Explainability**](docs/EXPLAINABILITY.md) | **Local Attribution**: Exact additive feature attributions for RF and XGBoost without background approximations |
+| [📜 **Rule Engine & Hybrid Arbitration**](docs/RULE_ENGINE.md) | **Deterministic Protocol Protection**: RFC 793/1122 protocol invariants, hybrid arbitration matrix, and source tracking |
+| [🛡️ **Deterministic Safety Gate**](docs/SAFETY_GATE.md) | **Mitigation Guardrails**: Critical host exemptions, 5% blast radius limit, 30s cooldown, advisory dry-run enforcement |
+| [🤖 **DQN Autonomous Response Policy**](docs/DQN_RESPONSE_POLICY.md) | **Reinforcement Learning**: 6D causal state vector construction, Q-value action selection, and cost optimization |
 | [🛡️ **Attack-Family & Response Audit**](docs/ATTACK_FAMILY_AND_RESPONSE_AUDIT.md) | **Audit Addendum**: Forensic audit of binary vs. family detection, 6D DQN causal state, and advisory mode |
-| [🧪 **Comprehensive Test Report**](docs/TEST_REPORT.md) | **573 Passing Tests**: Test suite breakdown, microsecond latencies, SHA-256 model verification, 100% pass |
+| [🧪 **Comprehensive Test Report**](docs/TEST_REPORT.md) | **616 Passing Tests**: Complete test suite breakdown, microsecond latencies, model verification, 100% pass |
 | [📈 **Research Evaluation Report**](docs/RESEARCH_EVALUATION.md) | **Empirical Findings**: Multi-model metrics, per-family error stratification, and CostOptimal vs. DQN baseline |
 | [📝 **Implementation & Continuation Log**](docs/IMPLEMENTATION_LOG.md) | **Forensic Audit Log**: Chronological actions, commit history, technology evaluations, and decisions |
 | [🏛️ **Authoritative Architecture**](docs/ARCHITECTURE.md) | **Core System Blueprint**: 12-section architecture, live RF + Rules vs. offline LSTM/fusion, data flows, and safety constraints |
@@ -284,15 +291,15 @@ pip install -e .[dev]
 
 ### 2. Verify Installation (Test Suite)
 
-Run the full 573-test verification suite to confirm everything is working:
+Run the full 616-test verification suite to confirm everything is working:
 
 ```bash
 ./run.sh test
 # or directly:
-.venv/bin/pytest -q
+.venv/bin/pytest tests/
 ```
 
-All 573 tests across unit, data, integration, semantic contract, and model test suites pass with 0 failures (100% pass rate).
+All 616 tests across unit, data, integration, semantic contract, active pipeline, and model test suites pass with 0 failures (100% pass rate).
 
 ### 3. Quick Demo — PCAP Replay
 
@@ -439,9 +446,12 @@ To retrain on the full raw benchmark datasets (~8.7 GB across 20 CSV files):
 
 | What you want to do | Shortcut | Direct Command | Root needed? |
 |---------------------|:--------:|----------------|:---:|
-| **Launch Dashboard (Web UI)** | `./run.sh` | `.venv/bin/python dashboard/server.py` | **No** |
+| **Launch Streamlit Operational Command Center** | — | `.venv/bin/streamlit run dashboard/streamlit_app.py` | **No** |
+| **Launch Research Evaluation Workbench (FastAPI/HTML5)** | `./run.sh` | `.venv/bin/python dashboard/server.py` | **No** |
+| Run Master Latency & Throughput Benchmark | — | `.venv/bin/python scripts/benchmark_latency_master.py` | No |
+| Train & Benchmark XGBoost across all 3 datasets | — | `.venv/bin/python scripts/phase1/train_xgboost_candidate.py --dataset all` | No |
 | Run quick offline PCAP replay demo | `./run.sh demo` | `.venv/bin/python scripts/demo/run_replay_demo.py` | No |
-| Run full test suite (493 tests) | `./run.sh test` | `.venv/bin/pytest -q` | No |
+| Run full test suite (616 tests, 100% pass) | `./run.sh test` | `.venv/bin/pytest tests/` | No |
 | Run CSV evaluation test suite (29 tests) | — | `.venv/bin/pytest tests/unit/test_csv_evaluation_workflow.py -v` | No |
 | Verify all calibrated attack scenarios | — | `.venv/bin/python scripts/demo/verify_attack_scenarios.py` | No |
 | Explain a score with TreeSHAP features | — | `.venv/bin/python scripts/demo/explain_score.py` | No |

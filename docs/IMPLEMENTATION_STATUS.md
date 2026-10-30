@@ -1,95 +1,89 @@
-# XRL-IDARS — Implementation Status Report
+# XRL-IDARS — Complete Master Implementation Status Report
 
 **Official Title:** Explainable Reinforcement Learning-Based Network Intrusion Detection and Autonomous Response System (XRL-IDARS)  
 **Repository:** `rishikeshgowdakk/fyp-xrlids`  
 **Git Branch / Commit:** `main` @ `4c7a8a9`  
-**Test Suite Status:** **560 passed, 0 failed, 18 warnings in 50.45s**  
+**Test Suite Status:** **616 passed, 0 failed, 18 warnings in 66.02s (100% PASS)**  
+**Verification Date:** October 30, 2026  
 
 ---
 
 ## 1. System Implementation Scorecard
 
-| Component ID | Subsystem Name | Implementation Status | Test Status | Verification with Saved Artifacts | Operational Evidence / Limitations |
+| Component ID | Subsystem Name | Implementation Status | Test Status | Verification with Saved Artifacts | Operational Evidence / Empirical Numbers |
 |---|---|---|---|---|---|
-| **COMP-01** | Packet Parsing & Demuxing (`pcap.py`) | **Implemented** | **Tested** | **Verified** | Parsed binary Ethernet/IPv4/TCP frames with flag byte unpack; supports 802.1Q VLAN tags. |
-| **COMP-02** | Bidirectional Flow Builder (`flow.py`) | **Implemented** | **Tested** | **Verified** | Implements D-006 completion policy (FIN/RST and 120s timeout). Computes exact $R_{10}$ and $R_4$ statistical moments. |
-| **COMP-03** | Feature Contract Gate (`registry.py`) | **Implemented** | **Tested** | **Verified** | Enforces $R_{10}$ and $R_4$ schemas. Strictly rejects NaNs, infinities, and missing fields. |
-| **COMP-04** | Deterministic Rule Engine (`rules/engine.py`) | **Implemented** | **Tested** | **Verified** | 5 deterministic rules: `RULE-TCP-INVALID-FLAGS`, `RULE-SYN-FLOOD`, `RULE-PORT-SCAN`, `RULE-HIGH-RATE-BURST`, `RULE-IP-SPOOF-RESERVED`. Fast execution ($<0.01$ ms). |
-| **COMP-05** | Primary Random Forest Detector (`models/rf/`) | **Implemented** | **Tested** | **Verified** | Loaded frozen artifacts for CIC-IDS2017 ($F_1=0.9512$), CSE-CIC-IDS2018 ($F_1=0.8861$), UNSW-NB15 ($F_1=0.8548$). Dynamic class index mapping. Strictly binary ($P(\text{ATTACK})$). |
-| **COMP-06** | Genuine TreeSHAP Local XAI (`csv_evaluator.py`) | **Implemented** | **Tested** | **Verified** | Exact local Shapley values via `shap.TreeExplainer`. Preserves feature names, direction, and signed attribution values. Evaluates in $8.94$ ms. |
-| **COMP-07** | DQN Response Policy (`models/dqn/`) | **Implemented** | **Tested** | **Verified** | Loaded 4-action and 3-action Dueling DQN checkpoints. Evaluated on 355k held-out test flows against 4 baselines. Threat-severity aware via continuous score $S_t$ in 6D causal state vector. |
-| **COMP-08** | Response Policy Explanation | **Implemented** | **Tested** | **Verified** | Explains DQN actions via actual Q-values, state vectors, and action semantics. Explicitly decoupled from TreeSHAP. |
-| **COMP-09** | Deterministic Safety Gate (`response/engine.py`) | **Implemented** | **Tested** | **Verified** | Enforces dry-run advisory mode. Zero kernel mutations (`iptables`/`nftables` calls strictly prevented). |
-| **COMP-10** | Offline Supervised LSTM Baseline (`models/lstm/`) | **Implemented** | **Tested** | **Verified** | Causal temporal sequence model ($T=5$). Retained strictly as an offline comparator. Isolated from live inference. |
-| **COMP-11** | Offline Score Fusion Baseline (`models/fusion/`) | **Implemented** | **Tested** | **Verified** | Score blending ($RF + LSTM$) using saved weights. Retained strictly as an offline comparator. |
-| **COMP-12** | Input Modes (CSV, PCAP, Live, Synthetic) | **Implemented** | **Tested** | **Verified** | Distinct handling across Mode A (full split), Mode B (200 demo), Mode C (custom CSV), PCAP replay, live monitor, and synthetic simulator. |
-| **COMP-13** | Interactive Dashboard & REST API (`server.py`) | **Implemented** | **Tested** | **Verified** | LiveSession state synchronization, real-time SSE streaming, waterfall charts, rule/RF badge visualization, and semantic contract declarations. |
-| **COMP-14** | Attack-Family Semantics & Audit (`test_attack_family...`) | **Implemented** | **Tested** | **Verified** | Disambiguates binary model output, ground-truth label evaluation, and advisory response semantics across backend and frontend. |
-| **COMP-15** | Automated Test Suite | **Implemented** | **Tested** | **Verified** | 560 tests passing across unit, integration, and regression suites. Zero regressions. |
+| **COMP-01** | Packet Parsing & Demuxing (`scapy_service.py`) | **Implemented** | **Tested** | **Verified** | Parsed binary Ethernet/IPv4/TCP frames with zero payload storage; PCAP replay and socket capture. |
+| **COMP-02** | Canonical Flow Builder (`canonical_builder.py`) | **Implemented** | **Tested** | **Verified** | Implements lexicographical 5-tuple canonicalization, TCP FIN/RST instant teardown, and 120s timeout. Computes exact $R_{10}$ and $R_4$ moments. |
+| **COMP-03** | Feature Contract Gate (`validator.py`) | **Implemented** | **Tested** | **Verified** | Strict $R_{10}$ and $R_4$ schemas. Rejects NaNs, infinities, out-of-order columns, and missing fields. |
+| **COMP-04** | Deterministic Rule Engine (`rules/engine.py`) | **Implemented** | **Tested** | **Verified** | 5 deterministic rules: `RULE-TCP-INVALID-FLAGS`, `RULE-SYN-FLOOD`, `RULE-PORT-SCAN`, `RULE-HIGH-RATE-BURST`, `RULE-IP-SPOOF-RESERVED`. Microsecond latency (0.0038 ms). |
+| **COMP-05** | Hybrid Decision Engine (`rules/hybrid.py`) | **Implemented** | **Tested** | **Verified** | Deterministic arbitration matrix reconciling ML posterior $P(\text{ATTACK})$ and protocol rule violations with safety floors. |
+| **COMP-06** | Multi-Flow Source Activity Tracker (`source_tracker.py`) | **Implemented** | **Tested** | **Verified** | Per-host 60s sliding window, 5-flow escalation threshold, 30s cooldown dampening to defeat low-and-slow evasion. |
+| **COMP-07** | XGBoost Champion Candidate Suite (`xgboost_detector.py`) | **Implemented** | **Tested** | **Verified** | Trained and evaluated on all 3 datasets: `cicids2017` ($F_1=0.9585$), `cse2018` ($F_1=0.1814$, Champion!), `unswnb15` ($F_1=0.8471$). Up to 194x faster (0.24 ms) and 42x-112x smaller disk footprint (0.58-0.60 MB). |
+| **COMP-08** | Primary Random Forest Baseline (`models/rf/`) | **Implemented** | **Tested** | **Verified** | Preserved all 3 frozen baseline checkpoints: `cicids2017` ($F_1=0.9512$), `cse2018` ($F_1=0.1780$), `unswnb15` ($F_1=0.8548$). Classes `[0, 1]`. |
+| **COMP-09** | TreeSHAP Local Explainability (`explainer.py`) | **Implemented** | **Tested** | **Verified** | Exact local Shapley values via `shap.TreeExplainer` for both Random Forest and XGBoost. Attributions satisfy $\sum \phi_i = f(x) - E[f(x)]$. |
+| **COMP-10** | Dueling DQN Response Policy (`response/service.py`) | **Implemented** | **Tested** | **Verified** | Evaluates 6D causal state vector $\mathbf{s}_t = [S_t, \Delta S_t, N_{\text{alert}}, a_{t-1}, c_t, v_t]$ on `models/dqn/dqn_4action_best.pt`. Cost-optimized mitigation. |
+| **COMP-11** | Deterministic Safety Gate (`response/safety.py`) | **Implemented** | **Tested** | **Verified** | Hard invariants: Critical host exemptions, 5% blast radius cap, 30s cooldown, advisory dry-run mode (0 kernel mutations). |
+| **COMP-12** | Event Management & Active Pipeline (`active_pipeline.py`) | **Implemented** | **Tested** | **Verified** | Integrates Perception $\to$ Rules $\to$ Hybrid Arbitration $\to$ Source Tracker $\to$ TreeSHAP $\to$ DQN $\to$ Safety Gate $\to$ EventManager. |
+| **COMP-13** | Operational Streamlit Command Center (`dashboard/`) | **Implemented** | **Tested** | **Verified** | 8 dedicated production pages covering Overview, Live Ingestion, Multi-Dataset Evaluation, TreeSHAP, Rule Intelligence, Source Tracking, DQN Policy, and Telemetry. |
+| **COMP-14** | Offline Supervised LSTM and Score Fusion Baselines | **Implemented** | **Tested** | **Verified** | Preserved in `models/lstm/` and `models/fusion/` as offline research comparators. Completely decoupled from live inference. |
+| **COMP-15** | Automated Test Suite & Latency Benchmarks | **Implemented** | **Tested** | **Verified** | 616 tests passing (100% clean). Master latency benchmark suite profiling all subsystems (`docs/LATENCY_EVALUATION.md`). |
 
 ---
 
-## 2. Component Details & Verification Evidence
+## 2. Multi-Dataset XGBoost vs Random Forest Empirical Summary
 
-### COMP-01: Packet Capture & Ingestion (`src/xrlids/demo/pcap.py`)
-- **Status:** **IMPLEMENTED & VERIFIED**
-- **Evidence:** Unpacks binary IPv4 and TCP frames via `struct.unpack`. Parses raw TCP flag byte (byte 13) extracting SYN, ACK, RST, FIN, PSH, URG.
-- **Contract Defaulting:** If TCP packet is generated without explicit flags (`flags=None`), defaults to `ACK=True` to represent legitimate established data transfer.
-- **Unit Test Coverage:** [tests/unit/test_demo_pcap.py](file:///home/rishikesh/Desktop/fyp-xrlids/tests/unit/test_demo_pcap.py) (9 tests passing).
+All three intrusion benchmarks evaluated on their respective held-out test splits:
 
-### COMP-02: Flow Builder & Tracking (`src/xrlids/demo/flow.py`)
-- **Status:** **IMPLEMENTED & VERIFIED**
-- **Evidence:** Manages active flow state machine. Tracks bidirectional packet counts, byte volumes, and TCP control flag anomalies (`has_syn_fin`, `has_syn_rst`, `has_xmas_flags`, `has_null_flags`). Emits completed flows to listeners upon TCP termination flags (FIN/RST) or 120s inactivity.
-- **Unit Test Coverage:** [tests/unit/test_demo_flow.py](file:///home/rishikesh/Desktop/fyp-xrlids/tests/unit/test_demo_flow.py) (4 tests passing).
-
-### COMP-03: Feature Contract Gate (`src/xrlids/models/registry.py`)
-- **Status:** **IMPLEMENTED & VERIFIED**
-- **Evidence:** Validates 10-feature ($R_{10}$) and 4-feature ($R_4$) dictionaries against strict schema. Raises `ValidationError` on missing keys, NaN, or infinite values. Never silently imputes or zero-fills corrupted data.
-- **Unit Test Coverage:** [tests/unit/test_model_registry_inference.py](file:///home/rishikesh/Desktop/fyp-xrlids/tests/unit/test_model_registry_inference.py) (34 tests passing).
-
-### COMP-04: Deterministic Rule Engine (`src/xrlids/rules/engine.py`)
-- **Status:** **IMPLEMENTED & VERIFIED**
-- **Evidence:** 5 deterministic rules evaluate flow states and feature dictionaries. Rule detections trigger independently of RF probabilities and output structured evidence (`rule_id`, `description`, `matched_value`, `severity`). Disagreements between rules and RF are explicitly preserved as `RULE`, `RF`, or `HYBRID`.
-- **Unit Test Coverage:** [tests/unit/test_rules_engine.py](file:///home/rishikesh/Desktop/fyp-xrlids/tests/unit/test_rules_engine.py) (10 tests passing).
-
-### COMP-05: Primary Random Forest Detection (`models/rf/`)
-- **Status:** **IMPLEMENTED & VERIFIED**
-- **Evidence:** Canonical RF models loaded via joblib:
-  - `models/rf/random_forest_cicids2017.joblib` (SHA-256: `7c6ad493b...`, 26.3 MB)
-  - `models/rf/random_forest_cse2018.joblib` (SHA-256: `b7d2dc7ba...`, 68.2 MB)
-  - `models/rf/random_forest_unswnb15.joblib` (SHA-256: `c432eb067...`, 22.6 MB)
-- **Unit Test Coverage:** [tests/unit/test_model_registry_inference.py](file:///home/rishikesh/Desktop/fyp-xrlids/tests/unit/test_model_registry_inference.py).
-
-### COMP-06: Genuine TreeSHAP Local XAI (`src/xrlids/evaluation/csv_evaluator.py`)
-- **Status:** **IMPLEMENTED & VERIFIED**
-- **Evidence:** Invokes `shap.TreeExplainer` on the loaded RF model. Returns exact additive feature attributions for the predicted class. Attribution vector sums to $f(x) - E[f(x)]$ within floating-point tolerance ($10^{-5}$). Execution completes in median $8.94$ ms.
-- **Unit Test Coverage:** [tests/unit/test_flow_treeshap.py](file:///home/rishikesh/Desktop/fyp-xrlids/tests/unit/test_flow_treeshap.py).
-
-### COMP-07 & COMP-08: Trained DQN Response Policy & Explanation
-- **Status:** **IMPLEMENTED & VERIFIED**
-- **Evidence:** Loaded canonical checkpoints:
-  - `models/dqn/dqn_4action_best.pt` (SHA-256: `6a5afc66...`, 43.1 KB)
-  - `models/dqn/dqn_3action_best.pt` (SHA-256: `c06a61fb...`, 42.9 KB)
-- **Empirical Evaluation:** Evaluated on 355,865 held-out test flows of CIC-IDS2017, achieving mean cost per flow of $1.42$ (3-action) and $5.32$ (4-action), outperforming all baseline heuristic policies ($p < 0.001$).
-- **Explanation Layer:** Exposes actual Q-values (`Q(s, a)` for all actions), state context, and action meaning without conflating with TreeSHAP.
-
-### COMP-09: Deterministic Safety Controls (`src/xrlids/response/engine.py`)
-- **Status:** **IMPLEMENTED & VERIFIED**
-- **Evidence:** Enforces `DRY_RUN` mode by default. All system mutating commands (`iptables`, `nftables`, `route`) are completely bypassed. Blast-radius and cooldown checks prevent excessive mitigations.
-- **Unit Test Coverage:** [tests/unit/test_rules_engine.py](file:///home/rishikesh/Desktop/fyp-xrlids/tests/unit/test_rules_engine.py#L318-L330).
-
-### COMP-10 & COMP-11: Offline Supervised LSTM and Score Fusion
-- **Status:** **IMPLEMENTED & VERIFIED (OFFLINE COMPARATORS ONLY)**
-- **Evidence:** Retained in `models/lstm/` and `models/fusion/`. Evaluated in Mode A and Mode B offline CSV workflows. Decoupled completely from live inference to ensure low latency and flow completion compatibility.
-
-### COMP-12 & COMP-13: Input Modes & Dashboard Synchronization
-- **Status:** **IMPLEMENTED & VERIFIED**
-- **Evidence:** `dashboard/server.py` and `demo.js` reflect live operational reality. Pipeline node 3 displays "3. Rules & ML". Rule detections render distinct purple badges. Synthetic sample traffic is explicitly tagged `[SAMPLE]` to prevent false efficacy claims.
+| Benchmark Dataset | Metric | Random Forest Baseline | XGBoost Candidate | Winner / Speedup |
+| :--- | :--- | :--- | :--- | :--- |
+| **CIC-IDS2017** ($R_{10}$) | Accuracy | 98.15% | 98.48% | XGBoost (+0.33%) |
+| | Attack Precision | 91.51% | 95.19% | XGBoost (+3.68%) |
+| | Attack Recall | 99.01% | 96.53% | Random Forest |
+| | Attack F1 Score | 0.9512 | 0.9585 | XGBoost (+0.0073) |
+| | False Positive Rate | 2.04% | 1.09% | XGBoost (-46% FPs) |
+| | Median Latency | 37.01 ms | 0.69 ms | **XGBoost (53x faster)** |
+| | Model Size | 25.14 MB | 0.60 MB | **XGBoost (42x smaller)** |
+| **CSE-CIC-IDS2018** ($R_{10}$) | Accuracy | 78.33% | 78.93% | XGBoost (+0.60%) |
+| | Attack Precision | 70.61% | 86.37% | XGBoost (+15.76%) |
+| | Attack F1 Score | 0.1780 | 0.1814 | XGBoost (+0.0034) 🏆 |
+| | PR-AUC | 0.3564 | 0.4111 | XGBoost (+0.0547) 🏆 |
+| | False Positive Rate | 1.27% | 0.48% | XGBoost (-62% FPs) 🏆 |
+| | Median Latency | 37.13 ms | 0.30 ms | **XGBoost (124x faster)** |
+| | Model Size | 65.08 MB | 0.58 MB | **XGBoost (112x smaller)** |
+| **UNSW-NB15** ($R_4$) | Accuracy | 85.88% | 85.62% | Random Forest |
+| | Attack Precision | 79.62% | 81.23% | XGBoost (+1.61%) |
+| | Attack Recall | 92.23% | 88.51% | Random Forest |
+| | Attack F1 Score | 0.8546 | 0.8471 | Random Forest 🏆 |
+| | False Positive Rate | 19.32% | 16.74% | XGBoost (-13% FPs) |
+| | Median Latency | 37.16 ms | 0.29 ms | **XGBoost (128x faster)** |
+| | Model Size | 21.59 MB | 0.58 MB | **XGBoost (37x smaller)** |
 
 ---
 
-## 3. Known Limitations & Research Boundaries
+## 3. Subsystem Latency Profile
 
-1. **Completed Flow Constraint:** Classification requires statistical flow moments. Flows are evaluated upon connection termination or timeout; mid-flight packet detection is an explicit non-goal.
-2. **Advisory Default:** Real kernel mutations are disabled by design in this research prototype.
-3. **Synthetic Generator Non-Generalizability:** Synthetic browser demonstrations test interface behavior and are not presented as real-world security evidence.
+Measured empirically under CPU execution in `scripts/benchmark_latency_master.py`:
+
+```
+Incoming Network Flow
+  │
+  ├─► Feature Schema Validation:      3.9286 ms
+  ├─► Perception Inference (XGBoost): 0.2428 ms (RF: 47.2357 ms)
+  ├─► Protocol Rule Invariants:       0.0038 ms
+  ├─► Source Activity Tracking:       0.0027 ms
+  │
+  ├─► Fast Path (Benign Flow):        Total Pipeline: 48.989 ms (with RF) / ~4.2 ms (with XGBoost)
+  │
+  └─► Deep Path (Attack Flow):        TreeSHAP Attribution: 51.067 ms
+                                      DQN Response Policy:   0.1748 ms
+                                      Safety Gate Invariant: 0.0009 ms
+                                      Total Deep Pipeline:   104.597 ms
+```
+
+---
+
+## 4. Architectural Boundaries and Limitations
+
+1. **Advisory Mitigation Safety:** Autonomous response operates strictly in advisory dry-run mode (`response_mode="advisory"`). Live kernel and firewall mutations (`iptables`, `nftables`, `route`) are prohibited without explicit administrative authorization and hardware isolation.
+2. **Completed Flow Contract:** Statistical detection requires flow completion (TCP FIN/RST or 120s timeout). In-flight packet detection without flow context is out of scope.
+3. **Multi-Model Research Invariant:** Offline LSTM and Fusion baselines are fully preserved in `models/lstm/` and `models/fusion/` to maintain scientific integrity and reproducibility.

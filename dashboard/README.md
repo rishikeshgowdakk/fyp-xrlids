@@ -118,3 +118,25 @@ python dashboard/server.py
 - **Live Demonstration Page**: [http://127.0.0.1:8000/demo.html](http://127.0.0.1:8000/demo.html)
 - **Full Research Workbench**: [http://127.0.0.1:8000/index.html](http://127.0.0.1:8000/index.html)
 
+---
+
+## 🛡️ Streamlit Operational Command Center (Phase 12)
+
+Alongside the HTML5 Research Workbench, XRL-IDARS provides a comprehensive multi-page **Streamlit Command Center** covering end-to-end active pipeline operations:
+
+```bash
+# Launch Streamlit Command Center (port 8501)
+.venv/bin/streamlit run dashboard/streamlit_app.py
+```
+
+### 8 Dedicated Streamlit Operational Modules:
+1. `01_Overview.py`: Architecture KPIs, active pipeline health, and real-time security event stream.
+2. `02_Live_Ingestion.py`: Streaming PCAP replay controls, Scapy socket capture, and active canonical 5-tuple flow assembler.
+3. `03_Model_Evaluation.py`: Multi-dataset benchmark metrics (CIC-IDS2017, CSE-CIC-IDS2018, UNSW-NB15) with dynamic head-to-head RF vs XGBoost tables and latency speedups.
+4. `04_Explainability.py`: Interactive TreeSHAP local feature attribution explorer, waterfall rankings, and threat direction badges.
+5. `05_Rule_Intelligence.py`: Canonical RFC 793/1122 protocol rule catalog, packet simulator, and hybrid arbitration truth matrix.
+6. `06_Source_Tracking.py`: Per-host 60s sliding window table, active cooldown timers, and multi-flow escalation trigger simulation.
+7. `07_Response_Policy.py`: 6D causal state inputs, Dueling DQN Q-value bar charts, and Deterministic Safety Gate verification.
+8. `08_System_Telemetry.py`: End-to-end latency waterfall chart, searchable JSON audit trail, and export facilities.
+
+

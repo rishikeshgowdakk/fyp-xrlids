@@ -67,6 +67,7 @@ reports/figures/*
 # Logs
 *.log
 logs/
+results/audits/*.jsonl
 
 # OS / editor / local tools
 .DS_Store

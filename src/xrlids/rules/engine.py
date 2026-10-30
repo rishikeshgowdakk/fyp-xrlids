@@ -8,9 +8,10 @@ testable, and have zero dependencies on model weights or heuristics.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Callable, Sequence
+from typing import TYPE_CHECKING, Any, Callable, Sequence
 
-from xrlids.demo.flow import Flow
+if TYPE_CHECKING:
+    from xrlids.demo.flow import Flow
 
 
 @dataclass(frozen=True)
