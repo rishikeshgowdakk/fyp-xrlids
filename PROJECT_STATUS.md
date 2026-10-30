@@ -1,20 +1,37 @@
 # PROJECT STATUS
 
-Last updated: 2026-10-28
+Last updated: 2026-10-30
 Project: **XRL-IDARS v1** · Repository: `fyp-xrlids`
 
 ```text
-PHASE 1 — SCIENTIFICALLY FROZEN
-PHASE 2 — SCIENTIFICALLY FROZEN
-PHASE 3 — LABORATORY VALIDATION COMPLETE
-FINAL SYNTHESIS — COMPLETE
+PHASE 0 — BASELINE REPOSITORY AUDIT COMPLETE (docs/PROJECT_BASELINE.md)
+PHASE 1 — R10-FLOWSEQ SPECIFICATION & MODEL ACCEPTANCE COMPLETE (docs/research/)
+PHASE 2 — CORE DATA & FLOW ENGINE (READY TO EXECUTE)
+PHASE 3 — RF OPERATIONAL DETECTOR (PLANNED)
+PHASE 4 — OPTIONAL TEMPORAL LSTM (PLANNED)
+PHASE 5 — DETECTION & RESPONSE ENGINE (PLANNED)
+PHASE 6 — BACKEND & FRONTEND INTEGRATION (PLANNED)
+PHASE 7 — GENUINE END-TO-END DEMONSTRATION (PLANNED)
+PHASE 8 — FINAL EVALUATION & RELEASE READINESS (PLANNED)
 PRODUCTION DEPLOYMENT — NOT VALIDATED
 ```
 
-Phase: **PHASE 1 — SCIENTIFICALLY FROZEN · PHASE 2 — SCIENTIFICALLY FROZEN · PHASE 3 — LABORATORY VALIDATION COMPLETE · FINAL SYNTHESIS — COMPLETE · PRODUCTION DEPLOYMENT — NOT VALIDATED**
-Overall: **Phase 1 Research Frozen & Demonstration Foundation Verified (`EXP-P1-CIC2017-R10-001`). Phase 2 Scientifically Frozen (`11f32f658cde525300f8bc46088a0143e8329c21`) under pre-registered audit criteria across all stages 2A through 2E and held-out test evaluation (`EXP-P2-FINAL-TEST-001`). Phase 3 Laboratory Validation Complete across all subphases 3A through 3K (`EXP-P3K-STRESS-SECURITY-001`). Final research synthesis complete (`docs/final/FINAL_RESEARCH_REPORT.md`). Production deployment is not validated.**
+Phase: **PHASE 0 COMPLETE · PHASE 1 COMPLETE (R10-FlowSeq Approved, Parity Corrected, Multi-Dimensional Acceptance Policy, Fusion Removed) · PHASE 2 READY**
+Overall: **Phase 0 Baseline Repository Audit complete (`docs/PROJECT_BASELINE.md`, 602/602 tests passed). Phase 1 Data & Architecture Finalization complete with Option A (R10-FlowSeq) approved, offline/live TCP flag and packet length std parity mathematically resolved and verified via automated tests (`tests/unit/test_r10_flowseq_parity.py`), multi-dimensional LSTM acceptance policy codified, and RF-LSTM fusion formally removed from the approved architecture (`docs/research/MODEL_ACCEPTANCE_CRITERIA.md`). Random Forest certified as the standalone primary operational detector. Ready for Phase 2 Core Data and Flow Engine implementation.**
 
 Legend: ✅ done / verified · 🟡 implemented / empirically observed on partial data · ⛔ blocked on research decision · ⬜ planned / not started
+
+## Phase 1: Data & Architecture Finalization (Completed 2026-10-30)
+
+| Area | Status | Scope / Evidence |
+| --- | --- | --- |
+| Baseline Audit (Phase 0) | ✅ Complete | Complete repository discovery, artifact checksumming, dependency inventory, and 100% test pass (602 tests in 93.22s) (`docs/PROJECT_BASELINE.md`). |
+| Dataset Feasibility Matrix (Phase 1A) | ✅ Verified | Complete schema inspection across 20 CSV files ($7.68\,\text{GB}$). Confirmed CIC-IDS2017 and UNSW-NB15 lack timestamps/IPs. Confirmed CSE-CIC-IDS2018 `Thuesday-20-02-2018` ($7.95\,\text{M}$ rows, $4.05\,\text{GB}$) contains complete 5-tuple, 1-second timestamps, and verified LOIC-HTTP attack labels (`docs/research/TEMPORAL_DATASET_FEASIBILITY.md`). |
+| Temporal Data Semantics Audit (Phase 1B) | ✅ Audited & Verified | Complete empirical audit of all 7.95M flows. Discovered 81.9% of benign and 90.9% of attack flows exceed 1.0s duration (mean attack duration 11.89s). Flag counts in CSV are binary 0/1 indicators. Assigned NO-GO on raw packet rates without packet-level data. Proposed authentic `R10-FlowSeq` and `T8-FlowHost` contracts (`docs/research/TEMPORAL_DATA_SEMANTICS_AUDIT.md`). |
+| R10-FlowSeq Specification (Phase 1C) | ✅ Approved Specification | Finalized sequence semantics ($K=5$ flows per source host, start-time ordered, 300s session timeout, causal last-flow label). Verified 100% live/offline parity between CSV, R10 contract, and Scapy flow builder. Specified leakage-resistant chronological 70/15/15 splits with 300s purge gaps and 3-host unseen attacker hold-out (`docs/research/R10_FLOWSEQ_FINAL_SPECIFICATION.md`). |
+| Scientific Consistency & Parity (Phase 1D) | ✅ Verified & Tested | Verified binary TCP flag indicators ($\min(\text{count}, 1.0)$) preventing $120\sigma$ scaler out-of-distribution distortion; verified population standard deviation ($\text{ddof}=0$) on packet lengths; created automated parity tests (`tests/unit/test_r10_flowseq_parity.py`: 3 passed) (`docs/research/R10_FLOWSEQ_FINAL_SPECIFICATION.md`). |
+| Multi-Dimensional Model Acceptance (Phase 1D) | ✅ Formal Policy | Codified multi-dimensional evaluation (Acc, Prec, Rec, F1, PR-AUC, ROC-AUC, FPR $\le 1\%$, unseen-host $F1 \ge 0.85$, latency $< 20\,\text{ms}$, resources) on compatible sequence tasks without forcing single-flow outperformance over RF as sole criterion (`docs/research/MODEL_ACCEPTANCE_CRITERIA.md`). |
+| Fusion Removal | ✅ Formal Decision | Score fusion explicitly removed from approved architecture. Zero blended probabilities in operational pipeline. Random Forest functions completely independently (`docs/ARCHITECTURE.md`). |
 
 ## Attack-Family Capability & Autonomous Response Integrity (Addendum Verified 2026-10-30)
 

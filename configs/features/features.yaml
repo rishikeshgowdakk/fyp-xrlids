@@ -103,6 +103,7 @@ gate:
   idle_mean_ms:        {Q1_live: partial, Q2_cross_dataset: no, Q3_identity_leak: no, Q4_target_leak: no, Q5_metadata: no, Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: yes, Q10_justify: partial}
   subflow_fwd_bytes:   {Q1_live: no, Q2_cross_dataset: no, Q3_identity_leak: no, Q4_target_leak: no, Q5_metadata: no, Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no, Q10_justify: partial}
   subflow_bwd_bytes:   {Q1_live: no, Q2_cross_dataset: no, Q3_identity_leak: no, Q4_target_leak: no, Q5_metadata: no, Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no, Q10_justify: partial}
+  inter_flow_delta_s:  {Q1_live: yes, Q2_cross_dataset: partial, Q3_identity_leak: no, Q4_target_leak: no, Q5_metadata: no, Q6_unit: yes, Q7_improves: unverified, Q8_hurts_cross: unverified, Q9_cost: no, Q10_justify: yes}
 
 # ---------------------------------------------------------------------------
 # Per-dataset column maps: raw column -> semantic field.#   Entry forms:

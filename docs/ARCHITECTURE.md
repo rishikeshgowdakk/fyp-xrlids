@@ -32,7 +32,7 @@ Deliver a verified, measurable, and reproducible research prototype that combine
 3. **Verified Random Forest Live Detection:** Establish Random Forest as the primary operational ML detector on live flow features, verifying model-preprocessor compatibility and probability calibration.
 4. **Genuine Local Explainability:** Provide exact TreeSHAP feature attributions on Random Forest predictions using genuine model trees and actual input vectors, explicitly rejecting fabricated attributions or canned ranking substitutions.
 5. **Empirically Evaluated Response Policy:** Formulate autonomous incident response as a Markov Decision Process (MDP) and evaluate Deep Q-Network (DQN) recommendations against established baseline policies on identical held-out benchmark test sets.
-6. **Session-Buffered Multi-Model Integration & Safe Fallback:** Establish Random Forest as the primary operational ML detector on live flow features. For flows sharing an active session/host key, `UnifiedInferenceService` buffers a sliding window of $T=5$ consecutive flow vectors to evaluate PyTorch LSTM sequence classification and linear score fusion ($S_{\text{fusion}} = \alpha \cdot S_{\text{rf}} + (1-\alpha) \cdot S_{\text{lstm}}$). For isolated flows or warm-up periods ($T < 5$), the pipeline safely falls back to Random Forest alone without fabricating scores.
+6. **Decoupled Multi-Model Architecture & Safe Standalone Operation:** Establish Random Forest as the primary operational ML detector on live flow features (synchronous fast path, latency $< 1.0\,\text{ms}$). For hosts with ongoing activity, an asynchronous background worker maintains a causal sliding buffer of $K=5$ consecutive completed flows to compute an independent host-level anomaly score using an experimental PyTorch LSTM. Score fusion is explicitly excluded from the operational pipeline: both detectors report independent signals, guaranteeing that temporal buffering never blocks or delays flow-level detection.
 7. **Transparent Dashboard & Honest Mode Distinctions:** Visually and programmatically distinguish live network capture (`LIVE`), recorded trace replay (`PCAP`), held-out benchmark evaluation (`DATASET`), and in-memory attack simulation (`SAMPLE`).
 
 ---
@@ -43,7 +43,7 @@ Deliver a verified, measurable, and reproducible research prototype that combine
 - Pure-Python userland PCAP parsing and raw packet ingestion via AF_PACKET sockets or Scapy capture service.
 - Bidirectional flow aggregation and feature extraction adhering to the R10 and R4 semantic contracts.
 - Deterministic rule engine executing 5 explicit security rules.
-- Multi-model inference service unifying Random Forest single-flow inference, session-isolated sequence buffering, PyTorch LSTM evaluation, and validation-tuned convex score fusion.
+- Independent dual-detector inference architecture decoupling Random Forest single-flow inference (fast path) from host-level LSTM sequence evaluation (background path), with zero score-fusion dependencies.
 - TreeSHAP local explanations computing exact base values and signed feature attributions.
 - PyTorch Dueling DQN response policy evaluated under 3-action and 4-action action spaces.
 - Isolated network namespace (`netns`) container execution for safe dry-run response validation.
@@ -58,48 +58,53 @@ Deliver a verified, measurable, and reproducible research prototype that combine
 
 ---
 
-## 4. Target Architecture Diagram
+## 4. Approved Target Architecture Diagram (Independent Detection & Advisory Response)
 
 ```mermaid
 flowchart TD
-    subgraph LIVE_PATH["Operational Live / Replay Path (Real-Time Observational & Advisory)"]
-        direction TB
-        L1["Traffic Source: Raw AF_PACKET / Scapy Sniffer / Paced PCAP / Attack Sim"] --> L2["Packet Parser (Ethernet + IPv4 + TCP/UDP)"]
-        L2 --> L3["Bidirectional FlowBuilder (D-006 Policy: FIN/RST or 120s Idle)"]
-        L3 --> L4["Canonical Feature Extraction (R10 / R4 Contract)"]
-        
-        L4 --> L5A["Deterministic Rule Engine\n• RULE-TCP-INVALID-FLAGS\n• RULE-SYN-FLOOD\n• RULE-PORT-SCAN\n• RULE-HIGH-RATE-BURST\n• RULE-IP-SPOOF-RESERVED"]
-        L4 --> L5B["Unified Multi-Model Inference Service\n• Primary: Frozen Random Forest\n• Sliding Buffer: Per-Session History (T=5)\n• Recurrent: Supervised LSTM Sequence Model\n• Score Fusion: S_fusion = alpha*S_rf + (1-alpha)*S_lstm"]
-        
-        L5A --> L6["Evidence & Alert Aggregator\n(Labelled: RF, RF+LSTM_FUSION, RULE, HYBRID, or NONE)"]
-        L5B --> L6
-        
-        L5B -.-> L7["Explainability Engine\n(TreeSHAP Local Attributions on RF)"]
-        
-        L6 --> L8["Autonomous Response Policy\n(Dueling DQN Action Value Estimation on 6D Causal State)"]
-        L8 --> L9["Deterministic Safety Gate\n(Rate Limit, Cooldown, Blast Radius, Critical Host Allowlist)"]
-        L9 --> L10["Advisory Action Dispatcher\n(Dry-Run Default / Optional Lab Netns)"]
-        
-        L6 --> L11["Live Console & REST API\n(/api/live & /demo.html)"]
-        L7 --> L11
-        L10 --> L11
+    subgraph INGESTION["1. Network Ingestion Layer"]
+        A1["Traffic Source: Live Interface / PCAP Replay / Netns Lab"] --> A2["PacketCaptureService\n(Bounded Queue: 10,000 pkts)"]
+        A2 --> A3["LiveFlowBuilder\n(Canonical 5-Tuple, D-006 Policy: FIN/RST or 120s Idle)"]
     end
 
-    subgraph OFFLINE_PATH["Offline Research & Benchmark Path (Multi-Model Verification)"]
+    A3 -->|"Completed Flow (R10 Vector)"| DETECT["2. Detection Event Layer"]
+
+    subgraph FAST["Primary Operational Detector: Random Forest (Synchronous, Latency < 1.0 ms)"]
         direction TB
-        O1["Held-Out Benchmark Split\n(CIC-IDS2017: 355k | CSE-2018: 1.66M | UNSW: 24.5k)"] --> O2["Schema Validation & Label Isolation"]
-        O2 --> O3["Compatible Frozen Preprocessor (preprocessor.joblib)"]
-        O3 --> O4["Random Forest Evaluation (predict_proba)"]
-        O3 --> O5["Optional Baseline: Supervised LSTM (T=5 Causal)"]
-        O4 & O5 --> O6["Optional Baseline: RF-LSTM Fusion (Linear Blend)"]
-        O4 & O5 & O6 --> O7["Statistical Verification & Metrics Suite\n(Precision, Recall, F1, PR-AUC, Bootstrapped CIs)"]
-        O4 -.-> O8["TreeSHAP Summary & Global Feature Importance"]
-        O7 --> O9["Reproducible Reports & Audit Cards\n(results/phase1/ & results/phase2/)"]
+        F1["Canonical R10 Normalization\n(StandardScaler loaded from preprocessor.joblib)"] --> F2["Random Forest Primary Classifier\n(P_RF flow attack probability in < 0.8 ms)"]
+        F2 --> F3["Immediate Actionable Flow Alert\n(Independent Detection Event)"]
     end
 
-    style LIVE_PATH fill:#f8fafc,stroke:#2563eb,stroke-width:2px
-    style OFFLINE_PATH fill:#faf5ff,stroke:#9333ea,stroke-width:2px
+    subgraph SLOW["Optional Temporal Detector: Temporal LSTM (Asynchronous Background Path)"]
+        direction TB
+        S1["R10-FlowSeq Host Sequence Buffer\n(K=5 Consecutive Completed Flows from Host H)"] --> S2["Unidirectional PyTorch LSTM\n(Causal Recurrent Evaluation)"]
+        S2 --> S3["Independent Host Anomaly Score\n(P_LSTM in [0.0, 1.0], Informative Context)"]
+    end
+
+    DETECT --> FAST
+    DETECT -.->|"Chronological Flow Stream"| SLOW
+
+    subgraph ADVISORY["3. Autonomous Advisory Response & Explainability Layer"]
+        direction TB
+        F3 --> R1["TreeSHAP Engine\n(Exact Local Attributions on RF Decision Trees)"]
+        F3 --> R2["Host Risk State Aggregator\n(State Vector s_t: P_RF, Flow Stats, Alert Counts, Optional P_LSTM)"]
+        R2 --> R3["Dueling DQN Policy\n(Action Q-Value Estimation on 6D Causal State)"]
+        R3 --> R4["Deterministic Safety Gate\n(Rate Limit, Cooldown, Blast Radius, Critical Host Allowlist)"]
+        R4 --> R5["Advisory Response Action\n(ZERO Host Network Mutations, Dry-Run by Default)"]
+    end
+
+    subgraph UI["4. Presentation & Audit Layer"]
+        F3 & S3 & R1 & R5 --> D1["DashboardServer\n(WebSocket /ws/telemetry + HTTP SSE)"]
+        D1 --> D2["Browser UI (Live Traffic / Alerts / SHAP / Response Center / Export)"]
+    end
+
+    style FAST fill:#f8fafc,stroke:#2563eb,stroke-width:2px
+    style SLOW fill:#faf5ff,stroke:#9333ea,stroke-width:2px
+    style ADVISORY fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
 ```
+
+> [!IMPORTANT]
+> **No Score Fusion Invariant**: There is NO RF-LSTM fusion component, NO blended probabilities, and NO fusion weights. Random Forest is the certified primary operational detector. The Temporal LSTM is strictly optional and experimental. The system operates fully on Random Forest alone.
 
 ---
 
@@ -177,7 +182,27 @@ Used by **UNSW-NB15** (sensor-degraded baseline):
 | 2 | `flow_bytes_per_s` | Byte rate per second | Bytes/second |
 | 3 | `packet_length_mean` | Mean packet length | Bytes |
 
-### 7.3 Schema & Contract Enforcement Rules
+### 7.3 R10-FlowSeq Contract (Approved Temporal Sequence Contract)
+Approved in Phase 1C for host-aware chronological flow sequences ($K=5$ flows per source host):
+Each sequence step $k$ contains the 10 canonical R10 features plus the inter-flow arrival delta ($\Delta t_{\text{inter-flow}}$):
+
+| Index | Feature Name | Description | Units / Type | Physical Invariant |
+|---|---|---|---|---|
+| 0 | `flow_duration_ms` | Elapsed duration of completed flow | Milliseconds | $\ge 0.0$ |
+| 1 | `flow_packets_per_s` | Total flow packets divided by flow duration | Packets/second | $\ge 0.0$ |
+| 2 | `flow_bytes_per_s` | Total flow bytes divided by flow duration | Bytes/second | $\ge 0.0$ |
+| 3 | `packet_length_mean` | Mean of packet lengths across flow | Bytes | $[0.0, 65535.0]$ |
+| 4 | `packet_length_std` | Sample standard deviation of packet sizes | Bytes | $\ge 0.0$ |
+| 5 | `syn_count` | TCP SYN flag count in flow | Count | Integer $\ge 0$ |
+| 6 | `ack_count` | TCP ACK flag count in flow | Count | Integer $\ge 0$ |
+| 7 | `rst_count` | TCP RST flag count in flow | Count | Integer $\ge 0$ |
+| 8 | `fin_count` | TCP FIN flag count in flow | Count | Integer $\ge 0$ |
+| 9 | `syn_ack_ratio` | Ratio of SYN count to ACK count: $\frac{\text{syn}}{\max(\text{ack}, 1.0)}$ | Ratio | Dimensionless $\ge 0.0$ |
+| 10 | `inter_flow_delta_s` | Elapsed time since previous flow from this host: $t_{\text{start}}(f_i) - t_{\text{start}}(f_{i-1})$ | Seconds | Clamped to $[0.0, 300.0]$ |
+
+*Historical Note on T10-Host*: The earlier proposed fixed-window contract (`T10-Host`) was audited in Phase 1B and formally rejected (NO-GO) because calculating sub-second packet rates from completed flow CSVs required fabricating ungrounded packet arrival distributions. Option A (`R10-FlowSeq`) was selected and approved as scientifically authentic.
+
+### 7.4 Schema & Contract Enforcement Rules
 1. **Zero Silent Fallbacks:** If an input dictionary or CSV row is missing any feature in the active contract, inference raises a `ContractViolationError` or validation error; missing features are **never** replaced with invented defaults.
 2. **Non-Finite Value Handling:** Rows containing `NaN`, `+Inf`, `-Inf`, or non-numeric values are rejected at the schema gate and logged in row accounting records.
 3. **Single Preprocessing Pass:** Preprocessing is applied exactly once via the fitted `StandardScaler` / pipeline loaded from `preprocessor.joblib`. Models are never fed raw unscaled features when a preprocessor is registered.
