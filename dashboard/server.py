@@ -68,6 +68,11 @@ from xrlids.evaluation.csv_evaluator import (  # noqa: E402
 from xrlids.features.definitions import R10_FEATURES, R4_FEATURES  # noqa: E402
 from xrlids.live.capture import CaptureConfig, PacketCaptureService  # noqa: E402
 from xrlids.live.devices import DeviceTracker  # noqa: E402
+from xrlids.models.inference_service import DEFAULT_INFERENCE_SERVICE, UnifiedInferenceService  # noqa: E402
+from xrlids.response.dqn.network import DuelingQNetwork  # noqa: E402
+from xrlids.response.safety import DEFAULT_CRITICAL_HOSTS, DeterministicSafetyGate  # noqa: E402
+from xrlids.response.state import StateBuilder  # noqa: E402
+from xrlids.response.types import Action, ActionSpaceMode  # noqa: E402
 from dashboard.workbench_data import (  # noqa: E402
     BENCHMARK_REGISTRY,
     get_comparison_data,
@@ -347,6 +352,30 @@ class LiveSession:
         self.injection: dict[str, Any] | None = None
         self.rule_engine = RuleEngine()
 
+        self.inference_service = None if engine is not None else DEFAULT_INFERENCE_SERVICE
+        self.safety_gate = DeterministicSafetyGate(action_mode=ActionSpaceMode.FOUR_ACTION)
+        self.state_builder = StateBuilder(alert_threshold=RESEARCH_THRESHOLD)
+        self.policy: Any | None = None
+        self.rf_evaluations = 0
+        self.fusion_evaluations = 0
+        self.dqn_evaluations = 0
+        self.safety_overrides = 0
+        self._init_dqn_policy()
+
+    def _init_dqn_policy(self) -> None:
+        dqn_path = REPO_ROOT / "models" / "dqn" / "dqn_4action_best.pt"
+        if dqn_path.exists():
+            try:
+                import torch
+                dqn = DuelingQNetwork(input_dim=6, action_dim=4)
+                ckpt = torch.load(dqn_path, map_location="cpu", weights_only=False)
+                state_dict = ckpt.get("online_net_state_dict", ckpt.get("model_state_dict", ckpt))
+                dqn.load_state_dict(state_dict)
+                dqn.eval()
+                self.policy = dqn
+            except Exception as exc:
+                logger.warning("Could not load DQN policy in LiveSession: %s", exc)
+
     # ------------------------------------------------------------- engine
     def _get_engine(self) -> ReplayEngine:
         """Return the loaded frozen detector, or raise instead of fabricating scores.
@@ -579,6 +608,10 @@ class LiveSession:
                     "alerts": self.alert_count,
                     "elapsed_s": round(elapsed, 2),
                     "packets_per_s": round(pps, 2),
+                    "rf_inferences": self.rf_evaluations,
+                    "fusion_inferences": self.fusion_evaluations,
+                    "dqn_evaluations": self.dqn_evaluations,
+                    "safety_overrides": self.safety_overrides,
                 },
                 "live_analysis": {
                     "has_ground_truth": total_eval > 0,
@@ -621,7 +654,15 @@ class LiveSession:
                         "All detection outputs are observational. No network intervention (firewall, routing, "
                         "traffic control) is ever executed by this system."
                     ),
-                    "dqn_integration": "DQN response policy is evaluated via offline replay simulation and is not connected to the live monitoring pipeline.",
+                    "dqn_integration": "Dueling DQN response policy (models/dqn/dqn_4action_best.pt) actively evaluated in advisory mode via 6D state vectors; governed by DeterministicSafetyGate.",
+                    "policy_model": "dqn_4action_best.pt",
+                    "inference_engine": "UnifiedInferenceService (Random Forest + session-buffered LSTM + Fusion)",
+                    "safety_gate": {
+                        "cooldown_steps": 30,
+                        "blast_radius_threshold": 0.05,
+                        "critical_hosts": list(DEFAULT_CRITICAL_HOSTS),
+                        "total_overrides": self.safety_overrides,
+                    },
                 },
             }
 
@@ -639,6 +680,14 @@ class LiveSession:
         self.fn = 0
         self.score_bands = {"benign": 0, "low": 0, "medium": 0, "high": 0}
         self.traffic_types.clear()
+        self.rf_evaluations = 0
+        self.fusion_evaluations = 0
+        self.dqn_evaluations = 0
+        self.safety_overrides = 0
+        if hasattr(self, "safety_gate"):
+            self.safety_gate.reset()
+        if hasattr(self, "state_builder"):
+            self.state_builder.reset()
         self._t0 = None
         self._t_end = None
         self.flows.clear()
@@ -672,10 +721,15 @@ class LiveSession:
 
             monitor = LiveLabMonitor(
                 engine=engine,
+                inference_service=self.inference_service,
                 alert_threshold=RESEARCH_THRESHOLD,
                 on_alert_callback=self._on_alert,
                 on_flow_callback=self._on_flow,
                 rule_engine=self.rule_engine,
+                policy=self.policy,
+                safety_gate=self.safety_gate,
+                state_builder=self.state_builder,
+                benchmark=getattr(self, "benchmark", "cicids2017"),
             )
             if mode == "live":
                 with self._lock:
@@ -826,25 +880,80 @@ class LiveSession:
 
                     flow_idx += 1
                     raw_features = item.get("features", {})
-                    pred, score = engine.predict_features(raw_features)
                     src_ep = item.get("src_endpoint", "172.16.0.1:49152")
                     dst_ep = item.get("dst_endpoint", "192.168.10.50:80")
+                    bench = getattr(self, "benchmark", "cicids2017")
+                    expected = R10_FEATURES if bench in ("cicids2017", "cse2018") else R4_FEATURES
+                    valid_features = None
+                    if isinstance(raw_features, dict) and all(f in raw_features and raw_features[f] is not None for f in expected):
+                        valid_features = {k: float(raw_features[k]) for k in expected}
+
+                    session_key = f"{src_ep}->{dst_ep}"
+                    rf_score = 0.0
+                    lstm_score = None
+                    fusion_score = None
+                    inf_source = "RF"
+
+                    if self.inference_service is not None and valid_features is not None:
+                        inf_res = self.inference_service.infer(
+                            features=valid_features,
+                            session_key=session_key,
+                            benchmark=bench,
+                            threshold=RESEARCH_THRESHOLD,
+                        )
+                        pred = inf_res.prediction
+                        score = float(inf_res.attack_score)
+                        rf_score = float(inf_res.rf_score)
+                        lstm_score = float(inf_res.lstm_score) if inf_res.lstm_score is not None else None
+                        fusion_score = float(inf_res.fusion_score) if inf_res.fusion_score is not None else None
+                        inf_source = "RF+LSTM_FUSION" if inf_res.inference_source == "RF+LSTM_FUSION" else "RF"
+                    else:
+                        pred, score = engine.predict_features(raw_features)
+                        rf_score = score
+
                     rule_matches = self.rule_engine.evaluate_features(
                         raw_features,
                         endpoints={"src_ip": src_ep.split(":")[0], "dst_ip": dst_ep.split(":")[0]},
                     )
                     rule_ids = [r.rule_id for r in rule_matches]
                     rule_alert = len(rule_matches) > 0
-                    rf_alert = bool(pred == 1 and score >= RESEARCH_THRESHOLD)
-                    is_alert = rf_alert or rule_alert
-                    detection_src = "HYBRID" if (rf_alert and rule_alert) else ("RULE" if rule_alert else ("RF" if rf_alert else "NONE"))
+                    model_alert = bool(pred == 1 and score >= RESEARCH_THRESHOLD)
+                    is_alert = model_alert or rule_alert
+                    detection_src = "HYBRID" if (model_alert and rule_alert) else ("RULE" if rule_alert else (inf_source if model_alert else "NONE"))
                     gt = item.get("ground_truth", "UNKNOWN")
 
-                    bench = getattr(self, "benchmark", "cicids2017")
-                    expected = R10_FEATURES if bench in ("cicids2017", "cse2018") else R4_FEATURES
-                    valid_features = None
-                    if isinstance(raw_features, dict) and all(f in raw_features and raw_features[f] is not None for f in expected):
-                        valid_features = {k: float(raw_features[k]) for k in expected}
+                    # Advisory DQN response policy and deterministic safety gate evaluation
+                    dqn_action_str: str | None = None
+                    enforced_action_str: str | None = None
+                    override_applied = False
+                    override_reason: str | None = None
+
+                    if self.policy is not None and self.safety_gate is not None and self.state_builder is not None:
+                        try:
+                            import torch
+                            bytes_per_s = float(raw_features.get("flow_bytes_per_s", 0.0))
+                            state_vec = self.state_builder.build_state(attack_score=score, flow_bytes_per_s=bytes_per_s)
+                            with torch.no_grad():
+                                q_vals = self.policy(torch.from_numpy(state_vec).float().unsqueeze(0))
+                                proposed_idx = int(torch.argmax(q_vals, dim=-1).item())
+                                proposed_action = Action(proposed_idx)
+                            dqn_action_str = proposed_action.name
+
+                            enforced_action, override_applied, override_reason = self.safety_gate.enforce_safety(
+                                step=flow_idx,
+                                flow_id=f"flow_{flow_idx}",
+                                host_id=src_ep.split(":")[0],
+                                proposed_action=proposed_action,
+                            )
+                            enforced_action_str = enforced_action.name
+                            rem_cool = self.safety_gate.get_remaining_cooldown(src_ep.split(":")[0], flow_idx)
+                            self.state_builder.update_history(
+                                attack_score=score,
+                                enforced_action=enforced_action,
+                                cooldown_remaining=rem_cool,
+                            )
+                        except Exception as exc:
+                            logger.debug("DQN evaluation bypassed in dataset stream: %s", exc)
 
                     obs = FlowObservation(
                         timestamp=datetime.now(timezone.utc).isoformat(),
@@ -865,6 +974,13 @@ class LiveSession:
                         rule_triggered=rule_alert,
                         rule_matches=rule_ids,
                         detection_source=detection_src,
+                        rf_score=round(rf_score, 4) if rf_score is not None else None,
+                        lstm_score=round(lstm_score, 4) if lstm_score is not None else None,
+                        fusion_score=round(fusion_score, 4) if fusion_score is not None else None,
+                        dqn_action=dqn_action_str,
+                        enforced_action=enforced_action_str,
+                        safety_override=override_applied,
+                        override_reason=override_reason,
                     )
 
                     with self._lock:
@@ -895,6 +1011,13 @@ class LiveSession:
                             rule_triggered=rule_alert,
                             rule_matches=rule_ids,
                             detection_source=detection_src,
+                            rf_score=obs.rf_score,
+                            lstm_score=obs.lstm_score,
+                            fusion_score=obs.fusion_score,
+                            dqn_action=dqn_action_str,
+                            enforced_action=enforced_action_str,
+                            safety_override=override_applied,
+                            override_reason=override_reason,
                         )
                         self._on_alert(alert)
 
@@ -1021,6 +1144,14 @@ class LiveSession:
         with self._lock:
             self.flow_count += 1
             self.flows.append(asdict(observation))
+            if observation.detection_source == "RF+LSTM_FUSION":
+                self.fusion_evaluations += 1
+            else:
+                self.rf_evaluations += 1
+            if observation.dqn_action is not None:
+                self.dqn_evaluations += 1
+            if observation.safety_override:
+                self.safety_overrides += 1
 
             score = observation.attack_score
             if score >= 0.85:

@@ -27,10 +27,10 @@ Every metric, latency figure, and evaluation finding in this document links dire
 | **6. TreeSHAP Explainability** | **PASS** | Genuine TreeSHAP attributions computed via `shap.TreeExplainer` on loaded Random Forest models. All mock explanations eliminated. Missing features fail closed with HTTP 400. |
 | **7. DQN Response Policy Evaluation** | **PASS** | Evaluated on 355,865 held-out test flows. Statistically significant ($p < 0.001$) cost reduction vs heuristic baselines. **Negative Finding Recorded:** Pre-registered practical significance criterion ($\ge 15.0\%$) was **NOT MET** (+11.29% Balanced, +14.10% Aggressive), and zero-parameter `CostOptimalThresholdPolicy` outperformed DQN in 4/6 regimes. |
 | **8. Response Safety & Non-Mutation** | **PASS** | Operational pipeline executes in advisory/dry-run mode by default. Zero host netfilter (`iptables`/`nftables`) or routing mutations occur. Controlled enforcement permitted strictly within isolated lab network namespace (`LAB-ISOLATED-NETNS-01`). |
-| **9. Dual Role of LSTM & Fusion** | **PASS** | Evaluated on held-out test splits (CIC F1=0.9633 LSTM, 0.9745 Fusion). Integrated into streaming inference via `UnifiedInferenceService` with sliding-window $T=5$ history; falls back to RF during initial 4-flow warm-up and activates fusion upon complete 5-flow sequence. |
+| **9. Dual Role of LSTM & Fusion** | **PASS** | Evaluated on held-out test splits (CIC F1=0.9633 LSTM, 0.9745 Fusion). Integrated into streaming inference and dashboard via `UnifiedInferenceService` with sliding-window $T=5$ history; falls back to RF during initial 4-flow warm-up and activates fusion upon complete 5-flow sequence. *Honest Limitation Documented:* Real traffic contains interleaved, short sessions; sequences $<5$ flows remain evaluated solely by RF. |
 | **10. Runtime Mode Distinguishability** | **PASS** | `LIVE`, `PCAP`, `DATASET`, and `SAMPLE` streams carry explicit mode tags, simulated flags, and device discovery isolation. |
-| **11. Test Suite Pass Rate** | **PASS** | **584 passed**, 0 failed, 0 skipped across all unit, data, model, capture, inference, and integration test suites in `.venv` (100% pass rate). |
-| **12. Remote CI Pipeline** | **PASS** | GitHub Actions workflow concluded with `success` on commit `90d16e0` (Run ID `40946354098`, Job `123702632177`). |
+| **11. Test Suite Pass Rate** | **PASS** | **585 passed**, 0 failed, 0 skipped across all unit, data, model, capture, inference, and integration test suites in `.venv` (100% pass rate). |
+| **12. Remote CI Pipeline** | **PASS** | Historical GitHub Actions workflow concluded with `success` on commit `90d16e0` (Run ID `40946354098`, Job `123702632177`). `.github/workflows/ci.yml` has now been updated to cover `engineering/**` branches. |
 | **13. Labelled 10K Replay Lab** | **PASS** | Replays 400, 1k, 5k, 10k flows from CIC-IDS2017 & CSE-CIC-IDS2018 at 6,716 flows/s with full confusion matrix, DQN action distributions, safety gate overrides, and 27-column audit CSV export. |
 
 ---
@@ -41,19 +41,20 @@ All model artifacts in `models/registry/model_manifest.json` and `models/registr
 
 | Benchmark | Model Artifact | Expected SHA-256 | Actual SHA-256 | Preprocessor Path | Preprocessor Hash (`dict_hash`) | Contract | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :---: | :---: |
-| **CIC-IDS2017** | `models/rf/random_forest_cicids2017.joblib` | `7c6ad4931a...` | `7c6ad4931a...` (Match) | `results/experiments/EXP-P1-CIC2017-R10-001/preprocessor.joblib` | `bb2eff8feee750694e9f7836371fbbd5a3ec25a666bf386a6350f588c7f3299c` | R10 (10 feats) | **PASS** |
+| **CIC-IDS2017** | `models/rf/random_forest_cicids2017.joblib` | `7c6ad493b7...` | `7c6ad493b7...` (Match) | `results/experiments/EXP-P1-CIC2017-R10-001/preprocessor.joblib` | `bb2eff8feee750694e9f7836371fbbd5a3ec25a666bf386a6350f588c7f3299c` | R10 (10 feats) | **PASS** |
 | **CSE-CIC-IDS2018** | `models/rf/random_forest_cse2018.joblib` | `b7d2dc7bac...` | `b7d2dc7bac...` (Match) | `results/experiments/EXP-P1-CSE2018-R10-MULTI-001/preprocessor.joblib` | `d2a6dc2eb3e4e963bcceb0f023f95039eb51e44208a55e2d63493e87cb5f3b79` | R10 (10 feats) | **PASS** |
-| **UNSW-NB15** | `models/rf/random_forest_unswnb15.joblib` | `c432eb062b...` | `c432eb062b...` (Match) | `results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/preprocessor.joblib` | `5966d284a1e9411bb2095f9cfa12efca55e6c7017fc2580a827056bf179c381c` | R4 (4 feats) | **PASS** |
+| **UNSW-NB15** | `models/rf/random_forest_unswnb15.joblib` | `c432eb0675...` | `c432eb0675...` (Match) | `results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/preprocessor.joblib` | `5966d284a1e9411bb2095f9cfa12efca55e6c7017fc2580a827056bf179c381c` | R4 (4 feats) | **PASS** |
 
-### Additional Checked Registry Artifacts
-1. **Supervised LSTM Detectors (Offline Baselines)**:
-   - `models/lstm/lstm_cicids2017.pt`: SHA-256 `6cefa1a8c3...` (10 features, hidden 64, layers 2, causal $T=5$)
-   - `models/lstm/lstm_cse2018.pt`: SHA-256 `4fa76ebc51...` (10 features, hidden 64, layers 2, causal $T=5$)
-   - `models/lstm/lstm_unswnb15.pt`: SHA-256 `d8ad5e0e02...` (4 features, hidden 64, layers 2, causal $T=5$)
-2. **DQN Response Policies**:
-   - `models/dqn/dqn_cicids2017.pt`: SHA-256 `06a8f77344...` (Evaluated test cost: 1.4208/flow)
-   - `models/dqn/dqn_cse2018.pt`: SHA-256 `c19a9f243d...` (Evaluated test cost: 1.3533/flow)
-   - `models/dqn/dqn_unswnb15.pt`: SHA-256 `d1d07c29be...` (Evaluated test cost: 1.3429/flow)
+### Additional Checked Canonical Registry Artifacts
+1. **Supervised LSTM Detectors**:
+   - `models/lstm/lstm_cicids2017.pt`: SHA-256 `2cdbf88d2eda358619d66a5d001fa7dde8ab3a36d8e0548c8c529ae8e8870f5c` (10 features, hidden 64, layers 2, causal $T=5$)
+   - `models/lstm/lstm_cse2018.pt`: SHA-256 `ea5b8198c20faa15d5d45ae7d081b754a76dbae1342a93b8234e0e06cfe8a33a` (10 features, hidden 64, layers 2, causal $T=5$)
+   - `models/lstm/lstm_unswnb15.pt`: SHA-256 `4d9386ff44c99eed822f8ace5c64429fab571b4f8aad847d6cc78bae5f308fbd` (4 features, hidden 64, layers 2, causal $T=5$)
+2. **Score-Level Fusion Configuration**:
+   - `models/fusion/fusion_weights.json`: SHA-256 `e35df25179a4574c83192bf35ebd0041772007c8b360151df489a5d9bd5450d0`
+3. **Dueling DQN Response Policies**:
+   - `models/dqn/dqn_4action_best.pt`: SHA-256 `6a5afc669b4e699ecd2b1c01df885cef9030c93b8888b487dd386533920ce954` (Evaluated test cost: 5.32/flow; 4 actions: ALLOW, ALERT, RATE_LIMIT, ISOLATE)
+   - `models/dqn/dqn_3action_best.pt`: SHA-256 `c06a61fb7777511600efd6db776745c4539da30c710fed8993145ed1b926be31` (Evaluated test cost: 1.42/flow; 3 actions: ALLOW, ALERT, ISOLATE)
 
 ### UNSW-NB15 R4 Path Investigation Findings
 - **Investigation**: The preprocessor for UNSW-NB15 resides at `results/experiments/EXP-P1-UNSWNB15-R10-MULTI-001/preprocessor.joblib`.

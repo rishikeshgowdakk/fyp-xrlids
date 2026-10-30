@@ -62,6 +62,10 @@ class DryRunAuditCard:
     override_reason: str | None
     r10_features: dict[str, float]
     top_explanations: dict[str, float] = field(default_factory=dict)
+    inference_source: str = "RANDOM_FOREST"
+    rf_score: float | None = None
+    lstm_score: float | None = None
+    fusion_score: float | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -80,6 +84,10 @@ class DryRunAuditCard:
             "override_reason": self.override_reason,
             "r10_features": {k: round(v, 4) for k, v in self.r10_features.items()},
             "top_explanations": {k: round(v, 4) for k, v in self.top_explanations.items()},
+            "inference_source": self.inference_source,
+            "rf_score": round(self.rf_score, 4) if self.rf_score is not None else None,
+            "lstm_score": round(self.lstm_score, 4) if self.lstm_score is not None else None,
+            "fusion_score": round(self.fusion_score, 4) if self.fusion_score is not None else None,
         }
 
 
@@ -238,6 +246,8 @@ class LivePipelineRunner:
         mode: LiveMode = LiveMode.OBSERVE,
         queue_capacity: int = 1000,
         health_config: HealthConfig | None = None,
+        benchmark: str = "cicids2017",
+        enable_lstm_fusion: bool = True,
     ) -> None:
         if mode == LiveMode.CONTROLLED_ENFORCEMENT:
             raise RuntimeError(
@@ -248,7 +258,14 @@ class LivePipelineRunner:
 
         self.capture_service = capture_service
         self.flow_builder = flow_builder or LiveFlowBuilder()
-        self.detector_model = detector_model
+        if detector_model is None:
+            try:
+                from xrlids.models.inference_service import DEFAULT_INFERENCE_SERVICE
+                self.detector_model = DEFAULT_INFERENCE_SERVICE
+            except Exception:
+                self.detector_model = None
+        else:
+            self.detector_model = detector_model
         self.policy = policy
         self.safety_gate = safety_gate or DeterministicSafetyGate()
         self.state_builder = state_builder or StateBuilder()
@@ -259,6 +276,8 @@ class LivePipelineRunner:
         self.health_monitor = HealthMonitor(config=health_config)
         self.auditor = DryRunAuditor()
         self.latency_tracker = LatencyTracker()
+        self.benchmark = benchmark
+        self.enable_lstm_fusion = enable_lstm_fusion
         self.error_counts: dict[str, int] = {
             "detector_failures": 0,
             "policy_failures": 0,
@@ -372,12 +391,32 @@ class LivePipelineRunner:
         t_feat_end = time.perf_counter()
         self.latency_tracker.record("feature_construction", t_feat_end - t_feat_start)
 
-        # 2. Detector Scoring (Phase 1 Frozen Detector)
+        # 2. Detector Scoring (Phase 1 Frozen Detector or Unified Inference Service)
         t_det_start = time.perf_counter()
         score = 0.0
+        inf_source = "RANDOM_FOREST"
+        rf_score = 0.0
+        lstm_score: float | None = None
+        fusion_score: float | None = None
+
         if self.detector_model is not None:
             try:
-                if hasattr(self.detector_model, "predict_proba"):
+                from xrlids.models.inference_service import UnifiedInferenceService
+                if isinstance(self.detector_model, UnifiedInferenceService):
+                    # Unified multi-model inference service (RF + session-buffered LSTM + Fusion)
+                    session_key = f"{flow.source_first_ip}->{flow.dest_first_ip}"
+                    res = self.detector_model.infer(
+                        features=r10_dict,
+                        session_key=session_key,
+                        benchmark=self.benchmark,
+                        enable_lstm_fusion=self.enable_lstm_fusion,
+                    )
+                    score = float(res.attack_score)
+                    inf_source = res.inference_source
+                    rf_score = float(res.rf_score)
+                    lstm_score = float(res.lstm_score) if res.lstm_score is not None else None
+                    fusion_score = float(res.fusion_score) if res.fusion_score is not None else None
+                elif hasattr(self.detector_model, "predict_proba"):
                     try:
                         res = self.detector_model.predict_proba(feat_df)
                     except Exception:
@@ -386,12 +425,16 @@ class LivePipelineRunner:
                         score = float(res[0, 1])
                     else:
                         score = float(res[0])
+                    rf_score = score
+                    inf_source = "RANDOM_FOREST"
                 elif hasattr(self.detector_model, "predict"):
                     try:
                         res = self.detector_model.predict(feat_df)
                     except Exception:
                         res = self.detector_model.predict(feat_vec)
                     score = float(res[0])
+                    rf_score = score
+                    inf_source = "RANDOM_FOREST"
             except Exception as err:
                 logger.error("Detector inference error for flow %d: %s", flow_id, err)
                 self.auditor.inference_failures += 1
@@ -493,6 +536,10 @@ class LivePipelineRunner:
             override_reason=override_reason,
             r10_features=r10_dict,
             top_explanations=top_explanations,
+            inference_source=inf_source,
+            rf_score=rf_score,
+            lstm_score=lstm_score,
+            fusion_score=fusion_score,
         )
         try:
             self.auditor.record(card)

@@ -3,7 +3,7 @@
 **Project:** Explainable Reinforcement Learning-Based Network Intrusion Detection and Autonomous Response System (XRL-IDARS)  
 **Date:** October 30, 2026  
 **Environment:** Linux 7.0.0-42-generic (x86_64) | Python 3.14.4 | PyTorch 2.14.0+cpu | scikit-learn 1.9.1 | SHAP 0.52.0 | Scapy 2.8.0  
-**Authoritative Status:** 584 passed tests, 0 failed, 0 skipped, 100% pass rate.
+**Authoritative Status:** 585 passed tests, 0 failed, 0 skipped, 100% pass rate.
 
 ---
 
@@ -15,12 +15,12 @@ All regression suites, targeted semantic invariant tests, safety gate constraint
 
 ```text
 ================================================================================
-TOTAL TESTS:      584
-PASSED:           584
+TOTAL TESTS:      585
+PASSED:           585
 FAILED:             0
 SKIPPED:            0
 WARNINGS:          19 (Deprecation/UserWarnings from third-party scientific libs)
-EXECUTION TIME:   40.42 seconds
+EXECUTION TIME:   41.20 seconds
 EXIT CODE:          0 (CLEAN PASS)
 ================================================================================
 ```
@@ -32,7 +32,8 @@ EXIT CODE:          0 (CLEAN PASS)
 | `4c7a8a9` | 493 | Phase 1 baseline & Phase 2 DQN response policy verification |
 | `4ee16ae` | 560 | Formalization of binary detection semantics and 6D causal state vector across codebase |
 | `cd8c4e4` | 573 | Labelled CIC-IDS2017 & CSE-CIC-IDS2018 Replay Lab (10k flows) + replay lab tests |
-| `5250629` | **584** | Scapy packet capture service (`test_scapy_capture.py` [5]), Unified RF+LSTM inference service (`test_unified_inference_service.py` [4]), and end-to-end causal pipeline integration (`test_end_to_end_scapy_pipeline.py` [2]) |
+| `5250629` | 584 | Scapy packet capture service (`test_scapy_capture.py` [5]), Unified RF+LSTM inference service (`test_unified_inference_service.py` [4]), and end-to-end causal pipeline integration (`test_end_to_end_scapy_pipeline.py` [2]) |
+| HEAD (`engineering/theme-ui`) | **585** | Unified live runner wiring (`test_phase3_runner.py` [1]) + dashboard LiveSession multi-model & DQN advisory integration |
 
 ---
 

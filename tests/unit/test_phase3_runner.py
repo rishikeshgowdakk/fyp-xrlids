@@ -177,3 +177,33 @@ def test_failsafe_invariant_policy_crash():
     assert runner.auditor.inference_failures >= 1
     assert runner.auditor.audit_cards[0].proposed_action == "ALLOW"
     assert runner.auditor.audit_cards[0].enforced_action == "ALLOW"
+
+
+def test_live_pipeline_runner_with_unified_inference_service():
+    """Verify LivePipelineRunner executes natively with UnifiedInferenceService and captures multi-model provenance."""
+    from xrlids.models.inference_service import UnifiedInferenceService
+
+    t0 = 1700000000.0
+    packets = [
+        PacketInfo(t0, "192.168.1.10", "10.0.0.1", 5000, 80, 6, 64, is_tcp=True, syn=True),
+        PacketInfo(t0 + 0.01, "10.0.0.1", "192.168.1.10", 80, 5000, 6, 64, is_tcp=True, rst=True),
+    ]
+
+    capture = PacketCaptureService(synthetic_stream=packets)
+    inf_service = UnifiedInferenceService()
+    policy = SingleThresholdPolicy(threshold=0.50)
+
+    runner = LivePipelineRunner(
+        capture_service=capture,
+        detector_model=inf_service,
+        policy=policy,
+        mode=LiveMode.DRY_RUN,
+    )
+
+    report = runner.run()
+    assert report["flows_processed"] == 1
+    assert len(runner.auditor.audit_cards) == 1
+    card = runner.auditor.audit_cards[0]
+    assert card.inference_source in ("RANDOM_FOREST", "RF+LSTM_FUSION")
+    assert card.rf_score is not None
+    assert 0.0 <= card.threat_score <= 1.0

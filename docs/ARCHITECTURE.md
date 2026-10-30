@@ -32,7 +32,7 @@ Deliver a verified, measurable, and reproducible research prototype that combine
 3. **Verified Random Forest Live Detection:** Establish Random Forest as the primary operational ML detector on live flow features, verifying model-preprocessor compatibility and probability calibration.
 4. **Genuine Local Explainability:** Provide exact TreeSHAP feature attributions on Random Forest predictions using genuine model trees and actual input vectors, explicitly rejecting fabricated attributions or canned ranking substitutions.
 5. **Empirically Evaluated Response Policy:** Formulate autonomous incident response as a Markov Decision Process (MDP) and evaluate Deep Q-Network (DQN) recommendations against established baseline policies on identical held-out benchmark test sets.
-6. **Strict Live/Offline Path Separation:** Retain supervised LSTM sequence models and RF-LSTM score fusion strictly as offline experimental baselines; do not route the live packet pipeline through unvalidated recurrent models.
+6. **Session-Buffered Multi-Model Integration & Safe Fallback:** Establish Random Forest as the primary operational ML detector on live flow features. For flows sharing an active session/host key, `UnifiedInferenceService` buffers a sliding window of $T=5$ consecutive flow vectors to evaluate PyTorch LSTM sequence classification and linear score fusion ($S_{\text{fusion}} = \alpha \cdot S_{\text{rf}} + (1-\alpha) \cdot S_{\text{lstm}}$). For isolated flows or warm-up periods ($T < 5$), the pipeline safely falls back to Random Forest alone without fabricating scores.
 7. **Transparent Dashboard & Honest Mode Distinctions:** Visually and programmatically distinguish live network capture (`LIVE`), recorded trace replay (`PCAP`), held-out benchmark evaluation (`DATASET`), and in-memory attack simulation (`SAMPLE`).
 
 ---
@@ -40,10 +40,10 @@ Deliver a verified, measurable, and reproducible research prototype that combine
 ## 3. Scope and Non-Goals
 
 ### In-Scope
-- Pure-Python userland PCAP parsing and raw packet ingestion via AF_PACKET sockets.
+- Pure-Python userland PCAP parsing and raw packet ingestion via AF_PACKET sockets or Scapy capture service.
 - Bidirectional flow aggregation and feature extraction adhering to the R10 and R4 semantic contracts.
 - Deterministic rule engine executing 5 explicit security rules.
-- Scikit-learn Random Forest inference using canonical trained artifacts (`models/registry/`).
+- Multi-model inference service unifying Random Forest single-flow inference, session-isolated sequence buffering, PyTorch LSTM evaluation, and validation-tuned convex score fusion.
 - TreeSHAP local explanations computing exact base values and signed feature attributions.
 - PyTorch Dueling DQN response policy evaluated under 3-action and 4-action action spaces.
 - Isolated network namespace (`netns`) container execution for safe dry-run response validation.
@@ -53,7 +53,7 @@ Deliver a verified, measurable, and reproducible research prototype that combine
 ### Non-Goals (Explicit Exclusions)
 - **Zero Host Network Mutations:** The system will **never** alter host system `iptables`, `nftables`, routing tables, or hardware firewall state during standard live monitoring or demonstration mode. All policy enforcement is advisory/dry-run by default.
 - **No In-Flight Early Flow Intrusion Detection:** Flow-level ML models classify completed flows upon termination or timeout. XRL-IDARS does not claim mid-packet intrusion prevention before flow completion without dedicated packet-level models.
-- **No Live LSTM or Fusion Routing:** Supervised LSTM (T=5) and RF-LSTM fusion are not deployed in the live inference loop. They are evaluated exclusively in the offline benchmark suite.
+- **No Ungrounded Temporal Parity Claims:** While `UnifiedInferenceService` buffers sequential flows and executes LSTM sequence evaluation when $T=5$ flows accumulate for a session key, real network traffic often contains isolated 1-2 flow bursts that never reach $T=5$. XRL-IDARS does not claim universal temporal sequence parity across fragmented or out-of-order live packet streams.
 - **No Fabricated Performance Claims:** Sample simulation scenarios and microbenchmarks are never presented as real network attacks or general real-world detection accuracy.
 
 ---
@@ -64,20 +64,20 @@ Deliver a verified, measurable, and reproducible research prototype that combine
 flowchart TD
     subgraph LIVE_PATH["Operational Live / Replay Path (Real-Time Observational & Advisory)"]
         direction TB
-        L1["Traffic Source: Raw AF_PACKET / Paced PCAP / Attack Sim"] --> L2["Packet Parser (Ethernet + IPv4 + TCP/UDP)"]
+        L1["Traffic Source: Raw AF_PACKET / Scapy Sniffer / Paced PCAP / Attack Sim"] --> L2["Packet Parser (Ethernet + IPv4 + TCP/UDP)"]
         L2 --> L3["Bidirectional FlowBuilder (D-006 Policy: FIN/RST or 120s Idle)"]
         L3 --> L4["Canonical Feature Extraction (R10 / R4 Contract)"]
         
         L4 --> L5A["Deterministic Rule Engine\n• RULE-TCP-INVALID-FLAGS\n• RULE-SYN-FLOOD\n• RULE-PORT-SCAN\n• RULE-HIGH-RATE-BURST\n• RULE-IP-SPOOF-RESERVED"]
-        L4 --> L5B["Primary ML Detector\n• Frozen Random Forest\n• Scaler & Preprocessor\n• Predict Proba & Threshold tau=0.50"]
+        L4 --> L5B["Unified Multi-Model Inference Service\n• Primary: Frozen Random Forest\n• Sliding Buffer: Per-Session History (T=5)\n• Recurrent: Supervised LSTM Sequence Model\n• Score Fusion: S_fusion = alpha*S_rf + (1-alpha)*S_lstm"]
         
-        L5A --> L6["Evidence & Alert Aggregator\n(Labelled: RF, RULE, HYBRID, or NONE)"]
+        L5A --> L6["Evidence & Alert Aggregator\n(Labelled: RF, RF+LSTM_FUSION, RULE, HYBRID, or NONE)"]
         L5B --> L6
         
         L5B -.-> L7["Explainability Engine\n(TreeSHAP Local Attributions on RF)"]
         
-        L6 --> L8["Autonomous Response Policy\n(Dueling DQN Action Value Estimation)"]
-        L8 --> L9["Deterministic Safety Gate\n(Rate Limit, Cooldown, Blast Radius)"]
+        L6 --> L8["Autonomous Response Policy\n(Dueling DQN Action Value Estimation on 6D Causal State)"]
+        L8 --> L9["Deterministic Safety Gate\n(Rate Limit, Cooldown, Blast Radius, Critical Host Allowlist)"]
         L9 --> L10["Advisory Action Dispatcher\n(Dry-Run Default / Optional Lab Netns)"]
         
         L6 --> L11["Live Console & REST API\n(/api/live & /demo.html)"]

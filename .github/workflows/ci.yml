@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "engineering/**", "pre-xgboost-replay-lab"]
   pull_request:
-    branches: [main]
+    branches: [main, "engineering/**"]
 
 permissions:
   contents: read

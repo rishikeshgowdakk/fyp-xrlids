@@ -2,8 +2,8 @@
 
 **Official Title:** Explainable Reinforcement Learning-Based Network Intrusion Detection and Autonomous Response System (XRL-IDARS)  
 **Repository:** `rishikeshgowdakk/fyp-xrlids`  
-**Git Branch / Commit:** `engineering/theme-ui` @ `5250629`  
-**Test Suite Status:** **584 passed, 0 failed, 19 warnings in 40.42s**  
+**Git Branch / Commit:** `engineering/theme-ui`
+**Test Suite Status:** **585 passed, 0 failed, 19 warnings in 41.2s**  
 
 ---
 
@@ -23,13 +23,14 @@
 | **COMP-10** | Supervised LSTM Detector (`models/lstm/`) | **Implemented** | **Tested** | **Verified** | Causal temporal sequence model ($T=5$). Evaluated on held-out test splits (0.9633 F1 CIC) and integrated into streaming pipeline with per-session warm-up buffer. |
 | **COMP-11** | Score Fusion Engine (`models/fusion/`) | **Implemented** | **Tested** | **Verified** | Score blending ($S_{\text{fusion}} = \alpha \cdot S_{\text{rf}} + (1-\alpha) \cdot S_{\text{lstm}}$) using saved weights. Evaluated on held-out test splits (0.9745 F1 CIC) and executed when both scores available. |
 | **COMP-12** | Input Modes (CSV, PCAP, Live, Synthetic) | **Implemented** | **Tested** | **Verified** | Distinct handling across Mode A (full split), Mode B (200 demo), Mode C (custom CSV), PCAP replay, live monitor, and synthetic simulator. |
-| **COMP-13** | Interactive Dashboard & REST API (`server.py`) | **Implemented** | **Tested** | **Verified** | LiveSession state synchronization, real-time streaming, waterfall charts, rule/RF badge visualization, and semantic contract declarations. |
+| **COMP-13** | Interactive Dashboard & REST API (`server.py`) | **Implemented** | **Tested** | **Verified** | LiveSession wired directly to UnifiedInferenceService, Dueling DQN, and DeterministicSafetyGate. Real-time streaming, waterfall charts, rule/RF badge visualization. |
 | **COMP-14** | Attack-Family Semantics & Audit (`test_attack_family...`) | **Implemented** | **Tested** | **Verified** | Disambiguates binary model output, ground-truth label evaluation, and advisory response semantics across backend and frontend. |
-| **COMP-15** | Automated Test Suite | **Implemented** | **Tested** | **Verified** | 584 tests passing across unit, integration, and regression suites. Zero regressions. |
+| **COMP-15** | Automated Test Suite | **Implemented** | **Tested** | **Verified** | 585 tests passing across unit, integration, and regression suites. Zero regressions. |
 | **COMP-16** | Scapy Capture & PCAP Ingestion Service (`src/xrlids/capture/scapy_service.py`) | **Implemented** | **Tested** | **Verified** | Thread-safe live interface sniffing, PCAP replay, non-blocking queue, BPF filter, packet conversion to canonical PacketInfo, drop and throughput stats. |
 | **COMP-17** | Unified Inference & Sequence Buffer Service (`src/xrlids/models/inference_service.py`) | **Implemented** | **Tested** | **Verified** | Multi-model dispatcher with sliding-window $T=5$ history per session. RF fallback during warm-up; score-level fusion upon 5th flow. |
 | **COMP-18** | Labelled Replay Lab Engine (`src/xrlids/demo/replay_lab.py`) | **Implemented** | **Tested** | **Verified** | Authentic flow streaming (400, 1k, 5k, 10k flows) from CIC-IDS2017 & CSE-CIC-IDS2018; 6,716 flows/s throughput, 27-column audit CSV export. |
 | **COMP-19** | End-to-End Causal Pipeline Integration (`tests/integration/test_end_to_end_scapy_pipeline.py`) | **Implemented** | **Tested** | **Verified** | Complete causal verification: Scapy PCAP → LiveFlowBuilder → UnifiedInference → TreeSHAP → 6D StateBuilder → DuelingQNetwork → DeterministicSafetyGate. |
+| **COMP-20** | Live Pipeline Runner Wiring (`src/xrlids/live/runner.py`) | **Implemented** | **Tested** | **Verified** | LivePipelineRunner natively supports UnifiedInferenceService, recording RF/LSTM/Fusion provenance and advisory actions in DryRunAuditCard. |
 
 ---
 
