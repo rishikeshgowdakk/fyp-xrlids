@@ -1,0 +1,22 @@
+{
+  "dataset_source": "data/demo/replay_lab_cache.joblib",
+  "dataset_csv": "/home/rishikesh/Desktop/fyp-xrlids/data/demo/evaluation_10k_records.csv",
+  "total_rows": 10000,
+  "label_distribution": {
+    "1": 5000,
+    "0": 5000
+  },
+  "family_distribution": {
+    "Benign": 5000,
+    "DDoS": 1168,
+    "PortScan": 1168,
+    "BruteForce": 1150,
+    "DoS": 1093,
+    "Web": 224,
+    "Bot": 193,
+    "Infiltration": 3,
+    "Heartbleed": 1
+  },
+  "evaluated_at": "2026-10-30T21:04:50.919796+00:00",
+  "git_branch": "fix/final-engineering-correctness"
+}

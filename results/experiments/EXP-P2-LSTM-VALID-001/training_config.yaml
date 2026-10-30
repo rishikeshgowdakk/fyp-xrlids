@@ -1,0 +1,65 @@
+experiment_id: EXP-P2-LSTM-VALID-001
+dataset: cse_cic_ids2018
+source_file: data/raw/cse_cic_ids2018/Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv
+parquet_cache: data/processed/cse2018_flowseq/cse2018_flowseq_r10.parquet
+host_map: data/processed/cse2018_flowseq/host_id_map.json
+feature_contract: R10_FLOWSEQ
+feature_dim: 11
+features:
+  - flow_duration_ms
+  - flow_packets_per_s
+  - flow_bytes_per_s
+  - packet_length_mean
+  - packet_length_std
+  - syn_count
+  - ack_count
+  - rst_count
+  - fin_count
+  - syn_ack_ratio
+  - inter_flow_delta_s
+
+sequence:
+  length: 5
+  stride: 1
+  group_by: host_id
+  order_by: ts
+  label_rule: last
+  session_gap_timeout_s: 300.0
+
+splits:
+  methodology: chronological_time_blocked
+  time_column: ts
+  train_window: [1519088400, 1519099200]    # 08:30:00 -> 11:30:00 UTC (70%)
+  purge_gap_1: [1519099201, 1519099500]     # 300s purge gap
+  val_window: [1519099501, 1519102800]      # 11:35:00 -> 12:30:00 UTC (15%)
+  purge_gap_2: [1519102801, 1519103100]     # 300s purge gap
+  test_window: [1519103101, 1519108200]     # 12:35:00 -> 14:00:00 UTC (15%)
+  held_out_attacker_ips:
+    - "18.218.11.51"
+    - "18.219.32.43"
+    - "18.218.115.60"
+
+model:
+  type: PyTorch_Unidirectional_LSTM
+  input_size: 11
+  hidden_size: 64
+  num_layers: 2
+  dropout: 0.2
+  dense_hidden: 32
+  output_size: 1
+
+training:
+  batch_size: 256
+  learning_rate: 0.001
+  optimizer: adam
+  loss: bce_with_logits
+  max_epochs: 15
+  patience: 3
+  early_stopping_metric: val_pr_auc
+  seed: 42
+  device: cpu
+
+baseline_rf:
+  model_path: models/rf/random_forest_cse2018.joblib
+  feature_contract: R10
+  feature_dim: 10

@@ -74,7 +74,17 @@ The Deep Q-Network response policy is evaluated on **held-out test episodes** (3
     - If $0.80 \le P(\text{ATTACK}) < 0.95 \to \text{RATE\_LIMIT}$
     - If $P(\text{ATTACK}) \ge 0.95 \to \text{ISOLATE}$
 - **Trained DQN Policy:**
-  - Action rule: $a^* = \arg\max_a Q(s, a; \theta)$, where state $s$ encodes model confidence, threat severity, host criticality, connection density, historical false-positive rate, and alert rate.
+  - Action rule: $a^* = \arg\max_a Q(s, a; \theta)$, where the observation is the strictly causal 6-dimensional state vector $\mathbf{s}_t = [S_t, \Delta S_t, N_{\text{alert}}, a_{t-1}, c_t, v_t] \in \mathbb{R}^6$:
+    - $S_t \in [0, 1]$: Continuous detector risk score for the arriving flow.
+    - $\Delta S_t \in [-1, 1]$: Score trajectory relative to moving historical baseline.
+    - $N_{\text{alert}} \in [0, 1]$: Recent alert density in the sliding temporal window.
+    - $a_{t-1} \in [0, 1]$: Normalized previous action index ($a_{t-1} / 3.0$).
+    - $c_t \in [0, 1]$: Remaining mandatory cooldown timer fraction.
+    - $v_t \in [0, 1]$: Normalized coarse volumetric scale ($\log_{10}(1 + \text{bytes\_per\_s}) / 8.0$).
+  - **Empirical Hypothesis & Practical Significance Outcome:**
+    - Statistical significance vs Baseline 2 was confirmed ($p < 0.001$, +11.29% Balanced, +14.10% Aggressive).
+    - However, the pre-registered practical significance criterion ($\ge 15.0\%$ cost reduction) was **NOT MET**.
+    - Additionally, the zero-parameter analytic `CostOptimalThresholdPolicy` outperformed the trained DQN in 4 out of 6 benchmark regimes (up to 20.12% lower cost), proving that in tabular flow arrivals without interactive sequential transitions, threshold optimization on calibrated detector scores is simpler and more robust.
 
 ### 3.2 Enterprise Cost Matrix & Reward Interpretation
 Response performance is evaluated via an enterprise risk cost function:

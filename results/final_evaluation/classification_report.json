@@ -1,0 +1,32 @@
+[
+  {
+    "model": "random_forest",
+    "accuracy": 0.8542,
+    "precision": 0.9718,
+    "recall": 0.7296,
+    "f1_score": 0.8334,
+    "macro_f1": 0.8519,
+    "roc_auc": 0.9834,
+    "evaluated_population": 10000
+  },
+  {
+    "model": "lstm_flowseq",
+    "accuracy": 0.7777,
+    "precision": 0.9859,
+    "recall": 0.5624,
+    "f1_score": 0.7163,
+    "macro_f1": 0.7668,
+    "roc_auc": 0.9671,
+    "evaluated_population": 9969
+  },
+  {
+    "model": "rf_lstm_fusion",
+    "accuracy": 0.8279,
+    "precision": 0.9976,
+    "recall": 0.6565,
+    "f1_score": 0.7919,
+    "macro_f1": 0.8226,
+    "roc_auc": 0.9814,
+    "evaluated_population": 9969
+  }
+]

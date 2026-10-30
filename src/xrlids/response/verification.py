@@ -15,6 +15,7 @@ from enum import Enum
 import logging
 from typing import Any, Mapping, Sequence
 
+from xrlids.config.protected_assets import is_critical_infrastructure
 from xrlids.response.safety import DEFAULT_CRITICAL_HOSTS, Action
 from xrlids.utils.logging_utils import get_logger
 
@@ -95,7 +96,7 @@ class ResponseVerifier:
         t0 = time.perf_counter()
 
         # 1. Critical Host Protection Invariant
-        if target_host in self.critical_hosts:
+        if target_host in self.critical_hosts or is_critical_infrastructure(target_host):
             if action in (Action.RATE_LIMIT, Action.ISOLATE):
                 elapsed_ms = (time.perf_counter() - t0) * 1000.0
                 logger.error("Verification FAILED: Critical host %s cannot be isolated or rate limited!", target_host)

@@ -169,8 +169,13 @@ def test_live_session_attack_injection(tmp_path: Path):
         assert status["packets_sent"] == 2
         assert status["finished_at"]
 
+        deadline_flow = time.time() + 5.0
         snapshot = session.snapshot()
         injected_flows = [f for f in snapshot["recent_flows"] if "203.0.113.67" in f["src_endpoint"]]
+        while not injected_flows and time.time() < deadline_flow:
+            time.sleep(0.05)
+            snapshot = session.snapshot()
+            injected_flows = [f for f in snapshot["recent_flows"] if "203.0.113.67" in f["src_endpoint"]]
         assert injected_flows, "the injected scenario flow must appear in the live flow table"
         # The mock model scores every flow 0.9 -> the injected flow produced a HIGH alert.
         assert any(

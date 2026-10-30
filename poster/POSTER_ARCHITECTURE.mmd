@@ -1,0 +1,89 @@
+flowchart TD
+    %% =========================================================================
+    %% XRL-IDARS APPROVED OPERATIONAL ARCHITECTURE — OPEN DAY 2026 EXHIBITION
+    %% =========================================================================
+
+    subgraph S1["1. Network Ingestion Layer"]
+        WIRE["Live Scapy Sniffer\n(AF_PACKET / Raw Wire)"] --> INGEST["Packet Dissection & Demuxing\n(Strict Protocol Validation)"]
+        PCAP["Offline PCAP Replay\n(Zero-Loss File Stream)"] --> INGEST
+    end
+
+    subgraph S2["2. Canonical Flow Demarcation Layer"]
+        INGEST --> CANON["Canonical Endpoint Sorter\n(Min IP:Port < Max IP:Port)"]
+        CANON --> FLOW_TAB["Bidirectional Flow Accumulator\n(FlowKey Hash Table)"]
+        FLOW_TAB --> EXPIRY{"Flow Lifecycle Expiry\n(Idle 1.0s / Max 120s / FIN / RST)"}
+    end
+
+    subgraph S3["3. Feature Extraction & Preprocessing"]
+        EXPIRY -->|Completed Flow| EXTRACT["Feature Vectorizer\n(Canonical R10 / Fallback R4 Contract)"]
+        EXTRACT --> SCALER["Train-Fitted StandardScaler\n(Zero Data-Leakage Transform)"]
+    end
+
+    subgraph S4["4. Operational Detection Layer (RF Only)"]
+        SCALER --> RF["Random Forest Classifier (100 Trees)\n★ SOLE OPERATIONAL ML DETECTOR ★"]
+        RF --> SCORE["Continuous Threat Score\nS_t = P(ATTACK | x) ∈ [0.0, 1.0]"]
+        SCORE --> EVENT["Security Event Object\n(UUID, FlowKey, Score, Timestamp)"]
+    end
+
+    subgraph S5["5. Real-Time Explainability Layer"]
+        EVENT --> SHAP["TreeSHAP Game-Theoretic Explainer\n(Local Feature Attributions in < 2.5 ms)"]
+        SHAP --> WATERFALL["Lundberg Attribution Waterfall\n(Top Positive & Negative Feature Drivers)"]
+    end
+
+    subgraph S6["6. Causal Response State Construction"]
+        EVENT --> BUILDER["StateBuilder (Causal Memory Tracker)\n★ ZERO LABEL OR FUTURE LEAKAGE ★"]
+        BUILDER --> STATE["6D Causal Observation Vector:\ns_t = [S_t, ΔS_t, N_alert, a_{t-1}, c_t, v_t]"]
+    end
+
+    subgraph S7["7. RL Response Optimization Layer"]
+        STATE --> DQN["Dueling Deep Q-Network Agent\n(Value V(s) & Advantage A(s, a) Heads)"]
+        DQN --> QVALS["Q(s, a) Estimation & Decision Margin ΔQ"]
+        QVALS --> PROPOSED["Proposed Action a* ∈ A:\n{ALLOW, ALERT, RATE_LIMIT, ISOLATE}"]
+    end
+
+    subgraph S8["8. Deterministic Safety Gate (Non-Bypassable Firewall)"]
+        PROPOSED --> SG_CRIT{"Invariant 1:\nCritical Host?"}
+        SG_CRIT -- Yes & ISOLATE --> OVER_CRIT["Override: Enforce ALERT\n(CRITICAL_INFRASTRUCTURE_EXEMPTION)"]
+        SG_CRIT -- No --> SG_BLAST{"Invariant 2:\nBlast Radius > 5%?"}
+        SG_BLAST -- Yes & ISOLATE --> OVER_BLAST["Override: Enforce ALERT\n(BLAST_RADIUS_CIRCUIT_BREAKER)"]
+        SG_BLAST -- No --> SG_COOL{"Invariant 3:\nCooldown Active?"}
+        SG_COOL -- Yes & a*=ALLOW --> OVER_COOL["Override: Maintain Prior Mitigation\n(MANDATORY_ACTION_COOLDOWN)"]
+        SG_COOL -- No --> PASS_ACT["Approve Action as Proposed\n(3-Action Clamped if Active)"]
+
+        OVER_CRIT --> ENFORCED["Enforced Mitigation Action:\na_enforced ∈ {ALLOW, ALERT, RATE_LIMIT, ISOLATE}"]
+        OVER_BLAST --> ENFORCED
+        OVER_COOL --> ENFORCED
+        PASS_ACT --> ENFORCED
+    end
+
+    subgraph S9["9. Advisory Actuation & Monitoring Layer"]
+        ENFORCED --> ACTUATOR["Response Executor\n★ ADVISORY / DRY-RUN MODE DEFAULT ★\n(Zero OS Kernel Firewall Mutations)"]
+        EVENT --> AUDIT["Audited Security Record\n(Wire Packet, SHAP, Q-Values, Overrides)"]
+        WATERFALL --> AUDIT
+        ENFORCED --> AUDIT
+        AUDIT --> STREAMLIT["Streamlit SOC Command Center (:8501)\n& HTTP/WebSocket Telemetry Bus"]
+    end
+
+    subgraph S10["10. Offline Research Benchmarking Track (NON-OPERATIONAL)"]
+        SCALER -.->|Research Sequence Window T=5| LSTM_BUF["Host Sequence Queue"]
+        LSTM_BUF -.-> LSTM["Pretrained LSTM FlowSeq Model\n(Temporal Benchmark Only)"]
+        LSTM -.-> FUSION["Convex Fusion Comparator (α·RF + (1-α)·LSTM)\n(Preserved Research Checkpoints)"]
+        RF -.-> FUSION
+    end
+
+    %% Visual Styling
+    classDef operational fill:#1e3a8a,stroke:#3b82f6,stroke-width:2px,color:#ffffff;
+    classDef detection fill:#b91c1c,stroke:#ef4444,stroke-width:2px,color:#ffffff;
+    classDef explain fill:#7c3aed,stroke:#a855f7,stroke-width:2px,color:#ffffff;
+    classDef response fill:#047857,stroke:#10b981,stroke-width:2px,color:#ffffff;
+    classDef safety fill:#b45309,stroke:#f59e0b,stroke-width:2px,color:#ffffff;
+    classDef telemetry fill:#0f172a,stroke:#64748b,stroke-width:2px,color:#ffffff;
+    classDef research fill:#334155,stroke:#94a3b8,stroke-width:1.5px,color:#cbd5e1,stroke-dasharray: 5 5;
+
+    class WIRE,PCAP,INGEST,CANON,FLOW_TAB,EXPIRY,EXTRACT,SCALER operational;
+    class RF,SCORE,EVENT detection;
+    class SHAP,WATERFALL explain;
+    class BUILDER,STATE,DQN,QVALS,PROPOSED response;
+    class SG_CRIT,SG_BLAST,SG_COOL,OVER_CRIT,OVER_BLAST,OVER_COOL,PASS_ACT,ENFORCED safety;
+    class ACTUATOR,AUDIT,STREAMLIT telemetry;
+    class LSTM_BUF,LSTM,FUSION research;

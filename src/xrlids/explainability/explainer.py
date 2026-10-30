@@ -64,8 +64,10 @@ class TreeSHAPExplainer:
         self.feature_names = list(feature_names or R10_FEATURES)
         self.validator = FeatureSchemaValidator("R10")
 
-        # Unwrap model if passed as detector wrapper
-        underlying = getattr(model, "model", model)
+        # Recursively unwrap model if passed as manager or detector wrapper
+        underlying = model
+        while hasattr(underlying, "model") and getattr(underlying, "model") is not None:
+            underlying = getattr(underlying, "model")
         if underlying is None:
             raise ValueError("Model passed to TreeSHAPExplainer is not fitted or is None")
 
@@ -131,7 +133,13 @@ class TreeSHAPExplainer:
 
         feature_records.sort(key=lambda x: abs(x["shap_attribution"]), reverse=True)
         attributions = [
-            {"feature": f["feature"], "attribution": f["shap_attribution"], "value": f["value"]}
+            {
+                "feature": f["feature"],
+                "attribution": f["shap_attribution"],
+                "shap_attribution": f["shap_attribution"],
+                "value": f["value"],
+                "direction": f["direction"],
+            }
             for f in feature_records
         ]
 

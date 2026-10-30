@@ -1,0 +1,137 @@
+============================= test session starts ==============================
+platform linux -- Python 3.14.4, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/rishikesh/Desktop/fyp-xrlids
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.15.1
+collected 704 items
+
+tests/data/test_audit.py ......                                          [  0%]
+tests/data/test_audit_per_file.py .                                      [  0%]
+tests/data/test_cicids2017_real_extraction.py ......                     [  1%]
+tests/data/test_column_contract_datasets.py .........                    [  3%]
+tests/data/test_feature_evidence.py ...                                  [  3%]
+tests/data/test_prepare.py ............                                  [  5%]
+tests/data/test_schema_validation.py .......                             [  6%]
+tests/data/test_streaming_pipeline_equivalence.py .                      [  6%]
+tests/integration/test_cross_dataset_transfer.py .......                 [  7%]
+tests/integration/test_end_to_end_scapy_pipeline.py ..                   [  7%]
+tests/integration/test_feature_parity.py ..                              [  7%]
+tests/integration/test_multi_file_experiment.py .                        [  8%]
+tests/integration/test_phase2a_baselines.py ...                          [  8%]
+tests/integration/test_phase3_parity_harness.py ..                       [  8%]
+tests/integration/test_pipeline_e2e_forensics.py .                       [  8%]
+tests/integration/test_postgres_storage_integration.py ......            [  9%]
+tests/integration/test_report_generation.py .                            [  9%]
+tests/integration/test_safety_invariants.py .....                        [ 10%]
+tests/integration/test_scapy_capture.py ....                             [ 11%]
+tests/integration/test_scapy_live_demonstration.py .................     [ 13%]
+tests/integration/test_smoke_pipeline.py .........                       [ 14%]
+tests/integration/test_transfer_feature_names.py .                       [ 15%]
+tests/model/test_model_registry_integrity.py ......                      [ 15%]
+tests/model/test_models.py ............                                  [ 17%]
+tests/unit/test_active_pipeline.py ....                                  [ 18%]
+tests/unit/test_attack_family_and_response_semantics.py ..........       [ 19%]
+tests/unit/test_attack_sim.py .......                                    [ 20%]
+tests/unit/test_audit_card.py ...                                        [ 21%]
+tests/unit/test_baselines_ladder.py ......                               [ 21%]
+tests/unit/test_canonical_flow_builder.py .....                          [ 22%]
+tests/unit/test_common_10_feature_contract.py .......                    [ 23%]
+tests/unit/test_csv_evaluation_workflow.py ............................. [ 27%]
+                                                                         [ 27%]
+tests/unit/test_dashboard_server.py ...........                          [ 29%]
+tests/unit/test_dataset_checksum_enforcement.py .......                  [ 30%]
+tests/unit/test_demo_flow.py .....                                       [ 30%]
+tests/unit/test_demo_pcap.py .....                                       [ 31%]
+tests/unit/test_demo_replay.py ....                                      [ 32%]
+tests/unit/test_dqn.py .........                                         [ 33%]
+tests/unit/test_dqn_response_service.py ...                              [ 33%]
+tests/unit/test_error_analysis.py ...                                    [ 34%]
+tests/unit/test_events_postgres.py .......                               [ 35%]
+tests/unit/test_experiment_preflight.py ......                           [ 36%]
+tests/unit/test_explainer.py ..                                          [ 36%]
+tests/unit/test_feature_validator.py ......                              [ 37%]
+tests/unit/test_features.py ............                                 [ 39%]
+tests/unit/test_final_engineering_correctness.py ....................    [ 41%]
+tests/unit/test_flagship.py .......                                      [ 42%]
+tests/unit/test_flow_treeshap.py ...........                             [ 44%]
+tests/unit/test_hybrid_dqn_consistency.py ...                            [ 44%]
+tests/unit/test_hybrid_engine.py ........                                [ 46%]
+tests/unit/test_label_contract.py ........                               [ 47%]
+tests/unit/test_label_normalization_regression.py ...................... [ 50%]
+...                                                                      [ 50%]
+tests/unit/test_live_manager.py ....                                     [ 51%]
+tests/unit/test_lstm_memory_safety.py ......                             [ 52%]
+tests/unit/test_metrics.py ..........                                    [ 53%]
+tests/unit/test_model_registry_inference.py ............................ [ 57%]
+......                                                                   [ 58%]
+tests/unit/test_multiclass_and_executor.py ......                        [ 59%]
+tests/unit/test_per_family_evaluation.py ...                             [ 59%]
+tests/unit/test_phase2_audit_consistency.py .............                [ 61%]
+tests/unit/test_phase2_spec.py .                                         [ 61%]
+tests/unit/test_phase3_burst.py ......                                   [ 62%]
+tests/unit/test_phase3_capture.py .....                                  [ 63%]
+tests/unit/test_phase3_concurrency.py ...........                        [ 64%]
+tests/unit/test_phase3_flow.py .....                                     [ 65%]
+tests/unit/test_phase3_gate.py .................                         [ 67%]
+tests/unit/test_phase3_netns.py ...........                              [ 69%]
+tests/unit/test_phase3_observability.py ............                     [ 71%]
+tests/unit/test_phase3_rollback.py ............                          [ 72%]
+tests/unit/test_phase3_runner.py .......                                 [ 73%]
+tests/unit/test_phase3_security_stress.py ...........                    [ 75%]
+tests/unit/test_population_loader.py .....                               [ 76%]
+tests/unit/test_post_publication_correctness.py ......                   [ 76%]
+tests/unit/test_preprocessing.py ......                                  [ 77%]
+tests/unit/test_r10_flowseq_parity.py ...                                [ 78%]
+tests/unit/test_replay_lab.py .............                              [ 80%]
+tests/unit/test_resource_profiler.py ....                                [ 80%]
+tests/unit/test_response_baselines.py ...........                        [ 82%]
+tests/unit/test_response_costs.py ......                                 [ 83%]
+tests/unit/test_response_environment.py ......                           [ 83%]
+tests/unit/test_response_isolation.py ...                                [ 84%]
+tests/unit/test_response_metrics.py .......                              [ 85%]
+tests/unit/test_response_safety.py .....                                 [ 86%]
+tests/unit/test_response_state.py .......                                [ 87%]
+tests/unit/test_rules_engine.py ..........                               [ 88%]
+tests/unit/test_scapy_capture.py .....                                   [ 89%]
+tests/unit/test_shap_analysis.py .                                       [ 89%]
+tests/unit/test_source_tracker.py .......                                [ 90%]
+tests/unit/test_splitting.py ...........                                 [ 91%]
+tests/unit/test_statistics_and_significance.py ....                      [ 92%]
+tests/unit/test_temporal_anomaly_evaluation.py ........                  [ 93%]
+tests/unit/test_threshold_governance.py .......                          [ 94%]
+tests/unit/test_unified_inference_service.py ....                        [ 95%]
+tests/unit/test_workbench_api.py ..............                          [ 97%]
+tests/unit/test_working_tree_clean.py ...............                    [ 99%]
+tests/unit/test_xgboost_detector.py .....                                [100%]
+
+=============================== warnings summary ===============================
+.venv/lib/python3.14/site-packages/shap/plots/colors/_colors.py:47
+  /home/rishikesh/Desktop/fyp-xrlids/.venv/lib/python3.14/site-packages/shap/plots/colors/_colors.py:47: PendingDeprecationWarning: The set_bad function will be deprecated in a future version. Use cmap.with_extremes(bad=...) or Colormap(bad=...) instead.
+    red_blue.set_bad(gray_rgb.tolist(), 1.0)
+
+.venv/lib/python3.14/site-packages/shap/plots/colors/_colors.py:48
+  /home/rishikesh/Desktop/fyp-xrlids/.venv/lib/python3.14/site-packages/shap/plots/colors/_colors.py:48: PendingDeprecationWarning: The set_over function will be deprecated in a future version. Use cmap.with_extremes(over=...) or Colormap(over=...) instead.
+    red_blue.set_over(gray_rgb.tolist(), 1.0)
+
+.venv/lib/python3.14/site-packages/shap/plots/colors/_colors.py:49
+  /home/rishikesh/Desktop/fyp-xrlids/.venv/lib/python3.14/site-packages/shap/plots/colors/_colors.py:49: PendingDeprecationWarning: The set_under function will be deprecated in a future version. Use cmap.with_extremes(under=...) or Colormap(under=...) instead.
+    red_blue.set_under(gray_rgb.tolist(), 1.0)  # "under" is incorrectly used instead of "bad" in the scatter plot
+
+tests/integration/test_end_to_end_scapy_pipeline.py:37
+  /home/rishikesh/Desktop/fyp-xrlids/tests/integration/test_end_to_end_scapy_pipeline.py:37: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.integration
+
+tests/unit/test_csv_evaluation_workflow.py::test_csv_evaluation_target_leakage_prevented
+tests/unit/test_csv_evaluation_workflow.py::test_csv_evaluation_single_class_edge_cases
+tests/unit/test_csv_evaluation_workflow.py::test_csv_multi_model_rf_lstm_fusion
+tests/unit/test_csv_evaluation_workflow.py::test_csv_multi_model_rf_lstm_fusion
+  /home/rishikesh/Desktop/fyp-xrlids/.venv/lib/python3.14/site-packages/sklearn/metrics/_classification.py:2939: UserWarning: y_pred contains classes not in y_true
+    warnings.warn("y_pred contains classes not in y_true")
+
+tests/unit/test_csv_evaluation_workflow.py: 11 warnings
+  /home/rishikesh/Desktop/fyp-xrlids/.venv/lib/python3.14/site-packages/sklearn/metrics/_classification.py:614: UserWarning: A single label was found in 'y_true' and 'y_pred'. For the confusion matrix to have the correct shape, use the 'labels' parameter to pass all known labels.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================= 704 passed, 19 warnings in 81.74s (0:01:21) ==================

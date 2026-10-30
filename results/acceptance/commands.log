@@ -1,0 +1,432 @@
+=== 1. FULL TEST SUITE EXECUTION ===
+Command: .venv/bin/pytest -v --tb=short
+
+=== 2. LIVE CAPTURE PERMISSION BOUNDARY TEST ===
+Command: .venv/bin/python -c "...LiveCaptureManager..."
+
+=== 3. INTEGRATED PIPELINE DEMO EXECUTION ===
+Command: .venv/bin/python scripts/demo/run_integrated_pipeline_demo.py
+
+======================================================================
+  XRL-IDARS — Scapy Attack Simulator & Pipeline Evaluation
+======================================================================
+Scenario:     Scenario C: TCP SYN Burst
+Category:     ATTACK (Family: DoS/DDoS)
+Target:       10.200.1.3 (Ports: [80])
+Description:  Bounded volumetric TCP SYN flood burst against victim port 80 (high SYN/ACK asymmetry).
+======================================================================
+
+[1] Scapy Packet Generation:
+    Generated 60 genuine Scapy packets in 9.09 ms.
+
+[2] Flow Reconstruction:
+    Reconstructed 2 bidirectional flow(s) in 17.86 ms.
+
+[3] Pipeline Inferences & Security Evaluation:
+
+  Flow #1: [TCP] 10.200.1.2:45000 -> 10.200.1.3:80
+    Packets: 30 | Duration: 290.0 ms | Bytes: 1620
+    Result: [ATTACK] | Score: 0.0000 (RF: 0.0000)
+    Source: RANDOM_FOREST (Infer Time: 122.09 ms)
+    Rule Triggers: RULE-SYN-FLOOD
+    DQN Recommendation: ISOLATE -> Enforced: ISOLATE (Overridden: False)
+    TreeSHAP Base Value: 0.500
+    TreeSHAP Top Features:
+      - packet_length_mean    : attr = -0.1407 (value: 54.0)
+      - flow_packets_per_s    : attr = -0.0707 (value: 103.4483)
+      - packet_length_std     : attr = -0.0590 (value: 0.0)
+
+  Flow #2: [TCP] 10.200.1.2:45001 -> 10.200.1.3:80
+    Packets: 30 | Duration: 290.0 ms | Bytes: 1620
+    Result: [ATTACK] | Score: 0.0000 (RF: 0.0000)
+    Source: RANDOM_FOREST (Infer Time: 45.51 ms)
+    Rule Triggers: RULE-SYN-FLOOD
+    DQN Recommendation: ISOLATE -> Enforced: ISOLATE (Overridden: False)
+    TreeSHAP Base Value: 0.500
+    TreeSHAP Top Features:
+      - packet_length_mean    : attr = -0.1407 (value: 54.0)
+      - flow_packets_per_s    : attr = -0.0707 (value: 103.4483)
+      - packet_length_std     : attr = -0.0590 (value: 0.0)
+
+======================================================================
+Summary: 60 pkts captured | 2 flows processed | 2 threat(s) detected
+Safety Mode: ADVISORY ONLY (Zero network mutations)
+======================================================================
+
+
+======================================================================
+  XRL-IDARS — Scapy Attack Simulator & Pipeline Evaluation
+======================================================================
+Scenario:     Scenario B: Port Scan Simulation
+Category:     ATTACK (Family: PortScan)
+Target:       10.200.1.3 (Ports: [21, 22, 80, 443, 8080])
+Description:  Controlled TCP SYN probes across bounded ports (21, 22, 80, 443, 8080) on isolated victim.
+======================================================================
+
+[1] Scapy Packet Generation:
+    Generated 15 genuine Scapy packets in 2.61 ms.
+
+[2] Flow Reconstruction:
+    Reconstructed 5 bidirectional flow(s) in 5.16 ms.
+
+[3] Pipeline Inferences & Security Evaluation:
+
+  Flow #1: [TCP] 10.200.1.2:55002 -> 10.200.1.3:80
+    Packets: 3 | Duration: 10.0 ms | Bytes: 162
+    Result: [BENIGN] | Score: 0.0526 (RF: 0.0526)
+    Source: RANDOM_FOREST (Infer Time: 121.59 ms)
+    DQN Recommendation: ALLOW -> Enforced: ALLOW (Overridden: False)
+    TreeSHAP Base Value: 0.500
+    TreeSHAP Top Features:
+      - packet_length_mean    : attr = -0.1398 (value: 54.0)
+      - flow_packets_per_s    : attr = -0.0680 (value: 299.9931)
+      - flow_duration_ms      : attr = -0.0647 (value: 10.0002)
+
+  Flow #2: [TCP] 10.200.1.2:55000 -> 10.200.1.3:21
+    Packets: 3 | Duration: 10.0 ms | Bytes: 162
+    Result: [ATTACK] | Score: 0.0313 (RF: 0.0313)
+    Source: RANDOM_FOREST (Infer Time: 41.71 ms)
+    Rule Triggers: RULE-PORT-SCAN
+    DQN Recommendation: ISOLATE -> Enforced: ISOLATE (Overridden: False)
+    TreeSHAP Base Value: 0.500
+    TreeSHAP Top Features:
+      - packet_length_mean    : attr = -0.1569 (value: 54.0)
+      - packet_length_std     : attr = -0.0590 (value: 0.0)
+      - syn_count             : attr = -0.0560 (value: 3.0)
+
+  Flow #3: [TCP] 10.200.1.2:55001 -> 10.200.1.3:22
+    Packets: 3 | Duration: 10.0 ms | Bytes: 162
+    Result: [ATTACK] | Score: 0.0313 (RF: 0.0313)
+    Source: RANDOM_FOREST (Infer Time: 40.55 ms)
+    Rule Triggers: RULE-PORT-SCAN
+    DQN Recommendation: ISOLATE -> Enforced: ISOLATE (Overridden: False)
+    TreeSHAP Base Value: 0.500
+    TreeSHAP Top Features:
+      - packet_length_mean    : attr = -0.1569 (value: 54.0)
+      - packet_length_std     : attr = -0.0590 (value: 0.0)
+      - syn_count             : attr = -0.0560 (value: 3.0)
+
+  Flow #4: [TCP] 10.200.1.2:55003 -> 10.200.1.3:443
+    Packets: 3 | Duration: 10.0 ms | Bytes: 162
+    Result: [ATTACK] | Score: 0.0313 (RF: 0.0313)
+    Source: RANDOM_FOREST (Infer Time: 38.61 ms)
+    Rule Triggers: RULE-PORT-SCAN
+    DQN Recommendation: ISOLATE -> Enforced: ISOLATE (Overridden: False)
+    TreeSHAP Base Value: 0.500
+    TreeSHAP Top Features:
+      - packet_length_mean    : attr = -0.1569 (value: 54.0)
+      - packet_length_std     : attr = -0.0590 (value: 0.0)
+      - syn_count             : attr = -0.0560 (value: 3.0)
+
+  Flow #5: [TCP] 10.200.1.2:55004 -> 10.200.1.3:8080
+    Packets: 3 | Duration: 10.0 ms | Bytes: 162
+    Result: [ATTACK] | Score: 0.0165 (RF: 0.0313)
+    Source: RF+LSTM_FUSION (Infer Time: 46.56 ms)
+    Rule Triggers: RULE-PORT-SCAN
+    DQN Recommendation: ISOLATE -> Enforced: ISOLATE (Overridden: False)
+    TreeSHAP Base Value: 0.500
+    TreeSHAP Top Features:
+      - packet_length_mean    : attr = -0.1569 (value: 54.0)
+      - packet_length_std     : attr = -0.0590 (value: 0.0)
+      - syn_count             : attr = -0.0560 (value: 3.0)
+
+======================================================================
+Summary: 15 pkts captured | 5 flows processed | 4 threat(s) detected
+Safety Mode: ADVISORY ONLY (Zero network mutations)
+======================================================================
+
+================================================================================
+XRL-IDARS — Reproducible Live Inference & Replay Demonstration
+================================================================================
+Target PCAP:            data/demo/sample_traffic.pcap
+Model Directory:        results/experiments/EXP-P1-CIC2017-R10-001
+Research Threshold:     0.5 (Frozen Baseline for Academic Comparison)
+Operational Candidate:  0.4 (Proposed Phase 2 Operational Parameter)
+Output Directory:       results/demo
+--------------------------------------------------------------------------------
+Streaming flow classification in progress...
+--------------------------------------------------------------------------------
+Flow #1  | TCP  | 192.168.1.50:45000    -> 142.250.190.46:80     | Pkts: 8  | Dur:  220.0ms | Score: 0.1438 | Truth: BENIGN | Res (0.50): [92mBENIGN[0m ([92mCORRECT[0m) | Ops (0.40): [92mBENIGN[0m ([92mCORRECT[0m)
+Flow #2  | TCP  | 192.168.1.50:49152    -> 104.16.132.229:443    | Pkts: 6  | Dur:  115.0ms | Score: 0.1230 | Truth: BENIGN | Res (0.50): [92mBENIGN[0m ([92mCORRECT[0m) | Ops (0.40): [92mBENIGN[0m ([92mCORRECT[0m)
+Flow #3  | TCP  | 10.0.0.99:45123       -> 192.168.1.10:80       | Pkts: 8  | Dur:    2.1ms | Score: 0.5080 | Truth: ATTACK | Res (0.50): [91mATTACK[0m ([92mCORRECT[0m) | Ops (0.40): [91mATTACK[0m ([92mCORRECT[0m)
+Flow #4  | TCP  | 10.0.0.99:45124       -> 192.168.1.10:80       | Pkts: 9  | Dur: 1032.0ms | Score: 0.5399 | Truth: ATTACK | Res (0.50): [91mATTACK[0m ([92mCORRECT[0m) | Ops (0.40): [91mATTACK[0m ([92mCORRECT[0m)
+Flow #5  | TCP  | 10.0.0.99:45125       -> 192.168.1.10:80       | Pkts: 9  | Dur:  400.0ms | Score: 0.4692 | Truth: ATTACK | Res (0.50): [92mBENIGN[0m ([91mINCORRECT[0m) | Ops (0.40): [91mATTACK[0m ([92mCORRECT[0m)
+Flow #6  | UDP  | 192.168.1.50:51234    -> 8.8.8.8:53            | Pkts: 2  | Dur:   25.0ms | Score: 0.0001 | Truth: BENIGN | Res (0.50): [92mBENIGN[0m ([92mCORRECT[0m) | Ops (0.40): [92mBENIGN[0m ([92mCORRECT[0m)
+--------------------------------------------------------------------------------
+DEMONSTRATION EXECUTION COMPLETE
+--------------------------------------------------------------------------------
+Packets Processed: 42
+Completed Flows:   6
+Evaluated Flows:   6
+
+--- Research Baseline Threshold (tau = 0.50) ---
+Confusion Matrix:  TP=2, FP=0, TN=3, FN=1
+Accuracy:          83.33% | Precision: 100.00% | Recall: 66.67% | F1: 0.8000
+False Alarm (FPR): 0.00% | Miss Rate (FNR): 33.33%
+
+--- Proposed Phase 2 Operational Candidate (tau_ops = 0.40; Sample Demo PCAP Only) ---
+Confusion Matrix:  TP=3, FP=0, TN=3, FN=0
+Accuracy:          100.00% | Precision: 100.00% | Recall: 100.00% | F1: 1.0000
+False Alarm (FPR): 0.00% | Miss Rate (FNR): 0.00%
+--------------------------------------------------------------------------------
+Artifacts Saved:   results/demo/replay_summary.json
+                   results/demo/demo_report.md
+================================================================================
+
+=== 4. DQN MULTI-SCENARIO VALIDATION BENCHMARK ===
+Command: .venv/bin/python scripts/experiments/evaluate_dqn_validation.py
+================================================================================
+  XRL-IDARS — Multi-Scenario DQN & Baseline Autonomous Response Validation
+================================================================================
+
+[1/5] Loading held-out flow population from d_pol_test_flows.joblib...
+      Loaded 355,865 flows in 3.65s.
+
+[2/5] Synthesizing / partitioning 5 evaluation scenarios...
+      - Scenario_1_HeldOut_Mixed_Attack           : 20,000 flows (Attacks: 13,027, Benign: 6,973)
+      - Scenario_2_Volumetric_Attack_Surge        :    450 flows (Attacks:   300, Benign:   150)
+      - Scenario_3_Low_Rate_Reconnaissance        :    300 flows (Attacks:   100, Benign:   200)
+      - Scenario_4_Mission_Critical_Host          :    250 flows (Attacks:   125, Benign:   125)
+      - Scenario_5_Benign_Enterprise_Baseline     :  5,000 flows (Attacks:     0, Benign: 5,000)
+
+[3/5] Initializing trained Dueling DQN and baseline ladder...
+      DQN Agent loaded from: /home/rishikesh/Desktop/fyp-xrlids/models/dqn/dqn_4action_best.pt
+      Total policies to evaluate: 7
+        * Trained_Dueling_DQN_4-action
+        * Baseline_0_Always_ALLOW
+        * Baseline_Always_ALERT
+        * Baseline_1_Single_Threshold_tau_0.50
+        * Baseline_2_Two_Tier_0.40_0.75
+        * Baseline_3_Heuristic_State_Machine
+        * Baseline_4_Cost_Optimal_Threshold
+
+[4/5] Executing evaluation matrix across 5 scenarios, 3 seeds, and 3 cost regimes...
+
+  >>> Running Scenario: Scenario_1_HeldOut_Mixed_Attack (20,000 flows)
+      Regime: standard_enterprise      | Mean Cost/Flow:
+        Trained_Dueling_DQN_4-action              :  23.2525 ± 0.0000 (FQR:  1.58%, BAS:  75.10%, Overrides: 36273)
+        Baseline_0_Always_ALLOW                   :  65.1350 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides:   0)
+        Baseline_Always_ALERT                     : 5005.9151 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_1_Single_Threshold_tau_0.50      :  32.4370 ± 0.0000 (FQR:  2.81%, BAS:  79.99%, Overrides: 40737)
+        Baseline_2_Two_Tier_0.40_0.75             :  23.2956 ± 0.0000 (FQR:  2.37%, BAS:  79.52%, Overrides: 39597)
+        Baseline_3_Heuristic_State_Machine        :  33.5214 ± 0.0000 (FQR:  2.84%, BAS:  42.48%, Overrides: 46431)
+        Baseline_4_Cost_Optimal_Threshold         :  14.8796 ± 0.0000 (FQR:  1.72%, BAS:  60.96%, Overrides: 36594)
+      Regime: high_availability        | Mean Cost/Flow:
+        Trained_Dueling_DQN_4-action              :  24.0228 ± 0.0000 (FQR:  1.58%, BAS:  75.10%, Overrides: 36273)
+        Baseline_0_Always_ALLOW                   :  32.5675 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides:   0)
+        Baseline_Always_ALERT                     : 5005.9151 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_1_Single_Threshold_tau_0.50      :  32.9650 ± 0.0000 (FQR:  2.81%, BAS:  79.99%, Overrides: 40737)
+        Baseline_2_Two_Tier_0.40_0.75             :  23.9436 ± 0.0000 (FQR:  2.37%, BAS:  79.52%, Overrides: 39597)
+        Baseline_3_Heuristic_State_Machine        :  34.5481 ± 0.0000 (FQR:  2.84%, BAS:  42.48%, Overrides: 46431)
+        Baseline_4_Cost_Optimal_Threshold         :  15.7451 ± 0.0000 (FQR:  1.72%, BAS:  60.96%, Overrides: 36594)
+      Regime: high_security_enclave    | Mean Cost/Flow:
+        Trained_Dueling_DQN_4-action              :  27.6148 ± 0.0000 (FQR:  1.58%, BAS:  75.10%, Overrides: 36273)
+        Baseline_0_Always_ALLOW                   : 325.6750 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides:   0)
+        Baseline_Always_ALERT                     : 5011.1259 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_1_Single_Threshold_tau_0.50      :  37.5260 ± 0.0000 (FQR:  2.81%, BAS:  79.99%, Overrides: 40737)
+        Baseline_2_Two_Tier_0.40_0.75             :  28.1507 ± 0.0000 (FQR:  2.37%, BAS:  79.52%, Overrides: 39597)
+        Baseline_3_Heuristic_State_Machine        :  37.8450 ± 0.0000 (FQR:  2.84%, BAS:  42.48%, Overrides: 46431)
+        Baseline_4_Cost_Optimal_Threshold         :  19.1876 ± 0.0000 (FQR:  1.72%, BAS:  60.96%, Overrides: 36594)
+
+  >>> Running Scenario: Scenario_2_Volumetric_Attack_Surge (450 flows)
+      Regime: standard_enterprise      | Mean Cost/Flow:
+        Trained_Dueling_DQN_4-action              :  10.8878 ± 0.0000 (FQR:  0.00%, BAS:  98.67%, Overrides: 822)
+        Baseline_0_Always_ALLOW                   :  66.6667 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides:   0)
+        Baseline_Always_ALERT                     : 118.5944 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_1_Single_Threshold_tau_0.50      :  11.3333 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 870)
+        Baseline_2_Two_Tier_0.40_0.75             :  11.3333 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 870)
+        Baseline_3_Heuristic_State_Machine        :  11.3333 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 870)
+        Baseline_4_Cost_Optimal_Threshold         :  21.0944 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides: 870)
+      Regime: high_availability        | Mean Cost/Flow:
+        Trained_Dueling_DQN_4-action              :  10.8878 ± 0.0000 (FQR:  0.00%, BAS:  98.67%, Overrides: 822)
+        Baseline_0_Always_ALLOW                   :  33.3333 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides:   0)
+        Baseline_Always_ALERT                     : 118.5944 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_1_Single_Threshold_tau_0.50      :  11.3333 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 870)
+        Baseline_2_Two_Tier_0.40_0.75             :  11.3333 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 870)
+        Baseline_3_Heuristic_State_Machine        :  11.3333 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 870)
+        Baseline_4_Cost_Optimal_Threshold         :  21.0944 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides: 870)
+      Regime: high_security_enclave    | Mean Cost/Flow:
+        Trained_Dueling_DQN_4-action              :  15.9011 ± 0.0000 (FQR:  0.00%, BAS:  98.67%, Overrides: 822)
+        Baseline_0_Always_ALLOW                   : 333.3333 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides:   0)
+        Baseline_Always_ALERT                     : 123.9278 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_1_Single_Threshold_tau_0.50      :  16.4889 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 870)
+        Baseline_2_Two_Tier_0.40_0.75             :  16.4889 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 870)
+        Baseline_3_Heuristic_State_Machine        :  16.4889 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 870)
+        Baseline_4_Cost_Optimal_Threshold         :  26.2500 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides: 870)
+
+  >>> Running Scenario: Scenario_3_Low_Rate_Reconnaissance (300 flows)
+      Regime: standard_enterprise      | Mean Cost/Flow:
+        Trained_Dueling_DQN_4-action              :   7.3667 ± 0.0000 (FQR:  9.00%, BAS:  91.00%, Overrides:  78)
+        Baseline_0_Always_ALLOW                   :  33.3333 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides:   0)
+        Baseline_Always_ALERT                     :  77.4333 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_1_Single_Threshold_tau_0.50      :  40.7000 ± 0.0000 (FQR: 100.00%, BAS:   0.00%, Overrides: 600)
+        Baseline_2_Two_Tier_0.40_0.75             :  12.0333 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides: 600)
+        Baseline_3_Heuristic_State_Machine        :  11.8550 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_4_Cost_Optimal_Threshold         :  77.4333 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+      Regime: high_availability        | Mean Cost/Flow:
+        Trained_Dueling_DQN_4-action              :  10.9667 ± 0.0000 (FQR:  9.00%, BAS:  91.00%, Overrides:  78)
+        Baseline_0_Always_ALLOW                   :  16.6667 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides:   0)
+        Baseline_Always_ALERT                     :  77.4333 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_1_Single_Threshold_tau_0.50      :  80.7000 ± 0.0000 (FQR: 100.00%, BAS:   0.00%, Overrides: 600)
+        Baseline_2_Two_Tier_0.40_0.75             :  22.0333 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides: 600)
+        Baseline_3_Heuristic_State_Machine        :  21.6550 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_4_Cost_Optimal_Threshold         :  77.4333 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+      Regime: high_security_enclave    | Mean Cost/Flow:
+        Trained_Dueling_DQN_4-action              :   7.6933 ± 0.0000 (FQR:  9.00%, BAS:  91.00%, Overrides:  78)
+        Baseline_0_Always_ALLOW                   : 166.6667 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides:   0)
+        Baseline_Always_ALERT                     :  80.1000 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_1_Single_Threshold_tau_0.50      :  17.3667 ± 0.0000 (FQR: 100.00%, BAS:   0.00%, Overrides: 600)
+        Baseline_2_Two_Tier_0.40_0.75             :   6.7000 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides: 600)
+        Baseline_3_Heuristic_State_Machine        :   6.6817 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_4_Cost_Optimal_Threshold         :  80.1000 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+
+  >>> Running Scenario: Scenario_4_Mission_Critical_Host (250 flows)
+      Regime: standard_enterprise      | Mean Cost/Flow:
+        Trained_Dueling_DQN_4-action              :   6.0040 ± 0.0000 (FQR:  0.00%, BAS:  99.20%, Overrides: 375)
+        Baseline_0_Always_ALLOW                   :  50.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides:   0)
+        Baseline_Always_ALERT                     :  66.7700 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_1_Single_Threshold_tau_0.50      :   6.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 375)
+        Baseline_2_Two_Tier_0.40_0.75             :   6.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 375)
+        Baseline_3_Heuristic_State_Machine        :   6.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 375)
+        Baseline_4_Cost_Optimal_Threshold         :   6.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 375)
+      Regime: high_availability        | Mean Cost/Flow:
+        Trained_Dueling_DQN_4-action              :   6.0040 ± 0.0000 (FQR:  0.00%, BAS:  99.20%, Overrides: 375)
+        Baseline_0_Always_ALLOW                   :  25.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides:   0)
+        Baseline_Always_ALERT                     :  66.7700 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_1_Single_Threshold_tau_0.50      :   6.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 375)
+        Baseline_2_Two_Tier_0.40_0.75             :   6.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 375)
+        Baseline_3_Heuristic_State_Machine        :   6.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 375)
+        Baseline_4_Cost_Optimal_Threshold         :   6.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 375)
+      Regime: high_security_enclave    | Mean Cost/Flow:
+        Trained_Dueling_DQN_4-action              :  10.0040 ± 0.0000 (FQR:  0.00%, BAS:  99.20%, Overrides: 375)
+        Baseline_0_Always_ALLOW                   : 250.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides:   0)
+        Baseline_Always_ALERT                     :  70.7700 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_1_Single_Threshold_tau_0.50      :  10.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 375)
+        Baseline_2_Two_Tier_0.40_0.75             :  10.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 375)
+        Baseline_3_Heuristic_State_Machine        :  10.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 375)
+        Baseline_4_Cost_Optimal_Threshold         :  10.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides: 375)
+
+  >>> Running Scenario: Scenario_5_Benign_Enterprise_Baseline (5,000 flows)
+      Regime: standard_enterprise      | Mean Cost/Flow:
+        Trained_Dueling_DQN_4-action              :   1.4728 ± 0.0000 (FQR:  1.00%, BAS:  86.10%, Overrides: 327)
+        Baseline_0_Always_ALLOW                   :   0.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides:   0)
+        Baseline_Always_ALERT                     : 1248.7510 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_1_Single_Threshold_tau_0.50      :   1.5637 ± 0.0000 (FQR:  2.24%, BAS:  88.74%, Overrides: 1353)
+        Baseline_2_Two_Tier_0.40_0.75             :   1.7403 ± 0.0000 (FQR:  1.76%, BAS:  88.44%, Overrides: 1062)
+        Baseline_3_Heuristic_State_Machine        :   2.0463 ± 0.0000 (FQR:  1.90%, BAS:  70.40%, Overrides: 2610)
+        Baseline_4_Cost_Optimal_Threshold         :   1.9677 ± 0.0000 (FQR:  1.30%, BAS:  72.82%, Overrides: 450)
+      Regime: high_availability        | Mean Cost/Flow:
+        Trained_Dueling_DQN_4-action              :   2.7478 ± 0.0000 (FQR:  1.00%, BAS:  86.10%, Overrides: 327)
+        Baseline_0_Always_ALLOW                   :   0.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides:   0)
+        Baseline_Always_ALERT                     : 1248.7510 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_1_Single_Threshold_tau_0.50      :   2.9077 ± 0.0000 (FQR:  2.24%, BAS:  88.74%, Overrides: 1353)
+        Baseline_2_Two_Tier_0.40_0.75             :   3.2043 ± 0.0000 (FQR:  1.76%, BAS:  88.44%, Overrides: 1062)
+        Baseline_3_Heuristic_State_Machine        :   3.2163 ± 0.0000 (FQR:  1.90%, BAS:  70.40%, Overrides: 2610)
+        Baseline_4_Cost_Optimal_Threshold         :   3.5637 ± 0.0000 (FQR:  1.30%, BAS:  72.82%, Overrides: 450)
+      Regime: high_security_enclave    | Mean Cost/Flow:
+        Trained_Dueling_DQN_4-action              :   0.6728 ± 0.0000 (FQR:  1.00%, BAS:  86.10%, Overrides: 327)
+        Baseline_0_Always_ALLOW                   :   0.0000 ± 0.0000 (FQR:  0.00%, BAS: 100.00%, Overrides:   0)
+        Baseline_Always_ALERT                     : 1248.7510 ± 0.0000 (FQR:  0.00%, BAS:   0.00%, Overrides:   0)
+        Baseline_1_Single_Threshold_tau_0.50      :   0.7797 ± 0.0000 (FQR:  2.24%, BAS:  88.74%, Overrides: 1353)
+        Baseline_2_Two_Tier_0.40_0.75             :   0.8523 ± 0.0000 (FQR:  1.76%, BAS:  88.44%, Overrides: 1062)
+        Baseline_3_Heuristic_State_Machine        :   1.3613 ± 0.0000 (FQR:  1.90%, BAS:  70.40%, Overrides: 2610)
+        Baseline_4_Cost_Optimal_Threshold         :   0.9687 ± 0.0000 (FQR:  1.30%, BAS:  72.82%, Overrides: 450)
+
+[5/5] Exporting complete machine-readable benchmark report to: /home/rishikesh/Desktop/fyp-xrlids/results/experiments/dqn_validation_results.json...
+      Benchmark written successfully (296,946 bytes).
+
+================================================================================
+  Validation execution completed successfully.
+================================================================================
+
+
+=== POST-PUBLICATION CORRECTNESS VERIFICATION & TEST SUITE ===
+Command: .venv/bin/pytest -v --tb=short
+Exit Code: 0
+Result: 671 passed, 19 warnings in 61.08s (100% pass rate)
+
+=== INTEGRATED PIPELINE DEMONSTRATION WITH PROVENANCE & VERIFIED EVENT ===
+Command: .venv/bin/python scripts/demo/run_integrated_pipeline_demo.py
+Exit Code: 0
+Verified Event ID: evt-64363f5f1d01 (flow-1793386851184-3)
+Source Mode: PCAP
+Endpoints: 10.0.0.99:45123 -> 192.168.1.10:80 (Proto: 6)
+RF Score: 0.5080 (Sole Operational Detector)
+Rule Matches: ['RULE-TCP-INVALID-FLAGS']
+TreeSHAP Attributions: packet_length_std (+0.2294), flow_packets_per_s (-0.0978), flow_bytes_per_s (-0.0563)
+DQN 6D State: [0.85, 0.0, 1.0, 0.0, 0.0, 0.8667]
+Q-Values: {'ALLOW': -103.4347, 'ALERT': -18.8499, 'RATE_LIMIT': -23.3905, 'ISOLATE': -11.3341}
+Proposed Action: ISOLATE | Enforced Action: ISOLATE (Safety Overridden: False)
+Executor State: VERIFIED | Advisory Status: is_advisory=True (0 kernel mutations)
+Total Events Evaluated: 8 | Threats Flagged: 5 | Rule Violations: 5 | Source Escalations: 0
+============================================================================
+  XRL-IDARS — Complete Real End-to-End Operational Pipeline Demonstration
+============================================================================
+
+[Stage 1] Initializing Operational Subsystems...
+  ✓ Model Loaded:       Random Forest (Sole Operational Detector)
+  ✓ Explainer Engine:   TreeSHAP (Lundberg & Lee)
+  ✓ Response Engine:    Dueling DQN (4-Action Policy)
+  ✓ Safety Guard:       Deterministic Safety Gate (Advisory Dry-Run)
+  ✓ Streamlit Audit:    EventManager active (0 initial events)
+
+[Stage 2] Replaying Authentic Wire Packets from: sample_traffic.pcap
+  ✓ Replayed 42 authentic packets via ScapyCaptureService.
+  ✓ Canonical FlowEngine assembled 6 completed flow(s).
+
+[Stage 3] Generating Wire-Format Scapy Packets (Scenario C: TCP SYN Burst)...
+  ✓ Synthesized 60 raw wire packets with asymmetric TCP flags.
+  ✓ Total completed flows ready for end-to-end evaluation: 8
+
+[Stage 4] Executing Operational Pipeline across 8 Flow(s)...
+  - Flow #1 [flow-1793389763784-1] (PCAP): 192.168.1.50:45000 -> 142.250.190.46:80 | Verdict: BENIGN | Enforced: ALLOW
+  - Flow #2 [flow-1793389763882-2] (PCAP): 192.168.1.50:49152 -> 104.16.132.229:443 | Verdict: BENIGN | Enforced: ALLOW
+  - Flow #3 [flow-1793389763981-3] (PCAP): 10.0.0.99:45123 -> 192.168.1.10:80 | Verdict: ATTACK | Enforced: ISOLATE
+  - Flow #4 [flow-1793389764078-4] (PCAP): 10.0.0.99:45124 -> 192.168.1.10:80 | Verdict: ATTACK | Enforced: ISOLATE
+  - Flow #5 [flow-1793389764166-5] (PCAP): 10.0.0.99:45125 -> 192.168.1.10:80 | Verdict: ATTACK | Enforced: ISOLATE
+  - Flow #6 [flow-1793389764256-6] (PCAP): 192.168.1.50:51234 -> 8.8.8.8:53 | Verdict: BENIGN | Enforced: ALLOW
+  - Flow #7 [flow-1793389764346-7] (SAMPLE): 10.200.1.2:45000 -> 10.200.1.3:80 | Verdict: ATTACK | Enforced: ALERT
+  - Flow #8 [flow-1793389764436-8] (SAMPLE): 10.200.1.2:45001 -> 10.200.1.3:80 | Verdict: ATTACK | Enforced: ALERT
+
+[Stage 5] Verifying Unified Security Event Association & Streamlit Visibility...
+  ✓ 8 of 8 events verified with 100% component association integrity:
+    [1] Random Forest Detection Score
+    [2] Lundberg TreeSHAP Local Attributions (10 Features)
+    [3] Dueling DQN Q-Value Action Recommendation
+    [4] Deterministic Safety Gate Decision & Overrides
+    [5] Advisory Dry-Run Response Execution Record
+    All 5 components are linked to the identical SecurityEvent ID and stored in EventManager.
+
+============================================================================
+  Verified Autonomous Response Security Event Record (Event ID: evt-1ccb1277aa1f)
+============================================================================
+Event ID:         evt-1ccb1277aa1f
+Flow ID:          flow-1793389763981-3
+Source Mode:      PCAP
+Timestamp:        2026-10-30T19:49:24.078008+00:00
+Endpoints:        10.0.0.99:45123 -> 192.168.1.10:80 (Proto: 6)
+RF Score:         0.5080 (Random Forest (Sole Operational Detector))
+Rule Matches:     ['RULE-TCP-INVALID-FLAGS']
+Hybrid Verdict:   HYBRID (Severity: HIGH)
+TreeSHAP Base:    0.5000
+TreeSHAP Top Attributions:
+  • packet_length_std   : +0.2294 (INCREASES_THREAT)
+  • flow_packets_per_s  : -0.0978 (DECREASES_THREAT)
+  • flow_bytes_per_s    : -0.0563 (DECREASES_THREAT)
+DQN 6D State:     [0.8500000238418579, 0.0, 1.0, 0.0, 0.0, 0.8666746616363525]
+DQN Q-Values:     {'ALLOW': -103.43466186523438, 'ALERT': -18.849855422973633, 'RATE_LIMIT': -23.390548706054688, 'ISOLATE': -11.334062576293945}
+Proposed Action:  ISOLATE
+Safety Enforced:  ISOLATE
+Override Reason:  OK
+Executor State:   VERIFIED
+Advisory Status:  is_advisory=True (0 kernel mutations, dry-run only)
+============================================================================
+
+Streamlit Telemetry KPIs:
+  Total Events Evaluated:     8
+  Threat Intrusions Flagged:  5
+  Rule Violations Triggered:  5
+  Source Escalations:         0
+
+>>> INTEGRATION VERIFICATION SUCCESSFUL: Pipeline is genuine, end-to-end, and integrated! <<<
+

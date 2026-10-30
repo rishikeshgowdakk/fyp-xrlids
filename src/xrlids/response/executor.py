@@ -116,6 +116,7 @@ class ResponseExecutor:
         ground_truth: int | None = None,
         metadata: Mapping[str, Any] | None = None,
         ttl_seconds: float | None = None,
+        step: int | None = None,
     ) -> ExecutionReport:
         """Process an action through the formal lifecycle.
         
@@ -131,10 +132,11 @@ class ResponseExecutor:
         ttl = float(ttl_seconds if ttl_seconds is not None else self.default_ttl_seconds)
 
         # 1. PROPOSED -> SAFETY GATE CHECK
+        curr_time = float(step) if step is not None else time.time()
         safety_result = self.safety_gate.check(
             action=proposed_action,
             target_host=target_host,
-            current_time=time.time(),
+            current_time=curr_time,
         )
 
         authorized_action = safety_result.action

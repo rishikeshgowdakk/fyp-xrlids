@@ -1429,6 +1429,20 @@ function renderDevices(snap) {
 }
 
 // ─── Initialization ───
+function handleRouteHash() {
+  const hash = window.location.hash;
+  if (hash === "#replay-lab") {
+    switchMainMode("research");
+    showResearchTab("replay-lab");
+  } else if (hash === "#live") {
+    switchMainMode("live");
+  } else if (hash.startsWith("#tab-")) {
+    const tab = hash.replace("#tab-", "");
+    switchMainMode("research");
+    showResearchTab(tab);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   onLiveModeChange();
   onCsvModelChange();
@@ -1436,8 +1450,11 @@ document.addEventListener("DOMContentLoaded", () => {
   renderDevices({ mode: null });
   switchMainMode("research");
   showResearchTab("dataset-explorer");
+  handleRouteHash();
   setInterval(pollLive, LIVE_POLL_MS);
 });
+
+window.addEventListener("hashchange", handleRouteHash);
 
 
 // ═══════════════════ LABELLED REPLAY LAB CONTROLLER ═══════════════════

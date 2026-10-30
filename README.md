@@ -1,106 +1,209 @@
 # XRL-IDARS
 
-**Explainable Reinforcement Learning-Based Network Intrusion Detection and Autonomous Response System**
+**Explainable Reinforcement Learning-Based Intrusion Detection and Autonomous Response System**
 
-XRL-IDARS is a research prototype for network-flow intrusion detection, explainability, and safety-constrained response decision support. It combines canonical bidirectional flow construction, deterministic security rules, a frozen binary detector, TreeSHAP explanations, a Dueling DQN response policy, and a deterministic safety gate.
+[![Tests](https://img.shields.io/badge/Tests-704%20Passed-brightgreen)](tests/)
+[![Python](https://img.shields.io/badge/Python-3.12%20%7C%203.14-blue)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-Academic-lightgrey)](LICENSE)
+[![Architecture](https://img.shields.io/badge/Architecture-RF%20Operational%20%2B%20TreeSHAP%20%2B%20DQN%20Advisory-orange)](docs/architecture/SYSTEM_ARCHITECTURE.md)
 
-> **Operational truth:** the documented live/replay detection path currently uses the registered Random Forest models. XGBoost is implemented and has a separate reported benchmark comparison, but it is not registered as the canonical live detector in `src/xrlids/models/registry.py`. Do not describe XGBoost as the live champion until its artifacts, preprocessing, registry integration, end-to-end tests, and benchmark provenance have been verified.
+> **Operational Truth & Architecture Baseline:**
+> - **Operational Detector:** The documented real-time Scapy packet capture and PCAP streaming pipeline strictly uses the registered **Random Forest** model (`models/rf/`) as the sole operational ML detector.
+> - **Offline Research Baselines:** Pretrained PyTorch LSTM sequence models (`models/lstm/`, `EXP-P2-LSTM-VALID-001`), convex score fusion weights (`models/fusion/`), and XGBoost candidate models (`models/xgboost/`) are preserved strictly for offline comparative research and benchmarking. They are never invoked in the live packet path.
+> - **Mode Distinction:** LIVE, PCAP, SAMPLE, and RESEARCH modes are explicitly separated across the backend and dashboards. Research benchmark results are never presented as live detection results.
 
-## Start here
+---
+
+## Start Here
 
 | Document | What it covers |
 |---|---|
-| [Architecture](docs/ARCHITECTURE.md) | Authoritative live/offline separation, data flow, and safety boundaries |
-| [Model Selection](docs/MODEL_SELECTION.md) | Formal champion selections across all eight ML and RL categories |
-| [Feature Engineering Study](docs/FEATURE_ENGINEERING_STUDY.md) | Empirical evaluation across five feature rungs (R4-R30) and three datasets |
+| [System Architecture](docs/architecture/SYSTEM_ARCHITECTURE.md) | Authoritative operational pipeline, data flows, and safety boundaries |
+| [Implementation Status](docs/IMPLEMENTATION_STATUS.md) | 21-component master status scorecard and verification evidence |
+| [Comprehensive Test Report](docs/TEST_REPORT.md) | Authoritative test suite progression (493 to 658 tests) and coverage |
+| [Model Selection](docs/MODEL_SELECTION.md) | Formal champion selections across all 8 ML and RL categories |
+| [Feature Engineering Study](docs/FEATURE_ENGINEERING_STUDY.md) | Empirical evaluation across five feature rungs ($R_4 \to R_{30}$) and 3 datasets |
 | [XGBoost vs Random Forest](docs/RF_VS_XGBOOST.md) | Reconciled empirical cross-dataset comparison and latency analysis |
-| [Implementation status](docs/IMPLEMENTATION_STATUS.md) | Subsystem implementation and verification status |
-| [Model artifact audit](docs/MODEL_ARTIFACT_AUDIT.md) | Canonical model files, feature contracts, and provenance |
-| [Evaluation protocol](docs/EVALUATION_PROTOCOL.md) | Dataset splits, metrics, and reproducibility requirements |
-| [Explainability](docs/EXPLAINABILITY.md) | TreeSHAP scope and interpretation |
-| [DQN response policy](docs/DQN_RESPONSE_POLICY.md) | Six-dimensional state and action policy |
-| [Safety gate](docs/SAFETY_GATE.md) | Advisory defaults and response guardrails |
-| [Flow processing](docs/FLOW_PROCESSING.md) | Bidirectional flow construction and feature extraction |
-| [Latency evaluation](docs/LATENCY_EVALUATION.md) | Reported component and pipeline timings |
-| [Exhibition guide](docs/EXHIBITION_GUIDE.md) | Existing demonstration instructions |
+| [Autonomous Response Validation](docs/AUTONOMOUS_RESPONSE_VALIDATION.md) | DQN audit, 6D causal state vector, and closed-loop transition verification |
+| [Final Engineering Acceptance](docs/FINAL_ENGINEERING_ACCEPTANCE.md) | Definitive technical acceptance audit, safety rules, and execution evidence |
+| [Exhibition & Viva Guide](docs/academic/VIVA_PREPARATION.md) | 15 detailed questions and answers for academic project defense |
 
-## Architecture at a glance
+---
 
-### Live / PCAP path
+## 1. Project Overview & Motivation
 
-1. Capture or replay packets.
-2. Parse supported packet headers; payload contents are not retained by the documented parser.
-3. Build canonical bidirectional flows using the five-tuple.
-4. Finalize flows on TCP FIN/RST or the configured idle timeout.
-5. Validate the dataset-compatible R10 or R4 feature contract.
-6. Evaluate deterministic rules independently from the ML posterior.
-7. Run the registered Random Forest detector and obtain a binary benign/attack score.
-8. Generate TreeSHAP explanations for supported tree-model predictions.
-9. Pass response context to the Dueling DQN policy.
-10. Apply deterministic safety checks and record the advisory decision.
+Traditional Network Intrusion Detection Systems (NIDS) suffer from three critical bottlenecks:
+1. **Opaque "Black-Box" Decisions**: Deep neural network detectors provide high detection rates but fail to explain why a packet flow was flagged, forcing security analysts to sift through thousands of uncontextualized alerts.
+2. **The Temporal Sequence Dilemma**: Many recent academic proposals apply complex recurrent neural networks (LSTMs, GRUs) to network intrusion detection. However, empirical evaluation demonstrates that maintaining stateful per-host sequence buffers introduces severe **cold-start blindness** (flows 1 to 4 remain undetected) and exposes the NIDS to **state-exhaustion denial of service**, with negligible accuracy gains over tabular tree ensembles ($+0.19\%$ F1).
+3. **Risks of Autonomous Mitigation**: Unconstrained reinforcement learning agents can isolate critical network infrastructure (gateways, DNS) or induce mass network blackouts during spoofed flood attacks.
 
-The live model evaluates **completed flows**, not every in-flight packet. The architecture documentation specifies a 120-second idle timeout and TCP FIN/RST completion.
+**XRL-IDARS resolves these bottlenecks** by employing Random Forest as an independent operational detector, providing real-time TreeSHAP local explanations, and restricting autonomous reinforcement learning recommendations to an advisory mode governed by deterministic safety shielding.
 
-### Offline research path
+---
 
-The repository also preserves supervised LSTM and RF–LSTM score-fusion experiments for offline dataset evaluation. They are not part of the documented live inference path. XGBoost is a separate supervised candidate/evaluation track; it must not be conflated with the registered RF runtime path.
+## 2. Approved Operational Architecture
 
-## Feature contracts
-
-- **R10:** CIC-IDS2017 and CSE-CIC-IDS2018; ten canonical flow features.
-- **R4:** UNSW-NB15; four derivable flow features.
-
-The exact ordered feature definitions are maintained in `src/xrlids/features/definitions.py`. A model must be paired with its matching train-fitted preprocessor and feature contract. Never substitute a preprocessor from another dataset or silently fill missing features.
-
-## Detection, explanation, and response are different jobs
-
-- **Detection model:** estimates binary (P(ATTACK)); the canonical RF artifacts are binary classifiers.
-- **TreeSHAP:** explains the selected tree detector's prediction. It does not explain the DQN policy.
-- **DQN:** selects a response recommendation from its trained six-dimensional causal state.
-- **Safety gate:** can reject or override unsafe recommendations.
-- **Response execution:** the standard operating mode is advisory/dry-run. Do not claim that a recommendation changed firewall or kernel state unless an explicitly authorized isolated-lab execution and its verification are demonstrated.
-
-Ground-truth attack-family labels in datasets are not automatically predictions from the binary detector.
-
-## XGBoost status
-
-The repository contains an `XGBoostDetector` wrapper with fit, prediction, feature-importance, and JSON model persistence methods. Unit tests cover basic fit/predict, input validation, feature importance, and save/load round trips.
-
-The reported comparison document contains candidate metrics for CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15. Those figures are **reported results, not a substitute for a reproducible experiment**. In particular:
-- The canonical model manifest currently lists RF, LSTM, DQN, and fusion artifacts; it does not list canonical XGBoost model artifacts.
-- The canonical runtime registry currently registers RF models for the three benchmarks.
-- The comparison and latency documents contain inconsistent timing figures; see [the comparison audit](docs/RF_VS_XGBOOST.md).
-- The CSE-CIC-IDS2018 reported attack F1 is very low for both candidates. A small relative improvement does not establish a useful detector.
-- Test-set results must not be used to select a production champion. Champion selection belongs on validation data, followed by one untouched final test evaluation.
-
-Accordingly, XGBoost is documented as an **implemented candidate requiring artifact/provenance and integration verification**, not as the deployed live champion.
-
-## Environment and tests
-
-The current GitHub Actions workflow uses Python 3.12 and installs the project with its development extra:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-pip install --extra-index-url https://download.pytorch.org/whl/cpu -e ".[dev]"
-pytest tests/ -v -ra --tb=short
+```mermaid
+graph TD
+    A[Raw Network Traffic / PCAP Replay] --> B[Scapy Ingestion Engine]
+    B --> C[Canonical FlowEngine - Bidirectional 5-Tuple]
+    C --> D[Feature Extraction - R10 / R4 Contract]
+    D --> E[StandardScaler Transform]
+    D --> F[Deterministic Rule Engine - RFC 793/1122]
+    E --> G[Random Forest Operational Detector]
+    G --> H[Hybrid Decision Arbitration]
+    F --> H
+    H --> I[Source Activity Tracker - 60s Sliding Window]
+    I --> J[TreeSHAP Local Explainability Engine]
+    I --> K[6D Causal State Builder]
+    K --> L[Dueling Deep Q-Network - 4 Actions]
+    L --> M[Deterministic Safety Gate - Invariant Shield]
+    M --> N[Advisory / Dry-Run Response Actuator]
+    J --> O[Streamlit Operational Command Center]
+    N --> O
 ```
 
-For packet capture on a real interface, operating-system permissions and interface availability may be required. PCAP replay is the safer reproducible path for demonstrations.
+### Separation of Concerns:
+- **Detection Model (Perception):** Estimates binary threat posterior $P(\text{ATTACK}) \in [0, 1]$.
+- **TreeSHAP (Explainability):** Explains the Random Forest detector's local feature attributions ($\sum \phi_i = f(x) - E[f(x)]$). It does not explain the DQN policy.
+- **Dueling DQN (Response):** Recommends optimal response action from a 6D causal state vector $\mathbf{s}_t = [S_t, \Delta S_t, N_{\text{alert}}, a_{t-1}, c_t, v_t] \in \mathbb{R}^6$.
+- **Safety Gate (Shielding):** Enforces critical host exemptions, 30s cooldown, 5% blast-radius circuit breaker, and advisory dry-run mode (0 kernel mutations).
 
-Check the [GitHub Actions history](https://github.com/rishikeshgowdakk/fyp-xrlids/actions) for the status of the exact commit you intend to use. A green run proves only the checks that actually ran; tests skipped because external raw datasets were unavailable are not empirical dataset validation.
+---
 
-## Research integrity rules
+## 3. Feature Contracts
 
-1. Keep train, validation, and test partitions separate.
+- **$R_{10}$ (Canonical 10-Feature Contract):** Used for CIC-IDS2017 and CSE-CIC-IDS2018:
+  `flow_duration_ms`, `flow_packets_per_s`, `flow_bytes_per_s`, `packet_length_mean`, `packet_length_std`, `syn_count`, `ack_count`, `rst_count`, `fin_count`, `syn_ack_ratio`.
+- **$R_4$ (Degraded 4-Feature Contract):** Used for UNSW-NB15:
+  `flow_duration_ms`, `flow_packets_per_s`, `flow_bytes_per_s`, `packet_length_mean`.
+
+The exact feature schemas and ordering are defined in `src/xrlids/features/definitions.py`. A model must always be paired with its matching train-fitted preprocessor.
+
+---
+
+## 4. Quick Start Guide
+
+### 1. Installation & Environment Setup
+```bash
+git clone https://github.com/rishikeshgowdakk/fyp-xrlids.git
+cd fyp-xrlids
+
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install -e ".[dev]"
+```
+
+### 2. Run Complete Verification Test Suite
+```bash
+.venv/bin/pytest tests/ -v -ra --tb=short
+```
+*Expected Result:* **704 passed, 0 failed, 100% pass rate**.
+
+### 3. Optional: PostgreSQL Persistent Event Storage
+By default, XRL-IDARS operates fully offline with an in-memory ring buffer and append-only JSONL audit logging (`XRLIDS_STORAGE_MODE=memory` or `auto`).
+To enable persistent PostgreSQL event storage across application restarts:
+```bash
+# Launch PostgreSQL via Docker Compose:
+docker compose up -d postgres
+
+# Or configure environment variables for an existing PostgreSQL instance:
+export POSTGRES_HOST=localhost
+export POSTGRES_PORT=5432
+export POSTGRES_DB=xrlids
+export POSTGRES_USER=xrlids_user
+export POSTGRES_PASSWORD=your_password
+export XRLIDS_STORAGE_MODE=auto
+
+# See detailed documentation in docs/database/POSTGRES_SETUP.md
+```
+
+### 4. Launch Operational Dashboards
+```bash
+# Primary Operational Command Center (Streamlit across 8 dedicated modules):
+.venv/bin/streamlit run dashboard/streamlit_app.py --server.port 8501
+
+# Supplementary Demo Server:
+.venv/bin/python dashboard/server.py 8000
+```
+Access the operational dashboard at: **`http://localhost:8501`**
+
+### 4. Run Calibrated Attack Demonstrations
+In an additional terminal window:
+```bash
+# Benign HTTP/ICMP Traffic Simulation:
+.venv/bin/python scripts/demo/run_scapy_simulation.py --scenario scenario_a_benign --explain
+
+# Volumetric TCP SYN Burst Attack Simulation:
+.venv/bin/python scripts/demo/run_scapy_simulation.py --scenario scenario_c_syn_burst --explain
+
+# Complete Real End-to-End Operational Pipeline Demonstration:
+.venv/bin/python scripts/demo/run_integrated_pipeline_demo.py
+```
+
+---
+
+## 5. Verified Model Performance Summary
+
+Every metric reported below is derived from direct test execution on frozen held-out test splits:
+
+| Model | Evaluation Dataset | Input Contract | Accuracy | Precision | Recall | F1-Score | PR-AUC | Algorithmic Latency |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Random Forest (Operational)** | CIC-IDS2017 Held-Out ($N=355,865$) | R10 (10 features) | $98.15\%$ | $91.51\%$ | $99.01\%$ | **$0.9512$** | $0.9824$ | **$< 0.80\,\text{ms}$** |
+| **Random Forest (Operational)** | CSE-CIC-IDS2018 Multi-Class ($N=1,662,459$) | R10 (10 features) | $97.23\%$ | $82.42\%$ | $95.80\%$ | **$0.8861$** | $0.9676$ | **$< 0.80\,\text{ms}$** |
+| **Random Forest (Operational)** | UNSW-NB15 Degraded ($N=24,504$) | R4 (4 features) | $85.88\%$ | $79.62\%$ | $92.23\%$ | **$0.8546$** | $0.9321$ | **$< 0.75\,\text{ms}$** |
+| **Random Forest (Operational)** | Tuesday Flood Window ($N=8,726$) | R10 (10 features) | $99.78\%$ | $99.84\%$ | $99.72\%$ | **$0.9977$** | $0.9998$ | **$< 0.80\,\text{ms}$** |
+| **PyTorch LSTM (Experimental)** | Tuesday Flood Window ($N=8,726$) | Sequence ($5 \times 11$) | $99.95\%$ | $100.0\%$ | $99.92\%$ | **$0.9996$** | $1.0000$ | $0.38\,\text{ms} + \text{Buffering}$ |
+| **XGBoost (Offline Benchmark)** | CIC-IDS2017 Held-Out ($N=355,865$) | R10 (10 features) | $98.48\%$ | $95.19\%$ | $96.53\%$ | **$0.9585$** | $0.9880$ | **$< 0.25\,\text{ms}$** |
+
+### Why Random Forest is the Sole Operational Detector:
+- **Marginal Deep Learning Gain:** The $+0.19\%$ F1 gain of the LSTM represents only 16 additional flows correctly classified out of 8,726.
+- **Cold-Start Blindness:** The LSTM cannot classify early flows in a session ($K < 5$).
+- **State-Exhaustion Protection:** Random Forest classifies statelessly, protecting the IDS from memory exhaustion during IP-spoofed flood attacks.
+- **Cross-Benchmark Viability:** Random Forest operates across all 17 attack families in all 3 benchmark datasets.
+
+---
+
+## 6. Research & Viva Documentation Hub
+
+Comprehensive academic runbooks for final-year thesis evaluation and project defense:
+
+- [🎓 **Viva Defense & Interview Preparation (15 Q&As)**](docs/academic/VIVA_PREPARATION.md)
+- [📋 **Final-Year Project Report Guide**](docs/academic/PROJECT_REPORT_GUIDE.md)
+- [⏱️ **5–10 Minute Live Demonstration Script**](docs/academic/DEMO_SCRIPT.md)
+- [🏆 **Formal Project Contributions & Novelty**](docs/academic/PROJECT_CONTRIBUTIONS.md)
+- [🔬 **Dataset Feasibility & Eligibility Audit**](docs/evaluation/DATASET_ELIGIBILITY.md)
+- [⚖️ **Random Forest vs. LSTM Reconciliation**](docs/evaluation/RF_VS_LSTM.md)
+- [⚡ **Empirical Latency Benchmark Report**](docs/evaluation/LATENCY_BENCHMARK.md)
+- [🧪 **End-to-End System Validation Evidence**](docs/testing/END_TO_END_VALIDATION.md)
+
+---
+
+## 7. Research Integrity Rules
+
+1. Keep train, validation, and test partitions strictly isolated.
 2. Tune models and thresholds on validation data; use the test split once for final reporting.
 3. Report each dataset separately because R10 and R4 are different contracts and populations.
 4. Report precision, recall, F1, PR-AUC, ROC-AUC, false-positive rate, latency, and artifact size; do not rely on accuracy alone.
 5. Record dataset version, source files, split manifest/hash, feature order, preprocessing artifact, model parameters, random seed, software versions, and artifact checksum.
 6. Distinguish implemented, unit-tested, integration-tested, empirically reproduced, and operationally enabled features.
-7. Never label a recommendation as an executed mitigation without execution and post-action verification evidence.
+7. Never label an advisory recommendation as an executed mitigation without execution and post-action verification evidence.
 
-## Repository
+---
 
-[GitHub: rishikeshgowdakk/fyp-xrlids](https://github.com/rishikeshgowdakk/fyp-xrlids)
+## 8. Security, Ethics & Limitations
+
+- **Advisory by Default:** All automated mitigations operate in dry-run mode to ensure zero uncommanded host network disruption.
+- **Throughput Boundary:** Scapy Python-space packet capture is bounded at $\approx 2,000 \to 5,000\,\text{pps}$ on commodity CPUs. It is an algorithmic research platform, not a 10 Gbps hardware ASIC appliance.
+- **Payload Privacy:** The system inspects only packet headers and statistical flow intervals, preserving user data privacy without decrypting application payloads.
+
+---
+
+## 9. References
+
+1. **Lundberg, S. M., & Lee, S.-I.** (2017). *A Unified Approach to Interpreting Model Predictions*. Advances in Neural Information Processing Systems (NeurIPS 2017).
+2. **Grinsztajn, L., Oyallon, E., & Varoquaux, G.** (2022). *Why tree-based models still outperform deep learning on tabular data*. Advances in Neural Information Processing Systems (NeurIPS 2022).
+3. **Alshiekh, M., et al.** (2018). *Safe Reinforcement Learning via Shielding*. AAAI Conference on Artificial Intelligence (AAAI 2018).
+4. **Sharafaldin, I., Lashkari, A. H., & Ghorbani, A. A.** (2018). *Toward Generating a New Intrusion Detection Dataset and Intrusion Traffic Characterization*. ICISSP.

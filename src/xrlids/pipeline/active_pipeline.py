@@ -44,6 +44,7 @@ class PipelineResult:
     """Comprehensive outcome of end-to-end flow evaluation."""
 
     flow_id: str
+    source_mode: str
     source_ip: str
     dest_ip: str
     source_port: int
@@ -74,6 +75,7 @@ class PipelineResult:
     def to_dict(self) -> dict[str, Any]:
         return {
             "flow_id": self.flow_id,
+            "source_mode": self.source_mode,
             "source_ip": self.source_ip,
             "dest_ip": self.dest_ip,
             "source_port": self.source_port,
@@ -135,6 +137,7 @@ class ActiveInferencePipeline:
         flow_id: str | None = None,
         timestamp: float | None = None,
         explain: bool | None = None,
+        source_mode: str = "LIVE",
     ) -> PipelineResult:
         """Process a completed flow end-to-end through all tiers."""
         t0 = time.perf_counter()
@@ -209,24 +212,31 @@ class ActiveInferencePipeline:
             cooldown_remaining=rem_cooldown,
         )
 
-        # 8. Safety Tier & Controlled Response Execution
-        enforced_act, is_override, override_reason = self.safety_gate.enforce_safety(
-            step=current_step,
-            flow_id=fid,
-            host_id=source_ip,
-            proposed_action=response_rec.action,
-        )
-
+        # 8. Safety Tier & Controlled Response Execution (single-point evaluation via executor)
         exec_report = self.executor.execute_action(
             proposed_action=response_rec.action,
             target_host=source_ip,
             state_before=response_rec.state_vector,
             metadata={"flow_id": fid, "severity": hybrid_dec.severity},
+            step=current_step,
+        )
+        enforced_act = exec_report.authorized_action
+        is_override = exec_report.safety_check.is_overridden
+        override_reason = exec_report.safety_check.reason
+
+        # 8b. Causal State Feedback: Update DQN state history strictly with actual ENFORCED action
+        updated_cooldown = self.safety_gate.get_remaining_cooldown(source_ip, current_step)
+        self.response_service.record_enforced_action(
+            host_id=source_ip,
+            attack_score=hybrid_dec.threat_score,
+            enforced_action=enforced_act,
+            cooldown_remaining=updated_cooldown,
         )
 
         # 9. Formulate SecurityEvent
         sec_event = SecurityEvent(
             flow_id=fid,
+            source_mode=source_mode,
             source_ip=source_ip,
             dest_ip=dest_ip,
             source_port=source_port,
@@ -245,6 +255,7 @@ class ActiveInferencePipeline:
             },
             rule_matches=[asdict(r) for r in rule_matches],
             hybrid_verdict=hybrid_dec.detection_source if hybrid_dec.is_attack else "BENIGN",
+            hybrid_risk_score=float(hybrid_dec.hybrid_risk_score),
             severity=hybrid_dec.severity,
             source_escalated=source_dec.escalate,
             source_status=self.source_tracker.get_host_status(source_ip, timestamp=ts),
@@ -271,6 +282,7 @@ class ActiveInferencePipeline:
 
         return PipelineResult(
             flow_id=fid,
+            source_mode=source_mode,
             source_ip=source_ip,
             dest_ip=dest_ip,
             source_port=source_port,

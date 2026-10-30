@@ -1,7 +1,7 @@
 # XRL-IDARS — Demonstration & Live Replay Verification Report
 
 ## 1. Executive Summary
-- **Run Timestamp (UTC):** `2026-10-29T21:17:04.833841+00:00`
+- **Run Timestamp (UTC):** `2026-10-30T17:42:33.072380+00:00`
 - **Source Traffic (PCAP):** `data/demo/sample_traffic.pcap`
 - **Model Identifier:** `results/experiments/EXP-P1-CIC2017-R10-001`
 - **Research Reporting Baseline Threshold:** `0.5` (Frozen for literature comparability)

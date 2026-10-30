@@ -1,0 +1,4 @@
+model,accuracy,precision,recall,f1_score,macro_f1,roc_auc,evaluated_population
+random_forest,0.8542,0.9718,0.7296,0.8334,0.8519,0.9834,10000
+lstm_flowseq,0.7777,0.9859,0.5624,0.7163,0.7668,0.9671,9969
+rf_lstm_fusion,0.8279,0.9976,0.6565,0.7919,0.8226,0.9814,9969

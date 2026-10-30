@@ -1,0 +1,45 @@
+{
+  "experiment_id": "EXP-P2-LSTM-VALID-001",
+  "dataset": "cse_cic_ids2018",
+  "file": "Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv",
+  "methodology": "chronological_time_blocked_with_purge_gaps",
+  "time_window_utc": {
+    "start": "2018-02-20 10:16:40",
+    "end": "2018-02-20 11:31:40",
+    "ts_min": 1519121000,
+    "ts_max": 1519125500,
+    "duration_s": 4500
+  },
+  "splits": {
+    "train": {
+      "ts_start": 1519121000,
+      "ts_end": 1519124150,
+      "flow_count": 58026,
+      "sequence_count": 47559,
+      "attack_fraction": 0.4939,
+      "attacker_hosts": [20, 21, 22, 23, 24, 25, 26]
+    },
+    "purge_gap_1_seconds": 120,
+    "validation": {
+      "ts_start": 1519124270,
+      "ts_end": 1519124825,
+      "flow_count": 11636,
+      "sequence_count": 8732,
+      "attacker_hosts": [20, 21, 22, 23, 24, 25, 26]
+    },
+    "purge_gap_2_seconds": 120,
+    "test": {
+      "ts_start": 1519124945,
+      "ts_end": 1519125500,
+      "flow_count": 11520,
+      "sequence_count": 8726,
+      "attack_fraction": 0.6049,
+      "attacker_hosts_in_distribution": [20, 21, 22, 23, 24, 25, 26],
+      "attacker_hosts_held_out_unseen": [27, 28, 29],
+      "unseen_attacker_ips": ["18.218.11.51", "18.219.32.43", "18.218.115.60"],
+      "unseen_test_sequences": 1179
+    }
+  },
+  "preprocessor_policy": "StandardScaler fitted strictly on Train split",
+  "seed": 42
+}

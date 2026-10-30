@@ -99,3 +99,44 @@ def test_state_builder_no_label_leakage():
     assert not hasattr(builder, "y")
     assert not hasattr(builder, "y_true")
     assert not hasattr(builder, "labels")
+
+
+def test_dqn_service_get_q_values_6d_contract():
+    """Verify DQNResponseService accepts 6D state vector and returns 4-action Q-values."""
+    from xrlids.response.service import DQNResponseService
+    service = DQNResponseService(action_dim=4)
+
+    # Valid 6D state
+    state_6d = np.array([0.85, 0.20, 0.60, 0.333, 0.50, 0.75], dtype=np.float32)
+    q_vals = service.get_q_values(state_6d)
+
+    assert isinstance(q_vals, np.ndarray)
+    assert q_vals.shape == (4,)
+    assert not np.isnan(q_vals).any()
+
+    # Invalid state shape raises ValueError
+    with pytest.raises(ValueError, match="Expected 6D state vector"):
+        service.get_q_values(np.array([0.5, 0.5], dtype=np.float32))
+
+
+def test_dashboard_dqn_state_labels_contract():
+    """Verify that page 06_DQN_Response_Policy.py strictly matches the 6D StateBuilder contract."""
+    from pathlib import Path
+    page_path = Path(__file__).resolve().parents[2] / "dashboard" / "pages" / "06_DQN_Response_Policy.py"
+    assert page_path.exists(), "Page 06_DQN_Response_Policy.py must exist"
+
+    content = page_path.read_text(encoding="utf-8")
+
+    # Verify correct dimensions exist in labels
+    assert "Current Attack Score" in content
+    assert "Score Trajectory" in content
+    assert "Rolling Alert Density" in content
+    assert "Previous Action" in content or "Previous Enforced Action" in content
+    assert "Remaining Cooldown Fraction" in content or "Cooldown Fraction" in content
+    assert "Normalized Volumetric Scale" in content or "Volumetric Scale" in content
+
+    # Verify incorrect old semantics are NOT present
+    assert "Critical Host Invariant" not in content
+    assert "Vulnerability Exposure" not in content
+    assert "Vulnerability Rating" not in content
+

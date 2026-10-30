@@ -3,31 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>XRL-IDARS — Live Demonstration &amp; Research Evaluation</title>
+  <title>XRL-IDARS — Live Intrusion Detection &amp; Autonomous Response Demonstration</title>
   <style>
     :root {
-      --bg-page: #ffffff;
+      --bg-page: #f8fafc;
       --bg-surface: #ffffff;
-      --bg-subtle: #f9fafb;
-      --bg-hover: #f3f4f6;
-      --border: #d1d5db;
-      --border-light: #e5e7eb;
-      --text-main: #111827;
-      --text-muted: #4b5563;
-      --text-dim: #6b7280;
-      --accent: #0969da;
-      --accent-subtle: #f0f7ff;
-      --status-green: #1a7f37;
+      --bg-subtle: #f1f5f9;
+      --bg-hover: #e2e8f0;
+      --border: #cbd5e1;
+      --border-light: #e2e8f0;
+      --border-dark: #94a3b8;
+      --text-main: #0f172a;
+      --text-muted: #334155;
+      --text-dim: #64748b;
+      --accent: #2563eb;
+      --accent-subtle: #eff6ff;
+      --status-green: #15803d;
       --status-green-bg: #f0fdf4;
-      --status-green-border: #bbf7d0;
-      --status-amber: #9a6700;
+      --status-green-border: #86efac;
+      --status-amber: #b45309;
       --status-amber-bg: #fffbeb;
-      --status-amber-border: #fde68a;
-      --status-red: #cf222e;
+      --status-amber-border: #fcd34d;
+      --status-red: #b91c1c;
       --status-red-bg: #fef2f2;
-      --status-red-border: #fecaca;
-      --radius: 3px;
-      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, Helvetica, sans-serif;
+      --status-red-border: #fca5a5;
+      --radius: 4px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
     }
 
@@ -53,7 +54,7 @@
       }
     }
 
-    /* Top Navigation Header */
+    /* Header */
     .top-header {
       display: flex;
       justify-content: space-between;
@@ -65,43 +66,43 @@
       gap: 12px;
     }
     .brand-title {
-      font-size: 1.25rem;
-      font-weight: 700;
+      font-size: 1.35rem;
+      font-weight: 800;
       color: var(--text-main);
       display: flex;
       align-items: center;
       gap: 8px;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.02em;
     }
     .brand-badge {
-      font-size: 0.7rem;
-      padding: 2px 6px;
-      background: var(--bg-subtle);
-      color: var(--text-muted);
-      border: 1px solid var(--border);
+      font-size: 0.72rem;
+      padding: 2px 7px;
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #7dd3fc;
       border-radius: var(--radius);
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.03em;
     }
     .mode-badge {
-      font-size: 0.7rem;
-      padding: 2px 6px;
+      font-size: 0.72rem;
+      padding: 2px 7px;
       background: var(--bg-surface);
       color: var(--text-muted);
-      border: 1px solid var(--border);
+      border: 1px solid var(--border-dark);
       border-radius: var(--radius);
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
     }
     .status-badge {
-      font-size: 0.7rem;
-      padding: 2px 6px;
+      font-size: 0.72rem;
+      padding: 2px 7px;
       background: var(--bg-surface);
       color: var(--text-dim);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
     }
     .status-badge.running {
@@ -114,1050 +115,718 @@
       border-color: var(--border);
       background: var(--bg-subtle);
     }
+    .status-badge.error {
+      color: var(--status-red);
+      border-color: var(--status-red-border);
+      background: var(--status-red-bg);
+    }
     .brand-subtitle {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
+      font-weight: 600;
       color: var(--text-muted);
-      margin-top: 2px;
+      margin-top: 3px;
     }
     .top-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 6px 12px;
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border-dark);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      text-decoration: none;
+      transition: background 0.15s ease;
+    }
+    .btn:hover:not(:disabled) {
+      background: var(--bg-hover);
+    }
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: #1d4ed8;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: #1d4ed8;
+    }
+    .btn-danger {
+      background: var(--status-red);
+      color: #ffffff;
+      border-color: #991b1b;
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: #991b1b;
+    }
+    .btn-secondary {
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      border-color: var(--border);
+    }
+
+    /* Controls Bar */
+    .control-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .control-group {
       display: flex;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
     }
-
-    /* Plain Rectangular Buttons */
-    .btn {
-      padding: 6px 13px;
-      border-radius: var(--radius);
-      font-weight: 600;
-      font-size: 0.82rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background-color 0.1s ease, border-color 0.1s ease;
-      border: 1px solid transparent;
-      text-decoration: none;
-      line-height: 1.25;
-      font-family: inherit;
-    }
-    .btn-primary {
-      background: var(--text-main);
-      color: #ffffff;
-      border-color: var(--text-main);
-    }
-    .btn-primary:hover {
-      background: #374151;
-      border-color: #374151;
-    }
-    .btn-secondary {
-      background: var(--bg-surface);
-      color: var(--text-main);
-      border: 1px solid var(--border);
-    }
-    .btn-secondary:hover {
-      background: var(--bg-hover);
-      border-color: #9ca3af;
-    }
-    .btn-danger {
-      background: var(--bg-surface);
-      color: var(--status-red);
-      border: 1px solid var(--status-red);
-    }
-    .btn-danger:hover {
-      background: var(--status-red-bg);
-    }
-
-    /* Select Control */
-    .select-wrapper {
-      position: relative;
-      display: inline-flex;
-    }
-    .select-control {
-      padding: 6px 24px 6px 10px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text-main);
-      font-size: 0.82rem;
-      font-weight: 500;
-      cursor: pointer;
-      appearance: none;
-      -webkit-appearance: none;
-      font-family: inherit;
-    }
-    .select-control:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    .select-arrow {
-      position: absolute;
-      right: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      pointer-events: none;
-      font-size: 0.65rem;
-      color: var(--text-dim);
-    }
-
-    /* Minimal System Overview Banner */
-    .overview-banner {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--text-main);
-      border-radius: var(--radius);
-      padding: 10px 14px;
-      margin-bottom: 14px;
-    }
-    .overview-title {
-      font-size: 0.74rem;
+    .control-label {
+      font-size: 0.76rem;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-main);
-      margin-bottom: 3px;
-    }
-    .overview-text {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      line-height: 1.45;
-    }
-
-    /* Demonstration Scenario Progress Bar */
-    .scenario-progress-container {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 10px 14px;
-      margin-bottom: 14px;
-      display: none;
-    }
-    .scenario-progress-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-main);
-    }
-    .progress-bar-track {
-      height: 6px;
-      background: var(--bg-hover);
-      border: 1px solid var(--border-light);
-      border-radius: 2px;
-      overflow: hidden;
-      position: relative;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      background: var(--text-main);
-      width: 0%;
-      transition: width 0.25s linear;
-    }
-
-    /* SECTION 1: Five-Stage Pipeline Strip (Section 9 Requirement) */
-    .zone-pipeline {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 14px;
-      margin-bottom: 14px;
-    }
-    .zone-title {
-      font-size: 0.74rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .pipeline-strip {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-      overflow-x: auto;
-      padding: 2px 0;
-    }
-    .pipe-node {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 8px 10px;
-      flex: 1;
-      min-width: 130px;
-      text-align: center;
-      position: relative;
-      transition: border-color 0.15s ease, background-color 0.15s ease;
-    }
-    /* State styling for pipeline stages (No timer cycling; purely backend driven) */
-    .pipe-node.active {
-      border: 2px solid var(--accent);
-      background: var(--accent-subtle);
-    }
-    .pipe-node.completed {
-      border: 1px solid var(--accent);
-      background: #ffffff;
-    }
-    .pipe-node.error {
-      border: 2px solid var(--status-red);
-      background: var(--status-red-bg);
-    }
-    .pipe-node-title {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--text-main);
-      margin-bottom: 2px;
-    }
-    .pipe-node-sub {
-      font-size: 0.7rem;
-      color: var(--text-dim);
-    }
-    .pipe-arrow {
-      color: var(--text-dim);
-      font-size: 0.95rem;
-      font-weight: bold;
-      flex-shrink: 0;
-    }
-    .pipeline-footnote {
-      font-size: 0.7rem;
-      color: var(--text-dim);
-      margin-top: 6px;
-      text-align: right;
-    }
-
-    /* SECTION 2: Demonstration Stream Counters */
-    .zone-four-numbers {
-      margin-bottom: 14px;
-    }
-    .counter-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
-    .counter-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 10px 14px;
-      text-align: left;
-    }
-    .counter-card.total { border-top: 2px solid var(--text-main); }
-    .counter-card.tp { border-top: 2px solid var(--status-green); }
-    .counter-card.fn { border-top: 2px solid var(--status-red); }
-    .counter-card.fp { border-top: 2px solid var(--status-amber); }
-
-    .counter-label {
-      font-size: 0.72rem;
-      font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
-    .counter-val {
-      font-size: 1.6rem;
-      font-weight: 700;
+    .select-control {
+      padding: 6px 10px;
+      border: 1px solid var(--border-dark);
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--bg-surface);
       color: var(--text-main);
-      line-height: 1.15;
-      margin: 3px 0 1px;
-      font-variant-numeric: tabular-nums;
-      font-family: var(--font-mono);
-    }
-    .counter-hint {
-      font-size: 0.68rem;
-      color: var(--text-dim);
+      min-width: 240px;
     }
 
-    /* SECTION 3: Traffic & Explainability Split View */
-    .zone-split {
+    /* 4 Metric Cards */
+    .metrics-grid {
       display: grid;
-      grid-template-columns: 1.45fr 1fr;
+      grid-template-columns: repeat(4, 1fr);
       gap: 12px;
       margin-bottom: 14px;
     }
-    @media (max-width: 992px) {
-      .zone-split { grid-template-columns: 1fr; }
-      .counter-grid { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 900px) {
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
     }
-    @media (max-width: 540px) {
-      .counter-grid { grid-template-columns: 1fr; }
+    .metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .metric-title {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .metric-val {
+      font-size: 1.7rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--text-main);
+      line-height: 1.1;
+    }
+    .metric-sub {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      margin-top: 4px;
     }
 
-    .stream-container {
+    /* Two-Column Workspace */
+    .split-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 1024px) {
+      .split-layout { grid-template-columns: 1fr; }
+    }
+
+    /* Panels */
+    .panel {
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 12px;
       display: flex;
       flex-direction: column;
-      height: 460px;
-    }
-    .stream-toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .stream-filters {
-      display: flex;
-      gap: 4px;
-    }
-    .filter-btn {
-      padding: 2px 8px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text-muted);
-      font-size: 0.72rem;
-      cursor: pointer;
-      font-weight: 500;
-      font-family: inherit;
-    }
-    .filter-btn.active {
-      background: var(--text-main);
-      color: #ffffff;
-      border-color: var(--text-main);
-    }
-    .flow-list {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      padding-right: 2px;
-    }
-    .flow-row {
-      background: #ffffff;
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius);
-      padding: 6px 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      transition: background-color 0.1s ease, border-color 0.1s ease;
-      font-size: 0.78rem;
-    }
-    .flow-row:hover {
-      background: var(--bg-hover);
-      border-color: var(--border);
-    }
-    .flow-row.selected {
-      border: 1px solid var(--accent);
-      background: var(--accent-subtle);
-    }
-    .flow-main {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-      min-width: 0;
-    }
-    .flow-endpoints {
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      color: var(--text-main);
-      font-weight: 600;
       overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      margin-bottom: 14px;
     }
-    .flow-meta {
-      font-size: 0.69rem;
+    .panel-header {
+      padding: 10px 14px;
+      background: var(--bg-subtle);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .panel-title {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--text-main);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .panel-subtitle {
+      font-size: 0.7rem;
+      font-weight: 600;
       color: var(--text-dim);
     }
-    .flow-badge-group {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      flex-shrink: 0;
-    }
-    .flow-score-bar-bg {
-      width: 44px;
-      height: 4px;
-      background: var(--border-light);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    .flow-score-bar-fill {
-      height: 100%;
-      border-radius: 2px;
+    .panel-body {
+      padding: 12px 14px;
+      overflow-y: auto;
+      max-height: 380px;
     }
 
-    /* Restrained Status Badges */
+    /* Data Tables */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+    .data-table th {
+      text-align: left;
+      padding: 7px 8px;
+      border-bottom: 2px solid var(--border);
+      font-weight: 700;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      position: sticky;
+      top: 0;
+      background: var(--bg-surface);
+      z-index: 1;
+    }
+    .data-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border-light);
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--text-main);
+    }
+    .data-table tr.clickable {
+      cursor: pointer;
+    }
+    .data-table tr.clickable:hover {
+      background: var(--bg-hover);
+    }
+    .data-table tr.selected {
+      background: var(--accent-subtle);
+      font-weight: 700;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
     .badge-attack {
       background: var(--status-red-bg);
       color: var(--status-red);
       border: 1px solid var(--status-red-border);
-      padding: 1px 5px;
-      border-radius: var(--radius);
-      font-weight: 700;
-      font-size: 0.68rem;
     }
     .badge-benign {
-      background: var(--bg-subtle);
-      color: var(--text-main);
-      border: 1px solid var(--border-light);
-      padding: 1px 5px;
-      border-radius: var(--radius);
-      font-weight: 600;
-      font-size: 0.68rem;
-    }
-    .badge-rule {
-      background: var(--bg-subtle);
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      padding: 1px 5px;
-      border-radius: var(--radius);
-      font-size: 0.66rem;
-      font-weight: 600;
-    }
-    .badge-action-allow {
       background: var(--status-green-bg);
       color: var(--status-green);
       border: 1px solid var(--status-green-border);
-      padding: 1px 5px;
-      border-radius: var(--radius);
-      font-size: 0.66rem;
-      font-weight: 700;
     }
-    .badge-action-block {
-      background: var(--status-red-bg);
-      color: var(--status-red);
-      border: 1px solid var(--status-red-border);
-      padding: 1px 5px;
-      border-radius: var(--radius);
-      font-size: 0.66rem;
-      font-weight: 700;
-    }
-    .badge-action-alert {
+    .badge-rule {
       background: var(--status-amber-bg);
       color: var(--status-amber);
       border: 1px solid var(--status-amber-border);
-      padding: 1px 5px;
-      border-radius: var(--radius);
-      font-size: 0.66rem;
-      font-weight: 700;
     }
-
-    /* "Why?" Explainability Card */
-    .why-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      height: 460px;
+    .badge-hybrid {
+      background: #fdf4ff;
+      color: #9333ea;
+      border: 1px solid #f0abfc;
     }
-    .why-header {
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 8px;
-      margin-bottom: 10px;
+    .badge-rf {
+      background: var(--accent-subtle);
+      color: var(--accent);
+      border: 1px solid #bfdbfe;
     }
-    .why-title {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .why-meta-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      margin-top: 8px;
-      font-size: 0.76rem;
-    }
-    .why-meta-item {
+    .badge-none {
       background: var(--bg-subtle);
-      border: 1px solid var(--border-light);
-      padding: 5px 8px;
-      border-radius: var(--radius);
-    }
-    .why-meta-label {
       color: var(--text-dim);
-      font-size: 0.66rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .why-meta-val {
-      color: var(--text-main);
-      font-weight: 600;
-      font-family: var(--font-mono);
-      font-size: 0.76rem;
+      border: 1px solid var(--border);
     }
 
-    .why-shap-container {
-      flex: 1;
-      overflow-y: auto;
-      margin-top: 4px;
-    }
-    .why-shap-title {
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .shap-factor {
-      background: #ffffff;
-      border: 1px solid var(--border-light);
-      border-left: 3px solid var(--border);
-      border-radius: var(--radius);
-      padding: 6px 8px;
-      margin-bottom: 5px;
-    }
-    .shap-factor.threat-increase {
-      border-left-color: var(--status-red);
-      background: #ffffff;
-    }
-    .shap-factor.threat-decrease {
-      border-left-color: var(--status-green);
-      background: #ffffff;
-    }
-    .shap-scientific-notice {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius);
-      padding: 6px 8px;
-      margin-top: 6px;
-      margin-bottom: 4px;
-    }
-    .shap-factor-title {
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: var(--text-main);
-      display: flex;
-      justify-content: space-between;
-    }
-    .shap-factor-desc {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    .why-policy-box {
-      margin-top: auto;
-      padding-top: 8px;
-      border-top: 1px solid var(--border);
-      font-size: 0.76rem;
-      background: var(--bg-subtle);
-      border: 1px solid var(--border-light);
-      padding: 6px 8px;
-      border-radius: var(--radius);
-    }
-    .why-policy-decision {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: 600;
-      color: var(--text-main);
-    }
-
-    /* SECTION 4: Research Benchmark Strip */
-    .zone-benchmark-strip {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 14px;
-      margin-bottom: 14px;
-    }
-    .benchmark-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .benchmark-title {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .benchmark-tag {
-      background: var(--bg-subtle);
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      font-size: 0.68rem;
-      padding: 1px 6px;
-      border-radius: var(--radius);
-      font-weight: 600;
-    }
-    .benchmark-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
-    @media (max-width: 992px) {
-      .benchmark-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 540px) {
-      .benchmark-grid { grid-template-columns: 1fr; }
-    }
-    .benchmark-tile {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 10px 12px;
-      text-align: left;
-    }
-    .benchmark-tile-name {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      margin-bottom: 3px;
-    }
-    .benchmark-tile-score {
-      font-size: 1.45rem;
-      font-weight: 700;
-      color: var(--text-main);
-      font-variant-numeric: tabular-nums;
-      font-family: var(--font-mono);
-      line-height: 1.15;
-    }
-    .benchmark-tile-detail {
-      font-size: 0.68rem;
-      color: var(--text-dim);
-      margin-top: 3px;
-    }
-
-    /* SECTION 5: Live Alert & Event History Log */
-    .zone-alerts-log {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 14px;
-      margin-bottom: 14px;
-    }
-    .table-container {
-      overflow-x: auto;
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius);
-    }
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.76rem;
-      text-align: left;
-    }
-    .data-table th {
-      background: var(--bg-subtle);
-      color: var(--text-main);
-      font-weight: 600;
-      padding: 6px 10px;
-      border-bottom: 1px solid var(--border);
-      white-space: nowrap;
-    }
-    .data-table td {
-      padding: 6px 10px;
-      border-bottom: 1px solid var(--border-light);
-      color: var(--text-main);
-    }
-    .data-table tr:hover td {
-      background: var(--bg-subtle);
-    }
-
-    /* Modal Scorecard */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.45);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 16px;
-    }
-    .modal-card {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      max-width: 480px;
-      width: 100%;
-      text-align: left;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    }
-    .modal-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--text-main);
-      margin-bottom: 4px;
-    }
-    .modal-desc {
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      margin-bottom: 14px;
-      line-height: 1.4;
-    }
-    .modal-stats {
+    /* Explainability Card */
+    .shap-meta {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 8px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-light);
     }
-    .modal-stat-box {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      padding: 8px 10px;
-      border-radius: var(--radius);
+    .shap-meta-item {
+      display: flex;
+      flex-direction: column;
     }
-    .modal-stat-val {
-      font-size: 1.25rem;
+    .shap-meta-label {
+      font-size: 0.7rem;
       font-weight: 700;
-      color: var(--text-main);
-      font-family: var(--font-mono);
-    }
-    .modal-stat-label {
-      font-size: 0.68rem;
       color: var(--text-dim);
       text-transform: uppercase;
-      letter-spacing: 0.04em;
     }
-    .modal-takeaway {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--text-main);
-      padding: 8px 10px;
-      border-radius: var(--radius);
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      margin-bottom: 14px;
-      line-height: 1.4;
-    }
-    .modal-takeaway strong {
+    .shap-meta-val {
+      font-size: 0.82rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
       color: var(--text-main);
-      display: block;
-      margin-bottom: 2px;
-      font-size: 0.8rem;
     }
-    .modal-actions {
+    .shap-bar-row {
       display: flex;
-      justify-content: flex-end;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 0.75rem;
       gap: 8px;
+    }
+    .shap-feat-name {
+      width: 140px;
+      font-weight: 700;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .shap-feat-val {
+      width: 60px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--text-dim);
+      text-align: right;
+    }
+    .shap-bar-track {
+      flex: 1;
+      height: 14px;
+      background: var(--bg-subtle);
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+    .shap-bar-fill-pos {
+      height: 100%;
+      background: var(--status-red);
+      border-radius: 2px;
+    }
+    .shap-bar-fill-neg {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    .shap-attr-val {
+      width: 65px;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      text-align: right;
+    }
+
+    /* Response Card */
+    .response-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .response-box {
+      padding: 8px 10px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+    }
+    .response-box-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .response-box-val {
+      font-size: 0.95rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--text-main);
+    }
+    .response-notice {
+      padding: 8px 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* Latency Table */
+    .latency-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      text-align: center;
+      margin-top: 8px;
+    }
+    .latency-tile {
+      padding: 6px 8px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+    }
+    .latency-tile-val {
+      font-size: 0.9rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--text-main);
+    }
+    .latency-tile-lbl {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    /* Timeline */
+    .timeline-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 8px;
+      border-left: 3px solid var(--border-dark);
+      background: var(--bg-surface);
+      font-size: 0.75rem;
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+    .timeline-item.alert {
+      border-left-color: var(--status-red);
+      background: var(--status-red-bg);
+    }
+    .timeline-item.rule {
+      border-left-color: var(--status-amber);
+      background: var(--status-amber-bg);
+    }
+    .timeline-item.dqn {
+      border-left-color: var(--accent);
+      background: var(--accent-subtle);
+    }
+    .timeline-time {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      min-width: 75px;
+    }
+    .timeline-src {
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 2px;
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .timeline-msg {
+      flex: 1;
+      font-weight: 600;
+      color: var(--text-main);
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Header Navigation -->
+  <!-- Top Navigation Header -->
   <header class="top-header">
     <div class="brand-group">
       <div class="brand-title">
         <span>XRL-IDARS</span>
-        <span class="brand-badge">Research Exhibition</span>
-        <span class="mode-badge" id="live-mode-badge">DATASET REPLAY</span>
-        <span class="status-badge stopped" id="live-status-badge">STOPPED</span>
+        <span class="brand-badge">Viva Defense Edition</span>
+        <span class="mode-badge" id="badge-capture-mode">ISOLATED LAB</span>
+        <span class="status-badge stopped" id="badge-capture-status">STOPPED</span>
+        <span class="status-badge" id="badge-model-status" style="color: var(--status-green); background: var(--status-green-bg); border-color: var(--status-green-border);">MODEL LOADED</span>
       </div>
       <div class="brand-subtitle">
-        Explainable Reinforcement Learning Intrusion Detection &amp; Autonomous Response System
+        Explainable Reinforcement Learning-Based Intrusion Detection and Autonomous Response System
       </div>
     </div>
     <div class="top-actions">
-      <button id="btn-run-scenario" class="btn btn-primary" onclick="startTwoMinuteScenario()">
-        ▶ Run Demonstration Scenario
-      </button>
-      <div class="select-wrapper">
-        <select id="select-inject-attack" class="select-control" onchange="handleInjectSelect(this.value)">
-          <option value="" disabled selected>Inject Attack Pattern...</option>
-          <option value="syn_flood">SYN Flood (L4 Volumetric)</option>
-          <option value="port_sweep">TCP Port Sweep (Reconnaissance)</option>
-          <option value="slowloris">Slowloris (L7 Low &amp; Slow)</option>
-          <option value="udp_flood">UDP Flood (Bandwidth Exhaustion)</option>
-          <option value="normal">Normal Benign Traffic</option>
-        </select>
-        <span class="select-arrow">▼</span>
-      </div>
-      <button id="btn-stop-stream" class="btn btn-danger" onclick="stopReplayStream()">
-        ⏹ Stop
-      </button>
+      <a href="/index.html#replay-lab" class="btn btn-secondary" title="Open the Labelled 10K Replay Lab">
+        🔬 10K Replay Lab →
+      </a>
       <a href="/index.html" class="btn btn-secondary" title="Open the full research workbench">
-        Research Workbench →
+        Full Research Workbench →
       </a>
     </div>
   </header>
 
-  <!-- Minimal System Overview Banner -->
-  <div class="overview-banner">
-    <div class="overview-title">System Overview</div>
-    <div class="overview-text">
-      XRL-IDARS inspects network traffic flows through an integrated multi-tier pipeline: deterministic rules catch protocol violations and volumetric bursts, a trained Random Forest classifier performs primary flow inference, TreeSHAP computes genuine local feature attributions for each prediction, and a Deep Q-Network recommends mitigation actions under a deterministic advisory safety gate. Replayed traffic streams held-out benchmark datasets through the live pipeline to demonstrate real-time response.
+  <!-- Main Controls Bar -->
+  <div class="control-bar">
+    <div class="control-group">
+      <span class="control-label">Monitoring:</span>
+      <button id="btn-start-monitoring" class="btn btn-primary" onclick="startMonitoring()">
+        ▶ Start Monitoring
+      </button>
+      <button id="btn-stop-monitoring" class="btn btn-danger" onclick="stopMonitoring()" disabled>
+        ⏹ Stop Monitoring
+      </button>
+      <button id="btn-reset-session" class="btn btn-secondary" onclick="resetSession()">
+        ↺ Reset Session
+      </button>
+    </div>
+
+    <div class="control-group">
+      <span class="control-label">Traffic Simulation:</span>
+      <select id="select-scenario" class="select-control">
+        <option value="scenario_a_benign">Scenario A — Benign Traffic (HTTP/TCP + Ping)</option>
+        <option value="scenario_b_port_scan">Scenario B — Port Scan Simulation (Probes: 21, 22, 80, 443, 8080)</option>
+        <option value="scenario_c_syn_burst">Scenario C — TCP SYN Burst (Volumetric SYN Flood)</option>
+        <option value="scenario_d_icmp_burst">Scenario D — ICMP Burst (Echo Flood)</option>
+      </select>
+      <button id="btn-launch-sim" class="btn btn-primary" onclick="launchSimulation()">
+        ⚡ Launch Simulation
+      </button>
+      <button id="btn-stop-sim" class="btn btn-secondary" onclick="stopSimulation()" disabled>
+        ⏹ Stop Simulation
+      </button>
+    </div>
+
+    <div class="control-group">
+      <span class="control-label">Export:</span>
+      <button class="btn btn-secondary" onclick="exportData('csv')" title="Download CSV Session Report">
+        📥 CSV Report
+      </button>
+      <button class="btn btn-secondary" onclick="exportData('json')" title="Download JSON Experiment Record">
+        📥 JSON Record
+      </button>
     </div>
   </div>
 
-  <!-- Demonstration Scenario Progress Indicator -->
-  <div id="scenario-progress" class="scenario-progress-container">
-    <div class="scenario-progress-header">
-      <span id="scenario-phase-name">Phase 1: Normal Baseline Traffic (0:00 - 0:25)</span>
-      <span id="scenario-time-remaining">120s remaining</span>
+  <!-- Four Main Metric Cards -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-title">Packets Captured</div>
+      <div class="metric-val" id="cnt-packets">0</div>
+      <div class="metric-sub">Observed wire packets</div>
     </div>
-    <div class="progress-bar-track">
-      <div id="scenario-progress-fill" class="progress-bar-fill"></div>
+    <div class="metric-card">
+      <div class="metric-title">Flows Processed</div>
+      <div class="metric-val" id="cnt-flows">0</div>
+      <div class="metric-sub">Flows Analysed (Bidirectional)</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-title">Threats Detected</div>
+      <div class="metric-val" id="cnt-threats" style="color: var(--status-red);">0</div>
+      <div class="metric-sub">Model (RF/Fusion) or Rule triggers</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-title">Active Alerts</div>
+      <div class="metric-val" id="cnt-alerts" style="color: var(--status-amber);">0</div>
+      <div class="metric-sub">High / Medium policy alerts</div>
     </div>
   </div>
 
-  <!-- SECTION 1: Autonomous Detection & Response Pipeline (Section 9 Requirement) -->
-  <section class="zone-pipeline">
-    <div class="zone-title">
-      <span>1. Autonomous Detection &amp; Response Pipeline</span>
-      <span style="font-weight: normal; text-transform: none; font-size: 0.7rem; color: var(--text-dim);">
-        End-to-End Latency: ~37.5 ms P50 (Burst Queue) · ~3.5 ms RF Single-Vector
-      </span>
-    </div>
-    <div class="pipeline-strip">
-      <div class="pipe-node" id="node-packet">
-        <div class="pipe-node-title">1. Packets / Records</div>
-        <div class="pipe-node-sub" id="pipe-packet-sub">Dataset Records (CIC-IDS2017)</div>
-      </div>
-      <div class="pipe-arrow">→</div>
-      <div class="pipe-node" id="node-features">
-        <div class="pipe-node-title">2. Flow Assembly</div>
-        <div class="pipe-node-sub">10 R10 Bidirectional Metrics</div>
-      </div>
-      <div class="pipe-arrow">→</div>
-      <div class="pipe-node" id="node-detector">
-        <div class="pipe-node-title">3. Rules &amp; ML</div>
-        <div class="pipe-node-sub">Deterministic Rules + RF</div>
-      </div>
-      <div class="pipe-arrow">→</div>
-      <div class="pipe-node" id="node-shap">
-        <div class="pipe-node-title">4. TreeSHAP</div>
-        <div class="pipe-node-sub">RF Feature Attribution</div>
-      </div>
-      <div class="pipe-arrow">→</div>
-      <div class="pipe-node" id="node-action">
-        <div class="pipe-node-title">5. Response Gate</div>
-        <div class="pipe-node-sub">DQN Policy (Advisory Mode)</div>
-      </div>
-    </div>
-    <div class="pipeline-footnote">
-      * Initial state is static. Stage highlighting is driven strictly by backend processing events. Supervised LSTM and RF-LSTM fusion are evaluated in offline benchmarks. Response actions are observational / dry-run advisory recommendations.
-    </div>
-  </section>
+  <!-- Two-Column Workspace -->
+  <div class="split-layout">
 
-  <!-- SECTION 2: Demonstration Stream Counters -->
-  <section class="zone-four-numbers">
-    <div class="zone-title">
-      <span>2. Demonstration Stream Counters</span>
-      <span style="font-weight: normal; text-transform: none; font-size: 0.7rem; color: var(--text-dim);">
-        Replay sample statistics · Strictly separated from held-out benchmark evaluation
-      </span>
-    </div>
-    <div class="counter-grid">
-      <div class="counter-card total">
-        <div class="counter-label">Flows Analysed</div>
-        <div class="counter-val" id="cnt-total">0</div>
-        <div class="counter-hint">Sequential replayed flows</div>
-      </div>
-      <div class="counter-card tp">
-        <div class="counter-label">Attacks Detected</div>
-        <div class="counter-val" id="cnt-tp" style="color: var(--status-green);">0</div>
-        <div class="counter-hint">True Positives (Alerted / Blocked)</div>
-      </div>
-      <div class="counter-card fn">
-        <div class="counter-label">Attacks Missed</div>
-        <div class="counter-val" id="cnt-fn" style="color: var(--status-red);">0</div>
-        <div class="counter-hint">False Negatives (Sub-threshold)</div>
-      </div>
-      <div class="counter-card fp">
-        <div class="counter-label">False Alarms</div>
-        <div class="counter-val" id="cnt-fp" style="color: var(--status-amber);">0</div>
-        <div class="counter-hint">False Positives (Benign penalized)</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SECTION 3: Traffic & Explainability Split View -->
-  <section class="zone-split">
-    <!-- Left: Flow Stream -->
-    <div class="stream-container">
-      <div class="stream-toolbar">
-        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-main);">
-          3. Incoming Flow Stream
+    <!-- Left Column: Live Traffic & Detection Pipeline -->
+    <div>
+      <!-- Live Traffic Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">1. Live Traffic Stream</div>
+          <div class="panel-subtitle">Real-time packet arrivals and flow assembly</div>
         </div>
-        <div class="stream-filters">
-          <button class="filter-btn active" onclick="setFlowFilter('all', this)">All</button>
-          <button class="filter-btn" onclick="setFlowFilter('attacks', this)">Attacks Only</button>
-          <button class="filter-btn" onclick="setFlowFilter('benign', this)">Benign Only</button>
+        <div class="panel-body" style="padding: 0;">
+          <table class="data-table" id="table-traffic">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Flow ID</th>
+                <th>Proto</th>
+                <th>Endpoints (Src → Dst)</th>
+                <th>Packets</th>
+                <th>Duration</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-traffic">
+              <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-dim); padding: 24px;">
+                  No traffic captured. Click "Start Monitoring" and launch a simulation.
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-      <div class="flow-list" id="flow-stream-list">
-        <div style="text-align: center; color: var(--text-dim); margin-top: 80px; font-size: 0.82rem;">
-          Click "▶ Run Demonstration Scenario" or "Inject Attack Pattern" above to begin live stream replay.
+
+      <!-- Detection Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">2. Flow Detection &amp; Multi-Model Evaluation</div>
+          <div class="panel-subtitle">Click a row to inspect TreeSHAP &amp; DQN action</div>
+        </div>
+        <div class="panel-body" style="padding: 0;">
+          <table class="data-table" id="table-detection">
+            <thead>
+              <tr>
+                <th>Flow ID</th>
+                <th>Result</th>
+                <th>Source</th>
+                <th>Attack Score</th>
+                <th>RF Score</th>
+                <th>LSTM / Fusion</th>
+                <th>Rules Triggered</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-detection">
+              <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-dim); padding: 24px;">
+                  Awaiting flow completions...
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <!-- Right: "Why?" Explainability Card -->
-    <div class="why-card" id="why-card">
-      <div class="why-header">
-        <div class="why-title">
-          <span>Flow Explainability &amp; Advisory Response</span>
-          <span id="why-action-badge" class="badge-action-allow" style="margin-left: auto;">ALLOW</span>
+    <!-- Right Column: TreeSHAP Explainability & Autonomous Response Policy -->
+    <div>
+      <!-- Explainability Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">3. Random Forest TreeSHAP Attribution</div>
+          <div class="panel-subtitle">Local feature attribution for selected flow</div>
         </div>
-        <div class="why-meta-grid">
-          <div class="why-meta-item">
-            <div class="why-meta-label">Flow ID / Protocol</div>
-            <div class="why-meta-val" id="why-flow-id">#-- (TCP)</div>
+        <div class="panel-body" id="panel-explainability">
+          <div class="shap-meta">
+            <div class="shap-meta-item">
+              <span class="shap-meta-label">Selected Flow</span>
+              <span class="shap-meta-val" id="shap-flow-id">#--</span>
+            </div>
+            <div class="shap-meta-item">
+              <span class="shap-meta-label">Expected Base Value</span>
+              <span class="shap-meta-val" id="shap-base-val">0.500</span>
+            </div>
           </div>
-          <div class="why-meta-item">
-            <div class="why-meta-label">Model Confidence</div>
-            <div class="why-meta-val" id="why-confidence">--%</div>
+          <div id="shap-bars-container">
+            <div style="text-align: center; color: var(--text-dim); padding: 24px 8px;">
+              Select a flow from the detection table to view exact TreeSHAP attributions.
+            </div>
           </div>
-          <div class="why-meta-item" style="grid-column: span 2;">
-            <div class="why-meta-label">Endpoints (Src → Dst)</div>
-            <div class="why-meta-val" id="why-endpoints" style="font-size: 0.74rem;">172.16.0.1:49152 → 192.168.10.50:80</div>
-          </div>
-          <div class="why-meta-item" id="why-rule-row" style="grid-column: span 2; display: none;">
-            <div class="why-meta-label">Deterministic Rule Match</div>
-            <div class="why-meta-val" id="why-rule-val" style="font-size: 0.74rem;">--</div>
+          <div style="margin-top: 10px; font-size: 0.68rem; color: var(--text-dim); border-top: 1px solid var(--border-light); padding-top: 6px;">
+            * TreeSHAP explains feature contributions toward the model prediction score. It does not alter test data or invent feature values.
           </div>
         </div>
       </div>
 
-      <div class="why-shap-title">
-        <span>Random Forest TreeSHAP Attribution</span>
-        <span style="font-size: 0.68rem; color: var(--text-dim); text-transform: none; font-weight: normal;">(Local Feature Weights)</span>
-      </div>
-
-      <div class="why-shap-container" id="why-shap-factors">
-        <div style="text-align: center; color: var(--text-dim); padding: 32px 12px; font-size: 0.8rem;">
-          Select a flow from the stream to view genuine Random Forest TreeSHAP attributions.
+      <!-- Response Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">4. Autonomous Response Policy (DQN &amp; Safety Gate)</div>
+          <div class="panel-subtitle">6D causal state evaluation &amp; safety invariant enforcement</div>
+        </div>
+        <div class="panel-body">
+          <div class="response-grid">
+            <div class="response-box">
+              <div class="response-box-label">DQN Proposed Action</div>
+              <div class="response-box-val" id="resp-dqn-action">ALLOW</div>
+            </div>
+            <div class="response-box">
+              <div class="response-box-label">Safety Gate Decision</div>
+              <div class="response-box-val" id="resp-gate-decision" style="color: var(--status-green);">APPROVED</div>
+            </div>
+            <div class="response-box" style="grid-column: span 2;">
+              <div class="response-box-label">Enforced Advisory Action</div>
+              <div class="response-box-val" id="resp-enforced-action">ALLOW</div>
+            </div>
+          </div>
+          <div class="response-notice" id="resp-notice">
+            Mode: ADVISORY / DRY_RUN ONLY. Zero network mutations or firewall modifications are applied to host interfaces.
+          </div>
         </div>
       </div>
 
-      <div class="why-policy-box">
-        <div class="why-policy-decision">
-          <span>Action Recommendation:</span>
-          <span id="why-policy-action" style="color: var(--text-main);">Cost-Optimal Gate: ALLOW (Safe)</span>
+      <!-- Latency & Performance Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">5. Pipeline Latency &amp; Throughput</div>
+          <div class="panel-subtitle">Real measured percentiles (P50 / P95 / P99)</div>
         </div>
-        <div style="font-size: 0.69rem; color: var(--text-dim); margin-top: 3px;">
-          Enforcement Invariant: Advisory dry-run mode. Network mutations and firewall changes are disabled.
+        <div class="panel-body">
+          <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">
+            End-to-End Processing Latency:
+          </div>
+          <div class="latency-grid">
+            <div class="latency-tile">
+              <div class="latency-tile-val" id="lat-p50">-- ms</div>
+              <div class="latency-tile-lbl">P50 (Median)</div>
+            </div>
+            <div class="latency-tile">
+              <div class="latency-tile-val" id="lat-p95">-- ms</div>
+              <div class="latency-tile-lbl">P95</div>
+            </div>
+            <div class="latency-tile">
+              <div class="latency-tile-val" id="lat-p99">-- ms</div>
+              <div class="latency-tile-lbl">P99</div>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.72rem; font-weight: 600; color: var(--text-dim); margin-top: 10px;">
+            <span>Rate: <strong id="tp-pps">0.0</strong> pkts/s</span>
+            <span>Flows: <strong id="tp-fps">0.0</strong> flows/s</span>
+            <span>Queue Drops: <strong>0</strong></span>
+          </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- SECTION 4: Research Benchmark Evaluation Strip -->
-  <section class="zone-benchmark-strip">
-    <div class="benchmark-header">
-      <div class="benchmark-title">
-        <span>4. Research Benchmark Evaluation (Offline Test Sets)</span>
-        <span class="benchmark-tag">355,833 Held-Out Flows</span>
-      </div>
-      <div style="font-size: 0.72rem; color: var(--text-dim);">
-        Frozen Seed-42 Artifacts · Strictly Separated from Replay Demonstration
-      </div>
+  <!-- Event Timeline Panel -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">6. Audit Event Timeline</div>
+      <div class="panel-subtitle">Chronological stream of genuine capture, flow, detection, and mitigation events</div>
     </div>
-    <div class="benchmark-grid">
-      <div class="benchmark-tile">
-        <div class="benchmark-tile-name">Random Forest Detector</div>
-        <div class="benchmark-tile-score">0.9512</div>
-        <div class="benchmark-tile-detail">F1-Score · Precision: 98.1% · Recall: 92.3%</div>
-      </div>
-      <div class="benchmark-tile">
-        <div class="benchmark-tile-name">Supervised LSTM Classifier</div>
-        <div class="benchmark-tile-score">0.9633</div>
-        <div class="benchmark-tile-detail">F1-Score · Shuffled Ablation: ΔF1 = -0.0038</div>
-      </div>
-      <div class="benchmark-tile">
-        <div class="benchmark-tile-name">RF-LSTM Score-Fusion</div>
-        <div class="benchmark-tile-score">0.9745</div>
-        <div class="benchmark-tile-detail">F1-Score · Accuracy: 99.06% (α = 0.60)</div>
-      </div>
-      <div class="benchmark-tile">
-        <div class="benchmark-tile-name">Response Policy Speedup</div>
-        <div class="benchmark-tile-score">~51.4x</div>
-        <div class="benchmark-tile-detail">Cost-Optimal: 1.95 µs vs Dueling DQN: 100.23 µs</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SECTION 5: Live Alert & Event History Log -->
-  <section class="zone-alerts-log">
-    <div class="zone-title">
-      <span>5. Event History &amp; Decision Audit Log</span>
-      <span style="font-weight: normal; text-transform: none; font-size: 0.7rem; color: var(--text-dim);">
-        Real-time detection events and rule triggers
-      </span>
-    </div>
-    <div class="table-container">
-      <table class="data-table" id="alerts-log-table">
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>Flow ID</th>
-            <th>Severity</th>
-            <th>Endpoints</th>
-            <th>Source</th>
-            <th>Ground Truth / Rule</th>
-            <th>Confidence</th>
-            <th>Advisory Response</th>
-          </tr>
-        </thead>
-        <tbody id="alerts-log-tbody">
-          <tr>
-            <td colspan="8" style="text-align: center; color: var(--text-dim); padding: 16px;">
-              No alerts recorded. Start stream replay or inject an attack pattern to observe detection events.
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- Scorecard Modal -->
-  <div id="modal-scorecard" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-title">Demonstration Scenario Complete</div>
-      <div class="modal-desc">
-        Demonstration stream replayed held-out multi-regime flows through the active pipeline.
-      </div>
-
-      <div class="modal-stats">
-        <div class="modal-stat-box">
-          <div class="modal-stat-val" id="modal-flows">120</div>
-          <div class="modal-stat-label">Flows Replayed</div>
+    <div class="panel-body" style="max-height: 220px;">
+      <div class="timeline-list" id="timeline-list">
+        <div style="text-align: center; color: var(--text-dim); padding: 16px;">
+          No events recorded. Start monitoring to begin event logging.
         </div>
-        <div class="modal-stat-box">
-          <div class="modal-stat-val" id="modal-caught">48 / 50</div>
-          <div class="modal-stat-label">Attacks Caught (Recall)</div>
-        </div>
-        <div class="modal-stat-box">
-          <div class="modal-stat-val" id="modal-false-alarms">0</div>
-          <div class="modal-stat-label">False Alarms (FP)</div>
-        </div>
-        <div class="modal-stat-box">
-          <div class="modal-stat-val" id="modal-precision">100.0%</div>
-          <div class="modal-stat-label">Sample Precision</div>
-        </div>
-      </div>
-
-      <div class="modal-takeaway">
-        <strong>Summary of Results</strong>
-        The detection pipeline isolated high-rate volumetric attacks and stealthy port sweeps from legitimate traffic, recommending appropriate mitigation actions with zero false alarms on normal flows.
-      </div>
-
-      <div class="modal-actions">
-        <button class="btn btn-primary" onclick="closeScorecard()">Close / Inspect Flows</button>
-        <a href="/index.html" class="btn btn-secondary">Go to Research Workbench →</a>
       </div>
     </div>
   </div>

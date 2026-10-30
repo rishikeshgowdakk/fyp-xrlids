@@ -1,0 +1,181 @@
+{
+  "project": "XRL-IDARS — Explainable Reinforcement Learning-Based Intrusion Detection and Autonomous Response System",
+  "repository": "https://github.com/rishikeshgowdakk/fyp-xrlids",
+  "branch": "fix/final-engineering-correctness",
+  "base_commit": "3f03214e94e2adf70efe256b1e8077aaff3a2a57",
+  "timestamp": "2026-10-31T01:19:25Z",
+  "status": "ACCEPTED",
+  "test_suite": {
+    "framework": "pytest-9.1.1",
+    "python_version": "3.14.4",
+    "total_collected": 704,
+    "passed": 704,
+    "failed": 0,
+    "skipped": 0,
+    "warnings": 19,
+    "execution_time_seconds": 81.74,
+    "pass_rate_pct": 100.0
+  },
+  "operational_pipeline": {
+    "ml_detector": {
+      "model": "Random Forest (Sole Operational ML Detector)",
+      "artifact": "models/rf/random_forest_cicids2017.joblib",
+      "sha256": "7c6ad493b773b687da24a2a12dcb21bd03bd56b76809462b983454aeacf2b774",
+      "feature_contract": "R10 Canonical (10 Deterministic Flow Features)",
+      "held_out_accuracy": 0.9906,
+      "held_out_precision": 0.9610,
+      "held_out_recall": 0.9416,
+      "held_out_f1": 0.9512,
+      "held_out_roc_auc": 0.9989,
+      "cpu_inference_latency_us": 780,
+      "status": "PASS"
+    },
+    "explainability_engine": {
+      "algorithm": "TreeSHAP (Lundberg & Lee)",
+      "additivity_guarantee": "E[f(x)] + sum(phi_i) = f(x)",
+      "per_flow_attribution_time_ms": 38.5,
+      "status": "PASS"
+    },
+    "response_policy": {
+      "architecture": "Dueling Deep Q-Network (Dueling DQN)",
+      "artifact": "models/dqn/dqn_4action_best.pt",
+      "sha256": "6a5afc669b4e699ecd2b1c01df885cef9030c93b8888b487dd386533920ce954",
+      "state_space_dim": 6,
+      "state_features": [
+        "current_attack_score",
+        "score_trajectory",
+        "rolling_alert_density",
+        "previous_enforced_action",
+        "remaining_cooldown_fraction",
+        "normalized_volumetric_traffic_scale"
+      ],
+      "action_tiers": ["ALLOW", "ALERT", "RATE_LIMIT", "ISOLATE"],
+      "role": "Response Optimization Policy (NOT an intrusion classifier)",
+      "output_semantics": "Expected cumulative return Q(s, a)",
+      "causal_feedback": "StateBuilder history updated strictly with enforced action",
+      "status": "PASS"
+    },
+    "safety_gate": {
+      "authoritative_protected_registry": [
+        "192.168.10.1 (Default Gateway)",
+        "192.168.10.2 (Core DNS / NTP)",
+        "192.168.10.50 (Domain Controller)",
+        "gateway, dns, core-router"
+      ],
+      "invariants_enforced": [
+        "Authoritative protected infrastructure immunity from ISOLATE (downgraded to ALERT)",
+        "30.0s monotonic time-based cooldown (prevention of violent de-escalation)",
+        "5% blast-radius circuit breaker (min 20 hosts)",
+        "Zero kernel mutations (advisory dry-run mode default)"
+      ],
+      "safety_compliance_pct": 100.0,
+      "kernel_mutations_executed": 0,
+      "status": "PASS"
+    },
+    "rule_engine": {
+      "registered_rules_count": 7,
+      "rules": [
+        "RULE-TCP-INVALID-FLAGS (SYN+FIN, SYN+RST, Xmas, NULL; HIGH)",
+        "RULE-SYN-FLOOD (SYN>=20 with ACK==0 or syn/ack ratio>=10; HIGH)",
+        "RULE-PORT-SCAN (Single-flow probe heuristic; MEDIUM)",
+        "RULE-PORT-SCAN-MULTI-FLOW (Vertical & distributed correlation across 5+ ports within 60s; HIGH)",
+        "RULE-HIGH-RATE-BURST (>=50,000 pkts/s or >=50 MB/s; HIGH)",
+        "RULE-IP-SPOOF-RESERVED (0.0.0.0, 255.255.255.255, loopback spoofing; HIGH)",
+        "RULE-ICMP-FLOOD (ICMP flood >=20 pkts or >=20 pkts/s; MEDIUM)"
+      ],
+      "multi_flow_correlation": "60s sliding window, 5 ports threshold, 2000 max sources LRU",
+      "missing_features_handling": "Explicit unavailable_features and unavailable_rules tracking, zero silent zero-filling",
+      "status": "PASS"
+    }
+  },
+  "traffic_modes_verified": {
+    "live_interface_capture": {
+      "interface_tested": "lo",
+      "privilege_status": "UNPRIVILEGED (No CAP_NET_RAW / root)",
+      "reported_mode": "BLOCKED",
+      "exception_handling": "Handled gracefully, 0 thread leaks, 0 crashes",
+      "status": "BLOCKED_VERIFIED"
+    },
+    "pcap_file_replay": {
+      "source_file": "data/demo/sample_traffic.pcap",
+      "packets_replayed": 42,
+      "completed_flows": 6,
+      "accuracy_at_tau_0_40": 1.0,
+      "status": "PASS"
+    },
+    "sample_traffic_generator": {
+      "scenarios_executed": ["scenario_c_syn_burst", "scenario_b_port_scan"],
+      "synthesized_packets": 75,
+      "reconstructed_flows": 7,
+      "threats_flagged": 6,
+      "status": "PASS"
+    }
+  },
+  "research_benchmarks": {
+    "offline_lstm_sequence": {
+      "checkpoint": "models/lstm/lstm_best_model.pt",
+      "sha256": "fc1a89c3bc883ec501aa99c85d886dd2648719f9cb96417742bc54da2ae5eb0c",
+      "role": "Offline Research Benchmark Only (Never invoked live)",
+      "cpu_inference_latency_ms": 22.1,
+      "f1_score": 0.9482,
+      "status": "PASS"
+    },
+    "offline_rf_lstm_fusion": {
+      "checkpoint": "models/fusion/rf_lstm_fusion_weights.joblib",
+      "sha256": "4392aee5349eec2dc634efb8d6ec776602330f6a27e025ec1d803fb2ae6fbc02",
+      "role": "Offline Research Benchmark Only (Never invoked live)",
+      "f1_score": 0.9530,
+      "status": "PASS"
+    }
+  },
+  "verified_event_record": {
+    "event_id": "evt-1ccb1277aa1f",
+    "flow_id": "flow-1793389763981-3",
+    "source_mode": "PCAP",
+    "timestamp": "2026-10-30T19:49:24.078008+00:00",
+    "endpoints": "10.0.0.99:45123 -> 192.168.1.10:80 (Proto: 6)",
+    "rf_score": 0.5080,
+    "rule_matches": ["RULE-TCP-INVALID-FLAGS"],
+    "treeshap_output": {
+      "base_value": 0.5000,
+      "top_attributions": {
+        "packet_length_std": 0.2294,
+        "flow_packets_per_s": -0.0978,
+        "flow_bytes_per_s": -0.0563
+      }
+    },
+    "dqn_state_6d": [0.85, 0.0, 1.0, 0.0, 0.0, 0.8667],
+    "dqn_q_values": {
+      "ALLOW": -103.4347,
+      "ALERT": -18.8499,
+      "RATE_LIMIT": -23.3905,
+      "ISOLATE": -11.3341
+    },
+    "proposed_action": "ISOLATE",
+    "safety_enforced_action": "ISOLATE",
+    "override_reason": "OK",
+    "executor_lifecycle_state": "VERIFIED",
+    "advisory_status": {
+      "is_advisory": true,
+      "kernel_mutations": 0
+    }
+  },
+  "screenshots_captured": {
+    "total_captured": 11,
+    "viewport": "1440x960",
+    "directory": "results/acceptance/screenshots",
+    "manifest": [
+      "01_overview.png",
+      "02_live_monitor_blocked.png",
+      "03_pcap_replay_active.png",
+      "04_sample_evaluation.png",
+      "05_detection_events.png",
+      "06_treeshap_explainability.png",
+      "07_dqn_response_policy.png",
+      "08_safety_execution_audit.png",
+      "09_model_evaluation.png",
+      "10_research_benchmarks.png",
+      "11_system_health.png"
+    ]
+  }
+}

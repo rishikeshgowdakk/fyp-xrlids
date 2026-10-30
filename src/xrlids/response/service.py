@@ -77,6 +77,16 @@ class DQNResponseService:
 
         self._host_builders: dict[str, StateBuilder] = {}
 
+    def get_q_values(self, state: np.ndarray) -> np.ndarray:
+        """Compute Q-values for a 6D causal state vector."""
+        state_arr = np.asarray(state, dtype=np.float32)
+        if state_arr.shape != (6,):
+            raise ValueError(f"Expected 6D state vector, got shape {state_arr.shape}")
+        state_tensor = torch.from_numpy(state_arr).unsqueeze(0).to(self.device)
+        with torch.no_grad():
+            q_out = self.network(state_tensor).squeeze(0).cpu().numpy()
+        return q_out
+
     def _load_checkpoint(self) -> None:
         """Load weights from PyTorch checkpoint."""
         if not self.checkpoint_path.exists():
@@ -107,9 +117,16 @@ class DQNResponseService:
         flow_bytes_per_s: float,
         host_id: str = "default",
         last_action: Action | None = None,
-        cooldown_remaining: int = 0,
+        cooldown_remaining: float | int = 0,
+        auto_update_history: bool = False,
+        enforced_action: Action | None = None,
     ) -> ResponseRecommendation:
-        """Evaluate flow threat context and recommend optimal response action."""
+        """Evaluate flow threat context and recommend optimal response action.
+        
+        Note: Under the verified Phase 2 architecture, StateBuilder causal history
+        must only be advanced after the safety gate has finalized the enforced action.
+        Set auto_update_history=True only for standalone policy evaluation without an executor.
+        """
         t0 = time.perf_counter()
         builder = self._get_builder(host_id)
 
@@ -122,9 +139,7 @@ class DQNResponseService:
         )
 
         # 2. Run DQN forward pass
-        state_tensor = torch.from_numpy(state_vec).unsqueeze(0).to(self.device)
-        with torch.no_grad():
-            q_out = self.network(state_tensor).squeeze(0).cpu().numpy()
+        q_out = self.get_q_values(state_vec)
 
         # 3. Map Q-values
         actions_list = [Action.ALLOW, Action.ALERT, Action.RATE_LIMIT, Action.ISOLATE][:self.action_dim]
@@ -138,12 +153,14 @@ class DQNResponseService:
         sorted_qs = sorted(q_out, reverse=True)
         adv = float(sorted_qs[0] - sorted_qs[1]) if len(sorted_qs) > 1 else 0.0
 
-        # Update host builder causal memory
-        builder.update_history(
-            attack_score=attack_score,
-            enforced_action=best_action,
-            cooldown_remaining=cooldown_remaining,
-        )
+        # Update host builder causal memory only if explicitly requested
+        if auto_update_history:
+            act_to_record = enforced_action if enforced_action is not None else best_action
+            builder.update_history(
+                attack_score=attack_score,
+                enforced_action=act_to_record,
+                cooldown_remaining=cooldown_remaining,
+            )
 
         t1 = time.perf_counter()
         elapsed_ms = (t1 - t0) * 1000.0
@@ -177,3 +194,22 @@ class DQNResponseService:
             justification=justification,
             inference_time_ms=elapsed_ms,
         )
+
+    def record_enforced_action(
+        self,
+        host_id: str,
+        attack_score: float,
+        enforced_action: Action,
+        cooldown_remaining: float | int = 0,
+    ) -> None:
+        """Advance causal state history with the finalized safety-enforced action and updated cooldown."""
+        builder = self._get_builder(host_id)
+        builder.update_history(
+            attack_score=attack_score,
+            enforced_action=enforced_action,
+            cooldown_remaining=cooldown_remaining,
+        )
+
+    def get_host_builder(self, host_id: str = "default") -> StateBuilder:
+        """Return the underlying StateBuilder for inspection in tests or diagnostics."""
+        return self._get_builder(host_id)
