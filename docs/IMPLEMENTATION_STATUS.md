@@ -1,3 +1,7 @@
+> **Documentation audit addendum (2026-10-30; supersedes conflicting XGBoost/live-champion wording below):** The current `src/xrlids/models/registry.py` registers the three canonical Random Forest detectors. The canonical `models/registry/model_manifest.json` contains nine RF/LSTM/DQN/Fusion artifacts and no XGBoost artifact entries. `src/xrlids/models/xgboost_detector.py` and its unit tests establish an implemented candidate wrapper, not a registered or live XGBoost champion. The current architecture documentation keeps RF in the live/replay path and LSTM/Fusion offline. Accordingly, COMP-07 is **implemented as a candidate wrapper and unit-tested; canonical artifact provenance, registry integration, and live end-to-end verification remain outstanding**. The XGBoost metrics below are historical reported figures, not independently reproduced by this audit. Do not treat a test-set comparison as a validation-based champion selection. Timing claims are disputed by the latency report; see its audit addendum. This addendum takes precedence over any older COMP-07 wording or champion label in this file.
+
+---
+
 # XRL-IDARS — Complete Master Implementation Status Report
 
 **Official Title:** Explainable Reinforcement Learning-Based Network Intrusion Detection and Autonomous Response System (XRL-IDARS)  
