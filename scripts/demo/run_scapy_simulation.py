@@ -41,6 +41,7 @@ from xrlids.response.safety import DeterministicSafetyGate
 from xrlids.response.state import StateBuilder
 from xrlids.response.types import Action, ActionSpaceMode
 from xrlids.rules.engine import RuleEngine
+from xrlids.rules.hybrid import HybridDecisionEngine
 
 
 def main() -> int:
@@ -134,6 +135,7 @@ def main() -> int:
 
     # 4. Pipeline Execution: Rules, RF/LSTM Inference, TreeSHAP, DQN & Safety Gate
     rule_engine = RuleEngine()
+    hybrid_engine = HybridDecisionEngine()
     safety_gate = DeterministicSafetyGate(action_mode=ActionSpaceMode.FOUR_ACTION)
     state_builder = StateBuilder()
 
@@ -163,15 +165,19 @@ def main() -> int:
         )
         t_inf_ms = (time.perf_counter() - t0_inf) * 1000.0
 
-        # Deterministic rules
+        # Deterministic rules & Hybrid Arbitration
         rule_matches = rule_engine.evaluate_flow(fl)
-        is_attack = (inf_res.prediction == 1) or (len(rule_matches) > 0)
+        hybrid_dec = hybrid_engine.evaluate(
+            rf_probability=inf_res.attack_score,
+            rule_matches=rule_matches,
+        )
+        is_attack = hybrid_dec.is_attack
         if is_attack:
             threat_count += 1
 
-        # DQN & Safety Gate
+        # DQN & Safety Gate: State vector receives arbitrated threat score
         bytes_per_s = features.get("flow_bytes_per_s", 0.0)
-        state_vec = state_builder.build_state(attack_score=inf_res.attack_score, flow_bytes_per_s=bytes_per_s)
+        state_vec = state_builder.build_state(attack_score=hybrid_dec.threat_score, flow_bytes_per_s=bytes_per_s)
         with torch.no_grad():
             q_vals = dqn(torch.from_numpy(state_vec).float().unsqueeze(0))
             proposed_act = Action(int(torch.argmax(q_vals, dim=-1).item()))
