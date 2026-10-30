@@ -3,7 +3,16 @@
 **Official Title:** Explainable Reinforcement Learning-Based Network Intrusion Detection and Autonomous Response System (XRL-IDARS)  
 **Repository:** `rishikeshgowdakk/fyp-xrlids`  
 **Git Branch / Commit:** `feature/scapy-live-demo`
-**Test Suite Status:** **602 passed, 0 failed, 19 warnings in 75.8s**  
+**Test Suite Status:** **605 passed, 0 failed, 19 warnings in 45.7s**  
+
+### Approved Operational Architecture:
+**Scapy → Canonical FlowEngine → R10 Feature Extraction → StandardScaler → Random Forest → Security Event → TreeSHAP Explanation → Dueling DQN → Deterministic Safety Gate → Advisory/Dry-run Response Actuator → Streamlit Dashboard.**
+*RF performs intrusion classification. DQN performs response recommendation. These are separate responsibilities. Do not combine their outputs into a new intrusion classifier.*
+
+### Explicit Preservation of Research Benchmarks & Mode Distinction:
+- **Research Benchmarks Preservation**: Preserve the existing pretrained LSTM model, RF–LSTM fusion implementation, checkpoints, experiment results and evaluation scripts. Use them exclusively for offline research benchmarking and comparison. The research dashboard may display RF, LSTM and fusion metrics, including latency comparisons. They must never be invoked by the operational live detection pipeline. Do not retrain or replace these models unless a specific reproducibility issue requires it and approval is obtained.
+- **Operational vs. Research Distinction**: Clearly distinguish LIVE, PCAP, SAMPLE and RESEARCH modes. Research benchmark results must never be presented as live detection results. Sample data must never be represented as actual network traffic.
+- **Real Integration Requirement**: Run at least one complete integrated demonstration where captured or replayed traffic travels through the actual operational pipeline. Verify that the resulting RF prediction, TreeSHAP explanation, DQN recommendation, safety decision and response record are associated with the same security event and visible in Streamlit. Unit tests alone do not satisfy this criterion (`scripts/demo/run_integrated_pipeline_demo.py`).
 
 ---
 
@@ -12,20 +21,20 @@
 | Component ID | Subsystem Name | Implementation Status | Test Status | Verification with Saved Artifacts | Operational Evidence / Limitations |
 |---|---|---|---|---|---|
 | **COMP-01** | Packet Parsing & Demuxing (`pcap.py`) | **Implemented** | **Tested** | **Verified** | Parsed binary Ethernet/IPv4/TCP frames with flag byte unpack; supports 802.1Q VLAN tags. |
-| **COMP-02** | Bidirectional Flow Builder (`flow.py`) | **Implemented** | **Tested** | **Verified** | Implements D-006 completion policy (FIN/RST and 120s timeout). Computes exact $R_{10}$ and $R_4$ statistical moments. |
+| **COMP-02** | Bidirectional Flow Builder (`flow.py`) | **Implemented** | **Tested** | **Verified** | Implements D-006 completion policy (120.0s idle, 1800.0s max, FIN/RST termination, $A < B$, $\text{ddof}=0$). Computes exact $R_{10}$ and $R_4$ statistical moments. |
 | **COMP-03** | Feature Contract Gate (`registry.py`) | **Implemented** | **Tested** | **Verified** | Enforces $R_{10}$ and $R_4$ schemas. Strictly rejects NaNs, infinities, and missing fields. |
 | **COMP-04** | Deterministic Rule Engine (`rules/engine.py`) | **Implemented** | **Tested** | **Verified** | 5 deterministic rules: `RULE-TCP-INVALID-FLAGS`, `RULE-SYN-FLOOD`, `RULE-PORT-SCAN`, `RULE-HIGH-RATE-BURST`, `RULE-IP-SPOOF-RESERVED`. Fast execution ($<0.01$ ms). |
-| **COMP-05** | Primary Random Forest Detector (`models/rf/`) | **Implemented** | **Tested** | **Verified** | Loaded frozen artifacts for CIC-IDS2017 ($F_1=0.9512$), CSE-CIC-IDS2018 ($F_1=0.8861$), UNSW-NB15 ($F_1=0.8548$). Dynamic class index mapping. Strictly binary ($P(\text{ATTACK})$). |
+| **COMP-05** | Primary Random Forest Detector (`models/rf/`) | **Implemented** | **Tested** | **Verified** | Sole operational ML detector. Loaded frozen artifacts for CIC-IDS2017 ($F_1=0.9512$, $N=355\text{k}$), CSE-CIC-IDS2018 ($F_1=0.8861$, $N=1.66\text{M}$), UNSW-NB15 ($F_1=0.8546$, $N=24.5\text{k}$). Tuesday flood window: $F_1=0.9977$. Strictly binary ($P(\text{ATTACK})$). |
 | **COMP-06** | Genuine TreeSHAP Local XAI (`csv_evaluator.py`) | **Implemented** | **Tested** | **Verified** | Exact local Shapley values via `shap.TreeExplainer`. Preserves feature names, direction, and signed attribution values. Evaluates in $8.94$ ms. |
 | **COMP-07** | DQN Response Policy (`models/dqn/`) | **Implemented** | **Tested** | **Verified** | Loaded 4-action and 3-action Dueling DQN checkpoints. Evaluated on 355k held-out test flows against 4 baselines. Threat-severity aware via continuous score $S_t$ in 6D causal state vector. |
 | **COMP-08** | Response Policy Explanation | **Implemented** | **Tested** | **Verified** | Explains DQN actions via actual Q-values, state vectors, and action semantics. Explicitly decoupled from TreeSHAP. |
 | **COMP-09** | Deterministic Safety Gate (`response/engine.py`, `safety.py`) | **Implemented** | **Tested** | **Verified** | Enforces dry-run advisory mode. Critical infrastructure exemption, 30-step cooldown, 5% blast-radius circuit breaker. Zero kernel mutations. |
-| **COMP-10** | Supervised LSTM Detector (`models/lstm/`) | **Implemented** | **Tested** | **Verified** | Causal temporal sequence model ($T=5$). Evaluated on held-out test splits (0.9633 F1 CIC) and integrated into streaming pipeline with per-session warm-up buffer. |
-| **COMP-11** | Score Fusion Engine (`models/fusion/`) | **Implemented** | **Tested** | **Verified** | Score blending ($S_{\text{fusion}} = \alpha \cdot S_{\text{rf}} + (1-\alpha) \cdot S_{\text{lstm}}$) using saved weights. Evaluated on held-out test splits (0.9745 F1 CIC) and executed when both scores available. |
+| **COMP-10** | Supervised LSTM Detector (`models/lstm/`) | **Implemented** | **Tested** | **Verified** | Experimental offline research baseline ($T=5$). Validated on Tuesday 2018 flood window ($F_1=0.9996$, $+0.19\%$ gain over RF). Excluded from operational pipeline to prevent cold-start blindness. |
+| **COMP-11** | Score Fusion Engine (`models/fusion/`) | **Implemented** | **Tested** | **Verified** | Offline research baseline ($S_{\text{fusion}} = \alpha \cdot S_{\text{rf}} + (1-\alpha) \cdot S_{\text{lstm}}$). Evaluated on held-out test splits. Strictly excluded from live operational detection path. |
 | **COMP-12** | Input Modes (CSV, PCAP, Live, Synthetic) | **Implemented** | **Tested** | **Verified** | Distinct handling across Mode A (full split), Mode B (200 demo), Mode C (custom CSV), PCAP replay, live monitor, and synthetic simulator. |
-| **COMP-13** | Interactive Dashboard & REST API (`server.py`) | **Implemented** | **Tested** | **Verified** | LiveSession wired directly to UnifiedInferenceService, Dueling DQN, and DeterministicSafetyGate. Real-time streaming, waterfall charts, rule/RF badge visualization. |
+| **COMP-13** | Operational Dashboards (`streamlit_app.py`, `server.py`) | **Implemented** | **Tested** | **Verified** | Primary: Streamlit operational command center across 8 dedicated modules (8501). Supplementary: Pure-Python HTTP/WebSocket server (8000). Real-time telemetry, waterfall charts, rule/RF visualization. |
 | **COMP-14** | Attack-Family Semantics & Audit (`test_attack_family...`) | **Implemented** | **Tested** | **Verified** | Disambiguates binary model output, ground-truth label evaluation, and advisory response semantics across backend and frontend. |
-| **COMP-15** | Automated Test Suite | **Implemented** | **Tested** | **Verified** | 585 tests passing across unit, integration, and regression suites. Zero regressions. |
+| **COMP-15** | Automated Test Suite | **Implemented** | **Tested** | **Verified** | 605 tests passing across unit, integration, and regression suites (100% pass rate). Zero regressions. |
 | **COMP-16** | Scapy Capture & PCAP Ingestion Service (`src/xrlids/capture/scapy_service.py`) | **Implemented** | **Tested** | **Verified** | Thread-safe live interface sniffing, PCAP replay, non-blocking queue, BPF filter, packet conversion to canonical PacketInfo, drop and throughput stats. |
 | **COMP-17** | Unified Inference & Sequence Buffer Service (`src/xrlids/models/inference_service.py`) | **Implemented** | **Tested** | **Verified** | Multi-model dispatcher with sliding-window $T=5$ history per session. RF fallback during warm-up; score-level fusion upon 5th flow. |
 | **COMP-18** | Labelled Replay Lab Engine (`src/xrlids/demo/replay_lab.py`) | **Implemented** | **Tested** | **Verified** | Authentic flow streaming (400, 1k, 5k, 10k flows) from CIC-IDS2017 & CSE-CIC-IDS2018; 6,716 flows/s throughput, 27-column audit CSV export. |

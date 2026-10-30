@@ -19,7 +19,6 @@ from xrlids.features.definitions import R10_FEATURES
 from xrlids.features.validator import FeatureSchemaValidator, FeatureValidationError
 from xrlids.models.multiclass_detector import MulticlassAttackClassifier
 from xrlids.models.random_forest import RandomForestDetector
-from xrlids.models.xgboost_detector import XGBoostDetector
 from xrlids.preprocessing.pipeline import Preprocessor
 from xrlids.utils.logging_utils import get_logger
 
@@ -84,12 +83,8 @@ class ModelManager:
             except Exception as e:
                 logger.warning("Could not read champion registry from %s: %s", self.registry_path, e)
 
-        model_type = (
-            self.force_model_type
-            or self.champion_metadata.get("model_type")
-            or "rf"
-        ).lower()
-        self.model_type = model_type
+        # Random Forest is the primary and sole operational intrusion detector
+        self.model_type = "rf"
         self.decision_threshold = float(self.champion_metadata.get("decision_threshold", 0.50))
 
         # 1. Load Preprocessor
@@ -105,22 +100,14 @@ class ModelManager:
         else:
             logger.warning("Preprocessor not found at %s; unscaled inference will be used", preproc_path)
 
-        # 2. Load Model
-        if model_type in ("xgboost", "xgb"):
-            xgb_path = self.repo_root / self.champion_metadata.get("model_path", "models/xgboost/xgboost_cicids2017.json")
-            if not xgb_path.exists():
-                xgb_path = self.repo_root / "models" / "xgboost" / "xgboost_cicids2017.json"
-            self.model = XGBoostDetector.load(xgb_path)
-            self.model_name = "XGBoost Champion"
-            self.model_type = "xgboost"
-        else:
-            rf_path = self.repo_root / self.champion_metadata.get("model_path", "models/rf/random_forest_cicids2017.joblib")
-            if not rf_path.exists():
-                rf_path = self.repo_root / "models" / "rf" / "random_forest_cicids2017.joblib"
-            import joblib
-            self.model = joblib.load(rf_path)
-            self.model_name = "Random Forest Champion"
-            self.model_type = "rf"
+        # 2. Load Model - Random Forest
+        rf_path = self.repo_root / self.champion_metadata.get("model_path", "models/rf/random_forest_cicids2017.joblib")
+        if not rf_path.exists():
+            rf_path = self.repo_root / "models" / "rf" / "random_forest_cicids2017.joblib"
+        import joblib
+        self.model = joblib.load(rf_path)
+        self.model_name = "Random Forest (Sole Operational Detector)"
+        self.model_type = "rf"
 
         # 3. Load Multiclass Attack Classifier if available
         self.multiclass_classifier: MulticlassAttackClassifier | None = None

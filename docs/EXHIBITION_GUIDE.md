@@ -38,21 +38,28 @@ python scripts/verify_fresh_clone_exhibition.py
 
 ## 2. Launch Commands & Dashboard Access
 
-Launch the interactive workbench with a single standard Python command:
+Launch the interactive dashboards with standard Python commands:
 
 ```bash
-# Launch dashboard server (default port 8000 on loopback 127.0.0.1)
+# 1. Primary Operational Command Center (Streamlit on port 8501 across 8 modules)
+streamlit run dashboard/streamlit_app.py --server.port 8501
+
+# 2. Supplementary Research Workbench & Demo Server (port 8000)
 python scripts/demo/run_dashboard.py
 ```
-*(Alternative direct launch: `python dashboard/server.py --port 8000`)*
+*(Alternative direct launch for demo server: `python dashboard/server.py --port 8000`)*
 
 ### Access URLs
 Open your web browser and navigate to:
-- **⚡ 3-Minute Viva Demonstration (Recommended First Screen)**:
+- **🛡️ Primary Operational Command Center (Streamlit, 8 Modules)**:
+  ```
+  http://localhost:8501
+  ```
+- **⚡ 3-Minute Viva Demonstration (Supplementary Demo Screen)**:
   ```
   http://localhost:8000/demo.html
   ```
-- **🔬 Full Research Evaluation Workbench (In-Depth Backup)**:
+- **🔬 Full Research Evaluation Workbench (Supplementary In-Depth Backup)**:
   ```
   http://localhost:8000/index.html
   ```
@@ -68,7 +75,7 @@ For an academic viva defense, thesis evaluation, or quick demonstration, **do no
 
 > [!TIP]
 > **The 30-Second Examiner Elevator Pitch**:  
-> *"XRL-IDARS watches network flows and does three things: it detects attacks using Random Forest and LSTM, it explains each decision with SHAP, and a reinforcement-learning agent picks the response. We can't attack a shared network, so the demo replays held-out benchmark traffic through the same pipeline. The benchmark numbers come from the full test sets."*
+> *"XRL-IDARS watches network flows and executes a 4-tier pipeline: it detects intrusions with a certified tabular Random Forest (< 0.8 ms), explains each decision using exact TreeSHAP game-theoretic Shapley values, and an autonomous reinforcement-learning agent recommends mitigation under a deterministic safety gate. Replay and live Scapy sniffing run through the exact operational pipeline. Offline LSTM and fusion models serve as comparative research benchmarks, where we show sequence modeling provides only marginal gain (+0.19% F1) at the cost of cold-start blindness."*
 
 ### 3-Minute Viva Demo Walkthrough:
 1. **Open `http://localhost:8000/demo.html`** and deliver the 30-second elevator pitch above.
@@ -108,7 +115,7 @@ flowchart LR
   - *"We do not assume models are perfect or that high benchmark metrics equate to production readiness. We audit every claim against held-out ground truth."*
 - **What to Point Out on Screen**:
   - Point to the **Git Commit Hash** and environment fingerprint (Python 3.14, PyTorch 2.14, Scikit-Learn 1.9.1, SHAP 0.52).
-  - Highlight the **Verified Test Suite**: `493 passed, 0 failed (100% pass rate)`.
+  - Highlight the **Verified Test Suite**: `605 passed, 0 failed (100% pass rate)`.
   - Point to the **Component Verification Matrix**: all 20 benchmark CSVs verified, Policy A feature deduplication enforced (0 cross-split duplicates).
 
 ---

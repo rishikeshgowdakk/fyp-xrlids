@@ -32,8 +32,9 @@ Deliver a verified, measurable, and reproducible research prototype that combine
 3. **Verified Random Forest Live Detection:** Establish Random Forest as the primary operational ML detector on live flow features, verifying model-preprocessor compatibility and probability calibration.
 4. **Genuine Local Explainability:** Provide exact TreeSHAP feature attributions on Random Forest predictions using genuine model trees and actual input vectors, explicitly rejecting fabricated attributions or canned ranking substitutions.
 5. **Empirically Evaluated Response Policy:** Formulate autonomous incident response as a Markov Decision Process (MDP) and evaluate Deep Q-Network (DQN) recommendations against established baseline policies on identical held-out benchmark test sets.
-6. **Decoupled Multi-Model Architecture & Safe Standalone Operation:** Establish Random Forest as the primary operational ML detector on live flow features (synchronous fast path, latency $< 1.0\,\text{ms}$). For hosts with ongoing activity, an asynchronous background worker maintains a causal sliding buffer of $K=5$ consecutive completed flows to compute an independent host-level anomaly score using an experimental PyTorch LSTM. Score fusion is explicitly excluded from the operational pipeline: both detectors report independent signals, guaranteeing that temporal buffering never blocks or delays flow-level detection.
-7. **Transparent Dashboard & Honest Mode Distinctions:** Visually and programmatically distinguish live network capture (`LIVE`), recorded trace replay (`PCAP`), held-out benchmark evaluation (`DATASET`), and in-memory attack simulation (`SAMPLE`).
+6. **Sole Operational Detector & Offline Experimental Baselines:** Establish Random Forest as the sole operational ML detector on live flow features (synchronous fast path, latency $< 0.8\,\text{ms}$). The operational pipeline contains exactly ONE operational ML classifier: Random Forest. The operational path strictly excludes LSTM inference, RF-LSTM fusion, and XGBoost inference.
+7. **Explicit Preservation of LSTM and Fusion Research Benchmarks:** Preserve the existing pretrained LSTM model, RF–LSTM fusion implementation, checkpoints, experiment results and evaluation scripts. Use them exclusively for offline research benchmarking and comparison. The research dashboard may display RF, LSTM and fusion metrics, including latency comparisons. They must never be invoked by the operational live detection pipeline. Do not retrain or replace these models unless a specific reproducibility issue requires it and approval is obtained.
+8. **Transparent Dashboard & Honest Mode Distinctions:** Clearly distinguish LIVE, PCAP, SAMPLE and RESEARCH modes. Research benchmark results must never be presented as live detection results. Sample data must never be represented as actual network traffic. Streamlit (`dashboard/streamlit_app.py`) serves as the primary operational command center across 8 dedicated modules, supported by the pure-Python server (`dashboard/server.py`) as a supplementary interface.
 
 ---
 
@@ -58,69 +59,75 @@ Deliver a verified, measurable, and reproducible research prototype that combine
 
 ---
 
-## 4. Approved Target Architecture Diagram (Independent Detection & Advisory Response)
+## 4. Approved Target Architecture Diagram (RF Operational Detection & Advisory Response)
 
 ```mermaid
 flowchart TD
     subgraph INGESTION["1. Network Ingestion Layer"]
         A1["Traffic Source: Live Interface / PCAP Replay / Netns Lab"] --> A2["PacketCaptureService\n(Bounded Queue: 10,000 pkts)"]
-        A2 --> A3["LiveFlowBuilder\n(Canonical 5-Tuple, D-006 Policy: FIN/RST or 120s Idle)"]
+        A2 --> A3["LiveFlowBuilder\n(Canonical 5-Tuple, D-006 Policy: FIN/RST or 120s Idle / 1800s Max)"]
     end
 
     A3 -->|"Completed Flow (R10 Vector)"| DETECT["2. Detection Event Layer"]
 
-    subgraph FAST["Primary Operational Detector: Random Forest (Synchronous, Latency < 1.0 ms)"]
+    subgraph FAST["Sole Operational ML Detector: Random Forest (Synchronous, Latency < 0.8 ms)"]
         direction TB
-        F1["Canonical R10 Normalization\n(StandardScaler loaded from preprocessor.joblib)"] --> F2["Random Forest Primary Classifier\n(P_RF flow attack probability in < 0.8 ms)"]
-        F2 --> F3["Immediate Actionable Flow Alert\n(Independent Detection Event)"]
+        F1["Canonical R10 Normalization\n(StandardScaler loaded from preprocessor.joblib)"] --> F2["Random Forest Classifier\n(P_RF flow attack probability in < 0.8 ms)"]
+        F2 --> F3["Actionable Flow Alert\n(Independent Detection Event)"]
     end
 
-    subgraph SLOW["Optional Temporal Detector: Temporal LSTM (Asynchronous Background Path)"]
+    subgraph RULES["Deterministic Protocol Rule Engine (Microsecond Latency)"]
         direction TB
-        S1["R10-FlowSeq Host Sequence Buffer\n(K=5 Consecutive Completed Flows from Host H)"] --> S2["Unidirectional PyTorch LSTM\n(Causal Recurrent Evaluation)"]
-        S2 --> S3["Independent Host Anomaly Score\n(P_LSTM in [0.0, 1.0], Informative Context)"]
+        R_RULE["5 RFC Invariant Checks\n(RULE-TCP-INVALID-FLAGS, RULE-SYN-FLOOD, etc.)"] --> R_EV["Rule Match Event"]
     end
 
     DETECT --> FAST
-    DETECT -.->|"Chronological Flow Stream"| SLOW
+    DETECT --> RULES
 
     subgraph ADVISORY["3. Autonomous Advisory Response & Explainability Layer"]
         direction TB
         F3 --> R1["TreeSHAP Engine\n(Exact Local Attributions on RF Decision Trees)"]
-        F3 --> R2["Host Risk State Aggregator\n(State Vector s_t: P_RF, Flow Stats, Alert Counts, Optional P_LSTM)"]
+        F3 & R_EV --> R2["Host Risk State Aggregator\n(6D Causal State Vector s_t: S_t, Delta S_t, N_alert, a_t-1, c_t, v_t)"]
         R2 --> R3["Dueling DQN Policy\n(Action Q-Value Estimation on 6D Causal State)"]
         R3 --> R4["Deterministic Safety Gate\n(Rate Limit, Cooldown, Blast Radius, Critical Host Allowlist)"]
         R4 --> R5["Advisory Response Action\n(ZERO Host Network Mutations, Dry-Run by Default)"]
     end
 
-    subgraph UI["4. Presentation & Audit Layer"]
-        F3 & S3 & R1 & R5 --> D1["DashboardServer\n(WebSocket /ws/telemetry + HTTP SSE)"]
-        D1 --> D2["Browser UI (Live Traffic / Alerts / SHAP / Response Center / Export)"]
+    subgraph UI["4. Presentation & Telemetry Layer"]
+        F3 & R_EV & R1 & R5 --> D1["Streamlit Operational Command Center (Primary: 8501)\n& DashboardServer (Supplementary: 8000)"]
+        D1 --> D2["Browser UI (Live Ingestion / Audit / SHAP / Response / Telemetry)"]
     end
 
     style FAST fill:#f8fafc,stroke:#2563eb,stroke-width:2px
-    style SLOW fill:#faf5ff,stroke:#9333ea,stroke-width:2px
+    style RULES fill:#fefce8,stroke:#ca8a04,stroke-width:2px
     style ADVISORY fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
 ```
 
 > [!IMPORTANT]
-> **No Score Fusion Invariant**: There is NO RF-LSTM fusion component, NO blended probabilities, and NO fusion weights. Random Forest is the certified primary operational detector. The Temporal LSTM is strictly optional and experimental. The system operates fully on Random Forest alone.
+> **Sole Operational ML Detector Invariant**: Exactly ONE operational ML classifier runs in the active live pipeline: **Random Forest**. The operational path strictly excludes LSTM inference, RF-LSTM score fusion, and XGBoost inference. Temporal LSTM and score fusion are strictly offline research benchmarks evaluated for comparative scientific inquiry.
 
 ---
 
 ## 5. Component Responsibilities
 
+The approved operational architecture is:
+
+**Scapy → Canonical FlowEngine → R10 Feature Extraction → StandardScaler → Random Forest → Security Event → TreeSHAP Explanation → Dueling DQN → Deterministic Safety Gate → Advisory/Dry-run Response Actuator → Streamlit Dashboard.**
+
+RF performs intrusion classification. DQN performs response recommendation. These are separate responsibilities. Do not combine their outputs into a new intrusion classifier.
+
 | Component | Module Path | Primary Responsibility | Architectural Invariant |
 |---|---|---|---|
 | **Packet Parser** | `src/xrlids/demo/pcap.py` | Extracts timestamps, endpoints, protocols, and raw TCP flags from wire or PCAP frames. | Pure Python, zero native C-dependencies, handles VLAN 802.1Q tags. |
-| **Flow Builder** | `src/xrlids/demo/flow.py` | Canonicalizes bidirectional 5-tuples and tracks packet lengths, byte volumes, and TCP control flags. | Closes flow on FIN/RST or 120s timeout (D-006 policy). |
+| **Flow Builder** | `src/xrlids/demo/flow.py` | Canonicalizes bidirectional 5-tuples and tracks packet lengths, byte volumes, and TCP control flags. | Closes flow on FIN/RST, 120.0s idle expiry, or 1800.0s max lifetime; canonical lexicographical 5-tuple key ($A < B$); population standard deviation ($\text{ddof}=0$) (D-006 policy). |
 | **Rule Engine** | `src/xrlids/rules/engine.py` | Evaluates deterministic security rules against completed flows or feature dictionaries. | 100% deterministic; zero ML weights; never mutates RF probabilities. |
-| **Random Forest Detector** | `src/xrlids/models/random_forest.py` | Primary live ML detector computing flow attack probabilities. | Model features and preprocessor must match verified training provenance. |
+| **Random Forest Detector** | `src/xrlids/models/random_forest.py` | Sole operational ML detector computing flow attack probabilities. | Model features and preprocessor must match verified training provenance. |
 | **Explainability Engine** | `src/xrlids/explainability/` | Computes TreeSHAP feature attributions on Random Forest predictions. | Explains actual input vector using loaded RF tree structure; no canned values. |
 | **Dueling DQN Agent** | `src/xrlids/response/dqn.py` | Maps incident state vectors to cost-optimal defensive action recommendations. | Trained with experience replay and target networks; outputs Q-values. |
 | **Deterministic Safety Gate** | `src/xrlids/enforcement/gate.py` | Enforces cooldown periods, blast-radius restrictions, and operational preconditions. | Fails closed; enforces advisory dry-run unless cryptographic tokens present. |
 | **Live Lab Monitor** | `src/xrlids/demo/live_lab.py` | Glues capture, flow construction, rule checking, ML inference, and alert queuing. | Pure userland observational stream; zero host socket or firewall mutations. |
-| **Dashboard Server** | `dashboard/server.py` | Threaded HTTP server exposing REST APIs, static assets, and SSE event channels. | Rebind-safe host validation; strictly separates sample, replay, and benchmark streams. |
+| **Operational Command Center** | `dashboard/streamlit_app.py` | Primary operational dashboard across 8 dedicated modules (8501). | Full live sniffing, replay, TreeSHAP, rules, tracking, response policy, and telemetry. |
+| **Dashboard Server** | `dashboard/server.py` | Pure-Python HTTP server exposing REST APIs and static demo assets (8000). | Supplementary interface; rebind-safe; separates sample, replay, and benchmark streams. |
 
 ---
 
@@ -211,6 +218,10 @@ Each sequence step $k$ contains the 10 canonical R10 features plus the inter-flo
 
 ## 8. Rule, RF, TreeSHAP, and DQN Responsibilities
 
+> [!IMPORTANT]
+> **Real End-to-End Integration Requirement:**
+> Run at least one complete integrated demonstration where captured or replayed traffic travels through the actual operational pipeline. Verify that the resulting RF prediction, TreeSHAP explanation, DQN recommendation, safety decision and response record are associated with the same security event and visible in Streamlit. Unit tests alone do not satisfy this criterion.
+
 ```mermaid
 stateDiagram-v2
     [*] --> Ingestion
@@ -274,13 +285,19 @@ stateDiagram-v2
 The supervised Long Short-Term Memory (LSTM) sequence model ($T=5$ causal time steps) and linear score fusion engine ($\alpha S_{RF} + (1-\alpha)S_{LSTM}$) are **strictly offline experimental baselines**.
 
 ### 9.2 Evidence and Rationale for Exclusion from Live Path
-1. **Empirical Performance Comparison:** Across 355,865 held-out test flows of CIC-IDS2017:
-   - **Random Forest:** Accuracy $99.88\% \pm 0.01\%$, F1-Score $0.9972 \pm 0.0003$, ROC-AUC $0.9999 \pm 0.0000$.
-   - **Supervised LSTM:** Accuracy $98.42\% \pm 0.12\%$, F1-Score $0.9635 \pm 0.0028$, ROC-AUC $0.9945 \pm 0.0011$.
-   - **RF-LSTM Fusion:** Accuracy $99.88\% \pm 0.01\%$, F1-Score $0.9973 \pm 0.0002$, ROC-AUC $0.9999 \pm 0.0000$.
-2. **Marginal Value vs. Complexity:** RF alone achieves $0.9972$ F1. Adding the recurrent sequence model yields a negligible $+0.0001$ F1 gain while adding sequence buffering, temporal state tracking, and a $10\times$ inference latency penalty.
+1. **Empirical Performance Comparison across Benchmarks:**
+   - **CIC-IDS2017 Held-Out Test Set** (`EXP-P1-CIC2017-R10-001`, $N = 355,865$):
+     - **Random Forest (Operational):** Accuracy $98.15\%$, Precision $91.51\%$, Recall $99.01\%$, F1-Score **$0.9512$**, PR-AUC $0.9824$, ROC-AUC $0.9968$.
+   - **CSE-CIC-IDS2018 Full Multi-Class Test Set** (`EXP-P1-CSE2018-R10-MULTI-001`, $N = 1,662,459$):
+     - **Random Forest (Operational):** Accuracy $97.23\%$, Precision $82.42\%$, Recall $95.80\%$, F1-Score **$0.8861$**, PR-AUC $0.9676$, ROC-AUC $0.9902$.
+   - **UNSW-NB15 Sensor-Degraded Test Set** (`EXP-P1-UNSWNB15-R10-MULTI-001`, $N = 24,504$, R4 contract):
+     - **Random Forest (Operational):** Accuracy $85.88\%$, Precision $79.62\%$, Recall $92.23\%$, F1-Score **$0.8546$**, PR-AUC $0.9321$, ROC-AUC $0.9485$.
+   - **Targeted Tuesday 2018 Flood Window** (`EXP-P2-LSTM-VALID-001`, $N = 8,726$, LOIC-HTTP active window $t \in [1519121000, 1519125500]$):
+     - **Random Forest Baseline:** F1-Score **$0.9977$**.
+     - **PyTorch LSTM (FlowSeq):** F1-Score **$0.9996$** ($\Delta F_1 = +0.0019$, $+0.19\%$ relative gain representing only 16 additional correctly classified flows out of 8,726).
+2. **Marginal Value vs. Operational Complexity:** The tiny $+0.19\%$ F1 gain of the LSTM requires buffering $K=5$ flows per source host, creating **cold-start blindness** on flows 1 to 4 and exposing the NIDS to **state-exhaustion denial of service** during IP-spoofed volumetric floods.
 3. **Explainability Feasibility:** TreeSHAP provides microsecond, exact explanations for tree ensembles. Explaining recurrent sequence models requires gradient-based or perturbation SHAP (KernelSHAP) which is computationally prohibitive for real-time traffic.
-4. **Preservation Commitment:** All LSTM checkpoints (`models/registry/EXP-P1-*-LSTM-*`) and fusion code remain in the repository and are fully tested and reproducible in the offline benchmark evaluation suite.
+4. **Preservation Commitment:** All LSTM checkpoints (`models/registry/EXP-P1-*-LSTM-*`, `results/experiments/EXP-P2-LSTM-VALID-001/lstm_flowseq_best.pt`) and fusion code remain in the repository and are fully tested and reproducible in the offline benchmark evaluation suite.
 
 ---
 
@@ -369,7 +386,7 @@ Traffic flows through the exact operational intrusion detection and response pip
 1. **Scapy Packet Ingestion:** Packets are converted to canonical `PacketInfo` dataclasses and delivered into a non-blocking queue.
 2. **Bidirectional Flow Reconstruction:** `FlowBuilder` matches packets into bidirectional flows, updating forward/backward packet counts, byte volumes, and TCP control flag histograms.
 3. **Feature Extraction:** Completed flows emit normalized 10-feature R10 vectors (`flow_duration_ms`, `flow_packets_per_s`, `flow_bytes_per_s`, `packet_length_mean`, `packet_length_std`, `syn_count`, `ack_count`, `rst_count`, `fin_count`, `syn_ack_ratio`).
-4. **Multi-Model Inference:** `RandomForest` computes $P(\text{ATTACK})$; if 5 sequential flows share a session key, `UnifiedInferenceService` evaluates LSTM sequence modeling and linear score fusion.
+4. **Operational ML Inference:** `RandomForest` evaluates the normalized feature vector and computes $P(\text{ATTACK})$ as the sole operational detector ($< 0.8\,\text{ms}$).
 5. **Deterministic Security Rules:** `RuleEngine` evaluates RFC violations and volumetric heuristics independently of ML inference.
 6. **Local Explainability:** `explain_flow_prediction` computes TreeSHAP additive feature attributions ($\phi_i$) for the exact input vector against the loaded Random Forest model trees.
 7. **Advisory DQN Response:** 6D state vector $\mathbf{s}_t = [S_t, \Delta S_t, N_{\text{alert}}, a_{t-1}, c_t, v_t]$ is fed to `DuelingQNetwork`, estimating Q-values across the action space (`ALLOW`, `ALERT`, `RATE_LIMIT`, `BLOCK`).
@@ -383,7 +400,7 @@ The Viva frontend provides an uncluttered, high-contrast cybersecurity operation
 - **Four Metric Cards:** Packets Captured, Flows Processed, Threats Detected, Active Alerts.
 - **Six Specialized Panels:**
   1. *Live Traffic Panel:* Real-time flow table with timestamps, endpoints, protocols, packet counts, and durations.
-  2. *Threat Detection Panel:* Flow results, detection provenance (`RF`, `RULE`, `HYBRID`, `RF+LSTM_FUSION`), confidence scores, and rule match badges.
+  2. *Threat Detection Panel:* Flow results, detection provenance (`RF`, `RULE`, `HYBRID`), confidence scores, and rule match badges.
   3. *TreeSHAP Explainability Panel:* Interactive waterfall chart showing top positive and negative contributing features for any selected flow.
   4. *Autonomous Response Advisory Panel:* DQN proposed action, safety gate enforced action, override badges, and strict dry-run notice.
   5. *Performance & Latency Panel:* P50, P95, P99 latency percentiles across Feature Extraction, RF Inference, Rule Engine, and DQN Response Selection.

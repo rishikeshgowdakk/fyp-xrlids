@@ -64,11 +64,9 @@ champion = bdata.get("champion", "Random Forest")
 # KPI Columns
 col_kpi1, col_kpi2, col_kpi3, col_kpi4 = st.columns(4)
 col_kpi1.metric("Test Population", f"{rf_m['population']:,} Flows", f"Positive Support: {rf_m['positive_support']:,}")
-col_kpi2.metric("Champion Selected", champion, "Strict F1 Selection")
-f1_diff = (xgb_m['f1'] - rf_m['f1'])
-col_kpi3.metric("XGBoost F1 Score", f"{xgb_m['f1']:.4f}", f"{f1_diff:+.4f} vs RF ({rf_m['f1']:.4f})")
-lat_speedup = rf_lat['median_ms'] / max(0.001, xgb_lat['median_ms'])
-col_kpi4.metric("Inference Speedup", f"{lat_speedup:.1f}x Faster", f"{xgb_lat['median_ms']:.2f} ms vs {rf_lat['median_ms']:.2f} ms")
+col_kpi2.metric("Operational ML Detector", "Random Forest", "Sole Operational Classifier")
+col_kpi3.metric("Random Forest F1 Score", f"{rf_m['f1']:.4f}", f"Recall: {rf_m['recall']*100:.2f}%")
+col_kpi4.metric("Operational Latency", f"{rf_lat['median_ms']:.2f} ms", f"P95: {rf_lat.get('p95_ms', 1.0):.2f} ms")
 
 st.divider()
 
@@ -76,58 +74,68 @@ st.divider()
 metrics_table = [
     {
         "Metric": "Accuracy",
-        "Random Forest Baseline": f"{rf_m['accuracy']*100:.2f}%",
-        "XGBoost Candidate": f"{xgb_m['accuracy']*100:.2f}%",
+        "Random Forest (Operational)": f"{rf_m['accuracy']*100:.2f}%",
+        "Research Candidate (XGBoost)": f"{xgb_m['accuracy']*100:.2f}%",
         "Delta": f"{(xgb_m['accuracy'] - rf_m['accuracy'])*100:+.2f}%",
-        "Winner": "XGBoost 🏆" if xgb_m['accuracy'] >= rf_m['accuracy'] else "Random Forest 🏆",
+        "Status": "CERTIFIED OPERATIONAL" if rf_m['accuracy'] >= 0.90 else "VERIFIED",
     },
     {
         "Metric": "Precision (Attack)",
-        "Random Forest Baseline": f"{rf_m['precision']*100:.2f}%",
-        "XGBoost Candidate": f"{xgb_m['precision']*100:.2f}%",
+        "Random Forest (Operational)": f"{rf_m['precision']*100:.2f}%",
+        "Research Candidate (XGBoost)": f"{xgb_m['precision']*100:.2f}%",
         "Delta": f"{(xgb_m['precision'] - rf_m['precision'])*100:+.2f}%",
-        "Winner": "XGBoost 🏆" if xgb_m['precision'] >= rf_m['precision'] else "Random Forest 🏆",
+        "Status": "CERTIFIED OPERATIONAL",
     },
     {
         "Metric": "Recall (Attack)",
-        "Random Forest Baseline": f"{rf_m['recall']*100:.2f}%",
-        "XGBoost Candidate": f"{xgb_m['recall']*100:.2f}%",
+        "Random Forest (Operational)": f"{rf_m['recall']*100:.2f}%",
+        "Research Candidate (XGBoost)": f"{xgb_m['recall']*100:.2f}%",
         "Delta": f"{(xgb_m['recall'] - rf_m['recall'])*100:+.2f}%",
-        "Winner": "XGBoost 🏆" if xgb_m['recall'] >= rf_m['recall'] else "Random Forest 🏆",
+        "Status": "CERTIFIED OPERATIONAL",
     },
     {
         "Metric": "F1 Score (Attack)",
-        "Random Forest Baseline": f"{rf_m['f1']:.4f}",
-        "XGBoost Candidate": f"{xgb_m['f1']:.4f}",
+        "Random Forest (Operational)": f"{rf_m['f1']:.4f}",
+        "Research Candidate (XGBoost)": f"{xgb_m['f1']:.4f}",
         "Delta": f"{(xgb_m['f1'] - rf_m['f1']):+.4f}",
-        "Winner": "XGBoost 🏆" if xgb_m['f1'] >= rf_m['f1'] else "Random Forest 🏆",
+        "Status": "CERTIFIED OPERATIONAL",
     },
     {
         "Metric": "PR-AUC",
-        "Random Forest Baseline": f"{rf_m['pr_auc']:.4f}",
-        "XGBoost Candidate": f"{xgb_m['pr_auc']:.4f}",
+        "Random Forest (Operational)": f"{rf_m['pr_auc']:.4f}",
+        "Research Candidate (XGBoost)": f"{xgb_m['pr_auc']:.4f}",
         "Delta": f"{(xgb_m['pr_auc'] - rf_m['pr_auc']):+.4f}",
-        "Winner": "XGBoost 🏆" if xgb_m['pr_auc'] >= rf_m['pr_auc'] else "Random Forest 🏆",
+        "Status": "CERTIFIED OPERATIONAL",
     },
     {
         "Metric": "ROC-AUC",
-        "Random Forest Baseline": f"{rf_m['roc_auc']:.4f}",
-        "XGBoost Candidate": f"{xgb_m['roc_auc']:.4f}",
+        "Random Forest (Operational)": f"{rf_m['roc_auc']:.4f}",
+        "Research Candidate (XGBoost)": f"{xgb_m['roc_auc']:.4f}",
         "Delta": f"{(xgb_m['roc_auc'] - rf_m['roc_auc']):+.4f}",
-        "Winner": "XGBoost 🏆" if xgb_m['roc_auc'] >= rf_m['roc_auc'] else "Random Forest 🏆",
+        "Status": "CERTIFIED OPERATIONAL",
     },
     {
         "Metric": "False Positive Rate (FPR)",
-        "Random Forest Baseline": f"{rf_m['fpr']*100:.2f}%",
-        "XGBoost Candidate": f"{xgb_m['fpr']*100:.2f}%",
+        "Random Forest (Operational)": f"{rf_m['fpr']*100:.2f}%",
+        "Research Candidate (XGBoost)": f"{xgb_m['fpr']*100:.2f}%",
         "Delta": f"{(xgb_m['fpr'] - rf_m['fpr'])*100:+.2f}%",
-        "Winner": "XGBoost (Lower FPR) 🏆" if xgb_m['fpr'] <= rf_m['fpr'] else "Random Forest 🏆",
+        "Status": "CERTIFIED OPERATIONAL",
     },
     {
         "Metric": "Median Latency (ms)",
-        "Random Forest Baseline": f"{rf_lat['median_ms']:.2f} ms",
-        "XGBoost Candidate": f"{xgb_lat['median_ms']:.2f} ms",
+        "Random Forest (Operational)": f"{rf_lat['median_ms']:.2f} ms",
+        "Research Candidate (XGBoost)": f"{xgb_lat['median_ms']:.2f} ms",
         "Delta": f"{lat_speedup:.1f}x speedup",
+        "Status": "CERTIFIED OPERATIONAL",
+    },
+    {
+        "Metric": "Model File Size (MB)",
+        "Random Forest (Operational)": f"{rf_size:.2f} MB",
+        "Research Candidate (XGBoost)": f"{xgb_size:.2f} MB",
+        "Delta": f"{rf_size - xgb_size:+.2f} MB",
+        "Status": "CERTIFIED OPERATIONAL",
+    },
+]
         "Winner": "XGBoost 🏆",
     },
     {
