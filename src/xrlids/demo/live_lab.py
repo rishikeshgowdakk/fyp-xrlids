@@ -52,6 +52,7 @@ class AlertEvent:
     enforced_action: str | None = None
     safety_override: bool = False
     override_reason: str | None = None
+    stage_latencies_ms: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
@@ -83,6 +84,7 @@ class FlowObservation:
     enforced_action: str | None = None
     safety_override: bool = False
     override_reason: str | None = None
+    stage_latencies_ms: dict[str, float] = field(default_factory=dict)
 
 
 class LiveLabMonitor:
@@ -102,6 +104,7 @@ class LiveLabMonitor:
         safety_gate: Any | None = None,
         state_builder: Any | None = None,
         benchmark: str = "cicids2017",
+        idle_timeout_s: float | None = None,
     ) -> None:
         self.engine = engine
         self.inference_service = inference_service
@@ -115,10 +118,13 @@ class LiveLabMonitor:
         self.safety_gate = safety_gate
         self.state_builder = state_builder
         self.benchmark = benchmark
+        self.idle_timeout_s = idle_timeout_s or (engine.idle_timeout_s if engine is not None else 120.0)
         self.alerts: list[AlertEvent] = []
         self.observations: deque[FlowObservation] = deque(maxlen=max_observations)
         self._last_alert_time: dict[str, float] = {}
         self._running = False
+        self._builder: FlowBuilder | None = None
+        self._flow_idx: int = 0
 
     def process_packet_stream(
         self,
@@ -132,39 +138,48 @@ class LiveLabMonitor:
         ``on_flow_callback``); attack detections additionally produce an
         AlertEvent (streamed to ``on_alert_callback``).
         """
-        idle_timeout = self.engine.idle_timeout_s if self.engine is not None else 120.0
-        builder = FlowBuilder(idle_timeout_s=idle_timeout)
+        builder = FlowBuilder(idle_timeout_s=self.idle_timeout_s)
+        self._builder = builder
         self.alerts.clear()
         self._last_alert_time.clear()
-        flow_idx = 0
+        self._flow_idx = 0
 
         for pkt in packet_generator:
             completed = builder.process_packet(pkt)
             for fl in completed:
-                flow_idx += 1
-                self._evaluate_and_alert(fl, flow_idx, mode=mode)
+                self._flow_idx += 1
+                self._evaluate_and_alert(fl, self._flow_idx, mode=mode)
 
         for fl in builder.flush_all():
-            flow_idx += 1
-            self._evaluate_and_alert(fl, flow_idx, mode=mode)
+            self._flow_idx += 1
+            self._evaluate_and_alert(fl, self._flow_idx, mode=mode)
 
         return list(self.alerts)
 
+    def flush_flows(self, mode: str = "live") -> list[FlowObservation]:
+        """Flush any active flows from the builder and evaluate them immediately."""
+        if self._builder is not None:
+            flushed = self._builder.flush_all()
+            for fl in flushed:
+                self._flow_idx += 1
+                self._evaluate_and_alert(fl, self._flow_idx, mode=mode)
+        return list(self.observations)
+
     def _evaluate_and_alert(self, flow: Flow, flow_idx: int, mode: str = "live") -> None:
         """Run model inference, record the observation, and emit an alert when threshold is crossed."""
+        t_pipeline_start = time.perf_counter()
+        t0_feat = time.perf_counter()
         features = flow.to_features()
+        t_features_ms = (time.perf_counter() - t0_feat) * 1000.0
+
         session_key = f"{flow.source_first_ip}->{flow.dest_first_ip}"
         rf_score = 0.0
         lstm_score: float | None = None
         fusion_score: float | None = None
         inf_source = "RF"
 
-        if self.engine is not None and getattr(self.engine, "model", None) is not None and self.engine.model.__class__.__name__ != "RandomForestClassifier":
-            # Custom or mock model supplied directly via engine
-            pred, conf = self.engine.predict_features(features)
-            rf_score = conf
-            inf_source = "RF"
-        elif self.inference_service is not None and hasattr(self.inference_service, "infer"):
+        t0_inf = time.perf_counter()
+        if self.inference_service is not None and hasattr(self.inference_service, "infer"):
             inf_res = self.inference_service.infer(
                 features=features,
                 session_key=session_key,
@@ -183,15 +198,18 @@ class LiveLabMonitor:
             inf_source = "RF"
         else:
             raise RuntimeError("Neither inference_service nor engine is configured on LiveLabMonitor")
+        t_infer_ms = (time.perf_counter() - t0_inf) * 1000.0
 
         proto = "TCP" if flow.key.protocol == 6 else ("UDP" if flow.key.protocol == 17 else f"PROTO_{flow.key.protocol}")
 
         # Deterministic rule checks (independent of ML model)
+        t0_rules = time.perf_counter()
         rule_matches = self.rule_engine.evaluate_flow(flow)
         rule_ids = [r.rule_id for r in rule_matches]
         rule_alert = len(rule_matches) > 0
         model_alert = bool(pred == 1 and conf >= self.alert_threshold)
         is_alert = model_alert or rule_alert
+        t_rules_ms = (time.perf_counter() - t0_rules) * 1000.0
 
         if model_alert and rule_alert:
             detection_source = "HYBRID"
@@ -208,6 +226,7 @@ class LiveLabMonitor:
         override_applied = False
         override_reason: str | None = None
 
+        t0_resp = time.perf_counter()
         if self.state_builder is not None and self.policy is not None and self.safety_gate is not None:
             try:
                 import torch
@@ -235,6 +254,16 @@ class LiveLabMonitor:
                 )
             except Exception as exc:
                 logger.debug("Policy/safety gate evaluation bypassed for flow %d: %s", flow_idx, exc)
+        t_resp_ms = (time.perf_counter() - t0_resp) * 1000.0
+        t_total_ms = (time.perf_counter() - t_pipeline_start) * 1000.0
+
+        latencies = {
+            "features_ms": round(t_features_ms, 3),
+            "inference_ms": round(t_infer_ms, 3),
+            "rules_ms": round(t_rules_ms, 3),
+            "response_ms": round(t_resp_ms, 3),
+            "total_ms": round(t_total_ms, 3),
+        }
 
         is_simulated = (mode == "sample")
 
@@ -264,6 +293,7 @@ class LiveLabMonitor:
             enforced_action=enforced_action_str,
             safety_override=override_applied,
             override_reason=override_reason,
+            stage_latencies_ms=latencies,
         )
         self.observations.append(observation)
         if self.on_flow_callback is not None:

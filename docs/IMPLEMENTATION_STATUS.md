@@ -2,8 +2,8 @@
 
 **Official Title:** Explainable Reinforcement Learning-Based Network Intrusion Detection and Autonomous Response System (XRL-IDARS)  
 **Repository:** `rishikeshgowdakk/fyp-xrlids`  
-**Git Branch / Commit:** `engineering/theme-ui`
-**Test Suite Status:** **585 passed, 0 failed, 19 warnings in 41.2s**  
+**Git Branch / Commit:** `feature/scapy-live-demo`
+**Test Suite Status:** **602 passed, 0 failed, 19 warnings in 75.8s**  
 
 ---
 
@@ -31,6 +31,7 @@
 | **COMP-18** | Labelled Replay Lab Engine (`src/xrlids/demo/replay_lab.py`) | **Implemented** | **Tested** | **Verified** | Authentic flow streaming (400, 1k, 5k, 10k flows) from CIC-IDS2017 & CSE-CIC-IDS2018; 6,716 flows/s throughput, 27-column audit CSV export. |
 | **COMP-19** | End-to-End Causal Pipeline Integration (`tests/integration/test_end_to_end_scapy_pipeline.py`) | **Implemented** | **Tested** | **Verified** | Complete causal verification: Scapy PCAP → LiveFlowBuilder → UnifiedInference → TreeSHAP → 6D StateBuilder → DuelingQNetwork → DeterministicSafetyGate. |
 | **COMP-20** | Live Pipeline Runner Wiring (`src/xrlids/live/runner.py`) | **Implemented** | **Tested** | **Verified** | LivePipelineRunner natively supports UnifiedInferenceService, recording RF/LSTM/Fusion provenance and advisory actions in DryRunAuditCard. |
+| **COMP-21** | Real-Time Scapy Live Attack Simulator & Viva Interface (`src/xrlids/demo/scapy_simulator.py`, `dashboard/demo.html`) | **Implemented** | **Tested** | **Verified** | Safe Scapy generator with 4 calibrated scenarios (Benign, Port Scan, SYN Burst, ICMP Burst). Bounded to 10.200.1.0/24. Real-time FlowBuilder, RF, RuleEngine, TreeSHAP, and DQN advisory response with 0 host network mutations. |
 
 ---
 
@@ -102,6 +103,15 @@
 ### COMP-19: End-to-End Pipeline Integration (`tests/integration/test_end_to_end_scapy_pipeline.py`)
 - **Status:** **IMPLEMENTED & VERIFIED**
 - **Evidence:** Validates full causal pipeline: Scapy PCAP → LiveFlowBuilder → UnifiedInference → TreeSHAP → 6D StateBuilder → DuelingQNetwork → DeterministicSafetyGate. Integration tests in `tests/integration/test_end_to_end_scapy_pipeline.py` (2 tests passing).
+
+### COMP-21: Real-Time Scapy Live Attack Simulator & Viva Interface (`src/xrlids/demo/scapy_simulator.py`, `dashboard/demo.html`)
+- **Status:** **IMPLEMENTED & VERIFIED**
+- **Evidence:** 
+  - Pure Scapy packet synthesis generator implementing Scenario A (Benign HTTP/ICMP), Scenario B (Port Scan probing ports 21, 22, 80, 443, 8080), Scenario C (Bounded TCP SYN Flood), and Scenario D (Bounded ICMP Echo Flood).
+  - Target isolation strictly enforced to `10.200.1.0/24` lab subnet; non-lab IPs rejected with `TargetIsolationError`.
+  - Zero-mock execution verified by `tests/integration/test_scapy_live_demonstration.py` (17 tests passing): Wire Packets → `FlowBuilder` → Canonical R10 Features → `RandomForest` / `UnifiedInferenceService` → `RuleEngine` → `TreeSHAP` → `DuelingQNetwork` (6D State) → `DeterministicSafetyGate` → Event Timeline → REST API.
+  - Zero host network mutation verified: Host network baseline unchanged before and after execution.
+  - Simple, robust Viva frontend (`dashboard/demo.html`, `dashboard/demo.js`) with 4 metric cards, 6 operational panels, TreeSHAP waterfall rendering, advisory DQN badge display, CSV/JSON session export, and bidirectional links to Research Dashboard (`index.html`).
 
 ### COMP-12 & COMP-13: Input Modes & Dashboard Synchronization
 - **Status:** **IMPLEMENTED & VERIFIED**

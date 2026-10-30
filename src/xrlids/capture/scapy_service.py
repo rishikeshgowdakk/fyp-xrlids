@@ -242,6 +242,18 @@ class ScapyCaptureService:
             self.stats.packets_dropped += 1
             return False
 
+    def inject_scapy_packet(self, scapy_pkt: Any) -> bool:
+        """Inject a Scapy packet into capture pipeline (used in isolated lab simulator)."""
+        pkt_info = scapy_packet_to_packet_info(scapy_pkt)
+        if pkt_info is not None:
+            return self._enqueue_packet(pkt_info)
+        self.stats.malformed_packets += 1
+        return False
+
+    def inject_packet_info(self, pkt: PacketInfo) -> bool:
+        """Inject parsed PacketInfo directly into capture queue."""
+        return self._enqueue_packet(pkt)
+
     def _run_capture(self) -> None:
         """Main worker loop dispatching to PCAP replay or live interface sniffing."""
         try:
@@ -299,7 +311,13 @@ class ScapyCaptureService:
                 self._enqueue_packet(pkt_info)
 
     def _capture_from_interface(self) -> None:
-        """Capture packets from live interface using Scapy sniff()."""
+        """Capture packets from live interface using Scapy sniff(), or virtual capture."""
+        if self.config.interface in ("virtual", "isolated_lab", "veth_virtual"):
+            logger.info("ScapyCaptureService running in virtual isolated capture mode.")
+            while not self._stop_event.is_set():
+                time.sleep(0.1)
+            return
+
         if not self.check_permissions():
             raise PermissionError(
                 "Live network capture requires root or CAP_NET_RAW permissions. "

@@ -307,3 +307,59 @@ The live monitor and dashboard operate in **observational dry-run mode**. Recomm
 3. **Explainability Boundary:** TreeSHAP feature attributions explain the Random Forest classifier only. They do not explain the DQN Q-value landscape or the rule engine triggers.
 4. **Offline Evaluation vs. Live Traffic Shift:** Performance metrics reported on held-out benchmark splits reflect identical distribution conditions. Real-world enterprise traffic subject to protocol variations, MTU differences, or zero-day exploits will exhibit different error profiles.
 5. **Sample Simulation Scope:** Packets synthesized in memory by `attack_sim.py` test pipeline plumbing and score calibration; they are synthetic demonstrations and not substitutes for empirical held-out benchmark verification.
+
+---
+
+## 13. Real-Time Scapy Live Demonstration & Isolated Lab Architecture
+
+### 13.1 Isolated Lab Topology & Target Safety
+The live demonstration operates within a strictly isolated, bounded sandbox to guarantee zero interference with production networks, public subnets, or host loopback sockets:
+- **Designated Subnet:** `10.200.1.0/24` (virtual ethernet pairs or virtual packet injection queue).
+- **Target IP:** `10.200.1.3` (`VICTIM_IP`).
+- **Attacker IP:** `10.200.1.2` (`ATTACKER_IP`).
+- **Target Safety Enforcer:** `validate_target_safety(ip)` strictly asserts that destination IPs fall within `10.200.1.0/24` or loopback `127.0.0.1`. Any external, public, or unauthorized IP is rejected with `TargetIsolationError`.
+
+### 13.2 Calibrated Scapy Traffic Scenarios
+The traffic simulator (`src/xrlids/demo/scapy_simulator.py`) generates real wire-format Scapy packets across four distinct, reproducible operational scenarios:
+1. **Scenario A — Benign Baseline Traffic (12 packets):**
+   - Clean 3-way TCP handshake (SYN $\to$ SYN/ACK $\to$ ACK) on port 80.
+   - HTTP GET request and 200 OK payload exchange.
+   - Graceful 4-way connection teardown (FIN/ACK $\to$ ACK $\to$ FIN/ACK $\to$ ACK).
+   - Standard ICMP Echo Request and Echo Reply ping exchange.
+   - Result: 0 rule alerts, RF evaluates low attack score ($< 0.05$), $100\%$ benign baseline.
+2. **Scenario B — Port Scan Simulation (15 packets):**
+   - Sequential probes targeting ports 21 (FTP), 22 (SSH), 80 (HTTP), 443 (HTTPS), and 8080 (HTTP-Alt).
+   - Simulates 4 closed ports responding with TCP RST/ACK and 1 open port (80) responding with SYN/ACK.
+   - Result: Deterministic rule `RULE-PORT-SCAN` detects multiple closed/probe ports; triggers alert.
+3. **Scenario C — TCP SYN Burst (60 packets):**
+   - Rapid burst of 60 raw TCP SYN packets (no completed handshakes) across 2 ephemeral source ports (30 SYNs each).
+   - Simulates asymmetric connection table starvation.
+   - Result: Deterministic rule `RULE-SYN-FLOOD` triggers alert; Dueling DQN receives elevated attack score ($S_t$) and proposes rate limiting or host blocking, validated through `DeterministicSafetyGate`.
+4. **Scenario D — ICMP Burst (40 packets):**
+   - High-frequency burst of 40 ICMP Echo Request packets (type 8, code 0) within a 0.20-second window.
+   - Result: Deterministic rule `RULE-ICMP-FLOOD` triggers alert on volumetric ping flood.
+
+### 13.3 Real Operational Pipeline
+Traffic flows through the exact operational intrusion detection and response pipeline without synthetic mocking:
+1. **Scapy Packet Ingestion:** Packets are converted to canonical `PacketInfo` dataclasses and delivered into a non-blocking queue.
+2. **Bidirectional Flow Reconstruction:** `FlowBuilder` matches packets into bidirectional flows, updating forward/backward packet counts, byte volumes, and TCP control flag histograms.
+3. **Feature Extraction:** Completed flows emit normalized 10-feature R10 vectors (`flow_duration_ms`, `flow_packets_per_s`, `flow_bytes_per_s`, `packet_length_mean`, `packet_length_std`, `syn_count`, `ack_count`, `rst_count`, `fin_count`, `syn_ack_ratio`).
+4. **Multi-Model Inference:** `RandomForest` computes $P(\text{ATTACK})$; if 5 sequential flows share a session key, `UnifiedInferenceService` evaluates LSTM sequence modeling and linear score fusion.
+5. **Deterministic Security Rules:** `RuleEngine` evaluates RFC violations and volumetric heuristics independently of ML inference.
+6. **Local Explainability:** `explain_flow_prediction` computes TreeSHAP additive feature attributions ($\phi_i$) for the exact input vector against the loaded Random Forest model trees.
+7. **Advisory DQN Response:** 6D state vector $\mathbf{s}_t = [S_t, \Delta S_t, N_{\text{alert}}, a_{t-1}, c_t, v_t]$ is fed to `DuelingQNetwork`, estimating Q-values across the action space (`ALLOW`, `ALERT`, `RATE_LIMIT`, `BLOCK`).
+8. **Deterministic Safety Gate:** `DeterministicSafetyGate` enforces cooldown windows (30 steps), blast radius caps ($5\%$), and critical host allowlists. All actions remain strictly **advisory** (dry-run).
+9. **Event Timeline & REST Delivery:** Consolidated snapshots and chronological events are served via `GET /api/demo/status`, `POST /api/demo/simulate`, and `GET /api/demo/explain`.
+
+### 13.4 Viva Demonstration Interface (`demo.html`)
+The Viva frontend provides an uncluttered, high-contrast cybersecurity operations console:
+- **Header:** System title, monitoring status (`STOPPED`/`RUNNING`), mode (`ISOLATED LAB`), model status (`LOADED`), and persistent navigation to the Research Dashboard.
+- **Main Controls:** Start/Stop Monitoring, Scenario Selector (A, B, C, D), Launch/Stop Simulation, Reset Session, and Export Report (JSON/CSV).
+- **Four Metric Cards:** Packets Captured, Flows Processed, Threats Detected, Active Alerts.
+- **Six Specialized Panels:**
+  1. *Live Traffic Panel:* Real-time flow table with timestamps, endpoints, protocols, packet counts, and durations.
+  2. *Threat Detection Panel:* Flow results, detection provenance (`RF`, `RULE`, `HYBRID`, `RF+LSTM_FUSION`), confidence scores, and rule match badges.
+  3. *TreeSHAP Explainability Panel:* Interactive waterfall chart showing top positive and negative contributing features for any selected flow.
+  4. *Autonomous Response Advisory Panel:* DQN proposed action, safety gate enforced action, override badges, and strict dry-run notice.
+  5. *Performance & Latency Panel:* P50, P95, P99 latency percentiles across Feature Extraction, RF Inference, Rule Engine, and DQN Response Selection.
+  6. *Chronological Event Timeline:* Detailed audit stream of capture starts, packet bursts, threat detections, and safety gate decisions.
