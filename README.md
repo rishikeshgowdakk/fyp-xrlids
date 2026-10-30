@@ -11,7 +11,9 @@ XRL-IDARS is a research prototype for network-flow intrusion detection, explaina
 | Document | What it covers |
 |---|---|
 | [Architecture](docs/ARCHITECTURE.md) | Authoritative live/offline separation, data flow, and safety boundaries |
-| [XGBoost vs Random Forest](docs/RF_VS_XGBOOST.md) | Reported cross-dataset comparison and limitations of the available evidence |
+| [Model Selection](docs/MODEL_SELECTION.md) | Formal champion selections across all eight ML and RL categories |
+| [Feature Engineering Study](docs/FEATURE_ENGINEERING_STUDY.md) | Empirical evaluation across five feature rungs (R4-R30) and three datasets |
+| [XGBoost vs Random Forest](docs/RF_VS_XGBOOST.md) | Reconciled empirical cross-dataset comparison and latency analysis |
 | [Implementation status](docs/IMPLEMENTATION_STATUS.md) | Subsystem implementation and verification status |
 | [Model artifact audit](docs/MODEL_ARTIFACT_AUDIT.md) | Canonical model files, feature contracts, and provenance |
 | [Evaluation protocol](docs/EVALUATION_PROTOCOL.md) | Dataset splits, metrics, and reproducibility requirements |

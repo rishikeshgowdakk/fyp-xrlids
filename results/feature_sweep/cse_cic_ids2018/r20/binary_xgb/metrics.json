@@ -1,0 +1,63 @@
+{
+  "dataset": "cse_cic_ids2018",
+  "rung": "R20",
+  "model_type": "XGBoost_Binary",
+  "features": [
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean",
+    "packet_length_std",
+    "syn_count",
+    "ack_count",
+    "rst_count",
+    "fin_count",
+    "syn_ack_ratio",
+    "flow_iat_mean_ms",
+    "flow_iat_std_ms",
+    "down_up_ratio",
+    "fwd_packet_length_mean",
+    "bwd_packet_length_mean",
+    "flow_bytes_per_packet",
+    "active_mean_ms",
+    "idle_mean_ms",
+    "subflow_fwd_bytes",
+    "subflow_bwd_bytes"
+  ],
+  "n_features": 20,
+  "metrics": {
+    "accuracy": 0.9877,
+    "precision": 0.9926470588235294,
+    "recall": 0.9298685034439574,
+    "f1": 0.9602327837051405,
+    "specificity": 0.9986909437105795,
+    "balanced_accuracy": 0.9642797235772684,
+    "fpr": 0.0013090562894204451,
+    "fnr": 0.07013149655604257,
+    "roc_auc": 0.9910062087585232,
+    "pr_auc": 0.9776995659298308,
+    "confusion_matrix": {
+      "tn": 8392,
+      "fp": 11,
+      "fn": 112,
+      "tp": 1485
+    },
+    "support": {
+      "benign": 8403,
+      "attack": 1597,
+      "total": 10000
+    }
+  },
+  "latency": {
+    "mean_ms": 0.3076386706379708,
+    "median_ms": 0.30611499823862687,
+    "std_ms": 0.01582360464758281,
+    "p95_ms": 0.3414933082240168,
+    "p99_ms": 0.34811317556886934,
+    "min_ms": 0.27961299929302186,
+    "max_ms": 0.34862499160226434,
+    "n_samples": 100
+  },
+  "training_time_s": 0.6698896884918213,
+  "model_size_mb": 0.4259510040283203
+}

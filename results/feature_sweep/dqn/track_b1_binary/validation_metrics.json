@@ -1,0 +1,22 @@
+{
+  "track": "Track_B1_Binary_DQN",
+  "input_dim": 6,
+  "total_flows": 25000,
+  "total_cost": 73908.0,
+  "mean_cost_per_flow": 2.95632,
+  "attack_containment_rate_pct": 98.74972091984819,
+  "false_quarantine_rate_pct": 0.2144145022172409,
+  "business_availability_score_pct": 96.559621850787,
+  "action_chattering_index": 0.3036921476859074,
+  "mitigation_delay_steps": 0.6019099590723056,
+  "action_counts": {
+    "ALLOW": 19830,
+    "ALERT": 376,
+    "RATE_LIMIT": 4702,
+    "ISOLATE": 92
+  },
+  "override_counts": {},
+  "contained_attacks": 4423,
+  "uncontained_attacks": 56,
+  "training_time_seconds": 47.15118145942688
+}

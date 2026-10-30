@@ -1,0 +1,314 @@
+{
+  "dataset": "cicids2017",
+  "rung": "R30",
+  "model_type": "XGBoost_Multiclass",
+  "features": [
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean",
+    "packet_length_std",
+    "syn_count",
+    "ack_count",
+    "rst_count",
+    "fin_count",
+    "syn_ack_ratio",
+    "flow_iat_mean_ms",
+    "flow_iat_std_ms",
+    "down_up_ratio",
+    "fwd_packet_length_mean",
+    "bwd_packet_length_mean",
+    "flow_bytes_per_packet",
+    "active_mean_ms",
+    "idle_mean_ms",
+    "subflow_fwd_bytes",
+    "subflow_bwd_bytes",
+    "fwd_iat_mean_ms",
+    "bwd_iat_mean_ms",
+    "fwd_packets_per_s",
+    "bwd_packets_per_s",
+    "packet_length_min",
+    "packet_length_max",
+    "fwd_header_length",
+    "bwd_header_length",
+    "psh_count",
+    "urg_count"
+  ],
+  "n_features": 30,
+  "metrics": {
+    "accuracy": 0.9955,
+    "macro_f1": 0.8010351191794242,
+    "weighted_f1": 0.994638207537625,
+    "rare_class_recall": 0.6501536098310291,
+    "per_class": {
+      "BENIGN": {
+        "precision": 0.9959544879898862,
+        "recall": 0.9986056534415009,
+        "f1": 0.9972783087537186,
+        "support": 7889
+      },
+      "BOT": {
+        "precision": 1.0,
+        "recall": 0.75,
+        "f1": 0.8571428571428571,
+        "support": 8
+      },
+      "DDOS": {
+        "precision": 0.9975669099756691,
+        "recall": 0.9987819732034104,
+        "f1": 0.9981740718198417,
+        "support": 821
+      },
+      "DOS GOLDENEYE": {
+        "precision": 0.9830508474576272,
+        "recall": 0.9666666666666667,
+        "f1": 0.9747899159663865,
+        "support": 60
+      },
+      "DOS HULK": {
+        "precision": 0.9953789279112755,
+        "recall": 0.992626728110599,
+        "f1": 0.9940009229349331,
+        "support": 1085
+      },
+      "DOS SLOWHTTPTEST": {
+        "precision": 0.9444444444444444,
+        "recall": 0.9444444444444444,
+        "f1": 0.9444444444444444,
+        "support": 36
+      },
+      "DOS SLOWLORIS": {
+        "precision": 0.9090909090909091,
+        "recall": 0.967741935483871,
+        "f1": 0.9375,
+        "support": 31
+      },
+      "FTP-PATATOR": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 31
+      },
+      "PORTSCAN": {
+        "precision": 1.0,
+        "recall": 0.8333333333333334,
+        "f1": 0.9090909090909091,
+        "support": 6
+      },
+      "SSH-PATATOR": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 16
+      },
+      "WEB ATTACK - BRUTE FORCE": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 7
+      },
+      "WEB ATTACK - XSS": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 10
+      }
+    },
+    "classes": [
+      "BENIGN",
+      "BOT",
+      "DDOS",
+      "DOS GOLDENEYE",
+      "DOS HULK",
+      "DOS SLOWHTTPTEST",
+      "DOS SLOWLORIS",
+      "FTP-PATATOR",
+      "PORTSCAN",
+      "SSH-PATATOR",
+      "WEB ATTACK - BRUTE FORCE",
+      "WEB ATTACK - XSS"
+    ],
+    "confusion_matrix": [
+      [
+        7878,
+        0,
+        2,
+        1,
+        5,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        6,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        820,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0,
+        58,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        8,
+        0,
+        0,
+        0,
+        1077,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        34,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        30,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        31,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        5,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      [
+        7,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        10,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  "latency": {
+    "mean_ms": 0.8647602493874729,
+    "median_ms": 0.8596965053584427,
+    "std_ms": 0.025262657701687834,
+    "p95_ms": 0.911532441386953,
+    "p99_ms": 0.9583329431188758,
+    "min_ms": 0.8215999987442046,
+    "max_ms": 0.9599110053386539,
+    "n_samples": 100
+  },
+  "training_time_s": 3.6668128967285156,
+  "model_size_mb": 0.41049861907958984
+}

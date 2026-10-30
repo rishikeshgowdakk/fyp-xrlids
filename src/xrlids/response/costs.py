@@ -123,6 +123,7 @@ class ResearchCostEngine:
         prev_action: Action,
         in_cooldown: bool,
         consecutive_alerts: int,
+        **kwargs: Any,
     ) -> tuple[float, float, float, float, float]:
         """Compute complete step cost breakdown and reward.
 
@@ -153,3 +154,35 @@ class ResearchCostEngine:
             "fatigue_threshold": self.fatigue_threshold,
             "fatigue_penalty_slope": self.fatigue_penalty_slope,
         }
+
+
+@dataclass
+class AttackAwareCostEngine(ResearchCostEngine):
+    """Cost engine that dynamically scales uncontained attack damage according to attack severity weight."""
+
+    def evaluate_step(
+        self,
+        action: Action,
+        y_true: int,
+        prev_action: Action,
+        in_cooldown: bool,
+        consecutive_alerts: int,
+        attack_family: str | None = None,
+        severity_weight: float | None = None,
+        **kwargs: Any,
+    ) -> tuple[float, float, float, float, float]:
+        base, chatter, fatigue, total_cost, reward = super().evaluate_step(
+            action=action,
+            y_true=y_true,
+            prev_action=prev_action,
+            in_cooldown=in_cooldown,
+            consecutive_alerts=consecutive_alerts,
+            **kwargs,
+        )
+        if y_true == 1 and action in (Action.ALLOW, Action.ALERT):
+            s_weight = float(severity_weight if severity_weight is not None else 0.5)
+            multiplier = 1.0 + 0.5 * max(0.0, s_weight - 0.5)
+            total_cost = (base * multiplier) + chatter + fatigue
+            reward = -total_cost
+
+        return base, chatter, fatigue, total_cost, reward

@@ -1,0 +1,37 @@
+{
+  "params": {
+    "n_estimators": 100,
+    "max_depth": 6,
+    "learning_rate": 0.1,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "random_state": 42,
+    "eval_metric": "logloss",
+    "tree_method": "hist",
+    "n_jobs": 4
+  },
+  "feature_names": [
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean",
+    "packet_length_std",
+    "syn_count",
+    "ack_count",
+    "rst_count",
+    "fin_count",
+    "syn_ack_ratio",
+    "flow_iat_mean_ms",
+    "flow_iat_std_ms",
+    "down_up_ratio",
+    "fwd_packet_length_mean",
+    "bwd_packet_length_mean",
+    "flow_bytes_per_packet",
+    "active_mean_ms",
+    "idle_mean_ms",
+    "subflow_fwd_bytes",
+    "subflow_bwd_bytes"
+  ],
+  "n_train_rows": 30000,
+  "model_file": "xgboost_binary.json"
+}

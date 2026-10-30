@@ -1,0 +1,24 @@
+{
+  "track": "Track_B2_Attack_Aware_DQN",
+  "input_dim": 8,
+  "total_flows": 25000,
+  "total_cost": 90507.2,
+  "mean_cost_per_flow": 3.620288,
+  "attack_containment_rate_pct": 98.6604152712659,
+  "false_quarantine_rate_pct": 1.5203937429949808,
+  "business_availability_score_pct": 96.7058135568442,
+  "action_chattering_index": 0.31613264530581225,
+  "mitigation_delay_steps": 0.6712141882673943,
+  "action_counts": {
+    "ALLOW": 19859,
+    "ALERT": 104,
+    "RATE_LIMIT": 4513,
+    "ISOLATE": 524
+  },
+  "override_counts": {
+    "BLAST_RADIUS_CIRCUIT_BREAKER": 2
+  },
+  "contained_attacks": 4419,
+  "uncontained_attacks": 60,
+  "training_time_seconds": 53.54793906211853
+}

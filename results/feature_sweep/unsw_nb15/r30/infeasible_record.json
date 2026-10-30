@@ -1,0 +1,7 @@
+{
+  "dataset": "unsw_nb15",
+  "rung": "R30",
+  "feasible": false,
+  "reason": "Missing Layer-4 TCP header lengths and push/urgent flag counts.",
+  "scientific_policy": "Decision D-002: Missing fields must not be synthetically proxied."
+}

@@ -60,6 +60,7 @@ class StateBuilder:
         *,
         cooldown_remaining: int | None = None,
         last_action: Action | None = None,
+        **kwargs: Any,
     ) -> np.ndarray:
         """Construct the 6D causal state vector for the current flow arrival.
 
@@ -142,3 +143,64 @@ class StateBuilder:
         self._alert_history.append(1 if s0 >= self.alert_threshold else 0)
         self._last_action = enforced_action
         self._cooldown_remaining = max(0, int(cooldown_remaining))
+
+
+FAMILY_SEVERITY_WEIGHTS: dict[str, float] = {
+    "Infiltration": 1.00,
+    "Bot": 0.95,
+    "DDoS": 0.85,
+    "DoS": 0.80,
+    "Web": 0.70,
+    "BruteForce": 0.65,
+    "PortScan": 0.40,
+    "BENIGN": 0.05,
+    "NORMAL": 0.05,
+    "Exploits": 0.90,
+    "Fuzzers": 0.60,
+    "Generic": 0.50,
+    "Reconnaissance": 0.40,
+    "Analysis": 0.45,
+    "Backdoor": 0.95,
+    "Shellcode": 1.00,
+    "Worms": 1.00,
+    "UNKNOWN": 0.50,
+}
+
+
+@dataclass
+class AttackAwareStateBuilder(StateBuilder):
+    """Extends 6D causal state representation to 8D by incorporating attack family severity weight w_family and confidence C_family in R^8."""
+
+    def build_state(
+        self,
+        attack_score: float,
+        flow_bytes_per_s: float,
+        *,
+        cooldown_remaining: int | None = None,
+        last_action: Action | None = None,
+        attack_family: str | None = None,
+        family_confidence: float | None = None,
+        **kwargs: Any,
+    ) -> np.ndarray:
+        base_state = super().build_state(
+            attack_score,
+            flow_bytes_per_s,
+            cooldown_remaining=cooldown_remaining,
+            last_action=last_action,
+            **kwargs,
+        )
+
+        fam = str(attack_family or "UNKNOWN")
+        severity = FAMILY_SEVERITY_WEIGHTS.get(fam, FAMILY_SEVERITY_WEIGHTS["UNKNOWN"])
+        s6 = float(np.clip(severity, 0.0, 1.0))
+
+        conf = float(family_confidence) if family_confidence is not None else attack_score
+        s7 = float(np.clip(conf, 0.0, 1.0))
+
+        state_vector = np.append(base_state, [s6, s7]).astype(np.float32)
+        if self.disabled_dimensions:
+            for dim in self.disabled_dimensions:
+                if 0 <= dim < 8:
+                    state_vector[dim] = 0.0
+        return state_vector
+

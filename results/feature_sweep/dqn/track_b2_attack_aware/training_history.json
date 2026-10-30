@@ -1,0 +1,125 @@
+{
+  "total_steps": 1000,
+  "episodes_completed": 16,
+  "training_time_seconds": 53.547789573669434,
+  "checkpoint_summary": {
+    "selection_metric": "mean_cost_per_flow",
+    "maximize": false,
+    "best_step": 1000,
+    "best_metric_value": 3.6137559186770263,
+    "best_checkpoint_path": "/home/rishikesh/Desktop/fyp-xrlids/results/feature_sweep/dqn/track_b2_attack_aware/checkpoints/checkpoint_step_001000.pt",
+    "evaluated_checkpoints_count": 2,
+    "history": [
+      {
+        "step": 500,
+        "checkpoint_path": "/home/rishikesh/Desktop/fyp-xrlids/results/feature_sweep/dqn/track_b2_attack_aware/checkpoints/checkpoint_step_000500.pt",
+        "metric_name": "mean_cost_per_flow",
+        "metric_value": 9.221633333333333,
+        "all_metrics": {
+          "total_steps": 15000,
+          "total_cost": 138324.5,
+          "mean_cost_per_flow": 9.221633333333333,
+          "false_quarantine_rate": 0.04794686968494371,
+          "business_availability_score_pct": 0.0,
+          "action_chattering_index": 0.09593972931528769,
+          "mitigation_delay_steps": 47.05050973123262,
+          "action_counts": {
+            "ALLOW": 0,
+            "ALERT": 14280,
+            "RATE_LIMIT": 0,
+            "ISOLATE": 720
+          },
+          "override_counts": {
+            "BLAST_RADIUS_CIRCUIT_BREAKER": 14280
+          },
+          "contained_attacks": 128,
+          "uncontained_attacks": 2525
+        }
+      },
+      {
+        "step": 1000,
+        "checkpoint_path": "/home/rishikesh/Desktop/fyp-xrlids/results/feature_sweep/dqn/track_b2_attack_aware/checkpoints/checkpoint_step_001000.pt",
+        "metric_name": "mean_cost_per_flow",
+        "metric_value": 3.6137559186770263,
+        "all_metrics": {
+          "total_steps": 142346,
+          "total_cost": 514403.7,
+          "mean_cost_per_flow": 3.6137559186770263,
+          "false_quarantine_rate": 0.013975502070126612,
+          "business_availability_score_pct": 96.87591265955436,
+          "action_chattering_index": 0.3198496610348098,
+          "mitigation_delay_steps": 0.7070597654594264,
+          "action_counts": {
+            "ALLOW": 112897,
+            "ALERT": 562,
+            "RATE_LIMIT": 26014,
+            "ISOLATE": 2873
+          },
+          "override_counts": {
+            "BLAST_RADIUS_CIRCUIT_BREAKER": 10
+          },
+          "contained_attacks": 25552,
+          "uncontained_attacks": 376
+        }
+      }
+    ]
+  },
+  "history": [
+    {
+      "step": 500,
+      "epsilon": 0.990519,
+      "beta": 0.6994,
+      "loss": 13.424886703491211,
+      "val_metrics": {
+        "total_steps": 15000,
+        "total_cost": 138324.5,
+        "mean_cost_per_flow": 9.221633333333333,
+        "false_quarantine_rate": 0.04794686968494371,
+        "business_availability_score_pct": 0.0,
+        "action_chattering_index": 0.09593972931528769,
+        "mitigation_delay_steps": 47.05050973123262,
+        "action_counts": {
+          "ALLOW": 0,
+          "ALERT": 14280,
+          "RATE_LIMIT": 0,
+          "ISOLATE": 720
+        },
+        "override_counts": {
+          "BLAST_RADIUS_CIRCUIT_BREAKER": 14280
+        },
+        "contained_attacks": 128,
+        "uncontained_attacks": 2525
+      },
+      "is_best": true,
+      "checkpoint": "/home/rishikesh/Desktop/fyp-xrlids/results/feature_sweep/dqn/track_b2_attack_aware/checkpoints/checkpoint_step_000500.pt"
+    },
+    {
+      "step": 1000,
+      "epsilon": 0.981019,
+      "beta": 0.9994,
+      "loss": 0.17783939838409424,
+      "val_metrics": {
+        "total_steps": 142346,
+        "total_cost": 514403.7,
+        "mean_cost_per_flow": 3.6137559186770263,
+        "false_quarantine_rate": 0.013975502070126612,
+        "business_availability_score_pct": 96.87591265955436,
+        "action_chattering_index": 0.3198496610348098,
+        "mitigation_delay_steps": 0.7070597654594264,
+        "action_counts": {
+          "ALLOW": 112897,
+          "ALERT": 562,
+          "RATE_LIMIT": 26014,
+          "ISOLATE": 2873
+        },
+        "override_counts": {
+          "BLAST_RADIUS_CIRCUIT_BREAKER": 10
+        },
+        "contained_attacks": 25552,
+        "uncontained_attacks": 376
+      },
+      "is_best": true,
+      "checkpoint": "/home/rishikesh/Desktop/fyp-xrlids/results/feature_sweep/dqn/track_b2_attack_aware/checkpoints/checkpoint_step_001000.pt"
+    }
+  ]
+}

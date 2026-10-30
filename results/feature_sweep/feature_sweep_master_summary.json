@@ -1,0 +1,508 @@
+{
+  "timestamp": "2026-10-30T06:15:54.861606+00:00",
+  "datasets": {
+    "cicids2017": {
+      "rungs": {
+        "R4": {
+          "dataset": "cicids2017",
+          "rung": "R4",
+          "feasible": true,
+          "n_features": 4,
+          "binary_rf": {
+            "accuracy": 0.9799,
+            "precision": 0.930956678700361,
+            "recall": 0.9772619611558503,
+            "f1": 0.9535474924890224,
+            "roc_auc": 0.9953413597079662,
+            "pr_auc": 0.9757024376166656,
+            "latency_median_ms": 37.08878249744885,
+            "size_mb": 2.514592170715332
+          },
+          "binary_xgb": {
+            "accuracy": 0.9742,
+            "precision": 0.928736695974086,
+            "recall": 0.950734249171009,
+            "f1": 0.9396067415730337,
+            "roc_auc": 0.9937995082047637,
+            "pr_auc": 0.9716093149099801,
+            "latency_median_ms": 0.69088650343474,
+            "size_mb": 0.4707822799682617
+          },
+          "multiclass_rf": {
+            "accuracy": 0.9609,
+            "macro_f1": 0.7059384916218887,
+            "weighted_f1": 0.9640654414467176,
+            "rare_class_recall": 0.7363616414307659,
+            "latency_median_ms": 37.35208250145661,
+            "size_mb": 2.320789337158203
+          },
+          "multiclass_xgb": {
+            "accuracy": 0.9737,
+            "macro_f1": 0.725115473681233,
+            "weighted_f1": 0.973076243968963,
+            "rare_class_recall": 0.5800691244239632,
+            "latency_median_ms": 0.32727399229770526,
+            "size_mb": 0.6038293838500977
+          }
+        },
+        "R10": {
+          "dataset": "cicids2017",
+          "rung": "R10",
+          "feasible": true,
+          "n_features": 10,
+          "binary_rf": {
+            "accuracy": 0.9789,
+            "precision": 0.9241071428571429,
+            "recall": 0.9805779251539555,
+            "f1": 0.9515054010572284,
+            "roc_auc": 0.9954576102974002,
+            "pr_auc": 0.9801432121977836,
+            "latency_median_ms": 37.59620299388189,
+            "size_mb": 1.944502830505371
+          },
+          "binary_xgb": {
+            "accuracy": 0.9791,
+            "precision": 0.9394639556377079,
+            "recall": 0.9630506868782568,
+            "f1": 0.9511111111111111,
+            "roc_auc": 0.9954890748164414,
+            "pr_auc": 0.98071459888087,
+            "latency_median_ms": 0.29085599089739844,
+            "size_mb": 0.419097900390625
+          },
+          "multiclass_rf": {
+            "accuracy": 0.9619,
+            "macro_f1": 0.7680558515571662,
+            "weighted_f1": 0.9650714528727758,
+            "rare_class_recall": 0.7805793285055957,
+            "latency_median_ms": 37.58474750065943,
+            "size_mb": 2.125123977661133
+          },
+          "multiclass_xgb": {
+            "accuracy": 0.9793,
+            "macro_f1": 0.7649888220345753,
+            "weighted_f1": 0.978670517823383,
+            "rare_class_recall": 0.6217357910906297,
+            "latency_median_ms": 0.3309210005681962,
+            "size_mb": 0.5476694107055664
+          }
+        },
+        "R15": {
+          "dataset": "cicids2017",
+          "rung": "R15",
+          "feasible": true,
+          "n_features": 15,
+          "binary_rf": {
+            "accuracy": 0.9943,
+            "precision": 0.9890476190476191,
+            "recall": 0.9838938891520607,
+            "f1": 0.9864640227974353,
+            "roc_auc": 0.9994633317959354,
+            "pr_auc": 0.9987742284854214,
+            "latency_median_ms": 39.288643492909614,
+            "size_mb": 1.2527751922607422
+          },
+          "binary_xgb": {
+            "accuracy": 0.9946,
+            "precision": 0.9928126497364638,
+            "recall": 0.9815253434391283,
+            "f1": 0.9871367317770366,
+            "roc_auc": 0.9995301638755016,
+            "pr_auc": 0.9986229115381847,
+            "latency_median_ms": 0.33635350700933486,
+            "size_mb": 0.34624195098876953
+          },
+          "multiclass_rf": {
+            "accuracy": 0.9888,
+            "macro_f1": 0.7939313782955129,
+            "weighted_f1": 0.9903503906416694,
+            "rare_class_recall": 0.7805793285055957,
+            "latency_median_ms": 37.71660700294888,
+            "size_mb": 1.4107208251953125
+          },
+          "multiclass_xgb": {
+            "accuracy": 0.9946,
+            "macro_f1": 0.784667861991848,
+            "weighted_f1": 0.9937493148203066,
+            "rare_class_recall": 0.6455453149001537,
+            "latency_median_ms": 0.3353309948579408,
+            "size_mb": 0.45023250579833984
+          }
+        },
+        "R20": {
+          "dataset": "cicids2017",
+          "rung": "R20",
+          "feasible": true,
+          "n_features": 20,
+          "binary_rf": {
+            "accuracy": 0.9954,
+            "precision": 0.9928400954653938,
+            "recall": 0.98531501657982,
+            "f1": 0.9890632429862103,
+            "roc_auc": 0.999708232637365,
+            "pr_auc": 0.9990860029195308,
+            "latency_median_ms": 37.55076700326754,
+            "size_mb": 1.058502197265625
+          },
+          "binary_xgb": {
+            "accuracy": 0.9956,
+            "precision": 0.994261119081779,
+            "recall": 0.9848413074372335,
+            "f1": 0.9895287958115182,
+            "roc_auc": 0.9995456559478539,
+            "pr_auc": 0.9987344976529203,
+            "latency_median_ms": 0.7731899968348444,
+            "size_mb": 0.3121366500854492
+          },
+          "multiclass_rf": {
+            "accuracy": 0.99,
+            "macro_f1": 0.7902726652788546,
+            "weighted_f1": 0.9915827874273977,
+            "rare_class_recall": 0.7805793285055957,
+            "latency_median_ms": 37.39586950541707,
+            "size_mb": 1.1728544235229492
+          },
+          "multiclass_xgb": {
+            "accuracy": 0.9951,
+            "macro_f1": 0.793273205391828,
+            "weighted_f1": 0.9942273261304762,
+            "rare_class_recall": 0.6455453149001537,
+            "latency_median_ms": 0.851871503982693,
+            "size_mb": 0.4059610366821289
+          }
+        },
+        "R30": {
+          "dataset": "cicids2017",
+          "rung": "R30",
+          "feasible": true,
+          "n_features": 30,
+          "binary_rf": {
+            "accuracy": 0.9953,
+            "precision": 0.9914285714285714,
+            "recall": 0.9862624348649929,
+            "f1": 0.9888387556399905,
+            "roc_auc": 0.9994912535542446,
+            "pr_auc": 0.9987962351199661,
+            "latency_median_ms": 37.53499899903545,
+            "size_mb": 1.1134729385375977
+          },
+          "binary_xgb": {
+            "accuracy": 0.9955,
+            "precision": 0.9942583732057416,
+            "recall": 0.984367598294647,
+            "f1": 0.9892882646988812,
+            "roc_auc": 0.9995872683747538,
+            "pr_auc": 0.9987772458313559,
+            "latency_median_ms": 0.796669497503899,
+            "size_mb": 0.3041200637817383
+          },
+          "multiclass_rf": {
+            "accuracy": 0.9887,
+            "macro_f1": 0.787785680960467,
+            "weighted_f1": 0.9903901701249804,
+            "rare_class_recall": 0.7805793285055957,
+            "latency_median_ms": 37.45938800420845,
+            "size_mb": 1.2502431869506836
+          },
+          "multiclass_xgb": {
+            "accuracy": 0.9955,
+            "macro_f1": 0.8010351191794242,
+            "weighted_f1": 0.994638207537625,
+            "rare_class_recall": 0.6501536098310291,
+            "latency_median_ms": 0.8596965053584427,
+            "size_mb": 0.41049861907958984
+          }
+        }
+      }
+    },
+    "cse_cic_ids2018": {
+      "rungs": {
+        "R4": {
+          "dataset": "cse_cic_ids2018",
+          "rung": "R4",
+          "feasible": true,
+          "n_features": 4,
+          "binary_rf": {
+            "accuracy": 0.9357,
+            "precision": 0.7754041570438799,
+            "recall": 0.8409517845961177,
+            "f1": 0.8068489035746471,
+            "roc_auc": 0.9596793970844566,
+            "pr_auc": 0.8977154270728669,
+            "latency_median_ms": 37.03782500087982,
+            "size_mb": 4.478534698486328
+          },
+          "binary_xgb": {
+            "accuracy": 0.9439,
+            "precision": 0.8770014556040757,
+            "recall": 0.754539762053851,
+            "f1": 0.8111746886570178,
+            "roc_auc": 0.9569949635573841,
+            "pr_auc": 0.8932302710254695,
+            "latency_median_ms": 0.7036930037429556,
+            "size_mb": 0.47283267974853516
+          },
+          "multiclass_rf": {
+            "accuracy": 0.8272,
+            "macro_f1": 0.5626027018268005,
+            "weighted_f1": 0.8645558460046247,
+            "rare_class_recall": 0.45430107526881724,
+            "latency_median_ms": 37.27090500615304,
+            "size_mb": 3.1526803970336914
+          },
+          "multiclass_xgb": {
+            "accuracy": 0.9456,
+            "macro_f1": 0.5859474577091576,
+            "weighted_f1": 0.9387028121030929,
+            "rare_class_recall": 0.42353643966547194,
+            "latency_median_ms": 0.8297370004584081,
+            "size_mb": 0.532649040222168
+          }
+        },
+        "R10": {
+          "dataset": "cse_cic_ids2018",
+          "rung": "R10",
+          "feasible": true,
+          "n_features": 10,
+          "binary_rf": {
+            "accuracy": 0.9443,
+            "precision": 0.812124849939976,
+            "recall": 0.8472135253600501,
+            "f1": 0.8292981918479926,
+            "roc_auc": 0.9689094473892685,
+            "pr_auc": 0.9144779080085361,
+            "latency_median_ms": 37.04295399802504,
+            "size_mb": 4.181574821472168
+          },
+          "binary_xgb": {
+            "accuracy": 0.9516,
+            "precision": 0.8949609652235628,
+            "recall": 0.7896055103318722,
+            "f1": 0.8389886892880905,
+            "roc_auc": 0.9696777271378838,
+            "pr_auc": 0.9160484368618342,
+            "latency_median_ms": 0.7245765009429306,
+            "size_mb": 0.4739046096801758
+          },
+          "multiclass_rf": {
+            "accuracy": 0.8473,
+            "macro_f1": 0.5917530906658212,
+            "weighted_f1": 0.8802748145221674,
+            "rare_class_recall": 0.46505376344086025,
+            "latency_median_ms": 37.28003749711206,
+            "size_mb": 2.854037284851074
+          },
+          "multiclass_xgb": {
+            "accuracy": 0.953,
+            "macro_f1": 0.6062385416432138,
+            "weighted_f1": 0.9467841184718058,
+            "rare_class_recall": 0.4432497013142174,
+            "latency_median_ms": 0.7987654898897745,
+            "size_mb": 0.4926872253417969
+          }
+        },
+        "R15": {
+          "dataset": "cse_cic_ids2018",
+          "rung": "R15",
+          "feasible": true,
+          "n_features": 15,
+          "binary_rf": {
+            "accuracy": 0.9868,
+            "precision": 0.9880079946702198,
+            "recall": 0.9286161552911709,
+            "f1": 0.9573918657198193,
+            "roc_auc": 0.9887229051913728,
+            "pr_auc": 0.9750395641398755,
+            "latency_median_ms": 37.498812496778555,
+            "size_mb": 2.454287528991699
+          },
+          "binary_xgb": {
+            "accuracy": 0.9869,
+            "precision": 0.9912868632707775,
+            "recall": 0.926111458985598,
+            "f1": 0.9575914535448365,
+            "roc_auc": 0.989973762985772,
+            "pr_auc": 0.9758383791135968,
+            "latency_median_ms": 0.757881993195042,
+            "size_mb": 0.4182147979736328
+          },
+          "multiclass_rf": {
+            "accuracy": 0.9408,
+            "macro_f1": 0.6577419847829981,
+            "weighted_f1": 0.9587188986460398,
+            "rare_class_recall": 0.47043010752688175,
+            "latency_median_ms": 37.06221050379099,
+            "size_mb": 2.077582359313965
+          },
+          "multiclass_xgb": {
+            "accuracy": 0.9865,
+            "macro_f1": 0.6554466243883198,
+            "weighted_f1": 0.9815710184172424,
+            "rare_class_recall": 0.4632616487455197,
+            "latency_median_ms": 0.8051274999161251,
+            "size_mb": 0.41534900665283203
+          }
+        },
+        "R20": {
+          "dataset": "cse_cic_ids2018",
+          "rung": "R20",
+          "feasible": true,
+          "n_features": 20,
+          "binary_rf": {
+            "accuracy": 0.9873,
+            "precision": 0.99,
+            "recall": 0.9298685034439574,
+            "f1": 0.9589925734581854,
+            "roc_auc": 0.9894427855513629,
+            "pr_auc": 0.9759143978314048,
+            "latency_median_ms": 37.29665149876382,
+            "size_mb": 2.2845449447631836
+          },
+          "binary_xgb": {
+            "accuracy": 0.9877,
+            "precision": 0.9926470588235294,
+            "recall": 0.9298685034439574,
+            "f1": 0.9602327837051405,
+            "roc_auc": 0.9910062087585232,
+            "pr_auc": 0.9776995659298308,
+            "latency_median_ms": 0.30611499823862687,
+            "size_mb": 0.4259510040283203
+          },
+          "multiclass_rf": {
+            "accuracy": 0.9317,
+            "macro_f1": 0.6561365073228637,
+            "weighted_f1": 0.9537851886881407,
+            "rare_class_recall": 0.47043010752688175,
+            "latency_median_ms": 37.6321950025158,
+            "size_mb": 1.831155776977539
+          },
+          "multiclass_xgb": {
+            "accuracy": 0.987,
+            "macro_f1": 0.6586060580140006,
+            "weighted_f1": 0.9822373615216892,
+            "rare_class_recall": 0.46684587813620076,
+            "latency_median_ms": 0.7949744904180989,
+            "size_mb": 0.4008054733276367
+          }
+        },
+        "R30": {
+          "dataset": "cse_cic_ids2018",
+          "rung": "R30",
+          "feasible": true,
+          "n_features": 30,
+          "binary_rf": {
+            "accuracy": 0.9865,
+            "precision": 0.9860372340425532,
+            "recall": 0.9286161552911709,
+            "f1": 0.9564656562399226,
+            "roc_auc": 0.9896291548676855,
+            "pr_auc": 0.9756744213280086,
+            "latency_median_ms": 37.040058996353764,
+            "size_mb": 2.3702707290649414
+          },
+          "binary_xgb": {
+            "accuracy": 0.9876,
+            "precision": 0.993963782696177,
+            "recall": 0.9279899812147777,
+            "f1": 0.9598445595854922,
+            "roc_auc": 0.9909568406369463,
+            "pr_auc": 0.9772217277762145,
+            "latency_median_ms": 0.7796439967933111,
+            "size_mb": 0.41813087463378906
+          },
+          "multiclass_rf": {
+            "accuracy": 0.9356,
+            "macro_f1": 0.6572480783422633,
+            "weighted_f1": 0.9558644602267541,
+            "rare_class_recall": 0.47043010752688175,
+            "latency_median_ms": 37.43174999544863,
+            "size_mb": 1.862020492553711
+          },
+          "multiclass_xgb": {
+            "accuracy": 0.9874,
+            "macro_f1": 0.6634553502487555,
+            "weighted_f1": 0.9825885993752743,
+            "rare_class_recall": 0.46684587813620076,
+            "latency_median_ms": 0.2990755019709468,
+            "size_mb": 0.39357566833496094
+          }
+        }
+      }
+    },
+    "unsw_nb15": {
+      "rungs": {
+        "R10": {
+          "dataset": "unsw_nb15",
+          "rung": "R10",
+          "feasible": false,
+          "reason": "Missing TCP flags (syn, ack, rst, fin) and packet length variance in NetFlow/Argus CSVs.",
+          "scientific_policy": "Decision D-002: Missing fields must not be synthetically proxied."
+        },
+        "R15": {
+          "dataset": "unsw_nb15",
+          "rung": "R15",
+          "feasible": false,
+          "reason": "Missing IAT statistics and directional packet metrics; no raw PCAPs available.",
+          "scientific_policy": "Decision D-002: Missing fields must not be synthetically proxied."
+        },
+        "R20": {
+          "dataset": "unsw_nb15",
+          "rung": "R20",
+          "feasible": false,
+          "reason": "Missing subflow and active/idle window segmentation fields.",
+          "scientific_policy": "Decision D-002: Missing fields must not be synthetically proxied."
+        },
+        "R30": {
+          "dataset": "unsw_nb15",
+          "rung": "R30",
+          "feasible": false,
+          "reason": "Missing Layer-4 TCP header lengths and push/urgent flag counts.",
+          "scientific_policy": "Decision D-002: Missing fields must not be synthetically proxied."
+        },
+        "R4": {
+          "dataset": "unsw_nb15",
+          "rung": "R4",
+          "feasible": true,
+          "n_features": 4,
+          "binary_rf": {
+            "accuracy": 0.8561,
+            "precision": 0.7943098808150711,
+            "recall": 0.9180182181737392,
+            "f1": 0.8516953519530042,
+            "roc_auc": 0.9458735988797866,
+            "pr_auc": 0.9258577269590667,
+            "latency_median_ms": 37.38344649900682,
+            "size_mb": 4.333775520324707
+          },
+          "binary_xgb": {
+            "accuracy": 0.8618,
+            "precision": 0.8176818089223874,
+            "recall": 0.8918018218173739,
+            "f1": 0.8531349628055259,
+            "roc_auc": 0.9436493654256138,
+            "pr_auc": 0.9210288877625165,
+            "latency_median_ms": 0.7277010008692741,
+            "size_mb": 0.5329599380493164
+          },
+          "multiclass_rf": {
+            "accuracy": 0.6878,
+            "macro_f1": 0.3826111616187139,
+            "weighted_f1": 0.7208069288755939,
+            "rare_class_recall": 0.31586904928102755,
+            "latency_median_ms": 37.25209100230131,
+            "size_mb": 10.299116134643555
+          },
+          "multiclass_xgb": {
+            "accuracy": 0.7614,
+            "macro_f1": 0.3380292615929861,
+            "weighted_f1": 0.7398506784407497,
+            "rare_class_recall": 0.06022330939793261,
+            "latency_median_ms": 0.3463850007392466,
+            "size_mb": 0.9456672668457031
+          }
+        }
+      }
+    }
+  },
+  "champion_selections": {}
+}

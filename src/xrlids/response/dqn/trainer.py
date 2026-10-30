@@ -68,12 +68,16 @@ class DqnTrainer:
         val_flows: list[FlowRecord],
         config: TrainingConfig,
         checkpoint_dir: str | Path,
+        state_builder_cls: type[StateBuilder] = StateBuilder,
+        cost_engine_cls: type[ResearchCostEngine] = ResearchCostEngine,
     ) -> None:
         self.agent = agent
         self.train_flows = train_flows
         self.val_flows = val_flows
         self.config = config
         self.checkpoint_dir = Path(checkpoint_dir)
+        self.state_builder_cls = state_builder_cls
+        self.cost_engine_cls = cost_engine_cls
 
         self.replay_buffer = PrioritizedReplayBuffer(
             capacity=config.replay_capacity,
@@ -99,7 +103,7 @@ class DqnTrainer:
 
     def train(self) -> dict[str, Any]:
         """Execute full training loop over designated policy training flows."""
-        cost_engine = ResearchCostEngine(regime=self.config.cost_regime)
+        cost_engine = self.cost_engine_cls(regime=self.config.cost_regime)
         flow_idx = 0
         n_train_flows = len(self.train_flows)
 
@@ -110,7 +114,7 @@ class DqnTrainer:
         while step < self.config.total_steps:
             # 1. Initialize episode
             safety_gate = DeterministicSafetyGate(action_mode=self.config.action_mode)
-            state_builder = StateBuilder()
+            state_builder = self.state_builder_cls()
 
             # Slice episode flows
             ep_flows = []
@@ -211,9 +215,9 @@ class DqnTrainer:
         if sample_limit and sample_limit < len(eval_flows):
             eval_flows = eval_flows[:sample_limit]
 
-        cost_engine = ResearchCostEngine(regime=self.config.cost_regime)
+        cost_engine = self.cost_engine_cls(regime=self.config.cost_regime)
         safety_gate = DeterministicSafetyGate(action_mode=self.config.action_mode)
-        state_builder = StateBuilder()
+        state_builder = self.state_builder_cls()
 
         sim = OfflineResponseSimulator(
             flows=eval_flows,

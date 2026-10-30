@@ -1,0 +1,7 @@
+{
+  "dataset": "unsw_nb15",
+  "rung": "R15",
+  "feasible": false,
+  "reason": "Missing IAT statistics and directional packet metrics; no raw PCAPs available.",
+  "scientific_policy": "Decision D-002: Missing fields must not be synthetically proxied."
+}

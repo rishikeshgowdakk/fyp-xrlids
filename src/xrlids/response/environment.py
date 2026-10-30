@@ -34,6 +34,8 @@ class FlowRecord:
     attack_score: float  # S_t in [0.0, 1.0] from frozen Phase 1 detector
     true_label: int      # 0: benign, 1: attack (for consequence/cost evaluation ONLY)
     flow_bytes_per_s: float = 0.0
+    attack_family: str = "BENIGN"
+    family_confidence: float = 0.0
 
 
 @dataclass
@@ -67,7 +69,8 @@ class OfflineResponseSimulator:
         self.state_builder.reset()
 
         if not self.flows:
-            return np.zeros(6, dtype=np.float32)
+            state_dim = len(self.state_builder.build_state(0.0, 0.0))
+            return np.zeros(state_dim, dtype=np.float32)
 
         first_flow = self.flows[0]
         initial_state = self.state_builder.build_state(
@@ -75,6 +78,8 @@ class OfflineResponseSimulator:
             flow_bytes_per_s=first_flow.flow_bytes_per_s,
             cooldown_remaining=0,
             last_action=Action.ALLOW,
+            attack_family=getattr(first_flow, "attack_family", "UNKNOWN"),
+            family_confidence=getattr(first_flow, "family_confidence", first_flow.attack_score),
         )
         return initial_state
 
@@ -152,12 +157,17 @@ class OfflineResponseSimulator:
                 consequences["false_outage"] = True
 
         # 4. Evaluate Cost & Step Reward
+        from xrlids.response.state import FAMILY_SEVERITY_WEIGHTS
+        flow_family = getattr(flow, "attack_family", "UNKNOWN")
+        flow_sev = FAMILY_SEVERITY_WEIGHTS.get(flow_family, 0.50)
         base_cost, chatter_cost, fatigue_cost, total_cost, reward = self.cost_engine.evaluate_step(
             action=enforced_action,
             y_true=flow.true_label,
             prev_action=prev_action,
             in_cooldown=in_cooldown,
             consecutive_alerts=self._consecutive_alerts,
+            attack_family=flow_family,
+            severity_weight=flow_sev,
         )
 
         # Current state before updating history
@@ -166,6 +176,8 @@ class OfflineResponseSimulator:
             flow_bytes_per_s=flow.flow_bytes_per_s,
             cooldown_remaining=self.safety_gate.get_remaining_cooldown(flow.host_id, step_idx),
             last_action=prev_action,
+            attack_family=getattr(flow, "attack_family", "UNKNOWN"),
+            family_confidence=getattr(flow, "family_confidence", flow.attack_score),
         )
 
         # Record step log
@@ -208,9 +220,12 @@ class OfflineResponseSimulator:
                 flow_bytes_per_s=next_flow.flow_bytes_per_s,
                 cooldown_remaining=next_cool,
                 last_action=enforced_action,
+                attack_family=getattr(next_flow, "attack_family", "UNKNOWN"),
+                family_confidence=getattr(next_flow, "family_confidence", next_flow.attack_score),
             )
         else:
-            next_state = np.zeros(6, dtype=np.float32)
+            state_dim = len(self.state_builder.build_state(0.0, 0.0))
+            next_state = np.zeros(state_dim, dtype=np.float32)
 
         info = {
             "step": step_idx,

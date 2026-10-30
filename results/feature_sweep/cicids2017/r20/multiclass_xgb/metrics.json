@@ -1,0 +1,304 @@
+{
+  "dataset": "cicids2017",
+  "rung": "R20",
+  "model_type": "XGBoost_Multiclass",
+  "features": [
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean",
+    "packet_length_std",
+    "syn_count",
+    "ack_count",
+    "rst_count",
+    "fin_count",
+    "syn_ack_ratio",
+    "flow_iat_mean_ms",
+    "flow_iat_std_ms",
+    "down_up_ratio",
+    "fwd_packet_length_mean",
+    "bwd_packet_length_mean",
+    "flow_bytes_per_packet",
+    "active_mean_ms",
+    "idle_mean_ms",
+    "subflow_fwd_bytes",
+    "subflow_bwd_bytes"
+  ],
+  "n_features": 20,
+  "metrics": {
+    "accuracy": 0.9951,
+    "macro_f1": 0.793273205391828,
+    "weighted_f1": 0.9942273261304762,
+    "rare_class_recall": 0.6455453149001537,
+    "per_class": {
+      "BENIGN": {
+        "precision": 0.9957027300303337,
+        "recall": 0.9986056534415009,
+        "f1": 0.9971520789823429,
+        "support": 7889
+      },
+      "BOT": {
+        "precision": 1.0,
+        "recall": 0.75,
+        "f1": 0.8571428571428571,
+        "support": 8
+      },
+      "DDOS": {
+        "precision": 0.9975669099756691,
+        "recall": 0.9987819732034104,
+        "f1": 0.9981740718198417,
+        "support": 821
+      },
+      "DOS GOLDENEYE": {
+        "precision": 0.9830508474576272,
+        "recall": 0.9666666666666667,
+        "f1": 0.9747899159663865,
+        "support": 60
+      },
+      "DOS HULK": {
+        "precision": 0.9953789279112755,
+        "recall": 0.992626728110599,
+        "f1": 0.9940009229349331,
+        "support": 1085
+      },
+      "DOS SLOWHTTPTEST": {
+        "precision": 0.9393939393939394,
+        "recall": 0.8611111111111112,
+        "f1": 0.8985507246376812,
+        "support": 36
+      },
+      "DOS SLOWLORIS": {
+        "precision": 0.8787878787878788,
+        "recall": 0.9354838709677419,
+        "f1": 0.90625,
+        "support": 31
+      },
+      "FTP-PATATOR": {
+        "precision": 0.96875,
+        "recall": 1.0,
+        "f1": 0.9841269841269841,
+        "support": 31
+      },
+      "PORTSCAN": {
+        "precision": 1.0,
+        "recall": 0.8333333333333334,
+        "f1": 0.9090909090909091,
+        "support": 6
+      },
+      "SSH-PATATOR": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 16
+      },
+      "WEB ATTACK - BRUTE FORCE": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 7
+      },
+      "WEB ATTACK - XSS": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 10
+      }
+    },
+    "classes": [
+      "BENIGN",
+      "BOT",
+      "DDOS",
+      "DOS GOLDENEYE",
+      "DOS HULK",
+      "DOS SLOWHTTPTEST",
+      "DOS SLOWLORIS",
+      "FTP-PATATOR",
+      "PORTSCAN",
+      "SSH-PATATOR",
+      "WEB ATTACK - BRUTE FORCE",
+      "WEB ATTACK - XSS"
+    ],
+    "confusion_matrix": [
+      [
+        7878,
+        0,
+        2,
+        1,
+        5,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        6,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        820,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0,
+        58,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        8,
+        0,
+        0,
+        0,
+        1077,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        31,
+        3,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        29,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        31,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        5,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        16,
+        0,
+        0
+      ],
+      [
+        7,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        10,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  "latency": {
+    "mean_ms": 0.8562939104740508,
+    "median_ms": 0.851871503982693,
+    "std_ms": 0.02580430679085664,
+    "p95_ms": 0.9122155606746674,
+    "p99_ms": 0.9381000195571688,
+    "min_ms": 0.8127400069497526,
+    "max_ms": 0.953844006289728,
+    "n_samples": 100
+  },
+  "training_time_s": 2.828897714614868,
+  "model_size_mb": 0.4059610366821289
+}

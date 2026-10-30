@@ -1,0 +1,294 @@
+{
+  "dataset": "cse_cic_ids2018",
+  "rung": "R10",
+  "model_type": "XGBoost_Multiclass",
+  "features": [
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean",
+    "packet_length_std",
+    "syn_count",
+    "ack_count",
+    "rst_count",
+    "fin_count",
+    "syn_ack_ratio"
+  ],
+  "n_features": 10,
+  "metrics": {
+    "accuracy": 0.953,
+    "macro_f1": 0.6062385416432138,
+    "weighted_f1": 0.9467841184718058,
+    "rare_class_recall": 0.4432497013142174,
+    "per_class": {
+      "BENIGN": {
+        "precision": 0.9619280475026196,
+        "recall": 0.9832202784719742,
+        "f1": 0.972457627118644,
+        "support": 8403
+      },
+      "BOT": {
+        "precision": 0.9971751412429378,
+        "recall": 0.9971751412429378,
+        "f1": 0.9971751412429378,
+        "support": 354
+      },
+      "BRUTE FORCE -WEB": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 1
+      },
+      "BRUTE FORCE -XSS": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      "DDOS ATTACK-HOIC": {
+        "precision": 0.6791907514450867,
+        "recall": 0.5860349127182045,
+        "f1": 0.6291834002677377,
+        "support": 401
+      },
+      "DDOS ATTACK-LOIC-UDP": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 3
+      },
+      "DOS ATTACKS-GOLDENEYE": {
+        "precision": 0.9425287356321839,
+        "recall": 0.8817204301075269,
+        "f1": 0.9111111111111111,
+        "support": 93
+      },
+      "DOS ATTACKS-HULK": {
+        "precision": 0.9327217125382263,
+        "recall": 0.8997050147492626,
+        "f1": 0.9159159159159159,
+        "support": 339
+      },
+      "DOS ATTACKS-SLOWLORIS": {
+        "precision": 0.8235294117647058,
+        "recall": 0.7777777777777778,
+        "f1": 0.8,
+        "support": 18
+      },
+      "INFILTERATION": {
+        "precision": 1.0,
+        "recall": 0.02608695652173913,
+        "f1": 0.05084745762711865,
+        "support": 115
+      },
+      "SQL INJECTION": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      "SSH-BRUTEFORCE": {
+        "precision": 0.9963503649635036,
+        "recall": 1.0,
+        "f1": 0.9981718464351006,
+        "support": 273
+      }
+    },
+    "classes": [
+      "BENIGN",
+      "BOT",
+      "BRUTE FORCE -WEB",
+      "BRUTE FORCE -XSS",
+      "DDOS ATTACK-HOIC",
+      "DDOS ATTACK-LOIC-UDP",
+      "DOS ATTACKS-GOLDENEYE",
+      "DOS ATTACKS-HULK",
+      "DOS ATTACKS-SLOWLORIS",
+      "INFILTERATION",
+      "SQL INJECTION",
+      "SSH-BRUTEFORCE"
+    ],
+    "confusion_matrix": [
+      [
+        8262,
+        1,
+        0,
+        0,
+        111,
+        0,
+        4,
+        21,
+        3,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        353,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        165,
+        0,
+        0,
+        0,
+        235,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        11,
+        0,
+        0,
+        0,
+        0,
+        0,
+        82,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        34,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        305,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        14,
+        0,
+        0,
+        0
+      ],
+      [
+        111,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        3,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        273
+      ]
+    ]
+  },
+  "latency": {
+    "mean_ms": 0.7804642892733682,
+    "median_ms": 0.7987654898897745,
+    "std_ms": 0.09703865001591482,
+    "p95_ms": 0.8586104595451616,
+    "p99_ms": 0.8954426499258265,
+    "min_ms": 0.37222899845801294,
+    "max_ms": 0.9549069945933297,
+    "n_samples": 100
+  },
+  "training_time_s": 1.9580543041229248,
+  "model_size_mb": 0.4926872253417969
+}

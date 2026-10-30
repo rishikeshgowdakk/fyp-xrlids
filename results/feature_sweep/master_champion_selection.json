@@ -1,0 +1,90 @@
+{
+  "timestamp": "2026-10-30T06:28:31.814610+00:00",
+  "selection_criteria": {
+    "best_binary_rf": "Highest holdout F1 among Random Forest binary detectors.",
+    "best_binary_xgboost": "Highest holdout F1 and lowest latency among XGBoost binary detectors.",
+    "best_multiclass_rf": "Highest macro F1 and rare class recall among RF multiclass classifiers.",
+    "best_multiclass_xgboost": "Highest macro F1 and throughput among XGBoost multiclass classifiers.",
+    "best_binary_dqn": "Track B1 Binary DQN with lowest mean cost and highest containment on validation.",
+    "best_attack_aware_dqn": "Track B2 Attack-Aware DQN with lowest cost on multi-threat attacks.",
+    "best_complete_system": "Highest end-to-end containment, lowest cost, and compliant with safety invariants.",
+    "best_live_deployable_system": "Best performing model strictly compatible with real-time live streaming (R10 or R4 contract)."
+  },
+  "selections": {
+    "best_binary_rf": {
+      "dataset": "cicids2017",
+      "rung": "R20",
+      "model_type": "RandomForest_Binary",
+      "features": 20,
+      "holdout_f1": 0.9890632429862103,
+      "latency_median_ms": 37.55076700326754,
+      "status": "APPROVED",
+      "artifact_path": "results/feature_sweep/cicids2017/r20/binary_rf/random_forest_binary.joblib"
+    },
+    "best_binary_xgboost": {
+      "dataset": "cicids2017",
+      "rung": "R20",
+      "model_type": "XGBoost_Binary",
+      "features": 20,
+      "holdout_f1": 0.9895287958115182,
+      "latency_median_ms": 0.7731899968348444,
+      "status": "OFFLINE_CHAMPION_LIVE_CANDIDATE",
+      "artifact_path": "results/feature_sweep/cicids2017/r20/binary_xgb/xgboost_binary.json"
+    },
+    "best_multiclass_rf": {
+      "dataset": "cicids2017",
+      "rung": "R15",
+      "model_type": "RandomForest_Multiclass",
+      "features": 15,
+      "macro_f1": 0.7939313782955129,
+      "rare_class_recall": 0.7805793285055957,
+      "latency_median_ms": 37.71660700294888,
+      "status": "APPROVED",
+      "artifact_path": "results/feature_sweep/cicids2017/r15/multiclass_rf/multiclass_rf.joblib"
+    },
+    "best_multiclass_xgboost": {
+      "dataset": "cicids2017",
+      "rung": "R30",
+      "model_type": "XGBoost_Multiclass",
+      "features": 30,
+      "macro_f1": 0.8010351191794242,
+      "rare_class_recall": 0.6501536098310291,
+      "latency_median_ms": 0.8596965053584427,
+      "status": "OFFLINE_CHAMPION",
+      "artifact_path": "results/feature_sweep/cicids2017/r30/multiclass_xgb/multiclass_xgboost.joblib"
+    },
+    "best_binary_dqn": {
+      "track": "Track_B1_Binary_DQN",
+      "state_dimension": 6,
+      "action_space": "FOUR_ACTION",
+      "mean_cost_per_flow": 2.95632,
+      "containment_rate_pct": 98.74972091984819,
+      "artifact_path": "results/feature_sweep/dqn/track_b1_binary/best_model.pt"
+    },
+    "best_attack_aware_dqn": {
+      "track": "Track_B2_Attack_Aware_DQN",
+      "state_dimension": 8,
+      "action_space": "FOUR_ACTION",
+      "mean_cost_per_flow": 3.620288,
+      "containment_rate_pct": 98.6604152712659,
+      "artifact_path": "results/feature_sweep/dqn/track_b2_attack_aware/best_model.pt"
+    },
+    "best_complete_system": {
+      "configuration": "Attack-Aware RF + Track B2 Attack-Aware DQN + Deterministic Safety Gate",
+      "detection_engine": "Random Forest R10 + Multiclass Attack Attribution",
+      "response_engine": "Track B2 8D Dueling DQN",
+      "safety_governance": "DeterministicSafetyGate with fail-safe advisory fallback",
+      "mean_cost_per_flow": 0.038,
+      "containment_rate_pct": 96.8,
+      "business_availability_pct": 99.4
+    },
+    "best_live_deployable_system": {
+      "configuration": "Binary RF Champion (R10) + Track B1 Binary DQN + TreeSHAP (Live Path)",
+      "contract": "R10 (Decision D-002)",
+      "live_scapy_compatible": true,
+      "unsw_compatible": false,
+      "single_flow_latency_ms": 92.78,
+      "advisory_mode": true
+    }
+  }
+}

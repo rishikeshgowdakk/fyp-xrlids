@@ -1,0 +1,53 @@
+{
+  "dataset": "cse_cic_ids2018",
+  "rung": "R10",
+  "model_type": "RandomForest_Binary",
+  "features": [
+    "flow_duration_ms",
+    "flow_packets_per_s",
+    "flow_bytes_per_s",
+    "packet_length_mean",
+    "packet_length_std",
+    "syn_count",
+    "ack_count",
+    "rst_count",
+    "fin_count",
+    "syn_ack_ratio"
+  ],
+  "n_features": 10,
+  "metrics": {
+    "accuracy": 0.9443,
+    "precision": 0.812124849939976,
+    "recall": 0.8472135253600501,
+    "f1": 0.8292981918479926,
+    "specificity": 0.9627513983101273,
+    "balanced_accuracy": 0.9049824618350888,
+    "fpr": 0.037248601689872665,
+    "fnr": 0.1527864746399499,
+    "roc_auc": 0.9689094473892685,
+    "pr_auc": 0.9144779080085361,
+    "confusion_matrix": {
+      "tn": 8090,
+      "fp": 313,
+      "fn": 244,
+      "tp": 1353
+    },
+    "support": {
+      "benign": 8403,
+      "attack": 1597,
+      "total": 10000
+    }
+  },
+  "latency": {
+    "mean_ms": 37.24479609008995,
+    "median_ms": 37.04295399802504,
+    "std_ms": 1.5130373792227427,
+    "p95_ms": 40.15279759769328,
+    "p99_ms": 41.2092181785556,
+    "min_ms": 34.17897499457467,
+    "max_ms": 41.57959499571007,
+    "n_samples": 100
+  },
+  "training_time_s": 1.276942253112793,
+  "model_size_mb": 4.181574821472168
+}

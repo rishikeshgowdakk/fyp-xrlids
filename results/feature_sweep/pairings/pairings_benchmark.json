@@ -1,0 +1,106 @@
+{
+  "timestamp": "2026-10-30T06:28:20.297920+00:00",
+  "n_flows_evaluated": 25000,
+  "pairings": {
+    "Pairing_1_Binary_RF_Binary_DQN": {
+      "pairing_name": "Pairing_1_Binary_RF_Binary_DQN",
+      "detector_type": "RandomForestDetector",
+      "is_attack_aware": false,
+      "dqn_input_dim": 6,
+      "total_flows": 25000,
+      "total_cost": 142816.0,
+      "mean_cost_per_flow": 5.71264,
+      "attack_containment_rate_pct": 98.47383284263654,
+      "false_quarantine_rate_pct": 2.0940528897929878,
+      "business_availability_score_pct": 70.8507837740816,
+      "action_chattering_index": 0.03860154406176247,
+      "mitigation_delay_steps": 0.0,
+      "safety_override_count": 49,
+      "safety_override_rate_pct": 0.196,
+      "throughput_flows_per_s": 2261.198515260399,
+      "latency_stats_ms": {
+        "mean_ms": 40.09401670016814,
+        "median_ms": 38.91621949878754,
+        "p95_ms": 52.50792026054114,
+        "p99_ms": 57.9470332071651,
+        "min_ms": 25.622524990467355,
+        "max_ms": 61.86438498843927
+      }
+    },
+    "Pairing_2_Binary_XGBoost_Binary_DQN": {
+      "pairing_name": "Pairing_2_Binary_XGBoost_Binary_DQN",
+      "detector_type": "XGBoostDetector",
+      "is_attack_aware": false,
+      "dqn_input_dim": 6,
+      "total_flows": 25000,
+      "total_cost": 142816.0,
+      "mean_cost_per_flow": 5.71264,
+      "attack_containment_rate_pct": 98.47383284263654,
+      "false_quarantine_rate_pct": 2.0940528897929878,
+      "business_availability_score_pct": 70.8507837740816,
+      "action_chattering_index": 0.03860154406176247,
+      "mitigation_delay_steps": 0.0,
+      "safety_override_count": 49,
+      "safety_override_rate_pct": 0.196,
+      "throughput_flows_per_s": 3418.795058759725,
+      "latency_stats_ms": {
+        "mean_ms": 0.8398720310651697,
+        "median_ms": 0.8021695030038245,
+        "p95_ms": 0.9414013569767121,
+        "p99_ms": 1.4825764330453304,
+        "min_ms": 0.7572559989057481,
+        "max_ms": 2.7089319919468835
+      }
+    },
+    "Pairing_3_Attack_Aware_RF_Attack_Aware_DQN": {
+      "pairing_name": "Pairing_3_Attack_Aware_RF_Attack_Aware_DQN",
+      "detector_type": "RandomForestDetector",
+      "is_attack_aware": true,
+      "dqn_input_dim": 8,
+      "total_flows": 25000,
+      "total_cost": 329506.5,
+      "mean_cost_per_flow": 13.18026,
+      "attack_containment_rate_pct": 39.92669590818963,
+      "false_quarantine_rate_pct": 3.099198276893622,
+      "business_availability_score_pct": 74.04571018308005,
+      "action_chattering_index": 0.04828193127725109,
+      "mitigation_delay_steps": 0.21428571428571427,
+      "safety_override_count": 10860,
+      "safety_override_rate_pct": 43.44,
+      "throughput_flows_per_s": 1505.9033956227588,
+      "latency_stats_ms": {
+        "mean_ms": 85.51578305996372,
+        "median_ms": 85.65890449972358,
+        "p95_ms": 92.51766409070115,
+        "p99_ms": 117.13068850571291,
+        "min_ms": 71.10195099085104,
+        "max_ms": 120.15914899529889
+      }
+    },
+    "Pairing_4_Attack_Aware_XGBoost_Attack_Aware_DQN": {
+      "pairing_name": "Pairing_4_Attack_Aware_XGBoost_Attack_Aware_DQN",
+      "detector_type": "XGBoostDetector",
+      "is_attack_aware": true,
+      "dqn_input_dim": 8,
+      "total_flows": 25000,
+      "total_cost": 329506.5,
+      "mean_cost_per_flow": 13.18026,
+      "attack_containment_rate_pct": 39.92669590818963,
+      "false_quarantine_rate_pct": 3.099198276893622,
+      "business_availability_score_pct": 74.04571018308005,
+      "action_chattering_index": 0.04828193127725109,
+      "mitigation_delay_steps": 0.21428571428571427,
+      "safety_override_count": 10860,
+      "safety_override_rate_pct": 43.44,
+      "throughput_flows_per_s": 1726.4243343219036,
+      "latency_stats_ms": {
+        "mean_ms": 62.998301609186456,
+        "median_ms": 62.85757499426836,
+        "p95_ms": 76.20570164217497,
+        "p99_ms": 81.23913125135014,
+        "min_ms": 48.16705499251839,
+        "max_ms": 100.10667399910744
+      }
+    }
+  }
+}

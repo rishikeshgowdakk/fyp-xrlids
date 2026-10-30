@@ -1,0 +1,330 @@
+{
+  "timestamp": "2026-10-30T06:27:11.115065+00:00",
+  "n_test_flows": 50000,
+  "n_bootstraps": 1000,
+  "seed": 42,
+  "policies": {
+    "Baseline_0_Always_Allow": {
+      "policy_name": "Baseline_0_Always_Allow",
+      "total_flows": 50000,
+      "total_cost": 2537800.0,
+      "mean_cost_per_flow": 50.756,
+      "attack_containment_rate_pct": 0.0,
+      "false_quarantine_rate_pct": 0.0,
+      "business_availability_score_pct": 100.0,
+      "action_chattering_index": 0.0,
+      "mitigation_delay_steps": 50.0,
+      "action_counts": {
+        "ALLOW": 50000,
+        "ALERT": 0,
+        "RATE_LIMIT": 0,
+        "ISOLATE": 0
+      },
+      "override_counts": {},
+      "contained_attacks": 0,
+      "uncontained_attacks": 25378,
+      "runtime_seconds": 3.3005411624908447
+    },
+    "Baseline_2_Two_Tier_Threshold": {
+      "policy_name": "Baseline_2_Two_Tier_Threshold",
+      "total_flows": 50000,
+      "total_cost": 828464.0,
+      "mean_cost_per_flow": 16.56928,
+      "attack_containment_rate_pct": 6.493813539285996,
+      "false_quarantine_rate_pct": 1.6570546665583625,
+      "business_availability_score_pct": 83.12484769718138,
+      "action_chattering_index": 0.04804096081921638,
+      "mitigation_delay_steps": 23.70731707317073,
+      "action_counts": {
+        "ALLOW": 20524,
+        "ALERT": 26712,
+        "RATE_LIMIT": 1102,
+        "ISOLATE": 1662
+      },
+      "override_counts": {
+        "BLAST_RADIUS_CIRCUIT_BREAKER": 26712
+      },
+      "contained_attacks": 1648,
+      "uncontained_attacks": 23730,
+      "runtime_seconds": 3.5016984939575195
+    },
+    "Baseline_3_Heuristic_Rule_Engine": {
+      "policy_name": "Baseline_3_Heuristic_Rule_Engine",
+      "total_flows": 50000,
+      "total_cost": 1239123.0,
+      "mean_cost_per_flow": 24.78246,
+      "attack_containment_rate_pct": 4.866419733627551,
+      "false_quarantine_rate_pct": 3.931443424579644,
+      "business_availability_score_pct": 33.608155308260905,
+      "action_chattering_index": 0.07806156123122462,
+      "mitigation_delay_steps": 35.48780487804878,
+      "action_counts": {
+        "ALLOW": 8275,
+        "ALERT": 34413,
+        "RATE_LIMIT": 5125,
+        "ISOLATE": 2187
+      },
+      "override_counts": {
+        "BLAST_RADIUS_CIRCUIT_BREAKER": 33472
+      },
+      "contained_attacks": 1235,
+      "uncontained_attacks": 24143,
+      "runtime_seconds": 3.7600347995758057
+    },
+    "Track_B1_Binary_DQN": {
+      "policy_name": "Track_B1_Binary_DQN",
+      "total_flows": 50000,
+      "total_cost": 235354.5,
+      "mean_cost_per_flow": 4.70709,
+      "attack_containment_rate_pct": 98.12830010245094,
+      "false_quarantine_rate_pct": 1.4296157907562344,
+      "business_availability_score_pct": 79.44927300787913,
+      "action_chattering_index": 0.036440728814576294,
+      "mitigation_delay_steps": 0.0,
+      "action_counts": {
+        "ALLOW": 19586,
+        "ALERT": 2003,
+        "RATE_LIMIT": 27969,
+        "ISOLATE": 442
+      },
+      "override_counts": {
+        "BLAST_RADIUS_CIRCUIT_BREAKER": 95
+      },
+      "contained_attacks": 24903,
+      "uncontained_attacks": 475,
+      "runtime_seconds": 13.96292519569397
+    },
+    "Track_B2_Attack_Aware_DQN": {
+      "policy_name": "Track_B2_Attack_Aware_DQN",
+      "total_flows": 50000,
+      "total_cost": 207074.6,
+      "mean_cost_per_flow": 4.141492,
+      "attack_containment_rate_pct": 99.85420442903302,
+      "false_quarantine_rate_pct": 2.3150028429859475,
+      "business_availability_score_pct": 83.21826009260012,
+      "action_chattering_index": 0.01994039880797616,
+      "mitigation_delay_steps": 0.0,
+      "action_counts": {
+        "ALLOW": 20490,
+        "ALERT": 2680,
+        "RATE_LIMIT": 26014,
+        "ISOLATE": 816
+      },
+      "override_counts": {
+        "BLAST_RADIUS_CIRCUIT_BREAKER": 2392
+      },
+      "contained_attacks": 25341,
+      "uncontained_attacks": 37,
+      "runtime_seconds": 15.8654465675354
+    }
+  },
+  "per_family_breakdowns": {
+    "Baseline_0_Always_Allow": {
+      "BENIGN": {
+        "total_flows": 24622,
+        "is_attack_family": false,
+        "containment_rate_pct": 100.0,
+        "false_quarantine_pct": 0.0,
+        "action_counts": {
+          "ALLOW": 24622,
+          "ALERT": 0,
+          "RATE_LIMIT": 0,
+          "ISOLATE": 0
+        }
+      },
+      "DoS": {
+        "total_flows": 25378,
+        "is_attack_family": true,
+        "containment_rate_pct": 0.0,
+        "false_quarantine_pct": 0.0,
+        "action_counts": {
+          "ALLOW": 25378,
+          "ALERT": 0,
+          "RATE_LIMIT": 0,
+          "ISOLATE": 0
+        }
+      }
+    },
+    "Baseline_2_Two_Tier_Threshold": {
+      "BENIGN": {
+        "total_flows": 24622,
+        "is_attack_family": false,
+        "containment_rate_pct": 100.0,
+        "false_quarantine_pct": 1.6570546665583625,
+        "action_counts": {
+          "ALLOW": 20467,
+          "ALERT": 3039,
+          "RATE_LIMIT": 708,
+          "ISOLATE": 408
+        }
+      },
+      "DoS": {
+        "total_flows": 25378,
+        "is_attack_family": true,
+        "containment_rate_pct": 6.493813539285996,
+        "false_quarantine_pct": 0.0,
+        "action_counts": {
+          "ALLOW": 57,
+          "ALERT": 23673,
+          "RATE_LIMIT": 394,
+          "ISOLATE": 1254
+        }
+      }
+    },
+    "Baseline_3_Heuristic_Rule_Engine": {
+      "BENIGN": {
+        "total_flows": 24622,
+        "is_attack_family": false,
+        "containment_rate_pct": 100.0,
+        "false_quarantine_pct": 3.931443424579644,
+        "action_counts": {
+          "ALLOW": 8275,
+          "ALERT": 10270,
+          "RATE_LIMIT": 5109,
+          "ISOLATE": 968
+        }
+      },
+      "DoS": {
+        "total_flows": 25378,
+        "is_attack_family": true,
+        "containment_rate_pct": 4.866419733627551,
+        "false_quarantine_pct": 0.0,
+        "action_counts": {
+          "ALLOW": 0,
+          "ALERT": 24143,
+          "RATE_LIMIT": 16,
+          "ISOLATE": 1219
+        }
+      }
+    },
+    "Track_B1_Binary_DQN": {
+      "BENIGN": {
+        "total_flows": 24622,
+        "is_attack_family": false,
+        "containment_rate_pct": 100.0,
+        "false_quarantine_pct": 1.4296157907562344,
+        "action_counts": {
+          "ALLOW": 19562,
+          "ALERT": 1552,
+          "RATE_LIMIT": 3156,
+          "ISOLATE": 352
+        }
+      },
+      "DoS": {
+        "total_flows": 25378,
+        "is_attack_family": true,
+        "containment_rate_pct": 98.12830010245094,
+        "false_quarantine_pct": 0.0,
+        "action_counts": {
+          "ALLOW": 24,
+          "ALERT": 451,
+          "RATE_LIMIT": 24813,
+          "ISOLATE": 90
+        }
+      }
+    },
+    "Track_B2_Attack_Aware_DQN": {
+      "BENIGN": {
+        "total_flows": 24622,
+        "is_attack_family": false,
+        "containment_rate_pct": 100.0,
+        "false_quarantine_pct": 2.3150028429859475,
+        "action_counts": {
+          "ALLOW": 20490,
+          "ALERT": 2643,
+          "RATE_LIMIT": 919,
+          "ISOLATE": 570
+        }
+      },
+      "DoS": {
+        "total_flows": 25378,
+        "is_attack_family": true,
+        "containment_rate_pct": 99.85420442903302,
+        "false_quarantine_pct": 0.0,
+        "action_counts": {
+          "ALLOW": 0,
+          "ALERT": 37,
+          "RATE_LIMIT": 25095,
+          "ISOLATE": 246
+        }
+      }
+    }
+  },
+  "bootstrap_comparisons": {
+    "Track_B1_Binary_DQN_vs_Baseline_3_Heuristic_Rule_Engine": {
+      "baseline_name": "Baseline_3_Heuristic_Rule_Engine",
+      "candidate_name": "Track_B1_Binary_DQN",
+      "baseline_total_cost": 1239123.0,
+      "candidate_total_cost": 235354.5,
+      "mean_paired_difference": -20.07537,
+      "ci_lower": -20.2840965,
+      "ci_upper": -19.86315025,
+      "ci_level": 0.95,
+      "p_value": 0.0,
+      "is_significant": true,
+      "superior_policy": "Track_B1_Binary_DQN",
+      "relative_cost_reduction_pct": 81.00636498555833,
+      "n_bootstraps": 1000
+    },
+    "Track_B2_Attack_Aware_DQN_vs_Baseline_3_Heuristic_Rule_Engine": {
+      "baseline_name": "Baseline_3_Heuristic_Rule_Engine",
+      "candidate_name": "Track_B2_Attack_Aware_DQN",
+      "baseline_total_cost": 1239123.0,
+      "candidate_total_cost": 207074.6,
+      "mean_paired_difference": -20.640967999999997,
+      "ci_lower": -20.85648415,
+      "ci_upper": -20.43063315,
+      "ci_level": 0.95,
+      "p_value": 0.0,
+      "is_significant": true,
+      "superior_policy": "Track_B2_Attack_Aware_DQN",
+      "relative_cost_reduction_pct": 83.2886162229254,
+      "n_bootstraps": 1000
+    },
+    "Track_B2_Attack_Aware_DQN_vs_Track_B1_Binary_DQN": {
+      "baseline_name": "Track_B1_Binary_DQN",
+      "candidate_name": "Track_B2_Attack_Aware_DQN",
+      "baseline_total_cost": 235354.5,
+      "candidate_total_cost": 207074.6,
+      "mean_paired_difference": -0.565598,
+      "ci_lower": -0.63721185,
+      "ci_upper": -0.49968350000000006,
+      "ci_level": 0.95,
+      "p_value": 0.0,
+      "is_significant": true,
+      "superior_policy": "Track_B2_Attack_Aware_DQN",
+      "relative_cost_reduction_pct": 12.015873926353647,
+      "n_bootstraps": 1000
+    },
+    "Track_B1_Binary_DQN_vs_Baseline_0_Always_Allow": {
+      "baseline_name": "Baseline_0_Always_Allow",
+      "candidate_name": "Track_B1_Binary_DQN",
+      "baseline_total_cost": 2537800.0,
+      "candidate_total_cost": 235354.5,
+      "mean_paired_difference": -46.04891,
+      "ci_lower": -46.4785695,
+      "ci_upper": -45.59414,
+      "ci_level": 0.95,
+      "p_value": 0.0,
+      "is_significant": true,
+      "superior_policy": "Track_B1_Binary_DQN",
+      "relative_cost_reduction_pct": 90.72604224131136,
+      "n_bootstraps": 1000
+    },
+    "Track_B2_Attack_Aware_DQN_vs_Baseline_0_Always_Allow": {
+      "baseline_name": "Baseline_0_Always_Allow",
+      "candidate_name": "Track_B2_Attack_Aware_DQN",
+      "baseline_total_cost": 2537800.0,
+      "candidate_total_cost": 207074.6,
+      "mean_paired_difference": -46.614508,
+      "ci_lower": -47.03750675,
+      "ci_upper": -46.161747649999995,
+      "ci_level": 0.95,
+      "p_value": 0.0,
+      "is_significant": true,
+      "superior_policy": "Track_B2_Attack_Aware_DQN",
+      "relative_cost_reduction_pct": 91.84038931357868,
+      "n_bootstraps": 1000
+    }
+  }
+}

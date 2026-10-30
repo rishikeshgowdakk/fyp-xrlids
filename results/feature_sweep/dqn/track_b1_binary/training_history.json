@@ -1,0 +1,117 @@
+{
+  "total_steps": 1000,
+  "episodes_completed": 21,
+  "training_time_seconds": 47.15110778808594,
+  "checkpoint_summary": {
+    "selection_metric": "mean_cost_per_flow",
+    "maximize": false,
+    "best_step": 1000,
+    "best_metric_value": 3.0085917412501932,
+    "best_checkpoint_path": "/home/rishikesh/Desktop/fyp-xrlids/results/feature_sweep/dqn/track_b1_binary/checkpoints/checkpoint_step_001000.pt",
+    "evaluated_checkpoints_count": 2,
+    "history": [
+      {
+        "step": 500,
+        "checkpoint_path": "/home/rishikesh/Desktop/fyp-xrlids/results/feature_sweep/dqn/track_b1_binary/checkpoints/checkpoint_step_000500.pt",
+        "metric_name": "mean_cost_per_flow",
+        "metric_value": 17.686666666666667,
+        "all_metrics": {
+          "total_steps": 15000,
+          "total_cost": 265300.0,
+          "mean_cost_per_flow": 17.686666666666667,
+          "false_quarantine_rate": 0.0,
+          "business_availability_score_pct": 100.0,
+          "action_chattering_index": 0.0,
+          "mitigation_delay_steps": 50.0,
+          "action_counts": {
+            "ALLOW": 15000,
+            "ALERT": 0,
+            "RATE_LIMIT": 0,
+            "ISOLATE": 0
+          },
+          "override_counts": {},
+          "contained_attacks": 0,
+          "uncontained_attacks": 2653
+        }
+      },
+      {
+        "step": 1000,
+        "checkpoint_path": "/home/rishikesh/Desktop/fyp-xrlids/results/feature_sweep/dqn/track_b1_binary/checkpoints/checkpoint_step_001000.pt",
+        "metric_name": "mean_cost_per_flow",
+        "metric_value": 3.0085917412501932,
+        "all_metrics": {
+          "total_steps": 142346,
+          "total_cost": 428261.0,
+          "mean_cost_per_flow": 3.0085917412501932,
+          "false_quarantine_rate": 0.0020271779278118506,
+          "business_availability_score_pct": 96.74019481523476,
+          "action_chattering_index": 0.30957884014190873,
+          "mitigation_delay_steps": 0.6006687703103659,
+          "action_counts": {
+            "ALLOW": 112726,
+            "ALERT": 1973,
+            "RATE_LIMIT": 27118,
+            "ISOLATE": 529
+          },
+          "override_counts": {},
+          "contained_attacks": 25557,
+          "uncontained_attacks": 371
+        }
+      }
+    ]
+  },
+  "history": [
+    {
+      "step": 500,
+      "epsilon": 0.990519,
+      "beta": 0.6994,
+      "loss": 12.589641571044922,
+      "val_metrics": {
+        "total_steps": 15000,
+        "total_cost": 265300.0,
+        "mean_cost_per_flow": 17.686666666666667,
+        "false_quarantine_rate": 0.0,
+        "business_availability_score_pct": 100.0,
+        "action_chattering_index": 0.0,
+        "mitigation_delay_steps": 50.0,
+        "action_counts": {
+          "ALLOW": 15000,
+          "ALERT": 0,
+          "RATE_LIMIT": 0,
+          "ISOLATE": 0
+        },
+        "override_counts": {},
+        "contained_attacks": 0,
+        "uncontained_attacks": 2653
+      },
+      "is_best": true,
+      "checkpoint": "/home/rishikesh/Desktop/fyp-xrlids/results/feature_sweep/dqn/track_b1_binary/checkpoints/checkpoint_step_000500.pt"
+    },
+    {
+      "step": 1000,
+      "epsilon": 0.981019,
+      "beta": 0.9994,
+      "loss": 0.6394131183624268,
+      "val_metrics": {
+        "total_steps": 142346,
+        "total_cost": 428261.0,
+        "mean_cost_per_flow": 3.0085917412501932,
+        "false_quarantine_rate": 0.0020271779278118506,
+        "business_availability_score_pct": 96.74019481523476,
+        "action_chattering_index": 0.30957884014190873,
+        "mitigation_delay_steps": 0.6006687703103659,
+        "action_counts": {
+          "ALLOW": 112726,
+          "ALERT": 1973,
+          "RATE_LIMIT": 27118,
+          "ISOLATE": 529
+        },
+        "override_counts": {},
+        "contained_attacks": 25557,
+        "uncontained_attacks": 371
+      },
+      "is_best": true,
+      "checkpoint": "/home/rishikesh/Desktop/fyp-xrlids/results/feature_sweep/dqn/track_b1_binary/checkpoints/checkpoint_step_001000.pt"
+    }
+  ]
+}

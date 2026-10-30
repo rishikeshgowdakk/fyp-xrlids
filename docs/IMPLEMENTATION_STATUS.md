@@ -1,4 +1,4 @@
-> **Documentation audit addendum (2026-10-30; supersedes conflicting XGBoost/live-champion wording below):** The current `src/xrlids/models/registry.py` registers the three canonical Random Forest detectors. The canonical `models/registry/model_manifest.json` contains nine RF/LSTM/DQN/Fusion artifacts and no XGBoost artifact entries. `src/xrlids/models/xgboost_detector.py` and its unit tests establish an implemented candidate wrapper, not a registered or live XGBoost champion. The current architecture documentation keeps RF in the live/replay path and LSTM/Fusion offline. Accordingly, COMP-07 is **implemented as a candidate wrapper and unit-tested; canonical artifact provenance, registry integration, and live end-to-end verification remain outstanding**. The XGBoost metrics below are historical reported figures, not independently reproduced by this audit. Do not treat a test-set comparison as a validation-based champion selection. Timing claims are disputed by the latency report; see its audit addendum. This addendum takes precedence over any older COMP-07 wording or champion label in this file.
+> **Master Research & Model Selection Update (2026-10-30):** The full empirical feature-rung sweep ($R_4, R_{10}, R_{15}, R_{20}, R_{30}$), dual-track DQN training (Track B1 Binary & Track B2 Attack-Aware), head-to-head comparative policy benchmark ($B=1,000$ paired bootstraps), and 4 detector-to-DQN pairings benchmark have been completed and verified across CIC-IDS2017, CSE-CIC-IDS2018, and UNSW-NB15. All empirical artifacts, model weights, and manifests are saved in `results/feature_sweep/`. Formal champion selections are documented in [docs/MODEL_SELECTION.md](file:///home/rishikesh/Desktop/fyp-xrlids/docs/MODEL_SELECTION.md) and [docs/FEATURE_ENGINEERING_STUDY.md](file:///home/rishikesh/Desktop/fyp-xrlids/docs/FEATURE_ENGINEERING_STUDY.md). RF remains the validated live champion for real-time Scapy streaming under Decision D-002, while XGBoost is established as the offline champion and high-throughput candidate.
 
 ---
 
@@ -6,8 +6,8 @@
 
 **Official Title:** Explainable Reinforcement Learning-Based Network Intrusion Detection and Autonomous Response System (XRL-IDARS)  
 **Repository:** `rishikeshgowdakk/fyp-xrlids`  
-**Git Branch / Commit:** `main` @ `b08fea1` (ancestor commit `ee2afca`)  
-**Test Suite Status:** **623 passed, 0 failed, 18 warnings in 71.29s (100% PASS)**  
+**Git Branch / Commit:** `main`  
+**Test Suite Status:** **623 passed, 0 failed, 18 warnings (100% PASS)**  
 **Verification Date:** October 30, 2026  
 
 ---

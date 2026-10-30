@@ -1,0 +1,7 @@
+{
+  "dataset": "unsw_nb15",
+  "rung": "R20",
+  "feasible": false,
+  "reason": "Missing subflow and active/idle window segmentation fields.",
+  "scientific_policy": "Decision D-002: Missing fields must not be synthetically proxied."
+}
