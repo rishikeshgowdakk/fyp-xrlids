@@ -179,6 +179,8 @@ class ScapyCaptureService:
     def __init__(self, config: ScapyCaptureConfig | None = None) -> None:
         self.config = config or ScapyCaptureConfig()
         self.stats = CaptureStats()
+        self.last_error: str | None = None
+        self.last_exception: Exception | None = None
         self._queue: queue.Queue[PacketInfo | None] = queue.Queue(maxsize=self.config.queue_size)
         self._stop_event = threading.Event()
         self._worker_thread: threading.Thread | None = None
@@ -451,6 +453,8 @@ class ScapyCaptureService:
                 self._capture_from_interface()
         except Exception as exc:
             self.stats.errors += 1
+            self.last_error = str(exc)
+            self.last_exception = exc
             logger.error("ScapyCaptureWorker encountered error: %s", exc)
         finally:
             with self._lock:

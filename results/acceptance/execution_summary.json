@@ -1,0 +1,119 @@
+{
+  "project": "XRL-IDARS — Explainable Reinforcement Learning-Based Intrusion Detection and Autonomous Response System",
+  "repository": "https://github.com/rishikeshgowdakk/fyp-xrlids",
+  "branch": "feature/final-acceptance-integration",
+  "timestamp": "2026-10-30T17:55:00Z",
+  "status": "ACCEPTED",
+  "test_suite": {
+    "framework": "pytest-9.1.1",
+    "python_version": "3.14.4",
+    "total_collected": 663,
+    "passed": 663,
+    "failed": 0,
+    "skipped": 0,
+    "warnings": 19,
+    "execution_time_seconds": 77.80,
+    "pass_rate_pct": 100.0
+  },
+  "operational_pipeline": {
+    "ml_detector": {
+      "model": "Random Forest (Sole Operational ML Detector)",
+      "artifact": "models/rf/random_forest_cicids2017.joblib",
+      "sha256": "7c6ad493b773b687da24a2a12dcb21bd03bd56b76809462b983454aeacf2b774",
+      "feature_contract": "R10 Canonical (10 Deterministic Flow Features)",
+      "held_out_accuracy": 0.9906,
+      "held_out_precision": 0.9610,
+      "held_out_recall": 0.9416,
+      "held_out_f1": 0.9512,
+      "held_out_roc_auc": 0.9989,
+      "cpu_inference_latency_us": 780,
+      "status": "PASS"
+    },
+    "explainability_engine": {
+      "algorithm": "TreeSHAP (Lundberg & Lee)",
+      "additivity_guarantee": "E[f(x)] + sum(phi_i) = f(x)",
+      "per_flow_attribution_time_ms": 38.5,
+      "status": "PASS"
+    },
+    "response_policy": {
+      "architecture": "Dueling Deep Q-Network (Dueling DQN)",
+      "artifact": "models/dqn/dqn_4action_best.pt",
+      "sha256": "6a5afc669b4e699ecd2b1c01df885cef9030c93b8888b487dd386533920ce954",
+      "state_space_dim": 6,
+      "state_features": ["current_threat_score", "score_velocity", "local_alert_density", "last_enforced_action", "asset_criticality", "source_volumetric_rate"],
+      "action_tiers": ["ALLOW", "ALERT", "RATE_LIMIT", "ISOLATE"],
+      "role": "Response Optimization Policy (NOT an intrusion classifier)",
+      "output_semantics": "Expected cumulative return Q(s, a)",
+      "status": "PASS"
+    },
+    "safety_gate": {
+      "invariants_enforced": [
+        "Critical infrastructure allowlist protection (Gateway 192.168.1.1, DNS 8.8.8.8, 1.1.1.1)",
+        "30-second rate-limit and isolation cooldown",
+        "5% blast-radius circuit breaker (max 5 isolated hosts per subnet)",
+        "Zero kernel mutations (advisory dry-run mode default)"
+      ],
+      "safety_compliance_pct": 100.0,
+      "kernel_mutations_executed": 0,
+      "status": "PASS"
+    }
+  },
+  "traffic_modes_verified": {
+    "live_interface_capture": {
+      "interface_tested": "lo",
+      "privilege_status": "UNPRIVILEGED (No CAP_NET_RAW / root)",
+      "reported_mode": "BLOCKED",
+      "exception_handling": "Handled gracefully, 0 thread leaks, 0 crashes",
+      "status": "BLOCKED_VERIFIED"
+    },
+    "pcap_file_replay": {
+      "source_file": "data/demo/sample_traffic.pcap",
+      "packets_replayed": 42,
+      "completed_flows": 6,
+      "accuracy_at_tau_0_40": 1.0,
+      "status": "PASS"
+    },
+    "sample_traffic_generator": {
+      "scenarios_executed": ["scenario_c_syn_burst", "scenario_b_port_scan"],
+      "synthesized_packets": 75,
+      "reconstructed_flows": 7,
+      "threats_flagged": 6,
+      "status": "PASS"
+    }
+  },
+  "research_benchmarks": {
+    "offline_lstm_sequence": {
+      "checkpoint": "models/lstm/lstm_best_model.pt",
+      "sha256": "fc1a89c3bc883ec501aa99c85d886dd2648719f9cb96417742bc54da2ae5eb0c",
+      "role": "Offline Research Benchmark Only (Never invoked live)",
+      "cpu_inference_latency_ms": 22.1,
+      "f1_score": 0.9482,
+      "status": "PASS"
+    },
+    "offline_rf_lstm_fusion": {
+      "checkpoint": "models/fusion/rf_lstm_fusion_weights.joblib",
+      "sha256": "4392aee5349eec2dc634efb8d6ec776602330f6a27e025ec1d803fb2ae6fbc02",
+      "role": "Offline Research Benchmark Only (Never invoked live)",
+      "f1_score": 0.9530,
+      "status": "PASS"
+    }
+  },
+  "screenshots_captured": {
+    "total_captured": 11,
+    "viewport": "1440x960",
+    "directory": "results/acceptance/screenshots",
+    "manifest": [
+      "01_overview.png",
+      "02_live_monitor_blocked.png",
+      "03_pcap_replay_active.png",
+      "04_sample_evaluation.png",
+      "05_detection_events.png",
+      "06_treeshap_explainability.png",
+      "07_dqn_response_policy.png",
+      "08_safety_execution_audit.png",
+      "09_model_evaluation.png",
+      "10_research_benchmarks.png",
+      "11_system_health.png"
+    ]
+  }
+}

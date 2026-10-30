@@ -69,6 +69,7 @@ reports/figures/*
 
 # Logs
 *.log
+!results/acceptance/commands.log
 logs/
 results/audits/*.jsonl
 

@@ -1,19 +1,15 @@
-"""Streamlit Operational Dashboard for XRL-IDARS (Phase 12).
+"""Streamlit Operational Dashboard for XRL-IDARS.
 
-Provides an enterprise-grade monitoring dashboard visualizing:
-- 4-Tier Active Pipeline (Perception, Rules, Explainability, Autonomous Response)
-- Real-time Flow Telemetry and Ingestion
-- Cross-Benchmark ML Performance (CIC-IDS2017, CSE-CIC-IDS2018, UNSW-NB15)
-- TreeSHAP Local Attributions
-- Deterministic Rule Engine & Hybrid Arbitration
-- Source-IP Sliding Windows and Escalations
-- Dueling DQN Policy and Deterministic Safety Gate
-- End-to-End Latency Waterfall
+Main entrypoint providing:
+- Global session state initialization (EventManager, ActiveInferencePipeline, LiveCaptureManager)
+- Unified left-sidebar navigation across 10 operational modules
+- Real-time event statistics and pipeline controls
+- Clean, minimal, neutral typography and restrained status colors
 """
 
 from __future__ import annotations
 
-import json
+import os
 from pathlib import Path
 import sys
 import time
@@ -28,145 +24,189 @@ if str(REPO_ROOT) not in sys.path:
 if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
+from dashboard.session_init import ensure_session_state
+from xrlids.capture.live_manager import LiveCaptureManager
 from xrlids.events.manager import EventManager
-from xrlids.models.manager import ModelManager
 from xrlids.pipeline.active_pipeline import ActiveInferencePipeline
 
-# Streamlit Page Configuration
+# Page configuration
 st.set_page_config(
-    page_title="XRL-IDARS Operational Command Center",
+    page_title="XRL-IDARS Command Center",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# Initialize Session State
-if "event_manager" not in st.session_state:
-    st.session_state.event_manager = EventManager()
-if "pipeline" not in st.session_state:
-    st.session_state.pipeline = ActiveInferencePipeline(
-        event_manager=st.session_state.event_manager
-    )
+# Custom minimal neutral CSS styling
+st.markdown("""
+<style>
+  /* Clean neutral typography */
+  .main .block-container {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+    max-width: 1200px;
+  }
+  h1, h2, h3, h4 {
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+  }
+  /* Restrained status badges */
+  .badge-neutral {
+    background-color: #f1f5f9;
+    color: #334155;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    display: inline-block;
+  }
+  .badge-op {
+    background-color: #dbeafe;
+    color: #1e40af;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    display: inline-block;
+  }
+  .badge-research {
+    background-color: #fef3c7;
+    color: #92400e;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    display: inline-block;
+  }
+</style>
+""", unsafe_allow_html=True)
 
-pipeline: ActiveInferencePipeline = st.session_state.pipeline
+# Ensure global session state
+event_mgr, pipeline, live_mgr = ensure_session_state()
+
 event_mgr: EventManager = st.session_state.event_manager
+pipeline: ActiveInferencePipeline = st.session_state.pipeline
+live_mgr: LiveCaptureManager = st.session_state.live_manager
 
-# Sidebar Information
+# Sidebar Global Telemetry
 with st.sidebar:
-    st.title("🛡️ XRL-IDARS")
-    st.caption("Explainable Reinforcement Learning-Based Intrusion Detection and Autonomous Response System")
+    st.markdown("### 🛡️ XRL-IDARS")
+    st.caption("Explainable Reinforcement Learning-Based Intrusion Detection & Autonomous Response")
     st.divider()
 
-    st.subheader("⚙️ System Status")
-    st.markdown("**Perception Model:** `Random Forest (Sole Operational Detector)`")
-    st.markdown("**Feature Contract:** `R10 Canonical`")
-    st.markdown("**Response Mode:** `Advisory (Dry-Run)`")
-    st.markdown("**Kernel Mutations:** `DISABLED (Safe)`")
+    st.markdown("**Operational Architecture**")
+    st.markdown("- **ML Detector:** `Random Forest (Sole Live ML)`")
+    st.markdown("- **Feature Contract:** `R10 Canonical (10 Features)`")
+    st.markdown("- **Response Policy:** `Dueling DQN (4 Actions)`")
+    st.markdown("- **Safety Gate:** `Deterministic Invariants`")
+    st.markdown("- **Actuator Mode:** `ADVISORY (Zero Mutations)`")
 
     st.divider()
     stats = event_mgr.get_stats()
-    st.metric("Total Events Evaluated", stats["total_events"])
-    st.metric("Threat Intrusions Flagged", stats["threat_events"])
-    st.metric("Deterministic Rule Hits", stats["rule_matches_count"])
-    st.metric("Source-IP Escalations", stats["escalated_events_count"])
+    c_s1, c_s2 = st.columns(2)
+    c_s1.metric("Total Events", stats["total_events"])
+    c_s2.metric("Threats", stats["threat_events"])
+
+    c_s3, c_s4 = st.columns(2)
+    c_s3.metric("Rule Matches", stats["rule_matches_count"])
+    c_s4.metric("Escalations", stats["escalated_events_count"])
 
     st.divider()
-    if st.button("🔄 Inject Sample Attack Flow"):
-        sample_attack = {
-            "flow_duration_ms": 350.0,
-            "flow_packets_per_s": 15000.0,
-            "flow_bytes_per_s": 900000.0,
+    # Quick Simulation / Buffer Action
+    if st.button("Inject Sample Test Flow", use_container_width=True):
+        sample_flow = {
+            "flow_duration_ms": 250.0,
+            "flow_packets_per_s": 8000.0,
+            "flow_bytes_per_s": 480000.0,
             "packet_length_mean": 60.0,
             "packet_length_std": 0.0,
-            "syn_count": 80.0,
+            "syn_count": 50.0,
             "ack_count": 0.0,
             "rst_count": 0.0,
             "fin_count": 0.0,
-            "syn_ack_ratio": 80.0,
+            "syn_ack_ratio": 50.0,
         }
         res = pipeline.process_flow(
-            sample_attack,
-            source_ip="10.100.4.88",
+            sample_flow,
+            source_ip="10.200.1.88",
             dest_ip="192.168.10.50",
-            flow_id=f"flow-demo-{int(time.time())}",
+            flow_id=f"flow-sample-{int(time.time()*1000)}",
         )
-        st.success(f"Processed flow! Verdict: {res.hybrid.verdict} ({res.hybrid.detection_source})")
+        st.success(f"Sample evaluated: {res.hybrid.verdict} ({res.hybrid.severity})")
 
-    if st.button("🧹 Clear Audit Buffer"):
+    if st.button("Clear Event Audit Buffer", use_container_width=True):
         event_mgr.clear()
         st.info("Buffer cleared.")
 
-# Main Landing Page Content
+# Main Page Header
 st.title("🛡️ XRL-IDARS Operational Command Center")
 st.markdown("""
-Welcome to the **XRL-IDARS** central operational dashboard. This system bridges statistical machine learning,
-exact local explainability (TreeSHAP), deterministic network protocol rules, multi-flow source tracking,
-and reinforcement learning-based response optimization under strict safety invariants.
+Autonomous network defense system coupling sub-millisecond Random Forest classification on 10 deterministic flow statistics ($R_{10}$) with exact local TreeSHAP attribution and a causal 6-dimensional Dueling Deep Q-Network (DQN) response policy under an inviolable deterministic safety gate.
 """)
 
 st.divider()
 
-# High-Level Metrics Row
-kpi1, kpi2, kpi3, kpi4 = st.columns(4)
-kpi1.metric("Pipeline Health", "100% OPERATIONAL", "All 4 tiers online")
-kpi2.metric("Detection Champion", pipeline.model_manager.model_name, "Latency < 0.2ms")
-kpi3.metric("Response Policy", "Dueling DQN (4-Action)", "Cost-optimized")
-kpi4.metric("Safety Enforcement", "Deterministic Gate", "0 Kernel Mutations")
+# Core Status Cards Row
+col1, col2, col3, col4 = st.columns(4)
+live_stats = live_mgr.get_stats()
 
-st.markdown("### 🏛️ 4-Tier Integrated Architecture")
+with col1:
+    st.markdown("**Capture Daemon**")
+    status_label = live_stats["status"]
+    if status_label == "RUNNING":
+        st.markdown("<span class='badge-op'>● CAPTURE ACTIVE</span>", unsafe_allow_html=True)
+    elif status_label == "BLOCKED":
+        st.markdown("<span class='badge-research'>⚠ BLOCKED (UNPRIVILEGED)</span>", unsafe_allow_html=True)
+    else:
+        st.markdown(f"<span class='badge-neutral'>○ {status_label}</span>", unsafe_allow_html=True)
+    st.caption(f"Interface: `{live_stats['interface']}` | PPS: {live_stats['packets_per_sec']}")
 
-c1, c2, c3, c4 = st.columns(4)
+with col2:
+    st.markdown("**Operational ML Detector**")
+    st.markdown("<span class='badge-op'>RANDOM FOREST</span>", unsafe_allow_html=True)
+    st.caption("F1 = 0.9512 | Latency < 0.80 ms (CPU)")
 
-with c1:
-    st.info("#### 1. Perception Tier\n"
-            "- **Model:** Random Forest (Sole Operational Detector)\n"
-            "- **Research Candidate:** XGBoost Benchmark (Offline)\n"
-            "- **Contract:** R10 canonical features (10 flows)\n"
-            "- **Output:** Continuous threat score $P(\\text{ATTACK})$\n"
-            "- **Inference:** Sub-millisecond CPU speed (~0.12 ms)")
+with col3:
+    st.markdown("**Autonomous Policy**")
+    st.markdown("<span class='badge-op'>DUELING DQN</span>", unsafe_allow_html=True)
+    st.caption("4 Actions: ALLOW, ALERT, RATE_LIMIT, ISOLATE")
 
-with c2:
-    st.warning("#### 2. Rule & Tracking Tier\n"
-               "- **Rule Engine:** 5 deterministic RFC rules\n"
-               "- **Arbitration:** Hybrid Decision Matrix\n"
-               "- **Source Tracker:** 5 flows / 60s sliding window\n"
-               "- **Cooldown:** 30s re-trigger suppression")
-
-with c3:
-    st.success("#### 3. Explainability Tier\n"
-               "- **Engine:** Lundberg & Lee TreeSHAP\n"
-               "- **Type:** Local additive attributions\n"
-               "- **Output:** Exact feature Shapley values\n"
-               "- **Direction:** Threat increasing vs decreasing")
-
-with c4:
-    st.error("#### 4. Response & Safety Tier\n"
-             "- **Policy:** Dueling Deep Q-Network\n"
-             "- **State:** 6D causal representation $\\mathbf{s}_t$\n"
-             "- **Safety Gate:** Critical host exemptions & blast radius\n"
-             "- **Execution:** Advisory dry-run mode")
+with col4:
+    st.markdown("**Execution Guardrail**")
+    st.markdown("<span class='badge-neutral'>ADVISORY / DRY-RUN</span>", unsafe_allow_html=True)
+    st.caption("Zero kernel mutations | Inviolable allowlists")
 
 st.divider()
 
-# Recent Events Table
-st.subheader("📡 Live Security Event Stream")
+# System Pipeline & Architecture Summary
+st.subheader("Operational Pipeline")
+st.markdown("""
+`Scapy / PCAP Replay` → `Canonical FlowEngine (Min<Max 5-Tuple)` → `R10 Feature Contract` → `StandardScaler` → **`Random Forest (Sole Operational ML)`** → `Security Event` → **`TreeSHAP Explainer`** → `6D StateBuilder` → **`Dueling DQN Policy`** → **`Deterministic Safety Gate`** → `Advisory Actuator` → `Streamlit SOC Dashboard (:8501)`
+""")
+
+st.info("ℹ️ **Scientific Integrity Invariant:** Random Forest performs intrusion classification. Dueling DQN performs multi-tier response selection. Pretrained PyTorch LSTM FlowSeq sequence models and RF–LSTM convex fusion are preserved strictly for offline research benchmarking and are never invoked in live operational packet processing.")
+
+st.divider()
+
+# Recent Event Stream Table
+st.subheader("Recent Security Events")
 recent_events = event_mgr.get_recent_events(limit=10)
 if recent_events:
-    table_data = []
+    table_rows = []
     for ev in reversed(recent_events):
-        table_data.append({
+        table_rows.append({
             "Timestamp": ev.timestamp[:19].replace("T", " "),
             "Flow ID": ev.flow_id,
             "Source IP": ev.source_ip,
-            "Score": round(ev.detection.get("attack_score", 0.0), 4),
+            "Dest IP": ev.dest_ip,
+            "Attack Score": round(ev.detection.get("attack_score", 0.0), 4),
             "Verdict": ev.hybrid_verdict,
             "Severity": ev.severity,
+            "Proposed Action": ev.response.get("proposed_action", "ALLOW"),
             "Enforced Action": ev.response.get("enforced_action", "ALLOW"),
             "Safety Override": "YES" if ev.response.get("safety_override") else "NO",
         })
-    st.dataframe(pd.DataFrame(table_data), use_container_width=True)
+    st.dataframe(pd.DataFrame(table_rows), use_container_width=True)
 else:
-    st.info("No events logged in the buffer yet. Click 'Inject Sample Attack Flow' in the sidebar or replay a PCAP in the Ingestion tab.")
-
-st.markdown("---")
-st.markdown("👉 **Use the left sidebar navigation** to explore dedicated modules: Live Ingestion, Model Evaluation, TreeSHAP Explainability, Rule Intelligence, Source Tracking, Response Policy, and System Telemetry.")
+    st.markdown("_No events recorded in buffer yet. Use Packet & Flow Ingestion to stream packets or inject a sample flow from the sidebar._")

@@ -209,20 +209,17 @@ class ActiveInferencePipeline:
             cooldown_remaining=rem_cooldown,
         )
 
-        # 8. Safety Tier & Controlled Response Execution
-        enforced_act, is_override, override_reason = self.safety_gate.enforce_safety(
-            step=current_step,
-            flow_id=fid,
-            host_id=source_ip,
-            proposed_action=response_rec.action,
-        )
-
+        # 8. Safety Tier & Controlled Response Execution (single-point evaluation via executor)
         exec_report = self.executor.execute_action(
             proposed_action=response_rec.action,
             target_host=source_ip,
             state_before=response_rec.state_vector,
             metadata={"flow_id": fid, "severity": hybrid_dec.severity},
+            step=current_step,
         )
+        enforced_act = exec_report.authorized_action
+        is_override = exec_report.safety_check.is_overridden
+        override_reason = exec_report.safety_check.reason
 
         # 9. Formulate SecurityEvent
         sec_event = SecurityEvent(

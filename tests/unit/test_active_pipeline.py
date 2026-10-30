@@ -106,3 +106,32 @@ def test_pipeline_critical_host_safety(tmp_path):
     if res.response.action == Action.ISOLATE:
         assert res.safety_override is True
         assert res.enforced_action == Action.ALERT
+
+
+def test_pipeline_safety_gate_agreement_and_single_evaluation(syn_flood_r10, tmp_path):
+    """Regression test ensuring pipeline, executor report, and event all agree on enforced action,
+    and safety gate is evaluated exactly once per flow."""
+    audit_file = tmp_path / "events.jsonl"
+    event_mgr = EventManager(audit_log_path=audit_file)
+    pipeline = ActiveInferencePipeline(event_manager=event_mgr)
+
+    eval_count_before = pipeline.safety_gate._total_evaluations
+
+    res = pipeline.process_flow(
+        syn_flood_r10,
+        source_ip="10.200.1.77",
+        dest_ip="10.0.0.1",
+        flow_id="test-agreement-1",
+    )
+
+    eval_count_after = pipeline.safety_gate._total_evaluations
+    # Safety gate must be evaluated exactly once per flow
+    assert eval_count_after == eval_count_before + 1
+
+    # PipelineResult, ExecutionReport, and SecurityEvent must all agree on enforced action
+    assert res.enforced_action == res.execution_report.authorized_action
+    assert res.security_event.response["enforced_action"] == res.enforced_action.name
+    assert res.security_event.response["proposed_action"] == res.response.action.name
+    assert res.security_event.response["safety_override"] == res.safety_override
+    assert res.execution_report.is_advisory is True
+
