@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1920px;
+    height: 1080px;
+    background: radial-gradient(circle at 50% 35%, #0f172a 0%, #020617 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #f8fafc;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 70px 80px;
+    text-align: center;
+  }
+
+  .grid-bg {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: 
+      linear-gradient(rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .header-block {
+    position: relative;
+    z-index: 2;
+  }
+  .inst-name {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #38bdf8;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .dept-name {
+    font-size: 16px;
+    color: #94a3b8;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .center-block {
+    position: relative;
+    z-index: 2;
+    margin: auto 0;
+  }
+  .acronym {
+    font-size: 96px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #ffffff 20%, #38bdf8 65%, #0284c7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 60px rgba(56, 189, 248, 0.4);
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+  }
+  .tagline {
+    font-size: 28px;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 24px;
+    letter-spacing: 0.5px;
+  }
+  .motto-badge {
+    display: inline-block;
+    background: linear-gradient(90deg, rgba(14, 165, 233, 0.2) 0%, rgba(16, 185, 129, 0.2) 100%);
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    border-radius: 9999px;
+    padding: 10px 32px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #38bdf8;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .details-block {
+    position: relative;
+    z-index: 2;
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 14px;
+    padding: 20px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1400px;
+    backdrop-filter: blur(10px);
+  }
+  .guide-col {
+    text-align: left;
+  }
+  .guide-col .lbl {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #38bdf8;
+    margin-bottom: 4px;
+  }
+  .guide-col .val {
+    font-size: 15px;
+    font-weight: 600;
+    color: #f1f5f9;
+  }
+  .team-col {
+    text-align: right;
+  }
+  .team-col .lbl {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #38bdf8;
+    margin-bottom: 4px;
+  }
+  .team-col .val {
+    font-size: 14px;
+    color: #cbd5e1;
+    font-weight: 500;
+  }
+
+  .footer-row {
+    position: relative;
+    z-index: 2;
+    padding-top: 20px;
+    font-size: 15px;
+    color: #64748b;
+  }
+</style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+
+  <div class="header-block">
+    <div class="inst-name">JSS Academy of Technical Education, Bengaluru</div>
+    <div class="dept-name">Department of Computer Science & Engineering &bull; Open Day 2026</div>
+  </div>
+
+  <div class="center-block">
+    <h1 class="acronym">XRL-IDARS</h1>
+    <p class="tagline">Making Network Security More Intelligent, Explainable and Responsible</p>
+    <div class="motto-badge">Code &bull; Create &bull; Innovate</div>
+  </div>
+
+  <div class="details-block">
+    <div class="guide-col">
+      <div class="lbl">Project Guide</div>
+      <div class="val">Dr. P. B. Mallikarjuna, Professor</div>
+    </div>
+    <div class="team-col">
+      <div class="lbl">Student Project Team (Group 43)</div>
+      <div class="val">Rishikesh Gowda K K &bull; Sharanya M &bull; Sudarshan &bull; Suraj Rao G</div>
+    </div>
+  </div>
+
+  <div class="footer-row">
+    Thank You &bull; Saturday, 31 October 2026 &bull; Lab A 204
+  </div>
+</body>
+</html>
