@@ -74,6 +74,18 @@ class SimulatorScenarioSpec:
 
 
 SCENARIO_SPECS: dict[str, SimulatorScenarioSpec] = {
+    "scenario_ping": SimulatorScenarioSpec(
+        scenario_id="scenario_ping",
+        name="Scenario Ping: Benign Ping",
+        category="BENIGN",
+        attack_family="BENIGN",
+        description="Controlled benign ICMP echo request/reply exchange between 10.200.1.2 and 10.200.1.3.",
+        target_ports=[],
+        default_packet_count=4,
+        default_rate_pps=5.0,
+        expected_ground_truth="BENIGN",
+        expected_rule=None,
+    ),
     "scenario_a_benign": SimulatorScenarioSpec(
         scenario_id="scenario_a_benign",
         name="Scenario A: Benign Traffic",
@@ -205,6 +217,32 @@ class ScapyAttackSimulator:
             }
             for s in SCENARIO_SPECS.values()
         ]
+
+    # ------------------------------------------------ Scenario Ping: Pure Benign Ping
+    def build_benign_ping(
+        self,
+        base_time: float | None = None,
+        count: int = 4,
+    ) -> list[Packet]:
+        """Generate pure, clean ICMP echo request/reply packets without TCP fragments."""
+        t0 = base_time if base_time is not None else time.time()
+        packets: list[Packet] = []
+        t = t0
+        for seq_num in range(1, count + 1):
+            echo_req = Ether(src=ATTACKER_MAC, dst=VICTIM_MAC) / IP(src=self.attacker_ip, dst=self.victim_ip) / ICMP(
+                type=8, code=0, id=0x1234, seq=seq_num
+            )
+            echo_req.time = t
+            packets.append(echo_req)
+            t += 0.010
+
+            echo_rep = Ether(src=VICTIM_MAC, dst=ATTACKER_MAC) / IP(src=self.victim_ip, dst=self.attacker_ip) / ICMP(
+                type=0, code=0, id=0x1234, seq=seq_num
+            )
+            echo_rep.time = t
+            packets.append(echo_rep)
+            t += 0.050
+        return packets
 
     # ------------------------------------------------ Scenario A: Benign Traffic
     def build_scenario_a_benign(
@@ -411,7 +449,9 @@ class ScapyAttackSimulator:
         base_time: float | None = None,
     ) -> list[Packet]:
         """Build Scapy packets for the given scenario ID."""
-        if scenario_id == "scenario_a_benign":
+        if scenario_id in ("scenario_ping", "scenario_benign_ping"):
+            return self.build_benign_ping(base_time=base_time, count=(packet_count or 4) // 2 or 2)
+        elif scenario_id == "scenario_a_benign":
             return self.build_scenario_a_benign(base_time=base_time, packet_count=packet_count or 12)
         elif scenario_id == "scenario_b_port_scan":
             return self.build_scenario_b_port_scan(base_time=base_time)

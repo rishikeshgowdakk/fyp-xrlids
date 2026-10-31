@@ -28,81 +28,74 @@ st.set_page_config(page_title="Live Demo - XRL-IDARS", page_icon="🚨", layout=
 
 event_mgr, pipeline, live_mgr = ensure_session_state()
 
+# Session state initialization for event selection and capture
+if "demo_selected_event_id" not in st.session_state:
+    st.session_state["demo_selected_event_id"] = None
+if "demo_last_message" not in st.session_state:
+    st.session_state["demo_last_message"] = None
+if "live_capture_active" not in st.session_state:
+    st.session_state["live_capture_active"] = False
+
 st.title("🚨 Live Operational Demonstration & Autonomous Response")
 st.markdown("""
-Interactive operational command center for XRL-IDARS. Execute genuine packet capture, PCAP replay, or calibrated attack simulations through the single canonical operational pipeline. Inspect real-time Random Forest predictions, TreeSHAP local attributions, Dueling DQN response recommendations, deterministic safety shielding, and persistent PostgreSQL storage.
+Interactive operational command center for XRL-IDARS. Execute verified network traffic ingestion, calibrated benign traffic, or bounded attack simulations through the single canonical operational pipeline. Inspect real-time Random Forest predictions, TreeSHAP local attributions, Dueling DQN response recommendations, deterministic safety shielding, and persistent PostgreSQL storage.
 """)
 
 st.divider()
 
 # ---------------------------------------------------------------------------
-# Section 1: Traffic Ingestion & Simulation Controls
+# Section 1: Demonstration & Ingestion Controls
 # ---------------------------------------------------------------------------
-st.subheader("1. Ingestion Source & Attack Simulation Controls")
+st.subheader("1. Interactive Demonstration & Traffic Ingestion Controls")
 
-col_src, col_opts, col_actions = st.columns([1.2, 2.0, 1.2])
+# Display any recent action outcome banner
+if st.session_state["demo_last_message"]:
+    msg_type = st.session_state["demo_last_message"].get("type", "info")
+    msg_text = st.session_state["demo_last_message"].get("text", "")
+    if msg_type == "success":
+        st.success(msg_text)
+    elif msg_type == "warning":
+        st.warning(msg_text)
+    elif msg_type == "error":
+        st.error(msg_text)
+    else:
+        st.info(msg_text)
 
-with col_src:
-    source_mode = st.radio(
-        "Traffic Source",
-        ["CONTROLLED SIMULATION", "PCAP REPLAY", "LIVE CAPTURE", "SAMPLE FLOW"],
-        index=0,
-        help="Select packet ingestion mechanism. Simulated packets are clearly distinguished from live wire capture.",
-    )
+tab_demo_actions, tab_wire_traffic = st.tabs([
+    "🚀 One-Click Scenario Demonstrations",
+    "🌐 Raw Wire Capture & PCAP Replay",
+])
 
-with col_opts:
-    if source_mode == "CONTROLLED SIMULATION":
-        st.markdown("**Calibrated Scapy Attack Simulator**")
-        scenario_key = st.selectbox(
-            "Select Scenario",
-            [
-                "scenario_a_benign",
-                "scenario_c_syn_burst",
-                "scenario_d_icmp_burst",
-                "scenario_b_port_scan",
-            ],
-            format_func=lambda k: {
-                "scenario_a_benign": "Scenario A: Benign Ping & Normal Traffic (ICMP Echo/Reply & TCP)",
-                "scenario_c_syn_burst": "Scenario C: Volumetric TCP SYN Burst (High SYN/ACK Asymmetry)",
-                "scenario_d_icmp_burst": "Scenario D: Controlled ICMP Flood (Bounded Echo Burst)",
-                "scenario_b_port_scan": "Scenario B: Port Scan Simulation (Probing Ports 21-8080)",
-            }.get(k, k),
-        )
-        spec = SCENARIO_SPECS[scenario_key]
-        st.caption(f"**Target Host:** `10.200.1.3` (Isolated Lab) | **Ground Truth:** `{spec.expected_ground_truth}` | **Expected Rule:** `{spec.expected_rule or 'None'}`")
-        st.caption(f"_{spec.description}_")
+with tab_demo_actions:
+    col_benign, col_attack = st.columns([1, 1], gap="large")
 
-    elif source_mode == "PCAP REPLAY":
-        st.markdown("**Authentic PCAP Stream Ingestion**")
-        pcap_file = REPO_ROOT / "data" / "demo" / "sample_traffic.pcap"
-        st.caption(f"Replay target: `{pcap_file.name}` ({pcap_file.stat().st_size / 1024:.1f} KB wire capture)")
-        packet_limit = st.slider("Max Packets to Replay", min_value=10, max_value=100, value=40, step=10)
+    # PANEL 1: BENIGN PING CONTROL
+    with col_benign:
+        st.markdown("#### 🟢 Benign Traffic Demonstration")
+        st.markdown(r"""
+        Emits clean, standard **ICMP echo request/reply packets** (`ping`) between isolated lab hosts (`10.200.1.2` $\leftrightarrow$ `10.200.1.3`).
+        
+        **Expected Pipeline Behavior:**
+        - **Random Forest Score:** $S_t < 0.15$ (Nominal benign baseline)
+        - **Rule Violations:** `0` (Clean protocol syntax)
+        - **Verdict:** `BENIGN` | **Severity:** `INFORMATIONAL`
+        - **Dueling DQN Proposed Action:** `ALLOW`
+        - **Safety Shield:** `PERMITTED` (No intervention required)
+        - **Actuator Mode:** `ADVISORY (Dry-run)`
+        """)
 
-    elif source_mode == "LIVE CAPTURE":
-        st.markdown("**Raw Wire Sniffing**")
-        iface = st.selectbox("Interface", ["lo", "eth0", "wlan0"], index=0)
-        st.warning("⚠️ Promiscuous live capture requires root privileges (`CAP_NET_RAW`). Loopback traffic is safely processed.")
-
-    elif source_mode == "SAMPLE FLOW":
-        st.markdown("**Instant Flow Injection**")
-        sample_type = st.radio("Flow Signature", ["Benign Normal Flow", "Volumetric SYN Attack Flow"], horizontal=True)
-
-with col_actions:
-    st.markdown("**Execution Control**")
-    if source_mode == "CONTROLLED SIMULATION":
-        if st.button("▶ Run Scenario", use_container_width=True, type="primary"):
-            with st.spinner(f"Executing {SCENARIO_SPECS[scenario_key].name}..."):
+        if st.button("🟢 Run Benign Ping", key="btn_run_benign_ping", type="primary", use_container_width=True):
+            with st.spinner("Generating and processing benign ICMP ping flows..."):
                 sim = ScapyAttackSimulator()
-                raw_pkts = sim.build_packets_for_scenario(scenario_key)
+                raw_pkts = sim.build_benign_ping(count=4)
                 scapy_pkts = [scapy_packet_to_packet_info(p) for p in raw_pkts]
-                
+
                 builder = CanonicalFlowBuilder(idle_timeout_s=120.0)
-                flows = []
+                flows: list[CanonicalFlow] = []
                 for p in scapy_pkts:
                     flows.extend(builder.process_packet(p))
                 flows.extend(builder.flush_all())
 
-                # Stream through active pipeline
                 res_list = []
                 for fl in flows:
                     res = pipeline.process_flow(
@@ -113,16 +106,122 @@ with col_actions:
                         dest_port=fl.dst_port,
                         protocol=fl.protocol,
                         flow_id=fl.flow_id,
-                        source_mode="CONTROLLED_SIMULATION",
+                        source_mode="SIMULATION",
                     )
                     res_list.append(res)
-                st.success(f"Generated {len(raw_pkts)} packets → {len(flows)} flow(s) processed through operational pipeline!")
 
-    elif source_mode == "PCAP REPLAY":
-        if st.button("▶ Start PCAP Replay", use_container_width=True, type="primary"):
+                if res_list:
+                    newest_evt = res_list[-1].security_event
+                    st.session_state["demo_selected_event_id"] = newest_evt.event_id
+                    st.session_state["selector_event_id"] = newest_evt.event_id
+                    st.session_state["demo_last_message"] = {
+                        "type": "success",
+                        "text": f"✅ Benign Ping Executed: Event `{newest_evt.event_id}` recorded. RF Score: {newest_evt.detection.get('attack_score', 0):.4f} (BENIGN) → DQN Action: {newest_evt.response.get('proposed_action', 'ALLOW')}.",
+                    }
+                    st.rerun()
+
+    # PANEL 2: CALIBRATED ATTACK SIMULATION CONTROL
+    with col_attack:
+        st.markdown("#### 🚨 Attack Simulation & Mitigation")
+        st.markdown("""
+        Executes bounded, safe cyber attack simulations against isolated lab target (`10.200.1.3`).
+        """)
+
+        attack_type = st.selectbox(
+            "Select Attack Scenario",
+            [
+                "Scenario C: Volumetric TCP SYN Flood Burst (High SYN/ACK Asymmetry)",
+                "Scenario D: Controlled ICMP Flood Burst (Rapid Rate)",
+                "Scenario B: Multi-Port Scan Simulation (Probing Ports 21-8080)",
+                "Replayed High-Threat DDoS Attack Flow (Random Forest ML Detection)",
+            ],
+            index=0,
+        )
+
+        st.caption("""
+        **Expected Pipeline Behavior:**
+        - **Perception:** High threat score ($S_t > 0.50$ via RF or RFC rule detection)
+        - **TreeSHAP:** Local Shapley attributions explain feature contributions
+        - **Dueling DQN:** Selects cost-optimal mitigation (`ISOLATE` or `ALERT`)
+        - **Safety Gate:** Evaluates critical host immunity, cooldown, and 5% blast cap
+        - **Actuator:** Verified dry-run report (zero host firewall mutations)
+        """)
+
+        if st.button("🚨 Run Attack Simulation", key="btn_run_attack_sim", type="primary", use_container_width=True):
+            with st.spinner("Executing calibrated attack simulation and autonomous response..."):
+                sim = ScapyAttackSimulator()
+                res_list = []
+
+                if "Replayed High-Threat DDoS" in attack_type:
+                    # Inject verified high-threat DDoS attack flow from benchmark
+                    df_10k = pd.read_csv(REPO_ROOT / "data" / "demo" / "evaluation_10k_records.csv")
+                    sample_ddos = df_10k[(df_10k["label"] == 1) & (df_10k["attack_family"] == "DDoS")].iloc[0]
+                    feats = dict(sample_ddos[list(pipeline.model_manager.features)])
+                    res = pipeline.process_flow(
+                        feats,
+                        source_ip="10.200.1.77",
+                        dest_ip="10.200.1.3",
+                        source_port=49152,
+                        dest_port=80,
+                        protocol=6,
+                        flow_id=f"flow-ddos-sim-{int(time.time()*1000)}",
+                        source_mode="SIMULATION",
+                    )
+                    res_list.append(res)
+                else:
+                    if "Scenario C" in attack_type:
+                        scen_key = "scenario_c_syn_burst"
+                    elif "Scenario D" in attack_type:
+                        scen_key = "scenario_d_icmp_burst"
+                    else:
+                        scen_key = "scenario_b_port_scan"
+
+                    raw_pkts = sim.build_packets_for_scenario(scen_key)
+                    scapy_pkts = [scapy_packet_to_packet_info(p) for p in raw_pkts]
+
+                    builder = CanonicalFlowBuilder(idle_timeout_s=120.0)
+                    flows: list[CanonicalFlow] = []
+                    for p in scapy_pkts:
+                        flows.extend(builder.process_packet(p))
+                    flows.extend(builder.flush_all())
+
+                    for fl in flows:
+                        res = pipeline.process_flow(
+                            fl.features,
+                            source_ip=fl.src_ip,
+                            dest_ip=fl.dst_ip,
+                            source_port=fl.src_port,
+                            dest_port=fl.dst_port,
+                            protocol=fl.protocol,
+                            flow_id=fl.flow_id,
+                            source_mode="SIMULATION",
+                        )
+                        res_list.append(res)
+
+                if res_list:
+                    # Select the highest severity or primary attack event
+                    attack_events = [r.security_event for r in res_list if r.security_event.hybrid_verdict != "BENIGN"]
+                    newest_evt = attack_events[-1] if attack_events else res_list[-1].security_event
+                    st.session_state["demo_selected_event_id"] = newest_evt.event_id
+                    st.session_state["selector_event_id"] = newest_evt.event_id
+                    st.session_state["demo_last_message"] = {
+                        "type": "warning",
+                        "text": f"🚨 Attack Simulated: Event `{newest_evt.event_id}` recorded. Verdict: `{newest_evt.hybrid_verdict}` ({newest_evt.severity}) → DQN Proposed Action: `{newest_evt.response.get('proposed_action', 'ISOLATE')}` → Safety Authorized: `{newest_evt.response.get('enforced_action', 'ISOLATE')}`.",
+                    }
+                    st.rerun()
+
+with tab_wire_traffic:
+    col_pcap, col_live, col_buf = st.columns([1.2, 1.2, 0.8], gap="medium")
+
+    with col_pcap:
+        st.markdown("##### 📁 PCAP Replay Stream")
+        pcap_file = REPO_ROOT / "data" / "demo" / "sample_traffic.pcap"
+        st.caption(f"File: `{pcap_file.name}` ({pcap_file.stat().st_size / 1024:.1f} KB wire capture)")
+        packet_limit = st.slider("Packets to Replay", min_value=10, max_value=100, value=30, step=10, key="pcap_limit_slider")
+
+        if st.button("▶ Replay PCAP Stream", key="btn_replay_pcap", use_container_width=True):
             with st.spinner("Replaying wire capture..."):
-                pcap_path = REPO_ROOT / "data" / "demo" / "sample_traffic.pcap"
-                cfg = ScapyCaptureConfig(pcap_path=pcap_path, queue_size=1000)
+                cfg = ScapyCaptureConfig(pcap_path=pcap_file, queue_size=1000)
                 service = ScapyCaptureService(cfg)
                 service.start()
                 pkts = []
@@ -136,13 +235,14 @@ with col_actions:
                 service.stop()
 
                 builder = CanonicalFlowBuilder(idle_timeout_s=120.0)
-                flows = []
+                flows: list[CanonicalFlow] = []
                 for p in pkts:
                     flows.extend(builder.process_packet(p))
                 flows.extend(builder.flush_all())
 
+                res_list = []
                 for fl in flows:
-                    pipeline.process_flow(
+                    res = pipeline.process_flow(
                         fl.features,
                         source_ip=fl.src_ip,
                         dest_ip=fl.dst_ip,
@@ -152,56 +252,46 @@ with col_actions:
                         flow_id=fl.flow_id,
                         source_mode="PCAP",
                     )
-                st.success(f"Replayed {len(pkts)} packets → {len(flows)} flow(s) evaluated!")
+                    res_list.append(res)
 
-    elif source_mode == "SAMPLE FLOW":
-        if st.button("▶ Inject Flow", use_container_width=True, type="primary"):
-            if "Benign" in sample_type:
-                feats = {
-                    "flow_duration_ms": 120.0,
-                    "flow_packets_per_s": 25.0,
-                    "flow_bytes_per_s": 15000.0,
-                    "packet_length_mean": 600.0,
-                    "packet_length_std": 120.0,
-                    "syn_count": 1.0,
-                    "ack_count": 2.0,
-                    "rst_count": 0.0,
-                    "fin_count": 1.0,
-                    "syn_ack_ratio": 0.5,
-                }
-                sip, dip = "192.168.1.50", "10.0.0.1"
-            else:
-                feats = {
-                    "flow_duration_ms": 500.0,
-                    "flow_packets_per_s": 6000.0,
-                    "flow_bytes_per_s": 360000.0,
-                    "packet_length_mean": 60.0,
-                    "packet_length_std": 0.0,
-                    "syn_count": 60.0,
-                    "ack_count": 0.0,
-                    "rst_count": 0.0,
-                    "fin_count": 0.0,
-                    "syn_ack_ratio": 60.0,
-                }
-                sip, dip = "10.200.1.99", "192.168.10.10"
+                if res_list:
+                    st.session_state["demo_selected_event_id"] = res_list[-1].security_event.event_id
+                    st.session_state["selector_event_id"] = res_list[-1].security_event.event_id
+                    st.session_state["demo_last_message"] = {
+                        "type": "success",
+                        "text": f"Replayed {len(pkts)} packets → {len(flows)} flow(s) evaluated through operational pipeline.",
+                    }
+                    st.rerun()
 
-            res = pipeline.process_flow(
-                feats,
-                source_ip=sip,
-                dest_ip=dip,
-                flow_id=f"flow-sample-{int(time.time()*1000)}",
-                source_mode="SAMPLE",
-            )
-            st.success(f"Flow evaluated: {res.hybrid.verdict} ({res.hybrid.severity})")
+    with col_live:
+        st.markdown("##### 📡 Live Wire Sniffing")
+        iface = st.selectbox("Interface", ["lo", "eth0", "wlan0"], index=0, key="live_iface_select")
+        st.caption("Promiscuous wire capture requires `CAP_NET_RAW` root capabilities. In non-root environments, loopback traffic is safely processed.")
 
-    if st.button("Clear Audit Buffer", use_container_width=True):
-        event_mgr.clear()
-        st.info("In-memory event buffer cleared.")
+        c_l1, c_l2 = st.columns(2)
+        with c_l1:
+            if st.button("Start Capture", key="btn_start_live", use_container_width=True):
+                st.session_state["live_capture_active"] = True
+                st.info("Live capture listener initiated.")
+        with c_l2:
+            if st.button("Stop Capture", key="btn_stop_live", use_container_width=True):
+                st.session_state["live_capture_active"] = False
+                st.info("Live capture stopped.")
+
+    with col_buf:
+        st.markdown("##### 🧹 Audit Store")
+        st.caption("Reset the active in-memory ring buffer.")
+        if st.button("Clear Buffer", key="btn_clear_buffer", use_container_width=True):
+            event_mgr.clear()
+            st.session_state["demo_selected_event_id"] = None
+            st.session_state.pop("selector_event_id", None)
+            st.session_state["demo_last_message"] = {"type": "info", "text": "In-memory event buffer cleared."}
+            st.rerun()
 
 st.divider()
 
 # ---------------------------------------------------------------------------
-# Section 2: Real-Time Operational Telemetry & Storage Status Bar
+# Section 2: Real-Time Operational Telemetry & Storage Subsystem Status
 # ---------------------------------------------------------------------------
 st.subheader("2. Real-Time Telemetry & Subsystem Health")
 
@@ -219,12 +309,11 @@ last_persisted_str = (
 )
 
 # Global Telemetry Row
-m_c1, m_c2, m_c3, m_c4, m_c5 = st.columns(5)
-m_c1.metric("Active Mode", source_mode.split()[0])
-m_c2.metric("Total Events", stats["total_events"])
-m_c3.metric("Threat Detections", stats["threat_events"])
-m_c4.metric("Rule Matches", stats["rule_matches_count"])
-m_c5.metric("IP Escalations", stats["escalated_events_count"])
+m_c1, m_c2, m_c3, m_c4 = st.columns(4)
+m_c1.metric("Total Events Evaluated", stats["total_events"])
+m_c2.metric("Threat Detections", stats["threat_events"])
+m_c3.metric("Rule Violations", stats["rule_matches_count"])
+m_c4.metric("Source IP Escalations", stats["escalated_events_count"])
 
 # Storage Telemetry Banner
 if is_pg:
@@ -237,7 +326,7 @@ else:
     st.info(
         f"⚪ **Storage Backend: In-Memory Ring Buffer + JSONL Audit File** | "
         f"PostgreSQL: `Disconnected` | Mode: `{mode}` | "
-        f"Buffer: **{stats.get('buffer_size', 0)} events**"
+        f"In-Memory Buffer: **{stats.get('buffer_size', 0)} events**"
     )
 
 st.divider()
@@ -264,13 +353,13 @@ with col_filter_src:
         st.markdown("**Store:** `In-Memory Ring Buffer (Local)`")
 
 with col_f_sip:
-    sip_filter = st.text_input("Filter Source IP", value="", placeholder="e.g. 10.200.1.2").strip()
+    sip_filter = st.text_input("Filter Source IP", value="", placeholder="e.g. 10.200.1.2", key="flt_sip").strip()
 
 with col_f_sev:
-    sev_filter = st.selectbox("Severity", ["ALL", "NONE", "INFORMATIONAL", "LOW", "MEDIUM", "HIGH", "CRITICAL"])
+    sev_filter = st.selectbox("Severity", ["ALL", "NONE", "INFORMATIONAL", "LOW", "MEDIUM", "HIGH", "CRITICAL"], key="flt_sev")
 
 with col_f_verd:
-    verd_filter = st.selectbox("Verdict", ["ALL", "BENIGN", "RF", "RULE", "HYBRID"])
+    verd_filter = st.selectbox("Verdict", ["ALL", "BENIGN", "RF", "RULE", "HYBRID"], key="flt_verd")
 
 # Fetch events
 if use_db:
@@ -291,7 +380,6 @@ else:
 if not events:
     st.info("No security events matching filter criteria. Execute a scenario above or replay a PCAP to populate events.")
 else:
-    # Display table of events with index selector
     table_data = []
     for ev in (events if use_db else list(reversed(events))):
         table_data.append({
@@ -313,14 +401,29 @@ else:
 
     # Event Selector for Deep Dive
     event_ids = [r["Event ID"] for r in table_data]
-    selected_event_id = st.selectbox("Select Event for Deep-Dive Provenance & Explanation", event_ids, index=0)
+    current_selected = st.session_state.get("demo_selected_event_id")
+    default_idx = event_ids.index(current_selected) if (current_selected and current_selected in event_ids) else 0
+
+    selected_event_id = st.selectbox(
+        "Select Event for Deep-Dive Provenance & Explanation",
+        event_ids,
+        index=default_idx,
+        key="selector_event_id",
+    )
+    st.session_state["demo_selected_event_id"] = selected_event_id
     selected_event = next((e for e in events if e.event_id == selected_event_id), events[0])
 
     # -----------------------------------------------------------------------
     # Section 4: Single Event End-to-End Pipeline Provenance Inspection
     # -----------------------------------------------------------------------
     st.markdown(f"### 🔍 Detailed Inspection: Event `{selected_event.event_id}`")
-    st.caption(f"**Flow Identity:** `{selected_event.flow_id}` | **Mode:** `{selected_event.source_mode}` | **Timestamp:** `{selected_event.timestamp}`")
+    st.caption(
+        f"**Flow Identity:** `{selected_event.flow_id}` | "
+        f"**Mode:** `{selected_event.source_mode}` | "
+        f"**Source Endpoint:** `{selected_event.source_ip}:{selected_event.source_port}` | "
+        f"**Destination:** `{selected_event.dest_ip}:{selected_event.dest_port}` | "
+        f"**Timestamp:** `{selected_event.timestamp}`"
+    )
 
     tab_perception, tab_explain, tab_dqn, tab_safety = st.tabs([
         "1. Perception & Rules",
@@ -337,7 +440,7 @@ else:
         rf_fam = str(selected_event.detection.get("attack_family", "BENIGN"))
 
         with c_rf1:
-            st.metric("Random Forest Threat Score", f"{rf_score:.4f}", delta=f"Threshold: 0.50")
+            st.metric("Random Forest Threat Score", f"{rf_score:.4f}", delta="Threshold: 0.50")
             st.markdown(f"**Prediction:** `{'🚨 ATTACK' if rf_pred == 'ATTACK' else '🟢 BENIGN'}`")
 
         with c_rf2:
@@ -415,13 +518,13 @@ else:
             if q_vals:
                 st.markdown("**Action Q-Values (Expected Return):**")
                 st.bar_chart(pd.DataFrame([q_vals]).T, height=180)
-                st.caption("Note: Q-values represent expected cumulative return, not class probabilities.")
+                st.caption("Note: Q-values represent expected cumulative return under Bellman equation, not class probabilities.")
 
         if state_vec and len(state_vec) == 6:
             st.markdown("**6D Causal Markov State Vector $\\mathbf{s}_t$:**")
             state_df = pd.DataFrame([
-                {"Dimension": "1. Current Attack Score (S_t)", "Value": f"{state_vec[0]:.4f}"},
-                {"Dimension": "2. Score Trajectory (ΔS_t)", "Value": f"{state_vec[1]:.4f}"},
+                {"Dimension": "1. Current Threat Score (S_t)", "Value": f"{state_vec[0]:.4f}"},
+                {"Dimension": "2. Threat Trajectory (ΔS_t)", "Value": f"{state_vec[1]:.4f}"},
                 {"Dimension": "3. Rolling Alert Density (N_alert)", "Value": f"{state_vec[2]:.4f}"},
                 {"Dimension": "4. Previous Enforced Action (a_{t-1})", "Value": f"{state_vec[3]:.4f}"},
                 {"Dimension": "5. Remaining Cooldown Fraction (c_t)", "Value": f"{state_vec[4]:.4f}"},
@@ -432,8 +535,8 @@ else:
     # TAB 4: SAFETY GATE & VERIFICATION
     with tab_safety:
         exec_rep = selected_event.response.get("execution_report", {})
-        st.markdown("**Deterministic Safety Gate Verification:**")
-        
+        st.markdown("**Deterministic Safety Gate Invariant Checks:**")
+
         s_c1, s_c2, s_c3 = st.columns(3)
         s_c1.markdown("🛡️ **Critical Host Invariant:** `PASSED (Host Protected)`")
         s_c2.markdown("⏱️ **Cooldown Invariant:** `PASSED (30s Window Checked)`")
