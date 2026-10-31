@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1920px;
+    height: 1080px;
+    background: radial-gradient(circle at 50% 30%, #0f172a 0%, #020617 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #f8fafc;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 60px 80px;
+  }
+
+  .grid-bg {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: 
+      linear-gradient(rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .header-block {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+  .tag {
+    font-size: 14px;
+    font-weight: 700;
+    color: #38bdf8;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .title {
+    font-size: 44px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    font-size: 18px;
+    color: #94a3b8;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    margin: 30px 0;
+    position: relative;
+    z-index: 2;
+  }
+  .domain-card {
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 16px;
+    padding: 28px;
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: all 0.3s ease;
+  }
+  .card-icon {
+    font-size: 38px;
+    line-height: 1;
+  }
+  .card-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #f1f5f9;
+  }
+  .card-desc {
+    font-size: 14px;
+    color: #94a3b8;
+    line-height: 1.5;
+  }
+  .card-pill {
+    align-self: flex-start;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(56, 189, 248, 0.1);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    margin-top: auto;
+  }
+
+  .footer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    border-top: 1px solid rgba(148, 163, 184, 0.15);
+    padding-top: 16px;
+    font-size: 14px;
+    color: #64748b;
+  }
+</style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+
+  <div class="header-block">
+    <div class="tag">Operational Applicability &amp; Potential Domains</div>
+    <h2 class="title">Real-World Applications &amp; Security Impact</h2>
+    <p class="subtitle">Architected to empower security analysts with explainable threat attributions and safety-shielded response policies across diverse network environments.</p>
+  </div>
+
+  <div class="cards-grid">
+    <div class="domain-card">
+      <div class="card-icon">🏢</div>
+      <div class="card-title">Enterprise Networks</div>
+      <div class="card-desc">Sub-millisecond perimeter line-rate flow inspection defending corporate backbones and multi-tier subnet boundaries against high-rate attacks.</div>
+      <div class="card-pill">Perimeter Defense</div>
+    </div>
+
+    <div class="domain-card">
+      <div class="card-icon">🏦</div>
+      <div class="card-title">Banking &amp; Financial Systems</div>
+      <div class="card-desc">High-frequency low-latency transaction network monitoring with exact Shapley attributions for rigorous regulatory compliance and audit trails.</div>
+      <div class="card-pill">Explainable Compliance</div>
+    </div>
+
+    <div class="domain-card">
+      <div class="card-icon">🏥</div>
+      <div class="card-title">Healthcare Infrastructure</div>
+      <div class="card-desc">Safety-shielded protection for hospital networks and medical IoT gateways, ensuring critical telemetry assets are never falsely isolated.</div>
+      <div class="card-pill">Inviolable Guardrails</div>
+    </div>
+
+    <div class="domain-card">
+      <div class="card-icon">🎓</div>
+      <div class="card-title">Educational Institutions</div>
+      <div class="card-desc">Campus-wide perimeter monitoring isolating abusive peer-to-peer scanning and DDoS floods while safeguarding academic and lab servers.</div>
+      <div class="card-pill">Campus Scale</div>
+    </div>
+
+    <div class="domain-card">
+      <div class="card-icon">☁️</div>
+      <div class="card-title">Cloud &amp; Data Centers</div>
+      <div class="card-desc">Scalable micro-segmentation advisory recommendations adapting dynamically to varying traffic volumes and multi-tenant virtual networks.</div>
+      <div class="card-pill">Dynamic Adaptability</div>
+    </div>
+
+    <div class="domain-card">
+      <div class="card-icon">🛡️</div>
+      <div class="card-title">Security Operations Centers (SOC)</div>
+      <div class="card-desc">Automated initial triage combining machine learning speed, TreeSHAP root-cause clarity, and DQN recommendations under human-in-the-loop oversight.</div>
+      <div class="card-pill">SOC Decision Support</div>
+    </div>
+  </div>
+
+  <div class="footer-row">
+    <div>XRL-IDARS &bull; Open Day 2026 Final Year Project Exhibition</div>
+    <div>JSS Academy of Technical Education, Bengaluru &bull; Dept. of Computer Science &amp; Engineering</div>
+  </div>
+</body>
+</html>

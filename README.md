@@ -14,6 +14,27 @@
 
 ---
 
+## 🎬 Open Day 2026 Exhibition Video & Demonstration
+
+| Demonstration Artifact | Resource / Direct Link | Description |
+| :--- | :---: | :--- |
+| **Official Demo Video** | [▶️ Watch Demo MP4 (88s)](artifacts/open_day_2026/XRL_IDARS_Open_Day_Demo.mp4) | Full HD 1080p 30 FPS video with professional voiceover & burned captions |
+| **Demonstration Script** | [📄 Video Storyboard & Script](artifacts/open_day_2026/VIDEO_SCRIPT.md) | Word-for-word 7-scene narration and millisecond synchronization index |
+| **Recording & QA Report** | [📊 Recording QA Report](artifacts/open_day_2026/RECORDING_REPORT.md) | Full audit of live backend execution, Scapy ingestion, and model checkpoints |
+| **Synchronized Subtitles** | [💬 Subtitles (SRT)](artifacts/open_day_2026/XRL_IDARS_Subtitles.srt) | Standard SubRip subtitle track with precise timestamps |
+| **Poster QR Code** | [📱 QR Code Image](artifacts/open_day_2026/QR_CODE_DEMO_VIDEO.png) | Vector QR Code for A3 poster linking to repository video deliverables |
+| **Video Thumbnail** | [🖼️ 1080p Thumbnail](artifacts/open_day_2026/THUMBNAIL.png) | High-resolution poster title card and institutional branding |
+
+<p align="center">
+  <a href="artifacts/open_day_2026/XRL_IDARS_Open_Day_Demo.mp4">
+    <img src="artifacts/open_day_2026/THUMBNAIL.png" alt="XRL-IDARS Open Day 2026 Video Demonstration" width="750" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+  </a>
+  <br>
+  <em>Official JSSATE Bengaluru Open Day 2026 Exhibition Demonstration (87.77s &bull; Full HD 1080p &bull; Voiceover &bull; Subtitles)</em>
+</p>
+
+---
+
 ## Start Here
 
 | Document | What it covers |

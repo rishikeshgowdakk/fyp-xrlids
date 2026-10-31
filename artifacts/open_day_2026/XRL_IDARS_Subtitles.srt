@@ -1,0 +1,28 @@
+1
+00:00:00,500 --> 00:00:08,683
+Every second, computer networks face cyber threats that can compromise sensitive information and disrupt critical services. Introducing XRL-IDARS, an explainable AI-powered intrusion detection and response system developed at JSS Academy of Technical Education, Bengaluru.
+
+2
+00:00:10,900 --> 00:00:18,311
+Traditional intrusion detection systems can struggle to explain their decisions and respond intelligently. XRL-IDARS combines machine learning, explainable AI, deterministic security rules and reinforcement-learning-based response recommendations.
+
+3
+00:00:20,500 --> 00:00:32,340
+Network traffic is converted into flows and processed using the matching feature pipeline. A trained Random Forest identifies suspicious activity, while independent security rules detect additional threats. TreeSHAP explains the models prediction, and a Dueling Deep Q-Network recommends a response. A deterministic safety gate checks every recommendation before it can proceed.
+
+4
+00:00:36,000 --> 00:00:52,147
+Here is the live demonstration. First, normal traffic is processed. Next, we introduce suspicious traffic. The system evaluates the flow, identifies the threat, and displays the prediction with its feature-level explanation. The DQN then recommends an appropriate response, while the safety gate prevents unsafe actions. Every event can be inspected through the dashboard.
+
+5
+00:00:58,200 --> 00:01:08,096
+XRL-IDARS also includes a reproducible evaluation workbench. We compare Random Forest, LSTM and fusion models using a ten-thousand-record evaluation dataset. The results help us assess detection performance, explainability and computational efficiency.
+
+6
+00:01:11,200 --> 00:01:19,861
+This technology can support enterprise networks, banking systems, healthcare infrastructure, educational institutions and cloud environments. By combining explainable detection with safety-controlled response recommendations, XRL-IDARS aims to help security teams understand threats and make more informed decisions.
+
+7
+00:01:22,200 --> 00:01:25,800
+XRL-IDARS: making network security more intelligent, explainable and responsible. Thank you.
+
