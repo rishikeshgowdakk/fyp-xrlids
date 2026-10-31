@@ -1,8 +1,8 @@
-"""Automated Acceptance Tests for XRL-IDARS Live Operational Demonstration.
+"""Automated software acceptance tests for the XRL-IDARS scenario pipeline. These tests do not prove real namespace transmission/capture.
 
 Formally tests the 7 required acceptance scenarios:
 1. Normal Ping:
-   - Actual packet transmission and capture.
+   - In-memory Scapy packet generation and flow ingestion (not wire transmission/capture).
    - RF inference (BENIGN) and DQN inference (ALLOW).
    - No block installed; ping connectivity succeeds (4/4 delivered).
 2. Controlled ICMP Attack:
@@ -112,7 +112,7 @@ def clean_pipeline():
 # Test 1: Normal ping (no block, ping succeeds)
 # ---------------------------------------------------------------------------
 def test_01_normal_ping_allow_lifecycle(clean_pipeline):
-    """Test 1: Actual transmission, capture, RF inference (BENIGN), DQN (ALLOW), ping succeeds."""
+    """Test 1: In-memory benign packet flow, RF inference, DQN recommendation, and advisory allow path."""
     pipeline = clean_pipeline
     sim = ScapyAttackSimulator()
 
@@ -167,7 +167,7 @@ def test_01_normal_ping_allow_lifecycle(clean_pipeline):
 # Test 2: Controlled ICMP attack (real lifecycle, firewall installation, verification)
 # ---------------------------------------------------------------------------
 def test_02_controlled_icmp_attack_firewall_installation_and_verification(clean_pipeline):
-    """Test 2: Controlled ICMP attack, RF & rules, TreeSHAP, DQN, safety gate, rule install, verified block."""
+    """Test 2: In-memory ICMP attack flow and firewall lifecycle using a mocked command runner."""
     pipeline = clean_pipeline
     sim = ScapyAttackSimulator()
 
