@@ -109,10 +109,10 @@ if traffic_source == "Scapy / Live Network Traffic":
     with col_scen:
         st.markdown("#### 🛠️ Scapy Traffic Generator & Isolated Lab")
         if LAB_TOPOLOGY.is_real_kernel_netns:
-            st.success("🔒 **Lab Network Mode:** `LIVE_KERNEL_NETNS` (Attacker `xrlids_att_01` ➔ Victim `xrlids_vic_01` via `veth`)")
+            st.warning("⚠️ **Namespace topology available, but scenario buttons currently run in-memory simulation; they do not transmit or capture packets on the veth link. Events are labelled `SIMULATION`.")
         else:
-            st.info(f"🧪 **Lab Network Mode:** `SIMULATION_SANDBOX` ({LAB_TOPOLOGY.setup_diagnostic})")
-        st.caption(f"Generates genuine, calibrated network packets targeting explicitly authorized lab host `{LAB_TOPOLOGY.victim_ip}` from test source `{LAB_TOPOLOGY.attacker_ip}`.")
+            st.info(f"🧪 **Scenario Mode:** `SIMULATION` — generated Scapy packets are processed in memory; no wire transmission/capture. {LAB_TOPOLOGY.setup_diagnostic}")
+        st.caption(f"Generates calibrated Scapy packet objects for an in-memory scenario targeting lab address `{LAB_TOPOLOGY.victim_ip}` from test source `{LAB_TOPOLOGY.attacker_ip}`.")
 
         scenario_choice = st.selectbox(
             "Select Traffic Scenario",
@@ -157,7 +157,7 @@ if traffic_source == "Scapy / Live Network Traffic":
 
         # Scenario execution logic
         if run_btn:
-            with st.spinner("Emitting scenario packets through isolated lab and canonical pipeline..."):
+            with st.spinner("Processing in-memory scenario packets through the canonical pipeline..."):
                 if "Normal Ping" in scenario_choice:
                     scen_id = "scenario_ping"
                 elif "Controlled ICMP Flood" in scenario_choice:
