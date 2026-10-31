@@ -125,7 +125,14 @@ class LabFirewallManager:
         self.default_ttl_seconds = default_ttl_seconds
         self.allowed_subnet = allowed_subnet
         self.netns = netns
-        self.cmd_runner = cmd_runner or subprocess.run
+        if cmd_runner is not None:
+            self.cmd_runner = cmd_runner
+        else:
+            try:
+                from xrlids.demo.privileged_runner import privileged_netns_cmd_runner
+                self.cmd_runner = privileged_netns_cmd_runner
+            except Exception:
+                self.cmd_runner = subprocess.run
         self._lab_network = ipaddress.IPv4Network(allowed_subnet)
 
         self._active_rules: dict[str, FirewallRuleRecord] = {}  # source_ip -> FirewallRuleRecord

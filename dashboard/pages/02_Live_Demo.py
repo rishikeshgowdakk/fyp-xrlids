@@ -1,23 +1,25 @@
 """Page 2: Live Operational Demonstration & Autonomous Response — XRL-IDARS.
 
 Comprehensive operational command center for XRL-IDARS:
-1. Dual Genuine Demonstration Modes:
-   - Scapy-generated / Live Network Traffic
-   - PCAP Wire Replay
+1. Three Genuine Demonstration Modes:
+   - 🔴 Real Ping-Based Live Demo (Linux Network Namespaces & veth Link)
+   - 🧪 Scapy In-Memory Simulation
+   - 📁 PCAP Wire Replay
 2. Controlled Traffic Scenarios:
-   - Normal Ping (Benign ICMP Echo)
-   - Controlled ICMP Flood (Rapid ICMP Echo Burst)
+   - Normal Ping (Benign ICMP Echo: 5 pkts @ 1s)
+   - Controlled ICMP Flood (Rapid ICMP Echo Burst: 500 pkts @ 100 pps)
    - Controlled SYN Burst (TCP SYN Asymmetry)
    - Controlled Port Scan (TCP Probing Ports 21-8080)
-3. End-to-End Pipeline Execution:
-   Traffic -> RF Detection -> TreeSHAP -> DQN Recommendation -> Safety Gate -> Firewall Execution -> Verification
-4. IP Response & Temporary Firewall Protection:
+3. End-to-End Operational Pipeline Execution:
+   Wire Sniffing -> Flow Assembly -> R10 Feature Extraction -> RF Detection -> Rule Engine -> TreeSHAP -> DQN Recommendation -> Safety Gate -> Firewall Actuation -> Verification
+4. Real IP Response & Temporary Firewall Protection:
    - Strict Lab Subnet Allowlisting (10.200.1.0/24)
-   - Default Safe Dry-Run (Zero host mutations)
+   - Strict Victim Namespace Isolation (xrlids_vic_01) — Zero host firewall mutations
+   - Default Safe Dry-Run (Advisory mode)
    - Explicit Operator Enablement for Active Firewall Rules
-   - Automatic Rule Expiry & Restored Connectivity
+   - Automatic Rule Expiry & Restored Nominal Connectivity
    - Verification of Dropped Packets and Blocked Attacker Traffic
-5. Absolute Data Provenance: Zero fabricated events, predictions, or Q-values.
+5. Absolute Data Provenance: Zero fabricated events, synthetic predictions, or mock Q-values.
 """
 
 from __future__ import annotations
@@ -39,8 +41,9 @@ if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from dashboard.session_init import ensure_session_state
-from xrlids.capture.scapy_service import ScapyCaptureConfig, ScapyCaptureService, scapy_packet_to_packet_info
-from xrlids.demo.lab_network import LAB_TOPOLOGY
+from xrlids.capture.scapy_service import ScapyCaptureConfig, ScapyCaptureService
+from xrlids.demo.lab_network import ATTACKER_NS, VICTIM_NS, LAB_TOPOLOGY
+from xrlids.demo.privileged_runner import get_lab_status
 from xrlids.demo.scapy_simulator import SCENARIO_SPECS, ScapyAttackSimulator
 from xrlids.events.manager import EventManager
 from xrlids.events.schema import SecurityEvent
@@ -72,7 +75,7 @@ fw_mgr.default_ttl_seconds = st.session_state["firewall_ttl_seconds"]
 
 st.title("🚨 Live Operational Demonstration & Autonomous Response")
 st.markdown("""
-Interactive operational command center for **XRL-IDARS**. Execute live Scapy-generated network traffic or offline PCAP replay through the single canonical operational pipeline. Inspect real-time **Random Forest** detections, **Deterministic Rule** violations, **TreeSHAP** attributions, **Dueling DQN** response recommendations, **Deterministic Safety Gate** invariant shielding, and temporary **Firewall Actuation** with automatic expiry.
+Interactive operational command center for **XRL-IDARS**. Execute real ping floods across isolated Linux network namespaces, run calibrated Scapy simulations, or replay wire PCAPs through the single canonical operational pipeline. Inspect real-time **Random Forest** detections, **Deterministic Rule** violations, **TreeSHAP** attributions, **Dueling DQN** response recommendations, **Deterministic Safety Gate** invariant shielding, and temporary **Firewall Actuation** with automatic expiry.
 """)
 
 st.divider()
@@ -80,7 +83,7 @@ st.divider()
 # ---------------------------------------------------------------------------
 # Section 1: Demonstration Mode & Ingestion Controls
 # ---------------------------------------------------------------------------
-st.subheader("1. Traffic Ingestion & Scenario Controls")
+st.subheader("1. Traffic Ingestion & Demonstration Controls")
 
 # Outcome notification banner
 if st.session_state["demo_last_message"]:
@@ -95,24 +98,280 @@ if st.session_state["demo_last_message"]:
     else:
         st.info(msg_text)
 
-# Traffic Source Selector
-traffic_source = st.radio(
-    "Select Traffic Source Mode",
-    ["Scapy / Live Network Traffic", "PCAP Wire Replay"],
+# Demonstration Mode Selector
+demo_mode = st.radio(
+    "Select Demonstration Mode",
+    [
+        "🔴 Real Ping-Based Live Demo (Netns & veth)",
+        "🧪 Scapy In-Memory Simulation",
+        "📁 PCAP Wire Replay",
+    ],
     horizontal=True,
     key="demo_traffic_source_mode",
 )
 
-if traffic_source == "Scapy / Live Network Traffic":
+# ---------------------------------------------------------------------------
+# MODE A: REAL PING-BASED LIVE DEMO (NETNS & VETH LINK)
+# ---------------------------------------------------------------------------
+if demo_mode == "🔴 Real Ping-Based Live Demo (Netns & veth)":
+    # Configure firewall to target isolated victim namespace exclusively
+    fw_mgr.netns = VICTIM_NS
+
+    col_lab, col_fw = st.columns([1.3, 1.0], gap="large")
+
+    with col_lab:
+        st.markdown("#### 🔴 Isolated Linux Lab & Live Wire Monitoring")
+        st.caption(
+            f"Genuine wire capture running on `{LAB_TOPOLOGY.veth_victim}` inside victim namespace `{LAB_TOPOLOGY.victim_ns}` (`{LAB_TOPOLOGY.victim_ip}`). "
+            f"Packets are transmitted from attacker namespace `{LAB_TOPOLOGY.attacker_ns}` (`{LAB_TOPOLOGY.attacker_ip}`). Zero host network interference."
+        )
+
+        lab_stat = LAB_TOPOLOGY.get_status()
+        is_lab_created = bool(lab_stat.get("lab_created", False))
+        is_conn_ok = bool(lab_stat.get("connectivity_ok", False))
+        is_cap_running = bool(live_mgr.is_running and live_mgr.capture_mode == "NETNS")
+
+        # Topology and state badge indicators
+        s_c1, s_c2, s_c3 = st.columns(3)
+        with s_c1:
+            if is_lab_created:
+                st.success("🟢 **Lab Netns:** Configured")
+            else:
+                st.info("⚪ **Lab Netns:** Not Created")
+        with s_c2:
+            if is_conn_ok:
+                st.success("🟢 **veth Link:** Connected")
+            else:
+                st.info("⚪ **veth Link:** Offline")
+        with s_c3:
+            if is_cap_running:
+                st.success("🟢 **Sniffer:** Sniffing Wire")
+            else:
+                st.info("⚪ **Sniffer:** Idle")
+
+        st.markdown("##### 🕹️ Frontend Lifecycle Controls")
+        # Row 1: Lab Topology Management
+        c_l1, c_l2, c_l3 = st.columns([1.2, 1.2, 0.8])
+        with c_l1:
+            if st.button("🚀 Start Isolated Lab", key="btn_setup_lab", type="primary", use_container_width=True):
+                with st.spinner("Configuring kernel namespaces and veth topology..."):
+                    ok, msg = LAB_TOPOLOGY.setup()
+                    if ok:
+                        st.session_state["demo_last_message"] = {
+                            "type": "success",
+                            "text": f"✅ Lab initialized: {msg}. Attacker ({LAB_TOPOLOGY.attacker_ip}) and Victim ({LAB_TOPOLOGY.victim_ip}) namespaces active.",
+                        }
+                    else:
+                        st.session_state["demo_last_message"] = {
+                            "type": "warning",
+                            "text": f"⚠️ Lab setup notice: {msg}",
+                        }
+                    st.rerun()
+
+        with c_l2:
+            if st.button("🧹 Stop & Clean Up Lab", key="btn_teardown_lab", use_container_width=True):
+                with st.spinner("Tearing down lab namespaces..."):
+                    if live_mgr.is_running:
+                        LAB_TOPOLOGY.stop_live_capture(live_mgr)
+                        st.session_state["live_capture_active"] = False
+                    ok, msg = LAB_TOPOLOGY.teardown()
+                    st.session_state["demo_last_message"] = {
+                        "type": "info",
+                        "text": f"✅ Lab cleanup: {msg}. Host network interfaces restored clean.",
+                    }
+                    st.rerun()
+
+        with c_l3:
+            if st.button("🔄 Refresh", key="btn_refresh_lab_stat", use_container_width=True):
+                st.rerun()
+
+        # Row 2: Live Monitoring Controls
+        c_m1, c_m2, c_m3 = st.columns([1.2, 1.2, 0.8])
+        with c_m1:
+            if not is_cap_running:
+                if st.button("📡 Start Live Monitoring", key="btn_start_netns_mon", use_container_width=True):
+                    if not is_lab_created:
+                        st.session_state["demo_last_message"] = {
+                            "type": "warning",
+                            "text": "Cannot start live monitoring: isolated lab is not set up. Click 'Start Isolated Lab' first.",
+                        }
+                        st.rerun()
+                    else:
+                        with st.spinner("Binding raw sniffer on victim veth and starting IPC receiver..."):
+                            ok, msg = LAB_TOPOLOGY.start_live_capture(live_mgr)
+                            if ok:
+                                st.session_state["live_capture_active"] = True
+                                st.session_state["demo_last_message"] = {
+                                    "type": "success",
+                                    "text": f"🟢 Live Monitoring Active: {msg}. Sniffing frames on {LAB_TOPOLOGY.veth_victim}.",
+                                }
+                            else:
+                                st.session_state["demo_last_message"] = {
+                                    "type": "error",
+                                    "text": f"❌ Failed to start monitoring: {msg}",
+                                }
+                            st.rerun()
+            else:
+                st.info("📡 **Live Monitoring Active**")
+
+        with c_m2:
+            if is_cap_running:
+                if st.button("⏹ Stop Monitoring", key="btn_stop_netns_mon", type="primary", use_container_width=True):
+                    with st.spinner("Stopping capture worker, flushing unclosed flows, and evaluating..."):
+                        stats = LAB_TOPOLOGY.stop_live_capture(live_mgr)
+                        st.session_state["live_capture_active"] = False
+                        st.session_state["demo_last_message"] = {
+                            "type": "info",
+                            "text": f"⏹ Monitoring Stopped: Flushed and evaluated {len(live_mgr.completed_flows)} flow(s). Packets sniffed: {stats.get('packets_captured', 0)}.",
+                        }
+                        st.rerun()
+            else:
+                st.caption("Monitoring is idle.")
+
+        with c_m3:
+            if st.button("🧹 Clear", key="btn_clear_events_netns", use_container_width=True):
+                event_mgr.clear()
+                st.session_state["demo_selected_event_id"] = None
+                st.session_state.pop("selector_event_id", None)
+                st.session_state["demo_last_message"] = {"type": "info", "text": "Event buffer cleared."}
+                st.rerun()
+
+        # Real-Time Telemetry Fragment (Auto-refreshes every 1s when capture worker is active)
+        st.markdown("##### 📊 Real-Time Wire Telemetry")
+        @st.fragment(run_every=1.0 if live_mgr.is_running else None)
+        def render_netns_telemetry() -> None:
+            l_stats = live_mgr.get_stats()
+            tm1, tm2, tm3, tm4 = st.columns(4)
+            tm1.metric("Packets Sniffed", l_stats.get("packets_captured", 0))
+            tm2.metric("Bytes Sniffed", l_stats.get("bytes_captured", 0))
+            tm3.metric("ICMP Frames", l_stats.get("icmp_packets", 0))
+            tm4.metric("Active Flows", l_stats.get("active_flows", 0))
+            if live_mgr.is_running:
+                st.caption(f"⚡ Promiscuous capture active on `{l_stats.get('interface', LAB_TOPOLOGY.veth_victim)}` in `{l_stats.get('netns', LAB_TOPOLOGY.victim_ns)}` | Auto-refreshing every 1s")
+
+        render_netns_telemetry()
+
+        # Interactive Terminal Ping Instructions
+        st.markdown("##### 💻 Demonstration Command (Run in Terminal)")
+        st.markdown("""
+        To execute genuine network traffic across the lab link, run one of the commands below in your terminal:
+        """)
+
+        tab_cmd_flood, tab_cmd_norm = st.tabs(["🚨 Controlled ICMP Flood", "🟢 Normal Ping"])
+
+        with tab_cmd_flood:
+            st.code("sudo ip netns exec xrlids_att_01 ping -c 500 -i 0.01 10.200.1.3", language="bash")
+            st.caption(
+                "**Expected Flow:** 500 rapid ICMP requests (100 pps) -> Captured on `veth_xrl_vic` -> "
+                "Flow completes within 2.0s idle timeout -> Rule: `RULE-ICMP-FLOOD` -> "
+                "RF ML: Honest BENIGN prediction (preserves ML score) -> Arbiter: `RULE` (Medium Severity) -> "
+                "DQN: Recommends `ISOLATE` / `RATE_LIMIT` -> Temporary firewall rule in `xrlids_vic_01` (if enabled)."
+            )
+
+        with tab_cmd_norm:
+            st.code("sudo ip netns exec xrlids_att_01 ping -c 5 10.200.1.3", language="bash")
+            st.caption(
+                "**Expected Flow:** 5 benign ICMP requests @ 1s -> Captured on `veth_xrl_vic` -> "
+                "Flow completes -> RF: `BENIGN` (< 0.50) -> Deterministic Rules: Clean -> "
+                "DQN: `ALLOW` -> Zero firewall rules installed -> All 5 pings delivered."
+            )
+
+    # PANEL: REAL FIREWALL ENFORCEMENT & OPERATOR CONTROLS
+    with col_fw:
+        st.markdown("#### 🛡️ Autonomous Response & Lab Firewall")
+
+        enforce_toggle = st.checkbox(
+            "⚡ Enable Real Firewall Enforcement",
+            value=st.session_state["operator_enforcement_enabled"],
+            key="cb_enforce_toggle_netns",
+            help="When enabled, authorized DQN ISOLATE responses install temporary iptables drop rules against verified lab attacker IP (10.200.1.2) inside victim namespace (xrlids_vic_01) with automatic expiry. When disabled, operates in safe dry-run advisory mode.",
+        )
+        if enforce_toggle != st.session_state["operator_enforcement_enabled"]:
+            st.session_state["operator_enforcement_enabled"] = enforce_toggle
+            pipeline.set_enforcement_mode(enforce_toggle)
+            st.session_state["demo_last_message"] = {
+                "type": "warning" if enforce_toggle else "info",
+                "text": "⚡ Operator Enablement: Real Firewall Enforcement ACTIVATED in victim namespace." if enforce_toggle else "⚪ Operator Enablement: Reverted to Safe Dry-run Advisory Mode.",
+            }
+            st.rerun()
+
+        ttl_slider = st.slider(
+            "Rule Expiry Window (TTL)",
+            min_value=10,
+            max_value=60,
+            value=int(st.session_state["firewall_ttl_seconds"]),
+            step=5,
+            format="%d seconds",
+            key="slider_ttl_netns",
+        )
+        st.session_state["firewall_ttl_seconds"] = float(ttl_slider)
+        fw_mgr.default_ttl_seconds = float(ttl_slider)
+
+        st.caption(f"""
+        **Firewall Safety Invariants:**
+        - **Target Namespace:** `{fw_mgr.netns or 'xrlids_vic_01'}` (Strict victim isolation — host iptables untouched)
+        - **Authorized Lab Subnet:** `10.200.1.0/24`
+        - **Immune Assets:** Gateway (`10.200.1.1`), Host LAN (`192.168.10.1`), DNS, Loopback
+        - **Current Mode:** `{'🚨 REAL ENFORCEMENT' if st.session_state['operator_enforcement_enabled'] else '⚪ SAFE DRY-RUN (Advisory)'}`
+        """)
+
+        # Active firewall rules display
+        active_rules = fw_mgr.get_active_rules()
+        if active_rules:
+            st.error(f"🚨 **Active Firewall Block Rules ({len(active_rules)}):**")
+            for r in active_rules:
+                st.markdown(f"""
+                - **Rule ID:** `{r['rule_id']}` | **Blocked IP:** `{r['source_ip']}`
+                - **Action:** `{r['action']}` | **Remaining TTL:** **{r['remaining_seconds']}s**
+                - **Packets Blocked:** **{r['packets_blocked']}** | **Target Netns:** `{fw_mgr.netns or 'xrlids_vic_01'}`
+                """)
+
+            c_fw1, c_fw2, c_fw3 = st.columns(3)
+            with c_fw1:
+                if st.button("🧪 Verify Block", key="btn_verify_block_netns", use_container_width=True):
+                    rep = fw_mgr.verify_traffic_blocked(active_rules[0]["source_ip"])
+                    st.session_state["demo_last_message"] = {
+                        "type": "error" if rep["is_blocked"] else "info",
+                        "text": f"Traffic Verification: Attacker `{rep['source_ip']}` traffic to `{rep['dest_ip']}` is CONFIRMED BLOCKED ({rep['probe_packets_dropped']}/{rep['probe_packets_sent']} probe packets dropped).",
+                    }
+                    st.rerun()
+            with c_fw2:
+                if st.button("🛡️ Rollback Rule", key="btn_rollback_rule_netns", type="primary", use_container_width=True):
+                    ok, msg, c_rep = fw_mgr.rollback_rule(active_rules[0]["rule_id"])
+                    st.session_state["demo_last_message"] = {
+                        "type": "success" if ok else "error",
+                        "text": f"✅ {msg} Nominal connectivity restored ({c_rep.get('test_pings_delivered', 4)}/4 test pings delivered).",
+                    }
+                    st.rerun()
+            with c_fw3:
+                if st.button("🔄 Check TTL", key="btn_check_ttl_netns", use_container_width=True):
+                    expired = fw_mgr.check_expirations()
+                    if expired:
+                        st.session_state["demo_last_message"] = {"type": "info", "text": f"Rule {expired[0].rule_id} expired. Connectivity restored."}
+                    st.rerun()
+        else:
+            st.success("🟢 **Firewall State:** Clean (Zero active blocks. All lab endpoints reach test service).")
+            if st.button("🧪 Test Connectivity Probe", key="btn_test_conn_netns", use_container_width=True):
+                sim = ScapyAttackSimulator()
+                rep = sim.test_ping_connectivity(firewall_filter_fn=fw_mgr.filter_packet, count=4)
+                st.session_state["demo_last_message"] = {
+                    "type": "success" if rep["success"] else "error",
+                    "text": f"Connectivity Probe: {rep['status']} between `{rep['source_ip']}` and `{rep['target_ip']}`.",
+                }
+                st.rerun()
+
+# ---------------------------------------------------------------------------
+# MODE B: SCAPY IN-MEMORY SIMULATION
+# ---------------------------------------------------------------------------
+elif demo_mode == "🧪 Scapy In-Memory Simulation":
+    fw_mgr.netns = None  # In-memory simulation does not wrap iptables in netns
+
     col_scen, col_fw = st.columns([1.3, 1.0], gap="large")
 
     with col_scen:
-        st.markdown("#### 🛠️ Scapy Traffic Generator & Isolated Lab")
-        if LAB_TOPOLOGY.is_real_kernel_netns:
-            st.warning("⚠️ **Namespace topology available, but scenario buttons currently run in-memory simulation; they do not transmit or capture packets on the veth link. Events are labelled `SIMULATION`.")
-        else:
-            st.info(f"🧪 **Scenario Mode:** `SIMULATION` — generated Scapy packets are processed in memory; no wire transmission/capture. {LAB_TOPOLOGY.setup_diagnostic}")
-        st.caption(f"Generates calibrated Scapy packet objects for an in-memory scenario targeting lab address `{LAB_TOPOLOGY.victim_ip}` from test source `{LAB_TOPOLOGY.attacker_ip}`.")
+        st.markdown("#### 🧪 Scapy In-Memory Scenario Generator")
+        st.info("🧪 **Scenario Mode:** `SIMULATION` — generated Scapy packets are processed in memory; no wire transmission/capture.")
+        st.caption(f"Generates calibrated Scapy packet objects targeting lab address `{LAB_TOPOLOGY.victim_ip}` from test source `{LAB_TOPOLOGY.attacker_ip}`.")
 
         scenario_choice = st.selectbox(
             "Select Traffic Scenario",
@@ -125,35 +384,16 @@ if traffic_source == "Scapy / Live Network Traffic":
             key="demo_scenario_choice",
         )
 
-        c_btn1, c_btn2, c_btn3 = st.columns([1.2, 1, 1])
+        c_btn1, c_btn2 = st.columns([1.2, 1])
         with c_btn1:
             run_btn = st.button("▶ Generate Scenario Traffic", key="btn_run_scenario", type="primary", use_container_width=True)
         with c_btn2:
-            if not st.session_state["live_capture_active"]:
-                if st.button("📡 Start Live Capture", key="btn_start_live", use_container_width=True):
-                    success, msg = live_mgr.start(interface="lo", allow_virtual_fallback=True)
-                    st.session_state["live_capture_active"] = True
-                    st.session_state["demo_last_message"] = {"type": "info", "text": f"Live Capture Active: {msg}"}
-                    st.rerun()
-            else:
-                if st.button("⏹ Stop Live Capture", key="btn_stop_live", use_container_width=True):
-                    stats = live_mgr.stop()
-                    st.session_state["live_capture_active"] = False
-                    st.session_state["demo_last_message"] = {"type": "info", "text": f"Live Capture Stopped. Flows evaluated: {len(live_mgr.completed_flows)}"}
-                    st.rerun()
-        with c_btn3:
-            if st.button("🧹 Clear Buffer", key="btn_clear_events", use_container_width=True):
+            if st.button("🧹 Clear Buffer", key="btn_clear_events_sim", use_container_width=True):
                 event_mgr.clear()
                 st.session_state["demo_selected_event_id"] = None
                 st.session_state.pop("selector_event_id", None)
                 st.session_state["demo_last_message"] = {"type": "info", "text": "Event buffer cleared."}
                 st.rerun()
-
-        # Capture status indicator
-        if st.session_state["live_capture_active"]:
-            st.success("🟢 **Live Capture Status:** RUNNING (Promiscuous Packet Sniffing Active on `lo`)")
-        else:
-            st.info("⚪ **Live Capture Status:** IDLE (Packet sniffer listening on demand)")
 
         # Scenario execution logic
         if run_btn:
@@ -167,7 +407,6 @@ if traffic_source == "Scapy / Live Network Traffic":
                 else:
                     scen_id = "scenario_b_port_scan"
 
-                # Check if attacker IP is actively blocked by firewall
                 attacker_ip = LAB_TOPOLOGY.attacker_ip
                 is_attacker_blocked = fw_mgr.is_source_blocked(attacker_ip)
 
@@ -178,7 +417,6 @@ if traffic_source == "Scapy / Live Network Traffic":
                 )
 
                 if events:
-                    # Pick primary/highest severity event
                     attack_events = [e for e in events if e.hybrid_verdict != "BENIGN"]
                     newest_evt = attack_events[-1] if attack_events else events[-1]
                     st.session_state["demo_selected_event_id"] = newest_evt.event_id
@@ -211,83 +449,39 @@ if traffic_source == "Scapy / Live Network Traffic":
                     }
                     st.rerun()
 
-    # PANEL: REAL FIREWALL ENFORCEMENT & OPERATOR CONTROLS
     with col_fw:
-        st.markdown("#### 🛡️ Autonomous Response & Firewall Actuation")
-
+        st.markdown("#### 🛡️ Autonomous Response & Simulation State")
+        st.info("Simulation mode runs in safe advisory dry-run. Operator toggle can simulate rule state transitions.")
         enforce_toggle = st.checkbox(
-            "⚡ Enable Real Firewall Enforcement",
+            "⚡ Enable Simulation Rule Tracking",
             value=st.session_state["operator_enforcement_enabled"],
-            key="cb_enforce_toggle",
-            help="When enabled, authorized DQN ISOLATE responses install temporary firewall drop rules against verified lab attacker IP (10.200.1.2) with automatic expiry. When disabled, operates in safe dry-run advisory mode.",
+            key="cb_enforce_toggle_sim",
         )
         if enforce_toggle != st.session_state["operator_enforcement_enabled"]:
             st.session_state["operator_enforcement_enabled"] = enforce_toggle
             pipeline.set_enforcement_mode(enforce_toggle)
-            st.session_state["demo_last_message"] = {
-                "type": "warning" if enforce_toggle else "info",
-                "text": "⚡ Operator Enablement: Real Firewall Enforcement ACTIVATED." if enforce_toggle else "⚪ Operator Enablement: Reverted to Safe Dry-run Advisory Mode.",
-            }
             st.rerun()
 
-        ttl_slider = st.slider("Rule Expiry Window (TTL)", min_value=10, max_value=60, value=int(st.session_state["firewall_ttl_seconds"]), step=5, format="%d seconds")
+        ttl_slider = st.slider("Rule Expiry Window (TTL)", min_value=10, max_value=60, value=int(st.session_state["firewall_ttl_seconds"]), step=5, format="%d seconds", key="slider_ttl_sim")
         st.session_state["firewall_ttl_seconds"] = float(ttl_slider)
         fw_mgr.default_ttl_seconds = float(ttl_slider)
 
-        st.caption(f"""
-        **Firewall Safety Invariants:**
-        - **Authorized Subnet:** `10.200.1.0/24` (Strict lab isolation)
-        - **Immune Assets:** Gateway (`10.200.1.1`), Production (`192.168.10.1`), DNS, Loopback
-        - **Current Mode:** `{'🚨 REAL ENFORCEMENT' if st.session_state['operator_enforcement_enabled'] else '⚪ SAFE DRY-RUN (Advisory)'}`
-        """)
-
-        # Active firewall rules display
         active_rules = fw_mgr.get_active_rules()
         if active_rules:
-            st.error(f"🚨 **Active Firewall Block Rules ({len(active_rules)}):**")
+            st.error(f"🚨 **Active Block Rules ({len(active_rules)}):**")
             for r in active_rules:
-                st.markdown(f"""
-                - **Rule ID:** `{r['rule_id']}` | **Blocked IP:** `{r['source_ip']}`
-                - **Action:** `{r['action']}` | **Remaining TTL:** **{r['remaining_seconds']}s**
-                - **Packets Blocked:** **{r['packets_blocked']}** | **Backend:** `{r.get('verification_details', {}).get('backend', 'LAB_FIREWALL')}`
-                """)
-
-            c_fw1, c_fw2, c_fw3 = st.columns(3)
-            with c_fw1:
-                if st.button("🧪 Verify Block", key="btn_verify_block", use_container_width=True):
-                    rep = fw_mgr.verify_traffic_blocked(active_rules[0]["source_ip"])
-                    st.session_state["demo_last_message"] = {
-                        "type": "error" if rep["is_blocked"] else "info",
-                        "text": f"Traffic Verification: Attacker `{rep['source_ip']}` traffic to `{rep['dest_ip']}` is CONFIRMED BLOCKED ({rep['probe_packets_dropped']}/{rep['probe_packets_sent']} probe packets dropped).",
-                    }
-                    st.rerun()
-            with c_fw2:
-                if st.button("🛡️ Rollback Rule", key="btn_rollback_rule", type="primary", use_container_width=True):
-                    ok, msg, c_rep = fw_mgr.rollback_rule(active_rules[0]["rule_id"])
-                    st.session_state["demo_last_message"] = {
-                        "type": "success" if ok else "error",
-                        "text": f"✅ {msg} Nominal connectivity restored ({c_rep.get('test_pings_delivered', 4)}/4 test pings delivered).",
-                    }
-                    st.rerun()
-            with c_fw3:
-                if st.button("🔄 Check TTL", key="btn_check_ttl", use_container_width=True):
-                    expired = fw_mgr.check_expirations()
-                    if expired:
-                        st.session_state["demo_last_message"] = {"type": "info", "text": f"Rule {expired[0].rule_id} expired. Connectivity restored."}
-                    st.rerun()
-        else:
-            st.success("🟢 **Firewall State:** Clean (Zero active blocks. All lab endpoints reach test service).")
-            if st.button("🧪 Test Connectivity Probe", key="btn_test_conn", use_container_width=True):
-                sim = ScapyAttackSimulator()
-                rep = sim.test_ping_connectivity(firewall_filter_fn=fw_mgr.filter_packet, count=4)
-                st.session_state["demo_last_message"] = {
-                    "type": "success" if rep["success"] else "error",
-                    "text": f"Connectivity Probe: {rep['status']} between `{rep['source_ip']}` and `{rep['target_ip']}`.",
-                }
+                st.markdown(f"- **Rule ID:** `{r['rule_id']}` | **Blocked IP:** `{r['source_ip']}` | **Remaining TTL:** **{r['remaining_seconds']}s**")
+            if st.button("🛡️ Rollback Rule", key="btn_rollback_sim", use_container_width=True):
+                fw_mgr.rollback_rule(active_rules[0]["rule_id"])
                 st.rerun()
+        else:
+            st.success("🟢 **Firewall State:** Clean (Zero active blocks).")
 
+# ---------------------------------------------------------------------------
+# MODE C: PCAP WIRE REPLAY
+# ---------------------------------------------------------------------------
 else:
-    # ------------------------------------------------ PCAP Wire Replay Mode
+    fw_mgr.netns = None
     st.markdown("#### 📁 Offline PCAP Wire Capture Replay")
     st.caption("Replays real captured network packets through the identical operational pipeline (Feature extraction, RF model, independent Rules, TreeSHAP, Dueling DQN, and Safety Gate).")
     st.warning("⚠️ **PCAP Replay Safety Guarantee:** PCAP replay represents recorded offline wire capture. It does NOT generate a live network sender and can NEVER trigger actual kernel firewall mutations. Responses are strictly advisory.")
@@ -327,7 +521,7 @@ else:
                         break
                 service.stop()
 
-                builder = CanonicalFlowBuilder(idle_timeout_s=120.0)
+                builder = CanonicalFlowBuilder(idle_timeout_s=120.0, icmp_idle_timeout_s=2.0)
                 flows: list[CanonicalFlow] = []
                 for p in pkts:
                     flows.extend(builder.process_packet(p))
@@ -390,11 +584,10 @@ events = event_mgr.get_recent_events(
 )
 
 if not events:
-    st.info("No security events currently recorded. Generate a scenario or replay a PCAP above to populate events.")
+    st.info("No security events currently recorded. Generate a real ping, run a scenario, or replay a PCAP above to populate events.")
 else:
     table_data = []
     for ev in list(reversed(events)):
-        # Determine exact firewall execution result
         exec_rep = ev.response.get("execution_report", {})
         fw_status = exec_rep.get("firewall_rule", {}).get("status", "DRY_RUN") if exec_rep else "DRY_RUN"
         is_adv = exec_rep.get("is_advisory", True) if exec_rep else True
@@ -412,7 +605,6 @@ else:
             fw_disp = "ADVISORY (Dry-run)"
             verif_disp = "VERIFIED_ADVISORY"
 
-        # Determine Rule Verdict string
         rule_list = ev.rule_matches
         rule_disp = ", ".join([r.get("rule_id") for r in rule_list]) if rule_list else "CLEAN (0 rules)"
 
@@ -453,7 +645,6 @@ else:
     # -----------------------------------------------------------------------
     st.markdown(f"### 🔍 Lifecycle Provenance: Event `{selected_event.event_id}`")
 
-    # Complete Lifecycle Visualizer
     exec_rep = selected_event.response.get("execution_report", {})
     fw_rule = exec_rep.get("firewall_rule", {}) if exec_rep else {}
     fw_status = fw_rule.get("status", "DRY_RUN") if exec_rep else "DRY_RUN"
@@ -623,6 +814,7 @@ else:
             - **Rule ID:** `{fw_rule.get('rule_id')}`
             - **Attacker Source Blocked:** `{fw_rule.get('source_ip')}` ➔ Protected Service `{fw_rule.get('dest_ip')}`
             - **Action:** `{fw_rule.get('action')}` (DROP)
+            - **Target Netns:** `{fw_mgr.netns or 'xrlids_vic_01'}`
             - **Command Executed:** `{fw_rule.get('command_executed')}`
             - **TTL Window:** {fw_rule.get('ttl_seconds')}s (Expires automatically)
             - **Packets Blocked:** **{fw_rule.get('packets_blocked')}**

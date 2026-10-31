@@ -574,7 +574,7 @@ class ConcurrencyHarness:
         # Final watchdog sweep and cleanup of remaining committed transactions
         expired = self.watchdog.check_expired()
         for rec in list(records):
-            if rec.state == TransactionState.COMMITTED and rec.enforced_action != Action.ALLOW.name:
+            if rec.state == TransactionState.COMMITTED:
                 rb = self.tx_manager.rollback_transaction(rec.transaction_id, reason="SOAK_FINAL_CLEANUP")
                 rollbacks.append(rb)
 

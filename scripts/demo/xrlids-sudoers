@@ -1,0 +1,4 @@
+# /etc/sudoers.d/xrlids - Narrowly scoped authorization for XRL-IDARS Lab Helper
+# Install with: sudo cp scripts/demo/xrlids-sudoers /etc/sudoers.d/xrlids && sudo chmod 0440 /etc/sudoers.d/xrlids
+%sudo ALL=(ALL) NOPASSWD: /home/rishikesh/Desktop/fyp-xrlids/.venv/bin/python /home/rishikesh/Desktop/fyp-xrlids/scripts/demo/lab_privileged_helper.py *
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/python3 /home/rishikesh/Desktop/fyp-xrlids/scripts/demo/lab_privileged_helper.py *

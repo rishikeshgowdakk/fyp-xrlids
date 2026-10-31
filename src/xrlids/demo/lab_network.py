@@ -26,6 +26,7 @@ from typing import Any
 
 from xrlids.capture.live_manager import LiveCaptureManager
 from xrlids.capture.scapy_service import scapy_packet_to_packet_info
+from xrlids.demo.privileged_runner import get_lab_status, run_helper
 from xrlids.demo.scapy_simulator import (
     ATTACKER_IP,
     VICTIM_IP,
@@ -64,80 +65,55 @@ class LabNetworkTopology:
 
     def _probe_capabilities(self) -> None:
         """Check whether operating system permits creation of real network namespaces."""
+        stat = get_lab_status()
+        if stat.get("lab_created") and stat.get("connectivity_ok"):
+            self.is_real_kernel_netns = True
+            self.setup_diagnostic = "Isolated lab namespaces active and verified."
+            return
+
         if os.geteuid() == 0:
             self.setup_diagnostic = "Privileged execution verified (euid=0)."
             return
 
-        # Attempt test probe
-        try:
-            res = subprocess.run(["ip", "netns", "list"], capture_output=True, text=True, timeout=1.0, check=False)
-            if res.returncode == 0:
-                self.setup_diagnostic = "Non-root execution with CAP_NET_ADMIN."
-                return
-        except Exception:
-            pass
-
-        self.setup_diagnostic = "Unprivileged execution (euid != 0): Linux network namespace creation restricted by OS."
+        self.setup_diagnostic = "Privilege escalation required to create kernel network namespaces."
 
     def setup(self) -> tuple[bool, str]:
-        """Set up the isolated network namespace and veth topology if privileged."""
-        if os.geteuid() != 0:
-            self.is_real_kernel_netns = False
-            return False, self.setup_diagnostic
-
-        try:
-            # 1. Clean existing namespaces if present
-            self.teardown()
-
-            # 2. Add namespaces
-            subprocess.run(["ip", "netns", "add", self.attacker_ns], check=True, capture_output=True)
-            subprocess.run(["ip", "netns", "add", self.victim_ns], check=True, capture_output=True)
-
-            # 3. Create veth pair
-            subprocess.run(
-                ["ip", "link", "add", self.veth_attacker, "type", "veth", "peer", "name", self.veth_victim],
-                check=True,
-                capture_output=True,
-            )
-
-            # 4. Move interfaces into namespaces
-            subprocess.run(["ip", "link", "set", self.veth_attacker, "netns", self.attacker_ns], check=True, capture_output=True)
-            subprocess.run(["ip", "link", "set", self.veth_victim, "netns", self.victim_ns], check=True, capture_output=True)
-
-            # 5. Configure IPs and bring links up
-            subprocess.run(
-                ["ip", "netns", "exec", self.attacker_ns, "ip", "addr", "add", f"{self.attacker_ip}/24", "dev", self.veth_attacker],
-                check=True,
-                capture_output=True,
-            )
-            subprocess.run(
-                ["ip", "netns", "exec", self.victim_ns, "ip", "addr", "add", f"{self.victim_ip}/24", "dev", self.veth_victim],
-                check=True,
-                capture_output=True,
-            )
-            subprocess.run(["ip", "netns", "exec", self.attacker_ns, "ip", "link", "set", "dev", self.veth_attacker, "up"], check=True, capture_output=True)
-            subprocess.run(["ip", "netns", "exec", self.victim_ns, "ip", "link", "set", "dev", self.veth_victim, "up"], check=True, capture_output=True)
-            subprocess.run(["ip", "netns", "exec", self.attacker_ns, "ip", "link", "set", "dev", "lo", "up"], check=True, capture_output=True)
-            subprocess.run(["ip", "netns", "exec", self.victim_ns, "ip", "link", "set", "dev", "lo", "up"], check=True, capture_output=True)
-
+        """Set up the isolated network namespace and veth topology via privileged runner."""
+        ok, data, msg = run_helper("setup")
+        if ok:
             self.is_real_kernel_netns = True
+            self.setup_diagnostic = data.get("message", "Linux kernel network namespaces and veth pair configured.")
             logger.info("Isolated Linux network namespaces and veth pair successfully configured.")
-            return True, "Linux kernel network namespaces and veth pair configured."
-        except Exception as exc:
+            return True, self.setup_diagnostic
+        else:
             self.is_real_kernel_netns = False
-            self.setup_diagnostic = f"Failed to configure kernel netns: {exc}"
-            logger.warning("Network namespace setup failed: %s", exc)
+            self.setup_diagnostic = f"Failed to configure kernel netns: {msg}"
+            logger.warning("Network namespace setup failed: %s", msg)
             return False, self.setup_diagnostic
 
-    def teardown(self) -> None:
-        """Tear down lab namespaces and interfaces."""
-        if os.geteuid() == 0:
-            for ns in (self.attacker_ns, self.victim_ns):
-                try:
-                    subprocess.run(["ip", "netns", "del", ns], capture_output=True, check=False)
-                except Exception:
-                    pass
+    def teardown(self) -> tuple[bool, str]:
+        """Tear down lab namespaces and interfaces safely."""
+        ok, data, msg = run_helper("teardown")
         self.is_real_kernel_netns = False
+        self.setup_diagnostic = msg
+        return ok, msg
+
+    def get_status(self) -> dict[str, Any]:
+        """Query real-time status of lab topology and capture."""
+        stat = get_lab_status()
+        self.is_real_kernel_netns = bool(stat.get("lab_created") and stat.get("connectivity_ok"))
+        return stat
+
+    def start_live_capture(self, live_mgr: LiveCaptureManager) -> tuple[bool, str]:
+        """Start genuine packet capture on veth_xrl_vic inside victim namespace."""
+        stat = self.get_status()
+        if not stat.get("lab_created"):
+            return False, "Cannot start live capture: isolated lab is not set up. Click 'Start Isolated Lab' first."
+        return live_mgr.start_netns_capture(netns=self.victim_ns, interface=self.veth_victim)
+
+    def stop_live_capture(self, live_mgr: LiveCaptureManager) -> dict[str, Any]:
+        """Stop packet capture worker and flush pending flows."""
+        return live_mgr.stop()
 
     def transmit_scenario(
         self,

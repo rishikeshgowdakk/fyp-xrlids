@@ -303,14 +303,22 @@ class CanonicalFlowBuilder:
     def __init__(
         self,
         idle_timeout_s: float = 120.0,
+        icmp_idle_timeout_s: float = 2.0,
         clock_mode: str = "packet",  # "packet" or "wall_clock"
     ) -> None:
         if clock_mode not in ("packet", "wall_clock"):
             raise ValueError(f"Invalid clock_mode '{clock_mode}', must be 'packet' or 'wall_clock'")
         self.idle_timeout_s = idle_timeout_s
+        self.icmp_idle_timeout_s = icmp_idle_timeout_s
         self.clock_mode = clock_mode
         self.active_flows: dict[CanonicalFlowKey, CanonicalFlow] = {}
         self.stats = FlowBuilderStats()
+
+    def get_flow_timeout(self, flow: CanonicalFlow) -> float:
+        """Return the idle timeout for the flow based on protocol."""
+        if flow.key.protocol == 1:  # ICMP
+            return self.icmp_idle_timeout_s
+        return self.idle_timeout_s
 
     def process_packet(self, pkt: PacketInfo) -> list[CanonicalFlow]:
         """Ingest a packet, expire timed-out flows, and return newly completed flows."""
@@ -318,11 +326,12 @@ class CanonicalFlowBuilder:
         current_time = time.monotonic() if self.clock_mode == "wall_clock" else pkt.timestamp
         completed: list[CanonicalFlow] = []
 
-        # 1. Check expiration for existing flows (120s idle timeout fallback)
+        # 1. Check expiration for existing flows (protocol-aware idle timeout)
         expired_keys = []
         for key, flow in self.active_flows.items():
             ref_time = current_time if self.clock_mode == "wall_clock" else pkt.timestamp
-            if ref_time - flow.last_time > self.idle_timeout_s:
+            timeout = self.get_flow_timeout(flow)
+            if ref_time - flow.last_time > timeout:
                 flow.is_closed = True
                 flow.closed_reason = "TIMEOUT"
                 completed.append(flow)
@@ -370,7 +379,8 @@ class CanonicalFlowBuilder:
         expired_keys = []
 
         for key, flow in self.active_flows.items():
-            if current_time - flow.last_time > self.idle_timeout_s:
+            timeout = self.get_flow_timeout(flow)
+            if current_time - flow.last_time > timeout:
                 flow.is_closed = True
                 flow.closed_reason = "TIMEOUT"
                 completed.append(flow)
