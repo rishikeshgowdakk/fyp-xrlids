@@ -34,7 +34,7 @@ from xrlids.demo.scapy_simulator import (
     validate_target_safety,
 )
 from xrlids.events.schema import SecurityEvent
-from xrlids.flow.canonical_builder import CanonicalFlow
+from xrlids.flow.canonical_builder import CanonicalFlow, CanonicalFlowBuilder
 from xrlids.pipeline.active_pipeline import ActiveInferencePipeline
 from xrlids.utils.logging_utils import get_logger
 
