@@ -2,25 +2,10 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-import sys
-import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-if str(REPO_ROOT / "src") not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT / "src"))
-
-from dashboard.session_init import ensure_session_state
-from xrlids.events.manager import EventManager
-from xrlids.pipeline.active_pipeline import ActiveInferencePipeline
-
 st.set_page_config(page_title="Overview - XRL-IDARS", page_icon="🛡️", layout="wide")
-
-event_mgr, pipeline, live_mgr = ensure_session_state()
 
 st.title("🛡️ XRL-IDARS — System Overview & Architecture")
 st.markdown("Explainable Reinforcement Learning-Based Intrusion Detection and Autonomous Response System combining sub-millisecond Random Forest perception on 10 canonical flow features ($R_{10}$), exact local TreeSHAP attribution, and a causal Dueling Deep Q-Network response policy under an inviolable deterministic safety shield.")
@@ -165,7 +150,7 @@ animated_architecture_html = """
   <path d="M 700 255 L 660 255" class="flow-line" marker-end="url(#arrow)"/>
   <!-- Dueling DQN to Safety Gate -->
   <path d="M 540 255 L 500 255" class="flow-line" marker-end="url(#arrow)"/>
-  <!-- Safety Gate to Advisory Actuator -->
+  <!-- Safety Gate to Policy-Gated Response -->
   <path d="M 380 255 L 340 255" class="flow-line" marker-end="url(#arrow)"/>
   <!-- Advisory Actuator to Event Manager -->
   <path d="M 220 255 L 180 255" class="flow-line" marker-end="url(#arrow)"/>
@@ -207,8 +192,8 @@ animated_architecture_html = """
   <g transform="translate(480, 45)">
     <rect class="node-box" width="120" height="60" fill="url(#gradRF)" stroke="#38bdf8" style="animation: pulseGlow 2.5s infinite;"/>
     <text class="node-title" x="60" y="24" fill="#ffffff">RANDOM FOREST</text>
-    <text class="node-sub" x="60" y="40" fill="#e0f2fe">Sole Live ML (&lt;0.8ms)</text>
-    <text class="badge-tag" x="60" y="52" fill="#7dd3fc">F1 = 0.9512</text>
+    <text class="node-sub" x="60" y="40" fill="#e0f2fe">Operational ML Detector</text>
+    <text class="badge-tag" x="60" y="52" fill="#7dd3fc">R10 Feature Input</text>
   </g>
 
   <!-- 4b. Deterministic Rules -->
@@ -265,7 +250,7 @@ animated_architecture_html = """
     <rect class="node-box" width="120" height="60" fill="url(#gradIngest)" stroke="#94a3b8"/>
     <text class="node-title" x="60" y="24" fill="#f8fafc">ACTUATOR</text>
     <text class="node-sub" x="60" y="40">Advisory / Dry-Run</text>
-    <text class="node-sub" x="60" y="52">0 Host Mutations</text>
+    <text class="node-sub" x="60" y="52">Lab-Safe Actuation</text>
   </g>
 
   <!-- 11. Security Event Manager -->
@@ -308,7 +293,7 @@ animated_architecture_html = """
   <!-- Clarification Banner in SVG -->
   <rect x="420" y="365" width="460" height="18" rx="4" fill="#0f172a" stroke="#10b981" stroke-width="0.8"/>
   <text x="650" y="378" font-size="9" fill="#10b981" font-weight="600" text-anchor="middle">
-    Asynchronous Persistence Branch (O(1) Enqueue) — Non-Blocking &amp; Decoupled from Detection Path
+    Event Audit & Persistence
   </text>
 </svg>
 </div>
