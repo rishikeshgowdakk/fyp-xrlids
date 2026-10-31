@@ -78,6 +78,12 @@ from xrlids.response.dqn.network import DuelingQNetwork  # noqa: E402
 from xrlids.response.safety import DEFAULT_CRITICAL_HOSTS, DeterministicSafetyGate  # noqa: E402
 from xrlids.response.state import StateBuilder  # noqa: E402
 from xrlids.response.types import Action, ActionSpaceMode  # noqa: E402
+from xrlids.response.firewall import (  # noqa: E402
+    AUTHORIZED_LAB_SUBNET,
+    DEFAULT_AUTHORIZED_ATTACKER_IP,
+    DEFAULT_PROTECTED_VICTIM_IP,
+    LabFirewallManager,
+)
 from dashboard.workbench_data import (  # noqa: E402
     BENCHMARK_REGISTRY,
     get_comparison_data,
@@ -378,6 +384,18 @@ class LiveSession:
         self.fusion_evaluations = 0
         self.dqn_evaluations = 0
         self.safety_overrides = 0
+        self.firewall_manager = LabFirewallManager(
+            enforcement_enabled=False,
+            default_ttl_seconds=30.0,
+            allowed_subnet=AUTHORIZED_LAB_SUBNET,
+        )
+        try:
+            self._device_tracker = DeviceTracker.from_system("wlo1")
+        except Exception:
+            try:
+                self._device_tracker = DeviceTracker.from_system()
+            except Exception:
+                self._device_tracker = None
         self._init_dqn_policy()
 
     def _init_dqn_policy(self) -> None:
@@ -630,7 +648,7 @@ class LiveSession:
                         on_packet_emitted=_on_pkt,
                     )
                     # Flush any half-open / active flows from simulator
-                    time.sleep(0.05)
+                    time.sleep(0.02)
                     with self._lock:
                         mon = self._monitor
                     if mon is not None:
@@ -673,6 +691,8 @@ class LiveSession:
     def reset_demo(self) -> dict[str, Any]:
         """Reset demo session counters, buffers, and event timeline."""
         with self._lock:
+            if hasattr(self, "firewall_manager"):
+                self.firewall_manager.clear()
             self.packets = 0
             self.total_bytes = 0
             self.flow_count = 0
@@ -754,17 +774,33 @@ class LiveSession:
                 else:
                     latency_summary[k] = {"p50": 0.0, "p95": 0.0, "p99": 0.0}
 
+            # Check firewall rule expirations
+            expired = self.firewall_manager.check_expirations()
+            for exp_rule in expired:
+                self.events.append({
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "type": "FIREWALL_EXPIRED",
+                    "message": f"Firewall Rule #{exp_rule.rule_id} expired. Traffic restored to {exp_rule.source_ip}.",
+                    "source": "FIREWALL",
+                })
+
             threat_count = sum(1 for f in self.flows if f.get("prediction_class") == 1 or f.get("rule_triggered"))
             recent_flows = list(self.flows)[-40:]
             recent_flows.reverse()
 
             latest_flow = self.flows[-1] if self.flows else None
+            active_rules = self.firewall_manager.get_active_rules()
+            is_blocked = self.firewall_manager.is_source_blocked("10.200.1.2")
+            device_data = self.device_snapshot()
             response_info = {
                 "dqn_action": latest_flow.get("dqn_action") if latest_flow else "ALLOW",
                 "enforced_action": latest_flow.get("enforced_action") if latest_flow else "ALLOW",
                 "safety_override": latest_flow.get("safety_override") if latest_flow else False,
                 "override_reason": latest_flow.get("override_reason") if latest_flow else None,
-                "mode": "ADVISORY / DRY_RUN (Zero network mutations)",
+                "mode": "ACTIVE LAB FIREWALL ENFORCEMENT" if self.firewall_manager.enforcement_enabled else "ADVISORY / DRY_RUN",
+                "is_blocked": is_blocked,
+                "active_rule_count": len(active_rules),
+                "active_rules": active_rules,
             }
 
             mode_display = "ISOLATED LAB" if self.mode in ("isolated_lab", "live") else ("PCAP REPLAY" if self.mode == "pcap" else "DATASET STREAM")
@@ -838,6 +874,15 @@ class LiveSession:
                     "queue_drops": 0,
                     "capture_errors": 0,
                 },
+                "firewall": {
+                    "enforcement_enabled": self.firewall_manager.enforcement_enabled,
+                    "active_rules": active_rules,
+                    "history": self.firewall_manager.get_history()[-20:],
+                    "is_attacker_blocked": is_blocked,
+                },
+                "network": None if (self.mode == "sample") else device_data.get("network"),
+                "devices": [] if (self.mode == "sample") else device_data.get("devices", []),
+                "device_counters": {} if (self.mode == "sample") else device_data.get("counters", {}),
                 "latest_alert": dict(self.alerts[-1]) if self.alerts else None,
             }
 
@@ -898,25 +943,44 @@ class LiveSession:
             return out.getvalue()
 
     def device_snapshot(self) -> dict[str, Any]:
-        """Return the passive device-discovery view (empty outside live mode)."""
+        """Return the passive device-discovery view."""
         with self._lock:
             tracker = self._device_tracker
+        if tracker is None:
+            try:
+                tracker = DeviceTracker.from_system("wlo1")
+                with self._lock:
+                    self._device_tracker = tracker
+            except Exception:
+                try:
+                    tracker = DeviceTracker.from_system()
+                    with self._lock:
+                        self._device_tracker = tracker
+                except Exception:
+                    pass
         if tracker is None:
             return {
                 "scope": "passive-observed",
                 "network": None,
                 "devices": [],
                 "counters": {"total": 0, "seen": 0, "cached": 0},
-                "note": (
-                    "Passive observation only. Device discovery is available in live capture "
-                    "mode; sample/simulator traffic is synthetic. No probes or scans are sent."
-                ),
+                "note": "Passive observation only. No active wifi interface detected.",
             }
         return tracker.snapshot()
 
     def snapshot(self) -> dict[str, Any]:
         """Return a consistent view of the session for the API/UI."""
         with self._lock:
+            # Check firewall rule expirations
+            expired = self.firewall_manager.check_expirations()
+            for exp_rule in expired:
+                self.events.append({
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "type": "FIREWALL_EXPIRED",
+                    "message": f"Firewall Rule #{exp_rule.rule_id} expired. Traffic restored to {exp_rule.source_ip}.",
+                    "source": "FIREWALL",
+                })
+
             elapsed = 0.0
             if self._t0 is not None:
                 end = self._t_end if self._t_end is not None else time.time()
@@ -987,12 +1051,18 @@ class LiveSession:
                 "recent_flows": list(self.flows)[-500:],
                 "recent_alerts": list(self.alerts)[-100:],
                 "injection": dict(self.injection) if self.injection else None,
-                "network": device_data.get("network"),
-                "devices": device_data.get("devices", []),
-                "device_counters": device_data.get("counters", {}),
+                "network": None if (self.mode == "sample") else device_data.get("network"),
+                "devices": [] if (self.mode == "sample") else device_data.get("devices", []),
+                "device_counters": {} if (self.mode == "sample") else device_data.get("counters", {}),
+                "firewall": {
+                    "enforcement_enabled": self.firewall_manager.enforcement_enabled,
+                    "active_rules": self.firewall_manager.get_active_rules(),
+                    "history": self.firewall_manager.get_history()[-20:],
+                    "is_attacker_blocked": self.firewall_manager.is_source_blocked("10.200.1.2"),
+                },
                 "rules": self.rule_engine.list_rules(),
                 "device_discovery": {
-                    "available": self.mode == "live",
+                    "available": False if (self.mode == "sample") else True,
                     "scope": device_data.get("scope", "passive-observed"),
                     "note": device_data.get("note", ""),
                 },
@@ -1006,11 +1076,12 @@ class LiveSession:
                     ),
                 },
                 "response_semantics": {
-                    "mode": "advisory",
+                    "mode": "active" if self.firewall_manager.enforcement_enabled else "advisory",
                     "note": (
-                        "All detection outputs are observational. No network intervention (firewall, routing, "
-                        "traffic control) is ever executed by this system."
+                        "Temporary safety-gated firewall isolation available for verified lab attacker IP. "
+                        "Critical assets, gateways, loopback and DNS are strictly protected."
                     ),
+                    "active_rules": self.firewall_manager.get_active_rules(),
                     "dqn_integration": "Dueling DQN response policy (models/dqn/dqn_4action_best.pt) actively evaluated in advisory mode via 6D state vectors; governed by DeterministicSafetyGate.",
                     "policy_model": "dqn_4action_best.pt",
                     "inference_engine": "UnifiedInferenceService (Random Forest + session-buffered LSTM + Fusion)",
@@ -1054,7 +1125,11 @@ class LiveSession:
         for k in self.latency_samples:
             self.latency_samples[k].clear()
         self.injection = None
-        self._device_tracker = None
+        if self._device_tracker is None:
+            try:
+                self._device_tracker = DeviceTracker.from_system("wlo1")
+            except Exception:
+                pass
 
     def _run(
         self,
@@ -1441,6 +1516,11 @@ class LiveSession:
             for pkt in packet_iter:
                 if self._stop_event.is_set():
                     break
+                # Active firewall filtering: drop packet if source IP is blocked
+                src = getattr(pkt, "src_ip", getattr(pkt, "source_ip", ""))
+                dst = getattr(pkt, "dst_ip", getattr(pkt, "dest_ip", ""))
+                if not self.firewall_manager.filter_packet(src, dst, pkt.packet_length):
+                    continue
                 with self._lock:
                     self.packets += 1
                     self.total_bytes += pkt.packet_length
@@ -1596,6 +1676,25 @@ class LiveSession:
                     "flow_id": observation.flow_id,
                 })
 
+            if observation.enforced_action == "ISOLATE":
+                src_ip = observation.src_endpoint.split(":")[0]
+                is_safe, _ = self.firewall_manager.validate_target_safety(src_ip)
+                if is_safe and not self.firewall_manager.is_source_blocked(src_ip):
+                    rule = self.firewall_manager.install_rule(
+                        source_ip=src_ip,
+                        action=Action.ISOLATE,
+                        ttl_seconds=30.0,
+                    )
+                    self.events.append({
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "type": "FIREWALL_BLOCKED",
+                        "message": f"🚨 FIREWALL ENFORCED: Blocked attacker IP {src_ip} [Rule #{rule.rule_id}] (TTL: {rule.ttl_seconds}s)",
+                        "source": "LAB_FIREWALL",
+                        "rule_id": rule.rule_id,
+                        "source_ip": src_ip,
+                        "status": "BLOCKED",
+                    })
+
     def _on_alert(self, alert: AlertEvent) -> None:
         with self._lock:
             self.alert_count += 1
@@ -1746,6 +1845,14 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self.send_json({"categories": DATASET_CATEGORIES})
         elif path == "/api/live/devices":
             self.send_json(LIVE_SESSION.device_snapshot())
+        elif path == "/api/live/firewall":
+            LIVE_SESSION.firewall_manager.check_expirations()
+            self.send_json({
+                "enforcement_enabled": LIVE_SESSION.firewall_manager.enforcement_enabled,
+                "active_rules": LIVE_SESSION.firewall_manager.get_active_rules(),
+                "history": LIVE_SESSION.firewall_manager.get_history()[-20:],
+                "is_attacker_blocked": LIVE_SESSION.firewall_manager.is_source_blocked("10.200.1.2"),
+            })
         elif path == "/api/live/interfaces":
             self.send_json(
                 {
@@ -1947,6 +2054,61 @@ class DashboardHandler(BaseHTTPRequestHandler):
             body = self.read_json_body()
             flow_id = int(body.get("flow_id", 1))
             self.send_json(LIVE_SESSION.explain_flow(flow_id))
+        elif parsed.path == "/api/live/block":
+            body = self.read_json_body()
+            src_ip = str(body.get("source_ip", DEFAULT_AUTHORIZED_ATTACKER_IP)).strip()
+            ttl = float(body.get("ttl", 30.0))
+            is_safe, msg = LIVE_SESSION.firewall_manager.validate_target_safety(src_ip)
+            if not is_safe:
+                self.send_json({"error": msg, "status": "rejected"}, status=HTTPStatus.FORBIDDEN)
+                return
+            rule = LIVE_SESSION.firewall_manager.install_rule(
+                source_ip=src_ip,
+                action=Action.ISOLATE,
+                ttl_seconds=ttl,
+            )
+            LIVE_SESSION.events.append({
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "type": "FIREWALL_BLOCKED",
+                "message": f"🚨 FIREWALL ENFORCED: Blocked attacker IP {src_ip} [Rule #{rule.rule_id}] (TTL: {rule.ttl_seconds}s)",
+                "source": "FIREWALL",
+                "rule_id": rule.rule_id,
+                "source_ip": src_ip,
+                "status": "BLOCKED",
+            })
+            self.send_json({"status": "blocked", "rule": rule.to_dict()})
+        elif parsed.path == "/api/live/unblock":
+            body = self.read_json_body()
+            src_ip = str(body.get("source_ip", DEFAULT_AUTHORIZED_ATTACKER_IP)).strip()
+            success, msg, report = LIVE_SESSION.firewall_manager.rollback_rule(src_ip)
+            LIVE_SESSION.events.append({
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "type": "FIREWALL_UNBLOCKED",
+                "message": f"Firewall Rule rolled back for {src_ip}: {msg}",
+                "source": "FIREWALL",
+            })
+            self.send_json({"status": "unblocked", "success": success, "message": msg, "report": report})
+        elif parsed.path == "/api/demo/ping-test":
+            body = self.read_json_body()
+            count = int(body.get("count", 4))
+            sim = ScapyAttackSimulator()
+            res = sim.test_ping_connectivity(
+                firewall_filter_fn=LIVE_SESSION.firewall_manager.filter_packet,
+                count=count,
+            )
+            LIVE_SESSION.events.append({
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "type": "CONNECTIVITY_PROBE",
+                "message": f"Ping probe ({res.get('source_ip')} -> {res.get('target_ip')}): {res.get('status')}",
+                "source": "PROBE",
+            })
+            self.send_json(res)
+        elif parsed.path == "/api/live/firewall/toggle":
+            if LIVE_SESSION.firewall_manager.enforcement_enabled:
+                LIVE_SESSION.firewall_manager.disable_enforcement()
+            else:
+                LIVE_SESSION.firewall_manager.enable_enforcement()
+            self.send_json({"enforcement_enabled": LIVE_SESSION.firewall_manager.enforcement_enabled})
         elif parsed.path == "/api/csv/evaluate":
             body = self.read_json_body()
             mode = str(body.get("mode", "custom")).strip().lower()

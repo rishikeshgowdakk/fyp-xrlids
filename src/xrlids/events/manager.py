@@ -198,8 +198,20 @@ class EventManager:
             except Exception as exc:
                 logger.warning("Failed to query events from PostgreSQL: %s. Falling back to ring buffer.", exc)
 
-        # In-memory buffer retrieval
+        # In-memory buffer retrieval (with disk JSONL replay fallback upon restart)
         with self._lock:
+            if not self._buffer and self.persist_to_disk and self.audit_log_path.exists():
+                try:
+                    with open(self.audit_log_path, "r", encoding="utf-8") as f:
+                        for line in f:
+                            line_str = line.strip()
+                            if line_str:
+                                try:
+                                    self._buffer.append(SecurityEvent.from_dict(json.loads(line_str)))
+                                except Exception:
+                                    pass
+                except Exception as exc:
+                    logger.debug("Failed to read JSONL audit fallback: %s", exc)
             events = list(self._buffer)
 
         if severity_filter and severity_filter.upper() != "ALL":

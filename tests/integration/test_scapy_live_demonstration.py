@@ -399,9 +399,10 @@ def test_unmocked_live_scapy_demonstration_lifecycle():
 
         # 10, 11. Verify DQN advisory response and safety gate
         resp = snap_c["response"]
-        assert resp["dqn_action"] in ("ALLOW", "ALERT", "RATE_LIMIT_100", "RATE_LIMIT_10", "BLOCK_HOST")
-        assert resp["enforced_action"] in ("ALLOW", "ALERT", "RATE_LIMIT_100", "RATE_LIMIT_10", "BLOCK_HOST")
-        assert "ADVISORY" in resp["mode"]
+        valid_actions = ("ALLOW", "ALERT", "RATE_LIMIT_100", "RATE_LIMIT_10", "BLOCK_HOST", "RATE_LIMIT", "ISOLATE")
+        assert resp["dqn_action"] in valid_actions
+        assert resp["enforced_action"] in valid_actions
+        assert ("ADVISORY" in resp["mode"] or "FIREWALL" in resp["mode"])
 
         # 12. Verify latency percentiles
         lat = snap_c["latency"]

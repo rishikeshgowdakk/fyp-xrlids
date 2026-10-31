@@ -80,6 +80,7 @@ class LiveCaptureManager:
         interface: str = "lo",
         bpf_filter: str = "ip",
         max_packets: int | None = None,
+        allow_virtual_fallback: bool = False,
     ) -> tuple[bool, str]:
         """Start live interface capture and background flow consumption."""
         with self._lock:
@@ -92,7 +93,7 @@ class LiveCaptureManager:
 
             # Verify permissions first
             has_perm, perm_msg = self.check_permissions()
-            if not has_perm:
+            if not has_perm and not allow_virtual_fallback:
                 self.status = "BLOCKED"
                 self.last_error = f"Permission Denied: {perm_msg}"
                 logger.warning("Live capture BLOCKED on %s: %s", interface, perm_msg)
@@ -100,7 +101,7 @@ class LiveCaptureManager:
 
             # Initialize capture service
             cfg = ScapyCaptureConfig(
-                interface=interface,
+                interface=interface if has_perm else None,
                 bpf_filter=bpf_filter,
                 max_packets=max_packets,
                 queue_size=10000,
@@ -113,21 +114,24 @@ class LiveCaptureManager:
             self.start_time = time.time()
             self.stop_time = 0.0
 
-            try:
-                self.service.start()
-            except Exception as exc:
-                self.status = "BLOCKED"
-                self.last_error = f"Failed to open interface {interface}: {exc}"
-                logger.error("Live capture service start failed: %s", exc)
-                return False, self.last_error
+            if has_perm:
+                try:
+                    self.service.start()
+                except Exception as exc:
+                    self.status = "BLOCKED"
+                    self.last_error = f"Failed to open interface {interface}: {exc}"
+                    logger.error("Live capture service start failed: %s", exc)
+                    return False, self.last_error
 
-            # Give worker 0.15s to verify socket binding
-            time.sleep(0.15)
-            if self.service.last_error:
-                self.status = "BLOCKED"
-                self.last_error = f"Socket Error on {interface}: {self.service.last_error}"
-                self.service.stop()
-                return False, self.last_error
+                # Give worker 0.15s to verify socket binding
+                time.sleep(0.15)
+                if self.service.last_error:
+                    self.status = "BLOCKED"
+                    self.last_error = f"Socket Error on {interface}: {self.service.last_error}"
+                    self.service.stop()
+                    return False, self.last_error
+            else:
+                logger.info("Starting live capture worker in Lab Virtual Tap mode on interface %s (Unprivileged sandbox)", interface)
 
             # Start background consumer thread
             self.status = "RUNNING"
@@ -137,8 +141,9 @@ class LiveCaptureManager:
                 name=f"LiveCaptureConsumer-{interface}",
             )
             self._consumer_thread.start()
-            logger.info("Live capture worker started on interface %s", interface)
-            return True, f"Capture active on interface {interface}"
+            mode_desc = "promiscuous raw capture" if has_perm else "lab virtual tap"
+            logger.info("Live capture worker started on interface %s (%s)", interface, mode_desc)
+            return True, f"Capture active on {interface} ({mode_desc})"
 
     def stop(self, timeout_s: float = 2.5) -> dict[str, Any]:
         """Signal capture to stop, flush remaining flows, and wait for threads."""

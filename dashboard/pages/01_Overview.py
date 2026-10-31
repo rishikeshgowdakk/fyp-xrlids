@@ -2,39 +2,15 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-import sys
-import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-if str(REPO_ROOT / "src") not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT / "src"))
-
-from dashboard.session_init import ensure_session_state
-from xrlids.events.manager import EventManager
-from xrlids.pipeline.active_pipeline import ActiveInferencePipeline
-
 st.set_page_config(page_title="Overview - XRL-IDARS", page_icon="🛡️", layout="wide")
 
-event_mgr, pipeline, live_mgr = ensure_session_state()
-
 st.title("🛡️ XRL-IDARS — System Overview & Architecture")
-st.markdown("""
-**Explainable Reinforcement Learning-Based Intrusion Detection and Autonomous Response System (XRL-IDARS)**  
-A defense platform combining sub-millisecond Random Forest perception on 10 deterministic flow statistics ($R_{10}$), exact local TreeSHAP attribution, and a causal 6-dimensional Dueling Deep Q-Network (DQN) response policy governed by an inviolable deterministic safety shield and asynchronous PostgreSQL event persistence.
-""")
+st.markdown("Explainable Reinforcement Learning-Based Intrusion Detection and Autonomous Response System combining sub-millisecond Random Forest perception on 10 canonical flow features ($R_{10}$), exact local TreeSHAP attribution, and a causal Dueling Deep Q-Network response policy under an inviolable deterministic safety shield.")
 
 st.divider()
-
-# ---------------------------------------------------------------------------
-# Section 1: Interactive Animated Operational Architecture Flowchart
-# ---------------------------------------------------------------------------
-st.subheader("1. Animated End-to-End Operational Pipeline")
-st.caption("Live dataflow showing packet ingestion, ML perception, TreeSHAP explanation, DQN response recommendation, deterministic shielding, and asynchronous persistence.")
 
 animated_architecture_html = """
 <!DOCTYPE html>
@@ -174,7 +150,7 @@ animated_architecture_html = """
   <path d="M 700 255 L 660 255" class="flow-line" marker-end="url(#arrow)"/>
   <!-- Dueling DQN to Safety Gate -->
   <path d="M 540 255 L 500 255" class="flow-line" marker-end="url(#arrow)"/>
-  <!-- Safety Gate to Advisory Actuator -->
+  <!-- Safety Gate to Policy-Gated Response -->
   <path d="M 380 255 L 340 255" class="flow-line" marker-end="url(#arrow)"/>
   <!-- Advisory Actuator to Event Manager -->
   <path d="M 220 255 L 180 255" class="flow-line" marker-end="url(#arrow)"/>
@@ -216,8 +192,8 @@ animated_architecture_html = """
   <g transform="translate(480, 45)">
     <rect class="node-box" width="120" height="60" fill="url(#gradRF)" stroke="#38bdf8" style="animation: pulseGlow 2.5s infinite;"/>
     <text class="node-title" x="60" y="24" fill="#ffffff">RANDOM FOREST</text>
-    <text class="node-sub" x="60" y="40" fill="#e0f2fe">Sole Live ML (&lt;0.8ms)</text>
-    <text class="badge-tag" x="60" y="52" fill="#7dd3fc">F1 = 0.9512</text>
+    <text class="node-sub" x="60" y="40" fill="#e0f2fe">Operational ML Detector</text>
+    <text class="badge-tag" x="60" y="52" fill="#7dd3fc">R10 Feature Input</text>
   </g>
 
   <!-- 4b. Deterministic Rules -->
@@ -274,7 +250,7 @@ animated_architecture_html = """
     <rect class="node-box" width="120" height="60" fill="url(#gradIngest)" stroke="#94a3b8"/>
     <text class="node-title" x="60" y="24" fill="#f8fafc">ACTUATOR</text>
     <text class="node-sub" x="60" y="40">Advisory / Dry-Run</text>
-    <text class="node-sub" x="60" y="52">0 Host Mutations</text>
+    <text class="node-sub" x="60" y="52">Lab-Safe Actuation</text>
   </g>
 
   <!-- 11. Security Event Manager -->
@@ -317,7 +293,7 @@ animated_architecture_html = """
   <!-- Clarification Banner in SVG -->
   <rect x="420" y="365" width="460" height="18" rx="4" fill="#0f172a" stroke="#10b981" stroke-width="0.8"/>
   <text x="650" y="378" font-size="9" fill="#10b981" font-weight="600" text-anchor="middle">
-    Asynchronous Persistence Branch (O(1) Enqueue) — Non-Blocking &amp; Decoupled from Detection Path
+    Event Audit & Persistence
   </text>
 </svg>
 </div>
@@ -326,160 +302,3 @@ animated_architecture_html = """
 """
 components.html(animated_architecture_html, height=480)
 
-st.divider()
-
-# ---------------------------------------------------------------------------
-# Section 2: Pipeline Stage Dictionary & Performance Contracts
-# ---------------------------------------------------------------------------
-st.subheader("2. Operational Pipeline Stage Specifications")
-
-pipeline_table = [
-    {
-        "Stage": "1. Packet Ingestion",
-        "Subsystem": "Scapy Ingestion Engine",
-        "Role": "Wire packet sniffing via raw sockets or PCAP stream parsing.",
-        "Input / Output": "Raw L2/L3 frames → PacketInfo metadata",
-        "Execution Latency": "~0.05 ms / pkt",
-        "Operational Invariant": "Live packet ingestion is strictly non-blocking.",
-    },
-    {
-        "Stage": "2. Flow Aggregation",
-        "Subsystem": "Canonical FlowEngine",
-        "Role": "Assembles packets into bidirectional flows keyed by sorted min<max 5-tuple.",
-        "Input / Output": "Packet sequence → CanonicalFlow object",
-        "Execution Latency": "0.012 ms / flow",
-        "Operational Invariant": "Emits on TCP FIN/RST or 120s sliding window timeout.",
-    },
-    {
-        "Stage": "3. Feature Extraction",
-        "Subsystem": "R10 Statistical Contract",
-        "Role": "Computes 10 standardized flow statistical moments and applies StandardScaler.",
-        "Input / Output": "Flow packets → 10D Float Vector",
-        "Execution Latency": "0.025 ms / flow",
-        "Operational Invariant": "Strict feature ordering frozen in definitions.py.",
-    },
-    {
-        "Stage": "4. ML Intrusion Detection",
-        "Subsystem": "Random Forest Champion",
-        "Role": "Sole operational ML detector. Evaluates flow threat probability P(ATTACK).",
-        "Input / Output": "Standardized R10 vector → Threat Score ∈ [0.0, 1.0]",
-        "Execution Latency": "0.78 ms / flow",
-        "Operational Invariant": "F1 = 0.9512; operates statelessly to resist state exhaustion.",
-    },
-    {
-        "Stage": "5. Deterministic Rules",
-        "Subsystem": "RFC 793/1122 RuleEngine",
-        "Role": "Deterministic protocol violation checking (SYN flood, ICMP flood, Port Scan).",
-        "Input / Output": "Header flags & rates → Rule matches",
-        "Execution Latency": "0.004 ms / flow",
-        "Operational Invariant": "Runs in parallel; cannot be suppressed by low RF scores.",
-    },
-    {
-        "Stage": "6. Decision Arbitration",
-        "Subsystem": "Hybrid Arbiter & Tracker",
-        "Role": "Blends ML score, rule matches, and sliding-window source IP activity.",
-        "Input / Output": "Perception outputs → Hybrid Verdict & Risk Score",
-        "Execution Latency": "0.005 ms / flow",
-        "Operational Invariant": "BENIGN, RF, RULE, or HYBRID verdict assigned.",
-    },
-    {
-        "Stage": "7. Local Explainability",
-        "Subsystem": "TreeSHAP Explainer",
-        "Role": "Computes exact Shapley attributions explaining why RF scored the flow.",
-        "Input / Output": "RF Trees + Features → Feature Attributions (φi)",
-        "Execution Latency": "1.82 ms / flow",
-        "Operational Invariant": "Explains Random Forest prediction, distinct from RL decision.",
-    },
-    {
-        "Stage": "8. State Construction",
-        "Subsystem": "6D Causal StateBuilder",
-        "Role": "Constructs Markov state: [St, ΔSt, N_alert, at-1, ct, vt].",
-        "Input / Output": "History & Threat → 6D Box Vector",
-        "Execution Latency": "0.008 ms / flow",
-        "Operational Invariant": "Dimensionality strictly matches DQN training contract.",
-    },
-    {
-        "Stage": "9. Response Optimization",
-        "Subsystem": "Dueling Deep Q-Network",
-        "Role": "Evaluates expected returns across ALLOW, ALERT, RATE_LIMIT, ISOLATE.",
-        "Input / Output": "6D State Vector → Action Q-Values & Proposed Action",
-        "Execution Latency": "0.18 ms / decision",
-        "Operational Invariant": "Q-values represent expected return, not probabilities.",
-    },
-    {
-        "Stage": "10. Invariant Shielding",
-        "Subsystem": "Deterministic Safety Gate",
-        "Role": "Enforces critical host exemptions, 30s cooldowns, and 5% blast-radius limit.",
-        "Input / Output": "Proposed Action → Authorized Enforced Action",
-        "Execution Latency": "0.001 ms / check",
-        "Operational Invariant": "Inviolable software shield; overrides unsafe recommendations.",
-    },
-    {
-        "Stage": "11. Action Actuation",
-        "Subsystem": "Advisory Actuator",
-        "Role": "Generates verified execution audit records without mutating host firewall.",
-        "Input / Output": "Authorized Action → Verified Execution Report",
-        "Execution Latency": "0.015 ms / action",
-        "Operational Invariant": "ADVISORY dry-run guarantee: zero host network disruption.",
-    },
-    {
-        "Stage": "12. Event Dispatching",
-        "Subsystem": "Security Event Manager",
-        "Role": "Thread-safe event publishing, in-memory ring buffer, and persistence routing.",
-        "Input / Output": "SecurityEvent → Memory Buffer (5k) + Dispatched",
-        "Execution Latency": "0.002 ms / event",
-        "Operational Invariant": "Ring buffer provides immediate reactivity for UI feeds.",
-    },
-    {
-        "Stage": "13. Database Persistence",
-        "Subsystem": "PostgreSQL Async Worker",
-        "Role": "Bounded asynchronous worker queue persisting complete JSONB event records.",
-        "Input / Output": "Event Queue → PostgreSQL security_events Table",
-        "Execution Latency": "O(1) Enqueue (<0.001 ms)",
-        "Operational Invariant": "Database latency or outages never stall packet ingestion.",
-    },
-]
-
-st.dataframe(pd.DataFrame(pipeline_table), use_container_width=True)
-
-st.divider()
-
-# ---------------------------------------------------------------------------
-# Section 3: Model Provenance & Separation of Responsibilities
-# ---------------------------------------------------------------------------
-col_p1, col_p2 = st.columns([1, 1])
-
-with col_p1:
-    st.subheader("Operational Champion Models")
-    st.markdown("""
-    - **Operational ML Detector (Perception):**
-      - Model: Random Forest (`models/rf/random_forest_cicids2017.joblib`)
-      - Contract: Canonical $R_{10}$ (10 features)
-      - Performance: **$F_1 = 0.9512$**, Accuracy = $99.06\\%$, Latency = $0.78\\,\\text{ms}$
-      - Role: **Sole live operational ML detector** for packet sniffing and streaming replay.
-    
-    - **Autonomous Response Policy (Decision):**
-      - Model: Dueling Deep Q-Network (`models/dqn/dqn_4action_best.pt`)
-      - State Contract: 6D Causal Markov State Vector
-      - Action Space: 4 Actions (`ALLOW`, `ALERT`, `RATE_LIMIT`, `ISOLATE`)
-      - Role: Recommends cost-optimal response under deterministic safety gate.
-    """)
-
-with col_p2:
-    st.subheader("Offline Research Benchmarks")
-    st.markdown("""
-    - **PyTorch LSTM FlowSeq Sequence Model:**
-      - Artifact: `models/lstm/` (`EXP-P2-LSTM-VALID-001`)
-      - Contract: $5 \\times 11$ temporal sequences
-      - Status: **Offline research benchmark only**. Never invoked live.
-    
-    - **Convex RF–LSTM Score Fusion Model:**
-      - Weights: $\\alpha = 0.70$ RF, $1 - \\alpha = 0.30$ LSTM (`models/fusion/`)
-      - Status: **Offline research benchmark only**.
-    
-    - **XGBoost High-Throughput Baseline:**
-      - Model: `models/xgboost/` (Candidate baseline, $F_1 = 0.9521$)
-      - Status: **Offline benchmark only**.
-    """)
-
-st.info("ℹ️ **Scientific Separation of Concerns:** Random Forest performs intrusion perception. Dueling DQN optimizes mitigation decisions. TreeSHAP explains the Random Forest detector's local feature attributions. The deterministic safety gate guarantees critical host protection and zero host firewall mutations.")

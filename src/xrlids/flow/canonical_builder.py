@@ -181,6 +181,36 @@ class CanonicalFlow:
         """Total packet count across both directions."""
         return len(self.packet_lengths)
 
+    @property
+    def flow_id(self) -> str:
+        """Deterministic flow identifier derived from canonical key."""
+        return self.key.flow_id
+
+    @property
+    def src_ip(self) -> str:
+        """First seen source IP address, falling back to endpoint_a."""
+        return self.source_first_ip or self.key.src_ip
+
+    @property
+    def dst_ip(self) -> str:
+        """First seen destination IP address, falling back to endpoint_b."""
+        return self.dest_first_ip or self.key.dst_ip
+
+    @property
+    def src_port(self) -> int:
+        """First seen source port, falling back to port_a."""
+        return self.source_first_port or self.key.src_port
+
+    @property
+    def dst_port(self) -> int:
+        """First seen destination port, falling back to port_b."""
+        return self.dest_first_port or self.key.dst_port
+
+    @property
+    def protocol(self) -> int:
+        """IP protocol number."""
+        return self.key.protocol
+
     def to_features(self, validate: bool = True) -> dict[str, float]:
         """Compute the canonical 10-feature contract (R10).
         

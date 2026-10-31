@@ -126,6 +126,14 @@ class ActiveInferencePipeline:
 
         self._step_counter = 0
 
+    @property
+    def firewall_manager(self):
+        return self.executor.firewall_manager
+
+    def set_enforcement_mode(self, enabled: bool) -> None:
+        """Toggle real firewall enforcement on the response executor."""
+        self.executor.set_enforcement_mode(enabled)
+
     def process_flow(
         self,
         flow_or_features: CanonicalFlow | Mapping[str, Any],
@@ -171,7 +179,14 @@ class ActiveInferencePipeline:
         else:
             rule_matches = self.rule_engine.evaluate_features(
                 features,
-                endpoints={"src_ip": source_ip, "dst_ip": dest_ip},
+                endpoints={
+                    "src_ip": source_ip,
+                    "dst_ip": dest_ip,
+                    "source_port": source_port,
+                    "dest_port": dest_port,
+                    "protocol": protocol,
+                    "packet_count": getattr(flow_or_features, "packet_count", int(features.get("packet_count", features.get("flow_packets_per_s", 0.0)))),
+                },
             )
 
         # 4. Hybrid Arbitration: Reconcile ML and Rules
@@ -216,6 +231,7 @@ class ActiveInferencePipeline:
         exec_report = self.executor.execute_action(
             proposed_action=response_rec.action,
             target_host=source_ip,
+            dest_host=dest_ip,
             state_before=response_rec.state_vector,
             metadata={"flow_id": fid, "severity": hybrid_dec.severity},
             step=current_step,

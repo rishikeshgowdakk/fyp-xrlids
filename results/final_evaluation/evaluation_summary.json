@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-10-30T21:04:50.911480+00:00",
+  "timestamp": "2026-10-31T02:26:10.991923+00:00",
   "total_records": 10000,
-  "evaluation_duration_s": 1.744,
+  "evaluation_duration_s": 1.019,
   "benchmark": "cicids2017",
   "contract": "R10",
   "models": {
