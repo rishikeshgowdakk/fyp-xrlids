@@ -423,7 +423,7 @@ elif demo_mode == "🧪 Scapy In-Memory Simulation":
                     st.session_state["selector_event_id"] = newest_evt.event_id
 
                     exec_rep = newest_evt.response.get("execution_report", {})
-                    fw_rule = exec_rep.get("firewall_rule", {}) if exec_rep else {}
+                    fw_rule = (exec_rep.get("firewall_rule") or {}) if exec_rep else {}
                     fw_status = fw_rule.get("status", "DRY_RUN") if exec_rep else "DRY_RUN"
 
                     if fw_status == "ACTIVE":
@@ -589,7 +589,7 @@ else:
     table_data = []
     for ev in list(reversed(events)):
         exec_rep = ev.response.get("execution_report", {})
-        fw_status = exec_rep.get("firewall_rule", {}).get("status", "DRY_RUN") if exec_rep else "DRY_RUN"
+        fw_status = (exec_rep.get("firewall_rule") or {}).get("status", "DRY_RUN") if exec_rep else "DRY_RUN"
         is_adv = exec_rep.get("is_advisory", True) if exec_rep else True
 
         if fw_status == "ACTIVE" and not is_adv:
@@ -646,7 +646,7 @@ else:
     st.markdown(f"### 🔍 Lifecycle Provenance: Event `{selected_event.event_id}`")
 
     exec_rep = selected_event.response.get("execution_report", {})
-    fw_rule = exec_rep.get("firewall_rule", {}) if exec_rep else {}
+    fw_rule = (exec_rep.get("firewall_rule") or {}) if exec_rep else {}
     fw_status = fw_rule.get("status", "DRY_RUN") if exec_rep else "DRY_RUN"
     fw_active = (fw_status == "ACTIVE" and not exec_rep.get("is_advisory", True))
     if fw_active:
@@ -829,7 +829,7 @@ else:
                 - Status: `{t_verif.get('status')}`
                 """)
         elif fw_rule and fw_rule.get("status") == "FAILED":
-            err_msg = fw_rule.get("verification_details", {}).get("error", "Unknown OS error")
+            err_msg = (fw_rule.get("verification_details") or {}).get("error", "Unknown OS error")
             st.error(f"""
             ❌ **FIREWALL INSTALLATION FAILED (NOT BLOCKED):**
             - **Rule ID:** `{fw_rule.get('rule_id')}`
