@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 import platform
 import sys
-import time
 
 import pandas as pd
 import streamlit as st
@@ -16,8 +15,6 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
-
-from xrlids.features.definitions import R10_FEATURES
 
 st.set_page_config(page_title="Benchmarks - XRL-IDARS", page_icon="📊", layout="wide")
 
@@ -110,14 +107,21 @@ if not summary_data or "random_forest" not in summary_data.get("models", {}):
 else:
     rf_m = summary_data["models"]["random_forest"]
     cm_rf = rf_m.get("confusion", {})
-    total_recs = int(summary_data.get("total_records", 10000))
-    duration_s = float(summary_data.get("evaluation_duration_s", 1.0))
-    latency_ms = (duration_s / max(1, total_recs)) * 1000.0
+    required_summary_fields = ("total_records", "evaluation_duration_s")
+    if any(key not in summary_data for key in required_summary_fields):
+        st.warning("No evaluation results available: the saved summary is missing its record count or measured duration.")
+        st.stop()
+    total_recs = int(summary_data["total_records"])
+    duration_s = float(summary_data["evaluation_duration_s"])
+    if total_recs <= 0 or duration_s <= 0:
+        st.warning("No evaluation results available: the saved record count or measured duration is invalid.")
+        st.stop()
+    batch_ms_per_record = (duration_s / total_recs) * 1000.0
 
     st.caption(
         f"**Dataset Provenance:** `{summary_data.get('benchmark', 'cicids2017').upper()}` | "
         f"**Feature Contract:** `R10 Canonical Flow Statistics` | "
-        f"**Population:** `{total_recs:,} records` (5,000 Benign, 5,000 Attack) | "
+        f"**Population:** `{total_recs:,} evaluated records` | "
         f"**Model Artifact:** `models/rf/random_forest_cicids2017.joblib` | "
         f"**Preprocessor:** `results/experiments/EXP-P1-CIC2017-R10-001/preprocessor.joblib`"
     )
@@ -136,14 +140,15 @@ else:
     m_c3.metric("Recall", f"{rf_m['recall'] * 100:.2f}%")
     m_c4.metric("Macro F1", f"{rf_m['macro_f1']:.4f}")
     m_c5.metric("ROC-AUC", f"{rf_m['roc_auc']:.4f}")
-    m_c6.metric("Measured Latency", f"{latency_ms:.3f} ms / flow")
+    m_c6.metric("Batch time / record", f"{batch_ms_per_record:.3f} ms")
 
     st.caption(f"""
-    **Latency Measurement Metadata:**
-    - **Measurement Method:** Batch wall-clock elapsed time ({duration_s:.3f} seconds total)
-    - **Sample Size:** {total_recs:,} flows
-    - **Hardware Platform:** {platform.processor() or 'x86_64 CPU'} ({platform.system()})
-    - **Inference Mode:** Single-threaded CPU inference
+    **Timing Metadata (not isolated model-inference latency):**
+    - **Measurement Method:** Total benchmark wall-clock duration divided by evaluated records
+    - **Total Elapsed Time:** {duration_s:.3f} seconds
+    - **Sample Size:** {total_recs:,} records
+    - **Hardware Platform:** {platform.platform()} | CPU: {platform.processor() or platform.machine()}
+    - **Interpretation:** This is an end-to-end benchmark average per record; it must not be presented as standalone Random Forest inference latency.
     """)
 
     st.divider()
@@ -175,9 +180,9 @@ else:
     with col_analysis:
         st.markdown("**Operational Line-Rate Performance Assessment**")
         st.markdown(f"""
-        - **Sub-Millisecond Inference:** Random Forest executes in **{latency_ms:.3f} ms** per flow, satisfying the sub-millisecond line-rate processing budget.
-        - **Low False Alarm Rate:** With an FPR of **{fpr:.2f}%** ({fp:,} out of {tn + fp:,} benign flows), legitimate network traffic flows uninterrupted without operator fatigue.
-        - **Perimeter Defense-in-Depth:** Flows misclassified as benign by the ML tier ($FNR = {fnr:.2f}\\%$) are independently inspected by the deterministic RFC 793/1122 protocol rule engine (SYN flood, ICMP flood, PortScan), guaranteeing dual-layer perimeter security.
+        - **Observed False Positive Rate:** **{fpr:.2f}%** ({fp:,} false positives out of {tn + fp:,} benign flows in this evaluation).
+        - **Observed False Negative Rate:** **{fnr:.2f}%** ({fn:,} missed attacks out of {fn + tp:,} attack flows in this evaluation).
+        - **Interpretation:** The benchmark timing above includes the evaluation run and is not a standalone per-flow model inference measurement. Deterministic rules are a separate operational layer and are not included in these Random Forest metrics.
         """)
 
     st.divider()
