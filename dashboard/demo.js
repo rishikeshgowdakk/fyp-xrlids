@@ -85,7 +85,7 @@ function renderUI(data) {
   // 4. Detection Table
   renderDetectionTable(data.detections || []);
 
-  // 5. Response Panel
+  // 5. Response Panel & Firewall State
   if (data.response) {
     const dqnEl = document.getElementById('resp-dqn-action');
     const gateEl = document.getElementById('resp-gate-decision');
@@ -98,15 +98,47 @@ function renderUI(data) {
       gateEl.textContent = isOverridden ? 'OVERRIDDEN' : 'APPROVED';
       gateEl.style.color = isOverridden ? 'var(--status-amber)' : 'var(--status-green)';
     }
-    if (enfEl) enfEl.textContent = data.response.enforced_action || 'ALLOW';
-    if (notEl) {
-      if (data.response.safety_override && data.response.override_reason) {
-        notEl.textContent = 'Safety Gate Invariant Applied: ' + data.response.override_reason;
-      } else {
-        notEl.textContent = 'Mode: ADVISORY / DRY_RUN ONLY. Zero network mutations or firewall modifications applied.';
+
+    const isBlocked = Boolean(data.response.is_blocked || (data.firewall && data.firewall.is_attacker_blocked));
+    const activeRules = (data.firewall && data.firewall.active_rules) || [];
+    const activeRule = activeRules.find(r => r.source_ip === '10.200.1.2') || activeRules[0];
+
+    const fwBadge = document.getElementById('fw-badge');
+    const fwDrops = document.getElementById('fw-drops');
+    const fwRuleId = document.getElementById('fw-rule-id');
+    const fwTtl = document.getElementById('fw-ttl');
+
+    if (isBlocked && activeRule) {
+      if (enfEl) {
+        enfEl.textContent = 'BLOCKED (Firewall Rule Active)';
+        enfEl.style.color = 'var(--status-red)';
       }
+      if (fwBadge) {
+        fwBadge.textContent = '🚨 ISOLATED / BLOCKED';
+        fwBadge.className = 'badge badge-attack';
+      }
+      if (fwDrops) fwDrops.textContent = (activeRule.packets_blocked || 0) + ' pkts';
+      if (fwRuleId) fwRuleId.textContent = activeRule.rule_id || 'LAB-FW-BLOCK';
+      if (fwTtl) fwTtl.textContent = (activeRule.remaining_seconds != null ? Math.round(activeRule.remaining_seconds) : 30) + 's';
+      if (notEl) notEl.textContent = `Firewall Invariant Enforced: Attacker IP ${activeRule.source_ip} is actively dropped at input filter.`;
+    } else {
+      if (enfEl) {
+        enfEl.textContent = data.response.enforced_action || 'ALLOW (Permitted)';
+        enfEl.style.color = 'var(--status-green)';
+      }
+      if (fwBadge) {
+        fwBadge.textContent = '🟢 TRAFFIC PERMITTED';
+        fwBadge.className = 'badge badge-benign';
+      }
+      if (fwDrops) fwDrops.textContent = '0 pkts';
+      if (fwRuleId) fwRuleId.textContent = 'None';
+      if (fwTtl) fwTtl.textContent = '—';
+      if (notEl) notEl.textContent = 'Mode: ACTIVE LAB FIREWALL. Normal flows permitted; attack traffic isolated upon DQN recommendation.';
     }
   }
+
+  // Render passive WiFi devices
+  renderDemoDevices(data);
 
   // 6. Latency Percentiles
   if (data.latency && data.latency.total_ms) {
@@ -406,6 +438,99 @@ function startTwoMinuteScenario() {
   startMonitoring().then(() => {
     launchSimulation();
   });
+}
+
+function renderDemoDevices(data) {
+  const tbody = document.getElementById('tbody-demo-devices');
+  const networkEl = document.getElementById('demo-device-network');
+  if (!tbody || !networkEl) return;
+
+  const network = data.network || {};
+  const parts = [];
+  if (network.interface) parts.push("Interface: " + network.interface);
+  if (network.ssid) parts.push("SSID: " + network.ssid);
+  if (network.gateway_ip) parts.push("Gateway: " + network.gateway_ip);
+  if (network.local_ip) parts.push("Host: " + network.local_ip);
+  if (network.signal_dbm != null) parts.push(network.signal_dbm + " dBm");
+  networkEl.textContent = parts.join(" · ") || "Passive WiFi Discovery (wlo1)";
+
+  const devices = data.devices || [];
+  if (devices.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-dim); padding: 16px;">Scanning interface for ARP/DHCP/mDNS traffic...</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = devices.map(d => {
+    const badges = [];
+    if (d.is_local) badges.push('<span class="badge badge-rf">THIS PC</span>');
+    if (d.is_gateway) badges.push('<span class="badge badge-rule">GATEWAY ROUTER</span>');
+    const label = d.hostname || d.label || (d.is_gateway ? "Gateway Router" : "Local Device");
+    const ageStr = d.live_seen ? (d.age_s < 5 ? 'now' : Math.round(d.age_s) + 's ago') : 'cached';
+    return `
+      <tr>
+        <td><strong>${escapeHtml(label)}</strong><br>${badges.join(' ')}</td>
+        <td class="mono"><strong>${escapeHtml(d.ip || '—')}</strong></td>
+        <td class="mono">${escapeHtml(d.mac || '—')}</td>
+        <td>${escapeHtml(d.vendor || 'Unknown Vendor')}</td>
+        <td>${escapeHtml((d.evidence || []).join(', ') || 'neighbor cache')}</td>
+        <td class="mono">${Number(d.packets || 0).toLocaleString()}</td>
+        <td class="mono">${ageStr}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function blockAttacker(ip = "10.200.1.2") {
+  try {
+    const res = await fetch("/api/live/block", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ source_ip: ip, ttl: 30.0, reason: "Manual block from demonstration UI" }),
+    });
+    const data = await res.json();
+    pollDemoStatus();
+  } catch (err) {
+    alert("Block request failed: " + err.message);
+  }
+}
+
+async function unblockAttacker(ip = "10.200.1.2") {
+  try {
+    const res = await fetch("/api/live/unblock", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ source_ip: ip }),
+    });
+    const data = await res.json();
+    pollDemoStatus();
+  } catch (err) {
+    alert("Unblock request failed: " + err.message);
+  }
+}
+
+async function testPingConnectivity() {
+  const statusEl = document.getElementById("ping-test-status");
+  if (statusEl) {
+    statusEl.innerHTML = `<span style="color: var(--accent);">Transmitting ICMP echo probe sequence (10.200.1.2 &rarr; 10.200.1.3)...</span>`;
+  }
+  try {
+    const res = await fetch("/api/demo/ping-test", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ source_ip: "10.200.1.2", count: 4 }),
+    });
+    const data = await res.json();
+    if (statusEl) {
+      if (data.success) {
+        statusEl.innerHTML = `<span style="color: var(--status-green); font-weight: 700;">🟢 PING SUCCESS: ${data.packets_delivered}/${data.packets_sent} echo replies received. Connectivity is ACTIVE.</span>`;
+      } else {
+        statusEl.innerHTML = `<span style="color: var(--status-red); font-weight: 700;">🚨 PING BLOCKED: ${data.packets_dropped}/${data.packets_sent} packets dropped by firewall rule. Attacker is ISOLATED.</span>`;
+      }
+    }
+    pollDemoStatus();
+  } catch (err) {
+    if (statusEl) statusEl.textContent = "Ping test error: " + err.message;
+  }
 }
 
 function escapeHtml(str) {

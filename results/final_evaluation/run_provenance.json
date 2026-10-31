@@ -17,6 +17,6 @@
     "Infiltration": 3,
     "Heartbleed": 1
   },
-  "evaluated_at": "2026-10-30T21:04:50.919796+00:00",
+  "evaluated_at": "2026-10-31T02:26:10.996808+00:00",
   "git_branch": "fix/final-engineering-correctness"
 }

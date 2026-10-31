@@ -1307,7 +1307,7 @@ async function pollLive() {
     }
 
     // Always update attack sources and passive device discoveries
-    renderAttackSources(snap.recent_alerts || []);
+    renderAttackSources(snap.recent_alerts || [], snap.firewall || {});
     renderDevices(snap);
   } catch (_) {}
 }
@@ -1328,7 +1328,7 @@ function formatAge(seconds) {
   return Math.floor(v / 3600) + "h";
 }
 
-function renderAttackSources(alerts) {
+function renderAttackSources(alerts, firewall) {
   const tbody = document.getElementById("attack-sources-body");
   if (!tbody) return;
   const byIp = new Map();
@@ -1343,22 +1343,85 @@ function renderAttackSources(alerts) {
   });
   const rows = Array.from(byIp.values()).sort((a, b) => b.maxScore - a.maxScore);
   if (rows.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:16px; color:var(--text-dim)">No attack sources detected</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:16px; color:var(--text-dim)">No attack sources detected</td></tr>';
     return;
   }
   tbody.innerHTML = "";
+  const activeRules = (firewall && firewall.active_rules) || [];
+
   rows.forEach(e => {
     const p = policyFor(e.maxScore);
-    const isSim = e.ip.startsWith("203.0.113.");
+    const isSim = e.ip.startsWith("203.0.113.") || e.ip.startsWith("10.200.1.");
+    const rule = activeRules.find(r => r.source_ip === e.ip);
+    const isBlocked = Boolean(rule || (e.ip === "10.200.1.2" && firewall && firewall.is_attacker_blocked));
+    const drops = rule ? (rule.packets_blocked || 0) : 0;
+
+    const statusHtml = isBlocked
+      ? `<span class="badge badge-red">🚨 BLOCKED (${drops} drops)</span>`
+      : `<span class="badge badge-green">🟢 ALLOWED</span>`;
+    const btnHtml = isBlocked
+      ? `<button class="btn btn-sm btn-secondary" onclick="unblockIp('${escapeHtml(e.ip)}')">↺ Unblock</button>`
+      : `<button class="btn btn-sm btn-danger" onclick="blockIp('${escapeHtml(e.ip)}')">🛡️ Block IP</button>`;
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td class="mono"><strong>${escapeHtml(e.ip)}</strong>${isSim ? ' <span class="badge badge-sim">SIM</span>' : ""}</td>
+      <td class="mono"><strong>${escapeHtml(e.ip)}</strong>${isSim ? ' <span class="badge badge-sim">LAB</span>' : ""}</td>
       <td class="mono">${e.alerts}</td>
       <td class="mono"><strong style="color:var(--red)">${fmt(e.maxScore)}</strong></td>
-      <td><span class="badge ${p.cls}">${p.action}</span></td>
+      <td>${statusHtml}</td>
+      <td>${btnHtml}</td>
     `;
     tbody.appendChild(tr);
   });
+}
+
+async function blockIp(ip = "10.200.1.2") {
+  try {
+    const res = await fetch("/api/live/block", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ source_ip: ip, ttl: 30.0 }),
+    });
+    const data = await res.json();
+    pollLive();
+  } catch (err) {
+    alert("Block failed: " + err.message);
+  }
+}
+
+async function unblockIp(ip = "10.200.1.2") {
+  try {
+    const res = await fetch("/api/live/unblock", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ source_ip: ip }),
+    });
+    const data = await res.json();
+    pollLive();
+  } catch (err) {
+    alert("Unblock failed: " + err.message);
+  }
+}
+
+async function triggerQuickSim(scenarioId) {
+  try {
+    if (!liveSessionActive) {
+      await startLive();
+      await new Promise(r => setTimeout(r, 350));
+    }
+    const res = await fetch("/api/demo/simulate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ scenario: scenarioId, speed: 1.0 }),
+    });
+    const data = await res.json();
+    if (data.error) {
+      alert("Simulation error: " + data.error);
+    }
+    pollLive();
+  } catch (err) {
+    alert("Simulation failed: " + err.message);
+  }
 }
 
 function renderDevices(snap) {
@@ -1369,24 +1432,13 @@ function renderDevices(snap) {
   const routerAnchor = document.getElementById("router-admin-link");
   if (!tbody || !networkEl || !countEl) return;
 
-  if (snap.mode !== "live") {
-    if (routerLink) routerLink.style.display = "none";
-    networkEl.textContent = snap.mode
-      ? "Device discovery available in live capture mode only"
-      : "Live capture not active";
-    countEl.textContent = "0 observed";
-    countEl.className = "badge badge-dim";
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:16px; color:var(--text-dim)">Start live capture to discover devices</td></tr>';
-    return;
-  }
-
   const network = snap.network || {};
   const parts = [];
   if (network.ssid) parts.push("SSID " + network.ssid);
   if (network.gateway_ip) parts.push("GW " + network.gateway_ip);
   if (network.local_ip) parts.push("PC " + network.local_ip);
   if (network.signal_dbm != null) parts.push(network.signal_dbm + " dBm");
-  networkEl.textContent = parts.join(" · ") || "Live capture on " + (snap.interface || "interface");
+  networkEl.textContent = parts.join(" · ") || ("WiFi Discovery on " + (snap.interface || "wlo1"));
 
   if (routerLink && routerAnchor) {
     const gw = String(network.gateway_ip || "");
@@ -1403,7 +1455,7 @@ function renderDevices(snap) {
   countEl.className = "badge" + (devices.length ? " badge-blue" : " badge-dim");
 
   if (devices.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:16px; color:var(--text-dim)">Waiting for ARP/DHCP/mDNS traffic…</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:16px; color:var(--text-dim)">Scanning network for ARP/DHCP/mDNS traffic…</td></tr>';
     return;
   }
 

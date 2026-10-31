@@ -1884,6 +1884,13 @@
             </div>
           </div>
           <div id="live-notice" style="margin-top: 10px; font-size: 12px; color: var(--text-muted);"></div>
+          <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-light); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Scapy Traffic Simulation:</span>
+            <button class="btn btn-sm" style="background: var(--surface-2); border: 1px solid var(--border);" onclick="triggerQuickSim('scenario_ping')">🟢 Normal Ping</button>
+            <button class="btn btn-sm btn-danger" onclick="triggerQuickSim('scenario_d_icmp_burst')">⚡ ICMP Flood</button>
+            <button class="btn btn-sm btn-danger" onclick="triggerQuickSim('scenario_c_syn_burst')">⚡ SYN Flood</button>
+            <button class="btn btn-sm btn-danger" onclick="triggerQuickSim('scenario_b_port_scan')">⚡ Port Scan</button>
+          </div>
         </div>
       </div>
 
@@ -1939,8 +1946,8 @@
         <!-- Attack Sources -->
         <div class="card">
           <div class="card-header">
-            <h2>Detected Attack Sources</h2>
-            <span class="badge badge-dim">Observational</span>
+            <h2>Detected Attack Sources &amp; Autonomous Firewall</h2>
+            <span class="badge badge-red" id="fw-enforcement-status">Active Enforcement</span>
           </div>
           <div class="card-body flush">
             <div class="table-wrap">
@@ -1950,11 +1957,12 @@
                     <th>Source IP</th>
                     <th>Alerts</th>
                     <th>Max Score</th>
-                    <th>Suggested Policy</th>
+                    <th>Firewall Status</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody id="attack-sources-body">
-                  <tr><td colspan="4" style="text-align:center; padding:16px; color: var(--text-dim);">No attack sources detected</td></tr>
+                  <tr><td colspan="5" style="text-align:center; padding:16px; color: var(--text-dim);">No attack sources detected</td></tr>
                 </tbody>
               </table>
             </div>

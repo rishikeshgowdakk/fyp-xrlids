@@ -40,6 +40,14 @@ class PacketInfo:
     urg: bool = False
     raw_flags: int = 0
 
+    @property
+    def source_ip(self) -> str:
+        return self.src_ip
+
+    @property
+    def dest_ip(self) -> str:
+        return self.dst_ip
+
 
 class PcapReader:
     """Streams parsed packets from a standard PCAP file."""

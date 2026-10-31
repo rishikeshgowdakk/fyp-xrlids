@@ -612,6 +612,7 @@
     <div class="control-group">
       <span class="control-label">Traffic Simulation:</span>
       <select id="select-scenario" class="select-control">
+        <option value="scenario_ping">Scenario Ping — Benign Ping (ICMP Echo Request/Reply)</option>
         <option value="scenario_a_benign">Scenario A — Benign Traffic (HTTP/TCP + Ping)</option>
         <option value="scenario_b_port_scan">Scenario B — Port Scan Simulation (Probes: 21, 22, 80, 443, 8080)</option>
         <option value="scenario_c_syn_burst">Scenario C — TCP SYN Burst (Volumetric SYN Flood)</option>
@@ -758,8 +759,8 @@
       <!-- Response Panel -->
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-title">4. Autonomous Response Policy (DQN &amp; Safety Gate)</div>
-          <div class="panel-subtitle">6D causal state evaluation &amp; safety invariant enforcement</div>
+          <div class="panel-title">4. Autonomous Response Policy &amp; Lab Firewall</div>
+          <div class="panel-subtitle">Dueling DQN recommendation &amp; temporary safety-gated firewall</div>
         </div>
         <div class="panel-body">
           <div class="response-grid">
@@ -772,12 +773,42 @@
               <div class="response-box-val" id="resp-gate-decision" style="color: var(--status-green);">APPROVED</div>
             </div>
             <div class="response-box" style="grid-column: span 2;">
-              <div class="response-box-label">Enforced Advisory Action</div>
-              <div class="response-box-val" id="resp-enforced-action">ALLOW</div>
+              <div class="response-box-label">Firewall Actuator Status</div>
+              <div class="response-box-val" id="resp-enforced-action">PERMITTED (Normal)</div>
             </div>
           </div>
+
+          <!-- Active Firewall Telemetry & Controls -->
+          <div style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-weight: 700; font-size: 0.74rem; text-transform: uppercase; color: var(--text-dim);">Firewall Enforcement (10.200.1.2)</span>
+              <span id="fw-badge" class="badge badge-benign">TRAFFIC PERMITTED</span>
+            </div>
+            <div style="display: flex; gap: 10px; font-size: 0.74rem; font-family: var(--font-mono); margin-bottom: 8px;" id="fw-telemetry">
+              <span>Dropped Pkts: <strong id="fw-drops" style="color: var(--status-red);">0</strong></span>
+              <span>•</span>
+              <span>Rule ID: <strong id="fw-rule-id">None</strong></span>
+              <span>•</span>
+              <span>TTL: <strong id="fw-ttl">—</strong></span>
+            </div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+              <button id="btn-demo-block" class="btn btn-danger" style="font-size: 0.72rem; padding: 4px 8px;" onclick="blockAttacker()">
+                🛡️ Block Attacker (10.200.1.2)
+              </button>
+              <button id="btn-demo-unblock" class="btn btn-secondary" style="font-size: 0.72rem; padding: 4px 8px;" onclick="unblockAttacker()">
+                ↺ Unblock / Rollback
+              </button>
+              <button id="btn-demo-ping" class="btn btn-primary" style="font-size: 0.72rem; padding: 4px 8px;" onclick="testPingConnectivity()">
+                📡 Test Ping Reachability
+              </button>
+            </div>
+            <div id="ping-test-status" style="margin-top: 6px; font-size: 0.72rem; font-family: var(--font-mono); color: var(--text-muted);">
+              Ready. Click "Test Ping Reachability" to verify end-to-end packet delivery.
+            </div>
+          </div>
+
           <div class="response-notice" id="resp-notice">
-            Mode: ADVISORY / DRY_RUN ONLY. Zero network mutations or firewall modifications are applied to host interfaces.
+            Mode: ACTIVE LAB FIREWALL. Autonomous response executes temporary safety-gated firewall isolation on verified attacker IP.
           </div>
         </div>
       </div>
@@ -828,6 +859,32 @@
           No events recorded. Start monitoring to begin event logging.
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Passive WiFi Device Discovery Panel -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">7. 📱 Live WiFi Network &amp; Passive Device Discovery</div>
+      <div class="panel-subtitle" id="demo-device-network">Scanning WiFi interface...</div>
+    </div>
+    <div class="panel-body" style="padding: 0;">
+      <table class="data-table" id="table-demo-devices">
+        <thead>
+          <tr>
+            <th>Device</th>
+            <th>IP Address</th>
+            <th>MAC Address</th>
+            <th>Vendor</th>
+            <th>Evidence</th>
+            <th>Packets</th>
+            <th>Status / Last Seen</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-demo-devices">
+          <tr><td colspan="7" style="text-align: center; color: var(--text-dim); padding: 16px;">Scanning local network...</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 

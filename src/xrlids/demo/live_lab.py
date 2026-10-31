@@ -220,6 +220,13 @@ class LiveLabMonitor:
         else:
             detection_source = "NONE"
 
+        # Hybrid threat score reconciling ML posterior and rule engine severity
+        threat_score = conf
+        if rule_alert:
+            has_high = any(getattr(r, "severity", "") == "HIGH" for r in rule_matches)
+            rule_floor = 0.85 if has_high else 0.65
+            threat_score = max(conf, rule_floor)
+
         # Advisory DQN response policy and deterministic safety gate evaluation
         dqn_action_str: str | None = None
         enforced_action_str: str | None = None
@@ -232,7 +239,7 @@ class LiveLabMonitor:
                 import torch
                 from xrlids.response.types import Action
                 bytes_per_s = features.get("flow_bytes_per_s", 0.0)
-                state_vec = self.state_builder.build_state(attack_score=conf, flow_bytes_per_s=bytes_per_s)
+                state_vec = self.state_builder.build_state(attack_score=threat_score, flow_bytes_per_s=bytes_per_s)
                 with torch.no_grad():
                     q_vals = self.policy(torch.from_numpy(state_vec).float().unsqueeze(0))
                     proposed_idx = int(torch.argmax(q_vals, dim=-1).item())
@@ -248,7 +255,7 @@ class LiveLabMonitor:
                 enforced_action_str = enforced_action.name
                 rem_cool = self.safety_gate.get_remaining_cooldown(flow.source_first_ip, flow_idx)
                 self.state_builder.update_history(
-                    attack_score=conf,
+                    attack_score=threat_score,
                     enforced_action=enforced_action,
                     cooldown_remaining=rem_cool,
                 )
@@ -275,7 +282,7 @@ class LiveLabMonitor:
             protocol=proto,
             packet_count=flow.packet_count,
             duration_ms=round(flow.duration_ms, 2),
-            attack_score=round(conf, 4),
+            attack_score=round(threat_score, 4),
             prediction_class=pred,
             prediction_label="ATTACK" if pred == 1 else "BENIGN",
             is_alert=is_alert,

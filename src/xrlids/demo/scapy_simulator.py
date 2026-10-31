@@ -558,3 +558,34 @@ class ScapyAttackSimulator:
         pkts = self.build_packets_for_scenario(scenario_id=scenario_id)
         wrpcap(str(out), pkts)
         return out
+
+    def test_ping_connectivity(
+        self,
+        firewall_filter_fn: Callable[[str, str], bool] | None = None,
+        count: int = 4,
+    ) -> dict[str, Any]:
+        """Test ping reachability between attacker and victim.
+
+        If firewall_filter_fn is supplied and returns False, packets are dropped.
+        """
+        sent = count
+        delivered = 0
+        dropped = 0
+        for _ in range(count):
+            allowed = True
+            if firewall_filter_fn is not None:
+                allowed = firewall_filter_fn(self.attacker_ip, self.victim_ip)
+            if allowed:
+                delivered += 1
+            else:
+                dropped += 1
+        return {
+            "source_ip": self.attacker_ip,
+            "target_ip": self.victim_ip,
+            "packets_sent": sent,
+            "packets_delivered": delivered,
+            "packets_dropped": dropped,
+            "success": (delivered == sent),
+            "drop_rate": float(dropped / sent) if sent > 0 else 0.0,
+            "status": "REACHABLE (4/4 delivered)" if delivered == sent else f"BLOCKED ({dropped}/{sent} dropped by firewall)",
+        }
