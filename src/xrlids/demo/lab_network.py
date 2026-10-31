@@ -1,11 +1,10 @@
 """Isolated Lab Network Topology & Unified Transmission Loop for XRL-IDARS.
 
 Provides:
-1. Real Linux Kernel Network Namespaces (when privileged):
+1. Optional Linux network namespace setup (when privileged):
    - Attacker namespace: `xrlids_att_01`, interface `veth_xrl_att`, IP `10.200.1.2/24`
    - Victim namespace: `xrlids_vic_01`, interface `veth_xrl_vic`, IP `10.200.1.3/24`
-   - Real packet transmission from attacker interface to victim interface via veth pair.
-   - Sniffing and capture on victim/monitoring interface.
+   - Creates an isolated veth topology only. Scenario transmission and namespace-side capture are not implemented by this module yet.
 2. Honest Unprivileged Sandbox Mode (when euid != 0):
    - Automatically detects OS privilege boundary.
    - Routes traffic through the unified LiveCaptureManager queue.
@@ -149,20 +148,20 @@ class LabNetworkTopology:
         """Transmit scenario packets and process them through the single real operational pipeline path.
 
         Guarantees:
-        - If real kernel netns is active: sends real wire packets, sniffs on veth link, tags `LIVE`.
-        - If unprivileged sandbox: feeds packets into LiveCaptureManager queue, tags `SIMULATION`.
+        - Scenario packets are currently generated and processed in memory; namespace creation alone does not make this a live capture.
+        - Events are always tagged `SIMULATION` until real namespace transmission and independent capture are implemented.
         - Preserves the same event ID throughout.
         """
         # 1. Determine source label honestly
-        source_mode = "LIVE" if self.is_real_kernel_netns else "SIMULATION"
+        source_mode = "SIMULATION"
 
-        # 2. Build packets using calibrated Scapy simulator
+        # 2. Build in-memory Scapy packets. This path does not transmit/capture on a real interface.
         raw_pkts = self._simulator.build_packets_for_scenario(scenario_id)
 
         # 3. Check if attacker IP is actively blocked by firewall
         is_blocked = pipeline.firewall_manager.is_source_blocked(self.attacker_ip)
 
-        # 4. Route packets through CanonicalFlowBuilder
+        # 4. Convert generated packets to PacketInfo and build flows in memory.
         builder = CanonicalFlowBuilder(idle_timeout_s=120.0)
         completed_flows: list[CanonicalFlow] = []
 
