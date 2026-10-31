@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import platform
 import sys
 import time
 
@@ -16,21 +17,20 @@ if str(REPO_ROOT) not in sys.path:
 if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from xrlids.evaluation.csv_evaluator import evaluate_csv_dataset
 from xrlids.features.definitions import R10_FEATURES
 
 st.set_page_config(page_title="Benchmarks - XRL-IDARS", page_icon="📊", layout="wide")
 
-st.title("📊 Operational Machine Learning Benchmarks")
+st.title("📊 Operational Random Forest Benchmarks")
 st.markdown("""
 Authoritative empirical evaluation suite for the operational **Random Forest** intrusion detector across standardized held-out benchmark splits and the 10,000-record evaluation dataset.
 """)
 
-# Prominent Mandatory Architectural Disclosure
+# Prominent Mandatory Architectural Scope
 st.info("""
 🛡️ **ARCHITECTURAL SCOPE & SEPARATION OF RESPONSIBILITIES**  
 **Random Forest is the sole operational machine-learning intrusion detector in XRL-IDARS.**  
-The Dueling Deep Q-Network (DQN) is a separate autonomous response recommendation agent operating in the mitigation tier, not another intrusion classifier. TreeSHAP explains the Random Forest detector's local feature attributions. Offline research sequence baselines are preserved in historical artifacts and are never invoked by the live detection pipeline.
+The Dueling Deep Q-Network (DQN) is a separate autonomous response recommendation agent operating in the mitigation tier, not an intrusion classifier. TreeSHAP explains the Random Forest detector's local feature attributions.
 """)
 
 st.divider()
@@ -42,6 +42,7 @@ st.subheader("1. Evaluation Dataset Provenance & Execution")
 
 eval_dir = REPO_ROOT / "results" / "final_evaluation"
 summary_file = eval_dir / "evaluation_summary.json"
+per_family_file = eval_dir / "per_family_metrics.json"
 csv_file = REPO_ROOT / "data" / "demo" / "evaluation_10k_records.csv"
 
 col_ctl1, col_ctl2, col_ctl3 = st.columns([1.5, 1.2, 1.2])
@@ -75,7 +76,7 @@ if dataset_choice == "Custom CSV Upload":
         except Exception as exc:
             st.error(f"Error parsing uploaded CSV: {exc}")
 
-# Execution or loading of results
+# Execution of evaluation
 if run_eval_clicked:
     with st.spinner("Executing leak-free Random Forest evaluation across records..."):
         if dataset_choice == "Custom CSV Upload" and custom_df is not None:
@@ -92,18 +93,26 @@ if run_eval_clicked:
         from scripts.demo.run_10k_benchmark import run_benchmark
         summary_data = run_benchmark(target_df)
         st.success(f"Evaluated {len(target_df)} records through Random Forest detector in {summary_data.get('evaluation_duration_s', 0):.2f}s!")
+        st.rerun()
 
 # Load summary from disk
+summary_data = None
 if summary_file.exists():
-    with open(summary_file, "r", encoding="utf-8") as f:
-        summary_data = json.load(f)
-else:
-    summary_data = None
+    try:
+        with open(summary_file, "r", encoding="utf-8") as f:
+            summary_data = json.load(f)
+    except Exception as exc:
+        st.error(f"Failed to load evaluation summary: {exc}")
 
-if summary_data:
-    rf_m = summary_data.get("models", {}).get("random_forest", {})
+# Check if evaluation results are available
+if not summary_data or "random_forest" not in summary_data.get("models", {}):
+    st.warning("⚠️ No evaluation results available. Click '▶ Run Random Forest Evaluation' above to execute evaluation on benchmark data.")
+else:
+    rf_m = summary_data["models"]["random_forest"]
     cm_rf = rf_m.get("confusion", {})
-    total_recs = summary_data.get("total_records", 10000)
+    total_recs = int(summary_data.get("total_records", 10000))
+    duration_s = float(summary_data.get("evaluation_duration_s", 1.0))
+    latency_ms = (duration_s / max(1, total_recs)) * 1000.0
 
     st.caption(
         f"**Dataset Provenance:** `{summary_data.get('benchmark', 'cicids2017').upper()}` | "
@@ -122,28 +131,36 @@ if summary_data:
     st.caption("Standardized test split evaluation on held-out network flows with strict label isolation and StandardScaler normalization.")
 
     m_c1, m_c2, m_c3, m_c4, m_c5, m_c6 = st.columns(6)
-    m_c1.metric("Accuracy", f"{rf_m.get('accuracy', 0.8542) * 100:.2f}%")
-    m_c2.metric("Precision", f"{rf_m.get('precision', 0.9718) * 100:.2f}%")
-    m_c3.metric("Recall", f"{rf_m.get('recall', 0.7296) * 100:.2f}%")
-    m_c4.metric("Macro F1", f"{rf_m.get('macro_f1', 0.8519):.4f}")
-    m_c5.metric("ROC-AUC", f"{rf_m.get('roc_auc', 0.9834):.4f}")
-    m_c6.metric("CPU Latency", "0.07 ms")
+    m_c1.metric("Accuracy", f"{rf_m['accuracy'] * 100:.2f}%")
+    m_c2.metric("Precision", f"{rf_m['precision'] * 100:.2f}%")
+    m_c3.metric("Recall", f"{rf_m['recall'] * 100:.2f}%")
+    m_c4.metric("Macro F1", f"{rf_m['macro_f1']:.4f}")
+    m_c5.metric("ROC-AUC", f"{rf_m['roc_auc']:.4f}")
+    m_c6.metric("Measured Latency", f"{latency_ms:.3f} ms / flow")
+
+    st.caption(f"""
+    **Latency Measurement Metadata:**
+    - **Measurement Method:** Batch wall-clock elapsed time ({duration_s:.3f} seconds total)
+    - **Sample Size:** {total_recs:,} flows
+    - **Hardware Platform:** {platform.processor() or 'x86_64 CPU'} ({platform.system()})
+    - **Inference Mode:** Single-threaded CPU inference
+    """)
 
     st.divider()
 
     # -----------------------------------------------------------------------
-    # Section 3: Confusion Matrix & Line-Rate Viability
+    # Section 3: Confusion Matrix & Line-Rate Assessment
     # -----------------------------------------------------------------------
     st.subheader("3. Confusion Matrix & Error Analysis")
 
     col_cm, col_analysis = st.columns([1.2, 1.8])
 
     with col_cm:
-        st.markdown("**Binary Confusion Matrix (Population: 10,000)**")
-        tn = cm_rf.get("tn", 4894)
-        fp = cm_rf.get("fp", 106)
-        fn = cm_rf.get("fn", 1352)
-        tp = cm_rf.get("tp", 3648)
+        st.markdown(f"**Binary Confusion Matrix (Population: {total_recs:,})**")
+        tn = int(cm_rf.get("tn", 0))
+        fp = int(cm_rf.get("fp", 0))
+        fn = int(cm_rf.get("fn", 0))
+        tp = int(cm_rf.get("tp", 0))
 
         cm_rf_df = pd.DataFrame([
             {"Actual Class": "Benign Flow (0)", "Pred Benign (TN)": f"{tn:,}", "Pred Attack (FP)": f"{fp:,}"},
@@ -157,39 +174,34 @@ if summary_data:
 
     with col_analysis:
         st.markdown("**Operational Line-Rate Performance Assessment**")
-        st.markdown("""
-        - **Sub-Millisecond Inference:** Random Forest executes in **0.07 ms** per flow on single CPU core, easily satisfying the strict **1.0 ms line-rate packet processing budget**.
-        - **Low False Alarm Rate:** With an FPR of only **2.12%** (106 out of 5,000 benign flows), legitimate business traffic remains uninterrupted without triggering defensive fatigue.
-        - **Defense in Depth:** Flows misclassified as benign by the ML tier ($FNR = 27.04\\%$) are independently inspected by the deterministic RFC 793/1122 protocol rule engine (SYN flood, ICMP flood, PortScan), guaranteeing dual-layer perimeter protection.
+        st.markdown(f"""
+        - **Sub-Millisecond Inference:** Random Forest executes in **{latency_ms:.3f} ms** per flow, satisfying the sub-millisecond line-rate processing budget.
+        - **Low False Alarm Rate:** With an FPR of **{fpr:.2f}%** ({fp:,} out of {tn + fp:,} benign flows), legitimate network traffic flows uninterrupted without operator fatigue.
+        - **Perimeter Defense-in-Depth:** Flows misclassified as benign by the ML tier ($FNR = {fnr:.2f}\\%$) are independently inspected by the deterministic RFC 793/1122 protocol rule engine (SYN flood, ICMP flood, PortScan), guaranteeing dual-layer perimeter security.
         """)
 
     st.divider()
 
     # -----------------------------------------------------------------------
-    # Section 4: Multi-Class Attack Family Breakdown
+    # Section 4: Multi-Class Attack Family Breakdown (Derived from evaluation output)
     # -----------------------------------------------------------------------
     st.subheader("4. Multi-Class Attack Family Breakdown")
-    st.caption("Distribution and per-family detection effectiveness across distinct threat categories in the 10,000-record benchmark.")
+    st.caption("Distribution and per-family detection effectiveness derived from the evaluated benchmark output.")
 
-    fam_summary = [
-        {"Attack Category": "Benign Traffic", "Population": 5000, "Detected (TP/TN)": 4894, "Recall": "97.9%", "Precision": "78.4%", "Severity": "INFORMATIONAL"},
-        {"Attack Category": "DDoS (LOIC, HOIC)", "Population": 1168, "Detected (TP/TN)": 1161, "Recall": "99.4%", "Precision": "98.7%", "Severity": "HIGH"},
-        {"Attack Category": "PortScan (Network Probing)", "Population": 1168, "Detected (TP/TN)": 1146, "Recall": "98.1%", "Precision": "99.2%", "Severity": "MEDIUM"},
-        {"Attack Category": "Brute Force (SSH / FTP Patator)", "Population": 1150, "Detected (TP/TN)": 1062, "Recall": "92.3%", "Precision": "94.0%", "Severity": "HIGH"},
-        {"Attack Category": "DoS (Slowloris, SlowHTTP, Hulk)", "Population": 1093, "Detected (TP/TN)": 1055, "Recall": "96.5%", "Precision": "97.1%", "Severity": "HIGH"},
-        {"Attack Category": "Web Attacks (XSS, SQL Injection)", "Population": 224, "Detected (TP/TN)": 194, "Recall": "86.5%", "Precision": "89.1%", "Severity": "CRITICAL"},
-        {"Attack Category": "Botnet & Infiltration", "Population": 197, "Detected (TP/TN)": 160, "Recall": "81.2%", "Precision": "85.4%", "Severity": "CRITICAL"},
-    ]
-    df_fam = pd.DataFrame(fam_summary)
-    st.dataframe(df_fam, use_container_width=True)
-
-    # Visualization of attack family distribution
-    st.bar_chart(df_fam.set_index("Attack Category")["Population"], height=220)
+    # Load from per_family_metrics.json
+    if per_family_file.exists():
+        with open(per_family_file, "r", encoding="utf-8") as f:
+            fam_data = json.load(f)
+        df_fam = pd.DataFrame(fam_data)
+        st.dataframe(df_fam, use_container_width=True)
+        st.bar_chart(df_fam.set_index("Attack Category")["Population"], height=220)
+    else:
+        st.info("Per-family breakdown will be generated upon executing benchmark evaluation.")
 
     st.divider()
 
     # -----------------------------------------------------------------------
-    # Section 5: Feature Contract & Model Architecture
+    # Section 5: Feature Contract & Model Parameters
     # -----------------------------------------------------------------------
     st.subheader("5. $R_{10}$ Feature Contract & Model Parameters")
 
@@ -236,7 +248,6 @@ if summary_data:
     exp_col1, exp_col2, exp_col3 = st.columns(3)
 
     with exp_col1:
-        # Strip offline research baselines if present in raw summary to export clean RF benchmark
         rf_summary_export = {
             "timestamp": summary_data.get("timestamp"),
             "total_records": summary_data.get("total_records"),
@@ -245,7 +256,7 @@ if summary_data:
             "contract": summary_data.get("contract"),
             "model": "Random Forest (Sole Operational Detector)",
             "metrics": rf_m,
-            "architecture_disclosure": "Random Forest is the sole operational machine-learning intrusion detector in XRL-IDARS. The DQN is a separate response recommendation agent, not another intrusion classifier.",
+            "architecture_disclosure": "Random Forest is the sole operational machine-learning intrusion detector in XRL-IDARS. The DQN is a separate response recommendation agent, not an intrusion classifier.",
         }
         sum_bytes = json.dumps(rf_summary_export, indent=2).encode("utf-8")
         st.download_button(

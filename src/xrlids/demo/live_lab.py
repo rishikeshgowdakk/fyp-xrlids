@@ -282,7 +282,7 @@ class LiveLabMonitor:
             protocol=proto,
             packet_count=flow.packet_count,
             duration_ms=round(flow.duration_ms, 2),
-            attack_score=round(threat_score, 4),
+            attack_score=round(conf, 4),
             prediction_class=pred,
             prediction_label="ATTACK" if pred == 1 else "BENIGN",
             is_alert=is_alert,

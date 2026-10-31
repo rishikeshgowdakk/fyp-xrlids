@@ -40,6 +40,7 @@ if str(REPO_ROOT / "src") not in sys.path:
 
 from dashboard.session_init import ensure_session_state
 from xrlids.capture.scapy_service import ScapyCaptureConfig, ScapyCaptureService, scapy_packet_to_packet_info
+from xrlids.demo.lab_network import LAB_TOPOLOGY
 from xrlids.demo.scapy_simulator import SCENARIO_SPECS, ScapyAttackSimulator
 from xrlids.events.manager import EventManager
 from xrlids.events.schema import SecurityEvent
@@ -106,8 +107,12 @@ if traffic_source == "Scapy / Live Network Traffic":
     col_scen, col_fw = st.columns([1.3, 1.0], gap="large")
 
     with col_scen:
-        st.markdown("#### 🛠️ Scapy Traffic Generator")
-        st.caption("Generates genuine, calibrated network packets targeting explicitly authorized lab host `10.200.1.3` from test source `10.200.1.2`.")
+        st.markdown("#### 🛠️ Scapy Traffic Generator & Isolated Lab")
+        if LAB_TOPOLOGY.is_real_kernel_netns:
+            st.success("🔒 **Lab Network Mode:** `LIVE_KERNEL_NETNS` (Attacker `xrlids_att_01` ➔ Victim `xrlids_vic_01` via `veth`)")
+        else:
+            st.info(f"🧪 **Lab Network Mode:** `SIMULATION_SANDBOX` ({LAB_TOPOLOGY.setup_diagnostic})")
+        st.caption(f"Generates genuine, calibrated network packets targeting explicitly authorized lab host `{LAB_TOPOLOGY.victim_ip}` from test source `{LAB_TOPOLOGY.attacker_ip}`.")
 
         scenario_choice = st.selectbox(
             "Select Traffic Scenario",
@@ -152,59 +157,44 @@ if traffic_source == "Scapy / Live Network Traffic":
 
         # Scenario execution logic
         if run_btn:
-            with st.spinner("Emitting genuine Scapy packets and processing through canonical pipeline..."):
-                sim = ScapyAttackSimulator()
-                raw_pkts = []
-
+            with st.spinner("Emitting scenario packets through isolated lab and canonical pipeline..."):
                 if "Normal Ping" in scenario_choice:
-                    raw_pkts = sim.build_benign_ping(count=4)
-                    source_label = "SCAPY_LIVE"
+                    scen_id = "scenario_ping"
                 elif "Controlled ICMP Flood" in scenario_choice:
-                    raw_pkts = sim.build_scenario_d_icmp_burst(packet_count=40)
-                    source_label = "SCAPY_LIVE"
+                    scen_id = "scenario_d_icmp_burst"
                 elif "Controlled SYN Burst" in scenario_choice:
-                    raw_pkts = sim.build_scenario_c_syn_burst(packet_count=60)
-                    source_label = "SCAPY_LIVE"
+                    scen_id = "scenario_c_syn_burst"
                 else:
-                    raw_pkts = sim.build_scenario_b_port_scan()
-                    source_label = "SCAPY_LIVE"
+                    scen_id = "scenario_b_port_scan"
 
                 # Check if attacker IP is actively blocked by firewall
-                attacker_ip = "10.200.1.2"
-                victim_ip = "10.200.1.3"
+                attacker_ip = LAB_TOPOLOGY.attacker_ip
                 is_attacker_blocked = fw_mgr.is_source_blocked(attacker_ip)
 
-                # Process packets through CanonicalFlowBuilder
-                builder = CanonicalFlowBuilder(idle_timeout_s=120.0)
-                scapy_pkts = [scapy_packet_to_packet_info(p) for p in raw_pkts]
-                flows: list[CanonicalFlow] = []
+                events = LAB_TOPOLOGY.transmit_scenario(
+                    scen_id,
+                    live_mgr=live_mgr,
+                    pipeline=pipeline,
+                )
 
-                for p in scapy_pkts:
-                    if p:
-                        # Apply firewall filter to packets
-                        if not is_attacker_blocked or p.src_ip != attacker_ip:
-                            flows.extend(builder.process_packet(p))
-                        else:
-                            # Drop packet at firewall layer
-                            fw_mgr.filter_packet(p.src_ip, p.dst_ip, packet_size=p.packet_length)
-                flows.extend(builder.flush_all())
-
-                res_list = []
-                for fl in flows:
-                    res = pipeline.process_flow(fl, source_mode=source_label)
-                    res_list.append(res)
-
-                if res_list:
+                if events:
                     # Pick primary/highest severity event
-                    attack_events = [r.security_event for r in res_list if r.security_event.hybrid_verdict != "BENIGN"]
-                    newest_evt = attack_events[-1] if attack_events else res_list[-1].security_event
+                    attack_events = [e for e in events if e.hybrid_verdict != "BENIGN"]
+                    newest_evt = attack_events[-1] if attack_events else events[-1]
                     st.session_state["demo_selected_event_id"] = newest_evt.event_id
                     st.session_state["selector_event_id"] = newest_evt.event_id
 
-                    fw_status = newest_evt.response.get("execution_report", {}).get("firewall_rule", {}).get("status", "DRY_RUN")
+                    exec_rep = newest_evt.response.get("execution_report", {})
+                    fw_rule = exec_rep.get("firewall_rule", {}) if exec_rep else {}
+                    fw_status = fw_rule.get("status", "DRY_RUN") if exec_rep else "DRY_RUN"
+
                     if fw_status == "ACTIVE":
                         msg_type = "error"
                         banner = f"🚨 Threat Detected & BLOCKED: Event `{newest_evt.event_id}`. Source `{newest_evt.source_ip}` BLOCKED via temporary firewall rule ({st.session_state['firewall_ttl_seconds']}s TTL). Traffic drops verified."
+                    elif fw_status == "FAILED":
+                        msg_type = "warning"
+                        err_detail = fw_rule.get("verification_details", {}).get("error", "Actuator failed")
+                        banner = f"⚠️ Threat Detected but Firewall Failed: Event `{newest_evt.event_id}`. Verdict: `{newest_evt.hybrid_verdict}` → Actuator Error: `{err_detail}`. Zero kernel rules installed."
                     elif newest_evt.hybrid_verdict != "BENIGN":
                         msg_type = "warning"
                         banner = f"⚠️ Threat Detected (Advisory Dry-run): Event `{newest_evt.event_id}`. Verdict: `{newest_evt.hybrid_verdict}` → DQN Proposed: `{newest_evt.response.get('proposed_action')}`. Zero firewall mutations."
@@ -217,7 +207,7 @@ if traffic_source == "Scapy / Live Network Traffic":
                 elif is_attacker_blocked:
                     st.session_state["demo_last_message"] = {
                         "type": "error",
-                        "text": f"🛡️ Traffic Blocked: Source `{attacker_ip}` is actively blocked by firewall rule! {len(raw_pkts)} packets dropped before reaching test service.",
+                        "text": f"🛡️ Traffic Blocked: Source `{attacker_ip}` is actively blocked by firewall rule! Packets dropped before reaching test service.",
                     }
                     st.rerun()
 
@@ -412,6 +402,9 @@ else:
         if fw_status == "ACTIVE" and not is_adv:
             fw_disp = "BLOCKED (Firewall)"
             verif_disp = "TRAFFIC_BLOCKED"
+        elif fw_status == "FAILED":
+            fw_disp = "FAILED (Perm/OS Error)"
+            verif_disp = "ACTUATOR_ERROR"
         elif ev.response.get("proposed_action") == "ALLOW":
             fw_disp = "PERMITTED (Allow)"
             verif_disp = "VERIFIED_SAFE"
@@ -463,17 +456,30 @@ else:
     # Complete Lifecycle Visualizer
     exec_rep = selected_event.response.get("execution_report", {})
     fw_rule = exec_rep.get("firewall_rule", {}) if exec_rep else {}
-    fw_active = (fw_rule.get("status") == "ACTIVE" and not exec_rep.get("is_advisory", True))
+    fw_status = fw_rule.get("status", "DRY_RUN") if exec_rep else "DRY_RUN"
+    fw_active = (fw_status == "ACTIVE" and not exec_rep.get("is_advisory", True))
+    if fw_active:
+        fw_step_disp = "BLOCKED (Temporary Rule Installed)"
+        verif_step_disp = "VERIFIED_BLOCKED"
+    elif fw_status == "FAILED":
+        fw_step_disp = "FAILED (OS/Kernel Error)"
+        verif_step_disp = "ACTUATOR_ERROR"
+    elif selected_event.response.get("enforced_action") == "ALLOW":
+        fw_step_disp = "PERMITTED (Allow)"
+        verif_step_disp = "VERIFIED_SAFE"
+    else:
+        fw_step_disp = "ADVISORY (Dry-Run)"
+        verif_step_disp = "VERIFIED_ADVISORY"
 
     st.info(f"""
     **Complete Event Lifecycle Progression:**
-    `[1. Traffic: {selected_event.source_ip} ➔ {selected_event.dest_ip}]` ➔
+    `[1. Traffic: {selected_event.source_ip} ➔ {selected_event.dest_ip} ({selected_event.source_mode})]` ➔
     `[2. RF Threat Score: {selected_event.detection.get('attack_score', 0):.4f} ({selected_event.detection.get('prediction_label', 'BENIGN')})]` ➔
     `[3. TreeSHAP: Computed]` ➔
     `[4. DQN Recommendation: {selected_event.response.get('proposed_action')}]` ➔
     `[5. Safety Gate: {selected_event.response.get('enforced_action')}]` ➔
-    `[6. Firewall Actuation: {'BLOCKED (Temporary Rule Installed)' if fw_active else 'ADVISORY (Dry-Run)'}]` ➔
-    `[7. Verification: VERIFIED]`
+    `[6. Firewall Actuation: {fw_step_disp}]` ➔
+    `[7. Verification: {verif_step_disp}]`
     """)
 
     tab_traffic, tab_perception, tab_explain, tab_dqn, tab_safety = st.tabs([
@@ -630,6 +636,17 @@ else:
                 - Delivered to protected service: **{t_verif.get('probe_packets_delivered')}**
                 - Status: `{t_verif.get('status')}`
                 """)
+        elif fw_rule and fw_rule.get("status") == "FAILED":
+            err_msg = fw_rule.get("verification_details", {}).get("error", "Unknown OS error")
+            st.error(f"""
+            ❌ **FIREWALL INSTALLATION FAILED (NOT BLOCKED):**
+            - **Rule ID:** `{fw_rule.get('rule_id')}`
+            - **Target IP:** `{fw_rule.get('source_ip')}`
+            - **Failure Status:** `FAILED_INSTALLATION`
+            - **Kernel Command:** `{fw_rule.get('command_executed')}`
+            - **OS Error / Stderr:** `{err_msg}`
+            - **Integrity Guarantee:** Zero kernel state mutated. System honestly refused to claim active block.
+            """)
         elif selected_event.response.get("enforced_action") == "ALLOW":
             st.success("🟢 **Action ALLOW:** Traffic permitted through without firewall modification. Ping probe succeeds.")
         else:

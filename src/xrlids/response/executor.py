@@ -212,31 +212,58 @@ class ResponseExecutor:
             )
 
             if not self.advisory_mode and self.firewall_manager.enforcement_enabled:
-                # Active enforcement mode: verify traffic block
-                traffic_verif = self.firewall_manager.verify_traffic_blocked(
-                    source_ip=target_host,
-                    dest_ip=dest_host,
-                )
-                verif_result = VerificationResult(
-                    verified=True,
-                    status=VerificationStatus.VERIFIED,
-                    target_host=target_host,
-                    action=authorized_action,
-                    latency_ms=(time.perf_counter() - t0) * 1000.0,
-                    details={
-                        "rule_id": fw_rule_record.rule_id,
-                        "status": "BLOCKED",
-                        "kernel_applied": fw_rule_record.kernel_rule_applied,
-                        "traffic_verification": traffic_verif,
-                    },
-                )
-                final_lifecycle = ActionLifecycleState.VERIFIED
-                self.active_mitigations[target_host] = {
-                    "action": authorized_action,
-                    "expire_timestamp": time.time() + ttl,
-                    "execution_id": exec_id,
-                    "rule_id": fw_rule_record.rule_id,
-                }
+                if fw_rule_record.status == "FAILED":
+                    # Kernel firewall mutation failed
+                    err_msg = fw_rule_record.verification_details.get("error", "Firewall installation failed")
+                    verif_result = VerificationResult(
+                        verified=False,
+                        status=VerificationStatus.FAILED_EFFECT_NOT_OBSERVED,
+                        target_host=target_host,
+                        action=authorized_action,
+                        latency_ms=(time.perf_counter() - t0) * 1000.0,
+                        details={
+                            "rule_id": fw_rule_record.rule_id,
+                            "status": "FAILED",
+                            "error": err_msg,
+                            "kernel_applied": False,
+                        },
+                    )
+                    final_lifecycle = ActionLifecycleState.REJECTED
+                    traffic_verif = {
+                        "source_ip": target_host,
+                        "dest_ip": dest_host,
+                        "is_blocked": False,
+                        "status": "FAILED_INSTALLATION",
+                        "error": err_msg,
+                    }
+                else:
+                    # Active enforcement mode: verify traffic block
+                    traffic_verif = self.firewall_manager.verify_traffic_blocked(
+                        source_ip=target_host,
+                        dest_ip=dest_host,
+                    )
+                    is_tr_blocked = bool(traffic_verif.get("is_blocked", False))
+                    verif_result = VerificationResult(
+                        verified=is_tr_blocked,
+                        status=VerificationStatus.VERIFIED if is_tr_blocked else VerificationStatus.FAILED_EFFECT_NOT_OBSERVED,
+                        target_host=target_host,
+                        action=authorized_action,
+                        latency_ms=(time.perf_counter() - t0) * 1000.0,
+                        details={
+                            "rule_id": fw_rule_record.rule_id,
+                            "status": "BLOCKED" if is_tr_blocked else "NOT_BLOCKED",
+                            "kernel_applied": fw_rule_record.kernel_rule_applied,
+                            "traffic_verification": traffic_verif,
+                        },
+                    )
+                    final_lifecycle = ActionLifecycleState.VERIFIED if is_tr_blocked else ActionLifecycleState.REJECTED
+                    if is_tr_blocked:
+                        self.active_mitigations[target_host] = {
+                            "action": authorized_action,
+                            "expire_timestamp": time.time() + ttl,
+                            "execution_id": exec_id,
+                            "rule_id": fw_rule_record.rule_id,
+                        }
             else:
                 # Advisory / Dry-run mode: do not claim BLOCKED
                 verif_result = self.verifier.verify_action(

@@ -1,0 +1,65 @@
+[
+  {
+    "Attack Category": "Benign",
+    "Population": 5000,
+    "Detected (TP/TN)": 4894,
+    "Recall": "97.9%",
+    "Severity": "INFORMATIONAL"
+  },
+  {
+    "Attack Category": "DDoS",
+    "Population": 1168,
+    "Detected (TP/TN)": 1167,
+    "Recall": "99.9%",
+    "Severity": "HIGH"
+  },
+  {
+    "Attack Category": "PortScan",
+    "Population": 1168,
+    "Detected (TP/TN)": 298,
+    "Recall": "25.5%",
+    "Severity": "MEDIUM"
+  },
+  {
+    "Attack Category": "BruteForce",
+    "Population": 1150,
+    "Detected (TP/TN)": 963,
+    "Recall": "83.7%",
+    "Severity": "HIGH"
+  },
+  {
+    "Attack Category": "DoS",
+    "Population": 1093,
+    "Detected (TP/TN)": 1073,
+    "Recall": "98.2%",
+    "Severity": "HIGH"
+  },
+  {
+    "Attack Category": "Web",
+    "Population": 224,
+    "Detected (TP/TN)": 24,
+    "Recall": "10.7%",
+    "Severity": "CRITICAL"
+  },
+  {
+    "Attack Category": "Bot",
+    "Population": 193,
+    "Detected (TP/TN)": 121,
+    "Recall": "62.7%",
+    "Severity": "CRITICAL"
+  },
+  {
+    "Attack Category": "Infiltration",
+    "Population": 3,
+    "Detected (TP/TN)": 1,
+    "Recall": "33.3%",
+    "Severity": "CRITICAL"
+  },
+  {
+    "Attack Category": "Heartbleed",
+    "Population": 1,
+    "Detected (TP/TN)": 1,
+    "Recall": "100.0%",
+    "Severity": "CRITICAL"
+  }
+]

@@ -385,7 +385,7 @@ class LiveSession:
         self.dqn_evaluations = 0
         self.safety_overrides = 0
         self.firewall_manager = LabFirewallManager(
-            enforcement_enabled=True,
+            enforcement_enabled=False,
             default_ttl_seconds=30.0,
             allowed_subnet=AUTHORIZED_LAB_SUBNET,
         )
@@ -880,9 +880,9 @@ class LiveSession:
                     "history": self.firewall_manager.get_history()[-20:],
                     "is_attacker_blocked": is_blocked,
                 },
-                "network": device_data.get("network"),
-                "devices": device_data.get("devices", []),
-                "device_counters": device_data.get("counters", {}),
+                "network": None if (self.mode == "sample") else device_data.get("network"),
+                "devices": [] if (self.mode == "sample") else device_data.get("devices", []),
+                "device_counters": {} if (self.mode == "sample") else device_data.get("counters", {}),
                 "latest_alert": dict(self.alerts[-1]) if self.alerts else None,
             }
 
@@ -1051,9 +1051,9 @@ class LiveSession:
                 "recent_flows": list(self.flows)[-500:],
                 "recent_alerts": list(self.alerts)[-100:],
                 "injection": dict(self.injection) if self.injection else None,
-                "network": device_data.get("network"),
-                "devices": device_data.get("devices", []),
-                "device_counters": device_data.get("counters", {}),
+                "network": None if (self.mode == "sample") else device_data.get("network"),
+                "devices": [] if (self.mode == "sample") else device_data.get("devices", []),
+                "device_counters": {} if (self.mode == "sample") else device_data.get("counters", {}),
                 "firewall": {
                     "enforcement_enabled": self.firewall_manager.enforcement_enabled,
                     "active_rules": self.firewall_manager.get_active_rules(),
@@ -1062,7 +1062,7 @@ class LiveSession:
                 },
                 "rules": self.rule_engine.list_rules(),
                 "device_discovery": {
-                    "available": True,
+                    "available": False if (self.mode == "sample") else True,
                     "scope": device_data.get("scope", "passive-observed"),
                     "note": device_data.get("note", ""),
                 },
